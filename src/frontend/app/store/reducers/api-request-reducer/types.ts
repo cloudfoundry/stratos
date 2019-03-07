@@ -16,6 +16,7 @@ export interface ActionState {
 // We use schemaKey to track this type
 export interface ListActionState extends ActionState {
   schemaKey?: string;
+  maxed?: boolean;
 }
 
 export interface DeleteActionState extends ActionState {

@@ -6,6 +6,7 @@ export function paginationFailure(state: PaginationEntityState, action): Paginat
     pageRequests: {
       ...state.pageRequests,
       [page]: {
+        ...state.pageRequests[page],
         busy: false,
         error: true,
         message: action.message

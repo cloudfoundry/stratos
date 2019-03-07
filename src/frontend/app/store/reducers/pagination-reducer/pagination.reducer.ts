@@ -20,6 +20,7 @@ import {
   SET_PARAMS,
   SET_RESULT_COUNT,
   UPDATE_MAXED_STATE,
+  UpdatePaginationMaxedState,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -156,7 +157,7 @@ function paginate(action, state, updatePagination) {
   }
 
   if (action.type === UPDATE_MAXED_STATE) {
-    return paginationMaxReached(state, action);
+    return paginationMaxReached(state, action as UpdatePaginationMaxedState);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

@@ -24,6 +24,7 @@ import {
 } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import { LocalPaginationHelpers } from './local-list.helpers';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -171,7 +172,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     this.maxedResults$ = !!this.masterAction.flattenPaginationMax ?
       this.pagination$.pipe(
-        map(pagination => pagination.currentlyMaxed),
+        map(LocalPaginationHelpers.isPaginationMaxed),
         distinctUntilChanged(),
       ) : observableOf(false);
   }

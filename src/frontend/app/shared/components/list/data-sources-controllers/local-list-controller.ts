@@ -6,6 +6,7 @@ import { PaginationEntityState } from '../../../../store/types/pagination.types'
 import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
 import { MultiActionListEntity } from '../../../monitors/pagination-monitor';
+import { LocalPaginationHelpers } from './local-list.helpers';
 
 
 export class LocalListController<T = any> {
@@ -51,7 +52,7 @@ export class LocalListController<T = any> {
       cleanPage$
     ).pipe(
       // If currentlyMaxed is set the entities list contains junk, so don't continue
-      filter(([paginationEntity, entities]) => !paginationEntity.currentlyMaxed),
+      filter(([paginationEntity, entities]) => LocalPaginationHelpers.isPaginationMaxed(paginationEntity)),
       map(([paginationEntity, entities]) => {
         this.pageSplitCache = null;
         if (!entities || !entities.length) {

@@ -22,6 +22,7 @@ import { selectPaginationState } from '../../store/selectors/pagination.selector
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import { entityFactory } from '../../store/helpers/entity-factory';
 import { IRequestDataState } from '../../store/types/entity.types';
+import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
   public __multiActionListEntity__ = true;
@@ -159,7 +160,7 @@ export class PaginationMonitor<T = any> {
     return pagination$.pipe(
       // Improve efficiency
       observeOn(asapScheduler),
-      filter(pagination => this.hasPage(pagination) && !pagination.currentlyMaxed),
+      filter(pagination => this.hasPage(pagination) && !LocalPaginationHelpers.isPaginationMaxed(pagination)),
       distinctUntilChanged(this.isPageSameIsh),
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),

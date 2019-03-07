@@ -16,7 +16,8 @@ export function paginationStart(state, action): PaginationEntityState {
         error: false,
         message: '',
         schemaKey,
-        entityKey
+        entityKey,
+        maxed: false
       }
     }
   };
