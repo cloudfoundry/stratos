@@ -108,7 +108,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (!paginator || this.paginationWidgetToStore) {
       return;
     }
-    console.log('subscribing')
     // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
     // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
     // event which handles either page or pageSize changes.

@@ -4,7 +4,7 @@ import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, OperatorFunction, ReplaySubject, Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount, tap, withLatestFrom, switchMap } from 'rxjs/operators';
 import { ListFilter, ListSort } from '../../../../store/actions/list.actions';
 import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
@@ -150,6 +150,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));
       }
     };
+
+    // NJ - We should avoid these kind on side-effect subscriptions
     this.transformedEntitiesSubscription = transformedEntities$.pipe(
       tap(items => this.transformedEntities = items)
     ).subscribe();
@@ -159,7 +161,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       new LocalListController<T>(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
-    this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items), tap(console.log)).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
 
@@ -250,7 +251,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   disconnect() {
-    this.pageSubscription.unsubscribe();
     this.transformedEntitiesSubscription.unsubscribe();
     if (this.seedSyncSub) { this.seedSyncSub.unsubscribe(); }
     this.externalDestroy();
@@ -273,8 +273,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   selectedRowToggle(row: T, multiMode: boolean = true) {
     this.getRowState(row).pipe(
-      first()
-    ).subscribe(rowState => {
+      first(),
+      withLatestFrom(this.page$)
+    ).subscribe(([rowState, filteredRows]) => {
       if (rowState.disabled) {
         return;
       }
@@ -287,7 +288,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           this.selectedRows.clear();
         }
         this.selectedRows.set(this.getRowUniqueId(row), row);
-        this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
+        this.selectAllChecked = multiMode && this.selectedRows.size === filteredRows.length;
       }
       this.selectedRows$.next(this.selectedRows);
       this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
@@ -297,24 +298,26 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   selectAllFilteredRows() {
     this.selectAllChecked = !this.selectAllChecked;
 
-    const updatedAllRows = this.filteredRows.reduce((obs, row) => {
-      obs.push(this.getRowState(row).pipe(
-        first(),
-        tap(rowState => {
-          if (rowState.disabled) {
-            return;
-          }
-          if (this.selectAllChecked) {
-            this.selectedRows.set(this.getRowUniqueId(row), row);
-          } else {
-            this.selectedRows.delete(this.getRowUniqueId(row));
-          }
-        })
-      ));
-      return obs;
-    }, []);
+    const updatedAllRows$ = this.page$.pipe(switchMap((filterEntities) => {
+      return combineLatest(filterEntities.reduce((obs, row) => {
+        obs.push(this.getRowState(row).pipe(
+          first(),
+          tap(rowState => {
+            if (rowState.disabled) {
+              return;
+            }
+            if (this.selectAllChecked) {
+              this.selectedRows.set(this.getRowUniqueId(row), row);
+            } else {
+              this.selectedRows.delete(this.getRowUniqueId(row));
+            }
+          })
+        ));
+        return obs;
+      }, []));
+    }));
 
-    combineLatest(...updatedAllRows).pipe(
+    updatedAllRows$.pipe(
       first()
     ).subscribe(() => {
       this.selectedRows$.next(this.selectedRows);
