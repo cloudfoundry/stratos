@@ -1,6 +1,6 @@
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, publishReplay, refCount, tap, switchMap } from 'rxjs/operators';
 
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 import { DataFunction } from './list-data-source';
@@ -47,12 +47,10 @@ export class LocalListController<T = any> {
     cleanPage$: Observable<T[]>,
     cleanPagination$: Observable<PaginationEntityState>,
     dataFunctions?: DataFunction<any>[]) {
-    return combineLatest(
+    const fullPageObs$ = combineLatest(
       cleanPagination$,
       cleanPage$
     ).pipe(
-      // If currentlyMaxed is set the entities list contains junk, so don't continue
-      filter(([paginationEntity, entities]) => LocalPaginationHelpers.isPaginationMaxed(paginationEntity)),
       map(([paginationEntity, entities]) => {
         this.pageSplitCache = null;
         if (!entities || !entities.length) {
@@ -68,6 +66,14 @@ export class LocalListController<T = any> {
       tap(({ paginationEntity, entities }) => this.setResultCount(paginationEntity, entities)),
       map(({ entities }) => entities)
     );
+    return cleanPagination$.pipe(
+      map(pagination => LocalPaginationHelpers.isPaginationMaxed(pagination)),
+      distinctUntilChanged(),
+      switchMap(maxed => {
+        return maxed ? observableOf([]) : fullPageObs$;
+      })
+    )
+
   }
 
   private extractActualEntity(entity: any | MultiActionListEntity) {
@@ -137,6 +143,7 @@ export class LocalListController<T = any> {
       + (paginationEntity.params['order-direction-field'] || '') + ','
       + (paginationEntity.params['order-direction'] || '') + ','
       + paginationEntity.clientPagination.filter.string + ','
+      + paginationEntity.forcedLocalPage
       + Object.values(paginationEntity.clientPagination.filter.items);
     // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }
@@ -144,6 +151,7 @@ export class LocalListController<T = any> {
   private paginationHasChanged(oldPag: PaginationEntityState, newPag: PaginationEntityState) {
     const oldPagCompareString = this.getPaginationCompareString(oldPag);
     const newPagCompareString = this.getPaginationCompareString(newPag);
+    console.log(oldPagCompareString !== newPagCompareString);
     return oldPagCompareString !== newPagCompareString;
   }
 }

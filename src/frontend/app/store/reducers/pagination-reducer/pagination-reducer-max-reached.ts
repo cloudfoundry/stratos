@@ -6,7 +6,10 @@ export function paginationMaxReached(state: PaginationState, action: UpdatePagin
   if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
     return state;
   }
-  const requestSection = LocalPaginationHelpers.getSchemaPageRequest(state[action.entityKey][action.paginationKey], action.entityKey);
+  const requestSection = LocalPaginationHelpers.getEntityPageRequest(
+    state[action.entityKey][action.paginationKey],
+    action.forcedEntityKey || action.entityKey
+  );
   const { maxedMode: oldMaxedMode } = state[action.entityKey][action.paginationKey];
   const { pageNumber, pageRequest } = requestSection;
   const { maxed: oldCurrentlyMaxed = false } = pageRequest;

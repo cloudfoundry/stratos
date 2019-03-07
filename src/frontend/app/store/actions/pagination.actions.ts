@@ -169,6 +169,7 @@ export class UpdatePaginationMaxedState implements Action {
     public max: number,
     public allEntities: number,
     public entityKey: string,
-    public paginationKey: string
+    public paginationKey: string,
+    public forcedEntityKey?: string
   ) { }
 }

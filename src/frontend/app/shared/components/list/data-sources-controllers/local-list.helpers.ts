@@ -25,9 +25,9 @@ export class LocalPaginationHelpers {
    * @param {string} schemaKey
    * @memberof LocalPaginationHelpers
    */
-  static getSchemaPageRequest(pagination: PaginationEntityState, schemaKey: string) {
+  static getEntityPageRequest(pagination: PaginationEntityState, entityKey: string) {
     const { pageRequests } = pagination;
-    const pageNumber = Object.keys(pagination.pageRequests).find(key => pageRequests[key].schemaKey === schemaKey) || null;
+    const pageNumber = Object.keys(pagination.pageRequests).find(key => pageRequests[key].entityKey === entityKey) || null;
     if (pageNumber) {
       return {
         pageNumber,

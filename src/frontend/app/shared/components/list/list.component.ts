@@ -333,7 +333,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
 
     const hasPages$ = this.dataSource.page$.pipe(
-      map(pag => !!(pag && pag.length))
+      map(pag => !!(pag && pag.length)),
+      distinctUntilChanged()
     );
 
     this.hasRows$ = observableCombineLatest(hasPages$, this.dataSource.maxedResults$).pipe(

@@ -157,13 +157,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       tap(items => this.transformedEntities = items)
     ).subscribe();
 
+    this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
 
-    this.page$ = this.isLocal ?
+    const page$ = this.isLocal ?
       new LocalListController<T>(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
+    this.page$ = page$.pipe(
+      withLatestFrom(this.isLoadingPage$),
+      filter(([page, isLoading]) => !isLoading),
+      map(([page]) => page)
+    )
+
     this.pagination$ = pagination$;
-    this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
 
 
     this.sort$ = this.createSortObservable();
@@ -206,6 +212,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           paginationKey: this.masterAction.paginationKey,
           entityKey: this.masterAction.entityKey,
           entity: this.masterAction.entity,
+          flattenPaginationMax: this.masterAction.flattenPaginationMax,
+          flattenPagination: this.masterAction.flattenPagination,
           __forcedPageNumber__: i + 1,
           __forcedPageSchemaKey__: multiActionConfig.schemaKey
         }) as PaginatedAction);

@@ -17,6 +17,7 @@ export interface ActionState {
 export interface ListActionState extends ActionState {
   schemaKey?: string;
   maxed?: boolean;
+  entityKey?: string;
 }
 
 export interface DeleteActionState extends ActionState {
