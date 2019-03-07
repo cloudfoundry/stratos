@@ -1,5 +1,15 @@
 <div class="cf-details" *ngIf="row?.user as user else noUser">
-  {{ user.name}}
-  <mat-icon *ngIf="user.admin" fontSet="stratos-icons" matTooltip="Admin" [ngClass]="{'cf-details__admin': spaceBetween}">admin</mat-icon>
+  <div class="cf-details__line">
+    <span class="cf-details__icon">
+      <mat-icon>person</mat-icon>
+    </span>
+    {{ user.name}}
+  </div>
+  <div *ngIf="user.admin" class="cf-details__line">
+    <span class="cf-details__icon">
+      <mat-icon class="cf-details__icon--admin" fontSet="stratos-icons" matTooltip="Admin" [ngClass]="{'cf-details__admin': spaceBetween}">admin</mat-icon>
+    </span>
+    Administrator
+  </div>
 </div>
 <ng-template #noUser>-</ng-template>

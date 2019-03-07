@@ -1,7 +1,21 @@
 .cf-details {
-  align-items: center;
+  align-items: start;
   display: flex;
-  &__admin {
-    padding-left: 5px;
+  flex-direction: column;
+
+  &__line {
+    align-items: center;
+    display: flex;
+  }
+
+  &__icon {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 32px;
+
+    &--admin {
+      width: 19px;
+    }
   }
 }

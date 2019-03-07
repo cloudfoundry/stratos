@@ -31,6 +31,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public cardMenu: MetaCardMenuItem[];
   public endpointConfig: EndpointTypeConfig;
   public hasDetails = true;
+  public endpointLink: string = null;
 
   @Input() component: CfEndpointDetailsComponent;
   private endpointDetails: ViewContainerRef;
@@ -49,6 +50,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.endpointConfig = getEndpointType(row.cnsi_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
+    this.endpointLink = row.connectionStatus === 'connected' ? EndpointsService.getLinkForEndpoint(row) : null
     this.updateDetails();
 
   }
@@ -78,10 +80,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.favorite = this.pRow.cnsi_type === 'cf' ? getFavoriteFromEndpointEntity(this.row) : null;
     const e = getEndpointType(this.pRow.cnsi_type);
     this.hasDetails = !!e.listDetailsComponent;
-  }
-
-  getLinkForEndpoint() {
-    return EndpointsService.getLinkForEndpoint(this.row);
   }
 
   updateDetails() {
