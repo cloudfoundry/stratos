@@ -10,6 +10,7 @@ import {
   Type,
   ViewChild,
   ViewContainerRef,
+  ComponentRef,
 } from '@angular/core';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -30,6 +31,7 @@ import {
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
 import { CardMultiActionComponents } from './card.component.types';
+import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
 
 export const listCards = [
   CardAppComponent,
@@ -43,6 +45,7 @@ export const listCards = [
   AppServiceBindingCardComponent,
   ServiceInstanceCardComponent
 ];
+type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
 @Component({
   selector: 'app-card',
   templateUrl: './card.component.html',
@@ -51,47 +54,80 @@ export const listCards = [
     ...listCards
   ]
 })
-export class CardComponent<T> implements OnInit, OnChanges {
+export class CardComponent<T> {
+  private componentRef: ComponentRef<any>;
+  private _component: cardTypes<T>;
+  private _item: T | MultiActionListEntity;
 
-  @Input() component: Type<CardCell<T>> | CardMultiActionComponents;
-  @Input() item: T;
+  @Input() set component(component: cardTypes<T>) {
+    if (!this._component) {
+      this.setupComponent(component, this.item);
+      this._component = component;
+    }
+  }
+  get component() {
+    return this._component;
+  }
+
+  @Input() set item(item: T | MultiActionListEntity) {
+    this._item = item;
+    this.setupComponent(this.component, item);
+  }
+
+  get item() {
+    return this._item;
+  }
+
   @Input() dataSource = null as IListDataSource<T>;
 
-  @ViewChild('target', { read: ViewContainerRef }) target;
+  @ViewChild('target', { read: ViewContainerRef }) target: ViewContainerRef;
 
-  @Input() schemaKey: string;
   cardComponent: CardCell<T>;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  ngOnInit() {
-    if (!this.component) {
+  private setupComponent(componentType: cardTypes<T>, item: T | MultiActionListEntity) {
+    if (!componentType || !item) {
       return;
     }
-    const component = this.getComponent(this.component, this.schemaKey);
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
-    // Add to target to ensure ngcontent is correct in new component
-    const componentRef = this.target.createComponent(componentFactory);
-    this.cardComponent = componentRef.instance as CardCell<T>;
-    this.cardComponent.row = this.item;
-    this.cardComponent.dataSource = this.dataSource;
-    this.cardComponent.schemaKey = this.schemaKey;
+    const { component, schemaKey, entity } = this.getComponent(componentType, item);
+    if (component) {
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
+      if (componentFactory) {
+        // Add to target to ensure ngcontent is correct in new component
+        // if (componentRef !== this.componentRef) {
+        this.clear();
+        this.componentRef = this.target.createComponent(componentFactory);
+        this.cardComponent = this.componentRef.instance as CardCell<T>;
+        // }
+        this.cardComponent.row = entity;
+        this.cardComponent.dataSource = this.dataSource;
+        this.cardComponent.schemaKey = schemaKey;
+      }
+    }
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.item;
-    if (
-      row &&
-      this.cardComponent &&
-      row.previousValue !== row.currentValue
-    ) {
-      this.cardComponent.row = row.currentValue;
+  private clear() {
+    if (this.target) {
+      this.target.clear();
+    }
+    if (this.componentRef) {
+      this.componentRef.destroy();
     }
   }
-  private getComponent(component: Type<CardCell<T>> | CardMultiActionComponents, schemaKey: string) {
-    if (component instanceof CardMultiActionComponents) {
-      return component.getComponent(schemaKey);
+
+  public getComponent(component: any | CardMultiActionComponents, item: T | MultiActionListEntity) {
+    const { schemaKey, entity } = item as MultiActionListEntity;
+    if (component instanceof CardMultiActionComponents && schemaKey) {
+      return {
+        component: component.getComponent(schemaKey),
+        schemaKey,
+        entity
+      }
     }
-    return component;
+    return {
+      component,
+      entity: item
+    };
   }
 }

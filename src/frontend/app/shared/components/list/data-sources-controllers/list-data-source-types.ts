@@ -1,4 +1,3 @@
-import { EntitySchema } from './../../../../store/helpers/entity-factory';
 import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
@@ -7,7 +6,6 @@ import { MetricsAction } from '../../../../store/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/types/pagination.types';
 import { ListFilter, ListSort } from '../../../../store/actions/list.actions';
-import { IMultiActionListEntity } from '../../../monitors/pagination-monitor';
 
 export interface IEntitySelectItem {
   page: number;
@@ -86,7 +84,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
 
   page$: Observable<T[]>;
 
-  multiActionPage$?: Observable<IMultiActionListEntity[]>;
+  isMultiAction$?: Observable<boolean>;
 
   addItem: T;
   isAdding$: BehaviorSubject<boolean>;

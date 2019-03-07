@@ -1,4 +1,3 @@
-import { IMultiActionListEntity } from './../../../monitors/pagination-monitor';
 import { EntitySchema, entityFactory } from './../../../../store/helpers/entity-factory';
 import { DataSource } from '@angular/cdk/table';
 import { SortDirection } from '@angular/material';
@@ -105,7 +104,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   public refresh: () => void;
 
-  public multiActionPage$: Observable<IMultiActionListEntity[]>;
+  public isMultiAction$: Observable<boolean>;
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
   constructor(
@@ -126,7 +125,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     },
       this.isLocal
     );
-
+    this.isMultiAction$ = paginationMonitor.isMultiAction$;
     const transformEntities = this.transformEntities || [];
     // Add any additional functions via an optional listConfig, such as sorting from the column definition
     const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
@@ -143,11 +142,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     const dataFunctions: DataFunction<any>[] = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
-    this.transformedEntitiesSubscription = transformedEntities$.pipe(
-      tap(items => this.transformedEntities = items)
-    ).subscribe();
-
-    const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
+    const setResultCount = (paginationEntity: PaginationEntityState, entities: any[]) => {
       const newLength = entities.length;
       if (
         paginationEntity.ids[paginationEntity.currentPage] &&
@@ -155,14 +150,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));
       }
     };
+    this.transformedEntitiesSubscription = transformedEntities$.pipe(
+      tap(items => this.transformedEntities = items)
+    ).subscribe();
+
+
     this.page$ = this.isLocal ?
-      new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
+      new LocalListController<T>(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
-    this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items), tap(console.log)).subscribe();
+    this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items)).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
-    this.multiActionPage$ = paginationMonitor.multiActionPage$;
+
 
     this.sort$ = this.createSortObservable();
 
@@ -343,7 +343,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
 
-  attachTransformEntity(entities$, entityLettable): Observable<T[]> {
+  attachTransformEntity<Y = T>(entities$, entityLettable): Observable<Y[]> {
     if (entityLettable) {
       return entities$.pipe(
         this.transformEntity

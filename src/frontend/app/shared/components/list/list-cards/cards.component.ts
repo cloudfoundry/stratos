@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { CardCell } from '../list.types';
-import { IMultiActionListEntity } from '../../../monitors/pagination-monitor';
 import { CardMultiActionComponents } from './card/card.component.types';
+import { MultiActionListEntity } from '../../../monitors/pagination-monitor';
 
 @Component({
   selector: 'app-cards',
@@ -21,8 +21,17 @@ export class CardsComponent<T> {
     this.columns = cardCell.columns;
   }
 
-  public multiActionTrackBy(index: number, item: IMultiActionListEntity) {
-    return this.dataSource ? this.dataSource.trackBy(index, item.entity) : null;
+  public multiActionTrackBy(index: number, item: any | MultiActionListEntity) {
+    if (!this.dataSource) {
+      return null;
+    }
+    if (this.isMultiActionItem(item)) {
+      return this.dataSource.trackBy(index, item.entity);
+    }
+    return this.dataSource.trackBy(index, item);
   }
 
+  public isMultiActionItem(component: any | MultiActionListEntity) {
+    return component instanceof MultiActionListEntity;
+  }
 }

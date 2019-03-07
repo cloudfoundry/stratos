@@ -7,7 +7,8 @@ export interface ICardMultiActionComponentList {
 }
 
 export class CardMultiActionComponents {
-  constructor(private cardList: ICardMultiActionComponentList, public columns?: number) { }
+  public __cardMultiActionComponents__ = true;
+  constructor(private cardList: ICardMultiActionComponentList, public columns = CardCell.columns) { }
   public getComponent(schemaKey: string) {
     return this.cardList[schemaKey];
   }

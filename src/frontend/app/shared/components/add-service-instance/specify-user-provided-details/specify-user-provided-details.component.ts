@@ -165,7 +165,6 @@ export class SpecifyUserProvidedDetailsComponent {
   }
 
   private getServiceData() {
-    console.log(this.formGroup.value);
     const data = {
       ...this.formGroup.value,
       spaceGuid: this.spaceGuid
@@ -182,7 +181,6 @@ export class SpecifyUserProvidedDetailsComponent {
   }
 
   private tagsArrayToChips(tagsArray: string[]) {
-    console.log(tagsArray);
     return tagsArray && Array.isArray(tagsArray) ? tagsArray.map(label => ({ label })) : [];
   }
 

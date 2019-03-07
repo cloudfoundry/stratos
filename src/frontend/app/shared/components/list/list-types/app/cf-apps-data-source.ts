@@ -25,6 +25,7 @@ import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/
 import { IListConfig } from '../../list.component.types';
 import { GetAllUserProvidedServices } from '../../../../../store/actions/user-provided-service.actions';
 import { ActionSchemaConfig, MultiActionConfig } from '../../data-sources-controllers/list-data-source-config';
+import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
   return new GetAllApplications(paginationKey, null, [
@@ -114,6 +115,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         }
         const actions = new Array<DispatchSequencerAction>();
         page.forEach(app => {
+          if (app instanceof MultiActionListEntity) {
+            app = app.entity;
+          }
           const appState = app.entity.state;
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;

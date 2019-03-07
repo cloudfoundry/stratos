@@ -23,9 +23,9 @@ import { PaginationEntityState } from '../../store/types/pagination.types';
 import { entityFactory } from '../../store/helpers/entity-factory';
 import { IRequestDataState } from '../../store/types/entity.types';
 
-export interface IMultiActionListEntity {
-  entity: any;
-  schemaKey: string;
+export class MultiActionListEntity {
+  public __multiActionListEntity__ = true;
+  constructor(public entity: any, public schemaKey: string) { }
 }
 export class PaginationMonitor<T = any> {
   /**
@@ -47,7 +47,7 @@ export class PaginationMonitor<T = any> {
 
 
   public currentPageIds$: Observable<string[]>;
-  public multiActionPage$: Observable<IMultiActionListEntity[]>;
+  public isMultiAction$: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
@@ -111,9 +111,9 @@ export class PaginationMonitor<T = any> {
     this.currentPageIds$ = this.createPagIdObservable(this.pagination$);
     if (this.isLocal) {
       this.fetchingCurrentPage$ = this.createLocalFetchingObservable(this.pagination$);
-      const { entities$, multiActionPage$ } = this.createLocalPageObservable(this.pagination$, schema, this.fetchingCurrentPage$);
+      const { entities$, isMultiAction$ } = this.createLocalPageObservable(this.pagination$, schema, this.fetchingCurrentPage$);
       this.currentPage$ = entities$;
-      this.multiActionPage$ = multiActionPage$;
+      this.isMultiAction$ = isMultiAction$;
     } else {
       this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
       this.currentPage$ = this.createPageObservable(this.pagination$, schema);
@@ -189,7 +189,7 @@ export class PaginationMonitor<T = any> {
 
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
 
-    const baseObs$ = pagination$.pipe(
+    const entities$ = pagination$.pipe(
       distinctUntilChanged(),
       // Improve efficiency
       observeOn(asapScheduler),
@@ -198,45 +198,32 @@ export class PaginationMonitor<T = any> {
       map(([[pagination], allEntities]) => {
         if (pagination.forcedLocalPage) {
           const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, schema);
-          return {
-            [pageSchema.key]: this.denormalizePage(page, pageSchema, allEntities)
-          };
+          return this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key));
         }
         return Object.keys(pagination.ids).reduce((allPageEntities, pageNumber) => {
           const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
-          return {
+          return [
             ...allPageEntities,
-            [pageSchema.key]: this.denormalizePage(page, pageSchema, allEntities)
-          };
-        }, {});
+            ...this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key))
+          ];
+        }, []);
       }),
       tag('de-norming-local ' + schema.key),
     );
 
-    const multiActionPage$ = baseObs$.pipe<IMultiActionListEntity[]>(
-      map(entityMap => {
-        return Object.keys(entityMap).reduce((multiActionPage, schemaKey) => {
-          return entityMap[schemaKey].reduce((page: IMultiActionListEntity[], entity: any) => {
-            return [
-              ...page,
-              {
-                entity,
-                schemaKey
-              }
-            ];
-          }, multiActionPage);
-        }, [] as IMultiActionListEntity[]);
-      })
-    );
-
-    const entities$ = baseObs$.pipe(
-      map(entityMap => {
-        return Object.values(entityMap).reduce((mappedEntities, entities) => {
-          return [
-            ...mappedEntities,
-            ...entities
-          ];
-        }, []);
+    const isMultiAction$ = combineLatest(
+      pagination$,
+      fetching$
+    ).pipe(
+      filter(([pagination, fetching]) => !fetching),
+      map(([pagination]) => {
+        return Object.values(pagination.pageRequests).reduce((schemaKeys, pageRequest) => {
+          const { schemaKey } = pageRequest;
+          if (schemaKey && !schemaKeys.includes(schemaKey)) {
+            schemaKeys.push(schemaKey);
+          }
+          return schemaKeys;
+        }, []).length > 1;
       })
     );
     return {
@@ -246,7 +233,7 @@ export class PaginationMonitor<T = any> {
         publishReplay(1),
         refCount(),
       ),
-      multiActionPage$
+      isMultiAction$
     };
   }
 
@@ -316,6 +303,7 @@ export class PaginationMonitor<T = any> {
         return !!Object.values(pagination.pageRequests).find(pageRequest => pageRequest.busy);
       }),
       distinctUntilChanged(),
+      observeOn(asapScheduler)
     );
   }
   // ### Initialization methods end.

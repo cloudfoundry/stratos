@@ -5,6 +5,7 @@ import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
+import { MultiActionListEntity } from '../../../monitors/pagination-monitor';
 
 
 export class LocalListController<T = any> {
@@ -68,6 +69,13 @@ export class LocalListController<T = any> {
     );
   }
 
+  private extractActualEntity(entity: any | MultiActionListEntity) {
+    if (entity instanceof MultiActionListEntity) {
+      return entity.entity;
+    }
+    return entity;
+  }
+
   /*
    * Emit client side page changes
    */
@@ -104,7 +112,7 @@ export class LocalListController<T = any> {
       currentPageSizeObservable$.pipe(tap(() => {
         this.pageSplitCache = null;
       })),
-      currentPageNumber$.pipe(),
+      currentPageNumber$,
     ).pipe(
       map(([entities, pageSize, currentPage]) => {
         const pages = this.pageSplitCache ? this.pageSplitCache : entities;
