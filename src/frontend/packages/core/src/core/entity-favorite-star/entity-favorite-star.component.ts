@@ -9,6 +9,7 @@ import { ConfirmationDialogConfig } from '../../shared/components/confirmation-d
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { favoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { UserFavoriteManager } from '../user-favorite-manager';
+import { LoggerService } from '../logger.service';
 
 @Component({
   selector: 'app-entity-favorite-star',
@@ -36,8 +37,11 @@ export class EntityFavoriteStarComponent {
 
   private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);
 
-  constructor(store: Store<AppState>, private confirmDialog: ConfirmationDialogService) {
-    this.userFavoriteManager = new UserFavoriteManager(store);
+  constructor(
+    store: Store<AppState>,
+    private confirmDialog: ConfirmationDialogService,
+    logger: LoggerService) {
+    this.userFavoriteManager = new UserFavoriteManager(store, logger);
   }
 
   public toggleFavorite(event: Event) {

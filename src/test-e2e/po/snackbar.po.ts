@@ -1,5 +1,4 @@
-import { by, element, ElementFinder } from 'protractor';
-import { browser, promise } from 'protractor';
+import { browser, by, element, ElementFinder, promise } from 'protractor';
 import { protractor } from 'protractor/built';
 
 import { Component } from './component.po';
@@ -55,8 +54,8 @@ export class SnackBarComponent extends Component {
   // Wait for snackbar with given message
   waitForMessage(message): promise.Promise<void> {
     const mesgElm = element(by.cssContainingText('.mat-simple-snackbar', message));
-    return browser.wait(until.presenceOf(mesgElm), 5000,
-      'Snackbar: ' + message + ' taking too long to appear in the DOM').then(() => {
+    return browser.wait(until.presenceOf(mesgElm), 10000,
+      'Snackbar: "' + message + '" taking too long to appear in the DOM').then(() => {
         return browser.driver.sleep(100);
       });
   }

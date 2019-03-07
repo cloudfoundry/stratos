@@ -1,0 +1,21 @@
+.cf-details {
+  align-items: start;
+  display: flex;
+  flex-direction: column;
+
+  &__line {
+    align-items: center;
+    display: flex;
+  }
+
+  &__icon {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 32px;
+
+    // &--admin {
+    //   width: 19px;
+    // }
+  }
+}
