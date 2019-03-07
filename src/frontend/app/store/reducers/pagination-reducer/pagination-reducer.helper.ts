@@ -240,7 +240,7 @@ function getObservables<T = any>(
     )
       .pipe(
         filter(([ent, pagination]) => {
-          return !!pagination && isPageReady(pagination);
+          return !!pagination && isPageReady(pagination, isLocal);
         }),
         publishReplay(1), refCount(),
         tap(([ent, pagination]) => {
@@ -288,8 +288,17 @@ function getPaginationCompareString(paginationEntity: PaginationEntityState) {
   return paginationEntity.totalResults + paginationEntity.currentPage + params + paginationEntity.pageCount;
 }
 
-export function isPageReady(pagination: PaginationEntityState) {
-  return !!pagination && !!pagination.ids[pagination.currentPage] && !isFetchingPage(pagination);
+export function isPageReady(pagination: PaginationEntityState, isLocal = false) {
+  if (!pagination) {
+    return false;
+  }
+  if (isLocal) {
+    return !Object.values(pagination.pageRequests).find((paginationPage) => paginationPage.busy);
+  }
+  if (!pagination.pageRequests[pagination.currentPage]) {
+    return false;
+  }
+  return pagination.pageRequests[pagination.currentPage].busy || false;
 }
 
 export function isFetchingPage(pagination: PaginationEntityState): boolean {
