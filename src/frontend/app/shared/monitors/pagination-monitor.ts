@@ -196,17 +196,7 @@ export class PaginationMonitor<T = any> {
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {
-        if (pagination.forcedLocalPage) {
-          const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, schema);
-          return this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key));
-        }
-        return Object.keys(pagination.ids).reduce((allPageEntities, pageNumber) => {
-          const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
-          return [
-            ...allPageEntities,
-            ...this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key))
-          ];
-        }, []);
+        return this.getLocalEntities(pagination, allEntities, schema).filter(ent => !!ent);
       }),
       tag('de-norming-local ' + schema.key),
     );
@@ -235,6 +225,28 @@ export class PaginationMonitor<T = any> {
       ),
       isMultiAction$
     };
+  }
+
+  private getLocalEntities(pagination: PaginationEntityState, allEntities: IRequestDataState, defaultSchema: normalizrSchema.Entity) {
+    const pages = Object.keys(pagination.ids);
+    if (pages.length > 1) {
+      if (pagination.forcedLocalPage) {
+        const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, defaultSchema);
+        return this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key));
+      }
+      return pages.reduce((allPageEntities, pageNumber) => {
+        const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, defaultSchema);
+        return [
+          ...allPageEntities,
+          ...this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key))
+        ];
+      }, []);
+    } else {
+      const page = pagination.ids[pagination.currentPage] || [];
+      return page.length
+        ? denormalize(page, [defaultSchema], allEntities)
+        : [];
+    }
   }
 
   private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: IRequestDataState) {
