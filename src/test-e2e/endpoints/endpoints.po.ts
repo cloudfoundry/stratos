@@ -31,14 +31,18 @@ export class EndpointCards extends ListCardComponent {
       metaCardItems
     ]).then(([t, m]: [string, MetaCardItem<string>[]]) => {
       const details = m.find(item => item.key === 'Details');
+      // Protect against zero details
       const safeDetails = details ? details.value : '';
+      // If we have details, assume they're cf details
       const cleanDetails = safeDetails.split('\n');
+      const user = cleanDetails[1] ? cleanDetails[1].replace(' (Administrator)', '') : ''
+      const isAdmin = safeDetails.endsWith(' (Administrator)')
       return {
         name: t.substring(0, t.indexOf('\n')),
         connected: m.find(item => item.key === 'Status').value === 'cloud_done',
         type: t.substring(t.indexOf('\n') + 1, t.length),
-        user: cleanDetails[1],
-        isAdmin: safeDetails.length > 2,
+        user,
+        isAdmin,
         url: m.find(item => item.key === 'Address').value,
         // favorite: data[6]
       } as EndpointMetadata;

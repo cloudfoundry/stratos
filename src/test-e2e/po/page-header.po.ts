@@ -19,12 +19,12 @@ export class PageHeader extends Component {
     return this.locator.all(by.css('.page-header button.mat-icon-button'));
   }
 
-  getIconButton(iconName: string) {
+  getIconButton(iconName: string): promise.Promise<ElementFinder> {
     return this.getIconButtons()
       .map(button => button.getText())
       .then(icons => {
         const index = icons.findIndex(name => name === iconName);
-        return index >= 0 ? this.getIconButtons().get(index) : null;
+        return this.getIconButtons().get(index);
       });
   }
 
