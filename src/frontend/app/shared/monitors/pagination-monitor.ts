@@ -25,6 +25,12 @@ import { IRequestDataState } from '../../store/types/entity.types';
 
 export class MultiActionListEntity {
   public __multiActionListEntity__ = true;
+  static getEntity(entity: MultiActionListEntity | any) {
+    if (entity instanceof MultiActionListEntity) {
+      return entity.entity;
+    }
+    return entity;
+  }
   constructor(public entity: any, public schemaKey: string) { }
 }
 export class PaginationMonitor<T = any> {

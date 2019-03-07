@@ -1,3 +1,4 @@
+import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 /* tslint:disable:max-line-length */
 import {
   Component,
@@ -185,7 +186,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
   @Input() component: Type<{}>;
   @Input() cellDefinition: ICellDefinition<T>;
   @Input() func: () => string;
-  @Input() row: T;
+  @Input() row: T | MultiActionListEntity;
   @Input() config: any;
 
   private cellComponent: TableCellCustom<T>;
@@ -216,12 +217,12 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
       // Add to target to ensure ngcontent is correct in new component
       this.cellComponent = <TableCellCustom<T>>component.instance;
-
-      this.cellComponent.row = this.row;
+      const row = MultiActionListEntity.getEntity(this.row);
+      this.cellComponent.row = row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
       if (this.dataSource.getRowState) {
-        this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+        this.cellComponent.rowState = this.dataSource.getRowState(row);
       }
       if (this.cellDefinition) {
         const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;
