@@ -1,12 +1,16 @@
-import { CoreModule } from '../../core/core.module';
 import { NgModule } from '@angular/core';
+import { Validators } from '@angular/forms';
 
+import { CoreModule } from '../../core/core.module';
 import { StratosExtension } from '../../core/extension/extension-service';
 import { EndpointAuthTypeConfig, EndpointType, EndpointTypeConfig } from '../../core/extension/extension-types';
-import { Validators } from '@angular/forms';
-import { KubernetesCertsAuthFormComponent } from './auth-forms/kubernetes-certs-auth-form/kubernetes-certs-auth-form.component';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
-import { KubernetesConfigAuthFormComponent } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
+import {
+  KubernetesCertsAuthFormComponent,
+} from './auth-forms/kubernetes-certs-auth-form/kubernetes-certs-auth-form.component';
+import {
+  KubernetesConfigAuthFormComponent,
+} from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { kubernetesEntities, kubernetesEntityKeys } from './store/kubernetes.entities';
 
 const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
@@ -15,6 +19,7 @@ const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
   authTypes: [],
   icon: 'kubernetes',
   iconFont: 'stratos-icons',
+  imagePath: '/core/assets/custom/kubernetes.svg',
   homeLink: (guid) => ['/kubernetes', guid],
   entitySchemaKeys: kubernetesEntityKeys
 }];
