@@ -1,3 +1,4 @@
+import { serviceInstancesWithSpaceSchemaKey, userProvidedServiceInstanceSchemaKey, serviceInstancesSchemaKey } from './../../../../../store/helpers/entity-factory';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -12,6 +13,10 @@ import { defaultPaginationPageSizeOptionsCards, ListViewTypes } from '../../list
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
+import { CardMultiActionComponents } from '../../list-cards/card/card.component.types';
+import {
+  UserProvidedServiceInstanceCardComponent
+} from './user-provided-service-instance-card/user-provided-service-instance-card.component';
 
 /**
  * Service instance list shown for `services` nav component
@@ -30,7 +35,10 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   };
   enableTextFilter = true;
   defaultView = 'cards' as ListView;
-  cardComponent = ServiceInstanceCardComponent;
+  cardComponent = new CardMultiActionComponents({
+    [serviceInstancesSchemaKey]: ServiceInstanceCardComponent,
+    [userProvidedServiceInstanceSchemaKey]: UserProvidedServiceInstanceCardComponent
+  });
   viewType = ListViewTypes.BOTH;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
 

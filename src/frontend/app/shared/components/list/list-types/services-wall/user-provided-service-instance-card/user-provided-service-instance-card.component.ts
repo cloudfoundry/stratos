@@ -1,23 +1,23 @@
 import { Component, Input } from '@angular/core';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { BehaviorSubject, of as observableOf } from 'rxjs';
+import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 
 
 @Component({
-  selector: 'app-service-instance-card',
-  templateUrl: './service-instance-card.component.html',
-  styleUrls: ['./service-instance-card.component.scss'],
+  selector: 'app-user-provided-service-instance-card',
+  templateUrl: './user-provided-service-instance-card.component.html',
+  styleUrls: ['./user-provided-service-instance-card.component.scss'],
 })
-export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
+export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
   serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
@@ -31,7 +31,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
     if (row) {
       this.serviceInstanceEntity = row;
-      const schema = entityFactory(serviceInstancesSchemaKey);
+      const schema = entityFactory(userProvidedServiceInstanceSchemaKey);
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
       this.serviceInstanceTags = row.entity.tags.map(t => ({
         value: t
@@ -83,34 +83,24 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
       this.serviceInstanceEntity.entity.cfGuid,
-      false
+      false,
+      true
     );
   }
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
-    this.serviceInstanceEntity.entity.cfGuid
+    this.serviceInstanceEntity.entity.cfGuid,
+    true
   )
 
   edit = () => this.serviceActionHelperService.editServiceBinding(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
-    null
+    null,
+    true
   )
-
-  getServiceName = () => {
-    const serviceEntity = this.serviceInstanceEntity.entity.service;
-    let extraInfo: IServiceExtra = null;
-    try {
-      extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-    } catch (e) { }
-    let displayName = serviceEntity.entity ? serviceEntity.entity.label : '';
-    if (extraInfo && extraInfo.displayName) {
-      displayName = extraInfo.displayName;
-    }
-    return displayName;
-  }
 
   getSpaceName = () => this.serviceInstanceEntity.entity.space.entity.name;
   getSpaceURL = () => [

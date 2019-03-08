@@ -152,6 +152,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
 import { UserPermissionDirective } from './user-permission.directive';
 import { AddServiceInstanceBaseStepComponent } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
 import { AppNameUniqueDirective } from '../features/applications/app-name-unique.directive/app-name-unique.directive';
+import { UserProvidedServiceInstanceCardComponent } from './components/list/list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 
 
 @NgModule({
@@ -247,6 +248,7 @@ import { AppNameUniqueDirective } from '../features/applications/app-name-unique
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
     CompactServiceInstanceCardComponent,
+    UserProvidedServiceInstanceCardComponent,
     SpecifyDetailsStepComponent,
     AddServiceInstanceComponent,
     SelectPlanStepComponent,

@@ -32,6 +32,9 @@ import {
 import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
 import { CardMultiActionComponents } from './card.component.types';
 import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
+import {
+  UserProvidedServiceInstanceCardComponent
+} from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 
 export const listCards = [
   CardAppComponent,
@@ -43,7 +46,8 @@ export const listCards = [
   CfStacksCardComponent,
   CfServiceCardComponent,
   AppServiceBindingCardComponent,
-  ServiceInstanceCardComponent
+  ServiceInstanceCardComponent,
+  UserProvidedServiceInstanceCardComponent
 ];
 type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
 @Component({
