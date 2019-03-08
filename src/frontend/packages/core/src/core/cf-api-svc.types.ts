@@ -161,4 +161,5 @@ export interface IUserProvidedService {
   service_bindings_url: string;
   routes: APIResource<IRoute>[];
   routes_url: string;
+  cfGuid?: string;
 }
