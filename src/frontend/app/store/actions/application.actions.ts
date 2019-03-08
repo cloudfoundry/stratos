@@ -60,10 +60,10 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
     page: 1,
-    'results-per-page': 4,
+    'results-per-page': 100,
   };
   flattenPagination = true;
-  flattenPaginationMax = 3;
+  flattenPaginationMax = 600;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
