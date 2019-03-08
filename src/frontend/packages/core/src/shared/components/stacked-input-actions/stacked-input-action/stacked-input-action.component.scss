@@ -1,0 +1,33 @@
+.input-action {
+  align-items: center;
+  display: flex;
+
+  $margin: 10px;
+
+  &__form {
+    align-items: center;
+    flex: 1;
+    flex-direction: row;
+    margin-right: $margin;
+  }
+  &__detail {
+    align-items: center;
+    display: flex;
+    margin-top: 20px;
+    > * {
+      margin-right: $margin;
+    }
+
+    &__remove {
+      cursor: pointer;
+      &.disabled {
+        cursor: default;
+        opacity: .5;
+      }
+    }
+
+    app-boolean-indicator {
+      width: 20px;
+    }
+  }
+}

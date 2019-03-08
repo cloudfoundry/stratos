@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/gorilla/context"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
@@ -212,13 +212,19 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+func bindToEnv(f func(echo.HandlerFunc, *env.VarSet) echo.HandlerFunc, e *env.VarSet) func(echo.HandlerFunc) echo.HandlerFunc {
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		return f(h, e)
+	}
+}
 
-	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
-	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
+func retryAfterUpgradeMiddleware(h echo.HandlerFunc, env *env.VarSet) echo.HandlerFunc {
+
+	upgradeVolume, noUpgradeVolumeOK := env.Lookup(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameOK := env.Lookup(UpgradeLockFileName)
 
 	// If any of those properties are not set, disable upgrade middleware
-	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+	if !noUpgradeVolumeOK || !noUpgradeLockFileNameOK {
 		return func(c echo.Context) error {
 			return h(c)
 		}

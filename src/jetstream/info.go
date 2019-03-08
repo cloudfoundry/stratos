@@ -66,7 +66,10 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			// Plugin doesn't implement an Endpoint Plugin interface, skip
 			continue
 		}
-		s.Endpoints[endpointPlugin.GetType()] = make(map[string]*interfaces.EndpointDetail)
+		// Empty Type can be used if a plugin just wants to implement UpdateMetadata
+		if len(endpointPlugin.GetType()) > 0 {
+			s.Endpoints[endpointPlugin.GetType()] = make(map[string]*interfaces.EndpointDetail)
+		}
 	}
 
 	// get the CNSI Endpoints
