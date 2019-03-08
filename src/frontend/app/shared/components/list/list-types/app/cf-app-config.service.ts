@@ -137,10 +137,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     noEntries: 'There are no applications'
   };
   enableTextFilter = true;
-  cardComponent = new CardMultiActionComponents({
-    [applicationSchemaKey]: CardAppComponent,
-    [userProvidedServiceInstanceSchemaKey]: ServiceInstanceCardComponent
-  });
+  cardComponent = CardAppComponent;
   defaultView = 'cards' as ListView;
 
   getGlobalActions = () => null;

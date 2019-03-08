@@ -151,7 +151,6 @@ export class LocalListController<T = any> {
   private paginationHasChanged(oldPag: PaginationEntityState, newPag: PaginationEntityState) {
     const oldPagCompareString = this.getPaginationCompareString(oldPag);
     const newPagCompareString = this.getPaginationCompareString(newPag);
-    console.log(oldPagCompareString !== newPagCompareString);
     return oldPagCompareString !== newPagCompareString;
   }
 }

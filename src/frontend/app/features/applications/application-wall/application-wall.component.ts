@@ -66,7 +66,6 @@ export class ApplicationWallComponent implements OnDestroy {
       CfAppsDataSource.paginationKey).subscribe();
   }
 
-  cardComponent = CardAppComponent;
 
   ngOnDestroy(): void {
     this.initCfOrgSpaceService.unsubscribe();
