@@ -174,25 +174,31 @@ export class PaginationMonitor<T = any> {
     );
   }
 
+  private getBaseEntityObservable(pagination$: Observable<PaginationEntityState>, schema: normalizrSchema.Entity) {
+    return pagination$.pipe(
+      switchMap(pagination => {
+        return combineLatest(Object.keys(pagination.ids).map((pageNumber) => {
+          const { pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
+          return this.store.select(selectEntities<T>(pageSchema.key)).pipe(distinctUntilChanged());
+        }));
+      }),
+      map(allPages => allPages.reduce((mergedPages, page) => ({
+        ...mergedPages,
+        ...page
+      }), {}))
+    );
+  }
+
   private createLocalPageObservable(
     pagination$: Observable<PaginationEntityState>,
     schema: normalizrSchema.Entity,
     fetching$: Observable<boolean>
   ) {
 
-    const entityObservable$ =
-      pagination$.pipe(
-        switchMap(pagination => {
-          return combineLatest(Object.keys(pagination.ids).map((pageNumber) => {
-            const { pageSchema } = this.getPageInfo(pagination, pageNumber, schema);
-            return this.store.select(selectEntities<T>(pageSchema.key)).pipe(distinctUntilChanged());
-          }));
-        }),
-        map(allPages => allPages.reduce((mergedPages, page) => ({
-          ...mergedPages,
-          ...page
-        }), {}))
-      );
+    const entityObservable$ = this.getBaseEntityObservable(
+      pagination$,
+      schema
+    );
 
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
 
