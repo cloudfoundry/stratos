@@ -201,6 +201,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
     this.masterAction = this.action as PaginatedAction;
+    this.setupAction(config);
+    if (!this.isLocal && this.config.listConfig) {
+      // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
+      // (one for the page size in the action and another when the initial page size is set)
+      this.masterAction.initialParams = this.masterAction.initialParams || {};
+      this.masterAction.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
+    }
+  }
+  private setupAction(config: IListDataSourceConfig<A, T>) {
     if (config.schema instanceof MultiActionConfig) {
       if (!config.isLocal) {
         // We cannot do multi action lists for none local lists
@@ -219,12 +228,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         }) as PaginatedAction);
       }
       this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
-    }
-    if (!this.isLocal && this.config.listConfig) {
-      // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
-      // (one for the page size in the action and another when the initial page size is set)
-      this.masterAction.initialParams = this.masterAction.initialParams || {};
-      this.masterAction.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
     }
   }
 

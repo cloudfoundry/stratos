@@ -28,47 +28,50 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
-
     if (row) {
-      this.serviceInstanceEntity = row;
-      const schema = entityFactory(userProvidedServiceInstanceSchemaKey);
-      this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
-      this.serviceInstanceTags = row.entity.tags.map(t => ({
-        value: t
-      }));
-      this.cfGuid = row.entity.cfGuid;
-      this.hasMultipleBindings.next(!(row.entity.service_bindings && row.entity.service_bindings.length > 0));
-      this.cardMenu = [
-        {
-          label: 'Edit',
-          action: this.edit,
-          can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
-            this.serviceInstanceEntity.entity.cfGuid,
-            this.serviceInstanceEntity.entity.space_guid
-          )
-        },
-        {
-          label: 'Unbind',
-          action: this.detach,
-          disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
-          can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
-            this.serviceInstanceEntity.entity.cfGuid,
-            this.serviceInstanceEntity.entity.space_guid
-          )
-        },
-        {
-          label: 'Delete',
-          action: this.delete,
-          can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
-            this.serviceInstanceEntity.entity.cfGuid,
-            this.serviceInstanceEntity.entity.space_guid
-          )
-        }
-      ];
+      this.setup(row);
     }
+  }
+
+  private setup(row: APIResource<IServiceInstance>) {
+    this.serviceInstanceEntity = row;
+    const schema = entityFactory(userProvidedServiceInstanceSchemaKey);
+    this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
+    this.serviceInstanceTags = row.entity.tags.map(t => ({
+      value: t
+    }));
+    this.cfGuid = row.entity.cfGuid;
+    this.hasMultipleBindings.next(!(row.entity.service_bindings && row.entity.service_bindings.length > 0));
+    this.cardMenu = [
+      {
+        label: 'Edit',
+        action: this.edit,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      },
+      {
+        label: 'Unbind',
+        action: this.detach,
+        disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      },
+      {
+        label: 'Delete',
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      }
+    ];
   }
 
   constructor(

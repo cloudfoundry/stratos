@@ -34,7 +34,8 @@
     transform: scale(.98);
   }
 
-  &__selected, &__active {
+  &__selected,
+  &__active {
     opacity: 1;
   }
 

@@ -58,6 +58,10 @@ export class SpecifyUserProvidedDetailsComponent {
       route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
       tags: new FormControl([]),
     });
+    this.initUpdate(serviceInstanceId, endpointId);
+  }
+
+  private initUpdate(serviceInstanceId: string, endpointId: string) {
     if (this.isUpdate) {
       this.formGroup.disable();
       const entityMonitor = new EntityMonitor(

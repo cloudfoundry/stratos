@@ -102,7 +102,6 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     this.options = new RequestOptions();
     this.options.url = `user_provided_service_instances`;
     this.options.params = new URLSearchParams();
-    // this.options.params.set('accepts_incomplete', 'true');
     this.options.method = 'post';
     const {
       spaceGuid: space_guid,
@@ -112,7 +111,6 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
       route_service_url,
       tags = []
     } = data;
-    // TODO: RC Test empty values
     this.options.body = {
       space_guid,
       name,

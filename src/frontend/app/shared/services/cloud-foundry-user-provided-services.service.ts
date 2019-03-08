@@ -19,28 +19,15 @@ import { selectRequestInfo } from '../../store/selectors/api.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
-// import { IUserProvidedService } from '../../../core/cf-api-svc.types';
-// import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-// import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-// import { GetAllUserProvidedServices, GetUserProvidedService } from '../../../store/actions/user-provided-service.actions';
-// import { AppState } from '../../../store/app-state';
-// import { entityFactory, userProvidedServiceInstanceSchemaKey } from '../../../store/helpers/entity-factory';
-// import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-// import { APIResource } from '../../../store/types/api.types';
-
-// TODO: RC Location
 
 @Injectable()
 export class CloudFoundryUserProvidedServicesService {
 
 
   constructor(
-    // public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
-    // private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    // private cfEndpointService: CloudFoundryEndpointService,
   ) {
 
   }
