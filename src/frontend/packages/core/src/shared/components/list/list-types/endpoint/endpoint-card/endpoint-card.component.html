@@ -1,4 +1,4 @@
-<app-meta-card class="endpoint-card" [routerLink]="endpointLink" [ngClass]="{'no-link': !endpointLink}" [favorite]="favorite" [actionMenu]="cardMenu">
+<app-meta-card class="endpoint-card" [routerLink]="endpointLink" [disableRouterLink]="!endpointLink" [ngClass]="{'no-link': !endpointLink}" [favorite]="favorite" [actionMenu]="cardMenu">
   <app-meta-card-title>
     <div class="endpoint-card__title">
       <div class="endpoint-card__image">
