@@ -182,15 +182,17 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ).subscribe();
 
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
-
+    console.log('here')
     const page$ = this.isLocal ?
       new LocalListController<T>(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
-      : transformedEntities$.pipe(publishReplay(1), refCount());
+      : transformedEntities$;
 
     this.page$ = page$.pipe(
       withLatestFrom(this.isLoadingPage$),
       filter(([page, isLoading]) => !isLoading),
-      map(([page]) => page)
+      map(([page]) => page),
+      publishReplay(1),
+      refCount()
     );
 
     this.pagination$ = pagination$;
@@ -394,6 +396,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   connect(): Observable<T[]> {
     return this.page$.pipe(
+      tap(console.log),
       tag('actual-page-obs')
     );
   }
