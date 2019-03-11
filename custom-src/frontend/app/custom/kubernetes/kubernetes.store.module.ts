@@ -7,6 +7,7 @@ import { Validators } from '@angular/forms';
 import { KubernetesCertsAuthFormComponent } from './auth-forms/kubernetes-certs-auth-form/kubernetes-certs-auth-form.component';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import { KubernetesConfigAuthFormComponent } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
+import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
 import { kubernetesEntities, kubernetesEntityKeys } from './store/kubernetes.entities';
 
 const kubernetesEndpointTypes: EndpointTypeConfig[] = [{
@@ -57,7 +58,16 @@ const kubernetesAuthTypes: EndpointAuthTypeConfig[] = [{
   },
   types: new Array<EndpointType>('k8s'),
   component: KubernetesCertsAuthFormComponent
-}
+},
+{
+  value: 'gke-auth',
+  name: 'GKE',
+  form: {
+    gkeconfig: ['', Validators.required],
+  },
+  types: new Array<EndpointType>('k8s'),
+  component: KubernetesGKEAuthFormComponent
+  }
 ];
 
 @StratosExtension({
