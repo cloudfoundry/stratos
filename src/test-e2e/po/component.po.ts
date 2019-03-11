@@ -1,5 +1,6 @@
-import { ElementFinder, protractor } from 'protractor/built';
 import { browser, promise } from 'protractor';
+import { ElementFinder, protractor } from 'protractor/built';
+
 import { E2EHelpers } from '../helpers/e2e-helpers';
 
 const until = protractor.ExpectedConditions;
@@ -33,13 +34,12 @@ export class Component {
 
   // Pass an optional description to help when debugging test issues
   waitUntilShown(elementDescription = 'Element'): promise.Promise<void> {
-    return browser.wait(until.presenceOf(this.locator), 5000,
-      elementDescription + ' taking too long to appear in the DOM').then(() => {
-        return browser.wait(until.visibilityOf(this.locator), 5000, elementDescription + ' not visible timing out').then(v => {
-          // Slight delay for animations
-          return browser.driver.sleep(100);
-        });
+    return browser.wait(until.presenceOf(this.locator), 5000, elementDescription + ' taking too long to appear in the DOM').then(() => {
+      return browser.wait(until.visibilityOf(this.locator), 5000, elementDescription + ' not visible timing out').then(v => {
+        // Slight delay for animations
+        return browser.driver.sleep(100);
       });
+    });
   }
 
   waitUntilNotShown(description = 'Element'): promise.Promise<void> {

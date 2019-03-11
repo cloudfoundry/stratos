@@ -4,6 +4,13 @@
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.2.0...2.3.0)
 
+### Important Security Fixes
+
+This release fixes two CVEs identified in Stratos related to the Session Cookie - we recommend you update to 2.3.0.
+
+* [CVE-2019-3783: Stratos Deploys With Public Default Session Store Secret](https://www.cloudfoundry.org/blog/cve-2019-3783)
+* [CVE-2019-3784: Stratos contains a Session Collision Vulnerability](https://www.cloudfoundry.org/blog/cve-2019-3784/)
+
 This release contains a number of fixes and improvements:
 
 **Fixes:**

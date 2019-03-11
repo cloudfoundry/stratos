@@ -1,6 +1,6 @@
-import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { HomePage } from '../home/home.po';
 import { LoginPage } from '../login/login.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
@@ -106,15 +106,15 @@ describe('Endpoints', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
       });
 
-      it('should go directly to applications view on logout and login', () => {
+      it('should go directly to home page view on logout and login', () => {
         endpointsPage.header.logout();
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
         loginPage.login(e2e.secrets.getConsoleNonAdminUsername(), e2e.secrets.getConsoleNonAdminPassword());
         loginPage.waitForLoading();
         loginPage.waitForApplicationPage();
-        const appPage = new ApplicationsPage();
-        expect(appPage.isActivePage()).toBeTruthy();
+        const homePage = new HomePage();
+        expect(homePage.isActivePage()).toBeTruthy();
       });
 
     });

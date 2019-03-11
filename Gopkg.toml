@@ -30,6 +30,14 @@
   source = "github.com/nwmac/go-flags"
   version = "=1.1"
 
+[[override]]
+  name = "github.com/labstack/echo"
+  version = ">=3.3.7"
+
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/domodwyer/mailyak"
+  version = "3.1.1"

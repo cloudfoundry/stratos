@@ -2,7 +2,7 @@
   'use strict';
 
   /**
-   * Custom spec reporter that will fail the tests if ant are skipped
+   * Custom spec reporter that will fail the tests if any are skipped
    * 
    * It only does this if the CI_ENV environment variable is set to 'true'
    * 
