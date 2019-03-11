@@ -268,7 +268,7 @@ links | `space.auditors` | | we might be able to fetch this via new users endpoi
 
 ### `/service_instances` (functionality for /spaces/{guid}/service_instances only)
 Type | Name | Notes
---- | --- | --- | ---
+--- | --- | ---
 `order_by` | `username`
 filter | space guid
 link | service bindings
@@ -283,7 +283,7 @@ link | `service`
 
 ## v3 Required Features
 
-### Single 'included` section per quest
+### Single 'included` section per request
 There should hopefully be a single `included` section even if `included` elements have their own `include`s. Not quite a requirement, but a real nice to have.
 
 ### `include`d lists
@@ -291,7 +291,7 @@ Ability to set `include` for lists of entities. See https://github.com/cloudfoun
 
 Use case - Routes, packages, builds, process stats, etc in an application
 
-### `order_by` values in `include`d
+### `order_by` values in `include`d entities
 Ability to use properties of entities that are from the `included` section in `order_by`.
 
 Covers simple case of sorting by a property in a 1:1 `include` and also summation of numerical properties in 1:M relationship.
