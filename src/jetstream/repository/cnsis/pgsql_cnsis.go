@@ -78,11 +78,13 @@ func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*interfaces.CNSIR
 			pCNSIType              string
 			pURL                   string
 			cipherTextClientSecret []byte
+			subType                sql.NullString
+			metadata               sql.NullString
 		)
 
 		cnsi := new(interfaces.CNSIRecord)
 
-		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cipherTextClientSecret, &cnsi.SSOAllowed, &cnsi.SubType, &cnsi.Metadata)
+		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cipherTextClientSecret, &cnsi.SSOAllowed, &subType, &metadata)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
 		}
@@ -91,6 +93,14 @@ func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*interfaces.CNSIR
 
 		if cnsi.APIEndpoint, err = url.Parse(pURL); err != nil {
 			return nil, fmt.Errorf("Unable to parse API Endpoint: %v", err)
+		}
+
+		if subType.Valid {
+			cnsi.SubType = subType.String
+		}
+
+		if metadata.Valid {
+			cnsi.Metadata = metadata.String
 		}
 
 		if len(cipherTextClientSecret) > 0 {
@@ -133,13 +143,23 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*interfaces.Conn
 			pCNSIType    string
 			pURL         string
 			disconnected bool
+			subType      sql.NullString
+			metadata     sql.NullString
 		)
 
 		cluster := new(interfaces.ConnectedEndpoint)
 		err := rows.Scan(&cluster.GUID, &cluster.Name, &pCNSIType, &pURL, &cluster.DopplerLoggingEndpoint, &cluster.Account, &cluster.TokenExpiry, &cluster.SkipSSLValidation,
-			&disconnected, &cluster.TokenMetadata, &cluster.SubType, &cluster.EndpointMetadata)
+			&disconnected, &cluster.TokenMetadata, &subType, &metadata)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan cluster records: %v", err)
+		}
+
+		if subType.Valid {
+			cluster.SubType = subType.String
+		}
+
+		if metadata.Valid {
+			cluster.EndpointMetadata = metadata.String
 		}
 
 		cluster.CNSIType = pCNSIType
@@ -178,12 +198,14 @@ func (p *PostgresCNSIRepository) findBy(query, match string, encryptionKey []byt
 		pCNSIType              string
 		pURL                   string
 		cipherTextClientSecret []byte
+		subType                sql.NullString
+		metadata               sql.NullString
 	)
 
 	cnsi := new(interfaces.CNSIRecord)
 
 	err := p.db.QueryRow(query, match).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
-		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cipherTextClientSecret, &cnsi.SSOAllowed, &cnsi.SubType, &cnsi.Metadata)
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cipherTextClientSecret, &cnsi.SSOAllowed, &subType, &metadata)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -192,6 +214,14 @@ func (p *PostgresCNSIRepository) findBy(query, match string, encryptionKey []byt
 		return interfaces.CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
 	default:
 		// do nothing
+	}
+
+	if subType.Valid {
+		cnsi.SubType = subType.String
+	}
+
+	if metadata.Valid {
+		cnsi.Metadata = metadata.String
 	}
 
 	cnsi.CNSIType = pCNSIType
