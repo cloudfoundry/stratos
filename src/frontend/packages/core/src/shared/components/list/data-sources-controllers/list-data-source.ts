@@ -21,6 +21,7 @@ import {
   switchMap,
   tap,
   withLatestFrom,
+  startWith,
 } from 'rxjs/operators';
 
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
@@ -187,7 +188,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       : transformedEntities$;
 
     this.page$ = page$.pipe(
-      withLatestFrom(this.isLoadingPage$),
+      withLatestFrom(this.isLoadingPage$.pipe(startWith(false))),
       filter(([page, isLoading]) => !isLoading),
       map(([page]) => page),
       publishReplay(1),
@@ -283,7 +284,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     return config.refresh ? config.refresh : () => {
-      this.store.dispatch(this.metricsAction || this.masterAction);
+      if (Array.isArray(this.action)) {
+        this.action.forEach(action => this.store.dispatch(action));
+      } else {
+        this.store.dispatch(this.metricsAction || this.masterAction);
+      }
     };
   }
 
