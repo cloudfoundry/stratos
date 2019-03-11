@@ -182,7 +182,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ).subscribe();
 
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
-    console.log('here')
     const page$ = this.isLocal ?
       new LocalListController<T>(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$;

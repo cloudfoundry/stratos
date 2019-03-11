@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { denormalize, schema as normalizrSchema } from 'normalizr';
+import { denormalize, schema as normalizrSchema, schema } from 'normalizr';
 import { asapScheduler, combineLatest, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
@@ -31,7 +31,13 @@ export class MultiActionListEntity {
     }
     return entity;
   }
-  constructor(public entity: any, public schemaKey: string) { }
+  static getEntityKey(entity: MultiActionListEntity | any, defaultEntityKey: string = null) {
+    if (entity instanceof MultiActionListEntity) {
+      return entity.entityKey;
+    }
+    return defaultEntityKey;
+  }
+  constructor(public entity: any, public entityKey: string) { }
 }
 export class PaginationMonitor<T = any> {
   /**

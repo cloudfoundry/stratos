@@ -218,11 +218,13 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
       // Add to target to ensure ngcontent is correct in new component
       this.cellComponent = <TableCellCustom<T>>component.instance;
       const row = MultiActionListEntity.getEntity(this.row);
+      const entityKey = MultiActionListEntity.getEntityKey(this.row);
       this.cellComponent.row = row;
+      this.cellComponent.entityKey = entityKey;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
       if (this.dataSource.getRowState) {
-        this.cellComponent.rowState = this.dataSource.getRowState(row);
+        this.cellComponent.rowState = this.dataSource.getRowState(row, entityKey);
       }
       if (this.cellDefinition) {
         const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;

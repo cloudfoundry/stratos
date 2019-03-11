@@ -83,7 +83,7 @@ export class CardComponent<T> {
     if (!componentType || !item) {
       return;
     }
-    const { component, schemaKey, entity } = this.getComponent(componentType, item);
+    const { component, entityKey, entity } = this.getComponent(componentType, item);
     if (component) {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
       if (componentFactory) {
@@ -95,7 +95,7 @@ export class CardComponent<T> {
         // }
         this.cardComponent.row = entity;
         this.cardComponent.dataSource = this.dataSource;
-        this.cardComponent.schemaKey = schemaKey;
+        this.cardComponent.entityKey = entityKey;
       }
     }
   }
@@ -110,11 +110,11 @@ export class CardComponent<T> {
   }
 
   private getComponent(component: any | CardMultiActionComponents, item: T | MultiActionListEntity) {
-    const { schemaKey, entity } = this.getEntity(item);
-    if (component instanceof CardMultiActionComponents && schemaKey) {
+    const { entityKey, entity } = this.getEntity(item);
+    if (component instanceof CardMultiActionComponents && entityKey) {
       return {
-        component: component.getComponent(schemaKey),
-        schemaKey,
+        component: component.getComponent(entityKey),
+        entityKey,
         entity
       };
     }
@@ -127,7 +127,7 @@ export class CardComponent<T> {
   private getEntity(item: T | MultiActionListEntity) {
     if (item instanceof MultiActionListEntity) {
       return {
-        schemaKey: item.schemaKey,
+        entityKey: item.entityKey,
         entity: item.entity
       };
     }

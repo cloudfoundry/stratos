@@ -18,13 +18,13 @@ export interface ICellDefinition<T> {
   // Dot separated path to get the value from the row
   valuePath?: string;
   // Takes president over valuePath
-  getValue?: (row: T) => string;
+  getValue?: (row: T, schemaKey?: string) => string;
   // Should the value of getLink be used in a href or routerLink
   externalLink?: boolean;
   // Automatically turns the cell into a link
-  getLink?: (row: T) => string;
+  getLink?: (row: T, schemaKey?: string) => string;
   // Used in conjunction with asyncValue
-  getAsyncLink?: (value) => string;
+  getAsyncLink?: (value, schemaKey?: string) => string;
   newTab?: boolean;
   asyncValue?: ICellAsyncValue;
   showShortLink?: boolean;
