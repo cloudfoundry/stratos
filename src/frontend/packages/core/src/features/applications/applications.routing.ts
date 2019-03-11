@@ -31,7 +31,7 @@ import { DeployApplicationComponent } from './deploy-application/deploy-applicat
 import { DeployApplicationModule } from './deploy-application/deploy-application.module';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy/edit-autoscaler-policy.component';
-import { AutoscalerMetricChartPageComponent } from './autoscaler-metric-chart-page/autoscaler-metric-chart-page.component';
+import { AutoscalerMetricPageComponent } from './autoscaler-metric-page/autoscaler-metric-page.component';
 import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page/autoscaler-scale-history-page.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
@@ -130,8 +130,8 @@ const applicationsRoutes: Routes = [
             component: EditAutoscalerPolicyComponent,
           },
           {
-            path: 'app-autoscaler-metric-chart-page',
-            component: AutoscalerMetricChartPageComponent,
+            path: 'app-autoscaler-metric-page',
+            component: AutoscalerMetricPageComponent,
           },
           {
             path: 'app-autoscaler-scale-history-page',

@@ -312,7 +312,7 @@ function buildMetricColorData(metricData, trigger) {
 function buildSingleColor(lineChartSeries, ul) {
   ul.map((item) => {
     const lineData = {
-      name: `${item.operator} ${item.threshold}`,
+      name: buildTriggerName(item),
       value: item.color
     };
     lineChartSeries.push(lineData);
@@ -426,10 +426,16 @@ function buildLowerLegendData(legendData, lower, latestUl) {
   return {};
 }
 
+function buildTriggerName(item) {
+  const type = LowerOperators.indexOf(item.operator) >= 0 ? 'lower' : 'upper';
+  return `${type} threshold: ${item.operator} ${item.threshold}`;
+}
+
 function buildSingleMarkLine(lineChartSeries, metricData, ul) {
   ul.map((item) => {
+    const type = LowerOperators.indexOf(item.operator) ? 'lower' : 'upper';
     const lineData = {
-      name: `${item.operator} ${item.threshold}`,
+      name: buildTriggerName(item),
       series: []
     };
     metricData.map((data) => {
