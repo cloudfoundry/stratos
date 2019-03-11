@@ -111,7 +111,8 @@ function createService(
   marketplaceSummaryPage: MarketplaceSummaryPage,
   servicesHelperE2E: ServicesHelperE2E,
   serviceName: string,
-  servicesWall: ServicesWallPage) {
+  servicesWall: ServicesWallPage
+) {
   const button = marketplaceSummaryPage.header.getIconButton('add');
   expect(button).toBeDefined();
   button.then(bt => bt.click());
