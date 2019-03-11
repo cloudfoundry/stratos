@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { denormalize, schema as normalizrSchema, schema } from 'normalizr';
+import { denormalize, schema as normalizrSchema } from 'normalizr';
 import { asapScheduler, combineLatest, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
@@ -159,7 +159,7 @@ export class PaginationMonitor<T = any> {
     schema: normalizrSchema.Entity,
   ) {
     const entityObservable$ = this.store
-      .select(selectEntities<T>(this.schema.key))
+      .select(selectEntities<T>(schema.key))
       .pipe(distinctUntilChanged());
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
     return pagination$.pipe(
