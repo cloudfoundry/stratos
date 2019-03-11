@@ -6,6 +6,7 @@ import { LoggerService } from '../../../core/src/core/logger.service';
 import {
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerHealthAction,
+  GetAppAutoscalerPolicyTriggerAction,
   GetAppAutoscalerScalingHistoryAction,
   GetAppAutoscalerMetricAction,
   UpdateAppAutoscalerPolicyAction,
@@ -41,7 +42,7 @@ const { proxyAPIVersion, autoscalerAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/proxy/${autoscalerAPIVersion}`;
 const healthPrefix = `/pp/${proxyAPIVersion}/proxy`;
 
-export function createFailedAutoscalerRequestMessage(requestType, error) {
+export function createAutoscalerRequestMessage(requestType, error) {
   return `Unable to ${requestType}: ${error.status} ${error._body}`;
 }
 
@@ -83,7 +84,7 @@ export class AutoscalerEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(createFailedAutoscalerRequestMessage('fetch health info', err), apiAction, actionType)
+              new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch health info', err), apiAction, actionType)
             ]));
       }));
 
@@ -117,7 +118,7 @@ export class AutoscalerEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(createFailedAutoscalerRequestMessage('update policy', err), apiAction, actionType)
+              new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), apiAction, actionType)
             ]));
       }));
 
@@ -156,7 +157,7 @@ export class AutoscalerEffects {
                 ];
               } else {
                 return [
-                  new WrapperRequestActionFailed(createFailedAutoscalerRequestMessage('fetch policy', err), apiAction, actionType)
+                  new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), apiAction, actionType)
                 ];
               }
             }));
@@ -191,7 +192,37 @@ export class AutoscalerEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(createFailedAutoscalerRequestMessage('update policy', err), apiAction, actionType)
+              new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), apiAction, actionType)
+            ]));
+      }));
+
+  @Effect()
+  fetchAppAutoscalerPolicyTrigger$ = this.actions$
+    .ofType<GetAppAutoscalerPolicyTriggerAction>(APP_AUTOSCALER_POLICY).pipe(
+      withLatestFrom(this.store),
+      mergeMap(([action, state]) => {
+        const actionType = 'fetch';
+        const apiAction = action as ICFAction;
+        this.store.dispatch(new StartRequestAction(apiAction, actionType));
+        const options = new RequestOptions();
+        options.url = `${commonPrefix}/apps/${action.appGuid}/policy`;
+        options.method = 'get';
+        options.headers = this.addHeaders(action.cfGuid);
+        return this.http
+          .request(new Request(options)).pipe(
+            mergeMap(response => {
+              const policyInfo = autoscalerTransformArrayToMap(response.json());
+              const mappedData = {
+                entities: { [action.entityKey]: {} },
+                result: []
+              } as NormalizedResponse;
+              this.transformTriggerData(action.entityKey, mappedData, policyInfo, action.query);
+              return [
+                new WrapperRequestActionSuccess(mappedData, apiAction, actionType, Object.keys(policyInfo.scaling_rules_map).length, 1)
+              ];
+            }),
+            catchError(err => [
+              new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch scaling policy trigger', err), apiAction, actionType)
             ]));
       }));
 
@@ -253,7 +284,7 @@ export class AutoscalerEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(createFailedAutoscalerRequestMessage('fetch scaling history', err), apiAction, actionType)
+              new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch scaling history', err), apiAction, actionType)
             ]));
       }));
 
@@ -289,7 +320,7 @@ export class AutoscalerEffects {
               ];
             }),
             catchError(err => [
-              new WrapperRequestActionFailed(createFailedAutoscalerRequestMessage('fetch metrics', err), apiAction, actionType)
+              new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch metrics', err), apiAction, actionType)
             ]));
       }));
 
@@ -319,6 +350,20 @@ export class AutoscalerEffects {
           created_at: item.timestamp,
           guid: item.timestamp,
           updated_at: item.timestamp
+        }
+      };
+    });
+    mappedData.result = Object.keys(mappedData.entities[key]);
+  }
+
+  transformTriggerData(key: string, mappedData: NormalizedResponse, data: any, query: any) {
+    mappedData.entities[key] = [];
+    Object.keys(data.scaling_rules_map).map((metricType) => {
+      data.scaling_rules_map[metricType]['query'] = query
+      mappedData.entities[key][metricType] = {
+        entity: data.scaling_rules_map[metricType],
+        metadata: {
+          guid: metricType
         }
       };
     });

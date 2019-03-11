@@ -23,6 +23,19 @@ import {
 } from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
+import {
+  AppServiceBindingCardComponent
+} from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
+import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
+import {
+  AppAutoscalerMetricChartCardComponent
+} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
+import {
+  AppAutoscalerComboChartComponent
+} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-chart.component';
+import {
+  AppAutoscalerComboSeriesVerticalComponent
+} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 
 
 export const listCards = [
@@ -37,6 +50,9 @@ export const listCards = [
   ServiceInstanceCardComponent,
   UserProvidedServiceInstanceCardComponent,
   EndpointCardComponent
+  AppAutoscalerMetricChartCardComponent,
+  AppAutoscalerComboChartComponent,
+  AppAutoscalerComboSeriesVerticalComponent
 ];
 export type CardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents | CardDynamicComponent<T>;
 

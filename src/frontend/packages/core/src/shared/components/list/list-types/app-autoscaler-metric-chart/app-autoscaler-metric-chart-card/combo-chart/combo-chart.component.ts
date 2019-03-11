@@ -135,7 +135,7 @@ import { scaleBand, scaleLinear, scalePoint, scaleTime } from 'd3-scale';
   styleUrls: ['./combo-chart.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class ComboChartComponent extends BaseChartComponent {
+export class AppAutoscalerComboChartComponent extends BaseChartComponent {
 
   @ViewChild(LineSeriesComponent) lineSeriesComponent: LineSeriesComponent;
 
@@ -164,6 +164,7 @@ export class ComboChartComponent extends BaseChartComponent {
   @Input() rangeFillOpacity: number;
   @Input() animations = true;
   @Input() yScaleMax: number;
+  @Input() metricName: string;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -272,7 +273,11 @@ export class ComboChartComponent extends BaseChartComponent {
   }
 
   getSeriesDomain(): any[] {
-    this.combinedSeries = this.lineChart.slice(0);
+    this.combinedSeries = [];
+    this.combinedSeries.push({
+      name: this.metricName,
+      series: this.results
+    });
     return this.combinedSeries.map(d => d.name);
   }
 
