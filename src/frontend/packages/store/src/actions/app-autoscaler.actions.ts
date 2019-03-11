@@ -82,6 +82,31 @@ export class DetachAppAutoscalerPolicyAction implements IRequestAction {
   entityKey = appAutoscalerPolicySchemaKey;
 }
 
+export class GetAppAutoscalerPolicyTriggerAction extends CFStartAction implements PaginatedAction {
+  constructor(
+    public paginationKey: string,
+    public appGuid: string,
+    public cfGuid: string,
+    public normalFormat?,
+  ) {
+    super();
+    this.query = {
+      metric: 'policy'
+    };
+  }
+  actions = [
+    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY,
+    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_SUCCESS,
+    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_FAILED
+  ];
+  type = APP_AUTOSCALER_POLICY;
+  entity = [entityFactory(appAutoscalerPolicySchemaKey)];
+  entityKey = appAutoscalerPolicySchemaKey;
+  options: RequestOptions;
+  query: any;
+  windowValue: string;
+}
+
 export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implements PaginatedAction {
   private static sortField = 'timestamp';
   constructor(

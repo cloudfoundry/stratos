@@ -64,7 +64,7 @@ function formatLabel(label: any): string {
     ])
   ]
 })
-export class ComboSeriesVerticalComponent implements OnChanges {
+export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
   @Input() dims;
   @Input() type = 'standard';

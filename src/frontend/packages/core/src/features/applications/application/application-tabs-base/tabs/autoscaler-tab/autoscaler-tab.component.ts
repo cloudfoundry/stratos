@@ -380,11 +380,8 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
         'applications',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
-        'app-autoscaler-metric-chart-page'
-      ],
-      query: {
-        // spaceGuid: app.app.entity.space_guid
-      }
+        'app-autoscaler-metric-page'
+      ]
     }));
   }
 
