@@ -259,8 +259,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     if (!multiActionConfig.selectPlaceholder) {
       return null;
     }
-    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((map, schemaConfig, i) => ([
-      ...map,
+    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => ([
+      ...actionMap,
       {
         page: i + 1,
         label: schemaConfig.prettyName,
