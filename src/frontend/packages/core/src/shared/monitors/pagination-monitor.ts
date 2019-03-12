@@ -24,7 +24,7 @@ import { PaginationEntityState } from '../../../../store/src/types/pagination.ty
 import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
-  public __multiActionListEntity__ = true;
+  // public __multiActionListEntity__ = true;
   static getEntity(entity: MultiActionListEntity | any) {
     if (entity instanceof MultiActionListEntity) {
       return entity.entity;

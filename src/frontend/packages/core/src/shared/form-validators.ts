@@ -10,7 +10,7 @@ export function isValidJsonValidator(): ValidatorFn {
           throw new Error('not an object');
         }
       } catch (e) {
-        return { 'notValidJson': { value: formField.value } };
+        return { notValidJson: { value: formField.value } };
       }
     }
     return null;

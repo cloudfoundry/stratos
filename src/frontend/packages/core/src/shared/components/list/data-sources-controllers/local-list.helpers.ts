@@ -4,11 +4,6 @@ export class LocalPaginationHelpers {
 
   /**
    * Looks in all the places necessary to see if the current pagination section is maxed.
-   *
-   * @static
-   * @param {PaginationEntityState} pagination
-   * @returns
-   * @memberof LocalPaginationHelpers
    */
   static isPaginationMaxed(pagination: PaginationEntityState) {
     if (pagination.forcedLocalPage) {
@@ -19,11 +14,6 @@ export class LocalPaginationHelpers {
 
   /**
    * Gets a local page request section relating to a particular schema key.
-   *
-   * @static
-   * @param {PaginationEntityState} pagination
-   * @param {string} schemaKey
-   * @memberof LocalPaginationHelpers
    */
   static getEntityPageRequest(pagination: PaginationEntityState, entityKey: string) {
     const { pageRequests } = pagination;

@@ -13,11 +13,11 @@ import { CardMultiActionComponents } from './card.component.types';
 export class CardsComponent<T> {
   public columns = CardCell.columns;
   @Input() dataSource: IListDataSource<T>;
-  private _component: CardCell<T> | CardMultiActionComponents;
+  private pComponent: CardCell<T> | CardMultiActionComponents;
   @Input()
-  get component() { return this._component; }
+  get component() { return this.pComponent; }
   set component(cardCell: CardCell<T> | CardMultiActionComponents) {
-    this._component = cardCell;
+    this.pComponent = cardCell;
   }
 
   public multiActionTrackBy(index: number, item: any | MultiActionListEntity) {

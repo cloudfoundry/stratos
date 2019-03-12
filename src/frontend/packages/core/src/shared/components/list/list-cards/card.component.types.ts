@@ -8,7 +8,7 @@ export interface ICardMultiActionComponentList {
 }
 
 export class CardMultiActionComponents {
-  public __cardMultiActionComponents__ = true;
+  // public __cardMultiActionComponents__ = true;
   static getComponentFromMultiAction(component: any | CardMultiActionComponents, schemaKey?: string) {
     if (component instanceof CardMultiActionComponents) {
       return component.getComponent(schemaKey);

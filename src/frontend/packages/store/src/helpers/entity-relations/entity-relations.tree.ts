@@ -16,10 +16,9 @@ function generateCacheKey(entityKey: string, action: EntityInlineParentAction): 
 }
 
 export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {
-  // EntitySchema
   const entityOrArray = action.entity;
   const isArray = Array.isArray(entityOrArray);
-  const entity = isArray ? entityOrArray[0] : entityOrArray;
+  const entity: EntitySchema = isArray ? entityOrArray[0] : entityOrArray;
   const entityKey = entity.key;
   const cacheKey = generateCacheKey(entityKey, action);
   const cachedTree = entityTreeCache[cacheKey];

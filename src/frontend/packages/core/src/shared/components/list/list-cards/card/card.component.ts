@@ -49,26 +49,26 @@ type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
 })
 export class CardComponent<T> {
   private componentRef: ComponentRef<any>;
-  private _component: cardTypes<T>;
-  private _item: T | MultiActionListEntity;
+  private pComponent: cardTypes<T>;
+  private pItem: T | MultiActionListEntity;
 
   @Input() set component(component: cardTypes<T>) {
-    if (!this._component) {
+    if (!this.pComponent) {
       this.setupComponent(component, this.item);
-      this._component = component;
+      this.pComponent = component;
     }
   }
   get component() {
-    return this._component;
+    return this.pComponent;
   }
 
   @Input() set item(item: T | MultiActionListEntity) {
-    this._item = item;
+    this.pItem = item;
     this.setupComponent(this.component, item);
   }
 
   get item() {
-    return this._item;
+    return this.pItem;
   }
 
   @Input() dataSource = null as IListDataSource<T>;
