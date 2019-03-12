@@ -400,7 +400,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   connect(): Observable<T[]> {
     return this.page$.pipe(
-      tap(console.log),
       tag('actual-page-obs')
     );
   }

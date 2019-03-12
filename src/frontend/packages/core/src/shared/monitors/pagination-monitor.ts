@@ -12,6 +12,8 @@ import {
   refCount,
   switchMap,
   withLatestFrom,
+  startWith,
+  tap,
 } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
@@ -237,7 +239,7 @@ export class PaginationMonitor<T = any> {
         filter(busy => !busy),
         switchMap(() => entities$),
         publishReplay(1),
-        refCount(),
+        refCount()
       ),
       isMultiAction$
     };
