@@ -184,7 +184,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		return err
 	}
 
-	dialTimeout := os.Getenv("CF_DIAL_TIMEOUT")
+	dialTimeout := cfAppPush.portalProxy.Env().String("CF_DIAL_TIMEOUT", "")
 	pushConfig.OutputWriter = socketWriter
 	pushConfig.DialTimeout = dialTimeout
 

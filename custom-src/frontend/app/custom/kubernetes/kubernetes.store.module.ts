@@ -1,4 +1,4 @@
-import { CoreModule } from './../../../../../src/frontend/app/core/core.module';
+import { CoreModule } from '../../core/core.module';
 import { NgModule } from '@angular/core';
 
 import { StratosExtension } from '../../core/extension/extension-service';

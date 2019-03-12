@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../../store/src//app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { HelmReleaseService } from '../../services/helm-release.service';
 import { KubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';

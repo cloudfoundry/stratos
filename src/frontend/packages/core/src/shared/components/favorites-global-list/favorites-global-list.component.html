@@ -1,0 +1,17 @@
+<div *ngIf="favInfo$ | async as favoriteInfo">
+  <div *ngIf="favoriteInfo.error && !favoriteInfo.fetching">Could not fetch favorites</div>
+  <div class="favorite-list" *ngIf="favoriteGroups$ | async as entityGroups">
+
+    <ng-container *ngIf="!favoriteInfo.fetching && !favoriteInfo.error">
+      <div class="favorites-list__empty-text" *ngIf="!entityGroups || !entityGroups.length">
+        It looks like you don't have any favorites, why don't you start by adding your favorite <a [routerLink]="['/endpoints']">endpoint</a>?
+      </div>
+      <div class="favorite-list__group" *ngFor="let favGroup of entityGroups;trackBy: trackByEndpointId">
+        <app-favorites-meta-card class="favorite-list__endpoint-card" [endpoint]="true" [endpointHasEntities]="favGroup.entities && favGroup.entities.length > 0"
+          [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
+        <app-favorites-entity-list *ngIf="favGroup.entities && favGroup.entities.length" class="favorite-list_entities"
+          [endpointTypes]="favGroup.endpoint.favorite.endpointType" [entities]="favGroup.entities"></app-favorites-entity-list>
+      </div>
+    </ng-container>
+  </div>
+</div>

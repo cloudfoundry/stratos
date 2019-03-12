@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
@@ -137,7 +138,7 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		CFAdminIdentifier:    CFAdminIdentifier,
 	}
 
-	pp := newPortalProxy(pc, db, nil, nil)
+	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)
 	initialisedEndpoint := initCFPlugin(pp)
 	pp.Plugins = make(map[string]interfaces.StratosPlugin)
@@ -251,7 +252,7 @@ const mockUAAToken = `eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eX
 
 var mockTokenExpiry = time.Now().AddDate(0, 0, 1).Unix()
 
-var mockUAAResponse = UAAResponse{
+var mockUAAResponse = interfaces.UAAResponse{
 	AccessToken:  mockUAAToken,
 	RefreshToken: mockUAAToken,
 }

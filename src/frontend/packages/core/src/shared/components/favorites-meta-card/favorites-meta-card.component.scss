@@ -1,0 +1,53 @@
+.fav-meta-card {
+  min-height: 160px;
+  outline: none;
+  &__header-text {
+    margin-top: 0;
+  }
+  &__type {
+    $type-height: 20px;
+    font-size: 13px;
+    line-height: $type-height;
+    margin-top: -($type-height - 2px);
+    opacity: .6;
+  }
+  &__missing {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-around;
+    padding: 10px;
+    padding-top: 20px;
+    &-text {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    &-small-text {
+      margin-bottom: 20px;
+    }
+  }
+  &__clickable {
+    cursor: pointer;
+  }
+  &__header {
+    white-space: nowrap;
+  }
+}
+
+.error-details {
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+  &__value {
+    padding-bottom: 5px;
+  }
+  &__label {
+    font-size: 10px;
+    opacity: .6;
+  }
+}
+
+.subtle-text {
+  opacity: .6;
+}

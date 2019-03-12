@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import {
   HelmReleasePodsTabComponent,
 } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
-import { HelmReleaseComponent } from '../../../../../src/frontend/app/custom/kubernetes/helm-release/helm-release.component';
+import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import {
   HelmReleaseServicesComponent,

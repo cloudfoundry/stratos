@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { ListConfig } from '../../../../../../../src/frontend/app/shared/components/list/list.component.types';
+import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { KubernetesAppsListConfigService } from '../../list-types/kubernetes-apps/kubernetes-apps-list-config.service';
 
 @Component({

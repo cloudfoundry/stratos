@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -151,30 +150,32 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Repository) (*interfaces.ConsoleConfig, error) {
 	log.Debug("initialiseConsoleConfig")
 
+	var err error
+
 	consoleConfig := new(interfaces.ConsoleConfig)
-	uaaEndpoint, err := config.GetValue("UAA_ENDPOINT")
-	if err != nil {
+	uaaEndpoint, found := p.Env().Lookup("UAA_ENDPOINT")
+	if !found {
 		return consoleConfig, errors.New("UAA_Endpoint not found")
 	}
 
-	consoleClient, err := config.GetValue("CONSOLE_CLIENT")
-	if err != nil {
+	consoleClient, found := p.Env().Lookup("CONSOLE_CLIENT")
+	if !found {
 		return consoleConfig, errors.New("CONSOLE_CLIENT not found")
 	}
 
-	consoleClientSecret, err := config.GetValue("CONSOLE_CLIENT_SECRET")
+	consoleClientSecret, found := p.Env().Lookup("CONSOLE_CLIENT_SECRET")
 	if err != nil {
 		// Special case, mostly this is blank, so assume its blank
 		consoleClientSecret = ""
 	}
 
-	consoleAdminScope, err := config.GetValue("CONSOLE_ADMIN_SCOPE")
-	if err != nil {
+	consoleAdminScope, found := p.Env().Lookup("CONSOLE_ADMIN_SCOPE")
+	if !found {
 		return consoleConfig, errors.New("CONSOLE_ADMIN_SCOPE not found")
 	}
 
-	skipSslValidation, err := config.GetValue("SKIP_SSL_VALIDATION")
-	if err != nil {
+	skipSslValidation, found := p.Env().Lookup("SKIP_SSL_VALIDATION")
+	if !found {
 		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
 	}
 

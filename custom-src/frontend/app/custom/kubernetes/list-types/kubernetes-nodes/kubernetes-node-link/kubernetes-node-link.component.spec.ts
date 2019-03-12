@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link.component';
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 
 describe('KubernetesNodeLinkComponent', () => {
   let component: KubernetesNodeLinkComponent<any>;
@@ -12,7 +12,7 @@ describe('KubernetesNodeLinkComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeLinkComponent],
-      imports: BaseTestModules,
+      imports: KubernetesBaseTestModules,
       providers: [KubernetesEndpointService, BaseKubeGuid]
     })
       .compileComponents();

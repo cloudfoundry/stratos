@@ -2,8 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { MetricsConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
-import { IMetricMatrixResult } from '../../../../../store/types/base-metric.types';
-import { IMetricApplication } from '../../../../../store/types/metric.types';
+import { IMetricMatrixResult } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions';
 

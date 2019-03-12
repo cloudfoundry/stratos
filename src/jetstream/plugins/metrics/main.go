@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo"
@@ -115,11 +114,7 @@ func (m *MetricsSpecification) GetType() string {
 }
 
 func (m *MetricsSpecification) GetClientId() string {
-	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
-		return clientId
-	}
-
-	return "metrics"
+	return m.portalProxy.Env().String(CLIENT_ID_KEY, "metrics")
 }
 
 func (m *MetricsSpecification) Register(echoContext echo.Context) error {

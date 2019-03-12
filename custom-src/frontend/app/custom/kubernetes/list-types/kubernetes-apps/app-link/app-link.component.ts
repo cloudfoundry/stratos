@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { TableCellCustom } from '../../../../../../../../src/frontend/app/shared/components/list/list.types';
-import { KubernetesApp } from '../../../../../../../../src/frontend/app/custom/kubernetes/store/kube.types';
+import { TableCellCustom } from '../../../../../shared/components/list/list.types';
+import { KubernetesApp } from '../../../../../custom/kubernetes/store/kube.types';
 
 @Component({
   selector: 'app-app-link',

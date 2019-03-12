@@ -14,11 +14,11 @@ import {
   getMetricsChartConfigBuilder,
 } from '../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { AppState } from '../../../store/app-state';
-import { entityFactory } from '../../../store/helpers/entity-factory';
-import { EntityInfo } from '../../../store/types/api.types';
-import { ChartSeries, IMetricMatrixResult } from '../../../store/types/base-metric.types';
-import { IMetricApplication } from '../../../store/types/metric.types';
+import { AppState } from '../../../../../store/src/app-state';
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { EntityInfo } from '../../../../../store/src/types/api.types';
+import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
+import { IMetricApplication } from '../../../../../store/src/types/metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { HelmReleaseService } from '../services/helm-release.service';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';

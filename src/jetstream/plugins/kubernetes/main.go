@@ -6,7 +6,6 @@ import (
 
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -47,11 +46,7 @@ func (c *KubernetesSpecification) GetType() string {
 }
 
 func (c *KubernetesSpecification) GetClientId() string {
-	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
-		return clientId
-	}
-
-	return "k8s"
+	return c.portalProxy.Env().String(CLIENT_ID_KEY, "k8s")
 }
 
 func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
@@ -60,7 +55,7 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 }
 
 func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
-	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1")
+	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1", nil, nil)
 	if err != nil {
 		return err
 	}

@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -55,11 +54,7 @@ func (m *CaaspSpecification) GetType() string {
 }
 
 func (m *CaaspSpecification) GetClientId() string {
-	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
-		return clientId
-	}
-
-	return "caasp"
+	return m.portalProxy.Env().String(CLIENT_ID_KEY, "caasp")
 }
 
 func (m *CaaspSpecification) Register(echoContext echo.Context) error {

@@ -1,9 +1,9 @@
+import { browser } from 'protractor';
+
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { SSOLoginPage } from './sso-login.po';
-import { element, by, browser } from 'protractor';
-import { createFalse } from 'typescript';
 import { ssoHelper } from '../helpers/sso-helper';
+import { SSOLoginPage } from './sso-login.po';
 
 describe('SSO Login', () => {
   const loginPage = new SSOLoginPage();

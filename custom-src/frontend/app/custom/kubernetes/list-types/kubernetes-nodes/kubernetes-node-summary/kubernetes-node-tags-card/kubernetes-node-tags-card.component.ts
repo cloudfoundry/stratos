@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Labels, Annotations } from '../../../../store/kube.types';
 import { Observable } from 'rxjs';
 import { AppChip } from '../../../../../../shared/components/chips/chips.component';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
