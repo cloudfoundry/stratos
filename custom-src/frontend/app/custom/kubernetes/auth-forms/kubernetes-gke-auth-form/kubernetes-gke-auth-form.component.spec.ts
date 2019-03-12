@@ -26,7 +26,7 @@ describe('KubernetesGKEAuthFormComponent', () => {
     const fb = new FormBuilder();
     const form = fb.group({
       authValues: fb.group({
-        kubeconfig: ''
+        gkeconfig: ''
       }),
     });
     component.formGroup = form;
