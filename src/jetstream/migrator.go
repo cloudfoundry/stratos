@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
@@ -38,7 +39,7 @@ func dbConfFromFlags() (dbconf *goose.DBConf, err error) {
 	return goose.NewDBConf(*flagPath, *flagEnv, *flagPgSchema)
 }
 
-func migrateDatabase() bool {
+func migrateDatabase(env *env.VarSet) bool {
 
 	flag.Usage = usage
 	flag.Parse()
@@ -53,7 +54,7 @@ func migrateDatabase() bool {
 		return true
 	}
 
-	if !parseCloudFoundry() {
+	if !parseCloudFoundry(env) {
 		return false
 	}
 
@@ -72,10 +73,10 @@ func migrateDatabase() bool {
 	return true
 }
 
-func parseCloudFoundry() bool {
+func parseCloudFoundry(env *env.VarSet) bool {
 
 	if *flagCloudFoundry {
-		dbEnv, err := parseCloudFoundryEnv()
+		dbEnv, err := parseCloudFoundryEnv(env)
 		if err != nil {
 			log.Fatal("Failed to parse Cloud Foundry Environment Variables")
 		}
@@ -108,7 +109,7 @@ func upRun(args []string) {
 
 	err = datastore.ApplyMigrations(conf, db)
 	if err != nil {
-		log.Fatal("Migration failed", err)
+		log.Fatal("Migration failed! ", err)
 	}
 }
 
@@ -189,14 +190,14 @@ var usagePrefix = `
 stratos db migration cli
 `
 
-func parseCloudFoundryEnv() (string, error) {
+func parseCloudFoundryEnv(env *env.VarSet) (string, error) {
 	var dbEnv string
 
 	fmt.Println("Attempting to parse VCAP_SERVICES")
 
 	var dbConfig datastore.DatabaseConfig
 
-	parsedDBConfig, err := datastore.ParseCFEnvs(&dbConfig)
+	parsedDBConfig, err := datastore.ParseCFEnvs(&dbConfig, env)
 	if err != nil {
 		return "", errors.New("Could not parse Cloud Foundry Services environment")
 	}
@@ -204,13 +205,13 @@ func parseCloudFoundryEnv() (string, error) {
 	if parsedDBConfig {
 		exportDatabaseConfig(dbConfig)
 
-		switch dbType := os.Getenv(DB_TYPE); dbType {
+		switch dbType := env.String(DB_TYPE, "unknown"); dbType {
 		case TYPE_POSTGRES:
 			dbEnv = "cf_postgres"
-			fmt.Printf("Migrating postgresql instance on %s\n", os.Getenv(DB_HOST))
+			fmt.Printf("Migrating postgresql instance on %s\n", env.String(DB_HOST, ""))
 		case TYPE_MYSQL:
 			dbEnv = "cf_mysql"
-			fmt.Printf("Migrating mysql instance on %s\n", os.Getenv(DB_HOST))
+			fmt.Printf("Migrating mysql instance on %s\n", env.String(DB_HOST, ""))
 		default:
 			// Database service not found or type not recognized
 			return "", nil

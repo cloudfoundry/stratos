@@ -15,6 +15,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesendpoints"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
@@ -56,13 +57,14 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 
 	cnsiClientId := c.FormValue("cnsi_client_id")
 	cnsiClientSecret := c.FormValue("cnsi_client_secret")
+	subType := c.FormValue("sub_type")
 
 	if cnsiClientId == "" {
 		cnsiClientId = p.GetConfig().CFClient
 		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, ssoAllowed, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, ssoAllowed, subType, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -71,7 +73,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -128,6 +130,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.ClientId = clientId
 	newCNSI.ClientSecret = clientSecret
 	newCNSI.SSOAllowed = ssoAllowed
+	newCNSI.SubType = subType
 
 	err = p.setCNSIRecord(guid, newCNSI)
 
@@ -148,10 +151,13 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 			"Missing target endpoint",
 			"Need CNSI GUID passed as form param")
 	}
-
+	// Should check for errors?
 	p.unsetCNSIRecord(cnsiGUID)
 
 	p.unsetCNSITokenRecords(cnsiGUID)
+
+	ufe := userfavoritesendpoints.Constructor(p, cnsiGUID)
+	ufe.RemoveFavorites()
 
 	return nil
 }
@@ -260,6 +266,24 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 	return jsonString, nil
 }
 
+func (p *portalProxy) UpdateEndointMetadata(guid string, metadata string) error {
+	log.Debug("UpdateEndointMetadata")
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
+	}
+
+	err = cnsiRepo.UpdateMetadata(guid, metadata)
+	if err != nil {
+		msg := "Unable to update endpoint metadata: %v"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
 func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) {
 	log.Debug("GetCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
@@ -339,6 +363,26 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 	}
 
 	return nil
+}
+
+func (p *portalProxy) SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord interfaces.TokenRecord) error {
+	log.Debug("SaveEndpointToken")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return err
+	}
+
+	return tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, tokenRecord, p.Config.EncryptionKeyInBytes)
+}
+
+func (p *portalProxy) DeleteEndpointToken(cnsiGUID string, userGUID string) error {
+	log.Debug("DeleteEndpointToken")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return err
+	}
+
+	return tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
 }
 
 func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {

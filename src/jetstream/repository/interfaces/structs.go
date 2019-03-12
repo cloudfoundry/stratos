@@ -44,6 +44,8 @@ type CNSIRecord struct {
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
 	SSOAllowed             bool     `json:"sso_allowed"`
+	SubType                string   `json:"sub_type"`
+	Metadata               string   `json:"metadata"`
 }
 
 // ConnectedEndpoint
@@ -58,17 +60,26 @@ type ConnectedEndpoint struct {
 	AuthorizationEndpoint  string   `json:"-"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	TokenMetadata          string   `json:"-"`
+	SubType                string   `json:"sub_type"`
+	EndpointMetadata       string   `json:"metadata"`
 }
 
 const (
-	AuthTypeOAuth2    = "OAuth2"
-	AuthTypeOIDC      = "OIDC"
+	// AuthTypeOAuth2 means OAuth2
+	AuthTypeOAuth2 = "OAuth2"
+	// AuthTypeOIDC means no OIDC
+	AuthTypeOIDC = "OIDC"
+	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	AuthTypeAKS       = "AKS"
+	// AuthTypeAKS means AKS
+	AuthTypeAKS = "AKS"
 )
 
 const (
+	// AuthConnectTypeCreds means authenticate with username/password credentials
 	AuthConnectTypeCreds = "creds"
+	// AuthConnectTypeNone means no authentication
+	AuthConnectTypeNone = "none"
 )
 
 // Token record for an endpoint (includes the Endpoint GUID)
@@ -123,6 +134,10 @@ type LoginRes struct {
 }
 
 type LoginHookFunc func(c echo.Context) error
+type LoginHook struct {
+	Priority int
+	Function LoginHookFunc
+}
 
 type ProxyRequestInfo struct {
 	EndpointGUID string
@@ -255,7 +270,7 @@ type PortalConfig struct {
 	EncryptionKeyInBytes            []byte
 	ConsoleVersion                  string
 	IsCloudFoundry                  bool
-	LoginHook                       LoginHookFunc
+	LoginHooks                      []LoginHook
 	SessionStore                    SessionStorer
 	ConsoleConfig                   *ConsoleConfig
 	PluginConfig                    map[string]string

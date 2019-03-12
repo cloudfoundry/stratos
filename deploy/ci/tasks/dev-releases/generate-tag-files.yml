@@ -8,7 +8,8 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  splatform/ci-stratos-concourse
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
    tag: "latest"
 
 run:
@@ -20,14 +21,14 @@ run:
 
       cd stratos
 
-      echo "Getting package.json version..."
+      RELEASE_TAG=$(cat .git/ref)
 
+      # RELEASE_TAG is the full tag that started the pipleinee, e.g. '2.0.0-rc.1' 
       VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
+      COMMIT_HASH=$(git log -1 --format="%h")
+      LATEST_TAG=$VERSION-${COMMIT_HASH}
 
       echo "Got version $VERSION from package.json."
-      echo "Getting latest git tag..."
-
-      LATEST_TAG=$VERSION-$(git log -1 --format="%h")
 
       echo "Got $LATEST_TAG as the latest git tag."
 
@@ -50,9 +51,11 @@ run:
 
       echo "Creating v2-alpha-tag, v2-version and build-args..."
 
-      cd ../image-tag      
+      cd ../image-tag
       echo "$LATEST_TAG" > v2-alpha-tag
       echo "$VERSION" > v2-version
+      echo "$RELEASE_TAG" > v2-tag
+      echo "$COMMIT_HASH" > v2-commit
       FILENAME="release-${LATEST_TAG}"
       cat > build-args << EOF
       { "stratos_version": "${LATEST_TAG}" }
@@ -70,6 +73,7 @@ run:
       cat v2-alpha-tag
       
       echo "Creating tag file tar..."
-      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version build-args ui-build-args
+      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version v2-tag v2-commit build-args ui-build-args
+
       echo "Created tag file tar as ${FILENAME}.tar"
       echo "Generate tag files complete!"

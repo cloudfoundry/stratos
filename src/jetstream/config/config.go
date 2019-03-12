@@ -13,12 +13,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 )
 
 const secretsDir = "/etc/secrets"
-
-var loadedConfig map[string]string
 
 // Load the given pointer to struct with values from the environment and the
 // /etc/secrets/ directory.
@@ -37,7 +36,7 @@ var loadedConfig map[string]string
 // The name will be given as defined to Getenv, and if that fails a lookup
 // it's name is then munged to conform to the /etc/secrets filename structure
 // and the file is attempted to be read.
-func Load(intf interface{}) error {
+func Load(intf interface{}, envLookup env.Lookup) error {
 	value := reflect.ValueOf(intf)
 
 	if value.Kind() != reflect.Ptr {
@@ -60,7 +59,7 @@ func Load(intf interface{}) error {
 			continue
 		}
 
-		if err := setFieldValue(value, field, tag); err != nil {
+		if err := setFieldValue(value, field, tag, envLookup); err != nil {
 			return err
 		}
 	}
@@ -68,13 +67,10 @@ func Load(intf interface{}) error {
 	return nil
 }
 
-func setFieldValue(value reflect.Value, field reflect.Value, tag string) error {
-	val, err := GetValue(tag)
-	if err != nil && !isNotFoundErr(err) {
-		return err
-	}
+func setFieldValue(value reflect.Value, field reflect.Value, tag string, envLookup env.Lookup) error {
+	val, ok := envLookup(tag)
 
-	if len(val) == 0 {
+	if !ok {
 		return nil
 	}
 
@@ -133,49 +129,25 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 	return nil
 }
 
-// IsSet - is the specified config name set?
-func IsSet(name string) bool {
-	_, err := GetValue(name)
-	return err == nil
-}
-
-// GetString -  Get the string value for the named configuration property
-func GetString(name string) string {
-	v, _ := GetValue(name)
-	return v
-}
-
-// GetValue tries to look up an env var of the given name and then
-// tries to look up the secret file of the same
-func GetValue(name string) (string, error) {
-	env := os.Getenv(name)
-	if len(env) == 0 {
-		env = loadedConfig[name]
-	}
-
-	if len(env) == 0 {
-		return readSecretFileTestHarness(name)
-	}
-
-	return env, nil
-}
-
-var readSecretFileTestHarness = readSecretFile
-
-// readSecretFile reads a variable in the form HELLO_THERE from a file
+// NewSecretsDirLookup - create a secret dir lookup
+// reads a variable in the form HELLO_THERE from a file
 // in /etc/secrets/hello-there
-func readSecretFile(name string) (string, error) {
-	name = strings.ToLower(strings.Replace(name, "_", "-", -1))
-	filename := filepath.Join(secretsDir, name)
+func NewSecretsDirLookup(secretsDir string) env.Lookup {
+	return func(name string) (string, bool) {
+		name = strings.ToLower(strings.Replace(name, "_", "-", -1))
+		filename := filepath.Join(secretsDir, name)
 
-	contents, err := ioutil.ReadFile(filename)
-	if os.IsNotExist(err) {
-		return "", notFoundErr(filename)
-	} else if err != nil {
-		return "", fmt.Errorf("failed to read secret file %q: %v", name, err)
+		if _, err := os.Stat(filename); err == nil {
+			contents, err := ioutil.ReadFile(filename)
+			if err != nil {
+				log.Warnf("Error reading secrets file: %s, %s", filename, err)
+				return "", false
+			}
+			return strings.TrimSpace(string(contents)), true
+		}
+		// File does not exist
+		return "", false
 	}
-
-	return strings.TrimSpace(string(contents)), nil
 }
 
 type notFoundErr string
@@ -192,18 +164,22 @@ func (n notFoundErr) Error() string {
 	return fmt.Sprintf("could not find secret file: %s", string(n))
 }
 
-// LoadConfigFile - Load the configuration values in the specified config file if it exists
-func LoadConfigFile(path string) error {
+// NewConfigFileLookup - Load the configuration values in the specified config file if it exists
+func NewConfigFileLookup(path string) env.Lookup {
+
+	// Check if the config file exists
+	if _, err := os.Stat(path); err != nil {
+		return env.NoopLookup
+	}
+
 	file, err := os.Open(path)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			log.Warn("Error reading configuraion file", err)
-		}
-		return err
+		log.Warn("Error reading configuration file, ignoring this file: ", err)
+		return env.NoopLookup
 	}
 	defer file.Close()
 
-	loadedConfig = make(map[string]string)
+	loadedConfig := make(map[string]string)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -217,17 +193,15 @@ func LoadConfigFile(path string) error {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Warn("Error reading configuration file", err)
-		return err
+	if scanner.Err() != nil {
+		// Error reading configuration file, ignoring this file
+		return env.NoopLookup
 	}
 
 	log.Infof("Loaded configuration from file: %s", path)
 
-	return nil
-}
-
-// SetConfigValue will update/set a value in the loaded configuration
-func SetConfigValue(name, value string) {
-	loadedConfig[name] = value
+	return func(k string) (string, bool) {
+		v, ok := loadedConfig[k]
+		return v, ok
+	}
 }

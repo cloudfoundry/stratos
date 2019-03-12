@@ -22,7 +22,7 @@ if [ "$1" == "mysql" ]; then
   PORT=3306
   echo "Using MYSQL database"
   echo "Starting MySQL Database..."
-  docker kill $(docker ps -q --filter "ancestor=mysql:latest")
+  killDockerContainer "mysql:latest"
   DB_DOCKER_PID=$(docker run -d -p $PORT:3306 --env MYSQL_ROOT_PASSWORD=stratos mysql:latest --default-authentication-plugin=mysql_native_password)
   echo "Waiting for mysql"
   until mysql -h $HOST -uroot -pstratos -e "SHOW DATABASES;" &> /dev/null
@@ -31,10 +31,13 @@ if [ "$1" == "mysql" ]; then
     sleep 2
   done
 
-  mysql -u root -pstratos -h $HOST -e "CREATE DATABASE $DB_NAME;"
-  mysql -u root -pstratos -h $HOST -e "CREATE USER '$USERNAME'@'$HOST' IDENTIFIED BY '$PASSWORD';"
-  mysql -u root -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME'@'$HOST';"
-  mysql -u root -pstratos -h $HOST -e "FLUSH PRIVILEGES;"
+  echo ""
+
+  echo "Creating database and setting permissions..."
+  mysql -uroot -pstratos -h $HOST -e "CREATE DATABASE $DB_NAME;"
+  mysql -uroot -pstratos -h $HOST -e "CREATE USER '$USERNAME'@'%' IDENTIFIED BY '$PASSWORD';"
+  mysql -uroot -pstratos -h $HOST -e "GRANT ALL PRIVILEGES ON * . * TO '$USERNAME'@'%';"
+  mysql -uroot -pstratos -h $HOST -e "FLUSH PRIVILEGES;"
 fi
 
 if [ "$1" == "pgsql" ]; then
@@ -42,8 +45,10 @@ if [ "$1" == "pgsql" ]; then
   PORT=5432
   echo "Using Postgres database"
   echo "Starting Postgres Database..."
-  docker kill $(docker ps -q --filter "ancestor=postgres:latest")
-  DB_DOCKER_PID=$(docker run -d -p $PORT:5432 --env POSTGRES_PASSWORD=stratos --env POSTGRES_DB=$DB_NAME --env POSTGRES_USER=$USERNAME postgres:latest)
+  killDockerContainer "postgres:latest"
+  USERNAME=stratos_pgsql
+  PASSWORD=stratos_pgsql_passw0rd
+  DB_DOCKER_PID=$(docker run -d -p $PORT:5432 --env POSTGRES_PASSWORD=${PASSWORD} --env POSTGRES_DB=$DB_NAME --env POSTGRES_USER=$USERNAME postgres:latest)
 fi
 
 DB=stratos-${DB_TYPE}
@@ -53,9 +58,13 @@ DB=stratos-${DB_TYPE}
 cf delete -f -r console
 cf ds -f $DB
 
-CONFIG='{"dbname":"'$DB_NAME'","name":"'$DB_NAME'","username":"'$USERNAME'","password":"'$PASSWORD'","uri":"'${DB_TYPE}'://database","port":"'$PORT'","hostname":"'$HOST'"}'
-echo "Creating user provided service for the database..."
-cf cups ${DB} -p "'${CONFIG}'"
+if [ -n "${DB_TYPE}" ]; then
+  CONFIG='{"dbname":"'$DB_NAME'","name":"'$DB_NAME'","username":"'$USERNAME'","password":"'$PASSWORD'","uri":"'${DB_TYPE}'://database","port":"'$PORT'","hostname":"'$HOST'"}'
+  echo "Creating user provided service for the database..."
+  echo "Database Server: ${HOST}:${PORT}"
+  cf cups ${DB} -p "'${CONFIG}'"
+  echo ${CONFIG}
+fi
 
 set -e
 
@@ -78,6 +87,8 @@ SUITE=""
 if [ "$2" == "sso" ] || [ "$3" == "sso" ] ; then
   echo "      SSO_LOGIN: true" >> $MANIFEST
   SUITE=" --suite=sso"
+  # Run the helper script to make sure the CF client is set up correctly
+  "$DIRPATH/init-pcfdev-uaa.sh"
 fi  
 
 if [ -n "${DB_TYPE}" ]; then
@@ -94,6 +105,9 @@ if [ "$2" == "prebuild" ]; then
   npm run prebuild-ui
 fi
 
+# If the push fails, we want to continue and show the logs
+set +e
+
 # Push Stratos to the Cloud Foundry
 cf push -f $MANIFEST
 RET=$?
@@ -105,32 +119,27 @@ if [ $RET -ne 0 ]; then
   echo "Push failed... showing recent log of the Stratos app"
   cf logs console --recent
   set -e
+else
+  # Push was okay, so we can prepare and run E2E tests
+  rm -rf node_modules
+  npm install
+
+  # Clean the E2E reports folder
+  rm -rf ./e2e-reports
+  mkdir -p ./e2e-reports
+  export E2E_REPORT_FOLDER=./e2e-reports
+
+  # Run the E2E tests
+  "$DIRPATH/runandrecord.sh" https://console.${CF_DOMAIN} ${SUITE}
+  RET=$?
+
+  # If we had test failures then copy console log to reports folder
+  if [ $RET -ne 0 ]; then
+    cf logs --recent console > "${E2E_REPORT_FOLDER}/console-app.log"
+  fi 
 fi
 
-# Get the E2E config
-rm -f secrets.yaml
-curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-
-rm -rf node_modules
-npm install
-
-# Clean the E2E reports folder
-rm -rf ./e2e-reports
-mkdir -p ./e2e-reports
-export E2E_REPORT_FOLDER=./e2e-reports
-
-# Run the E2E tests
-"$DIRPATH/runandrecord.sh" https://console.local.pcfdev.io ${SUITE}
-RET=$?
-
-# If we had test failures then copy console log to reports folder
-if [ $RET -ne 0 ]; then
-  cf logs --recent console > "${E2E_REPORT_FOLDER}/console-app.log"
-fi 
-
-# Delete the app
-cf delete -f -r console
-
+# Clean up
 rm $MANIFEST
 
 # Stop the database server
@@ -141,11 +150,14 @@ fi
 
 set +e
 
-# Pause the PCF Dev instance for now
-sleep 5
-echo "Suspending PCF Dev"
-cf pcfdev suspend
-cf pcfdev status
+# Delete the app - add one retry if it fails first time
+cf delete -f -r console
+if [ $? -ne 0 ]; then
+  sleep 60
+  cf delete -f -r console
+fi
+
+echo "All done"
 
 # Return exit code form the e2e tests
 exit $RET

@@ -1,7 +1,7 @@
 import { browser, promise } from 'protractor';
 
-import { IOrganization } from '../../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../../frontend/app/store/types/api.types';
+import { IOrganization } from '../../../frontend/packages/core/src/core/cf-api.types';
+import { APIResource } from '../../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { CFHelpers } from '../../helpers/cf-helpers';
@@ -38,7 +38,6 @@ describe('Org Spaces List -', () => {
         return cfHelper.addSpaceIfMissingForEndpointUsers(
           endpointGuid,
           org.metadata.guid,
-          org.entity.name,
           name,
           defaultCf,
           true);
@@ -50,7 +49,6 @@ describe('Org Spaces List -', () => {
     return promise.all(spaceNames.map(name => cfHelper.addSpaceIfMissingForEndpointUsers(
       endpointGuid,
       org.metadata.guid,
-      org.entity.name,
       name,
       defaultCf,
       true)));
@@ -107,8 +105,6 @@ describe('Org Spaces List -', () => {
     beforeAll(() => {
       setup(orgName, [], false);
     });
-
-    beforeEach(navToOrgSpaces);
 
     it('Should show no entities message', () => {
       expect(spaceList.isDisplayed()).toBeTruthy();

@@ -55,7 +55,7 @@ export function setUpTestOrgSpaceUserRoles(
   return cfHelper.addOrgIfMissingForEndpointUsers(cfGuid, defaultCf, orgName)
     .then(org => {
       orgGuid = org.metadata.guid;
-      return cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, orgName, spaceName, defaultCf, true);
+      return cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, spaceName, defaultCf, true);
     })
     .then(space => spaceGuid = space.metadata.guid)
     .then(() => cfHelper.addOrgUserRole(cfGuid, orgGuid, userName))
@@ -81,16 +81,18 @@ export function setUpTestOrgSpaceUserRoles(
 
 const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-cf-users';
 export function setupCfUserTableTests(
-  cfLevel: CfUserTableTestLevel, navToUserTableFn: (cfGuid, orgGuid, spaceGuid) => promise.Promise<any>) {
+  cfLevel: CfUserTableTestLevel,
+  navToUserTableFn: (cfGuid: string, orgGuid: string, spaceGuid: string) => promise.Promise<any>
+) {
 
   const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel);
   const spaceName = E2EHelpers.createCustomName(customOrgSpacesLabel);
   const userName = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
 
-  let cfGuid, cfHelper: CFHelpers;
+  let cfGuid: string, cfHelper: CFHelpers;
 
   beforeAll(() => {
-    let orgGuid, spaceGuid;
+    let orgGuid: string, spaceGuid: string;
 
     setUpTestOrgSpaceE2eTest(orgName, spaceName, userName).then(res => {
       cfHelper = res.cfHelper;
@@ -119,7 +121,8 @@ export function setupCfUserTableTests(
 
     beforeAll(() => {
       usersTable.waitUntilShown();
-      usersTable.header.waitUntilShown();
+      usersTable.waitForNoLoadingIndicator(20000);
+      usersTable.header.waitUntilShown('User table header');
       usersTable.header.setSearchText(userName);
       expect(usersTable.getTotalResults()).toBe(1);
 

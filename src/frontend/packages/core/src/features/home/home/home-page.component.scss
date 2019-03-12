@@ -1,0 +1,28 @@
+@import '../../../../sass/mixins';
+
+.favorites-list {
+  flex: 2;
+  @include breakpoint(tablet) {
+    margin-right: 40px;
+  }
+}
+.recent-list {
+  flex: 1;
+}
+.stats-panel {
+  flex: 40%;
+  margin-left: 20px;
+  padding-left: 24px;
+}
+
+.home-page {
+  display: flex;
+  flex-direction: column;
+  &__header {
+    margin-top: 0;
+  }
+
+  @include breakpoint(tablet) {
+    flex-direction: row;
+  }
+}

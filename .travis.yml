@@ -45,11 +45,11 @@ jobs:
     - golint src/jetstream/...
     - ./deploy/ci/travis/update-go-report-card.sh
   - stage: Test
-    name: Frontend Unit Tests
+  - name: Frontend Unit Tests
     env:
     - CI_ENV=true
     script:
-    - npm test
+    - npm run test
     - npm run codecov
   - name: Backend Unit Tests
     before_script:
@@ -59,6 +59,9 @@ jobs:
     - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     script:
     - npm run test-backend
+  - name: Helm Chart Unit Tests
+    script:
+    - "./deploy/ci/travis/helm-chart-unit-tests.sh"
   - name: E2E Tests - Long Suite
     before_script:
     - "./deploy/ci/travis/job-e2e-before_script.sh"

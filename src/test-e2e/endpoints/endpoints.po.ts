@@ -1,5 +1,6 @@
 import { browser, by, element } from 'protractor';
 import { ElementFinder } from 'protractor/built';
+
 import { E2EEndpointConfig } from '../e2e.types';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent, ListTableComponent } from '../po/list.po';
@@ -21,7 +22,8 @@ export class EndpointsTable extends ListTableComponent {
         type: data[2],
         user: data[3],
         isAdmin: data[4].indexOf('Yes') !== -1,
-        url: data[5]
+        url: data[5],
+        favorite: data[6]
       } as EndpointMetadata;
     });
   }
