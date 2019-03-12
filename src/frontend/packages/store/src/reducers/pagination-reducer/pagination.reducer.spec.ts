@@ -48,7 +48,7 @@ describe('PaginationReducer', () => {
     expect(paginationReducer(null, { type: RequestTypes.START })).toEqual(defaultPaginationState);
   });
 
-  it('should return fetching state', () => {
+  fit('should return fetching state', () => {
     const paginationReducer = createPaginationReducer([
       RequestTypes.START,
       RequestTypes.SUCCESS,
@@ -83,7 +83,14 @@ describe('PaginationReducer', () => {
           pageCount: 0,
           currentPage: 1,
           ids: {},
-          pageRequests: { 1: { busy: true, error: false, message: '', entityKey: applicationSchemaKey, maxed: false } },
+          pageRequests: {
+            1: {
+              busy: true, error: false, message: '',
+              schemaKey: undefined,
+              entityKey: applicationSchemaKey,
+              maxed: false
+            }
+          },
           clientPagination: {
             ...defaultClientPagination
           }
