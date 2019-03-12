@@ -1,21 +1,22 @@
 import { AfterContentInit, Component, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
-import { UtilsService } from '../../../../core/utils.service';
-import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../../store/src/app-state';
+import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
+import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.types';
-import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
-import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { entityFactory, endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
 import { EndpointTypeConfig } from '../../../../core/extension/extension-types';
+import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
+import { getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
 
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
@@ -34,7 +35,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   validate: Observable<boolean>;
 
   @ViewChild('form') form: NgForm;
-  @ViewChild('typeField') typeField: NgModel;
   @ViewChild('nameField') nameField: NgModel;
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
@@ -44,9 +44,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('clientIDField') clientIDField: NgModel;
   @ViewChild('clientSecretField') clientSecretField: NgModel;
 
-  typeValue: any;
-
-  endpointTypes = getEndpointTypes();
+  endpoint: EndpointTypeConfig;
   urlValidation: string;
 
   showAdvancedFields = false;
@@ -54,7 +52,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   endpointTypeSupportsSSO = false;
 
-  constructor(private store: Store<AppState>, private utilsService: UtilsService) {
+  constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
@@ -70,12 +68,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         })
       );
 
-    // Auto-select default endpoint type - typically this is Cloud Foundry
-    const defaultType = this.endpointTypes.filter((t) => t.value === DEFAULT_ENDPOINT_TYPE);
-    if (defaultType && defaultType.length) {
-      this.typeValue = defaultType[0].value;
-      this.setUrlValidation(this.typeValue);
-    }
+    const endpointType = getIdFromRoute(activatedRoute, 'type');
+    this.endpoint = getEndpointTypes().find(e => e.value === endpointType);
+    this.setUrlValidation(this.endpoint);
 
     // Client Redirect URI for SSO
     this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
@@ -84,7 +79,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   onNext: StepOnNextFunction = () => {
     const action = new RegisterEndpoint(
-      this.typeField.value,
+      this.endpoint.value,
       this.nameField.value,
       this.urlField.value,
       !!this.skipSllField.value,
@@ -124,8 +119,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       }));
   }
 
-  setUrlValidation(endpointValue: string) {
-    const endpoint = this.endpointTypes.find(e => e.value === endpointValue);
+  setUrlValidation(endpoint: EndpointTypeConfig) {
     this.urlValidation = endpoint ? endpoint.urlValidation : '';
     this.setAdvancedFields(endpoint);
   }
@@ -134,7 +128,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   setAdvancedFields(endpoint: EndpointTypeConfig) {
     this.showAdvancedFields = endpoint.value === 'cf';
 
-    // Only allow SSL if the endpoint type isCloud Foundry
+    // Only allow SSL if the endpoint type is Cloud Foundry
     this.endpointTypeSupportsSSO = endpoint.value === 'cf';
   }
 }

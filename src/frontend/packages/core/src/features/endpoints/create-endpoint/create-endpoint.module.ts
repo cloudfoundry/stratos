@@ -4,6 +4,8 @@ import { SharedModule } from '../../../shared/shared.module';
 import { CreateEndpointComponent } from './create-endpoint.component';
 import { NgModule } from '@angular/core';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
+import { CreateEndpointBaseStepComponent } from './create-endpoint-base-step/create-endpoint-base-step.component';
+import { ConnectEndpointStepComponent } from './connect-endpoint-step/connect-endpoint-step.component';
 
 @NgModule({
   imports: [
@@ -14,6 +16,8 @@ import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/crea
   declarations: [
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,
+    CreateEndpointBaseStepComponent,
+    ConnectEndpointStepComponent,
   ],
   exports: [
     CreateEndpointComponent
