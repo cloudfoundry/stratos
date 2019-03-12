@@ -10,8 +10,8 @@ import { AppMetadataTypes } from '../../../../../store/src/actions/app-metadata.
 import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
+import { AppNameUniqueDirective, AppNameUniqueChecking } from '../../../shared/app-name-unique.directive/app-name-unique.directive';
 
 
 @Component({

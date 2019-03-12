@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AddServiceInstanceBaseStepComponent } from './add-service-instance-base-step.component';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('AddServiceInstanceBaseStepComponent', () => {
   let component: AddServiceInstanceBaseStepComponent;
@@ -8,9 +9,9 @@ describe('AddServiceInstanceBaseStepComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddServiceInstanceBaseStepComponent ]
+      imports: BaseTestModules
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

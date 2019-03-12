@@ -7,7 +7,6 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../core/core.module';
-import { AppNameUniqueDirective } from '../features/applications/app-name-unique.directive/app-name-unique.directive';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
@@ -157,6 +156,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 
 /* tslint:disable:max-line-length */
 

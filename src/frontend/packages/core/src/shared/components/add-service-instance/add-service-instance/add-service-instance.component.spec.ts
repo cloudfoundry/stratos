@@ -39,6 +39,8 @@ import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.co
 import { SelectServiceComponent } from '../select-service/select-service.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-details/specify-user-provided-details.component';
+import { AppNameUniqueDirective } from '../../../app-name-unique.directive/app-name-unique.directive';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -47,6 +49,7 @@ describe('AddServiceInstanceComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
+        AppNameUniqueDirective,
         AddServiceInstanceComponent,
         SelectPlanStepComponent,
         SpecifyDetailsStepComponent,
@@ -71,7 +74,8 @@ describe('AddServiceInstanceComponent', () => {
         MultilineTitleComponent,
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
-        FocusDirective
+        FocusDirective,
+        SpecifyUserProvidedDetailsComponent
       ],
       imports: [
         PageHeaderModule,

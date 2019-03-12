@@ -1,14 +1,12 @@
+import { AppState } from '../../../../store/src/app-state';
+import { environment } from '../../environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Directive, forwardRef, Input, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
-
-import { AppState } from '../../../../../store/src/app-state';
-import { selectNewAppState } from '../../../../../store/src/effects/create-app-effects';
-import { environment } from '../../../environments/environment';
-
+import { selectNewAppState } from '../../../../store/src/effects/create-app-effects';
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {

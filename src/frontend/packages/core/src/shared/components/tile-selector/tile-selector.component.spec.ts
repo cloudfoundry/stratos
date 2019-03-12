@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TileSelectorComponent } from './tile-selector.component';
+import { MDAppModule } from '../../../core/md.module';
 
 describe('TileSelectorComponent', () => {
   let component: TileSelectorComponent;
@@ -8,9 +9,12 @@ describe('TileSelectorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TileSelectorComponent ]
+      imports: [
+        MDAppModule
+      ],
+      declarations: [TileSelectorComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

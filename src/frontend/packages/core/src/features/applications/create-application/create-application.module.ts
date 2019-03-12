@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 import { CreateApplicationComponent } from './create-application.component';

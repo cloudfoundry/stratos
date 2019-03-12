@@ -1,3 +1,6 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { BaseTestModules } from './../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SpecifyUserProvidedDetailsComponent } from './specify-user-provided-details.component';
@@ -8,9 +11,13 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SpecifyUserProvidedDetailsComponent ]
+      imports: [
+        ...BaseTestModules,
+        HttpClientModule,
+        HttpClientTestingModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
