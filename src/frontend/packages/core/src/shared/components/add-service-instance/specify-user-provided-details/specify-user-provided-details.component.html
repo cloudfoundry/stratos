@@ -1,7 +1,7 @@
 <form class="stepper-form" [formGroup]="formGroup">
   <mat-form-field>
-    <input matInput class="" formControlName="name" placeholder="Name" [appApplicationNameUniqueRequest]="getUniqueRequest" required>
-    <!-- // TODO: appNameChecking is undefined [appApplicationNameUnique]="appNameChecking" -->
+    <input matInput class="" formControlName="name" placeholder="Name" required>
+    <!-- // TODO: appNameChecking is undefined [appApplicationNameUnique]="appNameChecking" [appApplicationNameUniqueRequest]="getUniqueRequest"-->
     <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
       A service instance with this name already exists. Please enter a different one.
     </mat-error>
