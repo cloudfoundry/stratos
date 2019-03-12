@@ -1,13 +1,13 @@
-
-import { of as observableOf, Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../store/src/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -19,11 +19,11 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   @Input()
   rowState: Observable<RowState>;
 
-  private _row: T;
+  private pRow: T;
   @Input('row')
-  get row() { return this._row; }
+  get row() { return this.pRow; }
   set row(row: T) {
-    this._row = row;
+    this.pRow = row;
     if (row) {
       this.initialise(row);
     }

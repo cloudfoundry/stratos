@@ -11,8 +11,8 @@
 @import '../sass/components/mat-tabs';
 @import '../sass/components/mat-table';
 body {
-  margin: 0;
   font-family: Lato, sans-serif; // font-size: 13px;
+  margin: 0;
 }
 
 body,
@@ -31,9 +31,20 @@ html {
   }
 }
 
-.dashboard .mat-drawer-content {
-  overflow: visible;
+.dashboard {
+  .mat-drawer-content {
+    overflow: visible;
+  }
+  .mat-drawer-side {
+    border: 0;
+  }
+  .mat-card-title {
+    font-size: inherit;
+    font-weight: inherit;
+  }
 }
+
+
 
 html {
   box-sizing: border-box;

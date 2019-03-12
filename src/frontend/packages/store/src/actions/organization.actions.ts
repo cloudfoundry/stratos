@@ -30,9 +30,9 @@ export const GET_ORGANIZATION_USERS_FAILED = '[Organization] Get all org users f
 
 export class GetOrganization extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string,
-    public endpointGuid: string,
-    public includeRelations: string[] = [],
-    public populateMissing = true) {
+              public endpointGuid: string,
+              public includeRelations: string[] = [],
+              public populateMissing = true) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organizations/${guid}`;
@@ -132,7 +132,7 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
     this.options.method = 'post';
     this.guid = name;
     this.options.body = {
-      name: name
+      name
     };
   }
   actions = getActions('Organizations', 'Create Org');

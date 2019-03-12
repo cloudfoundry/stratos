@@ -99,7 +99,7 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
     public name: string,
     public servicePlanGuid: string,
     public spaceGuid: string,
-    public params: Object,
+    public params: object,
     public tags: string[],
   ) {
     super();
@@ -109,11 +109,11 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
     this.options.params.set('accepts_incomplete', 'true');
     this.options.method = 'post';
     this.options.body = {
-      name: name,
+      name,
       space_guid: spaceGuid,
       service_plan_guid: servicePlanGuid,
       parameters: params,
-      tags: tags
+      tags
     };
   }
   actions = getActions('Service Instances', 'Create Service Instance');
@@ -130,7 +130,7 @@ export class UpdateServiceInstance extends CreateServiceInstance {
     public name: string,
     public servicePlanGuid: string,
     public spaceGuid: string,
-    public params: Object,
+    public params: object,
     public tags: string[],
   ) {
     super(endpointGuid, guid, name, servicePlanGuid, spaceGuid, params, tags);

@@ -34,7 +34,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const row = changes['row'].currentValue;
+    const row = changes.row.currentValue;
     this.status$.next(this.mapStatus(row));
   }
 

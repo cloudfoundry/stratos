@@ -147,15 +147,6 @@ export class ApplicationService {
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
-   *
-   * @static
-   * @param {Store<AppState>} store
-   * @param {ApplicationStateService} appStateService
-   * @param {any} app
-   * @param {string} appGuid
-   * @param {string} cfGuid
-   * @returns {Observable<ApplicationStateData>}
-   * @memberof ApplicationService
    */
   static getApplicationState(
     store: Store<AppState>,

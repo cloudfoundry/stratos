@@ -15,59 +15,39 @@ import { EntitySchema } from '../entity-factory';
 export class ValidateEntityRelationsConfig {
   /**
    * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
-   *
-   * @type {string}
-   * @memberof ValidateEntityRelationsConfig
    */
   cfGuid: string;
   store: Store<AppState>;
   /**
    * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
-   *
-   * @type {IRequestDataState}
-   * @memberof ValidateEntityRelationsConfig
    */
   allEntities: IRequestDataState;
   /**
    * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
    * and quicker
-   *
-   * @type {IRequestTypeState}
-   * @memberof ValidateEntityRelationsConfig
    */
   allPagination: IRequestTypeState;
   /**
    * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
    * have an entity/entities
-   *
-   * @type {IRequestTypeState}
-   * @memberof ValidateEntityRelationsConfig
    */
   newEntities?: IRequestTypeState;
   /**
    * The action that has fetched the entity/entities
-   *
-   * @type {IRequestAction}
-   * @memberof ValidateEntityRelationsConfig
    */
   action: IRequestAction;
   /**
    * Collection of entity (guids) whose children may be missing. For example a list of organizations that have missing spaces
-   *
-   * @type {string[]}
-   * @memberof ValidateEntityRelationsConfig
    */
   parentEntities: string[];
   /**
    * If a child is missing, should we raise an action to fetch it?
    *
-   * @memberof ValidateEntityRelationsConfig
    */
   populateMissing = true;
   /**
    * If we're validating an api request we'll have the apiResponse, otherwise it's null and we're ad hoc validating an entity/list
    *
-   * @memberof ValidateEntityRelationsConfig
    */
   apiResponse: APIResponse;
 }
@@ -82,20 +62,16 @@ export class EntityTree {
  * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
  *
  * @export
- * @class EntityTreeRelation
  */
 export class EntityTreeRelation {
   entityKey: string;
 
   /**
- * Creates an instance of EntityTreeRelation.
- * @param {EntitySchema} entity
- * @param {boolean} [isArray=false] is this a collection of entities (should be paginationed) or not
- * @param {string} paramName parameter name of the entity within the schema. For example `space` may be `spaces` (entity.spaces)
- * @param {string} [path=''] location of the entity within the parent. For example `space` entity maybe be `entity.spaces`
- * @param {EntityTreeRelation[]} childRelations
- * @memberof EntityTreeRelation
- */
+   * Creates an instance of EntityTreeRelation.
+   * @param [isArray=false] is this a collection of entities (should be paginationed) or not
+   * @param paramName parameter name of the entity within the schema. For example `space` may be `spaces` (entity.spaces)
+   * @param [path=''] location of the entity within the parent. For example `space` entity maybe be `entity.spaces`
+   */
   constructor(
     public entity: EntitySchema,
     public isArray = false,
@@ -111,7 +87,6 @@ export class EntityTreeRelation {
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
  *
  * @export
- * @interface EntityInlineChildAction
  */
 export interface EntityInlineChildAction {
   entityKey: string;
@@ -123,8 +98,8 @@ export interface EntityInlineChildAction {
 
 export function isEntityInlineChildAction(anything): EntityInlineChildAction {
   return anything &&
-    !!anything['parentGuid'] &&
-    !!anything['parentEntitySchema']
+    !!anything.parentGuid &&
+    !!anything.parentEntitySchema
     ? anything as EntityInlineChildAction : null;
 }
 
@@ -132,7 +107,6 @@ export function isEntityInlineChildAction(anything): EntityInlineChildAction {
  * Helper interface. Actions that are a parent of children entities should have these included parent-child relations
  *
  * @export
- * @interface EntityInlineParentAction
  * @extends {PaginatedAction}
  */
 export interface EntityInlineParentAction extends IRequestAction {
@@ -140,8 +114,8 @@ export interface EntityInlineParentAction extends IRequestAction {
   populateMissing: boolean;
 }
 
-export function isEntityInlineParentAction(action: Action) {
-  return action && !!action['includeRelations'] && action['populateMissing'] !== undefined;
+export function isEntityInlineParentAction(anything: any): boolean {
+  return anything && !!anything.includeRelations && anything.populateMissing !== undefined;
 }
 
 export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
@@ -163,22 +137,15 @@ export function createEntityRelationPaginationKey(parentSchemaKey: string, paren
  * The result of a validation run. Indicates if any separate api requests have been started and a promise firing when they have completed
  *
  * @export
- * @class ValidationResult
  */
 export class ValidationResult {
   /**
    * True if data was missing an api requests have been kicked off to fetch
-   *
-   * @type {boolean}
-   * @memberof ValidationResult
    */
   started: boolean;
   /**
    * Promise that fires when the api requests kicked off to fetch missing data have all completed. Contains the new apiResponse (for the
    * case of validating api calls this might be updated to ensure parent entities are associated with missing children).
-   *
-   * @type {Promise<APIResponse>}
-   * @memberof ValidationResult
    */
   completed: Promise<APIResponse>;
 }
@@ -190,7 +157,6 @@ export interface ValidateResultFetchingState {
 /**
  * An object to represent the action and status of a missing inline depth/entity relation.
  * @export
- * @interface ValidateEntityResult
  */
 export interface ValidateEntityResult {
   action: Action;

@@ -1,19 +1,14 @@
-import {
-  CREATE_SPACE_SUCCESS,
-  CreateSpace,
-  DELETE_SPACE_SUCCESS,
-  DeleteSpace,
-} from '../actions/space.actions';
+import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
+import { CREATE_SPACE_SUCCESS, CreateSpace, DELETE_SPACE_SUCCESS, DeleteSpace } from '../actions/space.actions';
+import { IRequestEntityTypeState } from '../app-state';
 import { spaceSchemaKey } from '../helpers/entity-factory';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
-import { IRequestEntityTypeState } from '../app-state';
-import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
 
 type entityOrgType = APIResource<IOrganization<string[]>>;
 // Note - This reducer will be updated when we address general deletion of entities within inline lists (not paginated lists)
 export function updateOrganizationSpaceReducer() {
-  return function (state: IRequestEntityTypeState<entityOrgType>, action: APISuccessOrFailedAction<NormalizedResponse>) {
+  return (state: IRequestEntityTypeState<entityOrgType>, action: APISuccessOrFailedAction<NormalizedResponse>) => {
     switch (action.type) {
       case DELETE_SPACE_SUCCESS:
         const deleteSpaceAction: DeleteSpace = action.apiAction as DeleteSpace;

@@ -13,12 +13,12 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
 import { LoggerService } from '../../../../core/logger.service';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
-import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 
 
 
@@ -34,7 +34,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private nextSub: Subscription;
   cancel$: Observable<string>;
 
-  @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
+  @ContentChildren(StepComponent) stepComponents: QueryList<StepComponent>;
 
   @Input() cancel = null;
   @Input() nextButtonProgress = true;
@@ -84,7 +84,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   ngAfterContentInit() {
-    this.allSteps = this._steps.toArray();
+    this.allSteps = this.stepComponents.toArray();
     this.setActive(0);
 
     this.allSteps.forEach((step => {
@@ -146,7 +146,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.cancelQueryParams$
     ).pipe(
       map(([path, params]) => {
-        this.store.dispatch(new RouterNav({ path: path, query: params }));
+        this.store.dispatch(new RouterNav({ path, query: params }));
       })
     );
   }
@@ -159,7 +159,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           const timer = setInterval(() => {
             if (this.allSteps[index].blocked === false) {
               this.allSteps[index].active = true;
-              this.allSteps[index]._onEnter(this.enterData);
+              this.allSteps[index].onEnter(this.enterData);
               clearInterval(timer);
             }
           }, 5);
@@ -179,12 +179,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
 
     // 3) Set stepper state WRT required step
-    this.steps.forEach((_step, i) => {
-      _step.complete = i < index;
-      _step.active = i === index;
+    this.steps.forEach((s, i) => {
+      s.complete = i < index;
+      s.active = i === index;
     });
     this.currentIndex = index;
-    this.steps[this.currentIndex]._onEnter(this.enterData);
+    this.steps[this.currentIndex].onEnter(this.enterData);
     this.enterData = undefined;
   }
 

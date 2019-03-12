@@ -2,7 +2,7 @@ import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_
 import { APIResource } from '../types/api.types';
 
 export function endpointDisconnectApplicationReducer() {
-  return function (state: { [appGuid: string]: APIResource<{ cfGuid: string }> }, action: DisconnectEndpoint) {
+  return (state: { [appGuid: string]: APIResource<{ cfGuid: string }> }, action: DisconnectEndpoint) => {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
       case UNREGISTER_ENDPOINTS_SUCCESS:
