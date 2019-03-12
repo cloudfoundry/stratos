@@ -22,6 +22,8 @@ import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
+// NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
+
 // import { storeLogger } from 'ngrx-store-logger';
 
 // https://github.com/btroncone/ngrx-store-logger/issues/34
