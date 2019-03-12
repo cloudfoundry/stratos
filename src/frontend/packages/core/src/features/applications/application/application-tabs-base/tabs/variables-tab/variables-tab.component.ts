@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { LoggerService } from '../../../../../../core/logger.service';
 import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
@@ -13,7 +14,6 @@ import {
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { ApplicationService } from '../../../../application.service';
-import { AppState } from '../../../../../../../../store/src/app-state';
 
 
 export interface VariableTabAllEnvVarType {
@@ -43,7 +43,7 @@ export class VariablesTabComponent implements OnInit {
   }
 
   envVars$: Observable<{
-    names: String[],
+    names: string[],
     values: {}
   }>;
 
@@ -90,7 +90,7 @@ export class VariablesTabComponent implements OnInit {
     return result;
   }
 
-  private parseStratosProject(value: string): Object | string {
+  private parseStratosProject(value: string): object | string {
     try {
       return JSON.parse(value);
     } catch (err) {

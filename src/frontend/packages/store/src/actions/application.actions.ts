@@ -114,12 +114,9 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
 
   /**
    * Creates an instance of UpdateExistingApplication.
-   * @param {string} guid
-   * @param {string} endpointGuid
-   * @param {UpdateApplication} newApplication Sparsely populated application containing updated settings
-   * @param {IApp} [existingApplication] Existing application. Used in a few specific cases
-   * @param {AppMetadataTypes[]} [updateEntities] List of metadata calls to make if we successfully update the application
-   * @memberof UpdateExistingApplication
+   * @param newApplication Sparsely populated application containing updated settings
+   * @param [existingApplication] Existing application. Used in a few specific cases
+   * @param [updateEntities] List of metadata calls to make if we successfully update the application
    */
   constructor(
     public guid: string,
@@ -142,7 +139,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
     const keepFromOld = pick(
       oldEntities[applicationSchemaKey][this.guid].entity,
-      Object.keys(applicationEntitySchema['schema'])
+      Object.keys(applicationEntitySchema.schema)
     );
     newEntities[applicationSchemaKey][this.guid].entity = {
       ...newEntities[applicationSchemaKey][this.guid].entity,

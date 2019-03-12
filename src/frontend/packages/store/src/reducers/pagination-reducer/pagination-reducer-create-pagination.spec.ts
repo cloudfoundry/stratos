@@ -66,8 +66,8 @@ describe('CreatePaginationActionReducer', () => {
       'paginationKey'
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
-    expect(paginationState[entityKey]['paginationKey'].ids).toEqual(state[entityKey][paginationKey].ids);
-    expect(paginationState[entityKey]['paginationKey'].pageRequests).toEqual(state[entityKey][paginationKey].pageRequests);
+    expect(paginationState[entityKey].paginationKey.ids).toEqual(state[entityKey][paginationKey].ids);
+    expect(paginationState[entityKey].paginationKey.pageRequests).toEqual(state[entityKey][paginationKey].pageRequests);
   });
 
 });

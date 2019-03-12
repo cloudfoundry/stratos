@@ -14,17 +14,15 @@ import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
  * Allows a list to manage separate actions an/or separate entity types.
  * Also used to configure the entity type dropdown.
  * @export
- * @class Multi̦Actio̦nConfig
  */
 export class MultiActionConfig {
   /**
    * Creates an instance of Multi̦Actio̦nConfig.
-   * @param {ActionSchemaConfig[]} schemaConfigs configs to drive a multi action list
-   * @param {string} [selectPlaceholder='Select entity type'] The message that will be show in the select.
+   * @param schemaConfigs configs to drive a multi action list
+   * @param [selectPlaceholder='Select entity type'] The message that will be show in the select.
    * If this is null then the dropdown will be hidden
-   * @param {string} [deselectText=null] What string should be shown for the "deselect" select item.
+   * @param [deselectText=null] What string should be shown for the "deselect" select item.
    * A null value will show an empty item
-   * @memberof MultiActio̦nConfig
    */
   constructor(
     public schemaConfigs: ActionSchemaConfig[],
@@ -36,15 +34,11 @@ export class MultiActionConfig {
 /**
  * Gives information for an action and entity type used in multi action list. *
  * @export
- * @class ActionSchemaConfig
  */
 export class ActionSchemaConfig {
   /**
    * Creates an instance of ActionSchemaConfig.
-   * @param {PaginatedAction} paginationAction
-   * @param {string} schemaKey
-   * @param {string} [prettyName] The value that will be shown in the entity dropdown.
-   * @memberof ActionSchemaConfig
+   * @param [prettyName] The value that will be shown in the entity dropdown.
    */
   constructor(
     public paginationAction: PaginatedAction,

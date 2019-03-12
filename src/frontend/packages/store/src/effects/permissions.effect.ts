@@ -1,10 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
+import { LoggerService } from '../../../core/src/core/logger.service';
+import {
+  createCfFeatureFlagFetchAction,
+} from '../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
@@ -26,10 +30,6 @@ import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-import { LoggerService } from '../../../core/src/core/logger.service';
-import {
-  createCfFeatureFlagFetchAction,
-} from '../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 
@@ -100,10 +100,9 @@ export class PermissionsEffects {
     private logService: LoggerService
   ) { }
 
-  @Effect() getCurrentUsersPermissions$ = this.actions$.ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS).pipe(
-    withLatestFrom(
-      this.store.select(endpointsRegisteredCFEntitiesSelector)
-    ),
+  @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
+    ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS),
+    withLatestFrom(this.store.select(endpointsRegisteredCFEntitiesSelector)),
     switchMap(([action, endpoints]) => {
       const endpointsArray = Object.values(endpoints);
       const isAllAdmins = endpointsArray.every(endpoint => !!endpoint.user.admin);
@@ -130,7 +129,8 @@ export class PermissionsEffects {
   );
 
 
-  @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS).pipe(
+  @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.pipe(
+    ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS),
     switchMap(action => {
       const endpoint = action.endpoint as INewlyConnectedEndpointInfo;
       if (endpoint.user.admin || action.endpointType !== 'cf') {
@@ -220,7 +220,8 @@ export class PermissionEffects {
     private store: Store<AppState>
   ) { }
 
-  @Effect() getCurrentUsersPermissions$ = this.actions$.ofType<GetUserRelations>(GET_CURRENT_USER_RELATION).pipe(
+  @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
+    ofType<GetUserRelations>(GET_CURRENT_USER_RELATION),
     map(action => {
       return fetchCfUserRole(this.store, action, this.httpClient).pipe(
         map((success) => ({ type: action.actions[1] }))

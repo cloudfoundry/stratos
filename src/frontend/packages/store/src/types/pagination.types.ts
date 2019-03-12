@@ -58,6 +58,10 @@ export class PaginationEntityState {
   currentlyMaxed?: boolean;
 }
 
+export function isPaginatedAction(obj: any): PaginatedAction {
+  return obj && Object.keys(obj).indexOf('paginationKey') >= 0 ? obj as PaginatedAction : null;
+}
+
 export interface BasePaginatedAction extends Action {
   entityKey: string;
   paginationKey: string;

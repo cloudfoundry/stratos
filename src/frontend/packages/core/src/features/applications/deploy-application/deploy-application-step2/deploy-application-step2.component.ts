@@ -309,7 +309,7 @@ export class DeployApplicationStep2Component
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(name)),
-      catchError(_e => observableOf(null)),
+      catchError(e => observableOf(null)),
       tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
     );
   }

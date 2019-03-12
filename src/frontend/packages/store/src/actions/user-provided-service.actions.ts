@@ -106,7 +106,7 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     this.options.params = new URLSearchParams();
     this.options.method = 'post';
     const {
-      spaceGuid: space_guid,
+      spaceGuid,
       name,
       credentials = {},
       syslog_drain_url,
@@ -114,7 +114,7 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
       tags = []
     } = data;
     this.options.body = {
-      space_guid,
+      space_guid: spaceGuid,
       name,
       credentials,
       syslog_drain_url,

@@ -2,15 +2,15 @@ import { CdkTableModule } from '@angular/cdk/table';
 import { Component, ViewChild } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { empty, of as observableOf } from 'rxjs';
+import { EMPTY, of as observableOf } from 'rxjs';
 
+import { ListSort } from '../../../../../../store/src/actions/list.actions';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../core/core.module';
 import { UtilsService } from '../../../../core/utils.service';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../shared.module';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { TableComponent } from './table.component';
-import { ListSort } from '../../../../../../store/src/actions/list.actions';
 
 describe('TableComponent', () => {
 
@@ -80,7 +80,7 @@ describe('TableComponent', () => {
     } as IListPaginationController<any>;
     public dataSource = {
       trackBy: () => '1',
-      connect: () => empty(),
+      connect: () => EMPTY,
       disconnect: () => null,
       isTableLoading$: observableOf(false)
     };

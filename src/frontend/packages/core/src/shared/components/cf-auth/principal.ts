@@ -1,11 +1,18 @@
-import { CFAuthCheckerUser } from './checkers/users-assign-access';
-import { CFAuthCheckerSpace } from './checkers/space-access';
-import { CFAuthCheckerServiceInstance } from './checkers/service-instance-access';
-import { CFAuthCheckerRoute } from './checkers/route-access';
-import { CFAuthCheckerOrganization } from './checkers/organization-access';
-import { CFAuthCheckerApplication } from './checkers/application-access';
-import { CfAuthUserSummaryMapped, CFFeatureFlags, CFAuthResource, CFAuthAction, CFAuthChecker, CFFeatureFlagTypes } from './cf-auth.types';
 import { SessionData } from '../../../../../store/src/types/auth.types';
+import {
+  CFAuthAction,
+  CFAuthChecker,
+  CFAuthResource,
+  CfAuthUserSummaryMapped,
+  CFFeatureFlags,
+  CFFeatureFlagTypes,
+} from './cf-auth.types';
+import { CFAuthCheckerApplication } from './checkers/application-access';
+import { CFAuthCheckerOrganization } from './checkers/organization-access';
+import { CFAuthCheckerRoute } from './checkers/route-access';
+import { CFAuthCheckerServiceInstance } from './checkers/service-instance-access';
+import { CFAuthCheckerSpace } from './checkers/space-access';
+import { CFAuthCheckerUser } from './checkers/users-assign-access';
 
 export class CfAuthPrinciple {
 
@@ -27,17 +34,15 @@ export class CfAuthPrinciple {
   }
 
   /**
- * @name hasAccessTo
- * @description Does user have access to operation based on feature flags
- */
+   * Does user have access to operation based on feature flags
+   */
   hasAccessTo(operation: CFFeatureFlagTypes): boolean {
     return this.isAdmin || this.featureFlags[operation];
   }
 
   /**
- * @name isAllowed
- * @description Is user permitted to do the action.
- */
+   * Is user permitted to do the action.
+   */
   isAllowed(resourceType: CFAuthResource, action: CFAuthAction): boolean {
 
     let args = Array.prototype.slice.call(arguments);
@@ -51,10 +56,8 @@ export class CfAuthPrinciple {
   }
 
   /**
-* @name_createAccessCheckerList
-* @description Internal method to create checker list
-* @returns {Array}
-*/
+   * Internal method to create checker list
+   */
   private _createAccessCheckerList(): CFAuthChecker[] {
 
     const checkers = [];
@@ -69,9 +72,8 @@ export class CfAuthPrinciple {
   }
 
   /**
-* @name _getAccessChecker
-* @description Get Access checker for a given resource type
-*/
+   * Get Access checker for a given resource type
+   */
   private getAccessChecker(resourceType: CFAuthResource): CFAuthChecker {
 
     if (!this.checkers || this.checkers.length === 0) {

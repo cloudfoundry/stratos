@@ -204,13 +204,12 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   getMultiFiltersConfigs = () => [];
 
   /**
-   *Creates an instance of CfRoutesListConfigBase.
+   * Creates an instance of CfRoutesListConfigBase.
    * @param isLocal Is the list all local or paginated via the cf api
    * @param [hasActions=true] Should actions such as unmap and delete be shown
-   * @param {(route: Observable<APIResource<ListCfRoute>>) => Observable<boolean>} [canEditRoute] User can edit route?
-   * @param {Observable<boolean>} [canEditSpace$] User can edit space?
+   * @param [canEditRoute] User can edit route?
+   * @param [canEditSpace$] User can edit space?
    * @param [removeEntityOnUnmap=false] On unmap remove the entity from the list
-   * @memberof CfRoutesListConfigBase
    */
   constructor(
     private store: Store<AppState>,

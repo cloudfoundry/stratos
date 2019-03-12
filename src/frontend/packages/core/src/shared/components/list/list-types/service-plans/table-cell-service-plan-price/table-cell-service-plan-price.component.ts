@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../../core/cf-api-svc.types';
 import { canShowServicePlanCosts } from '../../../../../../features/service-catalog/services-helper';
 import { TableCellCustom } from '../../../list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-table-cell-service-plan-price',
@@ -14,10 +14,10 @@ export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIReso
   isFree: boolean;
   canShowCosts: boolean;
 
-  private _servicePlan;
+  private pServicePlan;
   @Input()
   set row(servicePlan: APIResource<IServicePlan>) {
-    this._servicePlan = servicePlan;
+    this.pServicePlan = servicePlan;
     if (!servicePlan) {
       return;
     }
@@ -25,6 +25,6 @@ export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIReso
     this.canShowCosts = canShowServicePlanCosts(servicePlan);
   }
   get row(): APIResource<IServicePlan> {
-    return this._servicePlan;
+    return this.pServicePlan;
   }
 }

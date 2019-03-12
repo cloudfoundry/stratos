@@ -1,12 +1,13 @@
 /**
  * Formats log messages from the Cloud Foundry firehose
  */
+import * as moment from 'moment';
 
-import { AnsiColorizer } from '../../../../shared/components/log-viewer/ansi-colorizer';
 import { LoggerService } from '../../../../core/logger.service';
 import { UtilsService } from '../../../../core/utils.service';
-import * as moment from 'moment';
-import { HTTP_METHODS, FireHoseItem } from './cloud-foundry-firehose.types';
+import { AnsiColorizer } from '../../../../shared/components/log-viewer/ansi-colorizer';
+import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
+
 
 /* eslint-disable no-control-regex */
 const ANSI_ESCAPE_MATCHER = new RegExp('\x1B\\[([0-9;]*)m', 'g');
@@ -145,7 +146,8 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const counterEvent = cfEvent.counterEvent;
-    let delta, total;
+    let delta;
+    let total;
     if (counterEvent.name.indexOf('ByteCount') !== -1) {
       delta = this.utils.bytesToHumanSize(counterEvent.delta);
       total = this.utils.bytesToHumanSize(counterEvent.total);
@@ -195,17 +197,18 @@ export class CloudFoundryFirehoseFormatter {
 
   // Map each character index in the sanitized version of originalString to its original index in originalString
   mapSanitizedIndices(originalString) {
-    let escapeMatch;
+    let escapeMatch = ANSI_ESCAPE_MATCHER.exec(originalString);
     const mappedIndices = {};
     let mappedUpTo = 0;
     let offset = 0;
 
     ANSI_ESCAPE_MATCHER.lastIndex = 0;
-    while ((escapeMatch = ANSI_ESCAPE_MATCHER.exec(originalString)) !== null) {
+    while (escapeMatch !== null) {
       while (mappedUpTo + offset < escapeMatch.index) {
         mappedIndices[mappedUpTo] = offset + mappedUpTo++;
       }
       offset += escapeMatch[0].length;
+      escapeMatch = ANSI_ESCAPE_MATCHER.exec(originalString);
     }
     while (mappedUpTo + offset < originalString.length) {
       mappedIndices[mappedUpTo] = offset + mappedUpTo++;
@@ -215,14 +218,15 @@ export class CloudFoundryFirehoseFormatter {
 
   // Determine which colour and bold modes are active where the highlight ends
   getPreviousModes(toEndOfMatch) {
-    let escapeMatch;
+    let escapeMatch = ANSI_ESCAPE_MATCHER.exec(toEndOfMatch);
     let boldOn = null;
     let prevColour = null;
     let lastColourMatches = null;
 
     ANSI_ESCAPE_MATCHER.lastIndex = 0;
-    while ((escapeMatch = ANSI_ESCAPE_MATCHER.exec(toEndOfMatch)) !== null) {
+    while (escapeMatch !== null) {
       lastColourMatches = escapeMatch;
+      escapeMatch = ANSI_ESCAPE_MATCHER.exec(toEndOfMatch);
     }
     if (lastColourMatches !== null) {
       boldOn = lastColourMatches[1].indexOf('1') === 0;

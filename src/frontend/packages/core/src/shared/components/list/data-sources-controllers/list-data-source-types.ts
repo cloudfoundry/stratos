@@ -15,17 +15,14 @@ export interface IEntitySelectItem {
 
 /**
  * Drives the entity list entity select
- *
- * @class EntitySelectConfig
  */
 export class EntitySelectConfig {
   /**
    * Creates an instance of EntitySelectConfig.
-   * @param {string} selectPlaceholder Placeholder text to show.
-   * @param {string} selectEmptyText The text shown when no value is selected
-   * @param {IEntitySelectItem} entitySelectItems Dictates which pagination page
+   * @param selectPlaceholder Placeholder text to show.
+   * @param selectEmptyText The text shown when no value is selected
+   * @param entitySelectItems Dictates which pagination page
    * is storing which entity ids. Used in the pagination monitor.
-   * @memberof EntitySelectConfig
    */
   constructor(
     public selectPlaceholder: string,
@@ -40,7 +37,7 @@ export interface AppEvent {
   actor_name: string;
   actor_type: string;
   actor_username: string;
-  metadata: Object;
+  metadata: object;
   organization_guid: string;
   space_guid: string;
   timestamp: string;

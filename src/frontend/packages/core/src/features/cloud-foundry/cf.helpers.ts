@@ -286,18 +286,20 @@ export function fetchTotalResults(
   store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<number> {
-
-  action.paginationKey = createFetchTotalResultsPagKey(action.paginationKey);
-  action.initialParams['results-per-page'] = 1;
-  action.flattenPagination = false;
-  action['includeRelations'] = [];
+  const newAction = {
+    ...action,
+    paginationKey: createFetchTotalResultsPagKey(action.paginationKey),
+    flattenPagination: false,
+    includeRelations: []
+  };
+  newAction.initialParams['results-per-page'] = 1;
 
   const pagObs = getPaginationObservables({
     store,
-    action,
+    action: newAction,
     paginationMonitor: paginationMonitorFactory.create(
-      action.paginationKey,
-      entityFactory(action.entityKey)
+      newAction.paginationKey,
+      entityFactory(newAction.entityKey)
     )
   });
   // Ensure the request is made by sub'ing to the entities observable
@@ -319,9 +321,9 @@ export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: Pagin
   }
 
   // Filter by cf/org/space
-  const cfGuid = paginationState.clientPagination.filter.items['cf'];
-  const orgGuid = paginationState.clientPagination.filter.items['org'];
-  const spaceGuid = paginationState.clientPagination.filter.items['space'];
+  const cfGuid = paginationState.clientPagination.filter.items.cf;
+  const orgGuid = paginationState.clientPagination.filter.items.org;
+  const spaceGuid = paginationState.clientPagination.filter.items.space;
   return !cfGuid && !orgGuid && !spaceGuid ? entities : entities.filter(e => {
     e = extractActualListEntity(e);
     const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);

@@ -3,40 +3,40 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
 
+import { GetServiceBroker } from '../../../../store/src/actions/service-broker.actions';
+import { GetServiceInstances } from '../../../../store/src/actions/service-instances.actions';
+import { GetService, GetServicePlansForService } from '../../../../store/src/actions/service.actions';
+import { AppState } from '../../../../store/src/app-state';
+import {
+  entityFactory,
+  serviceBrokerSchemaKey,
+  serviceInstancesSchemaKey,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
+} from '../../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
 import {
   IService,
   IServiceBroker,
   IServiceInstance,
   IServicePlan,
-  IServicePlanVisibility,
   IServicePlanExtra,
+  IServicePlanVisibility,
 } from '../../core/cf-api-svc.types';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { AppState } from '../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import {
-  serviceInstancesSchemaKey,
-  entityFactory,
-  servicePlanSchemaKey,
-  serviceBrokerSchemaKey,
-  serviceSchemaKey
-} from '../../../../store/src/helpers/entity-factory';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetServiceInstances } from '../../../../store/src/actions/service-instances.actions';
-import { GetServicePlansForService, GetService } from '../../../../store/src/actions/service.actions';
-import { ServicePlanAccessibility } from './services.service';
-import { CardStatus } from '../../shared/shared.types';
-import { safeStringToObj } from '../../core/utils.service';
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { EntityService } from '../../core/entity-service';
-import { GetServiceBroker } from '../../../../store/src/actions/service-broker.actions';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { safeStringToObj } from '../../core/utils.service';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { CardStatus } from '../../shared/shared.types';
+import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { ServicePlanAccessibility } from './services.service';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
-  serviceBroker: APIResource<IServiceBroker>,
-  allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
+                                   serviceBroker: APIResource<IServiceBroker>,
+                                   allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
   const svcAvailability = {
     isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
   };
@@ -79,7 +79,7 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
 export const getServiceInstancesInCf = (cfGuid: string, store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
   const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
   return getPaginationObservables<APIResource<IServiceInstance>>({
-    store: store,
+    store,
     action: new GetServiceInstances(cfGuid, paginationKey),
     paginationMonitor: paginationMonitorFactory.create(paginationKey, entityFactory(serviceInstancesSchemaKey))
   }, true).entities$;
@@ -102,7 +102,7 @@ export const getServicePlans = (
         const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
         // Could be a space-scoped service, make a request to fetch the plan
         return getPaginationObservables<APIResource<IServicePlan>>({
-          store: store,
+          store,
           action: getServicePlansAction,
           paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
         }, true)

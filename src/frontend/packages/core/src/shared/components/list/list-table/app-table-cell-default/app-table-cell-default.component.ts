@@ -1,9 +1,9 @@
 import { Component, Input, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
 import { TableCellCustom } from '../../list.types';
-import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { ICellDefinition } from '../table.types';
 
 @Component({
@@ -16,21 +16,21 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
 
   public cellDefinition: ICellDefinition<T>;
 
-  private _row: T;
+  private pRow: T;
   @Input('row')
-  get row() { return this._row; }
+  get row() { return this.pRow; }
   set row(row: T) {
-    this._row = row;
-    if (row && this._schemaKey) {
+    this.pRow = row;
+    if (row && this.pSchemaKey) {
       this.setValue(row, this.schemaKey);
     }
   }
 
-  private _schemaKey: string;
+  private pSchemaKey: string;
   @Input('schemaKey')
-  get schemaKey() { return this._schemaKey; }
+  get schemaKey() { return this.pSchemaKey; }
   set schemaKey(schemaKey: string) {
-    this._schemaKey = schemaKey;
+    this.pSchemaKey = schemaKey;
     if (this.row) {
       this.setValue(this.row, schemaKey);
     }

@@ -78,7 +78,6 @@ class FavoritesConfigMapper {
   }
   /**
    * For a given favorite, return the corresponding favorite meta card mapper
-   * @param favorite
    */
   public getMapperFunction(favorite: IFavoriteTypeInfo) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
@@ -86,9 +85,8 @@ class FavoritesConfigMapper {
   }
 
   /**
-  * For a given favorite, return the corresponding human readable type name
-  * @param favorite
-  */
+   * For a given favorite, return the corresponding human readable type name
+   */
   public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].prettyName : null;
@@ -96,7 +94,6 @@ class FavoritesConfigMapper {
 
   /**
    * For a given favorite, return the corresponding hydration action
-   * @param favorite
    */
   public getActionFromFavorite<T extends IFavoriteMetadata>(favorite: UserFavorite<T>) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
@@ -105,7 +102,6 @@ class FavoritesConfigMapper {
 
   /**
    * For a given favorite, return the corresponding hydration action
-   * @param favorite
    */
   public getEntityMetadata<T = any>(favorite: IFavoriteTypeInfo, entity: T) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
@@ -114,7 +110,6 @@ class FavoritesConfigMapper {
 
   /**
    * For a given endpoint type, return the list of possible favorite types
-   * @param favorite
    */
   public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
     return Object.values(this.mappers).reduce((types: IFavoriteTypes[], mapper) => {

@@ -35,13 +35,13 @@ export class AddServiceInstanceBaseStepComponent {
     )
   ];
 
-  private _selectedTile: ITileConfig<ICreateServiceTilesData>;
+  private pSelectedTile: ITileConfig<ICreateServiceTilesData>;
   get selectedTile() {
-    return this._selectedTile;
+    return this.pSelectedTile;
   }
   set selectedTile(tile: ITileConfig<ICreateServiceTilesData>) {
     this.serviceType = tile ? tile.data.type : null;
-    this._selectedTile = tile;
+    this.pSelectedTile = tile;
     if (tile) {
       this.store.dispatch(new RouterNav({
         path: `/services/new/${this.serviceType}`,

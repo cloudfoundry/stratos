@@ -20,7 +20,7 @@ import { UsersRolesState } from '../types/users-roles.types';
 export function createDefaultOrgRoles(orgGuid: string): IUserPermissionInOrg {
   return {
     name: '',
-    orgGuid: orgGuid,
+    orgGuid,
     permissions: createUserRoleInOrg(
       undefined,
       undefined,

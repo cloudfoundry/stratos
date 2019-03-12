@@ -24,7 +24,7 @@ import { PaginationEntityState } from '../../../../store/src/types/pagination.ty
 import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
-  public __multiActionListEntity__ = true;
+  // public __multiActionListEntity__ = true;
   static getEntity(entity: MultiActionListEntity | any) {
     if (entity instanceof MultiActionListEntity) {
       return entity.entity;
@@ -72,7 +72,6 @@ export class PaginationMonitor<T = any> {
 
   /**
    * Is the current page ready?
-   * @param pagination
    */
   private hasPage(pagination: PaginationEntityState) {
     if (!pagination) {
@@ -89,7 +88,6 @@ export class PaginationMonitor<T = any> {
 
   /**
    * Gets the request info for the current page.
-   * @param pagination
    */
   private getCurrentPageRequestInfo(
     pagination: PaginationEntityState,

@@ -39,7 +39,7 @@ import {
 } from '../../../../../../store/src/actions/service-instances.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { selectRequestInfo, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
@@ -114,7 +114,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
+      !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
   }
 
   constructor(
@@ -289,14 +289,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       switchMap(p => {
         if (this.bindExistingInstance) {
           // Binding an existing instance, therefore, skip creation by returning a dummy response
-          return observableOf({
-            creating: false,
-            error: false,
-            fetching: false,
-            response: {
-              result: []
-            }
-          });
+          return observableOf<RequestInfoState>(getDefaultRequestState());
         } else {
           return this.createServiceInstance(p);
         }
