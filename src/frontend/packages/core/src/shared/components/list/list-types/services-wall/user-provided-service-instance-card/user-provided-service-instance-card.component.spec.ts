@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
@@ -13,7 +13,7 @@ describe('UserProvidedServiceInstanceCardComponent', () => {
   let component: UserProvidedServiceInstanceCardComponent;
   let fixture: ComponentFixture<UserProvidedServiceInstanceCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         BaseTestModules,
@@ -28,7 +28,7 @@ describe('UserProvidedServiceInstanceCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserProvidedServiceInstanceCardComponent);
