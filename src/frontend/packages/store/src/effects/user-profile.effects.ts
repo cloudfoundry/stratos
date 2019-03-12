@@ -1,10 +1,10 @@
-
-import { switchMap, mergeMap, catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
+import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,
   GET_USERPROFILE,
@@ -22,7 +22,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from './../types/request.types';
-import { environment } from '../../../core/src/environments/environment';
+
 
 
 const { proxyAPIVersion } = environment;
@@ -40,7 +40,8 @@ export class UserProfileEffect {
     private httpClient: HttpClient,
   ) { }
 
-  @Effect() getUserProfileInfo$ = this.actions$.ofType<FetchUserProfileAction>(GET_USERPROFILE).pipe(
+  @Effect() getUserProfileInfo$ = this.actions$.pipe(
+    ofType<FetchUserProfileAction>(GET_USERPROFILE),
     mergeMap(action => {
       const apiAction = {
         entityKey: userProfileStoreNames.type,
@@ -63,7 +64,8 @@ export class UserProfileEffect {
         }));
     }));
 
-  @Effect() updateUserProfileInfo$ = this.actions$.ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE).pipe(
+  @Effect() updateUserProfileInfo$ = this.actions$.pipe(
+    ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE),
     mergeMap(action => {
       const apiAction = {
         entityKey: userProfileStoreNames.type,
@@ -95,7 +97,8 @@ export class UserProfileEffect {
         }));
     }));
 
-  @Effect() updateUserPrassword$ = this.actions$.ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD).pipe(
+  @Effect() updateUserPrassword$ = this.actions$.pipe(
+    ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD),
     mergeMap(action => {
       const apiAction = {
         entityKey: userProfileStoreNames.type,

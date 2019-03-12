@@ -1,5 +1,3 @@
-import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
-/* tslint:disable:max-line-length */
 import {
   Component,
   ComponentFactoryResolver,
@@ -118,7 +116,9 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
+import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
+/* tslint:disable:max-line-length */
 
 /* tslint:enable:max-line-length */
 export const listTableCells = [
@@ -216,7 +216,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
     if (component) {
 
       // Add to target to ensure ngcontent is correct in new component
-      this.cellComponent = <TableCellCustom<T>>component.instance;
+      this.cellComponent = component.instance as TableCellCustom<T>;
       const row = MultiActionListEntity.getEntity(this.row);
       const entityKey = MultiActionListEntity.getEntityKey(this.row);
       this.cellComponent.row = row;

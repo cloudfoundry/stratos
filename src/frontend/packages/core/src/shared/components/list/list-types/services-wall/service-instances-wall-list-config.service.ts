@@ -25,7 +25,6 @@ import {
  * Service instance list shown for `services` nav component
  *
  * @export
- * @class ServiceInstancesWallListConfigService
  * @extends {CfServiceInstancesListConfigBase}
  */
 @Injectable()
@@ -46,10 +45,10 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
 
   constructor(store: Store<AppState>,
-    datePipe: DatePipe,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    serviceActionHelperService: ServiceActionHelperService
+              datePipe: DatePipe,
+              private cfOrgSpaceService: CfOrgSpaceDataService,
+              currentUserPermissionsService: CurrentUserPermissionsService,
+              serviceActionHelperService: ServiceActionHelperService
   ) {
     super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
     const multiFilterConfigs = [

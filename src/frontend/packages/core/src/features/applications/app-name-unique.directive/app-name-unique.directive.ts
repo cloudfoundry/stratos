@@ -7,7 +7,7 @@ import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { selectNewAppState } from '../../../../../store/src/effects/create-app-effects';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 
 /* tslint:disable:no-use-before-declare  */

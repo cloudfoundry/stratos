@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
 import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { EntitySchema, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 import { GitSCM } from '../../../../data-services/scm/scm';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {
@@ -16,11 +16,8 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
 
   /**
    * Creates an instance of GithubCommitsDataSource.
-   * @param {Store<AppState>} store
-   * @param {IListConfig<APIResource<GithubCommit>>} listConfig
-   * @param {string} projectName For example `cloudfoundry-incubator/stratos`
-   * @param {string} sha Branch name, tag, etc
-   * @memberof GithubCommitsDataSource
+   * @param projectName For example `cloudfoundry-incubator/stratos`
+   * @param sha Branch name, tag, etc
    */
   constructor(
     store: Store<AppState>,

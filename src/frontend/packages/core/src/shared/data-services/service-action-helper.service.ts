@@ -81,7 +81,7 @@ export class ServiceActionHelperService {
       {
         path: [
           '/services/', this.getRouteKey(userProvided), endpointGuid, guid, 'edit'
-        ], query: query
+        ], query
       }
     ))
 

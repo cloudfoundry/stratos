@@ -1,6 +1,7 @@
+import { CFAuthChecker, CFAuthResource } from '../cf-auth.types';
 import { CfAuthPrinciple } from '../principal';
 import { CfAuthBaseAccess } from './base-access';
-import { CFAuthResource, CFAuthChecker } from '../cf-auth.types';
+
 export class CFAuthCheckerApplication extends CfAuthBaseAccess implements CFAuthChecker {
 
   /**
@@ -12,12 +13,11 @@ export class CFAuthCheckerApplication extends CfAuthBaseAccess implements CFAuth
   }
 
   /**
-    * @name create
-    * @description User can deploy apps if:
-    * 1. User is an admin
-    * 2. User is a space developer
-    * @param {string} spaceGuid GUID of the space where the application resides
-    */
+   * User can deploy apps if:
+   * 1. User is an admin
+   * 2. User is a space developer
+   * @param  spaceGuid GUID of the space where the application resides
+   */
   create(spaceGuid: string): boolean {
 
     // Admin
@@ -30,11 +30,10 @@ export class CFAuthCheckerApplication extends CfAuthBaseAccess implements CFAuth
   }
 
   /**
-   * @name update
-   * @description User can manage apps if:
+   * User can manage apps if:
    * 1. User is an admin
    * 2. User is a space developer
-   * @param {string} spaceGuid GUID of the space where the application resides
+   * @param spaceGuid GUID of the space where the application resides
    */
   update(spaceGuid: string): boolean {
     // Admin
@@ -47,11 +46,10 @@ export class CFAuthCheckerApplication extends CfAuthBaseAccess implements CFAuth
   }
 
   /**
-   * @name delete
-   * @description User can delete apps if:
+   * User can delete apps if:
    * 1. User is an admin
    * 2. User is a space developer
-   * @param {string} spaceGuid GUID of the space where the application resides
+   * @param spaceGuid GUID of the space where the application resides
    */
   delete(spaceGuid: string): boolean {
     // Admin
@@ -64,10 +62,8 @@ export class CFAuthCheckerApplication extends CfAuthBaseAccess implements CFAuth
   }
 
   /**
-   * @name canHandle
-   * @description Specifies that this ACL checker can handle `application` permission
-   * @param {String} resource - String representing the resource
-   * @returns {boolean}
+   * Specifies that this ACL checker can handle `application` permission
+   * @param resource - String representing the resource
    */
   canHandle(resource: CFAuthResource): boolean {
     return resource === CFAuthResource.application;

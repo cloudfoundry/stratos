@@ -19,13 +19,12 @@
     <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval" class="meta-card__favorite" *ngIf="favorite"
       [favorite]="favorite">
     </app-entity-favorite-star>
-    <div class="meta-card__header-container__actions" *ngIf="_actionMenu && (showMenu$ | async)"
-      appClickStopPropagation>
+    <div class="meta-card__header-container__actions" *ngIf="actionMenu && (showMenu$ | async)" appClickStopPropagation>
       <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu" [disabled]="isDeleting$ | async">
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu class="meta-card__header__popup" #menu="matMenu">
-        <ng-container *ngFor="let menuItem of _actionMenu">
+        <ng-container *ngFor="let menuItem of actionMenu">
           <button class="meta-card__header__popup__btn" [disabled]="menuItem.disabled | async" mat-menu-item *ngIf="menuItem.can | async"
             (click)="menuItem.action()">
             <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>

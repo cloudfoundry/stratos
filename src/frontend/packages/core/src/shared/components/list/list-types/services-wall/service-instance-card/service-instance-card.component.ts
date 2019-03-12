@@ -122,6 +122,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     this.serviceInstanceEntity.entity.space_guid,
     'summary'
   ]
-  getSpaceBreadcrumbs = () => ({ 'breadcrumbs': 'services-wall' });
+  getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
 }

@@ -52,9 +52,9 @@ export function setDefaultPaginationState(state: any) {
   defaultPaginationState = state;
 }
 
-const getPaginationUpdater = function (types: [string, string, string]) {
+const getPaginationUpdater = (types: [string, string, string]) => {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
+  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState => {
     switch (action.type) {
       case requestType:
         return paginationStart(state, action);
@@ -92,7 +92,7 @@ export function createPaginationReducer(types: [string, string, string]) {
 }
 
 function paginationReducer(updatePagination) {
-  return function (state, action) {
+  return (state, action) => {
     state = state || defaultPaginationState;
     return paginate(action, state, updatePagination);
   };

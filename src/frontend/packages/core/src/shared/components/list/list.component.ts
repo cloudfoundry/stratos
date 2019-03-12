@@ -155,9 +155,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   private initialPageEvent: PageEvent;
   private paginatorSettings: {
     pageSizeOptions: number[],
-    pageSize: Number,
-    pageIndex: Number,
-    length: Number
+    pageSize: number,
+    pageIndex: number,
+    length: number
   } = {
       pageSizeOptions: null,
       pageSize: null,
@@ -370,7 +370,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize
     this.paginationController.pagination$.pipe(first()).subscribe(pagination => {
-      this.initialPageEvent = new PageEvent;
+      this.initialPageEvent = new PageEvent();
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
       if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {

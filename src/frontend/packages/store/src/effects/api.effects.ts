@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
@@ -59,14 +59,13 @@ export class APIEffect {
   ) { }
 
   @Effect()
-  apiRequest$ = this.actions$
-    .ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
-    .pipe(
-      withLatestFrom(this.store),
-      mergeMap(([action, state]) => {
-        return this.doApiRequest(action, state);
-      }),
-    );
+  apiRequest$ = this.actions$.pipe(
+    ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
+    withLatestFrom(this.store),
+    mergeMap(([action, state]) => {
+      return this.doApiRequest(action, state);
+    }),
+  );
 
   private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
@@ -165,7 +164,8 @@ export class APIEffect {
           this.handleApiEvents(errorsCheck);
         }
 
-        let fakedAction, errorMessage;
+        let fakedAction;
+        let errorMessage;
         errorsCheck.forEach(error => {
           if (error.error) {
             // Dispatch a error action for the specific endpoint that's failed
@@ -281,7 +281,7 @@ export class APIEffect {
       }
       : {
         entity: { ...resource, cfGuid },
-        metadata: { guid: guid },
+        metadata: { guid },
       };
 
     // Inject `cfGuid` in nested entities
@@ -352,7 +352,7 @@ export class APIEffect {
         errorCode: succeeded ? '200' : errorCode,
         guid: cfGuid,
         url: action.options.url,
-        errorResponse: errorResponse,
+        errorResponse,
       };
     });
   }
@@ -422,8 +422,8 @@ export class APIEffect {
                 apiAction.guid,
               );
             }
-            totalResults += cfData['total_results'];
-            totalPages += cfData['total_pages'];
+            totalResults += cfData.total_results;
+            totalPages += cfData.total_pages;
             if (!cfData.resources.length) {
               return null;
             }
@@ -443,6 +443,7 @@ export class APIEffect {
     if (pagAction.__forcedPageSchemaKey__) {
       entityArray = [entityFactory(pagAction.__forcedPageSchemaKey__)];
     } else {
+      /* tslint:disable-next-line:no-string-literal  */
       if (apiAction.entity['length'] > 0) {
         entityArray = apiAction.entity;
       } else {

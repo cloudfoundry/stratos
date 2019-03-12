@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
@@ -66,9 +66,9 @@ export class RequestEffect {
    * 5) alternatively... if we've reached here for the same space but from an api request for that space.. ensure that the routes have not
    *    been dropped because their count is over 50
    *
-   * @memberof RequestEffect
    */
-  @Effect() validateEntities$ = this.actions$.ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE).pipe(
+  @Effect() validateEntities$ = this.actions$.pipe(
+    ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
     mergeMap(action => {
       const validateAction: ValidateEntitiesStart = action;
       const apiAction = validateAction.action;
@@ -127,7 +127,8 @@ export class RequestEffect {
     })
   );
 
-  @Effect() completeEntities$ = this.actions$.ofType<EntitiesPipelineCompleted>(EntitiesPipelineActionTypes.COMPLETE).pipe(
+  @Effect() completeEntities$ = this.actions$.pipe(
+    ofType<EntitiesPipelineCompleted>(EntitiesPipelineActionTypes.COMPLETE),
     mergeMap(action => {
       const completeAction: EntitiesPipelineCompleted = action;
       const actions = [];
@@ -165,11 +166,11 @@ export class RequestEffect {
 
 
   update(apiAction, busy: boolean, error: string) {
-    if (apiAction['paginationKey']) {
+    if (apiAction.paginationKey) {
       this.store.dispatch({
         type: SET_PAGE_BUSY,
-        busy: busy,
-        error: error,
+        busy,
+        error,
         apiAction
       });
     } else {

@@ -12,9 +12,9 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
 export class MetaCardItemComponent implements OnInit {
 
   styles = {
-    'row': 'meta-card-item-row',
+    row: 'meta-card-item-row',
     'row-top': 'meta-card-item-row-top',
-    'column': 'meta-card-item-column',
+    column: 'meta-card-item-column',
     'long-text': 'meta-card-item-long-text',
     'long-text-fixed': 'meta-card-item-long-text-fixed',
   };

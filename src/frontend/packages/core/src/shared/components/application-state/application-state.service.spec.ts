@@ -22,7 +22,7 @@ describe('ApplicationStateService', () => {
     expect(cfAppStateService).toBeTruthy();
   });
 
-  describe('check friendly names and indicators', function () {
+  describe('check friendly names and indicators', () => {
 
     function makeTestData(appState, packageState, instanceStates?) {
       const summary = {
@@ -35,7 +35,7 @@ describe('ApplicationStateService', () => {
       let instances = [];
       let running = 0;
       if (instanceStates) {
-        instanceStates.forEach(function (s) {
+        instanceStates.forEach(s => {
           instances.push({ state: s });
           if (s === 'RUNNING') { running++; }
         });
@@ -44,12 +44,12 @@ describe('ApplicationStateService', () => {
       }
       summary.running_instances = running;
       return {
-        summary: summary,
-        instances: instances
+        summary,
+        instances
       };
     }
 
-    it('Busted push', function () {
+    it('Busted push', () => {
       const testData = makeTestData('ANY', 'FAILED', ['RUNNING']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
 
@@ -59,7 +59,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.delete).toBe(true);
     });
 
-    it('Updating app', function () {
+    it('Updating app', () => {
       const testData = makeTestData('STOPPED', 'PENDING', ['RUNNING', 'CRASHED']);
       testData.summary.package_updated_at = 'some date';
       const res = cfAppStateService.get(testData.summary, testData.instances);
@@ -70,7 +70,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.start).toBe(true);
     });
 
-    it('Incomplete app', function () {
+    it('Incomplete app', () => {
       const testData = makeTestData('STOPPED', 'PENDING', ['RUNNING', 'CRASHED']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('incomplete');
@@ -80,7 +80,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.cli).toBe(true);
     });
 
-    it('User stopped app', function () {
+    it('User stopped app', () => {
       const testData = makeTestData('STOPPED', 'STAGED', ['RUNNING', 'CRASHED']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
@@ -90,7 +90,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.delete).toBe(true);
     });
 
-    it('Incomplete', function () {
+    it('Incomplete', () => {
       const testData = makeTestData('STOPPED', undefined, ['RUNNING', 'CRASHED']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('incomplete');
@@ -100,7 +100,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.cli).toBe(true);
     });
 
-    it('During push', function () {
+    it('During push', () => {
       const testData = makeTestData('STARTED', 'PENDING', ['RUNNING', 'CRASHED']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('busy');
@@ -109,7 +109,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.delete).toBe(true);
     });
 
-    it('After successful push', function () {
+    it('After successful push', () => {
       const testData = makeTestData('STARTED', 'STAGED', ['STARTING']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('busy');
@@ -120,7 +120,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.restart).toBe(true);
     });
 
-    it('Starting', function () {
+    it('Starting', () => {
       const testData = makeTestData('STARTED', 'STAGED', ['STARTING', 'RUNNING']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
 
@@ -132,7 +132,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.restart).toBe(true);
     });
 
-    it('Running!', function () {
+    it('Running!', () => {
       let testData = makeTestData('STARTED', 'STAGED', ['RUNNING']);
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('ok');
@@ -150,7 +150,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.launch).toBe(true);
     });
 
-    it('Borked, usually due to app code', function () {
+    it('Borked, usually due to app code', () => {
       let testData = makeTestData('STARTED', 'STAGED', ['CRASHED']);
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('error');
@@ -167,7 +167,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.stop).toBe(true);
     });
 
-    it('Borked, usually due to starting timeouts', function () {
+    it('Borked, usually due to starting timeouts', () => {
       let testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT']);
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
@@ -184,7 +184,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.stop).toBe(true);
     });
 
-    it('Borked, usually due to starting timeouts (1)', function () {
+    it('Borked, usually due to starting timeouts (1)', () => {
       let testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'CRASHED']);
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('error');
@@ -201,7 +201,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.stop).toBe(true);
     });
 
-    it('Borked, usually due to platform issues', function () {
+    it('Borked, usually due to platform issues', () => {
       let testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'CRASHED']);
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
@@ -219,7 +219,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.launch).toBe(true);
     });
 
-    it('Borked, usually due to platform issues (2)', function () {
+    it('Borked, usually due to platform issues (2)', () => {
       let testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'UNKNOWN']);
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
@@ -237,7 +237,7 @@ describe('ApplicationStateService', () => {
       expect(res.actions.launch).toBe(true);
     });
 
-    it('Borked, one crashed, one running, one stating', function () {
+    it('Borked, one crashed, one running, one stating', () => {
       const testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'CRASHED', 'STARTING']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
@@ -245,7 +245,7 @@ describe('ApplicationStateService', () => {
       expect($translate.instant(res.subLabel)).toBe('Crashing');
     });
 
-    it('Started, but no stats available', function () {
+    it('Started, but no stats available', () => {
       const testData = makeTestData('STARTED', 'STAGED');
       const res = cfAppStateService.get(testData.summary, undefined);
       expect(res.indicator).toBe('tentative');
@@ -253,7 +253,7 @@ describe('ApplicationStateService', () => {
       expect(res.subLabel).not.toBeDefined();
     });
 
-    it('Started, but have instance counf set to 0', function () {
+    it('Started, but have instance counf set to 0', () => {
       const testData = makeTestData('STARTED', 'STAGED');
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('tentative');

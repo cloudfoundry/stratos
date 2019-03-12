@@ -57,5 +57,5 @@ export class BooleanIndicatorComponent {
 
   getTypeText = (s: string) => s.split('-');
 
-  capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+  capitalizeFirstLetter = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 }

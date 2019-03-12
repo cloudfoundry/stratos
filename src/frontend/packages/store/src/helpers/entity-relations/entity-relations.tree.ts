@@ -1,6 +1,6 @@
 import { schema } from 'normalizr';
 
-import { EntitySchema, entityFactory } from '../entity-factory';
+import { EntitySchema } from '../entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction, EntityTree, EntityTreeRelation } from './entity-relations.types';
 
 const entityTreeCache: {
@@ -16,10 +16,11 @@ function generateCacheKey(entityKey: string, action: EntityInlineParentAction): 
 }
 
 export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {
-  let entity = action.entity;
-  const isArray = Array.isArray(entity);
-  entity = isArray ? entity[0] : entity;
-  const entityKey = entity['key'];
+  // EntitySchema
+  const entityOrArray = action.entity;
+  const isArray = Array.isArray(entityOrArray);
+  const entity = isArray ? entityOrArray[0] : entityOrArray;
+  const entityKey = entity.key;
   const cacheKey = generateCacheKey(entityKey, action);
   const cachedTree = entityTreeCache[cacheKey];
   const entityTree = fromCache && cachedTree ? cachedTree : createEntityTree(entity as EntitySchema, isArray);
@@ -48,11 +49,11 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
 }
 
 function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
-  const rootEntitySchema = schemaObj || entityRelation.entity['schema'];
+  const rootEntitySchema = schemaObj || entityRelation.entity.schema;
 
   Object.keys(rootEntitySchema).forEach(key => {
     let value = rootEntitySchema[key];
-    const isArray = value['length'] > 0;
+    const isArray = value.length > 0;
     value = isArray ? value[0] : value;
     const newPath = path ? path + '.' + key : key;
     if (value instanceof schema.Entity) {

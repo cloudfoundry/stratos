@@ -60,12 +60,12 @@ const requestActions = [
 ] as IRequestArray;
 
 function chainReducers(baseReducer, extraReducers) {
-  return function (state, action) {
+  return (state, action) => {
     let newState = baseReducer(state, action);
     let nextState;
     Object.keys(extraReducers).forEach(key => {
-      nextState = extraReducers[key].reduce((_state, reducer) => {
-        return reducer(_state, action);
+      nextState = extraReducers[key].reduce((s, reducer) => {
+        return reducer(s, action);
       }, newState[key]);
       if (nextState !== newState[key]) {
         newState = {

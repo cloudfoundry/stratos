@@ -346,7 +346,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
           return this.pollEntityService('starting', 'STARTED').pipe(first());
         }),
-      ).subscribe(null, this.dispatchAppStats, this.dispatchAppStats);
+      ).subscribe({
+        error: this.dispatchAppStats,
+        complete: this.dispatchAppStats
+      });
 
     });
   }
@@ -385,7 +388,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
       map(updatingSection => {
-        const updating = this.updatingSectionBusy(updatingSection['restaging']) ||
+        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
           this.updatingSectionBusy(updatingSection['Updating-Existing-Application']);
         return { updating };
       }),

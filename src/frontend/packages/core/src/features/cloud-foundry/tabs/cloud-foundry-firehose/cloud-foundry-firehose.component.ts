@@ -5,9 +5,9 @@ import { catchError, filter, share } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/logger.service';
 import { UtilsService } from '../../../../core/utils.service';
+import { environment } from '../../../../environments/environment.prod';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
-import { environment } from '../../../../environments/environment.prod';
 
 @Component({
   selector: 'app-cloud-foundry-firehose',
@@ -18,7 +18,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
   messages: Observable<string>;
   connectionStatus: Observable<number>;
 
-  filter: Function;
+  filter: (jsonString: string) => string;
 
   // Formatter for fire hose log messages
   formatter: CloudFoundryFirehoseFormatter;

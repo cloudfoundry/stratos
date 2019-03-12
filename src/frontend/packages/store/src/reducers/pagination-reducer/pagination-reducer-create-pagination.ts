@@ -6,8 +6,6 @@ import { spreadClientPagination } from './pagination-reducer.helper';
  * Creates new pagination from default values or a seed pagination section.
  * If the pagination exists and a seed pagination key is provided, sync the current pagination section and the seed.
  * If the pagination exists and no seed is given then do nothing.
- * @param state
- * @param action
  * @param defaultState The default state to create the pagination section with.
  */
 export function createNewPaginationSection(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState)

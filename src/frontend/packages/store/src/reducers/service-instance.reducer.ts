@@ -1,17 +1,19 @@
+import { IServiceBinding, IServiceInstance } from '../../../core/src/core/cf-api-svc.types';
 import {
-  DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   CREATE_SERVICE_BINDING_ACTION_SUCCESS,
+  CreateServiceBinding,
+  DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
-  CreateServiceBinding
 } from '../actions/service-bindings.actions';
+import { UPDATE_SERVICE_INSTANCE_SUCCESS, UpdateServiceInstance } from '../actions/service-instances.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
-import { UpdateServiceInstance, UPDATE_SERVICE_INSTANCE_SUCCESS } from '../actions/service-instances.actions';
-import { IServiceInstance, IServiceBinding } from '../../../core/src/core/cf-api-svc.types';
 
 export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResource<IServiceInstance>>, action: APISuccessOrFailedAction) {
-  let serviceInstanceGuid, serviceInstanceEntity, serviceBindingGuid;
+  let serviceInstanceGuid;
+  let serviceInstanceEntity;
+  let serviceBindingGuid;
   switch (action.type) {
     case DELETE_SERVICE_BINDING_ACTION_SUCCESS:
       const deleteServiceBindingAction = (action.apiAction as DeleteServiceBinding);
@@ -41,9 +43,9 @@ export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResourc
           ...serviceInstanceEntity,
           entity: {
             ...serviceInstanceEntity.entity,
-            name: name,
-            tags: tags,
-            params: params
+            name,
+            tags,
+            params
           }
         }
       };

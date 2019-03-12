@@ -5,7 +5,7 @@ export function endpointsReducer(state: EndpointState = {
   loading: false,
   error: false,
   message: ''
-}, action): EndpointState {
+},                               action): EndpointState {
   switch (action.type) {
     case GET_ENDPOINTS:
       return { ...state, loading: true, message: '', error: false };

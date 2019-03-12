@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
-import { EndpointTypeConfig, EndpointAuthTypeConfig, ExtensionEntitySchema } from './extension-types';
+import { EndpointAuthTypeConfig, EndpointTypeConfig, ExtensionEntitySchema } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -80,25 +80,21 @@ const extensionMetadata = {
  * Decortator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadata) {
-  return function (target) {
-    addExtensionTab(props.type, target, props);
-  };
+  return target => addExtensionTab(props.type, target, props);
 }
 
 /**
  * Decortator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
-  return function (target) {
-    addExtensionAction(props.type, target, props);
-  };
+  return target => addExtensionAction(props.type, target, props);
 }
 
 /**
  * Decorator for an Extension module
  */
 export function StratosExtension(config: StratosExtensionConfig) {
-  return (_target) => {
+  return target => {
     if (config.endpointTypes) {
       extensionMetadata.endpointTypes.push(...config.endpointTypes);
     }
@@ -112,9 +108,7 @@ export function StratosExtension(config: StratosExtensionConfig) {
 }
 
 export function StratosLoginComponent() {
-  return (target) => {
-    extensionMetadata.loginComponent = target;
-  };
+  return target => extensionMetadata.loginComponent = target;
 }
 
 function addExtensionTab(tab: StratosTabType, target: any, props: any) {

@@ -2,11 +2,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
-import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import {
-  createCFFeatureFlagPaginationKey,
-} from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { AppState } from '../../../store/src/app-state';
 import { entityFactory, featureFlagSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
@@ -19,6 +14,11 @@ import {
 import { endpointsRegisteredEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../../../store/src/types/current-user-roles.types';
+import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
+import {
+  createCFFeatureFlagPaginationKey,
+} from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,
@@ -78,11 +78,7 @@ export class CurrentUserPermissionsChecker {
     );
   }
   /**
-   *
    * @param permissionConfig Single permission to be checked
-   * @param endpointGuid
-   * @param orgOrSpaceGuid
-   * @param spaceGuid
    */
   public getSimpleCheck(permissionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
     switch (permissionConfig.type) {
@@ -208,7 +204,7 @@ export class CurrentUserPermissionsChecker {
   }
 
   public checkFeatureFlag(featureFlags: APIResource<IFeatureFlag>[], permission: CFFeatureFlagTypes) {
-    const flag = featureFlags.find(_flag => _flag.entity.name === permission.toString());
+    const flag = featureFlags.find(ff => ff.entity.name === permission.toString());
     if (!flag) {
       return false;
     }
@@ -231,8 +227,8 @@ export class CurrentUserPermissionsChecker {
   }
 
   /**
- * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
- */
+   * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
+   */
   public getReadOnlyCheck(endpointGuid: string) {
     return this.getEndpointState(endpointGuid).pipe(
       map(

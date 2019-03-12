@@ -72,7 +72,6 @@ export class PaginationMonitor<T = any> {
 
   /**
    * Is the current page ready?
-   * @param pagination
    */
   private hasPage(pagination: PaginationEntityState) {
     if (!pagination) {
@@ -89,7 +88,6 @@ export class PaginationMonitor<T = any> {
 
   /**
    * Gets the request info for the current page.
-   * @param pagination
    */
   private getCurrentPageRequestInfo(
     pagination: PaginationEntityState,

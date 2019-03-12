@@ -45,8 +45,6 @@ export class ResetPagination implements BasePaginatedAction {
 
 export class CreatePagination implements BasePaginatedAction {
   /**
-   * @param entityKey
-   * @param paginationKey
    * @param seed The pagination key for the section we should use as a seed when creating the new pagination section.
    */
   constructor(public entityKey: string, public paginationKey: string, public seed?: string) {
