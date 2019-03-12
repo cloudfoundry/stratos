@@ -48,7 +48,7 @@ describe('PaginationReducer', () => {
     expect(paginationReducer(null, { type: RequestTypes.START })).toEqual(defaultPaginationState);
   });
 
-  fit('should return fetching state', () => {
+  it('should return fetching state', () => {
     const paginationReducer = createPaginationReducer([
       RequestTypes.START,
       RequestTypes.SUCCESS,

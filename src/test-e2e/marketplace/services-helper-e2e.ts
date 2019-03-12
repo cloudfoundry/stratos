@@ -6,7 +6,6 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
-import { CreateServiceInstance } from './create-service-instance.po';
 import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
