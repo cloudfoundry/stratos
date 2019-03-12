@@ -12,7 +12,7 @@ export class CreateServiceInstance extends Page {
   stepper: CreateMarketplaceServiceInstance;
 
   public selectMarketplace() {
-    return this.baseStepper.selectServiceType(SERVICE_INSTANCE_TYPES.SERVICE)
+    return this.baseStepper.selectServiceType(SERVICE_INSTANCE_TYPES.SERVICE);
   }
 
   constructor(url = '/services/new') {
