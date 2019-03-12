@@ -147,138 +147,158 @@ Then Stratos should either ..
 ## v3 Required `include`s, `order_by`, filters, missing properties
 
 ### `/apps`
-Type | Name | Notes
---- | --- | ---
-`include` | `space` |
-`include` | Organization via `space.organization` |
-`include` | `packages` | Required to determine app state (state, updated_at)
-`include` | `processes` | Required to determine app state (instances)
-`include` | `processes.stats` | Required to determine app state (state).
-`include` | `current_droplet` | Required to determine app state (state).
-`include` | `packages.builds` | v3 currently has no link or relation. Required to determine app state (state).
-`order_by` | sum of `processes` `instances` count | [See below for notes](#v3-Required-Features)
-`order_by` | sum of `processes` `disk_in_mb` count | [See below for notes](#v3-Required-Features)
-`order_by` | sum of `processes` `memory_in_mb` count | [See below for notes](#v3-Required-Features)
-filter | `processes` state |
-filter | organization name | Allows free text search, rather than manual selection of cf and then org
-filter | space name | Allows free text search, rather than manual selection of cf, org and then space
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+~~`include`~~ | ~~`space`~~  |  | |
+`include` | Organization via `space.organization` | [HIGH] | Used in app wall's app list to filter local lists by org, org name on app wall app card, upfront fetch leading to quicker navigation to app summary | See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
+`include` | `packages` | [HIGH] | See [1] | Required to determine application state (state, updated_at)
+`include` | `processes` | [HIGH] | See [1] | Required to determine application state (instances)
+`include` | `processes.stats` | [HIGH] | See [1] | Required to determine application state (state).
+`include` | `current_droplet` | [HIGH] | See [1] | Required to determine application state (state).
+`include` | Builds via `packages.builds` | [HIGH] | See [1] | v3 currently has no link or relation. Required to determine application state (state).
+`order_by` | sum of `processes` `instances` count [See below for notes](#v3-Required-Features) | [MEDIUM] | See [2] |
+`order_by` | sum of `processes` `disk_in_mb` count [See below for notes](#v3-Required-Features) | [MEDIUM]  | See [2] |
+`order_by` | sum of `processes` `memory_in_mb` count [See below for notes](#v3-Required-Features) | [MEDIUM]  | See [2] |
+filter | `processes` state | [MEDIUM] | User wishes to find all apps that have errored processes
+filter | organization name | [LOW] | See [3] | 
+filter | space name | [LOW] | See [3] | 
+
+[1] Property/s used to determine application state without spamming requests ([app state](#Application-State)). On the application wall
+page we determine the state of up to 9 apps at a time. Returning this information in a single request, or during the initial request, will
+save apps * missing property's endpoints (packages, process, process stats, current_droplet, etc)
+
+[2] Enables sorting by instance count in tables ([non-local lists](cf-api-v2-usage.md#Lists)
+
+[3] Allows free text search, rather than manual selection of cf, org and then space. For instance a user types part of an org name in a
+special org drop down and only is presented with apps in matching orgs. This is a shortcut for the user having to scroll down a list in a
+drop down.
 
 ### `/app/${guid}`
-Type | Name | Notes
---- | --- | ---
-`include` | `route_mappings`
-`include` | Route via `route_mappings.route` | `/route` has no v3 equivalent
-`include` | Route via `route_mappings.route.domain` | `/domain` has no v3 equivalent
-links | `service_bindings`
-`include` | `service_bindings`
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+`include` | `route_mappings` | [MEDIUM] | See [1] | See [2]
+`include` | Route via `route_mappings.route` | [MEDIUM] | See [1] | See [2]. `/route` has no v3 equivalent
+`include` | Domain via `route_mappings.route.domain` | [MEDIUM] | See [1] | See [2]. `/domain` has no v3 equivalent. Required to display complete route url. From Greg `We are thinking about adding a fqdn on the routes object, which may be another way to achieve the same objective.`
+links | `service_bindings` | [MEDIUM] | See [3] | See [2]
+`include` | `service_bindings` | [MEDIUM] | See [3] | See [2]
 ~~`include`~~ | ~~`space`~~
-`include` | `space.organization`
-`include` | `packages` | Required to determine app state (state, updated_at).
-`include` | `processes` | Required to determine app state (instances)
-`include` | `processes.stats` | Required to determine app state (state).
-`include` | `current_droplet` | Required to determine app state (state).
-`include` | `packages.builds` | v3 currently has no link or relation. Required to determine app state (state).
-links | `features` | Required to fetch app ssh and revision info
-`include` | `features` | v3 currently has no link or relation to features. Required to fetch app ssh and revision info
-`include` | `droplets` | Note used at the moment, but it's easy to think that we'll want this info along with the app
-`include` | `tasks` | Note used at the moment, but it's easy to think that we'll want this info along with the app
-property | stack guid/whole entity | Stack name is included inline in an inlined `lifecycle` object. This placement seems like an odd pattern. It's not an entity on it's own with it's own endpoint... but does contain an inline entity (stack). The inlined stack contains only a name and not guid/rest of stack entity.
-property | buildpack guid/whole entity | As per stack guid above
-property | `enable_ssh` | .. or similar property to determine if ssh'ing to an instance is allowed at the app level
+`include` | `space.organization` | [MEDIUM] | See [3] | See [2]
+`include` | `packages` | [MEDIUM] | See [4] | See [2]. Required to determine application state (state, updated_at)
+`include` | `processes` | [MEDIUM] | See [4] | See [2]. Required to determine app state (instances)
+`include` | `processes.stats` | [MEDIUM] | See [4] | See [2]. Required to determine app state (state).
+`include` | `current_droplet` | [MEDIUM] | See [4] | See [2]. Required to determine app state (state).
+`include` | `packages.builds` | [MEDIUM] | See [4] | See [2]. v3 currently has no link or relation. Required to determine app state (state).
+links | `features` | [MEDIUM] | Display current app settings (ssh enabled and revisions enabled). | See [2]. There's a top level ssh enabled flag, however this will show if at the app level ssh is enabled
+`include` | `features` | [MEDIUM] | See above | See above
+`include` | `droplets` | [LOW] | We don't currently use this, however displaying these in a list to the user would be beneficial. | See [2]
+`include` | `tasks` |  [LOW] | We don't currently use this, however displaying these in a list to the user would be beneficial. | See [2]
+~~property~~ | ~~stack guid/whole entity~~ | | | Stack name is included inline in an inlined `lifecycle` object. This placement seems like an odd pattern. It's not an entity on it's own with it's own endpoint... but does contain an inline entity (stack). The inlined stack contains only a name and not guid/rest of stack entity. From Greg `Stack is referenced by name rather than guid due to some windows usage patterns. The window's stacks are not associated with a rootfs like the linux ones are, so they can add new stacks without having to update the stacks of all windows apps.`.
+~~property~~ | ~~buildpack guid/whole entity~~ | | | As per stack guid above. From Greg `Similarly with buildpacks, having associations by name rather than guid allows for upgrades across stack versions (for example the recent upgrade from cflinuxfs2 -> cflinuxfs3) without having to re-associated apps with the new stack's version of the buildpack.`
+~~property~~ | ~~`enable_ssh`~~  | | | ~~.. or similar property to determine if ssh'ing to an instance is allowed at the app level~~. See `/v3/apps/:guid/ssh_enabled`
+
+[1] Display bound route count & list of routes
+
+[2] Display information quicker on the Application pages without having to make additional requests (either once for a single entity or
+multiple times in the case of 1:M, for example `route_mappings` would require multiple requests to `routes` to fetch each one)
+
+[3] Display bound service instance count & list of services, determine if a service is already bound when user is binding existing service to app, etc
+
+[4] Property/s used to determine application state without spamming endpoints ([app state](#Application-State)). 
+
 
 ### `/apps/{guid}/packages`
-Type | Name | Notes
---- | --- | ---
-`include` | `app`
-links | `builds`
-`include` | `builds`
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+`include` | `app` | | |
+links | `builds` | | |
+`include` | `builds` | | |
 
 ### `/apps/{guid}/processes`
-Type | Name | Notes
---- | --- | ---
-`include` | `stats` |
-`order_by` | `state` |
-`order_by` | `stats` `usage.time` | [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.cpu` | [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.mem` | [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.disk` | [See below for notes](#v3-Required-Features)
-filter | `state`
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+`include` | `stats` | | |
+`order_by` | `state` | | |
+`order_by` | `stats` `usage.time` | | | [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.cpu` | | | [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.mem` | | | [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.disk` | | | [See below for notes](#v3-Required-Features)
+filter | `state` | | |
 
 ### `/service_bindings` (functionality for /apps/{guid}/service_bindings only)
-Type | Name | Notes
---- | --- | ---
-links | `service_instance`
-`include` | `service_instance`
-links | `service_instance.service`
-`include` | `service_instance.service`
-links | `service_instance.service_plan`
-`include` | `service_instance.service_plan`
-links | `service_instance.tags`
-`include` | `service_instance.tags`
-`order_by` | service instance name
-`order_by` | service name
-`order_by` | service plan name
-filter | service instance name
-filter | service name
-filter | service plan name
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+links | `service_instance` | | |
+`include` | `service_instance` | | |
+links | `service_instance.service` | | |
+`include` | `service_instance.service` | | |
+links | `service_instance.service_plan` | | |
+`include` | `service_instance.service_plan` | | |
+links | `service_instance.tags` | | |
+`include` | `service_instance.tags` | | |
+`order_by` | service instance name | | |
+`order_by` | service name | | |
+`order_by` | service plan name | | |
+filter | service instance name | | |
+filter | service name | | |
+filter | service plan name | | |
 
 ### `/spaces`
-Type | Name | Notes
---- | --- | ---
-`order_by` | `created_at`
-`order_by` | `name`
-filter | name
-links | `service_instances`
-`include` | `service_instances`
-links | `space_quota_definition`
-`include` | `space_quota_definition`
-~`include`~ | ~`applications`~ | Previous requirement pre-scaling change
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+`order_by` | `created_at` | | |
+`order_by` | `name` | | |
+filter | name | | |
+links | `service_instances` | | |
+`include` | `service_instances` | | |
+links | `space_quota_definition` | | |
+`include` | `space_quota_definition` | | |
+~`include`~ | ~`applications`~ |  | | Previous requirement pre-scaling change
 
 ### `/spaces/${guid}`
-Type | Name | Notes
---- | --- | ---
-links | `organization`
-`include` | `organization`
-links | `domains` | `/domains` has no v3 equivalent
-`include` | `domains` | `/domains` has no v3 equivalent
-links | `routes` | `/routes` has no v3 equivalent
-`include` | `routes` | `/routes` has no v3 equivalent
-links | `routes.domain` | `/routes` has no v3 equivalent
-`include` | `routes.domain` | `/routes` has no v3 equivalent
-links | `routes.applications` | `/routes` has no v3 equivalent. We expect these relations to be 1-to-not-many
-`include` | `routes.applications` | `/routes` has no v3 equivalent. We expect these relations to be 1-to-not-many
-~`include`~ | ~`applications`~ | | Previous requirement pre-scaling change
-links | `service_instances`
-`include` | `service_instances` |
-links | `service_instances.service_bindings` |
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+links | `organization` | | |
+`include` | `organization` | | |
+links | `domains` ||  |  `/domains` has no v3 equivalent
+`include` | `domains` ||   | `/domains` has no v3 equivalent
+links | `routes` ||  |  `/routes` has no v3 equivalent
+`include` | `routes` ||  |  `/routes` has no v3 equivalent
+links | `routes.domain` ||  |  `/routes` has no v3 equivalent
+`include` | `routes.domain` ||  |  `/routes` has no v3 equivalent
+links | `routes.applications` ||  |  `/routes` has no v3 equivalent. We expect these relations to be 1-to-not-many
+`include` | `routes.applications` | | | `/routes` has no v3 equivalent. We expect these relations to be 1-to-not-many
+~`include`~ | ~`applications`~ | | | Previous requirement pre-scaling change
+links | `service_instances` | | |
+`include` | `service_instances`  | | |
+links | `service_instances.service_bindings`  | | |
 `include` | `service_instances.service_bindings`
-links | space quota | | space quota has no v3 equivalent
-`include` | space quota | | space quota has no v3 equivalent
-property | allow_ssh | | .. or similar property to determine if ssh'ing to an instance is allowed at the space level
-links | `space.developers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
-`include` | `space.developers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
-links | `space.managers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
-`include` | `space.managers` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
-links | `space.auditors` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
-`include` | `space.auditors` | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+links | space quota | | | space quota has no v3 equivalent
+`include` | space quota | | | space quota has no v3 equivalent
+property | allow_ssh | | | .. or similar property to determine if ssh'ing to an instance is allowed at the space level
+links | `space.developers` | | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+`include` | `space.developers` | | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+links | `space.managers` | | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+`include` | `space.managers` | | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+links | `space.auditors` | | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
+`include` | `space.auditors` | | | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
 
 
 ### `/spaces/${guid}/routes` (no `/routes` endpoint)
 
 
 ### `/service_instances` (functionality for /spaces/{guid}/service_instances only)
-Type | Name | Notes
---- | --- | ---
-`order_by` | `username`
-filter | space guid
-link | service bindings
-`include` | service bindings
-link | `service_instance.applications`
-`include` | `service_instance.applications`
-link | `service_plan`
-`include` | `service_plan` | `/service_plan` has no v3 equivalent
-link | `service`
-`include` | `service` | `/service` has no v3 equivalent
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+`order_by` | `username`| | | 
+filter | space guid| | | 
+link | service bindings| | | 
+`include` | service bindings| | | 
+link | `service_instance.applications`| | | 
+`include` | `service_instance.applications`| | | 
+link | `service_plan`| | | 
+`include` | `service_plan` | | | `/service_plan` has no v3 equivalent
+link | `service`| | | 
+`include` | `service` | | | `/service` has no v3 equivalent
 
 
 ## v3 Required Features
