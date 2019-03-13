@@ -3,17 +3,17 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { GetAppRoutes } from '../../../../../../../store/src/actions/application-service-routes.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListConfig } from '../../list.component.types';
-import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { GetAppRoutes } from '../../../../../../../store/src/actions/application-service-routes.actions';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 
 export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfigBase implements IListConfig<APIResource> {
 
@@ -23,12 +23,11 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
   protected dataSource: CfAppRoutesDataSource;
 
   /**
-   *Creates an instance of CfAppRoutesListConfigServiceBase.
-   * @param {boolean} [hasActions=false]
+   * Creates an instance of CfAppRoutesListConfigServiceBase.
+   * @param [hasActions=false]
    * Display the generic unmap/delete actions
-   * @param {boolean} [genericRouteState=true]
+   * @param [genericRouteState=true]
    * Use the generic route state which enables the route busy ux
-   * @memberof CfAppRoutesListConfigServiceBase
    */
   constructor(
     store: Store<AppState>,

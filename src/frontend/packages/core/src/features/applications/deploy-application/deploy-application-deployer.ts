@@ -3,21 +3,20 @@ import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription 
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-
-import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
+import { AppState } from '../../../../../store/src/app-state';
+import { organizationSchemaKey, spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { selectEntity } from '../../../../../store/src/selectors/api.selectors';
+import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
 import {
   AppData,
-  OverrideAppDetails,
+  DeployApplicationSource,
   DeployApplicationState,
+  OverrideAppDetails,
   SocketEventTypes,
-  DeployApplicationSource
 } from '../../../../../store/src/types/deploy-application.types';
 import { environment } from '../../../environments/environment.prod';
-import { AppState } from '../../../../../store/src/app-state';
-import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
-import { selectEntity } from '../../../../../store/src/selectors/api.selectors';
-import { organizationSchemaKey, spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 
 
 export interface DeployApplicationDeployerStatus {
@@ -82,8 +81,8 @@ export class DeployApplicationDeployer {
 
   updateStatus(error = false, errorMsg?: string) {
     this.status$.next({
-      error: error,
-      errorMsg: errorMsg,
+      error,
+      errorMsg,
       deploying: this.deploying
     });
   }

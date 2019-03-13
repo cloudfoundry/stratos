@@ -107,9 +107,9 @@ export class CfUserService {
   }
 
   private parseOrgRole(user: CfUser,
-    processedOrgs: Set<string>,
-    orgsToProcess: APIResource<IOrganization>[],
-    result: IUserPermissionInOrg[]) {
+                       processedOrgs: Set<string>,
+                       orgsToProcess: APIResource<IOrganization>[],
+                       result: IUserPermissionInOrg[]) {
     orgsToProcess.forEach(org => {
       const orgGuid = org.entity.guid;
       if (processedOrgs.has(orgGuid)) {
@@ -146,9 +146,9 @@ export class CfUserService {
   }
 
   private parseSpaceRole(user: CfUser,
-    processedSpaces: Set<string>,
-    spacesToProcess: APIResource<ISpace>[],
-    result: IUserPermissionInSpace[]) {
+                         processedSpaces: Set<string>,
+                         spacesToProcess: APIResource<ISpace>[],
+                         result: IUserPermissionInSpace[]) {
     spacesToProcess.forEach(space => {
       const spaceGuid = space.entity.guid;
       if (processedSpaces.has(spaceGuid)) {
@@ -170,7 +170,6 @@ export class CfUserService {
 
   /**
    * Get the space roles for a user
-   * @param user
    * @param spaces Only fetch roles for these specific spaces. If missing fetch roles for all spaces
    */
   getSpaceRolesFromUser(user: CfUser, spaces?: APIResource<ISpace>[]): IUserPermissionInSpace[] {
@@ -327,8 +326,6 @@ export class CfUserService {
   /**
    * Create a paginated action that will fetch a list of users. For admins attempt to fetch all users regardless of cf/org/space level if
    * there's not too many, otherwise fetch list with respect to cf/org/level
-   * @param isAdmin
-   * @param cfGuid
    * @param orgGuid Populated if user is at org level
    * @param spaceGuid Populated if user is at space level
    */
@@ -358,8 +355,6 @@ export class CfUserService {
 
   /**
    * Create a paginated action that will fetch a list of users with respect to the level (cf, org or space)
-   * @param isAdmin
-   * @param cfGuid
    * @param orgGuid Populated if user is at org level
    * @param spaceGuid Populated if user is at space level
    */

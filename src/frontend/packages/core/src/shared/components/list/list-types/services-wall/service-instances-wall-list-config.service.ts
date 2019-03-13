@@ -2,22 +2,21 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { defaultPaginationPageSizeOptionsCards, ListViewTypes } from '../../list.component.types';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 
 /**
  * Service instance list shown for `services` nav component
  *
  * @export
- * @class ServiceInstancesWallListConfigService
  * @extends {CfServiceInstancesListConfigBase}
  */
 @Injectable()
@@ -35,10 +34,10 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
 
   constructor(store: Store<AppState>,
-    datePipe: DatePipe,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    serviceActionHelperService: ServiceActionHelperService
+              datePipe: DatePipe,
+              private cfOrgSpaceService: CfOrgSpaceDataService,
+              currentUserPermissionsService: CurrentUserPermissionsService,
+              serviceActionHelperService: ServiceActionHelperService
   ) {
     super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
     const multiFilterConfigs = [

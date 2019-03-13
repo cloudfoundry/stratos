@@ -31,6 +31,6 @@ export const createPaginationCompleteWatcher = (store: Store<AppState>, action: 
     first(),
   );
 
-  export function initStore() {
+export function initStore() {
     setDefaultPaginationState({ ...defaultCfEntitiesState });
  }

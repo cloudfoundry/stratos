@@ -68,7 +68,7 @@ export class MetricsComponent {
         });
         return {
           entity: ep,
-          metadata: metadata
+          metadata
         };
       }
       ));

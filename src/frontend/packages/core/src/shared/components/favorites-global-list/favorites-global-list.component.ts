@@ -9,6 +9,7 @@ import {
   fetchingFavoritesSelector,
 } from '../../../../../store/src/selectors/favorite-groups.selectors';
 import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
+import { LoggerService } from '../../../core/logger.service';
 
 
 interface IFavoritesInfo {
@@ -24,10 +25,10 @@ interface IFavoritesInfo {
 export class FavoritesGlobalListComponent implements OnInit {
   public favInfo$: Observable<IFavoritesInfo>;
   public favoriteGroups$: Observable<IGroupedFavorites[]>;
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, private logger: LoggerService) { }
 
   ngOnInit() {
-    const manager = new UserFavoriteManager(this.store);
+    const manager = new UserFavoriteManager(this.store, this.logger);
     this.favoriteGroups$ = manager.hydrateAllFavorites().pipe(
       map(favs => this.sortFavoriteGroups(favs))
     );

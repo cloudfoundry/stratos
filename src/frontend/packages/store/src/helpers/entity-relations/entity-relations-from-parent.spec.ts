@@ -2,6 +2,8 @@ import { async, inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
+import { ISpace } from '../../../../core/src/core/cf-api.types';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
 import { GetAllOrganizationSpaces } from '../../actions/organization.actions';
 import { RequestTypes } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
@@ -11,8 +13,6 @@ import { WrapperRequestActionSuccess } from '../../types/request.types';
 import { organizationSchemaKey } from '../entity-factory';
 import { populatePaginationFromParent } from './entity-relations';
 import { EntityRelationSpecHelper } from './entity-relations.spec';
-import { getInitialTestStoreState, createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
-import { ISpace } from '../../../../core/src/core/cf-api.types';
 
 describe('Entity Relations - populate from parent', () => {
 
@@ -69,7 +69,7 @@ describe('Entity Relations - populate from parent', () => {
           expect(action.totalResults).toBe(spaces.length);
           expect(action.totalPages).toBe(1);
           expect(action.response.result).toEqual(spaceGuids);
-          expect(action.response.entities.space).toEqual(spaces.reduce(function (map, space) {
+          expect(action.response.entities.space).toEqual(spaces.reduce((map, space) => {
             map[space.metadata.guid] = space;
             return map;
           }, {}));

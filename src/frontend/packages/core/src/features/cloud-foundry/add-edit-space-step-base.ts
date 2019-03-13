@@ -59,7 +59,7 @@ export class AddEditSpaceStepBase {
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
       const nameValid = this.validate(formField.value);
-      return !nameValid ? { 'spaceNameTaken': { value: formField.value } } : null;
+      return !nameValid ? { spaceNameTaken: { value: formField.value } } : null;
     };
   }
 

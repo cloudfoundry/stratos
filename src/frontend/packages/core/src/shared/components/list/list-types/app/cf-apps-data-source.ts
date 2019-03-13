@@ -74,7 +74,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
-      transformEntities: transformEntities,
+      transformEntities,
       listConfig,
       destroy: () => this.subs.forEach(sub => sub.unsubscribe())
     });

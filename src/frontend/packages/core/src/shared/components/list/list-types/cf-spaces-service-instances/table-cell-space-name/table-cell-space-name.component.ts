@@ -29,6 +29,6 @@ export class TableCellSpaceNameComponent<T> extends TableCellCustom<APIResource<
       this.row.entity.space_guid,
       'summary'
     ];
-    this.breadcrumbs = { 'breadcrumbs': 'services-wall' };
+    this.breadcrumbs = { breadcrumbs: 'services-wall' };
   }
 }

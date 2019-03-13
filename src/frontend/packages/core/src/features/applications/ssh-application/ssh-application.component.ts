@@ -1,17 +1,16 @@
-
-import { never as observableNever, Observable, Subject, Subscription } from 'rxjs';
-
-import { catchError, first, map } from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { NEVER, Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
+import { catchError, first, map } from 'rxjs/operators';
 
+import { AppState } from '../../../../../store/src/app-state';
 import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';
 import { ApplicationService } from '../application.service';
-import { AppState } from '../../../../../store/src/app-state';
+
 
 @Component({
   selector: 'app-ssh-application',
@@ -72,8 +71,8 @@ export class SshApplicationComponent implements OnInit {
     );
 
     if (!cfGuid || !appGuid || !this.instanceId) {
-      this.messages = observableNever();
-      this.connectionStatus = observableNever();
+      this.messages = NEVER;
+      this.connectionStatus = NEVER;
     } else {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
