@@ -27,7 +27,6 @@ describe('Service Instances Wall', () => {
     e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
   });
