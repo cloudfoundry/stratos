@@ -12,17 +12,21 @@ import { ServicesWallPage } from './services-wall.po';
 describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
   const secretsHelper = new SecretsHelpers();
-  let servicesHelperE2E: ServicesHelperE2E;
-  let e2eSetup;
 
   // When there's only one CF connected no filter is shown, hence we can't test the filter.
   // Ideally we should test with both one and more than one cf's connected, however for the moment we're just testing without
   const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
 
+  const createServiceInstance = new CreateServiceInstance();
+  let createMarketplaceServiceInstance;
+  let e2eSetup;
+  const servicesWall = new ServicesWallPage();
+  let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
   });
@@ -30,6 +34,10 @@ describe('Service Instances Wall', () => {
   beforeEach(() => {
     servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
     servicesWallPage.waitForPage();
+    createServiceInstance.navigateTo();
+    createServiceInstance.waitForPage();
+    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
   });
 
   describe('', () => {
@@ -38,8 +46,7 @@ describe('Service Instances Wall', () => {
 
     it('- should create service instance all tests depend on', () => {
       // Create service instance
-      const createServiceInstance = new CreateServiceInstance();
-      servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+      servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
