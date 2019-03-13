@@ -167,7 +167,8 @@
             "tsConfig": ["src/tsconfig.json"],
             "tslintConfig": "src/frontend/packages/core/tslint.json",
             "files": [
-              "src/frontend/packages/core/src/**/*.ts"
+              "src/frontend/packages/core/src/**/*.ts",
+              "src/frontend/packages/core/src/custom/**/*.ts"
             ]
           }
         }

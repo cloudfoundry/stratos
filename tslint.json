@@ -5,6 +5,11 @@
     "rxjs-tslint"
   ],
   "rules": {
+    "align": [
+      true,
+      "parameters",
+      "statements"
+    ],
     "array-type": false,
     "arrow-parens": false,
     "deprecation": {

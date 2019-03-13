@@ -5,6 +5,11 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { AppState } from '../../../../../store/src/app-state';
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { EntityInfo } from '../../../../../store/src/types/api.types';
+import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
+import { IMetricApplication } from '../../../../../store/src/types/metric.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { MetricsConfig } from '../../../shared/components/metrics-chart/metrics-chart.component';
@@ -14,11 +19,6 @@ import {
   getMetricsChartConfigBuilder,
 } from '../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { EntityInfo } from '../../../../../store/src/types/api.types';
-import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../store/src/types/metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { HelmReleaseService } from '../services/helm-release.service';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
@@ -66,12 +66,12 @@ export class PodMetricsComponent {
     public entityServiceFactory: EntityServiceFactory,
     public kubeEndpointService: KubernetesEndpointService
   ) {
-    this.podName = activatedRoute.snapshot.params['podName'];
+    this.podName = activatedRoute.snapshot.params.podName;
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `${result.metric.container_name}`);
     const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
-    (result => !!result.metric.cpu ? `${result.metric.container_name}:${result.metric.cpu}` : `${result.metric.container_name}`);
+      (result => !!result.metric.cpu ? `${result.metric.container_name}:${result.metric.cpu}` : `${result.metric.container_name}`);
     const networkChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
       (result => `Network Interface: ${result.metric.interface}`);
     this.instanceMetricConfigs = [
