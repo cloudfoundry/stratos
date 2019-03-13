@@ -1,4 +1,4 @@
-import { ITileConfig, ITileData, ITileIconConfig } from './tile-selector.types';
+import { ITileConfig, ITileData, ITileGraphic } from './tile-selector.types';
 
 export class TileConfigManager {
   private nextIndex = 0;
@@ -9,13 +9,13 @@ export class TileConfigManager {
   }
   public getNextTileConfig<T extends ITileData = ITileData>(
     label: string,
-    iconConfig: ITileIconConfig,
+    graphic: ITileGraphic,
     data: T
   ) {
     return new ITileConfig<T>(
       this.getIndex(),
       label,
-      iconConfig,
+      graphic,
       data
     );
   }

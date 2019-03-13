@@ -45,11 +45,12 @@ export class CreateEndpointBaseStepComponent {
     this.tileSelectorConfig = endpointTypes.map(et => {
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
         et.label,
-        {
-          matIcon: et.icon,
-          matIconFont: et.iconFont
-        },
-        // { matIcon: 'service', matIconFont: 'stratos-icons' },
+        et.imagePath ? {
+          location: et.imagePath
+        } : {
+            matIcon: et.icon,
+            matIconFont: et.iconFont
+          },
         { type: et.value }
       );
     });
