@@ -11,11 +11,11 @@ import { entityFactory, cfUserSchemaKey } from '../../../../../../../store/src/h
 
 export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string,
-    store: Store<AppState>,
-    getAllUsersAction: PaginatedAction,
-    listConfig: IListConfig<APIResource>,
-    rowStateManager: TableRowStateManager,
-    destroy: () => void
+              store: Store<AppState>,
+              getAllUsersAction: PaginatedAction,
+              listConfig: IListConfig<APIResource>,
+              rowStateManager: TableRowStateManager,
+              destroy: () => void
   ) {
     super({
       store,

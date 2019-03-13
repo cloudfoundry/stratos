@@ -4,26 +4,26 @@ import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { GetServiceInstance } from '../../../../../../../../store/src/actions/service-instances.actions';
+import {
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+} from '../../../../../../../../store/src/helpers/entity-factory';
+import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { AppEnvVarsState } from '../../../../../../../../store/src/types/app-metadata.types';
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
-import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
-import {
-  entityFactory,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-} from '../../../../../../../../store/src/helpers/entity-factory';
-import { GetServiceInstance } from '../../../../../../../../store/src/actions/service-instances.actions';
-import { AppEnvVarsState } from '../../../../../../../../store/src/types/app-metadata.types';
-import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 
 
 
@@ -125,10 +125,10 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
           const serviceInstanceName = serviceInstance.entity.entity.name;
           const serviceLabel = (service as EntityInfo<APIResource<IService>>).entity.entity.label;
 
-          if (systemEnvJson['VCAP_SERVICES'][serviceLabel]) {
+          if (systemEnvJson.VCAP_SERVICES[serviceLabel]) {
             return {
               key: serviceInstanceName,
-              value: systemEnvJson['VCAP_SERVICES'][serviceLabel].find(s => s.name === serviceInstanceName)
+              value: systemEnvJson.VCAP_SERVICES[serviceLabel].find(s => s.name === serviceInstanceName)
             };
           }
           return null;
@@ -155,7 +155,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   edit = () => this.serviceActionHelperService.editServiceBinding(
     this.row.entity.service_instance_guid,
     this.appService.cfGuid,
-    { 'appId': this.appService.appGuid }
+    { appId: this.appService.appGuid }
   )
 
 }

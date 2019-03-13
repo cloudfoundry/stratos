@@ -27,7 +27,7 @@ export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVa
     this.dialog.open(EnvVarViewComponent, {
       data: {
         key: this.row.name,
-        value: value
+        value
       },
       disableClose: false
     });

@@ -27,7 +27,6 @@ import {
  * Service instance list shown for `service / service instances` component
  *
  * @export
- * @class ServicePlansListConfigService
  */
 @Injectable()
 export class ServicePlansListConfigService implements IListConfig<APIResource<IServicePlan>> {

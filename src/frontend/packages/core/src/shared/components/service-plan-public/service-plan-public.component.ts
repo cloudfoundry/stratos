@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBroker, IServicePlan } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import {
@@ -11,7 +12,6 @@ import {
 } from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { CardStatus } from '../../shared.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-service-plan-public',
@@ -22,13 +22,13 @@ export class ServicePlanPublicComponent {
 
   planAccessibility$: Observable<CardStatus>;
   planAccessibilityMessage$: Observable<string>;
-  private _servicePlan: APIResource<IServicePlan>;
+  private pServicePlan: APIResource<IServicePlan>;
   @Input()
   get servicePlan(): APIResource<IServicePlan> {
-    return this._servicePlan;
+    return this.pServicePlan;
   }
   set servicePlan(servicePlan: APIResource<IServicePlan>) {
-    this._servicePlan = servicePlan;
+    this.pServicePlan = servicePlan;
     if (!servicePlan) {
       return;
     }

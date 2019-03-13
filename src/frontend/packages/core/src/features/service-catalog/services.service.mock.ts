@@ -48,7 +48,7 @@ export class ServicesServiceMock {
       service_guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
       extra: null,
       unique_id: '826fcda4-80e1-11e7-aead-9372473ff564-plan-shared',
-      'public': true,
+      public: true,
       bindable: true,
       active: true,
       service_url: '/v2/services/f88cdd0e-82e1-429c-be8b-7ab43644c3f4',

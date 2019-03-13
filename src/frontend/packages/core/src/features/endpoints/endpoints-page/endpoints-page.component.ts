@@ -13,11 +13,11 @@ import {
   StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
-import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -56,8 +56,8 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   ngOnInit() {
     this.startEndpointHealthCheckPulse();
     const params = queryParamMap();
-    if (params['cnsi_guid']) {
-      const guid = params['cnsi_guid'];
+    if (params.cnsi_guid) {
+      const guid = params.cnsi_guid;
       window.history.pushState({}, '', '/endpoints');
       this.sub = this.endpointsService.endpoints$.pipe(
         delay(0),

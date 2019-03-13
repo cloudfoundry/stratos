@@ -5,7 +5,7 @@ import { ApiActionTypes, APIResponse } from '../../actions/request.actions';
 import { GET_SPACE, GetSpace } from '../../actions/space.actions';
 import { AppState } from '../../app-state';
 import { IRequestDataState } from '../../types/entity.types';
-import { CFStartAction, IRequestAction } from '../../types/request.types';
+import { ICFAction, IRequestAction } from '../../types/request.types';
 import { ValidateEntityResult } from './entity-relations.types';
 import { orgSpacePostProcess } from './processors/org-space-post-processor';
 
@@ -15,16 +15,17 @@ export function validationPostProcessor(
   apiResponse: APIResponse,
   allEntities: IRequestDataState): ValidateEntityResult {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
-    return apiAction(store, action as CFStartAction, apiResponse, allEntities);
+    return apiAction(store, action, apiResponse, allEntities);
   }
 }
 
 function apiAction(
   store: Store<AppState>,
-  action: CFStartAction,
+  action: IRequestAction,
   apiResponse: APIResponse,
   allEntities: IRequestDataState): ValidateEntityResult {
-  const actions = action['actions'] || [];
+  const cfAction = action as ICFAction;
+  const actions = cfAction.actions || [];
   switch (actions[0]) {
     case GET_ORGANIZATION:
       return orgSpacePostProcess(store, action as GetOrganization, apiResponse, allEntities);

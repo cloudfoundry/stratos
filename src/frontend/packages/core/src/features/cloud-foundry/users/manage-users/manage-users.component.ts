@@ -1,19 +1,22 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
+import {
+  UsersRolesClear,
+  UsersRolesExecuteChanges,
+  UsersRolesSetUsers,
+} from '../../../../../../store/src/actions/users-roles.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { selectUsersRoles, selectUsersRolesPicked } from '../../../../../../store/src/selectors/users-roles.selector';
+import { CfUser } from '../../../../../../store/src/types/user.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
-import { CfUser } from '../../../../../../store/src/types/user.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { selectUsersRolesPicked, selectUsersRoles } from '../../../../../../store/src/selectors/users-roles.selector';
-import { UsersRolesSetUsers, UsersRolesClear, UsersRolesExecuteChanges } from '../../../../../../store/src/actions/users-roles.actions';
-import { Observable, of as observableOf } from 'rxjs';
 
 
 @Component({
@@ -75,10 +78,6 @@ export class UsersRolesComponent implements OnDestroy {
 
   /**
    * Determine where the return url should be. This will only apply when user visits modal directly (otherwise stepper uses previous state)
-   *
-   * @param {ActiveRouteCfOrgSpace} activeRouteCfOrgSpace
-   * @returns {Observable<string>}
-   * @memberof UsersRolesComponent
    */
   createReturnUrl(activeRouteCfOrgSpace: ActiveRouteCfOrgSpace): string {
     let route = `/cloud-foundry/${activeRouteCfOrgSpace.cfGuid}`;

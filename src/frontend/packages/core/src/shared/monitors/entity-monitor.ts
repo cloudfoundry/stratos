@@ -1,19 +1,30 @@
-
 import { Store } from '@ngrx/store';
 import { denormalize, schema as normalizrSchema } from 'normalizr';
 import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  publishReplay,
+  refCount,
+  share,
+  startWith,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
+
 import { AppState } from '../../../../store/src/app-state';
 import {
   ActionState,
   getDefaultActionState,
   getDefaultRequestState,
   RequestInfoState,
-  UpdatingSection
+  UpdatingSection,
 } from '../../../../store/src/reducers/api-request-reducer/types';
-import { selectRequestInfo, getAPIRequestDataState, selectEntity } from '../../../../store/src/selectors/api.selectors';
+import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
 import { IRequestDataState } from '../../../../store/src/types/entity.types';
+
 
 export class EntityMonitor<T = any> {
   constructor(
@@ -68,12 +79,12 @@ export class EntityMonitor<T = any> {
    */
   public entityRequest$: Observable<RequestInfoState>;
   /**
-  * An observable that emits a boolean indicating if the entity is being fetched or not.
-  */
+   * An observable that emits a boolean indicating if the entity is being fetched or not.
+   */
   public isFetchingEntity$: Observable<boolean>;
   /**
-  * An observable that emits a boolean indicating if the entity is being deleted or not.
-  */
+   * An observable that emits a boolean indicating if the entity is being deleted or not.
+   */
   public isDeletingEntity$: Observable<boolean>;
 
   /**
@@ -122,7 +133,7 @@ export class EntityMonitor<T = any> {
    * @param interval - The polling interval in ms.
    * @param updateKey - The store updating key for the poll
    */
-  poll(interval = 10000, action: Function, getActionState: (request: RequestInfoState) => ActionState) {
+  poll(interval = 10000, action: () => void, getActionState: (request: RequestInfoState) => ActionState) {
     return observableInterval(interval)
       .pipe(
         tag('poll'),

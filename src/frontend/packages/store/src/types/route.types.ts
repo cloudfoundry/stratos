@@ -1,9 +1,12 @@
-import { APIResource } from './api.types';
 import { IApp } from '../../../core/src/core/cf-api.types';
+import { APIResource } from './api.types';
+
 
 export class Route {
   constructor(
+    /* tslint:disable-next-line:variable-name  */
     public domain_guid: string,
+    /* tslint:disable-next-line:variable-name  */
     public space_guid: string,
     public host?: string,
     public path?: string,
@@ -19,7 +22,9 @@ export interface RouteMode {
 
 
 export class CfRoute {
+  /* tslint:disable-next-line:variable-name  */
   domain_guid: string;
+  /* tslint:disable-next-line:variable-name  */
   space_guid: string;
   path?: string;
   host?: string;

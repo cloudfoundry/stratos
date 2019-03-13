@@ -1,5 +1,4 @@
 .cf-details {
-  align-items: start;
   display: flex;
   flex-direction: column;
 
@@ -13,9 +12,5 @@
     display: flex;
     justify-content: center;
     width: 32px;
-
-    // &--admin {
-    //   width: 19px;
-    // }
   }
 }

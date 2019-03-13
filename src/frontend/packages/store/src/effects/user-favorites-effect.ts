@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, switchMap } from 'rxjs/operators';
 
@@ -51,7 +51,8 @@ export class UserFavoritesEffect {
     this.userFavoriteManager = new UserFavoriteManager(this.store, this.logger);
   }
 
-  @Effect() saveFavorite = this.actions$.ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE).pipe(
+  @Effect() saveFavorite = this.actions$.pipe(
+    ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE),
     mergeMap(action => {
       return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite).pipe(
         mergeMap(newFavorite => {
@@ -63,7 +64,8 @@ export class UserFavoritesEffect {
     })
   );
 
-  @Effect({ dispatch: false }) getFavorite$ = this.actions$.ofType<GetUserFavoritesAction>(GetUserFavoritesAction.ACTION_TYPE).pipe(
+  @Effect({ dispatch: false }) getFavorite$ = this.actions$.pipe(
+    ofType<GetUserFavoritesAction>(GetUserFavoritesAction.ACTION_TYPE),
     switchMap((action: GetUserFavoritesAction) => {
       const apiAction = {
         entityKey: userFavoritesSchemaKey,
@@ -90,7 +92,8 @@ export class UserFavoritesEffect {
     })
   );
 
-  @Effect() toggleFavorite = this.actions$.ofType<ToggleUserFavoriteAction>(ToggleUserFavoriteAction.ACTION_TYPE).pipe(
+  @Effect() toggleFavorite = this.actions$.pipe(
+    ofType<ToggleUserFavoriteAction>(ToggleUserFavoriteAction.ACTION_TYPE),
     mergeMap(action =>
       this.userFavoriteManager.getIsFavoriteObservable(action.favorite).pipe(
         first(),
@@ -105,7 +108,8 @@ export class UserFavoritesEffect {
     )
   );
 
-  @Effect({ dispatch: false }) removeFavorite$ = this.actions$.ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE).pipe(
+  @Effect({ dispatch: false }) removeFavorite$ = this.actions$.pipe(
+    ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE),
     switchMap((action: RemoveUserFavoriteAction) => {
       const { guid } = action.favorite;
       this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.favorite));
@@ -114,7 +118,8 @@ export class UserFavoritesEffect {
     })
   );
 
-  @Effect() updateMetadata$ = this.actions$.ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE).pipe(
+  @Effect() updateMetadata$ = this.actions$.pipe(
+    ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE),
     mergeMap((action: UpdateUserFavoriteMetadataAction) => {
       return this.http.post<UserFavorite<IFavoriteMetadata>>(
         `${favoriteUrlPath}/${action.favorite.guid}/metadata`,

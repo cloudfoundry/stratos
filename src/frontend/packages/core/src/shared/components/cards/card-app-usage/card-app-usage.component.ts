@@ -25,8 +25,8 @@ export class CardAppUsageComponent implements OnInit {
       this.appService.applicationRunning$,
     ).pipe(
       map(([monitor, isRunning]) => ({
-        monitor: monitor,
-        isRunning: isRunning,
+        monitor,
+        isRunning,
         status: !isRunning ? 'tentative' : pathGet('status.usage', monitor)
       })),
       share()

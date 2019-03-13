@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
@@ -22,13 +22,15 @@ export class AppEffects {
     private store: Store<AppState>,
   ) { }
 
-  @Effect({ dispatch: false }) updateSummary$ = this.actions$.ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS).pipe(
+  @Effect({ dispatch: false }) updateSummary$ = this.actions$.pipe(
+    ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
     map(action => {
       this.store.dispatch(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
     }),
   );
 
-  @Effect({ dispatch: false }) clearCellMetrics$ = this.actions$.ofType<APISuccessOrFailedAction>(UPDATE_SUCCESS).pipe(
+  @Effect({ dispatch: false }) clearCellMetrics$ = this.actions$.pipe(
+    ofType<APISuccessOrFailedAction>(UPDATE_SUCCESS),
     map(action => {
       // User's can scale down instances and previous instance data is kept in store, when the user scales up again this stale data can
       // be incorrectly shown straight away. In order to work around this fetch the latest metrics again when scaling up

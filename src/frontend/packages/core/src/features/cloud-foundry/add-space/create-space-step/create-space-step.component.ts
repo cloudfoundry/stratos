@@ -4,14 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
+import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 
 
 @Component({
@@ -36,7 +36,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   ngOnInit() {
     this.createSpaceForm = new FormGroup({
-      spaceName: new FormControl('', [<any>Validators.required, this.spaceNameTakenValidator()]),
+      spaceName: new FormControl('', [Validators.required as any, this.spaceNameTakenValidator()]),
     });
   }
 
@@ -47,11 +47,11 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
-      !this.validateNameTaken(formField.value) ? { 'spaceNameTaken': { value: formField.value } } : null;
+      !this.validateNameTaken(formField.value) ? { spaceNameTaken: { value: formField.value } } : null;
   }
 
   submit: StepOnNextFunction = () => {
-    const spaceName = this.createSpaceForm.value['spaceName'];
+    const spaceName = this.createSpaceForm.value.spaceName;
     this.store.dispatch(new CreateSpace(spaceName, this.orgGuid, this.cfGuid));
 
     return this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(

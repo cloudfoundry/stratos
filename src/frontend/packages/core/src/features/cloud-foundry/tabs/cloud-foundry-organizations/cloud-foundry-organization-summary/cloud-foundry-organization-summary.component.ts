@@ -15,7 +15,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 
 })
 export class CloudFoundryOrganizationSummaryComponent {
-  appLink: Function;
+  appLink: () => void;
   detailsLoading$: Observable<boolean>;
 
   constructor(
