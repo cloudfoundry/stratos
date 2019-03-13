@@ -20,7 +20,7 @@ export interface EndpointTypeConfig {
   /**
    * Get the link to the home page for the given endpoint GUID
    */
-  homeLink?: (string) => string[];
+  homeLink?: (s) => string[];
   /**
    * Schema keys associated with this endpoint type (used when clearing pagination)
    */
@@ -54,7 +54,7 @@ export interface EndpointAuthValues { [key: string]: string; }
  * Optional interface that an Endpoint Auth Form Component can implement
  * if it needs to supply content in the request body when connecting an endppoint
  * e.g. if it needs to send a config file
- **/
+ */
 export interface IEndpointAuthComponent extends IAuthForm {
   // Allows auth type to override which values are sent to the backend when connecting
   getValues(values: EndpointAuthValues): EndpointAuthValues;  // Map of values to send
