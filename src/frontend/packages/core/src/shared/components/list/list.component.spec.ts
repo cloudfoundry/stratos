@@ -19,6 +19,7 @@ import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
+import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 
 class MockedNgZone {
   run = fn => fn();
