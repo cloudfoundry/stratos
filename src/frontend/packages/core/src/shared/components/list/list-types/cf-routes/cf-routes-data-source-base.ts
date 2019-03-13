@@ -69,7 +69,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
           return [];
         }
         return routes.map(route => {
-          if (isListCfRoute(route)) {
+          if (isListCfRoute(route.entity)) {
             return route as APIResource<ListCfRoute>;
           }
           const entity: ListCfRoute = {
