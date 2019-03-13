@@ -60,7 +60,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
-    if (ds.endpointType !== 'cf' && !this.cardMenu) {
+    if (ds && ds.endpointType !== 'cf' && !this.cardMenu) {
       this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
         label: endpointAction.label,
         action: () => endpointAction.action(this.pRow),

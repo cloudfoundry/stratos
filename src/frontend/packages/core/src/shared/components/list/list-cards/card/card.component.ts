@@ -70,7 +70,16 @@ export class CardComponent<T> {
     return this.pItem;
   }
 
-  @Input() dataSource = null as IListDataSource<T>;
+  private pDataSource: IListDataSource<T> = null as IListDataSource<T>;
+  @Input() set dataSource(ds: IListDataSource<T>) {
+    this.pDataSource = ds;
+    if (this.cardComponent) {
+      this.cardComponent.dataSource = this.pDataSource;
+    }
+  }
+  get dataSource() {
+    return this.pDataSource;
+  }
 
   @ViewChild('target', { read: ViewContainerRef }) target: ViewContainerRef;
 
