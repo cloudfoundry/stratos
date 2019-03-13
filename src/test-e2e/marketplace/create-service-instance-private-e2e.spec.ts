@@ -7,20 +7,25 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 
 describe('Create Service Instance of Private Service', () => {
   const createServiceInstance = new CreateServiceInstance();
+  let createMarketplaceServiceInstance;
+  let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
-      .connectAllEndpoints(ConsoleUserType.admin);
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
+
   });
 
   beforeEach(() => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
+    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
   });
 
   it('- should reach create service instance page', () => {
@@ -46,7 +51,7 @@ describe('Create Service Instance of Private Service', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.cancel();
+    createMarketplaceServiceInstance.stepper.cancel();
 
     servicesWall.waitForPage();
 
@@ -56,13 +61,13 @@ describe('Create Service Instance of Private Service', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service
     servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.privateService.name);
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
-    createServiceInstance.stepper.cancel();
+    createMarketplaceServiceInstance.stepper.cancel();
 
     servicesWall.waitForPage();
 
@@ -73,7 +78,7 @@ describe('Create Service Instance of Private Service', () => {
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace(e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidOrgName,
       e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidSpaceName);
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service
     servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.privateService.name, true);

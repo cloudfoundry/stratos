@@ -12,18 +12,27 @@ import { ServicesWallPage } from './services-wall.po';
 
 describe('Edit Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
-  const servicesWall = new ServicesWallPage();
+  let createMarketplaceServiceInstance;
+  let e2eSetup;
   let servicesHelperE2E: ServicesHelperE2E;
+  const servicesWall = new ServicesWallPage();
   const serviceNamePrefix = 'e';
   const serviceNamesToDelete = [];
+
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+  });
+
+  beforeEach(() => {
+    createServiceInstance.navigateTo();
+    createServiceInstance.waitForPage();
+    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
   });
 
   const timeout = 100000;
