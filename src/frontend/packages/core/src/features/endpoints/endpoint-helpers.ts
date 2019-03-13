@@ -1,19 +1,23 @@
+import { Type } from '@angular/core';
+import { Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Validators } from '@angular/forms';
-
-import { urlValidationExpression } from '../../core/utils.service';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { EndpointTypeConfig, EndpointAuthTypeConfig, EndpointType } from '../../core/extension/extension-types';
 
 import { AppState } from '../../../../store/src/app-state';
-import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { selectEntities } from '../../../../store/src/selectors/api.selectors';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { ExtensionService } from '../../core/extension/extension-service';
+import { EndpointAuthTypeConfig, EndpointType, EndpointTypeConfig } from '../../core/extension/extension-types';
+import { urlValidationExpression } from '../../core/utils.service';
+import {
+  CfEndpointDetailsComponent,
+} from '../../shared/components/list/list-types/endpoint/cf-endpoint-details/cf-endpoint-details.component';
+import { TableCellCustom } from '../../shared/components/list/list.types';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
-import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
+import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -37,12 +41,15 @@ const endpointTypes: EndpointTypeConfig[] = [
     urlValidation: urlValidationExpression,
     icon: 'cloud_foundry',
     iconFont: 'stratos-icons',
-    homeLink: (guid) => ['/cloud-foundry', guid]
+    imagePath: '/core/assets/endpoint-icons/cloudfoundry.png',
+    homeLink: (guid) => ['/cloud-foundry', guid],
+    listDetailsComponent: CfEndpointDetailsComponent
   },
   {
     value: 'metrics',
     label: 'Metrics',
     allowTokenSharing: true,
+    imagePath: '/core/assets/endpoint-icons/metrics.svg',
     homeLink: (guid) => ['/endpoints/metrics', guid]
   },
 ];
@@ -76,6 +83,8 @@ let endpointAuthTypes: EndpointAuthTypeConfig[] = [
 
 const endpointTypesMap = {};
 
+export const endpointListDetailsComponents: Type<TableCellCustom<EndpointModel>>[] = [CfEndpointDetailsComponent];
+
 export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
   epTypes.forEach(epType => {
     endpointTypes.push(epType);
@@ -88,6 +97,10 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
           endpointAuthType.types.push(endpointAuthType.value as EndpointType);
         }
       });
+    }
+
+    if (epType.listDetailsComponent) {
+      endpointListDetailsComponents.push(epType.listDetailsComponent);
     }
   });
 
@@ -112,6 +125,10 @@ export function getCanShareTokenForEndpointType(type: string): boolean {
 
 export function getEndpointTypes() {
   return endpointTypes;
+}
+
+export function getEndpointType(type: string): EndpointTypeConfig {
+  return getEndpointTypes().find(ep => ep.value === type);
 }
 
 export function getIconForEndpoint(type: string): EndpointIcon {

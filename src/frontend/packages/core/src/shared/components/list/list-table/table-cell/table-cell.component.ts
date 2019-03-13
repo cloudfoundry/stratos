@@ -13,6 +13,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import { endpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
   TableCellEventActionComponent,
@@ -84,8 +85,8 @@ import {
   CfSpacePermissionCellComponent,
 } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import {
-  TableCellEndpointIsAdminComponent,
-} from '../../list-types/endpoint/table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+  TableCellEndpointDetailsComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
 import {
   TableCellEndpointNameComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
@@ -160,11 +161,12 @@ export const listTableCells = [
   TableCellSpaceNameComponent,
   TableCellAppCfOrgSpaceHeaderComponent,
   TableCellAppCfOrgSpaceComponent,
-  TableCellEndpointIsAdminComponent,
   TableCellAServicePlanPublicComponent,
   TableCellAServicePlanPriceComponent,
   TableCellAServicePlanExtrasComponent,
-  TableCellFavoriteComponent
+  TableCellFavoriteComponent,
+  TableCellEndpointDetailsComponent,
+  ...endpointListDetailsComponents
 ];
 
 @Component({

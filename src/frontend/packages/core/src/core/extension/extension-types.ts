@@ -2,6 +2,9 @@ import { Type } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Schema, schema } from 'normalizr';
 
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { TableCellCustom } from '../../shared/components/list/list.types';
+
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
 
@@ -12,11 +15,20 @@ export interface EndpointTypeConfig {
   allowTokenSharing?: boolean;
   icon?: string;
   iconFont?: string;
+  imagePath?: string;
   authTypes?: string[];
-  // Get the link to the home page for the given endpoint GUID
-  homeLink?: (link: string) => string[];
-  // Schema keys associated with this endpoint type (used when clearing pagination)
+  /**
+   * Get the link to the home page for the given endpoint GUID
+   */
+  homeLink?: (s) => string[];
+  /**
+   * Schema keys associated with this endpoint type (used when clearing pagination)
+   */
   entitySchemaKeys?: string[];
+  /**
+   * Show custom content in the endpoints list
+   */
+  listDetailsComponent?: Type<TableCellCustom<EndpointModel>>;
 }
 
 export interface EndpointAuthTypeConfig {

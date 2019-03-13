@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ContentChild, OnInit, TemplateRef, ViewChild, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
 import { MetaCardKeyComponent } from '../meta-card-key/meta-card-key.component';
 import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.component';
@@ -28,9 +28,6 @@ export class MetaCardItemComponent implements OnInit {
   @ViewChild('content') content: TemplateRef<any>;
 
   @Input() customStyle = 'row';
-
-  constructor() {
-  }
 
   ngOnInit() {
     this.itemStyle = this.styles[this.customStyle];

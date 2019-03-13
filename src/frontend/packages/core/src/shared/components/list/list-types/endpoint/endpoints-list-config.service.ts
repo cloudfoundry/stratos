@@ -1,37 +1,21 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
-import { map, pairwise } from 'rxjs/operators';
 
-import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
-import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
-import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
-import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../store/src/types/user-favorites.types';
-import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import {
-  ConnectEndpointDialogComponent,
-} from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import {
-  getEndpointUsername,
-  getFullEndpointApiUrl,
-  getNameForEndpointType,
-} from '../../../../../features/endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl, getNameForEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
-import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
-import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
@@ -76,30 +60,6 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
     cellFlex: '2'
   },
   {
-    columnId: 'username',
-    headerCell: () => 'Username',
-    cellDefinition: {
-      getValue: getEndpointUsername
-    },
-    sort: {
-      type: 'sort',
-      orderKey: 'username',
-      field: 'user.name'
-    },
-    cellFlex: '2'
-  },
-  {
-    columnId: 'user-type',
-    headerCell: () => 'Admin',
-    cellComponent: TableCellEndpointIsAdminComponent,
-    sort: {
-      type: 'sort',
-      orderKey: 'user-type',
-      field: 'user.admin'
-    },
-    cellFlex: '2'
-  },
-  {
     columnId: 'address',
     headerCell: () => 'Address',
     cellDefinition: {
@@ -112,81 +72,19 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
     },
     cellFlex: '5'
   },
+  {
+    columnId: 'details',
+    headerCell: () => 'Details',
+    cellComponent: TableCellEndpointDetailsComponent,
+    cellFlex: '4'
+  }
 ];
 
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
-  private listActionDelete: IListAction<EndpointModel> = {
-    action: (item) => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Unregister Endpoint',
-        `Are you sure you want to unregister endpoint '${item.name}'?`,
-        'Unregister',
-        true
-      );
-      this.confirmDialog.open(confirmation, () => {
-        this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
-        this.handleDeleteAction(item, ([oldVal, newVal]) => {
-          this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
-        });
-      });
-    },
-    label: 'Unregister',
-    description: 'Remove the endpoint',
-    createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
-  };
+  cardComponent = EndpointCardComponent;
 
-  private listActionDisconnect: IListAction<EndpointModel> = {
-    action: (item) => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Disconnect Endpoint',
-        `Are you sure you want to disconnect endpoint '${item.name}'?`,
-        'Disconnect',
-        false
-      );
-      this.confirmDialog.open(confirmation, () => {
-        this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
-        this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-          this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
-          this.store.dispatch(new GetSystemInfo());
-        });
-      });
-    },
-    label: 'Disconnect',
-    description: ``, // Description depends on console user permission
-    createVisible: (row$: Observable<EndpointModel>) => combineLatest(
-      this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER),
-      row$
-    ).pipe(
-      map(([isAdmin, row]) => {
-        const isConnected = row.connectionStatus === 'connected';
-        return isConnected && (!row.system_shared_token || row.system_shared_token && isAdmin);
-      })
-    )
-  };
-
-  private listActionConnect: IListAction<EndpointModel> = {
-    action: (item) => {
-      this.dialog.open(ConnectEndpointDialogComponent, {
-        data: {
-          name: item.name,
-          guid: item.guid,
-          type: item.cnsi_type,
-          ssoAllowed: item.sso_allowed
-        },
-        disableClose: true
-      });
-    },
-    label: 'Connect',
-    description: '',
-    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
-  };
-
-  private singleActions = [
-    this.listActionDisconnect,
-    this.listActionConnect,
-    this.listActionDelete
-  ];
+  private singleActions: IListAction<EndpointModel>[];
 
   private globalActions = [];
 
@@ -195,7 +93,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   ];
   isLocal = true;
   dataSource: EndpointsDataSource;
-  viewType = ListViewTypes.TABLE_ONLY;
+  viewType = ListViewTypes.BOTH;
+  defaultView = 'cards' as ListView;
   text = {
     title: '',
     filter: 'Filter Endpoints'
@@ -203,42 +102,14 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   enableTextFilter = true;
   tableFixedRowHeight = true;
 
-  private handleUpdateAction(item, effectKey, handleChange) {
-    this.handleAction(selectUpdateInfo(
-      endpointStoreNames.type,
-      item.guid,
-      effectKey,
-    ), handleChange);
-  }
-
-  private handleDeleteAction(item, handleChange) {
-    this.handleAction(selectDeletionInfo(
-      endpointStoreNames.type,
-      item.guid,
-    ), handleChange);
-  }
-
-  private handleAction(storeSelect, handleChange) {
-    const disSub = this.store.select(storeSelect).pipe(
-      pairwise())
-      .subscribe(([oldVal, newVal]) => {
-        // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
-        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-          handleChange([oldVal, newVal]);
-          disSub.unsubscribe();
-        }
-      });
-  }
-
   constructor(
     private store: Store<AppState>,
-    private dialog: MatDialog,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService
+    endpointListHelper: EndpointListHelper
   ) {
+    this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
       (row: EndpointModel) => new UserFavoriteEndpoint(
         row.guid,

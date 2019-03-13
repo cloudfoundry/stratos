@@ -55,7 +55,7 @@ export class SnackBarComponent extends Component {
     const mesgElm = element(by.cssContainingText('.mat-simple-snackbar', message));
     return browser.wait(
       until.presenceOf(mesgElm),
-      5000,
+      10000,
       'Snackbar: "' + message + '" taking too long to appear in the DOM'
     ).then(() => browser.driver.sleep(100));
   }

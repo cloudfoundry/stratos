@@ -32,20 +32,18 @@ describe('Endpoints', () => {
         connectDialog.snackBar.waitForMessage('There are no connected endpoints, connect with your personal credentials to get started.');
         connectDialog.snackBar.safeClose();
 
-        // Get the row in the table for this endpoint
-        endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
-          endpointsPage.table.openRowActionMenuByRow(row);
-          const menu = new MenuComponent();
-          menu.waitUntilShown();
-          return menu.getItemMap().then(items => {
-            expect(items.connect).toBeDefined();
-            items.connect.click();
+
+        endpointsPage.cards.findCardByTitle(toConnect.name)
+          .then(card => card.openActionMenu())
+          .then(actionMenu => actionMenu.getItem('Connect'))
+          .then(connect => {
+            expect(connect).toBeDefined();
+            connect.click();
             connectDialog.waitUntilShown();
             // Connect dialog should be shown
             expect(connectDialog.isPresent()).toBeTruthy();
             expect(connectDialog.isDisplayed()).toBeTruthy();
           });
-        });
       });
 
       it('should have empty username and password fields in the form', () => {
@@ -71,28 +69,27 @@ describe('Endpoints', () => {
         expect(connectDialog.canConnect()).toBeTruthy();
       });
 
-      it('should update service instance data on register', () => {
+      it('should update endpoints data on register', () => {
         connectDialog.connect();
         // Wait for snackbar
         connectDialog.snackBar.waitForMessage(`Connected endpoint '${toConnect.name}'`);
-        endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
+        endpointsPage.cards.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });
         connectDialog.waitUntilNotShown();
-        endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
-          endpointsPage.table.openRowActionMenuByRow(row);
-          const menu = new MenuComponent();
-          menu.waitUntilShown('Endpoint Action Menu');
-          return menu.getItemMap().then(items => {
-            expect(items.connect).not.toBeDefined();
-            expect(items.disconnect).toBeDefined();
-            // Only admins can unregister
-            expect(items.unregister).not.toBeDefined();
-            return menu.close();
+        endpointsPage.cards.findCardByTitle(toConnect.name)
+          .then(card => card.openActionMenu())
+          .then(menu => {
+            menu.waitUntilShown('Endpoint Action Menu');
+            return menu.getItemMap().then(items => {
+              expect(items.connect).not.toBeDefined();
+              expect(items.disconnect).toBeDefined();
+              // Only admins can unregister
+              expect(items.unregister).not.toBeDefined();
+              return menu.close();
+            });
           });
-
-        });
       });
 
       // NOTE: We connected as the User not the Admin, so logging in as admin will NOT have the endpoint connected
@@ -126,8 +123,8 @@ describe('Endpoints', () => {
       it('should update row in table when disconnected', () => {
         endpointsPage.navigateTo();
 
-        endpointsPage.table.getRowForEndpoint(toDisconnect.name).then(row => {
-          endpointsPage.table.openRowActionMenuByRow(row);
+        endpointsPage.cards.findCardByTitle(toDisconnect.name).then(card => {
+          card.openActionMenu();
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {
@@ -140,7 +137,7 @@ describe('Endpoints', () => {
             const snackBar = new SnackBarComponent();
             snackBar.waitUntilShown();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
-            endpointsPage.table.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
+            endpointsPage.cards.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
               expect(data.connected).toBeFalsy();
             });
           });

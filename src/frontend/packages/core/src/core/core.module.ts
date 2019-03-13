@@ -10,6 +10,7 @@ import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { Customizations } from './customizations.types';
+import { DisableRouterLinkDirective } from './disable-router-link.directive';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
@@ -51,7 +52,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     ButtonBlurOnClickDirective,
     PageNotFoundComponentComponent,
     EntityFavoriteStarComponent,
-    RecentEntitiesComponent
+    RecentEntitiesComponent,
+    DisableRouterLinkDirective
   ],
   providers: [
     AuthGuardService,
@@ -78,7 +80,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     ButtonBlurOnClickDirective,
     PageNotFoundComponentComponent,
     EntityFavoriteStarComponent,
-    RecentEntitiesComponent
+    RecentEntitiesComponent,
+    DisableRouterLinkDirective
   ],
   entryComponents: [
     LogOutDialogComponent

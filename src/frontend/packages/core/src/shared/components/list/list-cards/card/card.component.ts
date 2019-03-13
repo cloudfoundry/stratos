@@ -7,7 +7,6 @@ import {
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { CardAppComponent } from '../../list-types/app/card/card-app.component';
 import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
-import { EndpointCardComponent } from '../../list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
 import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import {
   CfSecurityGroupsCardComponent,
@@ -15,6 +14,7 @@ import {
 import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
+import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import {
   ServiceInstanceCardComponent,
 } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
@@ -24,10 +24,8 @@ import {
 import { CardCell } from '../../list.types';
 import { CardMultiActionComponents } from '../card.component.types';
 
-
 export const listCards = [
   CardAppComponent,
-  EndpointCardComponent,
   CfOrgCardComponent,
   CfSpaceCardComponent,
   CfBuildpackCardComponent,
@@ -36,7 +34,8 @@ export const listCards = [
   CfServiceCardComponent,
   AppServiceBindingCardComponent,
   ServiceInstanceCardComponent,
-  UserProvidedServiceInstanceCardComponent
+  UserProvidedServiceInstanceCardComponent,
+  EndpointCardComponent
 ];
 type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
 @Component({

@@ -57,5 +57,5 @@ export const listTableComponents = [
   TableRowComponent,
   TableCellDefaultComponent,
   ...listTableCells,
-  TableCellStatusDirective,
+  TableCellStatusDirective
 ];

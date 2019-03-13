@@ -58,6 +58,7 @@ describe('ListComponent', () => {
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
           // Fun fact, NgZone will execute something on import which causes an undefined error
           { provide: MockedNgZone, useValue: new MockedNgZone() },
+          EndpointListHelper
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone) => {
@@ -119,7 +120,8 @@ describe('ListComponent', () => {
           { provide: ListConfig, useClass: EndpointsListConfigService },
           ApplicationStateService,
           PaginationMonitorFactory,
-          EntityMonitorFactory
+          EntityMonitorFactory,
+          EndpointListHelper
         ],
         imports: [
           CoreModule,
