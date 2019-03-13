@@ -44,6 +44,8 @@ type CNSIRecord struct {
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
 	SSOAllowed             bool     `json:"sso_allowed"`
+	SubType                string   `json:"sub_type"`
+	Metadata               string   `json:"metadata"`
 }
 
 // ConnectedEndpoint
@@ -58,6 +60,8 @@ type ConnectedEndpoint struct {
 	AuthorizationEndpoint  string   `json:"-"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	TokenMetadata          string   `json:"-"`
+	SubType                string   `json:"sub_type"`
+	EndpointMetadata       string   `json:"metadata"`
 }
 
 const (
