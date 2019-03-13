@@ -1,3 +1,4 @@
+import { first } from 'rxjs/operators';
 import { browser, by, element, Key, promise, protractor } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
@@ -209,7 +210,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getSearchInputField(): ElementFinder {
-    return this.getRightHeaderSection().all(by.css('.filter')).first().element(by.css('input'));
+    return this.getRightHeaderSection().first(by.css('#listSearchFilter')).element(by.css('input'));
   }
 
   setSearchText(text: string): promise.Promise<void> {

@@ -28,7 +28,7 @@ describe('Create Service Instance of Private Service', () => {
   });
 
   it('- should reach create service instance page', () => {
-    expect(createServiceInstance.isActivePage()).toBeTruthy();
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
 
   describe('Long running tests - ', () => {

@@ -66,7 +66,7 @@
             </mat-form-field>
           </div>
           <!-- Filter by text input -->
-          <div class="filter"
+          <div class="filter" id="listSearchFilter"
             [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel"
