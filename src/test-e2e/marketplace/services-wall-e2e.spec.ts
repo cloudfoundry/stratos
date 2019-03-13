@@ -8,6 +8,7 @@ import { SideNavMenuItem } from '../po/side-nav.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
@@ -132,7 +133,7 @@ describe('Service Instances Wall', () => {
         browser.getCurrentUrl().then(url => {
           expect(url.endsWith('edit')).toBeTruthy();
         });
-        const createServiceInstance = new CreateServiceInstance();
+        const createServiceInstance = new CreateMarketplaceServiceInstance();
         createServiceInstance.stepper.cancel();
         servicesWallPage.isActivePage();
       });
