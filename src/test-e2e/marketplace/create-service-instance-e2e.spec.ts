@@ -4,18 +4,19 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 describe('Create Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
-  let createMarketplaceServiceInstance;
+  let createMarketplaceServiceInstance: CreateMarketplaceServiceInstance;
   let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.user)
+
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
 
