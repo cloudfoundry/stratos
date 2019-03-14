@@ -1,11 +1,52 @@
-import { browser, by, element } from 'protractor';
+import { browser, by, element, promise } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 
 import { E2EEndpointConfig } from '../e2e.types';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
-import { ListComponent, ListTableComponent } from '../po/list.po';
+import { ListCardComponent, ListComponent, ListHeaderComponent, ListTableComponent } from '../po/list.po';
+import { MetaCard, MetaCardItem } from '../po/meta-card.po';
 import { Page } from '../po/page.po';
 import { SnackBarComponent } from '../po/snackbar.po';
+
+export class EndpointCards extends ListCardComponent {
+  constructor(locator: ElementFinder, header: ListHeaderComponent) {
+    super(locator, header);
+  }
+
+  findCardByTitle(title: string, subtitle = 'Cloud Foundry'): promise.Promise<MetaCard> {
+    return super.findCardByTitle(`${title}\n${subtitle}`);
+  }
+
+  getEndpointDataForEndpoint(title: string, subtitle = 'Cloud Foundry'): promise.Promise<EndpointMetadata> {
+    return this.findCardByTitle(title, subtitle).then(card => this.getEndpointData(card));
+  }
+
+  getEndpointData(card: MetaCard): promise.Promise<EndpointMetadata> {
+    const title = card.getTitle();
+    const metaCardItems = card.getMetaCardItemsAsText();
+    return promise.all<string | MetaCardItem<string>[]>([
+      title,
+      metaCardItems
+    ]).then(([t, m]: [string, MetaCardItem<string>[]]) => {
+      const details = m.find(item => item.key === 'Details');
+      // Protect against zero details
+      const safeDetails = details ? details.value : '';
+      // If we have details, assume they're cf details
+      const cleanDetails = safeDetails.split('\n');
+      const user = cleanDetails[1] ? cleanDetails[1].replace(' (Administrator)', '') : '';
+      const isAdmin = safeDetails.endsWith(' (Administrator)');
+      return {
+        name: t.substring(0, t.indexOf('\n')),
+        connected: m.find(item => item.key === 'Status').value === 'cloud_done',
+        type: t.substring(t.indexOf('\n') + 1, t.length),
+        user,
+        isAdmin,
+        url: m.find(item => item.key === 'Address').value,
+        // favorite: data[6]
+      } as EndpointMetadata;
+    });
+  }
+}
 
 export class EndpointsTable extends ListTableComponent {
 
@@ -13,7 +54,7 @@ export class EndpointsTable extends ListTableComponent {
     super(locator);
   }
 
-  getEndpointData(row: ElementFinder) {
+  getEndpointData(row: ElementFinder): promise.Promise<EndpointMetadata> {
     // Get all of the columns
     return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then((data: string[]) => {
       return {
@@ -65,6 +106,7 @@ export class EndpointsPage extends Page {
 
   // Endpoints table (as opposed to generic list.table)
   public table = new EndpointsTable(this.list.getComponent());
+  public cards = new EndpointCards(this.list.locator, this.list.header);
 
   constructor() {
     super('/endpoints');

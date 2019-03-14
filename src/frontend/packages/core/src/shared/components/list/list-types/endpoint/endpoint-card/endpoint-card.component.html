@@ -1,0 +1,29 @@
+<app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink" [ngClass]="{'no-link': !endpointLink}" [favorite]="favorite" [actionMenu]="cardMenu">
+  <app-meta-card-title>
+    <div class="endpoint-card__title">
+      <div *ngIf="endpointConfig.imagePath" class="endpoint-card__image">
+        <img class="endpoint-card__image--img" src="{{endpointConfig.imagePath}}" />
+      </div>
+      <div class="endpoint-card__title__text">
+        <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
+        <div class="endpoint-card__title__text--subtext">{{endpointConfig.label}}</div>
+      </div>
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Status</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-endpoint-status [row]="row"></app-table-cell-endpoint-status>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Address</app-meta-card-key>
+    <app-meta-card-value>{{ address }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="hasDetails">
+    <app-meta-card-key>Details</app-meta-card-key>
+    <app-meta-card-value>
+      <div #endpointDetails></div>
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

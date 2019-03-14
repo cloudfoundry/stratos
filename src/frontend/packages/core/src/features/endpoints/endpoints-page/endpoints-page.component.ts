@@ -17,6 +17,7 @@ import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -25,7 +26,7 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
   providers: [{
     provide: ListConfig,
     useClass: EndpointsListConfigService,
-  }]
+  }, EndpointListHelper]
 })
 
 export class EndpointsPageComponent implements OnDestroy, OnInit {

@@ -1,12 +1,13 @@
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../../store/src/app-state';
+
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { IListConfig } from '../../list.component.types';
-import { entityFactory, endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 
 function syncPaginationSection(
@@ -22,6 +23,7 @@ function syncPaginationSection(
 }
 export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<AppState>;
+  endpointType: string;
 
   constructor(
     store: Store<AppState>,
@@ -54,5 +56,6 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       listConfig,
       refresh: () => this.store.dispatch(new GetSystemInfo(false, action))
     });
+    this.endpointType = endpointType;
   }
 }

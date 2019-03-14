@@ -12,11 +12,20 @@ export interface EndpointTypeConfig {
   allowTokenSharing?: boolean;
   icon?: string;
   iconFont?: string;
+  imagePath?: string;
   authTypes?: string[];
-  // Get the link to the home page for the given endpoint GUID
-  homeLink?: (link: string) => string[];
-  // Schema keys associated with this endpoint type (used when clearing pagination)
+  /**
+   * Get the link to the home page for the given endpoint GUID
+   */
+  homeLink?: (s) => string[];
+  /**
+   * Schema keys associated with this endpoint type (used when clearing pagination)
+   */
   entitySchemaKeys?: string[];
+  /**
+   * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
+   */
+  listDetailsComponent?: any;
 }
 
 export interface EndpointAuthTypeConfig {
