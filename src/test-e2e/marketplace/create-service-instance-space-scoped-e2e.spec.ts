@@ -29,7 +29,7 @@ describe('Create Service Instance of Space Scoped Service', () => {
 
 
   it('- should reach create service instance page', () => {
-    expect(createServiceInstance.isActivePage()).toBeTruthy();
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
 
   describe('Long running tests - ', () => {

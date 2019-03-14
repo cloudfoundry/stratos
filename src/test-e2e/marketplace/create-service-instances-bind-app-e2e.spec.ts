@@ -30,7 +30,7 @@ describe('Create Service Instance with binding', () => {
   });
 
   it('- should reach create service instance page', () => {
-    expect(createServiceInstance.isActivePage()).toBeTruthy();
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
 
   describe('Long running tests - ', () => {
