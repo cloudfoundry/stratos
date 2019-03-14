@@ -4,7 +4,7 @@ import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { debounceTime, filter, withLatestFrom, map } from 'rxjs/operators';
+import { debounceTime, filter, withLatestFrom, map, startWith } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from '../../../../../store/src/actions/dashboard-actions';
@@ -155,7 +155,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
         if (item.requiresEndpointType) {
           item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
-          item.hidden = this.endpointsService.disablePersistenceFeatures$;
+          item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));
         }
         nav.push(item);
       }

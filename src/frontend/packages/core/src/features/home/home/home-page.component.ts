@@ -27,7 +27,10 @@ export class HomePageComponent {
       map(off => {
         if (off) {
           this.store.dispatch(new RouterNav({
-            path: ['applications']
+            path: ['applications'],
+            extras: {
+              replaceUrl: true
+            }
           }));
         }
       }),
