@@ -146,52 +146,61 @@ Then Stratos should either ..
 
 ## v3 Required `include`s, `order_by`, filters, missing properties
 
+A few UX examples have been provided, however it's quite hard to list all requirements without a deep dive into the code. Most requirements
+for existing endpoints come from the need to either ..
+
+- Fetch properties, properties of properties, etc inline instead of making additional request. For the application wall's application list
+this can be the difference between making 21 calls and then a subsequent 18 calls.. rather than receive everything with the apps request.
+- Switch from a local list (sorting and filtering done locally due to lack of support in v2) to a non-local list (pagination, sorting and
+filtering done via v3 api)
+
 ### `/apps`
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
 ~~`include`~~ | ~~`space`~~  |  | |
-`include` | Organization via `space.organization` | [HIGH] | Used in app wall's app list to filter local lists by org, org name on app wall app card, upfront fetch leading to quicker navigation to app summary | See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
+`include` | Organization via `space.organization` | [HIGH] | Used in application wall's application list to filter local lists by org, show org name on app wall app entries, upfront fetch leading to quicker navigation to app summary | See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
 `include` | `packages` | [HIGH] | See [1] | Required to determine application state (state, updated_at)
 `include` | `processes` | [HIGH] | See [1] | Required to determine application state (instances)
-`include` | `processes.stats` | [HIGH] | See [1] | Required to determine application state (state).
+`include` | Stats via `processes.stats` | [HIGH] | See [1] | Required to determine application state (state).
 `include` | `current_droplet` | [HIGH] | See [1] | Required to determine application state (state).
 `include` | Builds via `packages.builds` | [HIGH] | See [1] | v3 currently has no link or relation. Required to determine application state (state).
 `order_by` | sum of `processes` `instances` count [See below for notes](#v3-Required-Features) | [MEDIUM] | See [2] |
 `order_by` | sum of `processes` `disk_in_mb` count [See below for notes](#v3-Required-Features) | [MEDIUM]  | See [2] |
 `order_by` | sum of `processes` `memory_in_mb` count [See below for notes](#v3-Required-Features) | [MEDIUM]  | See [2] |
 filter | `processes` state | [MEDIUM] | User wishes to find all apps that have errored processes
-filter | organization name | [LOW] | See [3] | 
-filter | space name | [LOW] | See [3] | 
+filter | organization name | [MEDIUM] | See [3] |
+filter | space name | [MEDIUM] | See [3] |
 
 [1] Property/s used to determine application state without spamming requests ([app state](#Application-State)). On the application wall
 page we determine the state of up to 9 apps at a time. Returning this information in a single request, or during the initial request, will
-save apps * missing property's endpoints (packages, process, process stats, current_droplet, etc)
+save apps x missing property's endpoints (packages, process, process stats, current_droplet, etc). This could lead to 21 concurrent calls
+followed by another 18 (given the results of the first run).
 
-[2] Enables sorting by instance count in tables. See ([non-local lists](cf-api-v2-usage.md#Lists) for more information on local and non-local list sorting.
+[2] Enables sorting by instance count in tables. See ([non-local lists](cf-api-v2-usage.md#Lists) for more information on local and non-local list sorting).
 
-[3] Allows free text search, rather than manual selection of cf, org and then space. For instance a user types part of an org name in a
-special org drop down and only is presented with apps in matching orgs. This is a shortcut for the user having to scroll down a list in a
+[3] Allows free text search by org or space name in application wall (rather than manual selection of cf, org and then space). For instance a user types part of an org name in a
+special org drop down and is presented with list of apps in matching orgs. This is a short cut for the user having to scroll down a list in a
 drop down.
 
 ### `/app/${guid}`
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
-`include` | `route_mappings` | [MEDIUM] | See [1] | See [2]
-`include` | Route via `route_mappings.route` | [MEDIUM] | See [1] | See [2]. `/route` has no v3 equivalent
-`include` | Domain via `route_mappings.route.domain` | [MEDIUM] | See [1] | See [2]. `/domain` has no v3 equivalent. Required to display complete route url. From Greg `We are thinking about adding a fqdn on the routes object, which may be another way to achieve the same objective.`
-links | `service_bindings` | [MEDIUM] | See [3] | See [2]
-`include` | `service_bindings` | [MEDIUM] | See [3] | See [2]
+`include` | `route_mappings` | [HIGH] | See [1] | See [2]
+`include` | Route via `route_mappings.route` | [HIGH] | See [1] | See [2]. `/route` has no v3 equivalent
+`include` | Domain via `route_mappings.route.domain` | [HIGH] | See [1] | See [2]. `/domain` has no v3 equivalent. Required to display complete route url. From Greg `We are thinking about adding a fqdn on the routes object, which may be another way to achieve the same objective.`
+links | `service_bindings` | [HIGH] | See [3] | See [2]
+`include` | `service_bindings` | [HIGH] | See [3] | See [2]
 ~~`include`~~ | ~~`space`~~
-`include` | `space.organization` | [MEDIUM] | Display the name of the organisation | See [2]
-`include` | `packages` | [MEDIUM] | See [4] | See [2]. Required to determine application state (state, updated_at)
-`include` | `processes` | [MEDIUM] | See [4] | See [2]. Required to determine app state (instances)
-`include` | `processes.stats` | [MEDIUM] | See [4] | See [2]. Required to determine app state (state).
-`include` | `current_droplet` | [MEDIUM] | See [4] | See [2]. Required to determine app state (state).
-`include` | `packages.builds` | [MEDIUM] | See [4] | See [2]. v3 currently has no link or relation. Required to determine app state (state).
+`include` | `space.organization` | [HIGH] | Display the name of the organisation | See [2]
+`include` | `packages` | [HIGH] | See [4] | See [2]. Required to determine application state (state, updated_at)
+`include` | `processes` | [HIGH] | See [4] | See [2]. Required to determine app state (instances)
+`include` | `processes.stats` | [HIGH] | See [4] | See [2]. Required to determine app state (state).
+`include` | `current_droplet` | [HIGH] | See [4] | See [2]. Required to determine app state (state).
+`include` | `packages.builds` | [HIGH] | See [4] | See [2]. v3 currently has no link or relation. Required to determine app state (state).
 links | `features` | [MEDIUM] | Display current app settings (ssh enabled and revisions enabled). | See [2]. There's a top level ssh enabled flag, however this will show if at the app level ssh is enabled
 `include` | `features` | [MEDIUM] | See above | See above
-`include` | `droplets` | [LOW] | We don't currently use this, however displaying these in a list to the user would be beneficial. | See [2]
-`include` | `tasks` |  [LOW] | We don't currently use this, however displaying these in a list to the user would be beneficial. | See [2]
+`include` | `droplets` | [MEDIUM] | We don't currently use this, however displaying these in a list to the user would be beneficial. | See [2]
+`include` | `tasks` |  [MEDIUM] | We don't currently use this, however displaying these in a list to the user would be beneficial. | See [2]
 ~~property~~ | ~~stack guid/whole entity~~ | | | Stack name is included inline in an inlined `lifecycle` object. This placement seems like an odd pattern. It's not an entity on it's own with it's own endpoint... but does contain an inline entity (stack). The inlined stack contains only a name and not guid/rest of stack entity. From Greg `Stack is referenced by name rather than guid due to some windows usage patterns. The window's stacks are not associated with a rootfs like the linux ones are, so they can add new stacks without having to update the stacks of all windows apps.`.
 ~~property~~ | ~~buildpack guid/whole entity~~ | | | As per stack guid above. From Greg `Similarly with buildpacks, having associations by name rather than guid allows for upgrades across stack versions (for example the recent upgrade from cflinuxfs2 -> cflinuxfs3) without having to re-associated apps with the new stack's version of the buildpack.`
 ~~property~~ | ~~`enable_ssh`~~  | | | ~~.. or similar property to determine if ssh'ing to an instance is allowed at the app level~~. See `/v3/apps/:guid/ssh_enabled`
@@ -203,75 +212,74 @@ multiple times in the case of 1:M, for example `route_mappings` would require mu
 
 [3] Display bound service instance count & list of services, determine if a service is already bound when user is binding existing service to app, etc
 
-[4] Property/s used to determine application state without spamming endpoints ([app state](#Application-State)). 
+[4] Property/s used to determine application state without spamming endpoints ([app state](#Application-State)).
 
 
 ### `/apps/{guid}/packages`
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
-links | `builds` | [MEDIUM] | See explanation in `/app/${guid}` - `packages.builds` | See [1]
-`include` | `builds` | [MEDIUM] | See above | See above
-`include` | `app` | [LOW] | This might come in handy in the future, more specifically if we list all `packages` | 
+links | `builds` | [HIGH] | See explanation in `/app/${guid}` - `packages.builds` | See [1]
+`include` | `builds` | [HIGH] | See above | See above
+`include` | `app` | [LOW] | This might come in handy in the future, more specifically if we list all `packages` |
 
 [1] If at some point we've fetched an app without this property we will make a separate request to fetch it, so the same includes/links are required
 
 ### `/apps/{guid}/processes`
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
-`include` | `stats` | [MEDIUM] | See explanation in `/app/${guid}` - `processes.stats` | See [1]
-`order_by` | `state` | [LOW] | In the app summary page instances tab we show a list of instances and their properties. This needs updating, but it's easy to imagine that we will display a list of processes in v3 | See [3]
-`order_by` | `stats` `usage.time` | [LOW] | See above | [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.cpu` | [LOW] | See above | [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.mem` | [LOW] | See above | [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.disk` | [LOW] | See above | [See below for notes](#v3-Required-Features)
-filter | `state` | [LOW] | See above |
+`include` | `stats` | [HIGH] | See explanation in `/app/${guid}` - `processes.stats` | See [1]
+`order_by` | `state` | [MEDIUM] | In the app summary page instances tab we show a list of instances and their properties. This needs updating, but it's easy to imagine that we will display a list of processes in v3 | See [2]
+`order_by` | `stats` `usage.time` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.cpu` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.mem` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.disk` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
+filter | `state` | [MEDIUM] | See above |
 
 [1] If at some point we've fetched an app without this property we will make a separate request to fetch it, so the same includes/links are required
 
-[2] In the app summary page instances tab we show a list of instances and their properties. This needs updating, but it's easy to imagine that we will display a list of processes in v3 
-
-[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
+[2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
 
 ### `/service_bindings` (functionality for missing /apps/{guid}/service_bindings only)
+
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
-links | `service_instance` | [MEDIUM] | See [1] | See [2]
-`include` | `service_instance` | [MEDIUM] | See above | See above
-links | `service_instance.service` | [MEDIUM] | See [1] | See [2]
-`include` | `service_instance.service` | [MEDIUM] | See above | See above
-links | `service_instance.service_plan` | [MEDIUM] | See [1] | See [2]
-`include` | `service_instance.service_plan` | [MEDIUM] | See above | See above
-links | `service_instance.tags` | [MEDIUM] | See [1] | See [2]
-`include` | `service_instance.tags` | [MEDIUM] | See above | See above
-`order_by` | service instance name | [LOW] | See [1] | See [3]
-`order_by` | service name | [LOW] | See [1] | See [3]
-`order_by` | service plan name | [LOW] | See [1] | See [3]
-filter | service instance name | [LOW] | See [1] | See [3]
-filter | service name | [LOW] | See [1] | See [3]
-filter | service plan name | [LOW] | See [1] | See [3]
+links | `service_instance` | [HIGH] | See [1] | See [2]
+`include` | `service_instance` | [HIGH] | See above | See above
+links | `service_instance.service` | [HIGH] | See above | See above
+`include` | `service_instance.service` | [HIGH] | See above | See above
+links | `service_instance.service_plan` | [HIGH] | See above | See above
+`include` | `service_instance.service_plan` | [HIGH] | See above | See above
+links | `service_instance.tags` | [HIGH] | See above | See above
+`include` | `service_instance.tags` | [HIGH] | See above | See above
+`order_by` | service instance name | [MEDIUM] | See [1] | See [3]
+`order_by` | service name | [MEDIUM] | See above | See above
+`order_by` | service plan name | [MEDIUM] | See above | See above
+filter | service instance name | [MEDIUM] | See above | See above
+filter | service name | [MEDIUM] | See above | See above
+filter | service plan name | [MEDIUM] | See above | See above
 
 [1] Display a list of service instances associated with a specific application
 
 [2] Fetching this information inline avoids making lots of additional requests
 
-[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
+[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
 
 
 ### `/spaces`
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
-`order_by` | `created_at` | [LOW] | See [1] | See [2]
-`order_by` | `name` | [LOW] | See [1] | See [2]
-filter | name | [LOW] | See [1]. Pre-check to ensure a space name is not taken before attempting to create. | See [2]
 links | `service_instances` | [LOW] | Show the count of service instances in the space | In the medium to long term we will determine this another way
 `include` | `service_instances` | [LOW] | See above | See above
-links | `space_quota_definition` | [MEDIUM] | Display the space quota information information per space | See [3]
-`include` | `space_quota_definition` | [MEDIUM] | See above | See above
+links | `space_quota_definition` | [HIGH] | Display the space quota information information per space | See [3]
+`include` | `space_quota_definition` | [HIGH] | See above | See above
 ~~`include`~~ | ~~`applications`~~ |  | | Previous requirement pre-scaling change
+`order_by` | `created_at` | [MEDIUM] | See [1] | See [2]
+`order_by` | `name` | [MEDIUM] | See [1] | See [2]
+filter | name | [MEDIUM] | See [1]. Pre-check to ensure a space name is not taken before attempting to create. | See [2]
 
 [1] Display a list of spaces in an organisation
 
-[2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
+[2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
 
 [3] Avoids making additional requests. Particularly important when viewing multiple spaces at the same time.
 
@@ -279,10 +287,10 @@ links | `space_quota_definition` | [MEDIUM] | Display the space quota informatio
 ### `/spaces/${guid}`
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
-links | `organization` | [MEDIUM] | Basic location information, display name and other information | Avoids making additional requests 
-`include` | `organization` | [MEDIUM] | See above | See above
-links | `domains` | [LOW] | Efficiency request, better to get these here than separately | `/domains` has no v3 equivalent
-`include` | `domains` | [LOW] | See above  | See above
+links | `organization` | [HIGH] | Basic location information, display name and other information | Avoids making additional requests
+`include` | `organization` | [HIGH] | See above | See above
+links | `domains` | [MEDIUM] | Efficiency request, better to get these here than separately | `/domains` has no v3 equivalent
+`include` | `domains` | [MEDIUM] | See above  | See above
 links | `routes` | [LOW] | Display the number of routes in this organisation | `/routes` has no v3 equivalent. See [1]
 `include` | `routes` | [LOW] | See above | See above
 ~~links~~ | ~~`routes.domain`~~ | | | Depending on the list of routes is bad due to scaling. We're removing this functionality
@@ -296,7 +304,7 @@ links | `service_instances` | [LOW] | Display the number of service instances in
 ~~`include~~` | ~~`service_instances.service_bindings`~~
 links | space quota | [HIGH] | Display quota information, when possible how close user is to various quotas, etc | space quota has no v3 equivalent
 `include` | space quota | [HIGH] | See above | See above
-property | allow_ssh | [HIGH] | Display value to user. Important from an admin sense | 
+property | allow_ssh | [HIGH] | Display value to user. Important from an admin sense |
 links | `space.developers` | [HIGH] | See [2] | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
 `include` | `space.developers` | [HIGH] | See [2] | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
 links | `space.managers` | [HIGH] | See [2] | we might be able to fetch this via new users endpoints described in https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.n1xhc33y2wyj
@@ -311,13 +319,13 @@ links | `space.auditors` | [HIGH] | See [2] | we might be able to fetch this via
 ### `/routes` (functionality for `/spaces/${guid}/routes only)
 
 > Note - There doesn't seem to be a way to list routes in a space. This is separate to the concept of listing them inline in a space (with
-some overlap though). This endpoint would be used to fetch a list of routes for a specific space and display them to the user. 
+some overlap though). This endpoint would be used to fetch a list of routes for a specific space and display them to the user.
 > The `/v3/route_mappings` endpoint provides a way to search for routes by app or route but not by space.
 
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
 filter | space guid | [HIGH] | Display a list of routes that are in a space
-links | `domain` | [LOW] | Display the url of the route | Not required if the fqdn is returned in the base rout
+links | `domain` | [LOW] | Display the url of the route | Not required if the fqdn is returned in the base route
 `include` | `domain` | [LOW] | See above | See above
 links | `applications` | [HIGH] | Display a list of the apps that are bound to the route | Avoids making a request to `/v3/route_mappings` for each route (could be a massive amount). We expect these relations to be 1-to-not-many
 `include` | `applications` | [HIGH] | See above | See above
@@ -331,30 +339,26 @@ links | `applications` | [HIGH] | Display a list of the apps that are bound to t
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
 link | `service_instance.applications`| [HIGH] | Display bound applications in a list of service instances | Not sure if this will be implemented the same as routes and route mappings, but would need similar functionality to fetch list inline 
-`include` | `service_instance.applications`| [HIGH] | See above | See above 
+`include` | `service_instance.applications`| [HIGH] | See above | See above
 link | `service_plan`| [HIGH] | Display service plan information per SI in a list of SI | See [2]. `/service_plan` has no v3 equivalent
 `include` | `service_plan` | [HIGH] | See above | See above
 link | `service`| [HIGH] | Display service information per SI in a list of SI | See [2] `/service` has no v3 equivalent
-`include` | `service` | | | 
-filter | space guid | [LOW] | | See [3]
-filter | org guid | [LOW] | | See [3]
-filter | `name` | [LOW] | | See [3]
+`include` | `service` | [HIGH] | See above | See above
+filter | space guid | [MEDIUM] | | See [3]
+filter | org guid | [MEDIUM] | | See [3]
+filter | `name` | [MEDIUM] | | See [3]
 `include` | space | [HIGH] | When showing all SI in a CF fetch inlined space to space name and allow local filtering by space and org
 
 [1] Display list of service instances in a space
 
 [2] Avoids making additional requests per service instance
 
-[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
+[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
 
 ### `/user_provided_service_instances`
-We've recently integrated user provided service instances into Stratos. There doesn't seem to be any current support for this in v3
 
-// TODO: RC
-Themes
-- Haven't listed all uses, just the most prominent. Otherwise would go on to describe the whole application
-- switch from local to non-local lists
-- fetching properties that might not have initially been fetched. Showing extra detail in application summary page that's not needed when listing applications 
+We've recently integrated user provided service instances into Stratos. There doesn't seem to be any current support for this in v3. We'd
+need similar functionality to `/service_instances` (where there's cross over).
 
 ## v3 Required Features
 
