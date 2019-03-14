@@ -149,8 +149,6 @@ export interface IOptionalAction<T> extends IBaseListAction<T> {
 export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
-   *
-   * @memberof IMultiListAction
    */
   action: (items: T[]) => boolean | Observable<ActionState>;
 }

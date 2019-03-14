@@ -1,7 +1,6 @@
-import { IRoute } from './cf-api.types';
 import { APIResource } from '../../../store/src/types/api.types';
-import { IServiceBinding, IService } from './cf-api-svc.types';
 import { CfUser } from '../../../store/src/types/user.types';
+import { IService, IServiceBinding } from './cf-api-svc.types';
 
 export interface IRoute {
   host: string;
@@ -138,7 +137,7 @@ export interface IDockercredentials {
 }
 
 export interface IEnvironmentjson {
-  [any: string]: string;
+  [key: string]: string;
 }
 
 export interface IDeveloper {

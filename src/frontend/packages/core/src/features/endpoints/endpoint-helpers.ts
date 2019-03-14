@@ -1,19 +1,19 @@
+import { Type } from '@angular/core';
+import { Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Validators } from '@angular/forms';
-
-import { urlValidationExpression } from '../../core/utils.service';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { EndpointTypeConfig, EndpointAuthTypeConfig, EndpointType } from '../../core/extension/extension-types';
 
 import { AppState } from '../../../../store/src/app-state';
-import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { selectEntities } from '../../../../store/src/selectors/api.selectors';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { ExtensionService } from '../../core/extension/extension-service';
+import { EndpointAuthTypeConfig, EndpointType, EndpointTypeConfig } from '../../core/extension/extension-types';
+import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
-import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
+import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -32,17 +32,10 @@ export interface EndpointIcon {
 
 const endpointTypes: EndpointTypeConfig[] = [
   {
-    value: 'cf',
-    label: 'Cloud Foundry',
-    urlValidation: urlValidationExpression,
-    icon: 'cloud_foundry',
-    iconFont: 'stratos-icons',
-    homeLink: (guid) => ['/cloud-foundry', guid]
-  },
-  {
     value: 'metrics',
     label: 'Metrics',
     allowTokenSharing: true,
+    imagePath: '/core/assets/endpoint-icons/metrics.svg',
     homeLink: (guid) => ['/endpoints/metrics', guid]
   },
 ];
@@ -75,6 +68,9 @@ let endpointAuthTypes: EndpointAuthTypeConfig[] = [
 ];
 
 const endpointTypesMap = {};
+
+// Any initial endpointTypes listDetailsComponent should be added here
+export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponent>[] = [];
 
 export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
   epTypes.forEach(epType => {
@@ -112,6 +108,10 @@ export function getCanShareTokenForEndpointType(type: string): boolean {
 
 export function getEndpointTypes() {
   return endpointTypes;
+}
+
+export function getEndpointType(type: string): EndpointTypeConfig {
+  return getEndpointTypes().find(ep => ep.value === type);
 }
 
 export function getIconForEndpoint(type: string): EndpointIcon {

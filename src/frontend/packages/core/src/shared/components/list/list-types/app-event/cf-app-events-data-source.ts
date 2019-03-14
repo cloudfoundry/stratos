@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
+import { GetAllAppEvents } from '../../../../../../../store/src/actions/app-event.actions';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { GetAllAppEvents } from '../../../../../../../store/src/actions/app-event.actions';
-import { entityFactory, appEventSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { appEventSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 
 export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 
@@ -33,11 +33,11 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 
   constructor(
     store: Store<AppState>,
-    _cfGuid: string,
-    _appGuid: string,
+    cfGuid: string,
+    appGuid: string,
   ) {
-    const paginationKey = `app-events:${_cfGuid}${_appGuid}`;
-    const action = new GetAllAppEvents(paginationKey, _appGuid, _cfGuid);
+    const paginationKey = `app-events:${cfGuid}${appGuid}`;
+    const action = new GetAllAppEvents(paginationKey, appGuid, cfGuid);
 
     super(
       {

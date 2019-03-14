@@ -19,7 +19,7 @@ export class RouterNav implements Action, LoggerAction {
     path: string[] | string;
     query?: RouterQueryParams;
     extras?: NavigationExtras;
-  }, public redirect?: RouterRedirect) {
+  },          public redirect?: RouterRedirect) {
     const path = payload.path as string[];
     const pathString = payload.path as string;
     this.message = path.join ? path.join('/') : pathString;

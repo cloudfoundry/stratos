@@ -1,26 +1,23 @@
-
-import { first, map } from 'rxjs/operators';
-
-
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, CanActivate, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { AppState } from '../../../store/src/app-state';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 
-export function queryParamMap() {
+export function queryParamMap(): { [key: string]: string } {
   const paramMap = {};
   const query = window.location.search.substring(1);
   if (query.length === 0) {
     return paramMap;
   }
   const vars = query.split('&');
-  for (let i = 0; i < vars.length; i++) {
-    const pair = vars[i].split('=');
-    paramMap[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+  for (const pair of vars) {
+    const vals = pair.split('=');
+    paramMap[decodeURIComponent(vals[0])] = decodeURIComponent(vals[1]);
   }
   return paramMap;
 }

@@ -21,7 +21,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   public valid$: Observable<boolean>;
 
   constructor(store: Store<AppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
+              public cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
     this.valid$ = this.deployer.fileTransferStatus$.pipe(

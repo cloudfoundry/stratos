@@ -1,6 +1,7 @@
-import { LoggerService } from '../../../core/logger.service';
-import { Component, OnInit, Input, Inject, ElementRef, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
+
+import { LoggerService } from '../../../core/logger.service';
 
 @Component({
   selector: 'app-code-block',
@@ -8,30 +9,30 @@ import { DOCUMENT } from '@angular/common';
   styleUrls: ['./code-block.component.scss']
 })
 export class CodeBlockComponent implements OnInit {
-  private _document: Document;
+  private document: Document;
 
   constructor(@Inject(DOCUMENT) document: Document, private logService: LoggerService) {
-    this._document = document;
+    this.document = document;
   }
 
   @Input() hideCopy: boolean;
   @Input() codeBlockStyle: string;
-  _canCopy = false;
-  _copySuccessfull = false;
-  _copySuccessWait = false;
+  canCopy = false;
+  copySuccessful = false;
+  copySuccessWait = false;
 
   @ViewChild('preBlock') code: ElementRef;
 
 
   ngOnInit() {
     try {
-      this._canCopy = this._document.queryCommandSupported('copy');
+      this.canCopy = this.document.queryCommandSupported('copy');
     } finally { }
   }
 
 
   copyToClipboard() {
-    const textArea = this._document.createElement('textarea');
+    const textArea = this.document.createElement('textarea');
 
     textArea.style.position = 'fixed';
     textArea.style.top = '0';
@@ -51,14 +52,14 @@ export class CodeBlockComponent implements OnInit {
     textArea.select();
 
     try {
-      this._copySuccessfull = document.execCommand('copy');
-      this._copySuccessWait = true;
-      setTimeout(() => this._copySuccessWait = false, 2000);
+      this.copySuccessful = document.execCommand('copy');
+      this.copySuccessWait = true;
+      setTimeout(() => this.copySuccessWait = false, 2000);
     } catch (err) {
       this.logService.warn('Failed to copy to clipboard');
     }
 
-    this._document.body.removeChild(textArea);
+    this.document.body.removeChild(textArea);
   }
 
 }

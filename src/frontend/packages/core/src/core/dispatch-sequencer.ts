@@ -1,6 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { from, Observable, of as observableOf } from 'rxjs';
 import { bufferTime, concatMap, delay, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
+
 import { AppState } from '../../../store/src/app-state';
 
 
@@ -16,20 +17,18 @@ export class DispatchSequencer {
   } = {};
 
   /**
-   * @param {Store<AppState>} store
-   * @param {number} [batchSize=5]
+   * @param [batchSize=5]
    * Multiple requests will be split up into batches of this size
-   * @param {number} [batchDelayInMs=5000]
+   * @param [batchDelayInMs=5000]
    * Delay to apply between each batch
-   * @param {number} [debounceInMs=5000]
+   * @param [debounceInMs=5000]
    * Ignore repeat request made within this time period
-   * @memberof DispatchSequencer
    */
   constructor(private store: Store<AppState>, private batchSize = 5, private batchDelayInMs = 5000, private debounceInMs = 5000) { }
 
   /**
-  * Filter out recently dispatched actions
-  */
+   * Filter out recently dispatched actions
+   */
   private filter(actions: DispatchSequencerAction[]): DispatchSequencerAction[] {
     if (this.debounceInMs) {
       const now = new Date().getTime();
@@ -49,9 +48,9 @@ export class DispatchSequencer {
   }
 
   /**
-  * Dispatch actions in groups of `batchSize` such that there are no duplicate actions dispatched within `debounceInMs`. Each batch dispatch
-  * will be separated by `batchDelayInMs`.
-  */
+   * Dispatch actions in groups of `batchSize` such that there are no duplicate actions dispatched within `debounceInMs`. Each batch
+   * dispatch will be separated by `batchDelayInMs`.
+   */
   public sequence(obs: Observable<DispatchSequencerAction[]>): Observable<any> {
     return obs.pipe(switchMap(actions => this.innerSequence(actions)));
   }

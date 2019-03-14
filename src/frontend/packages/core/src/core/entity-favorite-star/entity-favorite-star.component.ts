@@ -8,8 +8,9 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/use
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { favoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { UserFavoriteManager } from '../user-favorite-manager';
 import { EndpointsService } from '../endpoints.service';
+import { LoggerService } from '../logger.service';
+import { UserFavoriteManager } from '../user-favorite-manager';
 
 @Component({
   selector: 'app-entity-favorite-star',
@@ -24,9 +25,9 @@ export class EntityFavoriteStarComponent {
     this.confirmationDialogConfig.message =
       `Are you sure you would you like to unfavorite this ${name ? name.toLocaleLowerCase() : 'favorite'}?`;
     this.isFavorite$ = this.userFavoriteManager.getIsFavoriteObservable(favorite);
-    this._favorite = favorite;
+    this.pFavourite = favorite;
   }
-  private _favorite: UserFavorite<IFavoriteMetadata>;
+  private pFavourite: UserFavorite<IFavoriteMetadata>;
 
   @Input()
   private confirmRemoval = false;
@@ -37,8 +38,12 @@ export class EntityFavoriteStarComponent {
 
   private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);
 
-  constructor(store: Store<AppState>, private confirmDialog: ConfirmationDialogService, public endpointsService: EndpointsService) {
-    this.userFavoriteManager = new UserFavoriteManager(store);
+  constructor(
+    store: Store<AppState>,
+    private confirmDialog: ConfirmationDialogService,
+    logger: LoggerService,
+    public endpointsService: EndpointsService) {
+    this.userFavoriteManager = new UserFavoriteManager(store, logger);
   }
 
   public toggleFavorite(event: Event) {
@@ -49,18 +54,18 @@ export class EntityFavoriteStarComponent {
         first(),
         tap(is => {
           if (is) {
-            this.confirmDialog.open(this.confirmationDialogConfig, this._toggleFavorite);
+            this.confirmDialog.open(this.confirmationDialogConfig, this.pToggleFavorite);
           } else {
-            this._toggleFavorite();
+            this.pToggleFavorite();
           }
         })
       ).subscribe();
     } else {
-      this._toggleFavorite();
+      this.pToggleFavorite();
     }
   }
 
-  private _toggleFavorite = () => {
-    this.userFavoriteManager.toggleFavorite(this._favorite);
+  private pToggleFavorite = (res?: any) => {
+    this.userFavoriteManager.toggleFavorite(this.pFavourite);
   }
 }

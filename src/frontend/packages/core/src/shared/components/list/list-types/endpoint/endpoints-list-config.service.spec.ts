@@ -1,22 +1,22 @@
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
-import { StoreModule } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
+import { inject, TestBed } from '@angular/core/testing';
+
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
-import { TestBed, inject } from '@angular/core/testing';
-
+import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsListConfigService } from './endpoints-list-config.service';
 
 describe('EndpointsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EndpointsListConfigService],
+      providers: [EndpointsListConfigService, EndpointListHelper],
       imports: [
         CommonModule,
         CoreModule,
         SharedModule,
         createBasicStoreModule()
-      ]
+      ],
     });
   });
 

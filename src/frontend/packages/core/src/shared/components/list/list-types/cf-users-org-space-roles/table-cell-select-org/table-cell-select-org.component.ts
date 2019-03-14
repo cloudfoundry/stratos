@@ -1,16 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { UsersRolesSetOrg } from '../../../../../../../../store/src/actions/users-roles.actions';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { selectUsersRolesOrgGuid } from '../../../../../../../../store/src/selectors/users-roles.selector';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { TableCellCustom } from '../../../list.types';
-import { map } from 'rxjs/operators';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
-import { selectUsersRolesOrgGuid } from '../../../../../../../../store/src/selectors/users-roles.selector';
-import { UsersRolesSetOrg } from '../../../../../../../../store/src/actions/users-roles.actions';
 
 @Component({
   selector: 'app-table-cell-select-org',
@@ -20,8 +20,8 @@ import { UsersRolesSetOrg } from '../../../../../../../../store/src/actions/user
 export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {
 
   /**
- * Observable which is populated if only a single org is to be used
- */
+   * Observable which is populated if only a single org is to be used
+   */
   singleOrg$: Observable<APIResource<IOrganization>>;
   organizations$: Observable<APIResource<IOrganization>[]>;
   selectedOrgGuid: string;

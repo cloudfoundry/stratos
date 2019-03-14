@@ -1,10 +1,11 @@
 import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
-import { PaginationEntityState, PaginatedAction, PaginationParam } from '../../../../../../store/src/types/pagination.types';
-import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
+
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
+import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
+import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 
 export interface AppEvent {
   actee_name: string;
@@ -13,7 +14,7 @@ export interface AppEvent {
   actor_name: string;
   actor_type: string;
   actor_username: string;
-  metadata: Object;
+  metadata: object;
   organization_guid: string;
   space_guid: string;
   timestamp: string;

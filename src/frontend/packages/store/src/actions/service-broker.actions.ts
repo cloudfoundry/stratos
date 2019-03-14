@@ -32,14 +32,14 @@ export class GetServiceBrokers extends CFStartAction implements PaginatedAction 
 }
 export class GetServiceBroker extends CFStartAction implements IRequestAction {
   constructor(
-    public serviceBrokerGuid: string,
+    public guid: string,
     public endpointGuid: string,
     public includeRelations: string[] = [],
     public populateMissing = true
   ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `service_brokers/${serviceBrokerGuid}`;
+    this.options.url = `service_brokers/${guid}`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }
