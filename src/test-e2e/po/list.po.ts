@@ -210,7 +210,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getSearchInputField(): ElementFinder {
-    return this.getRightHeaderSection().first(by.css('#listSearchFilter')).element(by.css('input'));
+    return this.getRightHeaderSection().all(by.css('#listSearchFilter')).first().element(by.css('input'));
   }
 
   setSearchText(text: string): promise.Promise<void> {
