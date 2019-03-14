@@ -41,6 +41,7 @@ import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-det
 import { AddServiceInstanceComponent } from './add-service-instance.component';
 import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AppNameUniqueDirective } from '../../../app-name-unique.directive/app-name-unique.directive';
+import { StatefulIconComponent } from '../../stateful-icon/stateful-icon.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -74,6 +75,7 @@ describe('AddServiceInstanceComponent', () => {
         MultilineTitleComponent,
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
+        StatefulIconComponent,
         FocusDirective,
         SpecifyUserProvidedDetailsComponent
       ],
