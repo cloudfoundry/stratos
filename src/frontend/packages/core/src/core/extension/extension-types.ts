@@ -2,9 +2,6 @@ import { Type } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Schema, schema } from 'normalizr';
 
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { TableCellCustom } from '../../shared/components/list/list.types';
-
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
 
@@ -26,9 +23,9 @@ export interface EndpointTypeConfig {
    */
   entitySchemaKeys?: string[];
   /**
-   * Show custom content in the endpoints list
+   * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
    */
-  listDetailsComponent?: Type<TableCellCustom<EndpointModel>>;
+  listDetailsComponent?: any;
 }
 
 export interface EndpointAuthTypeConfig {
