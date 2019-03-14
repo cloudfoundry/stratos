@@ -16,6 +16,7 @@ import { UserService } from './user.service';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { endpointHealthChecks, EndpointHealthCheck } from '../../endpoints-health-checks';
+import { getEndpointType } from '../features/endpoints/endpoint-helpers';
 
 
 @Injectable()
@@ -95,11 +96,12 @@ export class EndpointsService implements CanActivate {
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
     return this.endpoints$.pipe(
       map(endpoints => {
-        const haveAtLeastOne = Object.values(endpoints).find(ep => ep.cnsi_type === type && ep.connectionStatus === 'connected');
+        const haveAtLeastOne = Object.values(endpoints).find(ep => {
+          const epType = getEndpointType(ep.cnsi_type);
+          return ep.cnsi_type === type && (epType.doesNotSupportConnect || ep.connectionStatus === 'connected');
+        });
         return !haveAtLeastOne;
       })
     );
   }
-
-
 }

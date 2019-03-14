@@ -45,6 +45,7 @@ type PortalProxy interface {
 	GetConfig() *PortalConfig
 	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
+	ListEndpoints() ([]*CNSIRecord, error)
 
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)
@@ -74,4 +75,8 @@ type PortalProxy interface {
 
 	AddLoginHook(priority int, function LoginHookFunc) error
 	ExecuteLoginHooks(c echo.Context) error
+	
+	// Plugins
+	GetPlugin(name string) interface{}
+	
 }

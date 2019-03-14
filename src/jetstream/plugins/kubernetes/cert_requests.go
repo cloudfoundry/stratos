@@ -31,6 +31,7 @@ func (k *KubeCertAuth) GetJSON() (string, error) {
 	}
 	return string(jsonString), nil
 }
+
 func (k *KubeCertAuth) GetCerticate() (tls.Certificate, error) {
 	cert, err := tls.X509KeyPair([]byte(k.Certificate), []byte(k.CertificateKey))
 	if err != nil {

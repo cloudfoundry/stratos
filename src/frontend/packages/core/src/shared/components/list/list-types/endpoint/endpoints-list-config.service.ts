@@ -21,6 +21,7 @@ import {
   getEndpointUsername,
   getFullEndpointApiUrl,
   getNameForEndpointType,
+  getEndpointType,
 } from '../../../../../features/endpoints/endpoint-helpers';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
@@ -179,7 +180,10 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Connect',
     description: '',
-    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
+      const ep = getEndpointType(row.cnsi_type);
+      return !ep.doesNotSupportConnect && row.connectionStatus === 'disconnected';
+    }))
   };
 
   private singleActions = [

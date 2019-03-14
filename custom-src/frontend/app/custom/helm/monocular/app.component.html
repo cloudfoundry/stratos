@@ -1,0 +1,23 @@
+<!-- Routed views go here -->
+<div [ngClass]="{ 'App': true, 'App--openMenu': showMenu }">
+  <nav class="App__Menu">
+    <ul>
+      <li>
+        <a class="reverse" routerLink="/charts" routerLinkActive="active">
+          Charts
+        </a>
+      </li>
+      <li>
+        <a class="reverse" href="https://github.com/helm/monocular/blob/master/docs/about.md" target="_blank">
+          About
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <div class="App__Wrap">
+    <main class="App__Content">
+      <router-outlet></router-outlet>
+    </main>
+    <app-footer></app-footer>
+  </div>
+</div>

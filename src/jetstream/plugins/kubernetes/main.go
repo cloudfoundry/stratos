@@ -6,7 +6,6 @@ import (
 
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -47,7 +46,7 @@ func (c *KubernetesSpecification) GetType() string {
 }
 
 func (c *KubernetesSpecification) GetClientId() string {
-	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
+	if clientId, ok := c.portalProxy.Env().Lookup(CLIENT_ID_KEY); ok {
 		return clientId
 	}
 
@@ -60,7 +59,7 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 }
 
 func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
-	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1")
+	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1", nil, nil)
 	if err != nil {
 		return err
 	}
@@ -136,7 +135,14 @@ func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
-	// no-op
+
+	log.Warn("Kubernetes: AddSessionGroupRoutes")
+
+	// Helm Routes
+	echoGroup.GET("/helm/releases", c.ListReleases)
+	echoGroup.POST("/helm/install", c.InstallRelease)
+	echoGroup.GET("/helm/versions", c.GetHelmVersions)
+	echoGroup.DELETE("/helm/releases/:endpoint/:name", c.DeleteRelease)
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
@@ -159,3 +165,5 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 
 func (c *KubernetesSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
 }
+
+//https://127.0.0.1:4200/pp/v1/chartsvc/v1/charts

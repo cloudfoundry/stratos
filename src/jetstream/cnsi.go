@@ -135,6 +135,13 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	// set the guid on the object so it's returned in the response
 	newCNSI.GUID = guid
 
+	// Notify plugins if they support the notification interface
+	for _, plugin := range p.Plugins {
+		if notifier, ok := plugin.(interfaces.EndpointNotificationPlugin); ok {
+			notifier.OnEndpointNotification(interfaces.EndpointRegisterAction, &newCNSI)
+		}
+	}
+
 	return newCNSI, err
 }
 
@@ -162,6 +169,11 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("buildCNSIList")
+	return p.ListEndpoints()
+}
+
+func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
+	log.Debug("ListEndpoints")
 	var cnsiList []*interfaces.CNSIRecord
 	var err error
 
@@ -340,6 +352,17 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 		msg := "Unable to delete a CNSI record: %v"
 		log.Errorf(msg, err)
 		return fmt.Errorf(msg, err)
+	}
+
+	// Lookup the endpoint, so can pass the information to the plugins
+	endpoint, err := cnsiRepo.Find(guid, p.Config.EncryptionKeyInBytes)
+	if err == nil {
+		// Notify plugins if they support the notification interface
+		for _, plugin := range p.Plugins {
+			if notifier, ok := plugin.(interfaces.EndpointNotificationPlugin); ok {
+				notifier.OnEndpointNotification(interfaces.EndpointUnregisterAction, &endpoint)
+			}
+		}
 	}
 
 	return nil

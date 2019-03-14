@@ -13,6 +13,8 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/src/app-state';
 import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
 import { EndpointHealthCheck } from '../../endpoints-health-checks';
+import { HelmModule } from './helm/helm.module';
+import { HelmSetupModule } from './helm/helm.setup.module';
 
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
@@ -25,7 +27,9 @@ const SuseCustomizations: CustomizationsMetadata = {
     CoreModule,
     SharedModule,
     MDAppModule,
-    KubernetesSetupModule
+    KubernetesSetupModule,
+    HelmModule,
+    HelmSetupModule
   ],
   declarations: [
     SuseLoginComponent,

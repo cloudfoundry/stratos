@@ -17,6 +17,8 @@ export interface EndpointTypeConfig {
   homeLink?: (string) => string[];
   // Schema keys associated with this endpoint type (used when clearing pagination)
   entitySchemaKeys?: string[];
+  // Indicates if this endpoint types can not be connected (optional - default is false)
+  doesNotSupportConnect?: boolean;
 }
 
 export interface EndpointAuthTypeConfig {
