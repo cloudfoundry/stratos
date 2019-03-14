@@ -5,11 +5,5 @@
     </span>
     {{ user.name}} <ng-container *ngIf="user.admin">(Administrator)</ng-container>
   </div>
-  <!-- <div *ngIf="user.admin" class="cf-details__line">
-    <span class="cf-details__icon">
-      <mat-icon class="cf-details__icon--admin" fontSet="stratos-icons" [ngClass]="{'cf-details__admin': spaceBetween}">admin</mat-icon>
-    </span>
-    Administrator
-  </div> -->
 </div>
 <ng-template #noUser>-</ng-template>

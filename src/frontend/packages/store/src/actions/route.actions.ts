@@ -98,7 +98,6 @@ export class DeleteRoute extends BaseRouteAction {
 export class UnmapRoute extends BaseRouteAction {
   /**
    * The key of the pagination section to remove the route from. Note, this should not be called `paginationKey`
-   * @param clearPaginationKey
    */
   constructor(
     public routeGuid: string,

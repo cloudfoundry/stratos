@@ -17,18 +17,18 @@ export interface ApplicationStateData {
 export class ApplicationStateService {
 
   /**
- * @description: State metadata
- *
- * First level keys match the APP_STATE with a '?' for a wildcard match for any APP_STATE
- * Second level keys match PACKAGE_STATE directly OR on a combination of #running #crashed, #flapping
- * which we presentation in the name as (X,X,X) - where X can be:
- *   - 0 - must be 0
- *   - N - must be >0
- *   - ? - matches when the value is not known
- *
- * To determine the incomplete state, we also need to look at the package_updated_at field
- *
- */
+   * @description: State metadata
+   *
+   * First level keys match the APP_STATE with a '?' for a wildcard match for any APP_STATE
+   * Second level keys match PACKAGE_STATE directly OR on a combination of #running #crashed, #flapping
+   * which we presentation in the name as (X,X,X) - where X can be:
+   *   - 0 - must be 0
+   *   - N - must be >0
+   *   - ? - matches when the value is not known
+   *
+   * To determine the incomplete state, we also need to look at the package_updated_at field
+   *
+   */
   private stateMetadata = {
     '?': {
       FAILED: {
@@ -132,7 +132,7 @@ export class ApplicationStateService {
         indicator: CardStatus.ERROR,
         actions: 'stop,restart,cli,restage'
       },
-      'CRASHING': {
+      CRASHING: {
         label: 'Deployed',
         subLabel: 'Crashing',
         indicator: CardStatus.WARNING,
@@ -160,9 +160,9 @@ export class ApplicationStateService {
   };
 
   /**
- * @description Translates string list of action names into a map for easier checking if an action is supported
- * @param {any} obj - object to traverse to replace 'actions' keys with maps
- */
+   * @description Translates string list of action names into a map for easier checking if an action is supported
+   * @param obj - object to traverse to replace 'actions' keys with maps
+   */
   private mapActions(obj: any) {
     for (const k of Object.keys(obj)) {
       const v = obj[k];
@@ -187,11 +187,11 @@ export class ApplicationStateService {
   }
 
   /**
-  * @description Get the application state metadata for an application based on its summary and
-  * optionally its instance metadata.
-  * @param {object} summary - the application summary metadata (either from summary or entity)
-  * @param {object} appInstances - the application instances metadata (from the app stats API call)
-  */
+   * @description Get the application state metadata for an application based on its summary and
+   * optionally its instance metadata.
+   * @param summary - the application summary metadata (either from summary or entity)
+   * @param appInstances - the application instances metadata (from the app stats API call)
+   */
   get(summary: any, appInstances: any): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     const pkgState = this.getPackageState(appState, summary);
@@ -261,10 +261,10 @@ export class ApplicationStateService {
   }
 
   /**
- * @description Gets the package state based on the application summary metadata
- * @param {string} appState - the application state
- * @param {object} summary - the application summary
- */
+   * @description Gets the package state based on the application summary metadata
+   * @param appState - the application state
+   * @param summary - the application summary
+   */
   private getPackageState(appState: string, summary: any): string {
     let pkgState = (summary ? summary.package_state : '') || '*NONE*';
     // Tweak package state based on extra info in package_updated_at if needed (for now, only if stopped)
@@ -275,11 +275,11 @@ export class ApplicationStateService {
   }
 
   /**
- * @description Get an object with the instance counts for running, crashed and failing
- * @param {object} summary - the application summary
- * @param {object} appInstances - the application instances metadata (from the app stats API call)
- * @returns {object} Object with instance count metadata
- */
+   * @description Get an object with the instance counts for running, crashed and failing
+   * @param summary - the application summary
+   * @param appInstances - the application instances metadata (from the app stats API call)
+   * @returns Object with instance count metadata
+   */
   private getCounts(summary, appInstances) {
     const counts: any = {};
     // Need to check based on additional state
@@ -310,11 +310,11 @@ export class ApplicationStateService {
   }
 
   /**
-* @description Get a count either from a value if supplied or by filterine app instance metadata
-* @param {number} value - the value to use directly or undefined if not available
-* @param {object} appInstances - the application instances metadata (from the app stats API call)
-* @param {string} instanceState - the instance state to use when filtering the app instance metadata
-*/
+   * @description Get a count either from a value if supplied or by filterine app instance metadata
+   * @param value - the value to use directly or undefined if not available
+   * @param appInstances - the application instances metadata (from the app stats API call)
+   * @param instanceState - the instance state to use when filtering the app instance metadata
+   */
   private getCount(value: number, appInstances: any, instanceState: string): number {
     // Use a value if one available
     if (value) {
@@ -329,9 +329,9 @@ export class ApplicationStateService {
   }
 
   /**
- * @description Format a numeric count into a string to be used for state matching
- * @param {number} value - the value to use directly or undefined if not available
- */
+   * @description Format a numeric count into a string to be used for state matching
+   * @param value - the value to use directly or undefined if not available
+   */
   private formatCount(value: number): string {
     if (value === 0) {
       return '0';
@@ -343,10 +343,10 @@ export class ApplicationStateService {
   }
 
   /**
-  * @description Get the instance state - single state to summarize the state of the application's instances
-  * @param {object} summary - the application summary metadata (either from summary or entity)
-  * @param {object} appInstances - the application instances metadata (from the app stats API call)
-  */
+   * @description Get the instance state - single state to summarize the state of the application's instances
+   * @param summary - the application summary metadata (either from summary or entity)
+   * @param appInstances - the application instances metadata (from the app stats API call)
+   */
   getInstanceState(summary: any, appInstances: any): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     if (appState !== 'STARTED') {
@@ -365,7 +365,7 @@ export class ApplicationStateService {
 
   private getStateForIndicator(indicator: CardStatus): ApplicationStateData {
     return {
-      indicator: indicator,
+      indicator,
       label: '-',
       actions: {}
     };

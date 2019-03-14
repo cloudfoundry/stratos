@@ -1,17 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import {
-  ErrorStateMatcher,
-  ShowOnDirtyErrorStateMatcher,
-} from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Subscription } from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 
+import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { UserProfileService } from '../user-profile.service';
-import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
 
 
 @Component({
@@ -84,15 +81,15 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       if (required !== this.lastRequired) {
         this.lastRequired = required;
         const validators = required ? [Validators.required] : [];
-        this.editProfileForm.controls['currentPassword'].setValidators(validators);
-        this.editProfileForm.controls['currentPassword'].updateValueAndValidity();
+        this.editProfileForm.controls.currentPassword.setValidators(validators);
+        this.editProfileForm.controls.currentPassword.updateValueAndValidity();
       }
       const havePassword = !!values.newPassword.length;
       if (havePassword !== this.lastHavePassword) {
         this.lastHavePassword = havePassword;
         const confirmValidator = havePassword ? [Validators.required, this.confirmPasswordValidator()] : [];
-        this.editProfileForm.controls['confirmPassword'].setValidators(confirmValidator);
-        this.editProfileForm.controls['confirmPassword'].updateValueAndValidity();
+        this.editProfileForm.controls.confirmPassword.setValidators(confirmValidator);
+        this.editProfileForm.controls.confirmPassword.updateValueAndValidity();
       }
     });
   }
@@ -100,7 +97,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   confirmPasswordValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const same = control.value === this.editProfileForm.value.newPassword;
-      return same ? null : { 'passwordMatch': { value: control.value } };
+      return same ? null : { passwordMatch: { value: control.value } };
     };
   }
 

@@ -14,31 +14,30 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { IOrganization, ISpace } from '../../core/cf-api.types';
-
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { AppState } from '../../../../store/src/app-state';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { GetAllOrganizations } from '../../../../store/src/actions/organization.actions';
+import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../store/src/app-state';
+import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { organizationSchemaKey, spaceSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import {
-  getPaginationObservables,
   getCurrentPageRequestInfo,
-  spreadPaginationParams
+  getPaginationObservables,
+  spreadPaginationParams,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/src/types/api.types';
 import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { PaginatedAction, QParam, PaginationParam } from '../../../../store/src/types/pagination.types';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { PaginatedAction, PaginationParam, QParam } from '../../../../store/src/types/pagination.types';
+import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
 import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
-import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
   return {
-    key: key,
-    label: label,
+    key,
+    label,
     ...cfOrgSpaceItem,
     list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
       return entities.map(entity => ({
@@ -69,9 +68,9 @@ export const enum CfOrgSpaceSelectMode {
 
 
 export const initCfOrgSpaceService = (store: Store<AppState>,
-  cfOrgSpaceService: CfOrgSpaceDataService,
-  schemaKey: string,
-  paginationKey: string): Observable<any> => {
+                                      cfOrgSpaceService: CfOrgSpaceDataService,
+                                      schemaKey: string,
+                                      paginationKey: string): Observable<any> => {
   return store.select(selectPaginationState(schemaKey, paginationKey)).pipe(
     filter((pag) => !!pag),
     first(),
@@ -180,8 +179,10 @@ export class CfOrgSpaceDataService implements OnDestroy {
     // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
     this.org.list$.pipe(
       first(),
-    ).subscribe(null, null, () => {
-      this.setupAutoSelectors();
+    ).subscribe({
+      complete: () => {
+        this.setupAutoSelectors();
+      }
     });
 
     this.isLoading$ = combineLatest(
@@ -224,8 +225,8 @@ export class CfOrgSpaceDataService implements OnDestroy {
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
         // Ensure we have at least one connected cf
         filter(cfs => {
-          for (let i = 0; i < cfs.length; i++) {
-            if (cfs[i].connectionStatus === 'connected') {
+          for (const cf of cfs) {
+            if (cf.connectionStatus === 'connected') {
               return true;
             }
           }

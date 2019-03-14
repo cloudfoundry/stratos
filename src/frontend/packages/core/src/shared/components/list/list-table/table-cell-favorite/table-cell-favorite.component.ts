@@ -19,19 +19,19 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends 
   public favorite: UserFavorite<Y>;
   public canFavorite = false;
 
-  private _config: TableCellFavoriteComponentConfig<T, Y>;
+  private pC: TableCellFavoriteComponentConfig<T, Y>;
   @Input('config')
-  get config() { return this._config; }
+  get config() { return this.pC; }
   set config(config: TableCellFavoriteComponentConfig<T, Y>) {
-    this._config = config;
+    this.pC = config;
     this.createUserFavorite();
   }
 
-  private _row: T;
+  private pRow: T;
   @Input('row')
-  get row() { return this._row; }
+  get row() { return this.pRow; }
   set row(row: T) {
-    this._row = row;
+    this.pRow = row;
     this.createUserFavorite();
   }
 

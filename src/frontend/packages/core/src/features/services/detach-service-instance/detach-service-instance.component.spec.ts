@@ -1,9 +1,9 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DetachServiceInstanceComponent } from './detach-service-instance.component';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
-import { DatePipe } from '@angular/common';
+import { DetachServiceInstanceComponent } from './detach-service-instance.component';
 
 describe('DetachServiceInstanceComponent', () => {
   let component: DetachServiceInstanceComponent;
@@ -11,11 +11,11 @@ describe('DetachServiceInstanceComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DetachServiceInstanceComponent, DetachAppsComponent ],
+      declarations: [DetachServiceInstanceComponent, DetachAppsComponent],
       imports: [BaseTestModules],
       providers: [DatePipe]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

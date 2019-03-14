@@ -1,4 +1,13 @@
-import { Component, ComponentFactoryResolver, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
@@ -7,23 +16,22 @@ import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { EndpointTypeConfig } from '../../../../../../core/extension/extension-types';
 import { getFavoriteFromEndpointEntity } from '../../../../../../core/user-favorite-helpers';
 import {
-  endpointListDetailsComponents,
+  coreEndpointListDetailsComponents,
   getEndpointType,
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../../cf-endpoints/base-endpoints-data-source';
-import { CfEndpointDetailsComponent } from '../cf-endpoint-details/cf-endpoint-details.component';
-import { EndpointListHelper } from '../endpoint-list.helpers';
+import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 
 @Component({
   selector: 'app-endpoint-card',
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss'],
-  entryComponents: [...endpointListDetailsComponents]
+  entryComponents: [...coreEndpointListDetailsComponents]
 })
-export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit {
+export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
 
   public rowObs = new ReplaySubject<EndpointModel>();
   public favorite: UserFavoriteEndpoint;
@@ -33,7 +41,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public hasDetails = true;
   public endpointLink: string = null;
 
-  @Input() component: CfEndpointDetailsComponent;
+  private componentRef: ComponentRef<EndpointListDetailsComponent>;
+
+  @Input() component: EndpointListDetailsComponent;
   private endpointDetails: ViewContainerRef;
   @ViewChild('endpointDetails', { read: ViewContainerRef }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
@@ -60,7 +70,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
-    if (ds.endpointType !== 'cf' && !this.cardMenu) {
+    if (ds && ds.endpointType !== 'cf' && !this.cardMenu) {
       this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
         label: endpointAction.label,
         action: () => endpointAction.action(this.pRow),
@@ -82,6 +92,14 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.hasDetails = !!e.listDetailsComponent;
   }
 
+  ngOnDestroy(): void {
+    this.endpointListHelper.destroyEndpointDetails({
+      componentRef: this.componentRef,
+      component: this.component,
+      endpointDetails: this.endpointDetails
+    });
+  }
+
   updateDetails() {
     if (!this.endpointDetails || !this.pRow) {
       return;
@@ -92,11 +110,16 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
 
     if (!this.component) {
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(e.listDetailsComponent);
-      const componentRef = this.endpointDetails.createComponent(componentFactory);
-      this.component = componentRef.instance as CfEndpointDetailsComponent;
+      const res =
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
+      this.componentRef = res.componentRef;
+      this.component = res.component;
     }
-    this.component.row = this.pRow;
-    this.component.spaceBetween = false;
+
+    if (this.component) {
+      this.component.row = this.pRow;
+      this.component.isTable = false;
+    }
   }
+
 }

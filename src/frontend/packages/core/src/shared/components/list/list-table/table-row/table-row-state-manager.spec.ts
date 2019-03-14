@@ -11,7 +11,7 @@ describe('TableRowStateManager', () => {
   let obs: Observable<RowsState>;
   const checkState = (manager: TableRowStateManager, actualState: RowState, expectedState: RowState) => {
     const fake = {
-      'FAKE': {
+      FAKE: {
         error: false
       }
     };
@@ -167,11 +167,11 @@ describe('TableRowStateManager', () => {
 
   it('should set the row state', async((done) => {
     const initState = {
-      '1': {
+      1: {
         error: true,
         customProp: 'custom'
       },
-      '2': {
+      2: {
         error: false,
         blocked: true
       }
@@ -182,12 +182,12 @@ describe('TableRowStateManager', () => {
       cusrtomProp2: 'test123'
     };
     const expectedState = {
-      '1': {
+      1: {
         error: false,
         blocked: true,
         cusrtomProp2: 'test123'
       },
-      '2': {
+      2: {
         error: false,
         blocked: true
       }

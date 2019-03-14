@@ -4,7 +4,7 @@ import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
 export function updateApplicationRoutesReducer() {
-  return function (state: APIResource, action: APISuccessOrFailedAction) {
+  return (state: APIResource, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case ASSIGN_ROUTE_SUCCESS:
         const assignAction: AssociateRouteWithAppApplication = action.apiAction as AssociateRouteWithAppApplication;

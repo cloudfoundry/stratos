@@ -1,16 +1,16 @@
-
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-
-import { take } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CfAuthPrinciple } from './principal';
-import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';
-import { IRequestEntityTypeState, AppState } from '../../../../../store/src/app-state';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { SessionData } from '../../../../../store/src/types/auth.types';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+
+import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
 import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
+import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { SessionData } from '../../../../../store/src/types/auth.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';
+import { CfAuthPrinciple } from './principal';
+
 
 /**
  * NOTE - WIP
@@ -19,8 +19,7 @@ import { selectSessionData } from '../../../../../store/src/reducers/auth.reduce
  * - Handling fetch wait and error
  * - Calculate read-only admin and group auditor values from user scope and intergrate with principals (new, not in V1)
  * - Determine org or space 'suspended' state and intergrate with principals
-*/
-
+ */
 @Injectable()
 export class CfAuthService {
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
@@ -71,8 +70,7 @@ export class CfAuthService {
   }
 
   /**
-   * @name isAllowed
-   * @description is user allowed the certain action
+   * is user allowed the certain action
    */
   isAllowed(endpointGuid: string, resourceType: CFAuthResource, action: CFAuthAction, ...args: any[]): boolean {
     if (!this.isInitialized(endpointGuid)) {
@@ -86,10 +84,9 @@ export class CfAuthService {
   }
 
   /**
-   * @name isOrgOrSpaceActionableByResource
-   * @description convenience method to determine if the user has rights to execute the action against the resource
+   * convenience method to determine if the user has rights to execute the action against the resource
    * in the organization or any of the organization's spaces
-  */
+   */
   isOrgOrSpaceActionableByResource(endpointGuid: string, orgGuid: string, spaceGuids: string[], action: CFAuthAction): boolean {
     // Is the organization valid?
     if (this.isAllowed(endpointGuid, CFAuthResource.organization, action, orgGuid)) {
@@ -106,8 +103,7 @@ export class CfAuthService {
   }
 
   /**
-   * @name isAdmin
-   * @description Is User Admin in endpoint
+   * Is User Admin in endpoint
    */
   isAdmin(endpointGuid: string): boolean {
     if (!this.isInitialized(endpointGuid)) {

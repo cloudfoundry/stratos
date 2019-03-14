@@ -13,7 +13,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
-import { endpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
+import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
   TableCellEventActionComponent,
@@ -165,7 +165,7 @@ export const listTableCells = [
   TableCellAServicePlanExtrasComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
-  ...endpointListDetailsComponents
+  ...coreEndpointListDetailsComponents
 ];
 
 @Component({
@@ -216,7 +216,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
     if (component) {
 
       // Add to target to ensure ngcontent is correct in new component
-      this.cellComponent = <TableCellCustom<T>>component.instance;
+      this.cellComponent = component.instance as TableCellCustom<T>;
 
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;

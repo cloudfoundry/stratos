@@ -64,11 +64,11 @@ export const getListStateObservables = (
 };
 
 function selectListState(key: string) {
-  return state => state['lists'][key];
+  return state => state.lists[key];
 }
 
 function selectListStateProperty(key: string, property: string) {
   return state => {
-    return (state['lists'][key] || {})[property];
+    return (state.lists[key] || {})[property];
   };
 }

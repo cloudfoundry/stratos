@@ -15,11 +15,11 @@ import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.serv
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { ApplicationStateService } from '../application-state/application-state.service';
-import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
-import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
+import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
+import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 
 class MockedNgZone {
   run = fn => fn();
@@ -58,7 +58,7 @@ describe('ListComponent', () => {
         providers: [
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
           // Fun fact, NgZone will execute something on import which causes an undefined error
-          { provide: MockedNgZone, useValue: new MockedNgZone },
+          { provide: MockedNgZone, useValue: new MockedNgZone() },
           EndpointListHelper
         ]
       });

@@ -2,18 +2,17 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { AppState } from '../../../../../../../store/src/app-state';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstancesDataSource } from './service-instances-data-source';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 /**
  * Service instance list shown for `service / service instances` component
  *
  * @export
- * @class ServiceInstancesListConfigService
  * @extends {CfServiceInstancesListConfigBase}
  */
 @Injectable()

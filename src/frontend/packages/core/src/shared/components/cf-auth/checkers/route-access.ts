@@ -1,6 +1,7 @@
+import { CFAuthChecker, CFAuthResource, CFFeatureFlagTypes } from '../cf-auth.types';
 import { CfAuthPrinciple } from '../principal';
 import { CfAuthBaseAccess } from './base-access';
-import { CFAuthResource, CFAuthChecker, CFFeatureFlagTypes } from '../cf-auth.types';
+
 export class CFAuthCheckerRoute extends CfAuthBaseAccess implements CFAuthChecker {
 
   /**
@@ -12,11 +13,10 @@ export class CFAuthCheckerRoute extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-    * @name create
-    * @description User can create a route if:
-    * 1. User is admin
-    * 2. User is a space developer AND route_creation feature flag is turned on
-    */
+   * User can create a route if:
+   * 1. User is admin
+   * 2. User is a space developer AND route_creation feature flag is turned on
+   */
   create(spaceGuid: string): boolean {
 
     // Admin
@@ -30,8 +30,7 @@ export class CFAuthCheckerRoute extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-   * @name update
-   * @description User can manage apps if:
+   * User can manage apps if:
    * 1. User is an admin
    * 2. User is a space developer
    */
@@ -45,8 +44,7 @@ export class CFAuthCheckerRoute extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-   * @name delete
-   * @description User can delete apps if:
+   * User can delete apps if:
    * 1. User is an admin
    * 2. User is a space developer
    */
@@ -60,8 +58,7 @@ export class CFAuthCheckerRoute extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-   * @name canHandle
-   * @description Specifies that this ACL checker can handle `application` permission
+   * Specifies that this ACL checker can handle `application` permission
    */
   canHandle(resource: CFAuthResource): boolean {
     return resource === CFAuthResource.route;

@@ -2,9 +2,6 @@ import { Type } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Schema, schema } from 'normalizr';
 
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { TableCellCustom } from '../../shared/components/list/list.types';
-
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
 
@@ -20,15 +17,15 @@ export interface EndpointTypeConfig {
   /**
    * Get the link to the home page for the given endpoint GUID
    */
-  homeLink?: (string) => string[];
+  homeLink?: (s) => string[];
   /**
    * Schema keys associated with this endpoint type (used when clearing pagination)
    */
   entitySchemaKeys?: string[];
   /**
-   * Show custom content in the endpoints list
+   * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
    */
-  listDetailsComponent?: Type<TableCellCustom<EndpointModel>>;
+  listDetailsComponent?: any;
 }
 
 export interface EndpointAuthTypeConfig {
@@ -54,7 +51,7 @@ export interface EndpointAuthValues { [key: string]: string; }
  * Optional interface that an Endpoint Auth Form Component can implement
  * if it needs to supply content in the request body when connecting an endppoint
  * e.g. if it needs to send a config file
- **/
+ */
 export interface IEndpointAuthComponent extends IAuthForm {
   // Allows auth type to override which values are sent to the backend when connecting
   getValues(values: EndpointAuthValues): EndpointAuthValues;  // Map of values to send

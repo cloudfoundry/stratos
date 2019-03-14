@@ -1,9 +1,10 @@
-import { CreatePagination, ResetPagination, ClearPaginationOfType, ClearPaginationOfEntity } from './../../actions/pagination.actions';
+import { Action } from '@ngrx/store';
+
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
-  UNREGISTER_ENDPOINTS,
   EndpointAction,
+  UNREGISTER_ENDPOINTS,
 } from '../../actions/endpoint.actions';
 import {
   ADD_PARAMS,
@@ -26,6 +27,12 @@ import {
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import {
+  ClearPaginationOfEntity,
+  ClearPaginationOfType,
+  CreatePagination,
+  ResetPagination,
+} from './../../actions/pagination.actions';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
@@ -44,8 +51,12 @@ import { paginationStart } from './pagination-reducer-start';
 import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
-import { getActionKey, getActionType, getPaginationKeyFromAction, getDefaultPaginationEntityState } from './pagination-reducer.helper';
-import { Action } from '@ngrx/store';
+import {
+  getActionKey,
+  getActionType,
+  getDefaultPaginationEntityState,
+  getPaginationKeyFromAction,
+} from './pagination-reducer.helper';
 
 
 
@@ -58,9 +69,9 @@ export function setDefaultPaginationState(state: any) {
   defaultPaginationState = state;
 }
 
-const getPaginationUpdater = function (types: [string, string, string]) {
+const getPaginationUpdater = (types: [string, string, string]) => {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
+  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState => {
     switch (action.type) {
       case requestType:
         return paginationStart(state, action);
@@ -98,7 +109,7 @@ export function createPaginationReducer(types: [string, string, string]) {
 }
 
 function paginationReducer(updatePagination, types) {
-  return function (state, action) {
+  return (state, action) => {
     state = state || defaultPaginationState;
     return paginate(action, state, updatePagination);
   };

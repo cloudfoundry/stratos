@@ -1,16 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EndpointListHelper } from '../endpoint-list.helpers';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details.component';
 
-describe('TableCellEndpointDetailsComponent', () => {
+fdescribe('TableCellEndpointDetailsComponent', () => {
   let component: TableCellEndpointDetailsComponent;
   let fixture: ComponentFixture<TableCellEndpointDetailsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellEndpointDetailsComponent ]
+      declarations: [],
+      imports: [...BaseTestModules],
+      providers: [EndpointListHelper]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

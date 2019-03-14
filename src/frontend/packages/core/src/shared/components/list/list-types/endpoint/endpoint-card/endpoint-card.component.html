@@ -1,5 +1,5 @@
-<app-meta-card class="endpoint-card" [routerLink]="endpointLink" [ngClass]="{'no-link': !endpointLink}"
-  [favorite]="favorite" [actionMenu]="cardMenu">
+<app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
+  [ngClass]="{'no-link': !endpointLink}" [favorite]="favorite" [actionMenu]="cardMenu">
   <app-meta-card-title>
     <div class="endpoint-card__title">
       <div *ngIf="endpointConfig.imagePath" class="endpoint-card__image">

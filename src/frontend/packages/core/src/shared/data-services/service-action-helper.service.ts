@@ -69,5 +69,5 @@ export class ServiceActionHelperService {
 
 
   editServiceBinding = (guid: string, endpointGuid: string, query: RouterQueryParams = {}) =>
-    this.store.dispatch(new RouterNav({ path: ['/services', endpointGuid, guid, 'edit'], query: query }))
+    this.store.dispatch(new RouterNav({ path: ['/services', endpointGuid, guid, 'edit'], query }))
 }

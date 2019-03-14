@@ -10,11 +10,7 @@ import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { ExtensionService } from '../../core/extension/extension-service';
 import { EndpointAuthTypeConfig, EndpointType, EndpointTypeConfig } from '../../core/extension/extension-types';
-import { urlValidationExpression } from '../../core/utils.service';
-import {
-  CfEndpointDetailsComponent,
-} from '../../shared/components/list/list-types/endpoint/cf-endpoint-details/cf-endpoint-details.component';
-import { TableCellCustom } from '../../shared/components/list/list.types';
+import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
 import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
@@ -35,16 +31,6 @@ export interface EndpointIcon {
 }
 
 const endpointTypes: EndpointTypeConfig[] = [
-  {
-    value: 'cf',
-    label: 'Cloud Foundry',
-    urlValidation: urlValidationExpression,
-    icon: 'cloud_foundry',
-    iconFont: 'stratos-icons',
-    imagePath: '/core/assets/endpoint-icons/cloudfoundry.png',
-    homeLink: (guid) => ['/cloud-foundry', guid],
-    listDetailsComponent: CfEndpointDetailsComponent
-  },
   {
     value: 'metrics',
     label: 'Metrics',
@@ -83,7 +69,8 @@ let endpointAuthTypes: EndpointAuthTypeConfig[] = [
 
 const endpointTypesMap = {};
 
-export const endpointListDetailsComponents: Type<TableCellCustom<EndpointModel>>[] = [CfEndpointDetailsComponent];
+// Any initial endpointTypes listDetailsComponent should be added here
+export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponent>[] = [];
 
 export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
   epTypes.forEach(epType => {
@@ -97,10 +84,6 @@ export function initEndpointTypes(epTypes: EndpointTypeConfig[]) {
           endpointAuthType.types.push(endpointAuthType.value as EndpointType);
         }
       });
-    }
-
-    if (epType.listDetailsComponent) {
-      endpointListDetailsComponents.push(epType.listDetailsComponent);
     }
   });
 

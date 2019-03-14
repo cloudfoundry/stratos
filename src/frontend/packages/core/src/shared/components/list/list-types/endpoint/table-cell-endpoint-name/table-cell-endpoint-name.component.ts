@@ -11,16 +11,16 @@ import { TableCellCustom } from '../../../list.types';
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel> {
 
-  private _row: EndpointModel;
+  private tableRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
-    this._row = row;
+    this.tableRow = row;
   }
   get row(): EndpointModel {
-    return this._row;
+    return this.tableRow;
   }
 
-  getLinkForEndpoint(row = this._row) {
+  getLinkForEndpoint(row = this.tableRow) {
     return EndpointsService.getLinkForEndpoint(row);
   }
 }
