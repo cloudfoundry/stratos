@@ -46,11 +46,7 @@ func (c *KubernetesSpecification) GetType() string {
 }
 
 func (c *KubernetesSpecification) GetClientId() string {
-	if clientId, ok := c.portalProxy.Env().Lookup(CLIENT_ID_KEY); ok {
-		return clientId
-	}
-
-	return "k8s"
+	return c.portalProxy.Env().String(CLIENT_ID_KEY, "k8s")
 }
 
 func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
@@ -135,9 +131,6 @@ func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
-
-	log.Warn("Kubernetes: AddSessionGroupRoutes")
-
 	// Helm Routes
 	echoGroup.GET("/helm/releases", c.ListReleases)
 	echoGroup.POST("/helm/install", c.InstallRelease)
@@ -165,5 +158,3 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 
 func (c *KubernetesSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
 }
-
-//https://127.0.0.1:4200/pp/v1/chartsvc/v1/charts
