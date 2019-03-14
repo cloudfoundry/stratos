@@ -155,7 +155,7 @@ describe('Endpoints', () => {
         expect(snackBar.hasMessage('SSL error - x509: certificate')).toBeTruthy();
         /* tslint:disable-line:max-line-length*/
         expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"'))
-        .toBeTruthy();
+          .toBeTruthy();
       });
 
       it('Successful register', () => {
@@ -169,9 +169,9 @@ describe('Endpoints', () => {
         register.stepper.next();
 
         expect(endpointsPage.isActivePage()).toBeTruthy();
-        expect(endpointsPage.table.isPresent()).toBeTruthy();
+        expect(endpointsPage.cards.isPresent()).toBeTruthy();
 
-        endpointsPage.table.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
+        endpointsPage.cards.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
           expect(data.name).toEqual(validEndpoint.name);
           expect(data.url).toEqual(validEndpoint.url);
           expect(data.connected).toBeFalsy();
