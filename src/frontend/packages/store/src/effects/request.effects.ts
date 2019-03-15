@@ -80,8 +80,6 @@ export class RequestEffect {
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
         map(([allEntities, allPagination]) => {
-          // The apiResponse will be null if we're validating as part of the entity service, not during an api request
-          const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {
             started: false,
             completed: Promise.resolve(apiResponse),
@@ -116,15 +114,16 @@ export class RequestEffect {
             independentUpdates
           )];
         })
-      ).pipe(catchError(error => {
-        this.logger.warn(`Entity validation process failed`, error);
-        if (validateAction.apiRequestStarted) {
-          return getFailApiRequestActions(apiAction, error, requestType);
-        } else {
-          this.update(apiAction, false, error.message);
-          return [];
-        }
-      }));
+      )
+        .pipe(catchError(error => {
+          this.logger.warn(`Entity validation process failed`, error);
+          if (validateAction.apiRequestStarted) {
+            return getFailApiRequestActions(apiAction, error, requestType);
+          } else {
+            this.update(apiAction, false, error.message);
+            return [];
+          }
+        }));
     })
   );
 
@@ -154,10 +153,11 @@ export class RequestEffect {
           (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
+          const entityKey = apiAction.proxyPaginationEntityKey || apiAction.entityKey;
           if (apiAction.removeEntityOnDelete) {
-            actions.unshift(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+            actions.unshift(new ClearPaginationOfEntity(entityKey, apiAction.guid));
           } else {
-            actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
+            actions.unshift(new ClearPaginationOfType(entityKey));
           }
         }
       }
@@ -185,7 +185,3 @@ export class RequestEffect {
   }
 
 }
-
-
-
-

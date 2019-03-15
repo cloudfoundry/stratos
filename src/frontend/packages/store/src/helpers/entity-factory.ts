@@ -34,6 +34,7 @@ export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 export const userFavoritesSchemaKey = 'userFavorites';
+export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -43,6 +44,8 @@ export const serviceBindingNoBindingsSchemaKey = 'serviceBindingNoBindings';
 export const entityCache: {
   [key: string]: EntitySchema
 } = {};
+
+const entityKeyReverseLookup = new Map<EntitySchema, string>();
 
 /**
  * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
@@ -389,6 +392,16 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
 entityCache[cfUserSchemaKey] = CFUserSchema;
 
 
+const UserProvidedServiceInstanceSchema = new EntitySchema(userProvidedServiceInstanceSchemaKey, {
+  entity: {
+    space: SpaceWithOrgsEntitySchema,
+    service_bindings: [ServiceBindingsSchema],
+    routes: [RouteSchema]
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[userProvidedServiceInstanceSchemaKey] = UserProvidedServiceInstanceSchema;
+
+
 export function entityFactory(key: string): EntitySchema {
   const entity = entityCache[key];
   if (!entity) {
@@ -399,7 +412,18 @@ export function entityFactory(key: string): EntitySchema {
 
 export function addEntityToCache(entitySchema: EntitySchema) {
   entityCache[entitySchema.key] = entitySchema;
+  entityKeyReverseLookup.set(entitySchema, entitySchema.key);
+}
+
+export function reverseLookupEntityKey(entitySchema: EntitySchema) {
+  return entityKeyReverseLookup.get(entitySchema);
 }
 
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
 entityCache[userProfileSchemaKey] = UserProfileInfoSchema;
+
+
+Object.keys(entityCache).forEach(key => {
+  entityKeyReverseLookup.set(entityCache[key], key);
+});
+

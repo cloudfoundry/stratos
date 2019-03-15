@@ -1,7 +1,7 @@
 import { CreatePagination } from '../../actions/pagination.actions';
 import { PaginationState } from '../../types/pagination.types';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
-import { getDefaultPaginationEntityState } from './pagination-reducer.helper';
+import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
 describe('CreatePaginationActionReducer', () => {
   const entityKey = 'entityKey';

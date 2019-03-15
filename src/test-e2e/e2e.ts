@@ -63,7 +63,7 @@ export class E2E {
     /* tslint:disable:no-console*/
     protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
     /* tslint:disable */
-  }  
+  }
 }
 
 /**

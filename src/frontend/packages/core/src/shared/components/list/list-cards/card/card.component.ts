@@ -1,16 +1,6 @@
-import {
-  Component,
-  ComponentFactoryResolver,
-  Input,
-  OnChanges,
-  OnInit,
-  SimpleChange,
-  SimpleChanges,
-  Type,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef } from '@angular/core';
 
+import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
   AppServiceBindingCardComponent,
@@ -28,7 +18,11 @@ import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/e
 import {
   ServiceInstanceCardComponent,
 } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
+import {
+  UserProvidedServiceInstanceCardComponent,
+} from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 import { CardCell } from '../../list.types';
+import { CardMultiActionComponents } from '../card.component.types';
 
 export const listCards = [
   CardAppComponent,
@@ -40,8 +34,10 @@ export const listCards = [
   CfServiceCardComponent,
   AppServiceBindingCardComponent,
   ServiceInstanceCardComponent,
+  UserProvidedServiceInstanceCardComponent,
   EndpointCardComponent
 ];
+type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
 @Component({
   selector: 'app-card',
   templateUrl: './card.component.html',
@@ -50,39 +46,101 @@ export const listCards = [
     ...listCards
   ]
 })
-export class CardComponent<T> implements OnInit, OnChanges {
+export class CardComponent<T> {
+  private componentRef: ComponentRef<any>;
+  private pComponent: cardTypes<T>;
+  private pItem: T | MultiActionListEntity;
 
-  @Input() component: Type<{}>;
-  @Input() item: T;
-  @Input() dataSource = null as IListDataSource<T>;
+  @Input() set component(component: cardTypes<T>) {
+    if (!this.pComponent) {
+      this.setupComponent(component, this.item);
+      this.pComponent = component;
+    }
+  }
+  get component() {
+    return this.pComponent;
+  }
 
-  @ViewChild('target', { read: ViewContainerRef }) target;
+  @Input() set item(item: T | MultiActionListEntity) {
+    this.pItem = item;
+    this.setupComponent(this.component, item);
+  }
+
+  get item() {
+    return this.pItem;
+  }
+
+  private pDataSource: IListDataSource<T> = null as IListDataSource<T>;
+  @Input() set dataSource(ds: IListDataSource<T>) {
+    this.pDataSource = ds;
+    if (this.cardComponent) {
+      this.cardComponent.dataSource = this.pDataSource;
+    }
+  }
+  get dataSource() {
+    return this.pDataSource;
+  }
+
+  @ViewChild('target', { read: ViewContainerRef }) target: ViewContainerRef;
 
   cardComponent: CardCell<T>;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  ngOnInit() {
-    if (!this.component) {
+  private setupComponent(componentType: cardTypes<T>, item: T | MultiActionListEntity) {
+    if (!componentType || !item) {
       return;
     }
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
-    // Add to target to ensure ngcontent is correct in new component
-    const componentRef = this.target.createComponent(componentFactory);
-    this.cardComponent = componentRef.instance as CardCell<T>;
-    this.cardComponent.row = this.item;
-    this.cardComponent.dataSource = this.dataSource;
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.item;
-    if (
-      row &&
-      this.cardComponent &&
-      row.previousValue !== row.currentValue
-    ) {
-      this.cardComponent.row = row.currentValue;
+    const { component, entityKey, entity } = this.getComponent(componentType, item);
+    if (component) {
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
+      if (componentFactory) {
+        // Add to target to ensure ngcontent is correct in new component
+        // if (componentRef !== this.componentRef) {
+        this.clear();
+        this.componentRef = this.target.createComponent(componentFactory);
+        this.cardComponent = this.componentRef.instance as CardCell<T>;
+        // }
+        this.cardComponent.row = entity;
+        this.cardComponent.dataSource = this.dataSource;
+        this.cardComponent.entityKey = entityKey;
+      }
     }
   }
 
+  private clear() {
+    if (this.target) {
+      this.target.clear();
+    }
+    if (this.componentRef) {
+      this.componentRef.destroy();
+    }
+  }
+
+  private getComponent(component: any | CardMultiActionComponents, item: T | MultiActionListEntity) {
+    const { entityKey, entity } = this.getEntity(item);
+    if (component instanceof CardMultiActionComponents && entityKey) {
+      return {
+        component: component.getComponent(entityKey),
+        entityKey,
+        entity
+      };
+    }
+    return {
+      component,
+      entity
+    };
+  }
+
+  private getEntity(item: T | MultiActionListEntity) {
+    if (item instanceof MultiActionListEntity) {
+      return {
+        entityKey: item.entityKey,
+        entity: item.entity
+      };
+    }
+    return {
+      entity: item
+    };
+  }
 }

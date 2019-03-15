@@ -259,7 +259,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           )), tap(o => {
             this.allServiceInstanceNames = o.map(s => s.entity.name);
           }));
-      })).subscribe();
+      })
+    ).subscribe();
   }
 
   private setupForms() {

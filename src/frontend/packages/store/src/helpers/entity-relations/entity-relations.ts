@@ -19,9 +19,9 @@ import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../s
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
-import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
+import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
-import { EntitySchema } from '../entity-factory';
+import { entityFactory, EntitySchema } from '../entity-factory';
 import { pick } from '../reducer.helper';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
@@ -36,7 +36,6 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
-
 
 interface ValidateResultFetchingState {
   fetching: boolean;
@@ -404,6 +403,15 @@ function handleValidationLoopResults(
  * @export
  */
 export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
+  const pAction = isPaginatedAction(config.action);
+  if (!!pAction && pAction.__forcedPageSchemaKey__) {
+    const forcedSchema = entityFactory(pAction.__forcedPageSchemaKey__);
+    config.action = {
+      ...config.action,
+      entity: [forcedSchema],
+      entityKey: forcedSchema.key
+    };
+  }
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
   const { action, populateMissing, newEntities, allEntities, store, parentEntities } = config;
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
@@ -412,8 +420,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
       completed: Promise.resolve(config.apiResponse)
     };
   }
-
-  const relationAction = action as EntityInlineParentAction;
+  const relationAction = getRelationAction(action);
   const entityTree = fetchEntityTree(relationAction);
 
   const results = validationLoop({
@@ -425,6 +432,21 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   });
 
   return handleValidationLoopResults(store, results, config.apiResponse, action, allEntities);
+}
+
+function getRelationAction(action: IRequestAction): EntityInlineParentAction {
+  const pagAction = action as PaginatedAction;
+  if (pagAction.__forcedPageSchemaKey__) {
+    const entityKey = pagAction.__forcedPageSchemaKey__;
+    return {
+      ...action,
+      entityKey,
+      entity: entityFactory(entityKey)
+    } as EntityInlineParentAction;
+  }
+  return {
+    ...action
+  } as EntityInlineParentAction;
 }
 
 export function listEntityRelations(action: EntityInlineParentAction, fromCache = true) {
@@ -447,7 +469,7 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
 export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
   const eicAction = isEntityInlineChildAction(action);
   if (!eicAction || !action.flattenPagination) {
-    return observableOf(null);
+    return observableOf(action);
   }
   const parentEntitySchema = eicAction.parentEntitySchema as EntitySchema;
   const parentGuid = eicAction.parentGuid;

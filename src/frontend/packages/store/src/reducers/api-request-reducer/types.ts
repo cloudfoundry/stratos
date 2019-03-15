@@ -12,6 +12,14 @@ export interface ActionState {
   message: string;
 }
 
+// Multi action lists can have different entity types per page
+// We use schemaKey to track this type
+export interface ListActionState extends ActionState {
+  schemaKey?: string;
+  maxed?: boolean;
+  entityKey?: string;
+}
+
 export interface DeleteActionState extends ActionState {
   deleted: boolean;
 }

@@ -1,0 +1,35 @@
+<form class="stepper-form" [formGroup]="formGroup">
+  <mat-form-field>
+    <input matInput class="" formControlName="name" placeholder="Name" required>
+    <!-- // TODO: appNameChecking is undefined [appApplicationNameUnique]="appNameChecking" [appApplicationNameUniqueRequest]="getUniqueRequest"-->
+    <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
+      A service instance with this name already exists. Please enter a different one.
+    </mat-error>
+    <mat-error *ngIf="formGroup.controls.name?.hasError('maxlength')">
+      A service instance name cannot exceed 50 characters.
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput class="" formControlName="syslog_drain_url" placeholder="Syslog Drain Url">
+    <mat-error *ngIf="formGroup.controls.syslog_drain_url?.hasError('pattern')">Invalid URL</mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput formControlName="route_service_url" type="url" placeholder="Route Service URL">
+    <mat-error *ngIf="formGroup.controls.route_service_url?.hasError('pattern')">Invalid URL</mat-error>
+  </mat-form-field>
+  <mat-form-field class="stepper-form__tags">
+    <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
+      <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" (removed)="removeTag(tag)">
+        {{tag.label}}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+      <input placeholder="Tags" name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addTag($event)" />
+    </mat-chip-list>
+  </mat-form-field>
+  <mat-form-field class="">
+    <textarea matInput formControlName="credentials" placeholder="Credentials" matAutosizeMinRows="2" matAutosizeMaxRows="5"></textarea>
+    <mat-error *ngIf="formGroup.controls.credentials.hasError('notValidJson')">
+      Not valid JSON.
+    </mat-error>
+  </mat-form-field>
+</form>
