@@ -21,29 +21,17 @@ export const defaultDashboardState: DashboardState = {
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action) {
   switch (action.type) {
     case OPEN_SIDE_NAV:
-      return {
-        ...state, sidenavOpen: true
-      };
+      return { ...state, sidenavOpen: true };
     case CLOSE_SIDE_NAV:
-      return {
-        ...state, sidenavOpen: false
-      };
+      return { ...state, sidenavOpen: false };
     case TOGGLE_SIDE_NAV:
-      return {
-        ...state, sidenavOpen: !state.sidenavOpen
-      };
+      return { ...state, sidenavOpen: !state.sidenavOpen };
     case CHANGE_SIDE_NAV_MODE:
-      return {
-        ...state, sideNavMode: action.mode
-      };
+      return { ...state, sideNavMode: action.mode };
     case TOGGLE_HEADER_EVENT:
-      return {
-        ...state, headerEventMinimized: !state.headerEventMinimized
-      };
+      return { ...state, headerEventMinimized: !state.headerEventMinimized };
     case SHOW_SIDE_HELP:
-      return {
-        ...state, sideHelpOpen: true, sideHelpDocument: action.document
-      };
+      return { ...state, sideHelpOpen: true, sideHelpDocument: action.document };
     default:
       return state;
   }
