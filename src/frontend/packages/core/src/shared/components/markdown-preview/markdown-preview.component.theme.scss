@@ -1,6 +1,6 @@
 @mixin app-markdown-preview-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
-  
+
   .markdown-preview__header {
     background-color: mat-color($primary);
     color: mat-contrast($primary, 500);
