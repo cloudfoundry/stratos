@@ -149,6 +149,9 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
+import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
+import { BlurDirective } from './components/blur.directive';
 
 /* tslint:disable:max-line-length */
 
@@ -177,6 +180,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     LoadingPageComponent,
     DetailsCardComponent,
     FocusDirective,
+    BlurDirective,
     UniqueDirective,
     CodeBlockComponent,
     EventTabActorIconPipe,
@@ -267,6 +271,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesEntityListComponent,
     MultilineTitleComponent,
     EndpointCardComponent,
+    MarkdownPreviewComponent,
+    MarkdownContentObserverDirective
   ],
   exports: [
     FormsModule,
@@ -286,6 +292,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     UptimePipe,
     SteppersModule,
     FocusDirective,
+    BlurDirective,
     UniqueDirective,
     CodeBlockComponent,
     LogViewerComponent,
@@ -365,7 +372,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     StackedInputActionComponent,
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
-    MultilineTitleComponent
+    MultilineTitleComponent,
+    MarkdownPreviewComponent,
+    MarkdownContentObserverDirective
   ],
   entryComponents: [
     DialogConfirmComponent,

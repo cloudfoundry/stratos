@@ -9,4 +9,9 @@
       <router-outlet></router-outlet>
     </div>
   </div>
+  <mat-sidenav #sideHelp mode="over" position="end" (closedStart)="sideHelpClosed($event)">
+    <div class="dashboard__side-help">
+      <app-markdown-preview [documentUrl]="helpDocumentUrl"></app-markdown-preview>
+    </div>    
+  </mat-sidenav>
 </mat-sidenav-container>

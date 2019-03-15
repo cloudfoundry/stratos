@@ -1,0 +1,21 @@
+.markdown-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  &__header {
+    display: flex;
+    flex: 0 0 56px;
+    height: 56px;
+
+    h1 {
+      align-self: center;
+      font-size: 20px;
+      margin-left: 24px;
+    }
+  }
+  &__content {
+    flex: 1;
+    overflow: auto;
+    padding: 10px 24px;
+  }
+}

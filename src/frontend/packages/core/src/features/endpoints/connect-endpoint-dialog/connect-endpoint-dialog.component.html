@@ -3,9 +3,14 @@
   </mat-progress-bar>
 </div>
 <div class="connection-dialog">
-  <h2 mat-dialog-title>
-    Connect to {{ data.name }}
-  </h2>
+  <div class="connection-dialog__title">
+    <h2 mat-dialog-title>
+      Connect to {{ data.name }}
+    </h2>
+    <button *ngIf="helpDocumentUrl" [appBlur]="true" class="connection-dialog__help" mat-icon-button (click)="showHelp()">
+      <mat-icon>help</mat-icon>
+    </button>
+  </div>
   <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
     <mat-dialog-content class="connection-dialog__content">
       <mat-form-field *ngIf="authTypesForEndpoint.length > 1">
