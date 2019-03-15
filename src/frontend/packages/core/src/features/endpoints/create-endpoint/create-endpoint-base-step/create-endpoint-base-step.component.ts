@@ -12,6 +12,7 @@ import { getEndpointTypes } from '../../endpoint-helpers';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
+  subType: string;
 }
 
 @Component({
@@ -33,7 +34,7 @@ export class CreateEndpointBaseStepComponent {
     this.pSelectedTile = tile;
     if (tile) {
       this.store.dispatch(new RouterNav({
-        path: `endpoints/new/${tile.data.type}`,
+        path: `endpoints/new/${tile.data.type}/${tile.data.subType || ''}`,
         query: {
           [BASE_REDIRECT_QUERY]: true
         }
@@ -41,8 +42,7 @@ export class CreateEndpointBaseStepComponent {
     }
   }
   constructor(public store: Store<AppState>) {
-    const endpointTypes = getEndpointTypes();
-    this.tileSelectorConfig = endpointTypes.map(et => {
+    this.tileSelectorConfig = getEndpointTypes().map(et => {
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
         et.label,
         et.imagePath ? {
@@ -51,7 +51,10 @@ export class CreateEndpointBaseStepComponent {
             matIcon: et.icon,
             matIconFont: et.iconFont
           },
-        { type: et.value }
+        {
+          type: et.type,
+          subType: et.subType
+        }
       );
     });
   }
