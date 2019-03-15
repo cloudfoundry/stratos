@@ -99,6 +99,7 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -277,7 +278,8 @@ import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-uni
     TileSelectorComponent,
     SpecifyUserProvidedDetailsComponent,
     AddServiceInstanceBaseStepComponent,
-    AppNameUniqueDirective
+    AppNameUniqueDirective,
+    EndpointCardComponent,
   ],
   exports: [
     FormsModule,

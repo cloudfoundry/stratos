@@ -16,6 +16,7 @@ import { UserService } from './user.service';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { endpointHealthChecks, EndpointHealthCheck } from '../../endpoints-health-checks';
+import { getEndpointTypes } from '../features/endpoints/endpoint-helpers';
 
 
 @Injectable()
@@ -24,6 +25,17 @@ export class EndpointsService implements CanActivate {
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
+
+  static getLinkForEndpoint(endpoint: EndpointModel): string {
+    if (!endpoint) {
+      return '';
+    }
+    const ext = getEndpointTypes().find(ep => ep.value === endpoint.cnsi_type);
+    if (ext && ext.homeLink) {
+      return ext.homeLink(endpoint.guid).join('/');
+    }
+    return '';
+  }
 
   constructor(
     private store: Store<AppState>,
@@ -100,6 +112,5 @@ export class EndpointsService implements CanActivate {
       })
     );
   }
-
 
 }

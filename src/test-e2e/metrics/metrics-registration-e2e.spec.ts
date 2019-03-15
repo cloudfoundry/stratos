@@ -45,10 +45,10 @@ describe('Metrics', () => {
 
     // Check that we have one row
     expect(endpointsPage.isActivePage()).toBeTruthy();
-    expect(endpointsPage.table.isPresent()).toBeTruthy();
+    expect(endpointsPage.cards.isPresent()).toBeTruthy();
 
-    expect(endpointsPage.table.getRows().count()).toBe(1);
-    endpointsPage.table.getEndpointDataForEndpoint('MetricsTest').then((data: EndpointMetadata) => {
+    expect(endpointsPage.cards.getCardCount()).toBe(1);
+    endpointsPage.cards.getEndpointDataForEndpoint('MetricsTest', 'Metrics').then((data: EndpointMetadata) => {
       expect(data.name).toEqual('MetricsTest');
       expect(data.url).toEqual('https://www.google.com');
       expect(data.connected).toBeFalsy();
