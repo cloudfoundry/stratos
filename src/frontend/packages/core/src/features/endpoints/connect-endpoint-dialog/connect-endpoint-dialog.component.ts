@@ -32,6 +32,7 @@ import {
   IEndpointAuthComponent,
 } from '../../../core/extension/extension-types';
 import { getCanShareTokenForEndpointType, getEndpointAuthTypes, getEndpointType } from '../endpoint-helpers';
+import { ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 
 
 @Component({
@@ -76,6 +77,8 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
   // The auth type that was initially auto-selected
   private autoSelected: EndpointAuthTypeConfig;
   public authFormComponentRef: ComponentRef<IAuthForm>;
+
+  public helpDocumentUrl: string;
 
   constructor(
     public store: Store<AppState>,
@@ -131,6 +134,8 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
       systemShared: false
     });
 
+    this.helpDocumentUrl = this.autoSelected.help;
+
     this.setupObservables();
     this.setupSubscriptions();
   }
@@ -138,6 +143,10 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Template container reference is not available at construction, so do this on init
     this.createComponent(this.autoSelected.component);
+  }
+
+  showHelp() {
+    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
   }
 
   authChanged() {
@@ -153,6 +162,7 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
       this.createComponent(authType.component);
     }
     this.bodyContent = '';
+    this.helpDocumentUrl = authType.help;
   }
   // Dynamically create the component for the selected auth type
   createComponent(component: Type<IAuthForm>) {

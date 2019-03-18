@@ -41,7 +41,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
     this.pRow = row;
 
     const e = getEndpointType(row.cnsi_type, row.sub_type);
-    if (!e.listDetailsComponent) {
+    if (!e || !e.listDetailsComponent) {
       return;
     }
     if (!this.cell) {

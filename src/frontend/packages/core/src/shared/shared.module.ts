@@ -158,6 +158,9 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
+import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
+import { BlurDirective } from './components/blur.directive';
 
 /* tslint:disable:max-line-length */
 
@@ -186,6 +189,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     LoadingPageComponent,
     DetailsCardComponent,
     FocusDirective,
+    BlurDirective,
     UniqueDirective,
     CodeBlockComponent,
     EventTabActorIconPipe,
@@ -278,6 +282,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     SpecifyUserProvidedDetailsComponent,
     AddServiceInstanceBaseStepComponent,
+    MarkdownPreviewComponent,
+    MarkdownContentObserverDirective
     AppNameUniqueDirective,
     EndpointCardComponent
   ],
@@ -299,6 +305,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     UptimePipe,
     SteppersModule,
     FocusDirective,
+    BlurDirective,
     UniqueDirective,
     CodeBlockComponent,
     LogViewerComponent,
@@ -381,6 +388,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MultilineTitleComponent,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
+    MarkdownPreviewComponent,
+    MarkdownContentObserverDirective
     AppNameUniqueDirective
   ],
   entryComponents: [

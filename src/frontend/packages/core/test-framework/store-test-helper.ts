@@ -616,7 +616,9 @@ function getDefaultInitialTestStoreState(): AppState {
     dashboard: {
       sidenavOpen: true,
       sideNavMode: 'side',
-      headerEventMinimized: false
+      headerEventMinimized: false,
+      sideHelpOpen: false,
+      sideHelpDocument: ''
     },
     createApplication: {
       cloudFoundryDetails: null,

@@ -1,13 +1,13 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, Inject, Renderer2, ElementRef } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
-import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+import { Subscription, Observable } from 'rxjs';
+import { debounceTime, filter, withLatestFrom, first, map } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import { ChangeSideNavMode, CloseSideNav, OpenSideNav, ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
@@ -16,7 +16,8 @@ import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
-
+import { DOCUMENT } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -33,11 +34,15 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private endpointsService: EndpointsService,
+    @Inject(DOCUMENT) private document: Document,
+    private renderer: Renderer2
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();
     }
   }
+
+  public helpDocumentUrl: string;
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;
@@ -49,6 +54,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   private breakpointSub: Subscription;
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
+
+  @ViewChild('sideHelp') public sideHelp: MatDrawer;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 
@@ -72,6 +79,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
         this.sidenav.close();
       }
+      if (dashboard.sideHelpOpen) {
+        this.sideHelp.close();
+      }
+
     });
   }
 
@@ -112,8 +123,29 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       .subscribe((dashboard: DashboardState) => {
         dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
         this.sidenav.mode = dashboard.sideNavMode;
+        if (dashboard.sideHelpOpen) {
+          this.showSideHelp(dashboard.sideHelpDocument);
+        }
       });
+  }
 
+  private showSideHelp(documentUrl: string) {
+    // Need to hide any open dialogs first
+    this.hideShowOverlays(true);
+    this.helpDocumentUrl = documentUrl;
+    this.sideHelp.open();
+   }
+
+  public sideHelpClosed() {
+    this.hideShowOverlays(false);
+  }
+
+  private hideShowOverlays(hide: boolean) {
+    const overlay = this.document.querySelector('.cdk-overlay-container');
+    if (!!overlay) {
+      const display = hide ? 'none' : 'unset';
+      this.renderer.setStyle(overlay, 'display', display);
+    }
   }
 
   private enableMobileNav() {

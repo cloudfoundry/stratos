@@ -6,6 +6,7 @@ export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';
 export const TOGGLE_SIDE_NAV = '[Dashboard] Toggle side nav';
 export const CHANGE_SIDE_NAV_MODE = '[Dashboard] Change side nav mode';
 export const TOGGLE_HEADER_EVENT = '[Dashboard] Toggle header event';
+export const SHOW_SIDE_HELP = '[Dashboard] Show side help';
 
 export class OpenSideNav implements Action {
   constructor() { }
@@ -29,4 +30,11 @@ export class ChangeSideNavMode implements Action {
 
 export class ToggleHeaderEvent implements Action {
   type = TOGGLE_HEADER_EVENT;
+}
+
+export class ShowSideHelp implements Action {
+
+  constructor(public document: string) {}
+
+  type = SHOW_SIDE_HELP;
 }

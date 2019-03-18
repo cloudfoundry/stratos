@@ -63,6 +63,7 @@ export interface EndpointAuthTypeConfig {
   form?: any;
   data?: any;
   component: Type<IAuthForm>;
+  help?: string;
 }
 
 /**
