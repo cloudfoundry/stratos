@@ -45,6 +45,7 @@ describe('Edit Service Instance', () => {
   it('- should be able edit a service instance', () => {
     servicesWall.clickCreateServiceInstance();
     createServiceInstance.waitForPage();
+    createServiceInstance.selectMarketplace();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
 
     servicesWall.waitForPage();
