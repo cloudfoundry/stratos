@@ -33,12 +33,12 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
@@ -278,6 +278,12 @@ func main() {
 // GetDatabaseConnection makes db connection available to plugins
 func (portalProxy *portalProxy) GetDatabaseConnection() *sql.DB {
 	return portalProxy.DatabaseConnectionPool
+}
+
+func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
+	plugin := portalProxy.Plugins[name]
+	log.Warn(portalProxy.Plugins)
+	return plugin
 }
 
 func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware, error) {

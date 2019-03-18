@@ -289,34 +289,30 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	if info.Files == 1 {
 		log.Debugf("Checking for archive file - %s", lastFilePath)
 
-		archiver := getArchiverFor(lastFilePath)
+		// Overwrite generic 'filefolder' type
+		info.DeploySource.SourceType = "archive"
 
-		if archiver != nil {
-			// Overwrite generic 'filefolder' type
-			info.DeploySource.SourceType = "archive"
+		log.Debug("Unpacking archive ......")
+		unpackPath := filepath.Join(tempDir, "application")
+		err := os.Mkdir(unpackPath, 0700)
 
-			log.Debug("Unpacking archive ......")
-			unpackPath := filepath.Join(tempDir, "application")
-			err := os.Mkdir(unpackPath, 0700)
-
-			err = archiver.Open(lastFilePath, unpackPath)
-			if err != nil {
-				return StratosProject{}, tempDir, err
-			}
-
-			// Just check to see if we actually unpacked into a root folder
-			contents, err := ioutil.ReadDir(unpackPath)
-			if err != nil {
-				return StratosProject{}, tempDir, err
-			}
-
-			if len(contents) == 1 && contents[0].IsDir() {
-				unpackPath = filepath.Join(unpackPath, contents[0].Name())
-			}
-
-			// Archive done
-			tempDir = unpackPath
+		err = archiver.Unarchive(lastFilePath, unpackPath)
+		if err != nil {
+			return StratosProject{}, tempDir, err
 		}
+
+		// Just check to see if we actually unpacked into a root folder
+		contents, err := ioutil.ReadDir(unpackPath)
+		if err != nil {
+			return StratosProject{}, tempDir, err
+		}
+
+		if len(contents) == 1 && contents[0].IsDir() {
+			unpackPath = filepath.Join(unpackPath, contents[0].Name())
+		}
+
+		// Archive done
+		tempDir = unpackPath
 	}
 
 	// The client (v2) can request only source upload and for deploy to wait until it sends a message
@@ -342,20 +338,6 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	}
 
 	return stratosProject, tempDir, nil
-}
-
-// Check the suffix of the file name and return an archiver that can handle that file type
-// Return nil if not a supported archive format
-func getArchiverFor(filePath string) archiver.Archiver {
-	if strings.HasSuffix(filePath, ".tar.gz") || strings.HasSuffix(filePath, ".tgz") {
-		return archiver.TarGz
-	} else if strings.HasSuffix(filePath, ".tar") {
-		return archiver.Tar
-	} else if strings.HasSuffix(filePath, ".zip") {
-		return archiver.Zip
-	}
-
-	return nil
 }
 
 func getGitSCMSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {

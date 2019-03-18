@@ -1,0 +1,14 @@
+<app-page-header [tabs]="tabLinks" [breadcrumbs]="breadcrumbs">
+  <h1>{{ title }}</h1>
+  <div class="page-header-right" *ngIf="!(isFetching$ | async)">
+    <button mat-icon-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+</app-page-header>
+<!--
+<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Kubernetes details'">
+  <router-outlet></router-outlet>
+</app-loading-page>
+-->
+<router-outlet></router-outlet>

@@ -1,0 +1,50 @@
+<header [ngClass]="{ 'header-bar': true }">
+  <div class="header-bar__content">
+    <div class="header-bar__logo">
+      <h1>
+        <a href="/" routerLink="/" class="reverse">{{ appName }}</a>
+      </h1>
+    </div>
+    <nav class="header-bar__navigation">
+      <ul>
+        <li class="header-bar__search" *ngIf="showSearch" [class.focused]="searchFocused">
+          <form (ngSubmit)="searchCharts(searchBox)">
+            <mat-icon svgIcon="search"></mat-icon>
+            <input placeholder="Search charts..." #searchBox (focus)="searchFocused = true" (blur)="searchFocused = false">
+          </form>
+        </li>
+        <li *ngIf="showSearch" class="separator"></li>
+        <li routerLink="/charts" routerLinkActive="active">
+          <a class="reverse">
+            Charts
+          </a>
+        </li>
+        <li *ngIf="!loggedIn" class="separator"></li>
+        <li *ngIf="!loggedIn">
+          <a class="reverse" href="{{config.backendHostname}}/auth">
+            Login with GitHub
+          </a>
+        </li>
+        <li *ngIf="loggedIn && user.email" class="separator"></li>
+        <li *ngIf="loggedIn && user.email">
+          {{ user.email }}
+          <a class="reverse" (click)="logout()" target="_blank">
+            (logout)
+          </a>
+        </li>
+        <li class="separator"></li>
+        <li>
+          <a class="reverse" href="{{ aboutUrl }}" target="_blank">
+            About
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <nav class="header-bar__open" [class.opened]="openedMenu">
+      <div (click)="openMenu()">
+        <mat-icon *ngIf="!openedMenu" svgIcon="menu"></mat-icon>
+        <mat-icon *ngIf="openedMenu" svgIcon="close"></mat-icon>
+      </div>
+    </nav>
+  </div>
+</header>

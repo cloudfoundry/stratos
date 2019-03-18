@@ -148,7 +148,11 @@ func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
-	// no-op
+	// Helm Routes
+	echoGroup.GET("/helm/releases", c.ListReleases)
+	echoGroup.POST("/helm/install", c.InstallRelease)
+	echoGroup.GET("/helm/versions", c.GetHelmVersions)
+	echoGroup.DELETE("/helm/releases/:endpoint/:name", c.DeleteRelease)
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

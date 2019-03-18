@@ -1,6 +1,7 @@
 <div>
-  <mat-icon *ngIf="row.connectionStatus === 'connected'" matTooltip="Connected">cloud_done</mat-icon>
-  <mat-icon *ngIf="row.connectionStatus === 'disconnected'" matTooltip="Disconnected">cloud_off</mat-icon>
-  <mat-spinner *ngIf="row.connectionStatus === 'checking'" diameter="20"></mat-spinner>
-  <mat-icon *ngIf="!row.connectionStatus || row.connectionStatus === 'unknown'">help_outline</mat-icon>
+  <span *ngIf="!connectable">-</span>
+  <mat-icon *ngIf="connectable && row.connectionStatus === 'connected'">cloud_done</mat-icon>
+  <mat-icon *ngIf="connectable && row.connectionStatus === 'disconnected'">cloud_off</mat-icon>
+  <mat-spinner *ngIf="connectable && row.connectionStatus === 'checking'" diameter="20"></mat-spinner>
+  <mat-icon *ngIf="connectable && (!row.connectionStatus || row.connectionStatus === 'unknown')">help_outline</mat-icon>
 </div>
