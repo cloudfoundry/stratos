@@ -31,11 +31,6 @@ interface BaseEndpointTypeConfig {
    * When all endpoints are displayed together use the order to define the position. Lower number = earlier position
    */
   order?: number;
-
-}
-
-export interface EndpointTypeExtensionConfigSubType extends BaseEndpointTypeConfig {
-  subType: string;
 }
 
 /**
@@ -50,6 +45,10 @@ export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
  */
 export interface EndpointTypeConfig extends BaseEndpointTypeConfig {
   type: EndpointType;
+}
+
+export interface EndpointTypeExtensionConfigSubType extends BaseEndpointTypeConfig {
+  subType: string;
 }
 
 export interface EndpointAuthTypeConfig {
