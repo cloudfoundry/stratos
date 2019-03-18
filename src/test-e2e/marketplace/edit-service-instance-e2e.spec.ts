@@ -31,7 +31,7 @@ describe('Edit Service Instance', () => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance, servicesHelperE2E);
   });
 
   const timeout = 100000;

@@ -19,12 +19,10 @@ describe('Service Instances Wall', () => {
   const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
 
   const createServiceInstance = new CreateServiceInstance();
-  let createMarketplaceServiceInstance;
   let e2eSetup;
-  const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
@@ -34,10 +32,7 @@ describe('Service Instances Wall', () => {
   beforeEach(() => {
     servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
     servicesWallPage.waitForPage();
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
-    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, new CreateMarketplaceServiceInstance(), servicesHelperE2E);
   });
 
   describe('', () => {
@@ -45,16 +40,17 @@ describe('Service Instances Wall', () => {
     extendE2ETestTime(timeout);
 
     it('- should create service instance all tests depend on', () => {
-      // Create service instance
-      servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
+      createServiceInstance.selectMarketplace();
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
   });
 
   it('- should reach service instances wall page', () => {
+    servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
+    servicesWallPage.waitForPage();
     expect(servicesWallPage.isActivePage()).toBeTruthy();
   });
 
