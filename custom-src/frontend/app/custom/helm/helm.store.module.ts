@@ -9,7 +9,7 @@ const helmEndpointTypes: EndpointTypeExtensionConfig[] = [{
   type: 'helm',
   label: 'Helm Repository',
   authTypes: [],
-  icon: 'kubernetes',
+  icon: 'helm',
   iconFont: 'stratos-icons',
   homeLink: (guid) => ['/monocular/repos', guid],
   entitySchemaKeys: monocularEntityKeys,

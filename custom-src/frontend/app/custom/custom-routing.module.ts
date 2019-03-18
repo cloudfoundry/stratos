@@ -21,7 +21,7 @@ const kubernetes: Routes = [
     data: {
       stratosNavigation: {
         text: 'Helm',
-        matIcon: 'kubernetes',
+        matIcon: 'helm',
         matIconFont: 'stratos-icons',
         position: 60,
         requiresEndpointType: 'helm'
