@@ -283,7 +283,7 @@ import { BlurDirective } from './components/blur.directive';
     SpecifyUserProvidedDetailsComponent,
     AddServiceInstanceBaseStepComponent,
     MarkdownPreviewComponent,
-    MarkdownContentObserverDirective
+    MarkdownContentObserverDirective,
     AppNameUniqueDirective,
     EndpointCardComponent
   ],
@@ -389,7 +389,7 @@ import { BlurDirective } from './components/blur.directive';
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
     MarkdownPreviewComponent,
-    MarkdownContentObserverDirective
+    MarkdownContentObserverDirective,
     AppNameUniqueDirective
   ],
   entryComponents: [

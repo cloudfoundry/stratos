@@ -19,6 +19,7 @@
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "assets": [
               "src/frontend/packages/core/assets",
+              { "glob": "**/*", "input": "custom-src/frontend/assets/custom", "output": "/core/assets/custom" },
               "src/frontend/packages/core/favicon.ico"
             ],
             "styles": [
@@ -101,7 +102,8 @@
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "assets": [
               "src/frontend/packages/core/favicon.ico",
-              "src/frontend/packages/core/assets"
+              "src/frontend/packages/core/assets",
+              { "glob": "**/*", "input": "custom-src/frontend/assets/custom", "output": "/core/assets/custom" }
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.css"
@@ -157,7 +159,8 @@
             "scripts": [],
             "assets": [
               "src/frontend/packages/core/src/favicon.ico",
-              "src/frontend/packages/core/src/assets"
+              "src/frontend/packages/core/assets",
+              { "glob": "**/*", "input": "custom-src/frontend/assets/custom", "output": "/core/assets/custom" }
             ]
           }
         },

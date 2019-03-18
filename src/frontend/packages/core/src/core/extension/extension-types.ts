@@ -35,24 +35,29 @@ interface BaseEndpointTypeConfig {
    * Indicates if this endpoint types can not be connected (optional - default is false)
    */
   doesNotSupportConnect?: boolean;
+
 }
 
 /**
- * Contains configuration for endpoint type extensions
- */
-export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
-  subTypes?: EndpointTypeExtensionConfigSubType[];
-}
-
-/**
- * Contains configuration for an endpoint type. All EndpointTypeExtensionConfig and their subtypes will be in a flat list of this type
+ * Configuration for an endpoint type used to defined endpoints via extensions and at runtime. All EndpointTypeExtensionConfig and their
+ * subtypes will be in a flat list of this type
  */
 export interface EndpointTypeConfig extends BaseEndpointTypeConfig {
   type: EndpointType;
 }
 
-export interface EndpointTypeExtensionConfigSubType extends BaseEndpointTypeConfig {
+/**
+ * Configuration for an endpoint sub type extension
+ */
+interface EndpointSubTypeExtensionConfig extends BaseEndpointTypeConfig {
   subType: string;
+}
+
+/**
+ * Configuration for an endpoint type extension
+ */
+export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
+  subTypes?: EndpointSubTypeExtensionConfig[];
 }
 
 export interface EndpointAuthTypeConfig {

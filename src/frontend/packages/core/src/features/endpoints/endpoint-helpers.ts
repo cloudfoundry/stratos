@@ -36,43 +36,56 @@ export interface EndpointIcon {
   font: string;
 }
 
+export enum EndpointAuthTypeNames {
+  CREDS = 'creds',
+  SSO = 'sso',
+  NONE = 'none'
+}
+
 const metricType: EndpointTypeExtensionConfig = {
   type: 'metrics',
   label: 'Metrics',
   allowTokenSharing: true,
   imagePath: '/core/assets/endpoint-icons/metrics.svg',
-  homeLink: (guid) => ['/endpoints/metrics', guid]
+  homeLink: (guid) => ['/endpoints/metrics', guid],
+  authTypes: [EndpointAuthTypeNames.CREDS, EndpointAuthTypeNames.NONE]
 };
 
 const endpointTypes: EndpointTypeConfig[] = [{
   ...metricType,
 }];
 
+export const endpointAuthTypeCreds: EndpointAuthTypeConfig = {
+  name: 'Username and Password',
+  value: EndpointAuthTypeNames.CREDS,
+  form: {
+    username: ['', Validators.required],
+    password: ['', Validators.required],
+  },
+  types: new Array<EndpointType>(),
+  component: CredentialsAuthFormComponent
+};
+
+export const endpointAuthTypeSso: EndpointAuthTypeConfig = {
+  name: 'Single Sign-On (SSO)',
+  value: EndpointAuthTypeNames.SSO,
+  form: {},
+  types: new Array<EndpointType>(),
+  component: SSOAuthFormComponent
+};
+
+export const endpointAuthTypeNone: EndpointAuthTypeConfig = {
+  name: 'No Authentication',
+  value: EndpointAuthTypeNames.NONE,
+  form: {},
+  types: new Array<EndpointType>(),
+  component: NoneAuthFormComponent
+};
+
 let endpointAuthTypes: EndpointAuthTypeConfig[] = [
-  {
-    name: 'Username and Password',
-    value: 'creds',
-    form: {
-      username: ['', Validators.required],
-      password: ['', Validators.required],
-    },
-    types: new Array<EndpointType>('cf', 'metrics'),
-    component: CredentialsAuthFormComponent
-  },
-  {
-    name: 'Single Sign-On (SSO)',
-    value: 'sso',
-    form: {},
-    types: new Array<EndpointType>('cf'),
-    component: SSOAuthFormComponent
-  },
-  {
-    name: 'No Authentication',
-    value: 'none',
-    form: {},
-    types: new Array<EndpointType>('metrics'),
-    component: NoneAuthFormComponent
-  },
+  endpointAuthTypeCreds,
+  endpointAuthTypeSso,
+  endpointAuthTypeNone,
 ];
 
 const endpointTypesMap = {};

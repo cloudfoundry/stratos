@@ -11,6 +11,7 @@ const helmEndpointTypes: EndpointTypeExtensionConfig[] = [{
   authTypes: [],
   icon: 'helm',
   iconFont: 'stratos-icons',
+  imagePath: '/core/assets/custom/helm.svg',
   homeLink: (guid) => ['/monocular/repos', guid],
   entitySchemaKeys: monocularEntityKeys,
   doesNotSupportConnect: true

@@ -20,6 +20,9 @@ $app-header-height: 56px;
   &__inline-help {
     min-width: 600px;
   }
+  &__side-help {
+    width: 600px;
+  }
 }
 
 .routing-indicator {
@@ -27,16 +30,4 @@ $app-header-height: 56px;
   position: absolute;
   right: 0;
   z-index: 999;
-}
-
-.side-help {
-  margin-top: 56px;
-  padding: 10px 24px;
-
-  h1 {
-    height: 0;
-    margin: 0;
-    padding: 0;
-    visibility: hidden;
-  }
 }

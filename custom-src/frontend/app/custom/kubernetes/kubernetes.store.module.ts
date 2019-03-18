@@ -30,22 +30,22 @@ const kubernetesEndpointTypes: EndpointTypeExtensionConfig[] = [{
     subType: 'caasp',
     label: 'SUSE CaaS Platform',
     authTypes: [KubeEndpointAuthTypes.CONFIG],
-    imagePath: '/core/assets/custom/SUSE_icon_color.png'
+    imagePath: '/core/assets/custom/caasp.png'
   }, {
     subType: 'aks',
     label: 'Azure AKS',
     authTypes: [KubeEndpointAuthTypes.CONFIG_AZ],
-    imagePath: '/core/assets/custom/aks.png'
+    imagePath: '/core/assets/custom/aks.svg'
   }, {
     subType: 'eks',
     label: 'Amazon EKS',
     authTypes: [KubeEndpointAuthTypes.AWS_IAM],
-    imagePath: '/core/assets/custom/eks.jpg'
+    imagePath: '/core/assets/custom/eks.svg'
   }, {
     subType: 'gke',
-    label: 'Google Kubernetes Engine (GKE)',
+    label: 'Google Kubernetes Engine',
     authTypes: [KubeEndpointAuthTypes.GKE],
-    imagePath: '/core/assets/custom/kubernetes.svg'
+    imagePath: '/core/assets/custom/gke.svg'
   }],
   authTypes: [KubeEndpointAuthTypes.CERT_AUTH],
   icon: 'kubernetes',
@@ -103,8 +103,9 @@ const kubernetesAuthTypes: EndpointAuthTypeConfig[] = [{
     gkeconfig: ['', Validators.required],
   },
   types: new Array<EndpointType>(),
-  component: KubernetesGKEAuthFormComponent
-  }
+  component: KubernetesGKEAuthFormComponent,
+  help: '/core/assets/custom/help/en/connecting_gke.md'
+}
 ];
 
 @StratosExtension({
