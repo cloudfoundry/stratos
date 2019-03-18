@@ -37,7 +37,7 @@ func (c *AWSIAMUserInfo) IsExpired() bool {
 }
 
 func (c *KubernetesSpecification) FetchIAMToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
-	log.Info("FetchIAMToken")
+	log.Debug("FetchIAMToken")
 
 	// Place the IAM properties into a JSON Struct and store that in the Refresh Token
 	// Then use the refresh method to get a current access token
