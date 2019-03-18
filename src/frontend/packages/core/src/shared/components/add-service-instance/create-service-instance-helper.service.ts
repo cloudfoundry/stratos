@@ -1,8 +1,22 @@
 import { Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, switchMap, first } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
+import { GetServiceInstances } from '../../../../../store/src/actions/service-instances.actions';
+import { GetServicePlanVisibilities } from '../../../../../store/src/actions/service-plan-visibility.actions';
+import { GetServicePlanServiceInstances } from '../../../../../store/src/actions/service-plan.actions';
+import { GetServiceInstancesForSpace } from '../../../../../store/src/actions/space.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import {
+  entityFactory,
+  serviceInstancesSchemaKey,
+  servicePlanVisibilitySchemaKey,
+} from '../../../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { QParam } from '../../../../../store/src/types/pagination.types';
 import {
   IService,
   IServiceBroker,
@@ -11,35 +25,9 @@ import {
   IServicePlanVisibility,
 } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { pathGet } from '../../../core/utils.service';
-import { CloudFoundryEndpointService } from '../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { getServicePlans, getSvcAvailability, getCfService, getServiceBroker } from '../../../features/service-catalog/services-helper';
-import { ServicePlanAccessibility } from '../../../features/service-catalog/services.service';
-
+import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
 import { CF_GUID } from '../../entity.tokens';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../store/src/app-state';
-import {
-  entityFactory,
-  servicePlanVisibilitySchemaKey,
-  organizationSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-  serviceInstancesSchemaKey
-} from '../../../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationPaginationKey,
-  createEntityRelationKey
-} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetServicePlanVisibilities } from '../../../../../store/src/actions/service-plan-visibility.actions';
-import { selectCreateServiceInstanceServicePlan } from '../../../../../store/src/selectors/create-service-instance.selectors';
-import { GetSpace, GetServiceInstancesForSpace } from '../../../../../store/src/actions/space.actions';
-import { QParam } from '../../../../../store/src/types/pagination.types';
-import { GetServicePlanServiceInstances } from '../../../../../store/src/actions/service-plan.actions';
-import { GetServiceInstances } from '../../../../../store/src/actions/service-instances.actions';
-import { IOrganization, ISpace } from '../../../core/cf-api.types';
 
 export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -194,7 +182,8 @@ export class CreateServiceInstanceHelper {
   // }
 
   getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null, cfGuid: string = null) => {
-    let action, paginationKey;
+    let action;
+    let paginationKey;
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, `${spaceGuid}-${servicePlanGuid}`);
       const q = [new QParam('service_plan_guid', servicePlanGuid, ':')];

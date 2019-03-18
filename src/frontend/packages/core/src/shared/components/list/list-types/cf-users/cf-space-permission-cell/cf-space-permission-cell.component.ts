@@ -41,7 +41,9 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   ) {
     super(store, confirmDialog, cfUserService);
 
-    const spaces$: Observable<APIResource<ISpace>[]> = this.config$.pipe(switchMap(config => config.spaces$));
+    const spaces$: Observable<APIResource<ISpace>[]> = this.config$.pipe(
+      switchMap(config => config.spaces$ as Observable<APIResource<ISpace>[]>)
+    );
     const isOrgLevel$: Observable<boolean> = this.config$.pipe(map(config => config.isOrgLevel));
     this.chipsConfig$ = combineLatest(
       this.rowSubject.asObservable(),

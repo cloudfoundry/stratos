@@ -5,12 +5,12 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../store/src/app-state';
-import { SetupUAA, SetUAAScope } from '../../../../../store/src/actions/setup.actions';
-import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
+import { SetUAAScope, SetupUAA } from '../../../../../store/src/actions/setup.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-console-uaa-wizard',
@@ -98,18 +98,18 @@ export class ConsoleUaaWizardComponent implements OnInit {
   }
   ngOnInit() {
     this.uaaForm = new FormGroup({
-      apiUrl: new FormControl('', [<any>Validators.required]),
+      apiUrl: new FormControl('', [Validators.required as any]),
       skipSll: new FormControl(false),
-      clientId: new FormControl('', [<any>Validators.required]),
+      clientId: new FormControl('', [Validators.required as any]),
       clientSecret: new FormControl(''),
-      adminUsername: new FormControl('', [<any>Validators.required]),
-      adminPassword: new FormControl('', [<any>Validators.required]),
+      adminUsername: new FormControl('', [Validators.required as any]),
+      adminPassword: new FormControl('', [Validators.required as any]),
       useSSO: new FormControl(false),
     });
 
     let observer;
-    this.validateUAAForm = Observable.create((_observer) => {
-      observer = _observer;
+    this.validateUAAForm = new Observable(o => {
+      observer = o;
       observer.next(false);
     });
 

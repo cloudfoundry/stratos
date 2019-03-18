@@ -242,12 +242,14 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       // Wait for the store to have the correct org
       filter(newRoles => newRoles && newRoles.orgGuid === orgGuid),
       first()
-    ).subscribe(null, null, () => {
-      // The org has changed, completely recreate the roles table
-      this.destroySpacesList();
+    ).subscribe({
+      complete: () => {
+        // The org has changed, completely recreate the roles table
+        this.destroySpacesList();
 
-      this.wrapperRef = this.spaceRolesTable.createComponent(this.wrapperFactory);
-      this.cd.detectChanges();
+        this.wrapperRef = this.spaceRolesTable.createComponent(this.wrapperFactory);
+        this.cd.detectChanges();
+      }
     });
   }
 

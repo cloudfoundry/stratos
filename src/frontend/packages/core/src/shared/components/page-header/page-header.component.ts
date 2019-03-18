@@ -24,7 +24,7 @@ export class PageHeaderComponent {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
-  public _favorite: UserFavorite<IFavoriteMetadata>;
+  public pFavorite: UserFavorite<IFavoriteMetadata>;
 
   @Input() hideSideNavButton = false;
 
@@ -41,8 +41,8 @@ export class PageHeaderComponent {
   @Input() showHistory = true;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
-    if (favorite && (!this._favorite || (favorite.guid !== this._favorite.guid))) {
-      this._favorite = favorite;
+    if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
+      this.pFavorite = favorite;
       const mapperFunction = favoritesConfigMapper.getMapperFunction(favorite);
       const prettyType = favoritesConfigMapper.getPrettyTypeName(favorite);
       const prettyEndpointType = favoritesConfigMapper.getPrettyTypeName({
@@ -68,7 +68,7 @@ export class PageHeaderComponent {
 
   public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;
-  public actionsKey: String;
+  public actionsKey: string;
 
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {

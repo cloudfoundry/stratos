@@ -1,5 +1,5 @@
-import { APIResource } from './api.types';
 import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
+import { APIResource } from './api.types';
 
 export function getDefaultCfUserMissingRoles(): CfUserMissingRoles {
   return {
@@ -72,39 +72,28 @@ export enum SpaceUserRoleNames {
 export class UserRoleInOrg {
   /**
    * See {OrgUserRoleNames.MANAGER} for name
-   *
-   * @type {Boolean}
-   * @memberof UserRoleInOrg
    */
-  managers: Boolean;
+  managers: boolean;
   /**
    * See {OrgUserRoleNames.BILLING_MANAGERS} for name
-   *
-   * @type {Boolean}
-   * @memberof UserRoleInOrg
    */
-  billing_managers: Boolean;
+  /* tslint:disable-next-line:variable-name  */
+  billing_managers: boolean;
   /**
    * See {OrgUserRoleNames.AUDITOR} for name
-   *
-   * @type {Boolean}
-   * @memberof UserRoleInOrg
    */
-  auditors: Boolean;
+  auditors: boolean;
   /**
    * See {OrgUserRoleNames.USER} for name
-   *
-   * @type {Boolean}
-   * @memberof UserRoleInOrg
    */
-  users: Boolean;
+  users: boolean;
 }
 /**
  * Temporary function. Once we move to typescript 2.7 (blocked on angular/compiler cli) we can use constant named properties in
  * UserRoleInOrg, thus can create roles without this workaround function. See
  * https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#constant-named-properties for details
  */
-export function createUserRoleInOrg(manager: Boolean, billingManager: Boolean, auditor: Boolean, user: Boolean): UserRoleInOrg {
+export function createUserRoleInOrg(manager: boolean, billingManager: boolean, auditor: boolean, user: boolean): UserRoleInOrg {
   const res = {};
   res[OrgUserRoleNames.MANAGER] = manager;
   res[OrgUserRoleNames.BILLING_MANAGERS] = billingManager;
@@ -129,25 +118,16 @@ export interface IUserPermissionInSpace {
 export interface UserRoleInSpace {
   /**
    * See {SpaceUserRoleNames.MANAGER} for name
-   *
-   * @type {Boolean}
-   * @memberof UserRoleInSpace
    */
-  managers: Boolean;
+  managers: boolean;
   /**
    * See {SpaceUserRoleNames.DEVELOPER} for name
-   *
-   * @type {Boolean}
-   * @memberof UserRoleInSpace
    */
-  developers: Boolean;
+  developers: boolean;
   /**
    * See {SpaceUserRoleNames.AUDITOR} for name
-   *
-   * @type {Boolean}
-   * @memberof UserRoleInSpace
    */
-  auditors: Boolean;
+  auditors: boolean;
 }
 
 /**
@@ -156,7 +136,7 @@ export interface UserRoleInSpace {
  * https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#constant-named-properties for details
  *
  */
-export function createUserRoleInSpace(manager: Boolean, auditor: Boolean, developer: Boolean): UserRoleInSpace {
+export function createUserRoleInSpace(manager: boolean, auditor: boolean, developer: boolean): UserRoleInSpace {
   const res = {};
   res[SpaceUserRoleNames.MANAGER] = manager;
   res[SpaceUserRoleNames.DEVELOPER] = developer;

@@ -1,11 +1,11 @@
 import { Action } from '@ngrx/store';
 
+import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { gitBranchesSchemaKey, gitCommitSchemaKey } from '../helpers/entity-factory';
-import { GitAppDetails, SourceType, OverrideAppDetails } from '../types/deploy-application.types';
+import { GitAppDetails, OverrideAppDetails, SourceType } from '../types/deploy-application.types';
 import { GitBranch, GitCommit } from '../types/git.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
-import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
@@ -87,9 +87,8 @@ export class FetchCommits implements PaginatedAction {
 
   /**
    * Creates an instance of FetchCommits.
-   * @param {string} projectName For example `cloudfoundry-incubator/stratos`
-   * @param {string} sha Branch name, tag, etc
-   * @memberof FetchCommits
+   * @param projectName For example `cloudfoundry-incubator/stratos`
+   * @param sha Branch name, tag, etc
    */
   constructor(public scm: GitSCM, public projectName: string, public sha: string) {
     this.paginationKey = scm.getType() + projectName + sha;

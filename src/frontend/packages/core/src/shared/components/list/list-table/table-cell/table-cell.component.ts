@@ -13,6 +13,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
   TableCellEventActionComponent,
@@ -84,8 +85,8 @@ import {
   CfSpacePermissionCellComponent,
 } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import {
-  TableCellEndpointIsAdminComponent,
-} from '../../list-types/endpoint/table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
+  TableCellEndpointDetailsComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
 import {
   TableCellEndpointNameComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
@@ -117,7 +118,6 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-
 
 /* tslint:enable:max-line-length */
 export const listTableCells = [
@@ -160,11 +160,12 @@ export const listTableCells = [
   TableCellSpaceNameComponent,
   TableCellAppCfOrgSpaceHeaderComponent,
   TableCellAppCfOrgSpaceComponent,
-  TableCellEndpointIsAdminComponent,
   TableCellAServicePlanPublicComponent,
   TableCellAServicePlanPriceComponent,
   TableCellAServicePlanExtrasComponent,
-  TableCellFavoriteComponent
+  TableCellFavoriteComponent,
+  TableCellEndpointDetailsComponent,
+  ...coreEndpointListDetailsComponents
 ];
 
 @Component({
@@ -215,7 +216,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
     if (component) {
 
       // Add to target to ensure ngcontent is correct in new component
-      this.cellComponent = <TableCellCustom<T>>component.instance;
+      this.cellComponent = component.instance as TableCellCustom<T>;
 
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;

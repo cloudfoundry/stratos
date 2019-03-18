@@ -60,7 +60,7 @@ export function buildMetricsChartConfig<T = any>(
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: getServiceItemValueMapper(dataType),
       metricsAction,
-      filterSeries: filterSeries,
+      filterSeries,
     },
     MetricsChartHelpers.buildChartConfig(yAxisLabel, yAxisTickFormatter)
   ];

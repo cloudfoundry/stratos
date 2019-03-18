@@ -2,6 +2,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityFactory, routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { IRoute } from '../../../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../../../core/utils.service';
 import { getRoute, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
@@ -13,10 +17,6 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { ListPaginationMultiFilterChange, RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
-import { entityFactory, routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export interface ListCfRoute extends IRoute {
   url: string;
@@ -25,18 +25,21 @@ export interface ListCfRoute extends IRoute {
   mappedAppsCountLabel?: string;
 }
 
+function isListCfRoute(anything: any): boolean {
+  return !!anything.url && !!anything.isTCPRoute;
+}
+
 export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
 
   cfGuid: string;
   appGuid: string;
 
   /**
-   *Creates an instance of CfRoutesDataSourceBase.
-   * @param {string} [appGuid]
+   * Creates an instance of CfRoutesDataSourceBase.
+   * @param [appGuid]
    * Are the routes specific to a single app?
-   * @param {boolean} [genericRouteState=true]
+   * @param [genericRouteState=true]
    * Use the generic route state which enables the route busy ux
-   * @memberof CfRoutesDataSourceBase
    */
   constructor(
     store: Store<AppState>,
@@ -66,7 +69,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
           return [];
         }
         return routes.map(route => {
-          if (route.entity['url'] && route.entity['isTCPRoute']) {
+          if (isListCfRoute(route.entity)) {
             return route as APIResource<ListCfRoute>;
           }
           const entity: ListCfRoute = {
@@ -100,13 +103,6 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
 
   /**
    * Create a row state manager that will set the route row state to busy/blocked/deleting etc
-   * @private
-   * @static
-   * @param store
-   * @param paginationKey
-   * @param {boolean} genericRouteState
-   * @returns {{ rowsState: Observable<RowsState>, sub: Subscription }}
-   * @memberof CfRoutesDataSourceBase
    */
   private static createRowState(store, paginationKey, genericRouteState: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
     if (genericRouteState) {
@@ -157,7 +153,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
           const entityMonitor = new EntityMonitor(store, route.metadata.guid, routeSchemaKey, entityFactory(routeSchemaKey));
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
-              const unmapping = request.updating['unmapping'] || { busy: false };
+              const unmapping = request.updating.unmapping || { busy: false };
               const busy = unmapping.busy;
               rowStateManager.setRowState(route.metadata.guid, {
                 deleting: request.deleting.busy,

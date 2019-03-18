@@ -25,7 +25,7 @@ export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> 
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
-      transformEntities: transformEntities,
+      transformEntities,
       listConfig
     });
   }

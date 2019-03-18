@@ -1,6 +1,7 @@
 import { favoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { EndpointModel } from './endpoint.types';
+import { LoggerService } from '../../../core/src/core/logger.service';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
@@ -78,8 +79,19 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
       .join(favoriteGuidSeparator);
   }
 
-  static getEntityGuidFromFavoriteGuid(favoriteGuid: string) {
-    return favoriteGuid.split(favoriteGuidSeparator)[0];
+  static getEntityGuidFromFavoriteGuid(favoriteGuid: string, logger: LoggerService): string {
+    const parts = favoriteGuid.split(favoriteGuidSeparator);
+    if (parts.length < 3) {
+      logger.error('Failed to determine entity guid from favorite guid: ', parts);
+      return null;
+    } else if (parts.length === 3)  {
+      return favoriteGuid.split(favoriteGuidSeparator)[0];
+    } else {
+      // cf guid may contain a hypen meaning there are more than 3 parts, so use everything prior to the 2nd to last part
+      return favoriteGuid.replace(
+        `${favoriteGuidSeparator}${parts[parts.length - 2]}${favoriteGuidSeparator}${parts[parts.length - 1]}`,
+        '');
+    }
   }
 }
 

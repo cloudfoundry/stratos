@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
 import { SHOW_SNACK_BAR, ShowSnackBar } from '../actions/snackBar.actions';
@@ -12,7 +12,8 @@ export class SnackBarEffects {
     private actions$: Actions,
     public snackBar: MatSnackBar
   ) { }
-  @Effect({ dispatch: false }) getInfo$ = this.actions$.ofType<ShowSnackBar>(SHOW_SNACK_BAR).pipe(
+  @Effect({ dispatch: false }) getInfo$ = this.actions$.pipe(
+    ofType<ShowSnackBar>(SHOW_SNACK_BAR),
     map(action => {
       const snackBarRef = this.snackBar.open(action.message, null, {
         duration: 5000

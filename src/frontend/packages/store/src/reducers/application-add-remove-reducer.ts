@@ -1,12 +1,12 @@
-import { APIResource } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
+import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
 import { CREATE_SUCCESS, DELETE_SUCCESS } from '../actions/application.actions';
 import { deepMergeState } from '../helpers/reducer.helper';
-import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
+import { APIResource } from '../types/api.types';
+import { APISuccessOrFailedAction } from '../types/request.types';
 
 
 export function applicationAddRemoveReducer() {
-  return function (state: APIResource, action: APISuccessOrFailedAction) {
+  return (state: APIResource, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case CREATE_SUCCESS:
         return addApplicationToSpace(state, action);
@@ -53,7 +53,7 @@ function deleteApplicationFromSpace(state: APIResource, action: APISuccessOrFail
   const updatedSpaces = {};
   Object.keys(state).forEach(spaceGuid => {
     const space = state[spaceGuid] as APIResource<SpaceAsAppRefs>;
-    const apps = <string[]>space.entity.apps;
+    const apps = space.entity.apps as string[];
     if (apps && apps.findIndex((value) => value === appGuid) >= 0) {
       const newSpaceEntity = {
         entity: {

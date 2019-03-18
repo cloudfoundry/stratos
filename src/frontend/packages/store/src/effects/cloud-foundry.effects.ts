@@ -1,15 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { flatMap, mergeMap, catchError } from 'rxjs/operators';
+import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
-import { GET_INFO, GetCFInfo } from '../actions/cloud-foundry.actions';
-import { NormalizedResponse } from '../types/api.types';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, ICFAction } from '../types/request.types';
-import { AppState } from './../app-state';
-import { cfInfoSchemaKey } from '../helpers/entity-factory';
 import { environment } from '../../../core/src/environments/environment.prod';
+import { GET_INFO, GetCFInfo } from '../actions/cloud-foundry.actions';
+import { cfInfoSchemaKey } from '../helpers/entity-factory';
+import { NormalizedResponse } from '../types/api.types';
+import {
+  ICFAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../types/request.types';
+import { AppState } from './../app-state';
 
 @Injectable()
 export class CloudFoundryEffects {
@@ -21,7 +26,8 @@ export class CloudFoundryEffects {
   ) { }
 
   @Effect()
-  fetchInfo$ = this.actions$.ofType<GetCFInfo>(GET_INFO).pipe(
+  fetchInfo$ = this.actions$.pipe(
+    ofType<GetCFInfo>(GET_INFO),
     flatMap(action => {
       const actionType = 'fetch';
       const apiAction = {
@@ -31,7 +37,7 @@ export class CloudFoundryEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const headers = new Headers({ 'x-cap-cnsi-list': action.cfGuid });
       const requestArgs = {
-        headers: headers
+        headers
       };
       const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
       return this.http

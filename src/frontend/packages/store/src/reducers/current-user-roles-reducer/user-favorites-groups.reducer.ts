@@ -122,20 +122,20 @@ function addEntityFavorite(favoriteGroups: IUserFavoritesGroups, action: SaveUse
   };
 }
 
-function addFavoriteToGroup(_favoriteGroup: IUserFavoriteGroup = getDefaultFavoriteGroup(), favorite: UserFavorite<IFavoriteMetadata>) {
-  const favoriteGroup = {
-    ..._favoriteGroup,
+function addFavoriteToGroup(favoriteGroup: IUserFavoriteGroup = getDefaultFavoriteGroup(), favorite: UserFavorite<IFavoriteMetadata>) {
+  const fg = {
+    ...favoriteGroup,
     entitiesIds: [
-      ..._favoriteGroup.entitiesIds
+      ...favoriteGroup.entitiesIds
     ]
   };
   const { guid } = favorite;
   const isEndpoint = isEndpointTypeFavorite(favorite);
-  if (!isEndpoint && guid && !favoriteGroup.entitiesIds.includes(guid)) {
-    favoriteGroup.entitiesIds.push(guid);
+  if (!isEndpoint && guid && !fg.entitiesIds.includes(guid)) {
+    fg.entitiesIds.push(guid);
   }
   if (isEndpoint) {
-    favoriteGroup.ethereal = false;
+    fg.ethereal = false;
   }
-  return favoriteGroup;
+  return fg;
 }

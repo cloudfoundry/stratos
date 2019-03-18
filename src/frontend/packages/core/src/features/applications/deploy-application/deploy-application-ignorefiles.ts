@@ -42,20 +42,20 @@ export class GitIgnoreFilter {
    * Each of these two arrays in turn contains two regexps, one
    * strict and one for 'maybe'.
    *
-   * @param  {String} content  The content to parse,
-   * @returns {Array[]}         The parsed positive and negatives definitions.
+   * @param  content  The content to parse,
+   * @returns          The parsed positive and negatives definitions.
    */
   parse(content) {
     const prepareRegexes = this.prepareRegexes.bind(this);
     return content.split('\n')
-      .map(function (line) {
+      .map(line => {
         line = line.trim();
         return line;
       })
-      .filter(function (line) {
+      .filter(line => {
         return line && line[0] !== '#';
       })
-      .reduce(function (lists, line) {
+      .reduce((lists, line) => {
         const isNegative = line[0] === '!';
         if (isNegative) {
           line = line.slice(1);
@@ -74,13 +74,13 @@ export class GitIgnoreFilter {
         return list
           .sort()
           .map(pattern => prepareRegexes(pattern))
-          .reduce(function (ls, prepared) {
+          .reduce((ls, prepared) => {
             ls[0].push(prepared[0]);
             ls[1].push(prepared[1]);
             return ls;
           }, [[], [], []]);
       })
-      .map(function (item) {
+      .map(item => {
         return [
           item[0].length > 0 ? new RegExp('^((' + item[0].join(')|(') + '))') : new RegExp('$^'),
           item[1].length > 0 ? new RegExp('^((' + item[1].join(')|(') + '))') : new RegExp('$^')
@@ -105,7 +105,7 @@ export class GitIgnoreFilter {
     const prepareRegexPattern = this.prepareRegexPattern.bind(this);
     return pattern
       .split('/')
-      .map(function (item, index) {
+      .map((item, index) => {
         if (index) {
           return '([\\/]?(' + prepareRegexPattern(item) + '\\b|$))';
         } else {

@@ -89,7 +89,7 @@ type StateEntity = ISpace | IOrganization;
 interface StateEntities<T> { [guid: string]: APIResource<StateEntity>; }
 
 export function userSpaceOrgReducer<T extends StateEntity>(isSpace: boolean) {
-  return function (state: StateEntities<T>, action: APISuccessOrFailedAction) {
+  return (state: StateEntities<T>, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case ADD_ROLE_SUCCESS:
       case REMOVE_ROLE_SUCCESS:
