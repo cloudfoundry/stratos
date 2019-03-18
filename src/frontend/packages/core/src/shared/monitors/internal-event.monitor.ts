@@ -2,7 +2,12 @@ import { NgZone } from '@angular/core';
 import * as moment from 'moment';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, share, startWith } from 'rxjs/operators';
-import { InternalEventSubjectState, InternalEventsState, InternalEventSeverity } from '../../../../store/src/types/internal-events.types';
+
+import {
+  InternalEventSeverity,
+  InternalEventsState,
+  InternalEventSubjectState,
+} from '../../../../store/src/types/internal-events.types';
 
 export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {
@@ -36,7 +41,6 @@ export class InternalEventMonitor {
     subjectIds: string[] | Observable<string[]> = observableOf(null),
     private ngZone: NgZone,
   ) {
-    const empty = {};
     if (Array.isArray(subjectIds)) {
       subjectIds = observableOf(subjectIds);
     }
