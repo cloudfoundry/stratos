@@ -92,7 +92,7 @@ export class CardComponent<T> {
       if (completeSetupData.componentType && completeSetupData.dataSource && completeSetupData.item) {
         this.setupComponent(completeSetupData.componentType, completeSetupData.item, completeSetupData.dataSource);
       }
-    }
+    };
   })();
 
   private setupComponent(componentType: cardTypes<T>, item: T | MultiActionListEntity, dataSource: IListDataSource<T>) {
