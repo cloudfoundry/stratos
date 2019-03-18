@@ -2,6 +2,44 @@
 
 Weekly status updates are published here.
 
+## 8 March 2019
+
+This week:
+
+- Added a card view to the endpoints view
+- Continued to refine the support for User Provided Service Instances
+- Working on support to allow list views to show different entity types in the same list
+- Ensured features requiring persistence database are not enabled when using SQLite
+
+## 1 March 2019
+
+This week:
+
+- Updated the front-end code to use Angular 7 (in review)
+- Continued to add support for User Provided Service Instances
+- Reviewed, tweaked and merged our first phase of work on improving extensions support
+
+## 22 February 2019
+
+This week:
+
+- The user invite feature has been reviewed and merged
+- Front-end code restructuring to support next phase of extensions work
+- Pre-work for update to Angular 7
+- Add support for User Provided Services
+- Updates to our documentation on our needs for the Cloud Foundry V3 API
+
+**Important:**
+
+Hello All - Two CVEs in Stratos were recently discovered - both are fixed in 2.3.0 - so we **encourage you to update** to that latest version to address these issues. Both relate to the session cookie:
+
+https://www.cloudfoundry.org/blog/cve-2019-3783/
+https://www.cloudfoundry.org/blog/cve-2019-3784/
+
+**Deployment Survey**
+
+We want to understand more about how everyone is deploying Stratos - so we can better support the most used deployment scenarios and (possibly) remove some of the deployment mechanisms that aren’t being used - we’ve got a quick survey we’d love it if you could fill out: https://www.surveymonkey.co.uk/r/MLXDMKG
+
 ## 15 February 2019
 
 This week:

@@ -1,0 +1,31 @@
+.endpoint-card {
+  cursor: pointer;
+  &.no-link {
+    cursor: default;
+  }
+  &:focus {
+    outline: 0;
+  }
+
+  &__image {
+    height: 48px;
+    margin-right: 10px;
+
+    &--img {
+      height: 100%;
+      width: auto;
+    }
+  }
+
+  &__title {
+    display: flex;
+    &__text {
+      display: flex;
+      flex-direction: column;
+      &--subtext {
+        font-size: 13px;
+        opacity: .6;
+      }
+    }
+  }
+}

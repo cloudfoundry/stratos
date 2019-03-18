@@ -1,6 +1,6 @@
+import { browser, promise } from 'protractor';
+
 import { CFPage } from '../../po/cf-page.po';
-import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
-import { promise, browser } from 'protractor';
 
 
 export class CfSpaceLevelPage extends CFPage {

@@ -49,7 +49,7 @@ jobs:
     env:
     - CI_ENV=true
     script:
-    - npm test
+    - npm run test
     - npm run codecov
   - name: Backend Unit Tests
     before_script:

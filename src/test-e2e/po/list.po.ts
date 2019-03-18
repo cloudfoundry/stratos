@@ -142,7 +142,7 @@ export class ListCardComponent extends Component {
   }
 
   private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
-    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+    const card = this.locator.all(by.css(`${ListCardComponent.cardsCss} ${metaType}`)).filter(elem =>
       elem.getText().then(text => text === title)
     ).first();
     browser.wait(until.presenceOf(card));
@@ -426,7 +426,7 @@ export class ListComponent extends Component {
 
   public empty: ListEmptyComponent;
 
-  constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
+  constructor(public locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.header = new ListHeaderComponent(locator);
