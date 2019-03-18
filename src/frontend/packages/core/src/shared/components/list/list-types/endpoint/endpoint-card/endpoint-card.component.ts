@@ -19,7 +19,7 @@ import {
 import { CardStatus } from '../../../../../shared.types';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { BaseEndpointsDataSource } from '../../cf-endpoints/base-endpoints-data-source';
+import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { CfEndpointDetailsComponent } from '../cf-endpoint-details/cf-endpoint-details.component';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 
@@ -72,11 +72,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
     this.pDs = ds;
-    if (!ds) {
-      return;
-    }
-
-    if (!this.cardMenu) {
+    // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
+    if (ds && !ds.endpointType && !this.cardMenu) {
       this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
         label: endpointAction.label,
         action: () => endpointAction.action(this.pRow),

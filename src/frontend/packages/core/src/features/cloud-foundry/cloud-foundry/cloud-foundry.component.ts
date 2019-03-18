@@ -3,13 +3,13 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import {
   CFEndpointsListConfigService,
 } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { AppState } from '../../../../../store/src/app-state';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-cloud-foundry',
@@ -27,7 +27,7 @@ export class CloudFoundryComponent {
   connectedEndpoints$: Observable<number>;
   constructor(
     private store: Store<AppState>,
-    private cfService: CloudFoundryService
+    cfService: CloudFoundryService
   ) {
     this.connectedEndpoints$ = cfService.connectedCFEndpoints$.pipe(
       map(connectedEndpoints => {
