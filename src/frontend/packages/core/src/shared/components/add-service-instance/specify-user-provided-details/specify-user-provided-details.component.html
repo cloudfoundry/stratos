@@ -1,13 +1,16 @@
 <form class="stepper-form" [formGroup]="formGroup">
   <mat-form-field>
-    <input matInput class="" formControlName="name" placeholder="Name" required>
-    <!-- // TODO: appNameChecking is undefined [appApplicationNameUnique]="appNameChecking" [appApplicationNameUniqueRequest]="getUniqueRequest"-->
-    <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
+    <input matInput class="" formControlName="name" placeholder="Name" [appApplicationNameUnique]="appNameChecking"
+      [appApplicationNameUniqueRequest]="getUniqueRequest" required>
+    <mat-error *ngIf="formGroup.controls.name?.hasError('appNameTaken')">
       A service instance with this name already exists. Please enter a different one.
     </mat-error>
     <mat-error *ngIf="formGroup.controls.name?.hasError('maxlength')">
       A service instance name cannot exceed 50 characters.
     </mat-error>
+    <div *ngIf="!formGroup.controls.name?.hasError('maxlength')" class="inline-icon inline-icon__form">
+      <app-stateful-icon [state]="appNameChecking?.status"></app-stateful-icon>
+    </div>
   </mat-form-field>
   <mat-form-field>
     <input matInput class="" formControlName="syslog_drain_url" placeholder="Syslog Drain Url">
@@ -23,11 +26,13 @@
         {{tag.label}}
         <mat-icon matChipRemove>cancel</mat-icon>
       </mat-chip>
-      <input placeholder="Tags" name="tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addTag($event)" />
+      <input placeholder="Tags" name="tags" [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addTag($event)" />
     </mat-chip-list>
   </mat-form-field>
   <mat-form-field class="">
-    <textarea matInput formControlName="credentials" placeholder="Credentials" matAutosizeMinRows="2" matAutosizeMaxRows="5"></textarea>
+    <textarea matInput formControlName="credentials" placeholder="Credentials" matAutosizeMinRows="2"
+      matAutosizeMaxRows="5"></textarea>
     <mat-error *ngIf="formGroup.controls.credentials.hasError('notValidJson')">
       Not valid JSON.
     </mat-error>

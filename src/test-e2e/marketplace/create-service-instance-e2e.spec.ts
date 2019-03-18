@@ -4,28 +4,33 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 describe('Create Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
+  let createMarketplaceServiceInstance: CreateMarketplaceServiceInstance;
+  let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.user)
+
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+
   });
 
   beforeEach(() => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
+    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
   });
 
   it('- should reach create service instance page', () => {
-    expect(createServiceInstance.isActivePage()).toBeTruthy();
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
   describe('Long running tests - ', () => {
     const timeout = 100000;
@@ -45,7 +50,7 @@ describe('Create Service Instance', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.cancel();
+    createMarketplaceServiceInstance.stepper.cancel();
 
     servicesWall.waitForPage();
 
@@ -55,13 +60,13 @@ describe('Create Service Instance', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service
     servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
-    createServiceInstance.stepper.cancel();
+    createMarketplaceServiceInstance.stepper.cancel();
 
     servicesWall.waitForPage();
 
@@ -71,17 +76,17 @@ describe('Create Service Instance', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service
     servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service Plan
     servicesHelperE2E.setServicePlan();
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
-    createServiceInstance.stepper.cancel();
+    createMarketplaceServiceInstance.stepper.cancel();
 
     servicesWall.waitForPage();
 
@@ -90,24 +95,24 @@ describe('Create Service Instance', () => {
   it('- should return user to Service summary when cancelled on service instance details', () => {
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service
     servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service Plan
     servicesHelperE2E.setServicePlan();
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
-    createServiceInstance.stepper.isBindAppStepDisabled().then(bindAppDisabled => {
+    createMarketplaceServiceInstance.stepper.isBindAppStepDisabled().then(bindAppDisabled => {
       if (!bindAppDisabled) {
         // Bind App
         servicesHelperE2E.setBindApp();
-        createServiceInstance.stepper.next();
+        createMarketplaceServiceInstance.stepper.next();
       }
 
-      createServiceInstance.stepper.cancel();
+      createMarketplaceServiceInstance.stepper.cancel();
 
       servicesWall.waitForPage();
     });

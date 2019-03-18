@@ -8,17 +8,19 @@ import { SideNavMenuItem } from '../po/side-nav.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
   const secretsHelper = new SecretsHelpers();
-  let servicesHelperE2E: ServicesHelperE2E;
-  let e2eSetup;
 
   // When there's only one CF connected no filter is shown, hence we can't test the filter.
   // Ideally we should test with both one and more than one cf's connected, however for the moment we're just testing without
   const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
 
+  const createServiceInstance = new CreateServiceInstance();
+  let e2eSetup;
+  let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
     e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -30,6 +32,7 @@ describe('Service Instances Wall', () => {
   beforeEach(() => {
     servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
     servicesWallPage.waitForPage();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, new CreateMarketplaceServiceInstance(), servicesHelperE2E);
   });
 
   describe('', () => {
@@ -37,17 +40,17 @@ describe('Service Instances Wall', () => {
     extendE2ETestTime(timeout);
 
     it('- should create service instance all tests depend on', () => {
-      // Create service instance
-      const createServiceInstance = new CreateServiceInstance();
-      servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
+      createServiceInstance.selectMarketplace();
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
     });
   });
 
   it('- should reach service instances wall page', () => {
+    servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
+    servicesWallPage.waitForPage();
     expect(servicesWallPage.isActivePage()).toBeTruthy();
   });
 
@@ -125,7 +128,7 @@ describe('Service Instances Wall', () => {
         browser.getCurrentUrl().then(url => {
           expect(url.endsWith('edit')).toBeTruthy();
         });
-        const createServiceInstance = new CreateServiceInstance();
+        const createServiceInstance = new CreateMarketplaceServiceInstance();
         createServiceInstance.stepper.cancel();
         servicesWallPage.isActivePage();
       });

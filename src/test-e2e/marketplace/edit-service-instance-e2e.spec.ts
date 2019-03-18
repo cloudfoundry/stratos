@@ -12,18 +12,26 @@ import { ServicesWallPage } from './services-wall.po';
 
 describe('Edit Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
-  const servicesWall = new ServicesWallPage();
+  let createMarketplaceServiceInstance;
+  let e2eSetup;
   let servicesHelperE2E: ServicesHelperE2E;
+  const servicesWall = new ServicesWallPage();
   const serviceNamePrefix = 'e';
   const serviceNamesToDelete = [];
+
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+  });
+
+  beforeEach(() => {
+    createServiceInstance.navigateTo();
+    createServiceInstance.waitForPage();
+    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance, servicesHelperE2E);
   });
 
   const timeout = 100000;
@@ -37,6 +45,7 @@ describe('Edit Service Instance', () => {
   it('- should be able edit a service instance', () => {
     servicesWall.clickCreateServiceInstance();
     createServiceInstance.waitForPage();
+    createServiceInstance.selectMarketplace();
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
 
     servicesWall.waitForPage();

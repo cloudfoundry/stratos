@@ -41,11 +41,12 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     return action;
   }
 
-  constructor(store: Store<AppState>,
-              appService: ApplicationService,
-              datePipe: DatePipe,
-              currentUserPermissionService: CurrentUserPermissionsService,
-              private paginationMonitorFactory: PaginationMonitorFactory
+  constructor(
+    store: Store<AppState>,
+    appService: ApplicationService,
+    datePipe: DatePipe,
+    currentUserPermissionService: CurrentUserPermissionsService,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     super(store, appService, datePipe, currentUserPermissionService);
 

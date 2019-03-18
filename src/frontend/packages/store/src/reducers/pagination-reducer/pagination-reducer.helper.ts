@@ -242,7 +242,8 @@ function getObservables<T = any>(
         filter(([ent, pagination]) => {
           return !!pagination && isPageReady(pagination, isLocal);
         }),
-        publishReplay(1), refCount(),
+        publishReplay(1),
+        refCount(),
         tap(([ent, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
@@ -254,7 +255,7 @@ function getObservables<T = any>(
             )));
           }
         }),
-        switchMap(() => paginationMonitor.currentPage$)
+        switchMap(() => paginationMonitor.currentPage$),
       );
 
   return {
@@ -298,7 +299,7 @@ export function isPageReady(pagination: PaginationEntityState, isLocal = false) 
   if (!pagination.pageRequests[pagination.currentPage]) {
     return false;
   }
-  return pagination.pageRequests[pagination.currentPage].busy || false;
+  return !pagination.pageRequests[pagination.currentPage].busy || false;
 }
 
 export function isFetchingPage(pagination: PaginationEntityState): boolean {

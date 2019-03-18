@@ -38,9 +38,10 @@ describe('Entity Relations - populate from parent', () => {
 
   it('No list in parent - no op', (done) => {
     inject([Store], (iStore: Store<AppState>) => {
-      populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true))
-        .pipe(first()).subscribe((action: WrapperRequestActionSuccess) => {
-          expect(action).toBeUndefined();
+      const testAction = new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true);
+      populatePaginationFromParent(iStore, testAction)
+        .pipe(first()).subscribe((action: GetAllOrganizationSpaces) => {
+          expect(action).toEqual(testAction);
           done();
         });
     })();

@@ -14,8 +14,12 @@ import {
 import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import {
+  EndpointCardComponent,
+  EndpointCardComponent,
+} from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
+import {
+  ServiceInstanceCardComponent,
   ServiceInstanceCardComponent,
 } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
 import {
@@ -38,6 +42,12 @@ export const listCards = [
   EndpointCardComponent
 ];
 type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
+
+interface ISetupData<T> {
+  dataSource: IListDataSource<T>;
+  componentType: cardTypes<T>;
+  item: T | MultiActionListEntity;
+}
 @Component({
   selector: 'app-card',
   templateUrl: './card.component.html',
@@ -49,36 +59,24 @@ type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
 export class CardComponent<T> {
   private componentRef: ComponentRef<any>;
   private pComponent: cardTypes<T>;
-  private pItem: T | MultiActionListEntity;
+  private pDataSource: IListDataSource<T>;
 
-  @Input() set component(component: cardTypes<T>) {
-    if (!this.pComponent) {
-      this.setupComponent(component, this.item);
-      this.pComponent = component;
+  @Input() set dataSource(dataSource: IListDataSource<T>) {
+    if (!this.pDataSource) {
+      this.componentCreator({ dataSource });
+      this.pDataSource = dataSource;
     }
   }
-  get component() {
-    return this.pComponent;
+
+  @Input() set component(componentType: cardTypes<T>) {
+    if (!this.pComponent) {
+      this.componentCreator({ componentType });
+      this.pComponent = componentType;
+    }
   }
 
   @Input() set item(item: T | MultiActionListEntity) {
-    this.pItem = item;
-    this.setupComponent(this.component, item);
-  }
-
-  get item() {
-    return this.pItem;
-  }
-
-  private pDataSource: IListDataSource<T> = null as IListDataSource<T>;
-  @Input() set dataSource(ds: IListDataSource<T>) {
-    this.pDataSource = ds;
-    if (this.cardComponent) {
-      this.cardComponent.dataSource = this.pDataSource;
-    }
-  }
-  get dataSource() {
-    return this.pDataSource;
+    this.componentCreator({ item });
   }
 
   @ViewChild('target', { read: ViewContainerRef }) target: ViewContainerRef;
@@ -87,7 +85,20 @@ export class CardComponent<T> {
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  private setupComponent(componentType: cardTypes<T>, item: T | MultiActionListEntity) {
+  private componentCreator = (() => {
+    let completeSetupData: Partial<ISetupData<T>> = {};
+    return (setupData: Partial<ISetupData<T>>, ) => {
+      completeSetupData = {
+        ...completeSetupData,
+        ...setupData
+      };
+      if (completeSetupData.componentType && completeSetupData.dataSource && completeSetupData.item) {
+        this.setupComponent(completeSetupData.componentType, completeSetupData.item, completeSetupData.dataSource);
+      }
+    };
+  })();
+
+  private setupComponent(componentType: cardTypes<T>, item: T | MultiActionListEntity, dataSource: IListDataSource<T>) {
     if (!componentType || !item) {
       return;
     }
@@ -95,14 +106,11 @@ export class CardComponent<T> {
     if (component) {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
       if (componentFactory) {
-        // Add to target to ensure ngcontent is correct in new component
-        // if (componentRef !== this.componentRef) {
         this.clear();
         this.componentRef = this.target.createComponent(componentFactory);
         this.cardComponent = this.componentRef.instance as CardCell<T>;
-        // }
         this.cardComponent.row = entity;
-        this.cardComponent.dataSource = this.dataSource;
+        this.cardComponent.dataSource = dataSource;
         this.cardComponent.entityKey = entityKey;
       }
     }

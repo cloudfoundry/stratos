@@ -245,27 +245,18 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createOrg() {
-    const orgList$ = this.getEndpointsAndOrgs$.pipe(
-      switchMap(endpoints => {
-        return combineLatest(
-          this.cf.select.asObservable(),
-          observableOf(endpoints),
-          this.allOrgs.entities$
-        );
-      }),
-      map(
-        ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
-          const [pag, cfList] = endpointsAndOrgs;
-          if (selectedCF && entities) {
-            return entities
-              .map(org => org.entity)
-              .filter(org => org.cfGuid === selectedCF)
-              .sort((a, b) => a.name.localeCompare(b.name));
-          }
-          return [];
-        }
-      )
-    );
+    const orgList$ = combineLatest(
+      this.cf.select.asObservable(),
+      this.allOrgs.entities$
+    ).pipe(map(([selectedCF, entities]) => {
+      if (selectedCF && entities) {
+        return entities
+          .map(org => org.entity)
+          .filter(org => org.cfGuid === selectedCF)
+          .sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return [];
+    }));
 
     this.org = {
       list$: orgList$,

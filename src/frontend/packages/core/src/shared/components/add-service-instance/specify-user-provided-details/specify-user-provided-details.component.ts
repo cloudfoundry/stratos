@@ -28,6 +28,7 @@ import { environment } from '../../../../environments/environment';
 import { isValidJsonValidator } from '../../../form-validators';
 import { EntityMonitor } from '../../../monitors/entity-monitor';
 import { StepOnNextResult } from '../../stepper/step/step.component';
+import { AppNameUniqueChecking } from '../../../app-name-unique.directive/app-name-unique.directive';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -49,6 +50,8 @@ export class SpecifyUserProvidedDetailsComponent {
   public spaceGuid: string;
   @Input()
   public serviceInstanceId: string;
+
+  public appNameChecking = new AppNameUniqueChecking();
 
   constructor(
     private store: Store<AppState>,
