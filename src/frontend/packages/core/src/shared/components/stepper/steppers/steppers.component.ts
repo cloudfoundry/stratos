@@ -179,7 +179,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           const timer = setInterval(() => {
             if (this.allSteps[index].blocked === false) {
               this.allSteps[index].active = true;
-              this.allSteps[index].onEnter(this.enterData);
+              if (this.allSteps[index].onEnter) {
+                this.allSteps[index].onEnter(this.enterData);
+              }
               clearInterval(timer);
             }
           }, 5);
