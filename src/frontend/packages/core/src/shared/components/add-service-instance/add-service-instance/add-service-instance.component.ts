@@ -180,6 +180,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     const { endpointId, serviceInstanceId } = this.activatedRoute.snapshot.params;
     if (this.serviceType === this.serviceTypes.USER_SERVICE) {
       this.serviceInstanceId = serviceInstanceId;
+      this.title$ = observableOf('Edit User Provided Service Instance');
     } else {
       const entityService = this.getServiceInstanceEntityService(serviceInstanceId, endpointId);
       return entityService.waitForEntity$.pipe(
