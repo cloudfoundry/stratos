@@ -7,6 +7,7 @@ import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { HelmRelease } from '../store/helm.types';
 import { GetHelmReleases } from '../store/helm.actions';
 import { helmReleasesSchemaKey } from '../store/helm.entities';
+import { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
 
 export class HelmReleasesDataSource extends ListDataSource<HelmRelease> {
 

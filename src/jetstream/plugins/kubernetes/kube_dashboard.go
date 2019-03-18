@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -108,11 +107,11 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 	log.Info(userGUID)
 	log.Info(cnsiGUID)
 
-	log.Info(c.Request().URI())
+	log.Info(c.Request().RequestURI)
 
 	var prefix = "/pp/v1/kubedash/" + cnsiGUID + "/"
 
-	path := c.Request().URI()[len(prefix):]
+	path := c.Request().RequestURI[len(prefix):]
 
 	log.Info(path)
 
@@ -152,8 +151,8 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 	log.Info("Config")
 	log.Info(config.Host)
 	log.Info("Making request")
-	req := c.Request().(*standard.Request).Request
-	w := c.Response().(*standard.Response).ResponseWriter
+	req := c.Request()
+	w := c.Response().Writer
 	log.Infof("%v+", req)
 
 	// if h.tryUpgrade(w, req) {
@@ -209,6 +208,8 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 		log.Infof("GOT PROXY RESPONSE: %s", loc.String())
 		log.Infof("%d", response.StatusCode)
 		log.Info(response.Header.Get("Content-Type"))
+
+		log.Infof("%v+", response.Header)
 		response.Header.Del("X-FRAME-OPTIONS")
 		response.Header.Set("X-FRAME-OPTIONS", "sameorigin")
 		log.Info("%v+", response)

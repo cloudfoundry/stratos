@@ -27,6 +27,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     store: Store<AppState>,
     listConfig: IListConfig<EndpointModel>,
     endpointType: string,
+    onlyConnected = true
   ) {
     const action = new GetAllEndpoints();
     const paginationKey = `${endpointType}-endpoints`;
@@ -43,7 +44,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       transformEntities: [
         (entities: EndpointModel[]) => {
           return entities.filter(endpoint => {
-            return endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === endpointType;
+            return endpoint.cnsi_type === endpointType && (onlyConnected ? endpoint.connectionStatus === 'connected' : true);
           });
         },
         {

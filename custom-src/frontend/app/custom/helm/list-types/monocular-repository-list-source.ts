@@ -16,8 +16,7 @@ export class MonocularRepositoryDataSource extends BaseEndpointsDataSource {
     endpointType: string,
     public highlighted: string,
   ) {
-    //super(store, listConfig, endpointType, null);
-    super(store, listConfig, endpointType);
+    super(store, listConfig, endpointType, false);
   }
 
   getRowState = function(row: any): Observable<RowState> {

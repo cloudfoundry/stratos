@@ -89,7 +89,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 
 	defer tiller.Close()
 
-	if req, err := chartutil.LoadRequirements(chart); err == nil {
+	if _, err := chartutil.LoadRequirements(chart); err == nil {
 		log.Debug("Chart requirements loaded")
 	} else if err != chartutil.ErrRequirementsNotFound {
 		log.Error("Can not load requirements")
