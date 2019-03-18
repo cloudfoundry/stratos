@@ -118,6 +118,7 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
+import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
 /* tslint:enable:max-line-length */
 export const listTableCells = [
@@ -186,7 +187,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
   @Input() component: Type<{}>;
   @Input() cellDefinition: ICellDefinition<T>;
   @Input() func: () => string;
-  @Input() row: T;
+  @Input() row: T | MultiActionListEntity;
   @Input() config: any;
 
   private cellComponent: TableCellCustom<T>;
@@ -217,12 +218,14 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
       // Add to target to ensure ngcontent is correct in new component
       this.cellComponent = component.instance as TableCellCustom<T>;
-
-      this.cellComponent.row = this.row;
+      const row = MultiActionListEntity.getEntity(this.row);
+      const entityKey = MultiActionListEntity.getEntityKey(this.row);
+      this.cellComponent.row = row;
+      this.cellComponent.entityKey = entityKey;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
       if (this.dataSource.getRowState) {
-        this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+        this.cellComponent.rowState = this.dataSource.getRowState(row, entityKey);
       }
       if (this.cellDefinition) {
         const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;

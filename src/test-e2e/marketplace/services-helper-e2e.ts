@@ -7,6 +7,7 @@ import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
 import { CreateServiceInstance } from './create-service-instance.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
 const until = protractor.ExpectedConditions;
@@ -15,10 +16,10 @@ export class ServicesHelperE2E {
 
   cfRequestHelper: CFRequestHelpers;
   cfHelper: CFHelpers;
-  createServiceInstance: CreateServiceInstance;
+  createServiceInstance: CreateMarketplaceServiceInstance;
   serviceInstanceName: string;
 
-  constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateServiceInstance = null) {
+  constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateMarketplaceServiceInstance = null) {
     this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
     this.cfHelper = new CFHelpers(e2eSetup);
     this.serviceInstanceName = E2EHelpers.createCustomName(customServiceLabel).toLowerCase();
@@ -34,7 +35,7 @@ export class ServicesHelperE2E {
     expect(this.serviceInstanceName.length)
       .toBeLessThanOrEqual(50, `Service name should not exceed 50 characters: ${this.serviceInstanceName}`);
   }
-  setCreateServiceInstance = (createServiceInstance: CreateServiceInstance) => {
+  setCreateServiceInstance = (createServiceInstance: CreateMarketplaceServiceInstance) => {
     this.createServiceInstance = createServiceInstance;
   }
 

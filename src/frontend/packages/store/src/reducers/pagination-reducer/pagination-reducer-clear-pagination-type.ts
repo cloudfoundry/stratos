@@ -1,14 +1,15 @@
+import { getEndpointSchemeKeys } from '../../../../core/src/core/extension/extension-service';
 import { EndpointAction } from '../../actions/endpoint.actions';
 import {
   applicationSchemaKey,
   cfUserSchemaKey,
   organizationSchemaKey,
+  serviceInstancesSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
-  serviceInstancesSchemaKey
+  userProvidedServiceInstanceSchemaKey,
 } from '../../helpers/entity-factory';
 import { PaginationState } from '../../types/pagination.types';
-import { getEndpointSchemeKeys } from '../../../../core/src/core/extension/extension-service';
 
 export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
   return entityKeys.reduce((prevState, entityKey) => {
@@ -40,6 +41,7 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
         serviceSchemaKey,
         cfUserSchemaKey,
         serviceInstancesSchemaKey,
+        userProvidedServiceInstanceSchemaKey
       ],
       defaultPaginationEntityState
     );

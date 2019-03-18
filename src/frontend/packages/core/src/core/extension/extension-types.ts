@@ -5,8 +5,9 @@ import { Schema, schema } from 'normalizr';
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
 
-export interface EndpointTypeConfig {
-  value: EndpointType;
+interface BaseEndpointTypeConfig {
+  type?: EndpointType;
+  subType?: string;
   label: string;
   urlValidation?: string;
   allowTokenSharing?: boolean;
@@ -26,6 +27,28 @@ export interface EndpointTypeConfig {
    * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
    */
   listDetailsComponent?: any;
+  /**
+   * When all endpoints are displayed together use the order to define the position. Lower number = earlier position
+   */
+  order?: number;
+}
+
+/**
+ * Contains configuration for endpoint type extensions
+ */
+export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
+  subTypes?: EndpointTypeExtensionConfigSubType[];
+}
+
+/**
+ * Contains configuration for an endpoint type. All EndpointTypeExtensionConfig and their subtypes will be in a flat list of this type
+ */
+export interface EndpointTypeConfig extends BaseEndpointTypeConfig {
+  type: EndpointType;
+}
+
+export interface EndpointTypeExtensionConfigSubType extends BaseEndpointTypeConfig {
+  subType: string;
 }
 
 export interface EndpointAuthTypeConfig {

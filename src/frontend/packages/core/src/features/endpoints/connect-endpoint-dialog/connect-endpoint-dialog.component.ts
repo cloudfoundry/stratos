@@ -31,7 +31,7 @@ import {
   IAuthForm,
   IEndpointAuthComponent,
 } from '../../../core/extension/extension-types';
-import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
+import { getCanShareTokenForEndpointType, getEndpointAuthTypes, getEndpointType } from '../endpoint-helpers';
 
 
 @Component({
@@ -87,12 +87,23 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
       name: string,
       guid: string,
       type: EndpointType,
+      subType: string,
       ssoAllowed: boolean,
     },
     private resolver: ComponentFactoryResolver
   ) {
+    const endpointType = getEndpointType(this.data.type, this.data.subType);
+    const authTypes = getEndpointAuthTypes();
+    const epAuthTypes = endpointType.authTypes || [];
+    epAuthTypes.forEach(epAuthType => {
+      const epAt = authTypes.find(at => at.value === epAuthType);
+      if (epAt) {
+        this.authTypesForEndpoint.push(epAt);
+      }
+    });
+
     // Populate the valid auth types for the endpoint that we want to connect to
-    getEndpointAuthTypes().forEach(authType => {
+    authTypes.forEach(authType => {
       if (authType.types.find(t => t === this.data.type)) {
         this.authTypesForEndpoint.push(authType);
       }
@@ -102,7 +113,7 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
     this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || data.ssoAllowed);
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
-    this.canShareEndpointToken = getCanShareTokenForEndpointType(data.type);
+    this.canShareEndpointToken = getCanShareTokenForEndpointType(endpointType.type, endpointType.subType);
 
     // Create the endpoint form
     this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};

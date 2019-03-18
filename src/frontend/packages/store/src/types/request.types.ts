@@ -32,6 +32,9 @@ export type IRequestActionEntity = EntitySchema | EntitySchema[];
 export interface IRequestAction extends RequestAction {
   entity?: IRequestActionEntity;
   entityKey: string;
+  // This is used for multiaction lists where the deleted entity
+  // is going to be part of another entities pagination section
+  proxyPaginationEntityKey?: string;
   endpointGuid?: string;
   updatingKey?: string;
   // For single entity requests

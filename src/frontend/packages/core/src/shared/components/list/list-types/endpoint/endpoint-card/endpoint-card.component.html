@@ -7,7 +7,9 @@
       </div>
       <div class="endpoint-card__title__text">
         <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
-        <div class="endpoint-card__title__text--subtext">{{endpointConfig.label}}</div>
+        <div class="endpoint-card__title__text--subtext">{{endpointConfig.label}}<ng-container *ngIf="endpointParentType">
+            ({{ endpointParentType }})</ng-container>
+        </div>
       </div>
     </div>
   </app-meta-card-title>
