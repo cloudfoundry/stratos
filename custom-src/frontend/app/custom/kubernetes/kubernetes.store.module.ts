@@ -27,17 +27,17 @@ const kubernetesEndpointTypes: EndpointTypeExtensionConfig[] = [{
     subType: 'caasp',
     label: 'CaaS Platform',
     authTypes: [KubeEndpointAuthTypes.CONFIG],
-    imagePath: '/core/assets/custom/SUSE_icon_color.png'
+    imagePath: '/core/assets/custom/caasp.png'
   }, {
     subType: 'aks',
     label: 'Azure AKS',
     authTypes: [KubeEndpointAuthTypes.CONFIG_AZ],
-    imagePath: '/core/assets/custom/aks.png'
+    imagePath: '/core/assets/custom/aks.svg'
   }, {
     subType: 'eks',
     label: 'AWS EKS',
     authTypes: [KubeEndpointAuthTypes.AWS_IAM],
-    imagePath: '/core/assets/custom/eks.jpg'
+    imagePath: '/core/assets/custom/eks.svg'
   }],
   authTypes: [KubeEndpointAuthTypes.CERT_AUTH],
   icon: 'kubernetes',
