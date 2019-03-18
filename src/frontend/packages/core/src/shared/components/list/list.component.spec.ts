@@ -15,10 +15,11 @@ import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.serv
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { ApplicationStateService } from '../application-state/application-state.service';
-import { EndpointCardComponent } from './list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
+import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
+import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 
 class MockedNgZone {
   run = fn => fn();

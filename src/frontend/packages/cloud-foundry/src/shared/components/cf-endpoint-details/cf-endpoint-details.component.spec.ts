@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CoreModule } from '../../../../../../core/core.module';
-import { SharedModule } from '../../../../../shared.module';
+import { CoreModule } from '../../../../../core/src/core/core.module';
+import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { CfEndpointDetailsComponent } from './cf-endpoint-details.component';
 
 describe('CfEndpointDetailsComponent', () => {
@@ -10,7 +10,7 @@ describe('CfEndpointDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [],
+      declarations: [CfEndpointDetailsComponent],
       imports: [
         CoreModule,
         SharedModule

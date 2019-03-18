@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -13,12 +13,29 @@ import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store
 import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
+import { TableCellCustom } from '../../list.types';
+
+interface EndpointDetailsContainerRefs {
+  componentRef: ComponentRef<EndpointListDetailsComponent>;
+  component: EndpointListDetailsComponent;
+  endpointDetails: ViewContainerRef;
+}
+
+export abstract class EndpointListDetailsComponent extends TableCellCustom<EndpointModel> {
+  isEndpointListDetailsComponent = true;
+  isTable = true;
+}
+
+function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent {
+  return obj ? obj.isEndpointListDetailsComponent ? obj as EndpointListDetailsComponent : null : null;
+}
 
 @Injectable()
 export class EndpointListHelper {
@@ -27,7 +44,8 @@ export class EndpointListHelper {
     private store: Store<AppState>,
     private dialog: MatDialog,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService) {
+    private confirmDialog: ConfirmationDialogService,
+    private log: LoggerService) {
 
   }
 
@@ -124,5 +142,31 @@ export class EndpointListHelper {
           disSub.unsubscribe();
         }
       });
+  }
+
+  createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef, componentFactoryResolver: ComponentFactoryResolver):
+    EndpointDetailsContainerRefs {
+    const componentFactory = componentFactoryResolver.resolveComponentFactory<EndpointListDetailsComponent>(listDetailsComponent);
+    const componentRef = container.createComponent<EndpointListDetailsComponent>(componentFactory);
+    const component = isEndpointListDetailsComponent(componentRef.instance);
+    const refs = {
+      componentRef,
+      component,
+      endpointDetails: container
+    };
+    if (!component) {
+      this.log.warn(`Attempted to create a non-endpoint list details component "${listDetailsComponent}"`);
+      this.destroyEndpointDetails(refs);
+    }
+    return refs;
+  }
+
+  destroyEndpointDetails(refs: EndpointDetailsContainerRefs) {
+    if (refs.componentRef) {
+      refs.componentRef.destroy();
+    }
+    if (refs.endpointDetails) {
+      refs.endpointDetails.clear();
+    }
   }
 }

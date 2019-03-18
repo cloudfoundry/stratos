@@ -13,7 +13,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
-import { endpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
+import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
   TableCellEventActionComponent,
@@ -166,7 +166,7 @@ export const listTableCells = [
   TableCellAServicePlanExtrasComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
-  ...endpointListDetailsComponents
+  ...coreEndpointListDetailsComponents
 ];
 
 @Component({

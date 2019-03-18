@@ -1,4 +1,13 @@
-import { Component, ComponentFactoryResolver, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, startWith } from 'rxjs/operators';
@@ -12,7 +21,7 @@ import { EndpointTypeConfig } from '../../../../../../core/extension/extension-t
 import { getFavoriteFromEndpointEntity } from '../../../../../../core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
-  endpointListDetailsComponents,
+  coreEndpointListDetailsComponents,
   getEndpointType,
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
@@ -20,16 +29,16 @@ import { CardStatus } from '../../../../../shared.types';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
-import { CfEndpointDetailsComponent } from '../cf-endpoint-details/cf-endpoint-details.component';
-import { EndpointListHelper } from '../endpoint-list.helpers';
+import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 
 @Component({
   selector: 'app-endpoint-card',
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss'],
-  entryComponents: [...endpointListDetailsComponents]
+  entryComponents: [...coreEndpointListDetailsComponents]
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
+
   public rowObs = new ReplaySubject<EndpointModel>();
   public favorite: UserFavoriteEndpoint;
   public address: string;
@@ -42,7 +51,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public cardStatus$: Observable<CardStatus>;
   private subs: Subscription[] = [];
 
-  @Input() component: CfEndpointDetailsComponent;
+  private componentRef: ComponentRef<EndpointListDetailsComponent>;
+
+  @Input() component: EndpointListDetailsComponent;
   private endpointDetails: ViewContainerRef;
   @ViewChild('endpointDetails', { read: ViewContainerRef }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
@@ -104,6 +115,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   ngOnDestroy(): void {
     safeUnsubscribe(...this.subs);
+    this.endpointListHelper.destroyEndpointDetails({
+      componentRef: this.componentRef,
+      component: this.component,
+      endpointDetails: this.endpointDetails
+    });
   }
 
   updateInnerComponent() {
@@ -116,12 +132,17 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
 
     if (!this.component) {
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(e.listDetailsComponent);
-      const componentRef = this.endpointDetails.createComponent(componentFactory);
-      this.component = componentRef.instance as CfEndpointDetailsComponent;
+      const res =
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
+      this.componentRef = res.componentRef;
+      this.component = res.component;
+    }
+
+    if (this.component) {
+      this.component.row = this.pRow;
+      this.component.isTable = false;
     }
     this.component.row = this.pRow;
-    this.component.spaceBetween = false;
 
     this.updateCardStatus();
   }
@@ -140,4 +161,5 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       ).subscribe(() => this.store.dispatch(new SetHeaderEvent(true))));
     }
   }
+
 }
