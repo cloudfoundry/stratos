@@ -1,9 +1,9 @@
+import { IAppSummary, IRoute } from '../../../core/src/core/cf-api.types';
+import { ASSIGN_ROUTE_SUCCESS, AssociateRouteWithAppApplication } from '../actions/application-service-routes.actions';
+import { DeleteRoute, RouteEvents, UnmapRoute } from '../actions/route.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
-import { ASSIGN_ROUTE_SUCCESS, AssociateRouteWithAppApplication } from '../actions/application-service-routes.actions';
-import { IRoute, IAppSummary } from '../../../core/src/core/cf-api.types';
-import { RouteEvents, UnmapRoute, DeleteRoute } from '../actions/route.actions';
 
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
@@ -32,7 +32,8 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>
   }
 }
 export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<APIResource<IAppSummary>>, action: APISuccessOrFailedAction) {
-  let currentState, routeGuid;
+  let currentState;
+  let routeGuid;
   switch (action.type) {
     case RouteEvents.UNMAP_ROUTE_SUCCESS:
       const unmapRouteAction = action.apiAction as UnmapRoute;

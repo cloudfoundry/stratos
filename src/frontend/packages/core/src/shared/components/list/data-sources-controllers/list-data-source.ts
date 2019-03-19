@@ -39,7 +39,7 @@ export class DataFunctionDefinition {
   field: string;
   static is(obj) {
     if (obj) {
-      const typed = <DataFunctionDefinition>obj;
+      const typed = obj as DataFunctionDefinition;
       return typed.type && typed.orderKey && typed.field;
     }
     return false;

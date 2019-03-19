@@ -42,7 +42,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private servicesWallService: ServicesWallService
   ) {
     this.stepperForm = new FormGroup({
-      service: new FormControl('', [<any>Validators.required]),
+      service: new FormControl('', [Validators.required as any]),
     });
     const cfSpaceGuid$ =
       combineLatest(

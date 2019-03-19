@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, switchMap } from 'rxjs/operators';
 
+import { IOrganization } from '../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../core/src/core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../core/src/shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
 import { GET_CF_USERS_AS_NON_ADMIN, GetAllUsersAsNonAdmin } from '../actions/users.actions';
 import { AppState } from '../app-state';
@@ -16,9 +19,6 @@ import { endpointsEntityRequestDataSelector } from '../selectors/endpoint.select
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
-import { PaginationMonitorFactory } from '../../../core/src/shared/monitors/pagination-monitor.factory';
-import { EntityServiceFactory } from '../../../core/src/core/entity-service-factory.service';
-import { IOrganization } from '../../../core/src/core/cf-api.types';
 
 
 @Injectable()
@@ -34,7 +34,8 @@ export class UsersEffects {
   /**
    * Fetch users from each organisation. This is used when the user connected to cf is non-admin and cannot access the global users/ list
    */
-  @Effect() fetchUsersByOrg$ = this.actions$.ofType<GetAllUsersAsNonAdmin>(GET_CF_USERS_AS_NON_ADMIN).pipe(
+  @Effect() fetchUsersByOrg$ = this.actions$.pipe(
+    ofType<GetAllUsersAsNonAdmin>(GET_CF_USERS_AS_NON_ADMIN),
     switchMap(action => {
       const mockRequestType: ApiRequestTypes = 'fetch';
       const mockPaginationAction: PaginatedAction = {

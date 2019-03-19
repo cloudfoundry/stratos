@@ -1,8 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ConditionType, Condition } from '../../../../../store/kube.types';
-import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
-import { map, filter } from 'rxjs/operators';
+import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
+import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
+import { Condition, ConditionType } from '../../../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-node-condition',
@@ -20,17 +21,17 @@ export class KubernetesNodeConditionComponent implements OnInit {
   inverse = false;
 
   public titles = {
-    'Ready': 'Ready',
-    'OutOfDisk': 'Out of Disk',
-    'MemoryPressure': 'Memory Pressure',
-    'DiskPressure': 'Disk Pressure'
+    Ready: 'Ready',
+    OutOfDisk: 'Out of Disk',
+    MemoryPressure: 'Memory Pressure',
+    DiskPressure: 'Disk Pressure'
   };
 
   public icons = {
-    'Ready': ['done_outline', 'material-icons'],
-    'OutOfDisk': ['storage', 'material-icons'],
-    'MemoryPressure': ['memory', 'material-icons'],
-    'DiskPressure': ['storage', 'material-icons'],
+    Ready: ['done_outline', 'material-icons'],
+    OutOfDisk: ['storage', 'material-icons'],
+    MemoryPressure: ['memory', 'material-icons'],
+    DiskPressure: ['storage', 'material-icons'],
   };
 
   constructor(

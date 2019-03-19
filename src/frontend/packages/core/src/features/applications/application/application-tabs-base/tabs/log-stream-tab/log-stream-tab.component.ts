@@ -1,17 +1,16 @@
-
-import { never as observableNever, Observable, Subject } from 'rxjs';
-
-import { filter, share, catchError } from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
+import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
+import { catchError, filter, share } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
 import { ApplicationService } from '../../../../application.service';
-import { AppState } from '../../../../../../../../store/src/app-state';
+
 
 export interface LogItem {
   message: string;
@@ -47,7 +46,7 @@ export class LogStreamTabComponent implements OnInit {
 
   ngOnInit() {
     if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
-      this.messages = observableNever();
+      this.messages = NEVER;
     } else {
       const host = window.location.host;
       const streamUrl = `wss://${host}/pp/v1/${
@@ -76,7 +75,9 @@ export class LogStreamTabComponent implements OnInit {
         return;
       }
 
-      let msgColour, sourceColour, bold;
+      let msgColour;
+      let sourceColour;
+      let bold;
 
       // CF timestamps are in nanoseconds
       const msStamp = Math.round(messageObj.timestamp / 1000000);

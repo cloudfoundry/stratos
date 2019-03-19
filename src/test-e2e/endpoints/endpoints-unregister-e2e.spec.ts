@@ -26,16 +26,16 @@ describe('Endpoints', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
 
           // Should have a single row initially
-          endpointsPage.table.getRows().then(rows => { expect(rows.length).toBe(1); });
+          expect(endpointsPage.cards.getCardCount()).toBe(1);
 
           // Get the row in the table for this endpoint
-          endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-            endpointsPage.table.openRowActionMenuByRow(row);
+          endpointsPage.cards.findCardByTitle(toUnregister.name).then(card => {
+            card.openActionMenu();
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
-            endpointsPage.table.waitUntilNotBusy();
+            endpointsPage.list.waitForNoLoadingIndicator();
             // Should have removed the only row, so we should see welcome message again
             expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
           });
@@ -56,19 +56,17 @@ describe('Endpoints', () => {
 
           // Current number of rows
           let endpointCount = 0;
-          endpointsPage.table.getRows().then(rows => endpointCount = rows.length);
+          endpointsPage.cards.getCardCount().then(count => endpointCount = count);
 
           // Get the row in the table for this endpoint
-          endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-            endpointsPage.table.openRowActionMenuByRow(row);
+          endpointsPage.cards.findCardByTitle(toUnregister.name).then(card => {
+            card.openActionMenu();
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
-            endpointsPage.table.waitUntilNotBusy();
-            endpointsPage.table.getRows().then(rows => {
-              expect(rows.length).toBe(endpointCount - 1);
-            });
+            endpointsPage.list.waitForNoLoadingIndicator();
+            expect(endpointsPage.cards.getCardCount()).toBe(endpointCount - 1);
           });
         });
       });
@@ -86,11 +84,11 @@ describe('Endpoints', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Should have a single row initially
-        endpointsPage.table.getRows().then(rows => { expect(rows.length).toBe(1); });
+        expect(endpointsPage.cards.getCardCount()).toBe(1);
 
         // Get the row in the table for this endpoint
-        endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-          endpointsPage.table.openRowActionMenuByRow(row);
+        endpointsPage.cards.findCardByTitle(toUnregister.name).then(card => {
+          card.openActionMenu();
           const menu = new MenuComponent();
           menu.waitUntilShown();
           menu.getItemMap().then(items => {

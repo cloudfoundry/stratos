@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
-import {
-  EndpointCardComponent,
-} from '../../../../shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
-import { endpointColumns } from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
-import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { BaseEndpointsDataSource } from '../../../../shared/components/list/list-types/cf-endpoints/base-endpoints-data-source';
+import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import {
+  BaseEndpointsDataSource,
+} from '../../../../shared/components/list/list-types/cf-endpoints/base-endpoints-data-source';
+import {
+  EndpointCardComponent,
+} from '../../../../shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
+import { endpointColumns } from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
+import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 
 @Injectable()
 export class KubernetesEndpointsListConfigService implements IListConfig<EndpointModel> {

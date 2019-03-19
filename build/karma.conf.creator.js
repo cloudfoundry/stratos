@@ -43,13 +43,8 @@ module.exports = function (project) {
       },
       singleRun: process.env.CI_ENV ? true : false,
       files: [{
-          pattern: './src/**/*.spec.ts',
-          watched: false
-        },
-        {
-          pattern: path.join(repoRoot, 'node_modules/@angular/material/prebuilt-themes/indigo-pink.css')
-        }
-      ],
+        pattern: path.join(repoRoot, 'node_modules/@angular/material/prebuilt-themes/indigo-pink.css')
+      }],
       exclude: [
         '**/*-e2e.spec.ts'
       ]

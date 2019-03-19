@@ -8,6 +8,7 @@ import { CustomImportModule } from '../../custom-import.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
+import { EndpointListHelper } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from '../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
@@ -162,6 +163,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CfAdminAddUserWarningComponent,
   ],
   providers: [
+    EndpointListHelper,
     CFEndpointsListConfigService,
     EndpointsListConfigService,
     {
@@ -176,7 +178,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundryEndpointService,
     CfRolesService,
     CloudFoundryCellService,
-    UserInviteService,
+    UserInviteService
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent

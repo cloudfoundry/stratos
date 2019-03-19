@@ -2,9 +2,9 @@ import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { UtilsService } from '../../../../core/utils.service';
-import { AppState } from '../../../../../../store/src/app-state';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { UtilsService } from '../../../../core/utils.service';
 import { CardStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';
 
@@ -23,7 +23,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() units: string;
   @Input() value: string;
   @Input() showUsage = false;
-  @Input() link: string | Function;
+  @Input() link: () => void | string;
 
   formattedValue: string;
   formattedLimit: string;

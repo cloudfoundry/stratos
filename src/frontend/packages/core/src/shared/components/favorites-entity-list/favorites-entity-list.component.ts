@@ -15,9 +15,9 @@ export class FavoritesEntityListComponent implements AfterViewInit {
 
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
-    this._entities = favoriteEntities ? [...favoriteEntities] : favoriteEntities;
+    this.pEntities = favoriteEntities ? [...favoriteEntities] : favoriteEntities;
     this.entitiesSubject.next(favoriteEntities);
-    this.hasEntities = this._entities && this._entities.length > 0;
+    this.hasEntities = this.pEntities && this.pEntities.length > 0;
   }
   @Input()
   public placeholder = false;
@@ -60,7 +60,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
   public filterName: string;
   public filterType: string;
 
-  public _entities: IFavoriteEntity[] = [];
+  public pEntities: IFavoriteEntity[] = [];
 
   public limitedEntities: IFavoriteEntity[];
   public minLimit = 3;

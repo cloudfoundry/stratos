@@ -19,13 +19,13 @@ export class PageHeader extends Component {
     return this.locator.all(by.css('.page-header button.mat-icon-button'));
   }
 
-  getIconButton(iconName: string) {
-    return this.getIconButtons().map(button => {
-      return button.getText();
-    }).then(icons => {
-      const index = icons.findIndex(name => name === iconName);
-      return this.getIconButtons().get(index);
-    });
+  getIconButton(iconName: string): promise.Promise<ElementFinder> {
+    return this.getIconButtons()
+      .map(button => button.getText())
+      .then(icons => {
+        const index = icons.findIndex(name => name === iconName);
+        return index >= 0 ? this.getIconButtons().get(index) : null;
+      });
   }
 
   clickIconButton(iconName: string): promise.Promise<void> {
@@ -51,14 +51,16 @@ export class PageHeader extends Component {
   }
 
   logout(): promise.Promise<any> {
-    return this.clickIconButton('more_vert').then(() => {
-      browser.driver.sleep(2000);
-      const menu = new MenuComponent();
-      menu.waitUntilShown();
-      menu.clickItem('Logout');
-      browser.driver.sleep(2000);
-      return browser.waitForAngular();
-    });
+    return this.locator.element(by.id('userMenu'))
+      .click()
+      .then(() => {
+        // browser.driver.sleep(2000);
+        const menu = new MenuComponent();
+        menu.waitUntilShown();
+        menu.clickItem('Logout');
+        // browser.driver.sleep(2000);
+        return browser.waitForAngular();
+      });
   }
 
 }

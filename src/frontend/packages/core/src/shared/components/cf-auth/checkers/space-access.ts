@@ -1,6 +1,7 @@
+import { CFAuthChecker, CFAuthResource } from '../cf-auth.types';
 import { CfAuthPrinciple } from '../principal';
 import { CfAuthBaseAccess } from './base-access';
-import { CFAuthResource, CFAuthChecker } from '../cf-auth.types';
+
 export class CFAuthCheckerSpace extends CfAuthBaseAccess implements CFAuthChecker {
 
   constructor(private principal: CfAuthPrinciple) {
@@ -8,11 +9,10 @@ export class CFAuthCheckerSpace extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-    * @name create
-    * @description User can create a space if:
-    * 1. User is an Admin
-    * 2. User is an Org Manager
-    */
+   * User can create a space if:
+   * 1. User is an Admin
+   * 2. User is an Org Manager
+   */
   create(spaceGuid: string): boolean {
     if (super.baseCreate()) {
       return true;
@@ -22,8 +22,7 @@ export class CFAuthCheckerSpace extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-   * @name update
-   * @description User can update a space if:
+   * User can update a space if:
    * 1. User is an admin
    * 2. User is org manager
    * 3. user is space manager
@@ -39,8 +38,7 @@ export class CFAuthCheckerSpace extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-   * @name delete
-   * @description User can delete space if:
+   * User can delete space if:
    * 1. user is an admin
    * 2. user is the org manager
    */
@@ -54,8 +52,7 @@ export class CFAuthCheckerSpace extends CfAuthBaseAccess implements CFAuthChecke
   }
 
   /**
-   * @name canHandle
-   * @description Specifies that this ACL checker can handle `application` permission
+   * Specifies that this ACL checker can handle `application` permission
    */
   canHandle(resource: CFAuthResource): boolean {
     return resource === CFAuthResource.space;

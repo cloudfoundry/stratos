@@ -6,19 +6,21 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
+import { SaveAppOverrides } from '../../../../../../store/src/actions/deploy-applications.actions';
+import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
+import { GetAllStacks } from '../../../../../../store/src/actions/stack.action';
+import { AppState } from '../../../../../../store/src/app-state';
+import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectCfDetails } from '../../../../../../store/src/selectors/deploy-application.selector';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { OverrideAppDetails } from '../../../../../../store/src/types/deploy-application.types';
 import { IDomain } from '../../../../core/cf-api.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { selectCfDetails } from '../../../../../../store/src/selectors/deploy-application.selector';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
-import { GetAllStacks } from '../../../../../../store/src/actions/stack.action';
-import { OverrideAppDetails } from '../../../../../../store/src/types/deploy-application.types';
-import { SaveAppOverrides } from '../../../../../../store/src/actions/deploy-applications.actions';
+import {
+  ApplicationEnvVarsHelper,
+} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 @Component({
   selector: 'app-deploy-application-options-step',
@@ -164,7 +166,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     }));
 
     // Extract any existing values from the app's env var and assign to form
-    this.appGuid = this.activatedRoute.snapshot.queryParams['appGuid'];
+    this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
       combineLatest(this.domains$, cfDetails$).pipe(
         switchMap(([domains, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),

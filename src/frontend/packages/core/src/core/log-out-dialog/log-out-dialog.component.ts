@@ -1,10 +1,11 @@
-import { Component, OnInit, Inject, OnDestroy, Optional } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { AppState } from '../../../../store/src/app-state';
+
 import { Logout } from '../../../../store/src/actions/auth.actions';
+import { AppState } from '../../../../store/src/app-state';
 
 @Component({
   selector: 'app-log-out-dialog',
@@ -17,7 +18,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
     private store: Store<AppState>) { }
 
-  private _autoLogout: Subscription;
+  private autoLogout: Subscription;
   public countDown: number;
   public countdownTotal: number;
   public percentage = 0;
@@ -25,11 +26,11 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const updateInterval = 500;
     this.countdownTotal = this.countDown = this.data.expiryDate - Date.now();
-    this._autoLogout = interval(updateInterval)
+    this.autoLogout = interval(updateInterval)
       .pipe(
         tap(() => {
           if (this.countDown <= 0) {
-            this._autoLogout.unsubscribe();
+            this.autoLogout.unsubscribe();
             this.store.dispatch(new Logout());
           } else {
             this.countDown -= updateInterval;
@@ -41,7 +42,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.percentage = 0;
-    this._autoLogout.unsubscribe();
+    this.autoLogout.unsubscribe();
   }
 
 }
