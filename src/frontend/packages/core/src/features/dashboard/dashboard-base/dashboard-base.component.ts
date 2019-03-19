@@ -7,7 +7,13 @@ import { Subscription, Observable } from 'rxjs';
 import { debounceTime, filter, withLatestFrom, first, map } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { ChangeSideNavMode, CloseSideNav, OpenSideNav, ShowSideHelp, CloseSideHelp } from '../../../../../store/src/actions/dashboard-actions';
+import {
+  ChangeSideNavMode,
+  CloseSideNav,
+  OpenSideNav,
+  ShowSideHelp,
+  CloseSideHelp
+} from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
