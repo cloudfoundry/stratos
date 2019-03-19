@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Renderer2, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import * as marked from 'marked';
+import * as markdown from 'marked';
 
 @Component({
   selector: 'app-markdown-preview',
@@ -11,13 +11,13 @@ export class MarkdownPreviewComponent implements OnInit {
 
   markdownHtml: string;
   documentUrl: string;
-  title = '';
+  title = null;
 
   @Input('documentUrl')
   set setDocumentUrl(value: string) {
     if (this.documentUrl !== value) {
       this.documentUrl = value;
-      this.title = '';
+      this.title = null;
       this.loadDocument();
     }
   }
@@ -31,7 +31,13 @@ export class MarkdownPreviewComponent implements OnInit {
   private loadDocument() {
     this.httpClient.get(this.documentUrl, {responseType: 'text'}).subscribe((markText) => {
       if (markText && markText.length > 0) {
-        this.markdownHtml = marked(markText);
+        // Ensure links in the readme open in a new tab
+        const renderer = new markdown.Renderer();
+        renderer.link = function(href, title, text) {
+          const link = markdown.Renderer.prototype.link.call(this, href, title, text);
+          return link.replace('<a', '<a target="_blank" ');
+        };
+        this.markdownHtml = markdown(markText, { renderer });
       }
     });
   }
@@ -39,11 +45,13 @@ export class MarkdownPreviewComponent implements OnInit {
   public markdownRendered() {
     // Find the page title and move it to the header
     const h1 = this.markdown.nativeElement.getElementsByTagName('h1');
-    if (!this.title) {
+    if (this.title === null) {
       if (h1.length > 0) {
-        const titleElement = h1[0];
-        this.title = titleElement.innerText;
-        titleElement.remove();
+        window.setTimeout(() => {
+          const titleElement = h1[0];
+          const titleText = titleElement.innerText;
+          this.title = titleText;
+        }, 100);
       } else {
         this.title = 'Help';
       }
