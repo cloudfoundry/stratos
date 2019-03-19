@@ -7,7 +7,7 @@ import { Subscription, Observable } from 'rxjs';
 import { debounceTime, filter, withLatestFrom, first, map } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { ChangeSideNavMode, CloseSideNav, OpenSideNav, ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
+import { ChangeSideNavMode, CloseSideNav, OpenSideNav, ShowSideHelp, CloseSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
@@ -48,6 +48,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   private closeSub: Subscription;
 
   public fullView: boolean;
+  public noMargin: boolean;
 
   private routeChangeSubscription: Subscription;
 
@@ -71,11 +72,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     this.store.dispatch(new GetUserFavoritesAction());
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
+    this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
     this.routeChangeSubscription = this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),
       withLatestFrom(dashboardState$)
     ).subscribe(([event, dashboard]) => {
       this.fullView = this.isFullView(this.activatedRoute.snapshot);
+      this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
       if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
         this.sidenav.close();
       }
@@ -97,6 +100,16 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     while (route.firstChild) {
       route = route.firstChild;
       if (route.data.uiFullView) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  isNoMarginView(route: ActivatedRouteSnapshot): boolean {
+    while (route.firstChild) {
+      route = route.firstChild;
+      if (route.data.uiNoMargin) {
         return true;
       }
     }
@@ -138,6 +151,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   public sideHelpClosed() {
     this.hideShowOverlays(false);
+    this.store.dispatch(new CloseSideHelp());
+
   }
 
   private hideShowOverlays(hide: boolean) {

@@ -87,6 +87,8 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
 import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
+import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
+import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 
 @NgModule({
   imports: [
@@ -103,6 +105,8 @@ import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-co
     KubernetesPodsTabComponent,
     KubernetesPodTagsComponent,
     KubernetesNamespacesTabComponent,
+    KubernetesDashboardTabComponent,
+    KubernetesSummaryTabComponent,
     KubernetesAppsTabComponent,
     HelmReleaseComponent,
     AppLinkComponent,

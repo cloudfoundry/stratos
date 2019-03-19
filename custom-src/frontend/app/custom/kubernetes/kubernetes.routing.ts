@@ -24,6 +24,7 @@ import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-p
 import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
 import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
 import { KubernetesNamespacePodsComponent } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
+import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 const kubernetes: Routes = [{
   path: '',
   component: KubernetesComponent
@@ -139,7 +140,24 @@ const kubernetes: Routes = [{
       component: KubernetesAppsTabComponent,
     },
   ]
-}];
+},
+{
+  path: ':endpointId/dashboard',
+  component: KubernetesDashboardTabComponent,
+  data: {
+    uiNoMargin: true
+  },
+  children: [
+    {
+      path: '**',
+      component: KubernetesDashboardTabComponent,
+      data: {
+        uiNoMargin: true
+      }
+    }
+  ]
+}
+];
 
 @NgModule({
   imports: [RouterModule.forChild(kubernetes)]

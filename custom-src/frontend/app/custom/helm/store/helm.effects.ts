@@ -84,19 +84,14 @@ export class HelmEffects {
           result: []
         } as NormalizedResponse;
 
-        console.log('List releases');
-
-        console.log(response);
-
         // Go through each endpoint ID
         Object.keys(response).forEach(endpoint => {
-          console.log('ONE');
-          console.log(endpoint);
-          console.log(response[endpoint]);
           response[endpoint].releases.forEach((data) => {
             // Release name is unique for an endpoint
             const id = endpoint + ':' + data.name;
             data.guid = id;
+            // Make a note of the guid of the endpoint for the release
+            data.endpointId = endpoint;
             data.status = mapHelmStatus(data.info.status.code);
             data.lastDeployed = mapHelmModifiedDate(data.info.last_deployed);
             data.firstDeployed = mapHelmModifiedDate(data.info.first_deployed);
@@ -104,8 +99,6 @@ export class HelmEffects {
             processedData.result.push(id);
           });
         });
-        console.log('here');
-        console.log(processedData);
         return [
           new WrapperRequestActionSuccess(processedData, action)
         ];

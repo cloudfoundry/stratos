@@ -1,5 +1,12 @@
 import { SideNavModes } from '../types/dashboard.types';
-import { CLOSE_SIDE_NAV, OPEN_SIDE_NAV, TOGGLE_SIDE_NAV, TOGGLE_HEADER_EVENT, SHOW_SIDE_HELP } from '../actions/dashboard-actions';
+import {
+  CLOSE_SIDE_NAV,
+  OPEN_SIDE_NAV,
+  TOGGLE_SIDE_NAV,
+  TOGGLE_HEADER_EVENT,
+  SHOW_SIDE_HELP,
+  CLOSE_SIDE_HELP
+} from '../actions/dashboard-actions';
 import { CHANGE_SIDE_NAV_MODE } from '../actions/dashboard-actions';
 
 export interface DashboardState {
@@ -32,6 +39,8 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return { ...state, headerEventMinimized: !state.headerEventMinimized };
     case SHOW_SIDE_HELP:
       return { ...state, sideHelpOpen: true, sideHelpDocument: action.document };
+    case CLOSE_SIDE_HELP:
+      return { ...state, sideHelpOpen: false, sideHelpDocument: '' };
     default:
       return state;
   }

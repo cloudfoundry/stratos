@@ -41,6 +41,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1 // indirect
@@ -51,6 +52,7 @@ require (
 	github.com/spf13/cobra v0.0.3 // indirect
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245 // indirect
+	github.com/unrolled/render v1.0.0 // indirect
 	golang.org/x/net v0.0.0-20190225153610-fe579d43d832 // indirect
 	golang.org/x/oauth2 v0.0.0-20190226191147-529b322ea346 // indirect
 	golang.org/x/time v0.0.0-20181108054448-85acf8d2951c // indirect
@@ -60,7 +62,7 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/api v0.0.0-20190226013409-f951fa7b8c72 // indirect
 	k8s.io/apiextensions-apiserver v0.0.0-20190225215027-42f453e3c54a // indirect
-	k8s.io/apimachinery v0.0.0-20190117220443-572dfc7bdfcb // indirect
+	k8s.io/apimachinery v0.0.0-20190117220443-572dfc7bdfcb
 	k8s.io/apiserver v0.0.0-20190225213950-239e48e34c98 // indirect
 	k8s.io/cli-runtime v0.0.0-20190223141024-b5efea9a9c9c // indirect
 	k8s.io/client-go v10.0.0+incompatible

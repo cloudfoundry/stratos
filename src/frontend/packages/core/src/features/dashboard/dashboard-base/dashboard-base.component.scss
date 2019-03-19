@@ -18,7 +18,10 @@ $app-header-height: 56px;
     margin-top: 102px;
   }
   &__inline-help {
-    min-width: 600px;
+    width: 600px;
+  }
+  &__noMargin {
+    padding: 0;
   }
   &__side-help {
     width: 600px;

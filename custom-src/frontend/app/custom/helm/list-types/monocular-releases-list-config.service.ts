@@ -11,6 +11,7 @@ import { HelmReleasesDataSource } from './monocular-releases-list-source';
 import { HelmRelease } from '../store/helm.types';
 import { DatePipe } from '@angular/common';
 import { HelmReleaseLinkComponent } from './helm-release-link/helm-release-link.component';
+import { TableCellEndpointNameComponent } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 @Injectable()
 export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
@@ -37,6 +38,12 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       cellFlex: '2'
     },
     {
+      columnId: 'cluster',
+      headerCell: () => 'Cluster',
+      cellComponent: TableCellEndpointNameComponent,
+      cellFlex: '2'
+    },
+    {
       columnId: 'namespace',
       headerCell: () => 'Namespace',
       cellDefinition: {
@@ -47,7 +54,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
         orderKey: 'namespace',
         field: 'namespace'
       },
-      cellFlex: '3'
+      cellFlex: '2'
     },
     {
       columnId: 'status',
@@ -86,7 +93,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
         orderKey: 'lastDeployed',
         field: 'lastDeployed'
       },
-      cellFlex: '3'
+      cellFlex: '2'
     },
   ] as ITableColumn<HelmRelease>[];
 
