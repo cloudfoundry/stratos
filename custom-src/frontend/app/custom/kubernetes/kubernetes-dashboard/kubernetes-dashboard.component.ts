@@ -1,10 +1,12 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Component, OnInit, ViewChild, ElementRef, Renderer2 } from '@angular/core';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { ActivatedRoute } from '@angular/router';
 import { KubernetesService } from '../services/kubernetes.service';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-kubernetes-dashboard',
@@ -38,6 +40,8 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   href = '';
 
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+
   constructor(public kubeEndpointService: KubernetesEndpointService, private sanitizer: DomSanitizer, public renderer: Renderer2) { }
 
   ngOnInit() {
@@ -50,6 +54,15 @@ export class KubernetesDashboardTabComponent implements OnInit {
     this.href = href;
     this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/${guid}/`);
     console.log(window.location);
+
+    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
+      map(endpoint => ([{
+        breadcrumbs: [
+          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+        ]
+      }])
+      )
+    );
   }
 
   iframeLoaded() {

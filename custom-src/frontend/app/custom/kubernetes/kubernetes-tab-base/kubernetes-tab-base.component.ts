@@ -28,6 +28,7 @@ import { KubernetesService } from '../services/kubernetes.service';
 export class KubernetesTabBaseComponent implements OnInit {
 
   tabLinks = [
+    { link: 'summary', label: 'Summary' },
     { link: 'nodes', label: 'Nodes' },
     { link: 'namespaces', label: 'Namespaces' },
     { link: 'pods', label: 'Pods' },

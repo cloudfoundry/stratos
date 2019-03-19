@@ -23,7 +23,7 @@ const kubernetes: Routes = [
         text: 'Helm',
         matIcon: 'helm',
         matIconFont: 'stratos-icons',
-        position: 60,
+        position: 65,
         requiresEndpointType: 'helm'
       }
     }

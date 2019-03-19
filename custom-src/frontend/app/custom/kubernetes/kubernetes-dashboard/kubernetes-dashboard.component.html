@@ -1,23 +1,13 @@
-<app-page-header [tabs]="tabLinks">
-  <h1>{{ (kubeEndpointService.endpoint$ | async)?.entity.name }}</h1>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
+  <h1>Dashboard</h1>
   <div class="page-header-right" [ngClass]="{'kube-dashboard__hidden': isLoading$ | async }">
     <span>
-      <!--
-      <mat-form-field floatLabel="never">
-        <input matInput [(ngModel)]="searchTerms" name="searchTerms" placeholder="Search" (keyup)="onKey($event)">
-      </mat-form-field>
-    -->
     <button mat-icon-button (click)="toggle()" *ngIf="expanded">
         <mat-icon matTooltip="Collapse">expand_less</mat-icon>
     </button>
     <button mat-icon-button (click)="toggle()" *ngIf="!expanded">
         <mat-icon matTooltip="Expand">expand_more</mat-icon>
     </button>
-      <!--
-    <button mat-icon-button (click)="create()">
-      <mat-icon matTooltip="Create">add</mat-icon>
-    </button>
-  -->
     </span>
   </div>
 </app-page-header>

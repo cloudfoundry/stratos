@@ -95,7 +95,7 @@ func normalizeLocation(location *url.URL) *url.URL {
 }
 
 func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
-	log.Info("kubeDashboardTest request")
+	log.Debug("kubeDashboardTest request")
 
 	//	c.Response().Header().Set("X-FRAME-OPTIONS", "sameorigin")
 
@@ -104,16 +104,13 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 
 	var p = k.portalProxy
 
-	log.Info(userGUID)
-	log.Info(cnsiGUID)
-
-	log.Info(c.Request().RequestURI)
+	log.Debug(c.Request().RequestURI)
 
 	var prefix = "/pp/v1/kubedash/" + cnsiGUID + "/"
 
 	path := c.Request().RequestURI[len(prefix):]
 
-	log.Info(path)
+	log.Debug(path)
 
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
@@ -128,18 +125,18 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 		return errors.New("Could not get token")
 	}
 
-	log.Info(tokenRec.AuthToken)
-	log.Info(tokenRec.AuthType)
+	log.Debug(tokenRec.AuthToken)
+	log.Debug(tokenRec.AuthType)
 
 	// Make the info call to the SSH endpoint info
 	// Currently this is not cached, so we must get it each time
 	apiEndpoint := cnsiRecord.APIEndpoint
-	log.Info(apiEndpoint)
+	log.Debug(apiEndpoint)
 	// target := fmt.Sprintf("%s/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/", apiEndpoint)
 	//target := fmt.Sprintf("%s/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/", apiEndpoint)
 	// target := http://localhost:8001/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy
 	target := fmt.Sprintf("%s/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/%s", apiEndpoint, path)
-	log.Info(target)
+	log.Debug(target)
 	targetURL, _ := url.Parse(target)
 	targetURL = normalizeLocation(targetURL)
 
@@ -148,12 +145,12 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 		return errors.New("Could not get config for this auth type")
 	}
 
-	log.Info("Config")
-	log.Info(config.Host)
-	log.Info("Making request")
+	log.Debug("Config")
+	log.Debug(config.Host)
+	log.Debug("Making request")
 	req := c.Request()
 	w := c.Response().Writer
-	log.Infof("%v+", req)
+	log.Debugf("%v+", req)
 
 	// if h.tryUpgrade(w, req) {
 	// 	return
@@ -181,7 +178,6 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 		if len(req.URL.RawQuery) > 0 {
 			queryPart = "?" + req.URL.RawQuery
 		}
-		log.Warn("REDIRECT")
 		w.Header().Set("Location", req.URL.Path+"/"+queryPart)
 		w.WriteHeader(http.StatusMovedPermanently)
 		return nil
@@ -205,21 +201,21 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 	proxy.Transport = transport
 	proxy.FlushInterval = defaultFlushInterval
 	proxy.ModifyResponse = func(response *http.Response) error {
-		log.Infof("GOT PROXY RESPONSE: %s", loc.String())
-		log.Infof("%d", response.StatusCode)
-		log.Info(response.Header.Get("Content-Type"))
+		log.Debugf("GOT PROXY RESPONSE: %s", loc.String())
+		log.Debugf("%d", response.StatusCode)
+		log.Debug(response.Header.Get("Content-Type"))
 
-		log.Infof("%v+", response.Header)
+		log.Debugf("%v+", response.Header)
 		response.Header.Del("X-FRAME-OPTIONS")
 		response.Header.Set("X-FRAME-OPTIONS", "sameorigin")
-		log.Info("%v+", response)
+		log.Debug("%v+", response)
 		return nil
 	}
 
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(w, newReq)
 
-	log.Infof("Finsihed proxying request: %s", target)
+	log.Debugf("Finsihed proxying request: %s", target)
 
 	return nil
 }

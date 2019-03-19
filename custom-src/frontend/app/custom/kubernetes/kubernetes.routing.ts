@@ -25,6 +25,8 @@ import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-nod
 import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
 import { KubernetesNamespacePodsComponent } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
+import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
+
 const kubernetes: Routes = [{
   path: '',
   component: KubernetesComponent
@@ -120,8 +122,12 @@ const kubernetes: Routes = [{
   children: [
     {
       path: '',
-      redirectTo: 'nodes',
+      redirectTo: 'summary',
       pathMatch: 'full'
+    },
+    {
+      path: 'summary',
+      component: KubernetesSummaryTabComponent
     },
     {
       path: 'nodes',
