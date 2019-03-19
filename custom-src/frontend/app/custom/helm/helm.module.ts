@@ -33,6 +33,7 @@ import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.compo
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseLinkComponent } from './list-types/helm-release-link/helm-release-link.component';
+import { HelmReleaseEndpointLinkComponent } from './list-types/helm-release-endpoint-link/helm-release-endpoint-link.component';
 
 @NgModule({
   imports: [
@@ -67,7 +68,8 @@ import { HelmReleaseLinkComponent } from './list-types/helm-release-link/helm-re
     HelmRepositoryCountComponent,
     HelmReleaseTabBaseComponent,
     HelmReleaseSummaryTabComponent,
-    HelmReleaseLinkComponent
+    HelmReleaseLinkComponent,
+    HelmReleaseEndpointLinkComponent
   ],
   providers: [
     ChartsService,
