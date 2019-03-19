@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { combineLatest, distinct, map, startWith } from 'rxjs/operators';
 
@@ -8,6 +8,10 @@ import { GitSCMService, GitSCMType } from '../../../../../../shared/data-service
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { ENTITY_SERVICE } from '../../../../../../shared/entity.tokens';
+import { EntityService } from '../../../../../../core/entity-service';
+import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -20,8 +24,13 @@ const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/
   ]
 })
 export class BuildTabComponent implements OnInit {
-
-  constructor(public applicationService: ApplicationService, private scmService: GitSCMService) { }
+  public isBusyUpdating$: Observable<{ updating: boolean }>;
+  public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
+  constructor(
+    public applicationService: ApplicationService,
+    private scmService: GitSCMService,
+    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
+  ) { }
 
   cardTwoFetching$: Observable<boolean>;
 
@@ -41,6 +50,15 @@ export class BuildTabComponent implements OnInit {
       map(([app, appSummary]: [ApplicationData, EntityInfo<APIResource<IAppSummary>>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
+
+    this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
+      map(updatingSection => {
+        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
+          this.updatingSectionBusy(updatingSection['Updating-Existing-Application']);
+        return { updating };
+      }),
+      startWith({ updating: true })
+    );
 
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
@@ -87,6 +105,10 @@ export class BuildTabComponent implements OnInit {
       }),
       startWith({ type: 'loading' })
     );
+  }
+
+  private updatingSectionBusy(section: ActionState) {
+    return section && section.busy;
   }
 
   private createDockerImageUrl(dockerImage: string): string {

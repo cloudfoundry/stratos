@@ -72,7 +72,6 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
-  public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
   public appState$: Observable<ApplicationStateData>;
 
   public favorite$ = this.applicationService.app$.pipe(

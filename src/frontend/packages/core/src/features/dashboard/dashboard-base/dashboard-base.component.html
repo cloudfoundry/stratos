@@ -1,16 +1,33 @@
 <mat-sidenav-container class="dashboard">
-  <app-routing-indicator class="routing-indicator"></app-routing-indicator>
   <mat-sidenav #sidenav class="dashboard__side-nav" mode="over">
     <app-side-nav [tabs]="sideNavTabs">
     </app-side-nav>
   </mat-sidenav>
-  <div class="dashboard__inner">
-    <div class="dashboard__page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
-      <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs">
-      </app-page-side-nav>
+  <div class="page-content">
+    <div class="page-header" *ngIf="tabNavService.pageHeader$ | async as portal">
+      <ng-container [cdkPortalOutlet]="portal"></ng-container>
     </div>
-    <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView}">
-      <router-outlet></router-outlet>
+    <app-routing-indicator class="routing-indicator"></app-routing-indicator>
+    <div class="dashboard__inner">
+      <div class="dashboard__page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
+        <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs">
+        </app-page-side-nav>
+      </div>
+      <div class="dashboard__main">
+        <div *ngIf="subNavData$ | async as data">
+          <div class="page-header-sub-nav" *ngIf="data[0] || data[1]">
+            <div class="page-header-sub-nav__container">
+              <div *ngIf="data[0] as activeTabLabel" class="page-header-sub-nav__title">
+                {{ activeTabLabel }}
+              </div>
+              <ng-container *ngIf="data[1] as portal" [cdkPortalOutlet]="portal"></ng-container>
+            </div>
+          </div>
+        </div>
+        <div #content class="dashboard__content">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
     </div>
   </div>
 </mat-sidenav-container>

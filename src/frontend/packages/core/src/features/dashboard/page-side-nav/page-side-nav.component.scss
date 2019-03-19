@@ -5,6 +5,7 @@
   border-right: 1px solid $border-color;
   display: flex;
   flex-direction: column;
+  height: 100%;
   position: absolute;
   width: 200px;
   z-index: 1;
@@ -46,7 +47,7 @@
     flex: 1;
     list-style-type: none;
     margin: 0;
-    overflow-y: auto;
+    overflow: auto;
     padding: 15px 0 0;
 
     @include breakpoint(tablet) {

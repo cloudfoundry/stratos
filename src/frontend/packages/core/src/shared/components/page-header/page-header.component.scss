@@ -8,13 +8,6 @@ $bottom-index: $top-index - 1;
   $breadcrumb-padding: 3px;
   position: relative;
   z-index: $top-index;
-  &__inner {
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    z-index: $top-index;
-  }
   &__history {
     padding: 0 20px 20px;
   }
@@ -49,7 +42,6 @@ $bottom-index: $top-index - 1;
     }
   }
   &__outer {
-    margin-bottom: 20px;
     z-index: 1;
   }
   &__menu-separator {
@@ -102,32 +94,6 @@ $bottom-index: $top-index - 1;
   &__favorite {
     margin-bottom: -2px;
     margin-left: 10px;
-  }
-}
-
-.tab-header {
-  align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, .1);
-  display: flex;
-  height: 60px;
-  margin: -20px -20px 0;
-  margin-left: 180px;
-  opacity: .6;
-  padding: 0;
-  @include breakpoint(tablet) {
-    margin: 0;
-    padding: 0 34px;
-  }
-  &__title {
-    display: none;
-    $font-size: 22px;
-    font-size: $font-size;
-    font-weight: bold;
-    line-height: $font-size;
-    margin-right: 20px;
-    @include breakpoint(tablet) {
-      display: flex;
-    }
   }
 }
 

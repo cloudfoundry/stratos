@@ -1,26 +1,38 @@
 @import '../../../../sass/colors';
-$app-header-height: 56px;
+@import '../../../../sass/mixins';
+
+$app-sub-header-height: 60px;
 .dashboard {
   background-color: transparent;
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  z-index: 1;
   &__page-tabs {
     background-color: rgba(146, 146, 146, .1);
-    margin-top: $app-header-height;
   }
   &__inner {
     display: flex;
     height: 100%;
   }
   &__content {
-    margin-top: $app-header-height;
+    flex: auto;
     max-height: 100%;
     overflow: auto;
     padding: 20px;
     width: 100%;
   }
-  &___subHeader {
-    margin-top: $app-header-height;
+  &__main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .routing-indicator {
@@ -28,4 +40,35 @@ $app-header-height: 56px;
   position: absolute;
   right: 0;
   z-index: 999;
+}
+
+.page-header-sub-nav {
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+  display: flex;
+  height: $app-sub-header-height;
+  margin-left: 200px;
+  opacity: .6;
+  padding: 0;
+  width: 100%;
+  @include breakpoint(tablet) {
+    margin: 0;
+    padding: 0 34px;
+  }
+  &__title {
+    display: none;
+    $font-size: 22px;
+    font-size: $font-size;
+    font-weight: bold;
+    line-height: $font-size;
+    margin-right: 20px;
+    @include breakpoint(tablet) {
+      display: flex;
+    }
+  }
+  &__container {
+    align-items: center;
+    display: flex;
+    width: 100%;
+  }
 }

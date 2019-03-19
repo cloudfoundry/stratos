@@ -2,8 +2,8 @@ import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angu
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
-import { filter, withLatestFrom } from 'rxjs/operators';
+import { Subscription, Observable, combineLatest } from 'rxjs';
+import { filter, withLatestFrom, tap, startWith } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import { CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
@@ -16,6 +16,7 @@ import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 import { TabNavService } from '../../../../tab-nav.service';
+import { Portal } from '@angular/cdk/portal';
 
 
 @Component({
@@ -25,6 +26,8 @@ import { TabNavService } from '../../../../tab-nav.service';
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentInit {
+  public activeTabLabel$: Observable<string>;
+  public subNavData$: Observable<[string, Portal<any>]>;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -46,6 +49,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
+  @ViewChild('content') public content;
+
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 
   sideNaveMode = 'side';
@@ -54,6 +59,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngOnInit() {
+    this.subNavData$ = combineLatest(
+      this.tabNavService.getCurrentTabHeaderObservable().pipe(
+        startWith(null)
+      ),
+      this.tabNavService.tabSubNav$
+    )
     this.endpointsService.registerHealthCheck(
       new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
     );
@@ -65,6 +76,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       filter((event) => event instanceof NavigationEnd),
       withLatestFrom(dashboardState$)
     ).subscribe(([event, dashboard]) => {
+      if (this.content) {
+        // Ensure we always end up at the of the page when we navigate.
+        this.content.nativeElement.scrollTop = 0;
+      }
       this.fullView = this.isFullView(this.activatedRoute.snapshot);
       if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
         this.sidenav.close();
@@ -90,7 +105,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-
     this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
       this.store.dispatch(new CloseSideNav());
     });

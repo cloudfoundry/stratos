@@ -20,6 +20,7 @@
   }
   &--minimized {
     .header-event {
+      min-height: 25px;
       padding: 5px 20px;
       &__error-icon,
       &__message-wrapper {

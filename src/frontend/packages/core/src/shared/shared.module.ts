@@ -151,6 +151,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
 import { UserPermissionDirective } from './user-permission.directive';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
+import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 /* tslint:disable:max-line-length */
 
 @NgModule({
@@ -269,7 +270,8 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
     MultilineTitleComponent,
     EndpointCardComponent,
     PageSubNavComponent,
-    BreadcrumbsComponent
+    BreadcrumbsComponent,
+    PageSubNavSectionComponent
   ],
   exports: [
     FormsModule,
@@ -370,7 +372,8 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
     FavoritesGlobalListComponent,
     MultilineTitleComponent,
     PageSubNavComponent,
-    BreadcrumbsComponent
+    BreadcrumbsComponent,
+    PageSubNavSectionComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

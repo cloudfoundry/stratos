@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, asapScheduler, Observable } from 'rxjs';
-import { observeOn, map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, asapScheduler, Observable, Subject, combineLatest } from 'rxjs';
+import { observeOn, map, startWith, withLatestFrom, publishReplay, refCount, tap } from 'rxjs/operators';
 import { Portal } from '@angular/cdk/portal';
 import { Router } from '@angular/router';
 import { ISubHeaderTabs } from './src/shared/components/page-subheader/page-subheader.types';
-import { IBreadcrumb } from './src/shared/components/breadcrumbs/breadcrumbs.types';
 
 @Injectable()
 export class TabNavService {
@@ -17,12 +16,8 @@ export class TabNavService {
   private tabSubNavSubject: BehaviorSubject<Portal<any>>;
   public tabSubNav$: Observable<Portal<any>>;
 
-  private breadcrumbsSubject: BehaviorSubject<IBreadcrumb[]>;
-  public breadcrumbs$: Observable<IBreadcrumb[]>;
-
-  public setBreadcrumbs(breadcrumbs: IBreadcrumb[]) {
-    this.breadcrumbsSubject.next(breadcrumbs);
-  }
+  private pageHeaderSubject: BehaviorSubject<Portal<any>>;
+  public pageHeader$: Observable<Portal<any>>;
 
   public setTabs(tabs: ISubHeaderTabs[]) {
     this.tabNavsSubject.next(tabs);
@@ -36,20 +31,29 @@ export class TabNavService {
     this.tabSubNavSubject.next(portal);
   }
 
+  public setPageHeader(portal: Portal<any>) {
+    this.pageHeaderSubject.next(portal);
+  }
+
   public clear() {
     this.tabNavsSubject.next(undefined);
     this.tabHeaderSubject.next(undefined);
     this.tabSubNavSubject.next(undefined);
+    this.pageHeaderSubject.next(undefined);
   }
 
   public clearSubNav() {
     this.tabSubNavSubject.next(undefined);
   }
 
-  public getCurrentTabHeaderObservable(tabs: ISubHeaderTabs[]) {
-    return this.router.events.pipe(
-      map(() => this.getCurrentTabHeader(tabs)),
-      startWith(this.getCurrentTabHeader(tabs))
+  public getCurrentTabHeaderObservable() {
+    return combineLatest(
+      this.router.events.pipe(
+        startWith(null)
+      ),
+      this.tabNavs$
+    ).pipe(
+      map(([event, tabs]) => this.getCurrentTabHeader(tabs)),
     );
   }
 
@@ -64,23 +68,23 @@ export class TabNavService {
     return activeTab.label;
   }
 
+  private observeSubject(subject: Subject<any>) {
+    return subject.asObservable().pipe(
+      publishReplay(1),
+      refCount(),
+      observeOn(asapScheduler)
+    );
+  }
+
 
   constructor(private router: Router) {
     this.tabNavsSubject = new BehaviorSubject(undefined);
-    this.tabNavs$ = this.tabNavsSubject.asObservable().pipe(
-      observeOn(asapScheduler)
-    );
+    this.tabNavs$ = this.observeSubject(this.tabNavsSubject);
     this.tabHeaderSubject = new BehaviorSubject(undefined);
-    this.tabHeader$ = this.tabHeaderSubject.asObservable().pipe(
-      observeOn(asapScheduler)
-    );
+    this.tabHeader$ = this.observeSubject(this.tabHeaderSubject);
     this.tabSubNavSubject = new BehaviorSubject(undefined);
-    this.tabSubNav$ = this.tabSubNavSubject.asObservable().pipe(
-      observeOn(asapScheduler)
-    );
-    this.breadcrumbsSubject = new BehaviorSubject(undefined);
-    this.breadcrumbs$ = this.breadcrumbsSubject.asObservable().pipe(
-      observeOn(asapScheduler)
-    );
+    this.tabSubNav$ = this.observeSubject(this.tabSubNavSubject);
+    this.pageHeaderSubject = new BehaviorSubject(undefined);
+    this.pageHeader$ = this.observeSubject(this.pageHeaderSubject);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild, TemplateRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -15,19 +15,21 @@ import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-ma
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 import { TabNavService } from '../../../../tab-nav.service';
+import { TemplatePortal } from '@angular/cdk/portal';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent {
+export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
   private pTabs: ISubHeaderTabs[]
-  public activeTab$: Observable<string>;
+
+  @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
 
@@ -139,12 +141,13 @@ export class PageHeaderComponent {
     );
   }
 
-  ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable(this.pTabs);
-  }
-
   ngOnDestroy() {
     this.tabNavService.clear();
+  }
+
+  ngAfterViewInit() {
+    const portal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
+    this.tabNavService.setPageHeader(portal);
   }
 
 }
