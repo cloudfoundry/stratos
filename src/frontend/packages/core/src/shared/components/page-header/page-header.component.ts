@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -14,6 +14,7 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { TabNavService } from '../../../../tab-nav.service';
 
 @Component({
   selector: 'app-page-header',
@@ -25,6 +26,8 @@ export class PageHeaderComponent {
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
+  private pTabs: ISubHeaderTabs[]
+  public activeTab$: Observable<string>;
 
   @Input() hideSideNavButton = false;
 
@@ -34,7 +37,25 @@ export class PageHeaderComponent {
   endpointIds$: Observable<string[]>;
 
   @Input()
-  tabs: ISubHeaderTabs[];
+  set tabs(tabs: ISubHeaderTabs[]) {
+    if (tabs) {
+      this.pTabs = tabs.map(tab => ({
+        ...tab,
+        link: this.router.createUrlTree([tab.link], {
+          relativeTo: this.route
+        }).toString()
+      }));
+      this.tabNavService.setTabs(this.pTabs);
+    }
+  }
+
+  @Input()
+  set tabsHeader(header: string) {
+    if (header) {
+      this.tabNavService.setHeader(header);
+    }
+  }
+
 
   @Input() showUnderFlow = false;
 
@@ -102,7 +123,12 @@ export class PageHeaderComponent {
     this.store.dispatch(new Logout());
   }
 
-  constructor(private store: Store<AppState>, private route: ActivatedRoute) {
+  constructor(
+    private store: Store<AppState>,
+    private route: ActivatedRoute,
+    private tabNavService: TabNavService,
+    private router: Router,
+  ) {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
@@ -111,6 +137,14 @@ export class PageHeaderComponent {
     this.userNameFirstLetter$ = this.username$.pipe(
       map(name => name[0].toLocaleUpperCase())
     );
+  }
+
+  ngOnInit() {
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable(this.pTabs);
+  }
+
+  ngOnDestroy() {
+    this.tabNavService.clear();
   }
 
 }

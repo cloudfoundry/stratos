@@ -149,7 +149,8 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
+import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
 /* tslint:disable:max-line-length */
 
 @NgModule({
@@ -267,6 +268,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesEntityListComponent,
     MultilineTitleComponent,
     EndpointCardComponent,
+    PageSubNavComponent,
+    BreadcrumbsComponent
   ],
   exports: [
     FormsModule,
@@ -365,7 +368,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     StackedInputActionComponent,
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
-    MultilineTitleComponent
+    MultilineTitleComponent,
+    PageSubNavComponent,
+    BreadcrumbsComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

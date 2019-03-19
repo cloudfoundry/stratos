@@ -3,11 +3,11 @@ import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
-import { ISubHeaderTabs } from '../../../../../../shared/components/page-subheader/page-subheader.types';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { entityFactory, metricSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-cloud-foundry-cell-base',
@@ -22,10 +22,11 @@ export class CloudFoundryCellBaseComponent {
 
   static AppsLinks = 'apps';
 
-  tabLinks: ISubHeaderTabs[] = [
+  tabLinks: IPageSideNavTab[] = [
     {
       link: 'summary',
-      label: 'Summary'
+      label: 'Summary',
+      matIcon: 'description'
     },
     {
       link: 'charts',

@@ -6,14 +6,16 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
+import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
-export interface SideNavItem {
-  text: string;
-  matIcon: string;
+export interface SideNavItem extends ISubHeaderTabs {
+  label: string;
+  matIcon?: string;
   matIconFont?: string;
   link: string;
+  position?: number;
   hidden?: Observable<boolean>;
 }
 

@@ -58,6 +58,7 @@ import { ApplicationStateService } from './shared/components/application-state/a
 import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
+import { TabNavService } from '../tab-nav.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -117,6 +118,7 @@ export class CustomRouterStateSerializer
     CloudFoundryModule
   ],
   providers: [
+    TabNavService,
     LoggedInService,
     ExtensionService,
     DynamicExtensionRoutes,

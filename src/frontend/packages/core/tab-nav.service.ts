@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, asapScheduler, Observable } from 'rxjs';
-import { ISubHeaderTabs } from './shared/components/page-subheader/page-subheader.types';
 import { observeOn, map, startWith } from 'rxjs/operators';
 import { Portal } from '@angular/cdk/portal';
 import { Router } from '@angular/router';
-import { IBreadcrumb } from './shared/components/breadcrumbs/breadcrumbs.types';
+import { ISubHeaderTabs } from './src/shared/components/page-subheader/page-subheader.types';
+import { IBreadcrumb } from './src/shared/components/breadcrumbs/breadcrumbs.types';
 
 @Injectable()
 export class TabNavService {

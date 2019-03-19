@@ -4,10 +4,10 @@ import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 import { ServicesService } from '../services.service';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { AppState } from '../../../../../store/src/app-state';
+import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-service-tabs-base',
@@ -20,10 +20,11 @@ export class ServiceTabsBaseComponent {
   hasVisiblePlans$: Observable<boolean>;
   servicesSubscription: Subscription;
 
-  tabLinks: ISubHeaderTabs[] = [
+  tabLinks: IPageSideNavTab[] = [
     {
       link: 'summary',
-      label: 'Summary'
+      label: 'Summary',
+      matIcon: 'description'
     },
     {
       link: 'instances',
@@ -34,6 +35,7 @@ export class ServiceTabsBaseComponent {
       label: 'Plans'
     }
   ];
+
   breadcrumbs: IHeaderBreadcrumb[] = [
     {
       breadcrumbs: [{ value: 'Marketplace', routerLink: '/marketplace' }]

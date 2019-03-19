@@ -1,13 +1,12 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+import { filter, withLatestFrom } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import { CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
@@ -16,6 +15,7 @@ import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { TabNavService } from '../../../../tab-nav.service';
 
 
 @Component({
@@ -29,15 +29,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   constructor(
     public pageHeaderService: PageHeaderService,
     private store: Store<AppState>,
-    private breakpointObserver: BreakpointObserver,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private endpointsService: EndpointsService,
-  ) {
-    if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
-      this.enableMobileNav();
-    }
-  }
+    public tabNavService: TabNavService
+  ) { }
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;
@@ -56,6 +52,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   dispatchRelations() {
     this.store.dispatch(new GetCurrentUsersRelations());
   }
+
   ngOnInit() {
     this.endpointsService.registerHealthCheck(
       new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
@@ -93,15 +90,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
-      debounceTime(250)
-    ).subscribe(result => {
-      if (result.matches) {
-        this.enableMobileNav();
-      } else {
-        this.disableMobileNav();
-      }
-    });
 
     this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
       this.store.dispatch(new CloseSideNav());
@@ -116,24 +104,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   }
 
-  private enableMobileNav() {
-    this.store.dispatch(new CloseSideNav());
-    this.store.dispatch(new ChangeSideNavMode('over'));
-  }
-
-  private disableMobileNav() {
-    this.store.dispatch(new OpenSideNav());
-    this.store.dispatch(new ChangeSideNavMode('side'));
-  }
-
   private getNavigationRoutes(): SideNavItem[] {
     let navItems = this.collectNavigationRoutes('', this.router.config);
 
     // Sort by name
-    navItems = navItems.sort((a: any, b: any) => a.text.localeCompare(b.text));
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => a.label.localeCompare(b.label));
 
     // Sort by position
-    navItems = navItems.sort((a: any, b: any) => {
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => {
       const posA = a.position ? a.position : 99;
       const posB = b.position ? b.position : 99;
       return posA - posB;

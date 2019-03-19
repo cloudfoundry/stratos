@@ -41,6 +41,7 @@ import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { ApplicationData, ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -127,14 +128,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     );
 
     this.tabLinks = [
-      { link: 'summary', label: 'Summary' },
-      { link: 'instances', label: 'Instances' },
-      { link: 'routes', label: 'Routes' },
-      { link: 'log-stream', label: 'Log Stream' },
-      { link: 'services', label: 'Services' },
-      { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
-      { link: 'events', label: 'Events' }
-    ];
+      { link: 'summary', label: 'Summary', matIcon: 'description' },
+      { link: 'instances', label: 'Instances', matIcon: 'library_books' },
+      { link: 'routes', label: 'Routes', matIconFont: 'stratos-icons', matIcon: 'network_route' },
+      { link: 'log-stream', label: 'Log Stream', matIcon: 'featured_play_list' },
+      { link: 'services', label: 'Services', matIconFont: 'stratos-icons', matIcon: 'service' },
+      { link: 'variables', label: 'Variables', matIcon: 'lock', hidden: appDoesNotHaveEnvVars$ },
+      { link: 'events', label: 'Events', matIcon: 'watch_later' }
+    ];;
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
@@ -183,7 +184,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     update => update[this.autoRefreshString] || { busy: false }
   ));
 
-  tabLinks: ISubHeaderTabs[];
+  tabLinks: IPageSideNavTab[];
 
   private getBreadcrumbs(
     application: IApp,

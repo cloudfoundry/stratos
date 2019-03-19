@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TabNavService } from '../../../tab-nav.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
+import { TabNavService } from '../../../../tab-nav.service';
 
 export interface IPageSideNavTab {
   key?: string;
