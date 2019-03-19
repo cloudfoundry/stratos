@@ -298,6 +298,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.steps[currentIndex].finishButtonText;
   }
 
+  getAddButtonText(currentIndex: number): string {
+    return this.steps[currentIndex].addButtonText;
+  }
+
   getCancelButtonText(currentIndex: number): string {
     return this.steps[currentIndex].cancelButtonText;
   }

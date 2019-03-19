@@ -32,6 +32,7 @@ export class AppAutoscalerMetricChartListConfigService extends ListConfig<Entity
   };
 
   showMetricsRange = true;
+  pollInterval = 60000;
   selectedTimeValue = '30:minute';
   times: ITimeRange[] = [
     {

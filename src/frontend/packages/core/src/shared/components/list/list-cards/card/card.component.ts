@@ -49,7 +49,7 @@ export const listCards = [
   AppServiceBindingCardComponent,
   ServiceInstanceCardComponent,
   UserProvidedServiceInstanceCardComponent,
-  EndpointCardComponent
+  EndpointCardComponent,
   AppAutoscalerMetricChartCardComponent,
   AppAutoscalerComboChartComponent,
   AppAutoscalerComboSeriesVerticalComponent

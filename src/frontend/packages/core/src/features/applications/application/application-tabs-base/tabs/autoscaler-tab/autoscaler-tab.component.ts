@@ -106,16 +106,16 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
   paramsMetrics = {
     'start-time': 0,
     'end-time': (new Date()).getTime().toString() + '000000',
-    'page': '1',
+    page: '1',
     'results-per-page': '1',
-    'order': 'desc'
+    order: 'desc'
   };
   paramsHistory = {
     'start-time': 0,
     'end-time': (new Date()).getTime().toString() + '000000',
-    'page': '1',
+    page: '1',
     'results-per-page': '5',
-    'order': 'desc'
+    order: 'desc'
   };
 
   ngOnDestroy(): void {

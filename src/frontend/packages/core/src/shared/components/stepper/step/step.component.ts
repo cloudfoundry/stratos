@@ -76,10 +76,19 @@ export class StepComponent {
   cancelButtonText = 'Cancel';
 
   @Input()
+  addButtonText = 'Add';
+
+  @Input()
   disablePrevious = false;
 
   @Input()
   blocked = false;
+
+  @Input()
+  showAdd = false;
+
+  @Input()
+  disableAdd = false;
 
   @Input()
   public destructiveStep = false;
@@ -98,6 +107,9 @@ export class StepComponent {
 
   @Input()
   onLeave: (isNext?: boolean) => void = () => { }
+
+  @Input()
+  onAdd: () => void = () => { }
 
   constructor() {
     this.pOnEnter = (data?: any) => {
