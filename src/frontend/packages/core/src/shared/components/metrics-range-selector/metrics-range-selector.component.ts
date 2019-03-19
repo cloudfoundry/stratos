@@ -73,6 +73,11 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     this.rangeSelectorManager.metricRangeService.defaultTimeValue = timeValue;
   }
 
+  @Input()
+  set pollInterval(interval: number) {
+    this.rangeSelectorManager.pollInterval = interval;
+  }
+
   get baseAction() {
     return this.baseActionValue;
   }

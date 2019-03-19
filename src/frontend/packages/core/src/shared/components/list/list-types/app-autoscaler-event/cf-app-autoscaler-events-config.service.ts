@@ -47,6 +47,7 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> i
   };
 
   showMetricsRange = true;
+  pollInterval = 120000;
   selectedTimeValue = '1:week';
   times: ITimeRange[] = [
     {

@@ -40,3 +40,21 @@ app-tile-grid {
 .edit-recurring-schedule {
   max-width: 100%;
 }
+
+// .steppers__contents {
+//   height: unset;
+// }
+
+// .app-autoscaler-edit-specific-date .mat-form-field-infix {
+//   width: unset;
+// }
+
+
+.app-autoscaler-edit-policy-item {
+  .app-autoscaler-edit-policy-desc {
+    margin-bottom: .5em;
+  }
+  mat-error {
+    font-size: 85%;
+  }
+}
