@@ -25,7 +25,6 @@ export class AddServiceInstanceBaseStepComponent {
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(
       'Marketplace Service',
       { matIcon: 'store' },
-      // { matIcon: 'service', matIconFont: 'stratos-icons' },
       { type: SERVICE_INSTANCE_TYPES.SERVICE }
     ),
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(

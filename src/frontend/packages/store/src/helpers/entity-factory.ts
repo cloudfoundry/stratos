@@ -46,8 +46,6 @@ const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
-const entityKeyReverseLookup = new Map<EntitySchema, string>();
-
 /**
  * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
  *
@@ -413,18 +411,7 @@ export function entityFactory(key: string): EntitySchema {
 
 export function addEntityToCache(entitySchema: EntitySchema) {
   entityCache[entitySchema.key] = entitySchema;
-  entityKeyReverseLookup.set(entitySchema, entitySchema.key);
-}
-
-export function reverseLookupEntityKey(entitySchema: EntitySchema) {
-  return entityKeyReverseLookup.get(entitySchema);
 }
 
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
 entityCache[userProfileSchemaKey] = UserProfileInfoSchema;
-
-
-Object.keys(entityCache).forEach(key => {
-  entityKeyReverseLookup.set(entityCache[key], key);
-});
-

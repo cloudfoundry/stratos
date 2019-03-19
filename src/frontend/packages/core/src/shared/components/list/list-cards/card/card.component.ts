@@ -14,16 +14,15 @@ import {
 import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-import {
-  UserProvidedServiceInstanceCardComponent,
-} from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
-import { CardMultiActionComponents } from '../card.component.types';
-
 import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import {
   ServiceInstanceCardComponent,
 } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
+import {
+  UserProvidedServiceInstanceCardComponent,
+} from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 import { CardCell } from '../../list.types';
+import { CardMultiActionComponents } from '../card.component.types';
 
 export const listCards = [
   CardAppComponent,

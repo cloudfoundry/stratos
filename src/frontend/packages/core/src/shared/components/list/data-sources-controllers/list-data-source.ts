@@ -18,10 +18,10 @@ import {
   map,
   publishReplay,
   refCount,
+  startWith,
   switchMap,
   tap,
   withLatestFrom,
-  startWith,
 } from 'rxjs/operators';
 
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
@@ -97,7 +97,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public editRow: T;
 
   // Cached collections
-  public filteredRows: Array<T>;
   public transformedEntities: Array<T>;
 
   // Misc

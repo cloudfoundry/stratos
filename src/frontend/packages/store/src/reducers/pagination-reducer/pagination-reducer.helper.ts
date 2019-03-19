@@ -1,4 +1,4 @@
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -202,6 +202,12 @@ function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
   return !hasError(pagination) && !hasValidOrGettingPage(pagination);
 }
 
+function safePopulatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+  return populatePaginationFromParent(store, action).pipe(
+    map(newAction => newAction || action)
+  );
+}
+
 function getObservables<T = any>(
   store: Store<AppState>,
   entityKey: string,
@@ -224,9 +230,9 @@ function getObservables<T = any>(
     tap(([prevPag, newPag]: [PaginationEntityState, PaginationEntityState]) => {
       if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, newPag, prevPag)) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        combineLatest(arrayAction.map(action => populatePaginationFromParent(store, action))).pipe(
+        combineLatest(arrayAction.map(action => safePopulatePaginationFromParent(store, action))).pipe(
           first(),
-        ).subscribe(newAction => newAction.forEach(action => action && store.dispatch(action)));
+        ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
       }
     }),
     map(([prevPag, newPag]) => newPag)

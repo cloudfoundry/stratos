@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, map } from 'rxjs/operators';
 
 import {
   CreateUserProvidedServiceInstance,
   GetAllUserProvidedServices,
   GetUserProvidedService,
   IUserProvidedServiceInstanceData,
+  UpdateUserProvidedServiceInstance,
 } from '../../../../store/src/actions/user-provided-service.actions';
 import { AppState } from '../../../../store/src/app-state';
 import {
   entityFactory,
   serviceInstancesSchemaKey,
+  serviceSchemaKey,
   userProvidedServiceInstanceSchemaKey,
 } from '../../../../store/src/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -21,6 +23,7 @@ import { selectRequestInfo } from '../../../../store/src/selectors/api.selectors
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IUserProvidedService } from '../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { EntityMonitor } from '../monitors/entity-monitor';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 
@@ -71,22 +74,34 @@ export class CloudFoundryUserProvidedServicesService {
     const create$ = this.store.select(selectRequestInfo(userProvidedServiceInstanceSchemaKey, guid));
     this.store.dispatch(action);
     return create$.pipe(
+      debounceTime(250),
       filter(a => !a.creating),
-      switchMap(a => {
-        const createdGuid = a.response.result[0];
-        this.store.dispatch(new GetUserProvidedService(createdGuid, cfGuid));
-        return this.store.select(selectRequestInfo(userProvidedServiceInstanceSchemaKey, createdGuid));
-      }),
-      map(ri => ({
-        ...ri,
-        response: {
-          result: [guid]
-        }
-      }))
     );
   }
 
-  // updateUserProvidedService(): Observable<RequestInfoState> {
-  // }
+  updateUserProvidedService(
+    cfGuid: string,
+    guid: string,
+    data: Partial<IUserProvidedServiceInstanceData>,
+  ): Observable<RequestInfoState> {
+    const updateAction = new UpdateUserProvidedServiceInstance(
+      cfGuid,
+      guid,
+      data,
+      serviceSchemaKey
+    );
+    this.store.dispatch(updateAction);
+    return new EntityMonitor(
+      this.store,
+      guid,
+      userProvidedServiceInstanceSchemaKey,
+      entityFactory(userProvidedServiceInstanceSchemaKey)
+    ).entityRequest$.pipe(
+      filter(
+        er => er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance] &&
+          er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].busy
+      )
+    );
+  }
 
 }

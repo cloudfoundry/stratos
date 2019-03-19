@@ -32,7 +32,9 @@ export interface PaginationClientPagination {
 }
 
 export class PaginationEntityState {
-  // For multi action lists, this is used to force a particular entity type.
+  /**
+   * For multi action lists, this is used to force a particular entity type.
+   */
   forcedLocalPage?: number;
   currentPage = 0;
   totalResults = 0;

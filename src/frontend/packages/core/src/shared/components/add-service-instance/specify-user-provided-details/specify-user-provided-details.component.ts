@@ -4,31 +4,19 @@ import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { debounceTime, filter, first, map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import {
-  CreateUserProvidedServiceInstance,
-  GetUserProvidedService,
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../../../store/src/actions/user-provided-service.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import {
-  entityFactory,
-  serviceInstancesSchemaKey,
-  serviceSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { EntityService } from '../../../../core/entity-service';
 import { urlValidationExpression } from '../../../../core/utils.service';
 import { environment } from '../../../../environments/environment';
-import { isValidJsonValidator } from '../../../form-validators';
-import { EntityMonitor } from '../../../monitors/entity-monitor';
-import { StepOnNextResult } from '../../stepper/step/step.component';
 import { AppNameUniqueChecking } from '../../../app-name-unique.directive/app-name-unique.directive';
+import { isValidJsonValidator } from '../../../form-validators';
+import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
+import { StepOnNextResult } from '../../stepper/step/step.component';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -54,10 +42,11 @@ export class SpecifyUserProvidedDetailsComponent {
   public appNameChecking = new AppNameUniqueChecking();
 
   constructor(
-    private store: Store<AppState>,
     route: ActivatedRoute,
+    private upsService: CloudFoundryUserProvidedServicesService
   ) {
-    const { endpointId, serviceInstanceId } = route.snapshot.params;
+    const { endpointId, serviceInstanceId } =
+      route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;
     this.formGroup = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
@@ -72,35 +61,21 @@ export class SpecifyUserProvidedDetailsComponent {
   private initUpdate(serviceInstanceId: string, endpointId: string) {
     if (this.isUpdate) {
       this.formGroup.disable();
-      const entityMonitor = new EntityMonitor(
-        this.store,
-        serviceInstanceId,
-        userProvidedServiceInstanceSchemaKey,
-        entityFactory(userProvidedServiceInstanceSchemaKey)
-      );
-      const entityService = new EntityService<APIResource>(
-        this.store,
-        entityMonitor,
-        new GetUserProvidedService(serviceInstanceId, endpointId)
-      );
-      entityService.entityObs$
-        .pipe(
-          filter(entityInfo => entityInfo.entity && !entityInfo.entityRequestInfo.fetching),
-          map(entityInfo => entityInfo.entity),
-          first()
-        )
-        .subscribe(entity => {
-          this.formGroup.enable();
-          const serviceEntity = entity.entity;
-          this.formGroup.setValue({
-            name: serviceEntity.name,
-            syslog_drain_url: serviceEntity.syslog_drain_url,
-            credentials: JSON.stringify(serviceEntity.credentials),
-            route_service_url: serviceEntity.route_service_url,
-            tags: []
-          });
-          this.tags = this.tagsArrayToChips(serviceEntity.tags);
+      this.upsService.getUserProvidedService(endpointId, serviceInstanceId).pipe(
+        first(),
+        map(entityInfo => entityInfo.entity)
+      ).subscribe(entity => {
+        this.formGroup.enable();
+        const serviceEntity = entity;
+        this.formGroup.setValue({
+          name: serviceEntity.name,
+          syslog_drain_url: serviceEntity.syslog_drain_url,
+          credentials: JSON.stringify(serviceEntity.credentials),
+          route_service_url: serviceEntity.route_service_url,
+          tags: []
         });
+        this.tags = this.tagsArrayToChips(serviceEntity.tags);
+      });
     }
   }
 
@@ -129,21 +104,11 @@ export class SpecifyUserProvidedDetailsComponent {
   private onNextCreate() {
     const data = this.getServiceData();
     const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
-    const action = new CreateUserProvidedServiceInstance(
+    return this.upsService.createUserProvidedService(
       this.cfGuid,
       guid,
       data as IUserProvidedServiceInstanceData,
-      serviceInstancesSchemaKey
-    );
-    this.store.dispatch(action);
-    return new EntityMonitor(
-      this.store,
-      guid,
-      userProvidedServiceInstanceSchemaKey,
-      entityFactory(userProvidedServiceInstanceSchemaKey)
-    ).entityRequest$.pipe(
-      debounceTime(250),
-      filter(er => !er.creating),
+    ).pipe(
       map(er => ({
         success: !er.error,
         redirect: !er.error
@@ -153,23 +118,11 @@ export class SpecifyUserProvidedDetailsComponent {
 
   private onNextUpdate() {
     const updateData = this.getServiceData();
-    const updateAction = new UpdateUserProvidedServiceInstance(
+    return this.upsService.updateUserProvidedService(
       this.cfGuid,
       this.serviceInstanceId,
-      updateData,
-      serviceSchemaKey
-    );
-    this.store.dispatch(updateAction);
-    return new EntityMonitor(
-      this.store,
-      this.serviceInstanceId,
-      userProvidedServiceInstanceSchemaKey,
-      entityFactory(userProvidedServiceInstanceSchemaKey)
-    ).entityRequest$.pipe(
-      filter(
-        er => er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance] &&
-          er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].busy
-      ),
+      updateData
+    ).pipe(
       map(er => ({
         success: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
         redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error
