@@ -27,12 +27,15 @@
         <div class="steppers__navigation-left">
           <button id="stepper_previous" *ngIf="steps.length !== 1 || basePreviousRedirect" color="accent" mat-button
             mat-raised-button (click)="setActive(currentIndex - 1)"
-            [disabled]="!canGoto(currentIndex - 1)">Previous</button>
+            [disabled]="!canGoto(currentIndex - 1) || steps[currentIndex].disablePrevious">Previous</button>
         </div>
         <div class="steppers__navigation-right">
           <button id="stepper_cancel" color="primary" mat-button [routerLink]="cancel$ | async"
             [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)" *ngIf="cancel"
             (click)="steps[currentIndex].onLeave(false)">{{ this.getCancelButtonText(currentIndex) }}</button>
+          <button id="stepper_add" color="primary" mat-button mat-raised-button *ngIf="steps[currentIndex].showAdd"
+            [disabled]="steps[currentIndex].disableAdd"
+            (click)="steps[currentIndex].onAdd()">{{ this.getAddButtonText(currentIndex) }}</button>
           <button id="stepper_next" *ngIf="!steps[currentIndex].hideNextButton" class="steppers__navigation-right__next"
             [color]="steps[currentIndex].destructiveStep ? 'warn' : 'primary'" type="submit" mat-button
             mat-raised-button (click)="goNext(currentIndex)"

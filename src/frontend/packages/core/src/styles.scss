@@ -105,3 +105,14 @@ button.mat-simple-snackbar-action {
 .autoscaler-metric-page .cards__columns-3 app-card {
   width: 100%;
 }
+
+app-edit-autoscaler-policy {
+  .steppers__contents {
+    height: unset;
+  }
+  .app-autoscaler-edit-specific-date .mat-form-field-infix {
+    width: unset;
+  }
+} 
+
+

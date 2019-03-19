@@ -42,6 +42,8 @@ export class MetricsRangeSelectorManagerService {
 
   private pollIndex: number;
 
+  public pollInterval = 10000;
+
   constructor(public metricRangeService: MetricsRangeSelectorService) { }
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
@@ -142,7 +144,7 @@ export class MetricsRangeSelectorManagerService {
     this.endWindowPoll();
     this.pollIndex = window.setInterval(
       () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow)),
-      10000
+      this.pollInterval
     );
   }
 

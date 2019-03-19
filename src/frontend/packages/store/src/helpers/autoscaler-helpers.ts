@@ -3,7 +3,11 @@ import * as moment from 'moment';
 
 export const PolicyDefaultSetting = {
   breach_duration_secs_default: 120,
+  breach_duration_secs_min: 60,
+  breach_duration_secs_max: 3600,
   cool_down_secs_default: 120,
+  cool_down_secs_min: 60,
+  cool_down_secs_max: 3600,
 };
 export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput'];
 export const ScaleTypes = ['upper', 'lower'];
