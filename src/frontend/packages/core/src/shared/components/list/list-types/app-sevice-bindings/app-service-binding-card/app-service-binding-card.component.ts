@@ -48,7 +48,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   listData: {
     label: string;
     data$: Observable<string>;
-    customStyle: string;
+    customStyle?: string;
   }[];
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>> | null>;
