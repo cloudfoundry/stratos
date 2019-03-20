@@ -23,9 +23,3 @@ export interface IListRowCell {
     component?: Component
   }[];
 }
-
-export interface IListRowCellData {
-  label: string;
-  data$?: Observable<string>;
-  component?: Component;
-}
