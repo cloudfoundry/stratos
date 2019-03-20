@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { UserProvidedServiceInstanceCardComponent } from './user-provided-service-instance-card.component';
-import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 
 describe('UserProvidedServiceInstanceCardComponent', () => {
   let component: UserProvidedServiceInstanceCardComponent;
@@ -69,7 +69,8 @@ describe('UserProvidedServiceInstanceCardComponent', () => {
         tags: [],
         service_bindings: [],
         service_bindings_url: '',
-        routes_url: ''
+        routes_url: '',
+        route_service_url: ''
       },
       metadata: {
         created_at: '',
