@@ -1,3 +1,4 @@
+import { favoritesConfigMapper, FavoriteConfig } from './../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
@@ -10,6 +11,16 @@ import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth
 import { EffectsModule } from '@ngrx/effects';
 import { KubernetesEffects } from './store/kubernetes.effects';
 import { KubernetesStoreModule } from './kubernetes.store.module';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { IEndpointFavMetadata, IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
+import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
+
+export interface IK8FavMetadata extends IFavoriteMetadata {
+  guid: string;
+  name: string;
+  address: string;
+}
 
 @NgModule({
   imports: [
@@ -34,4 +45,32 @@ import { KubernetesStoreModule } from './kubernetes.store.module';
     KubernetesGKEAuthFormComponent,
   ]
 })
-export class KubernetesSetupModule { }
+export class KubernetesSetupModule {
+  constructor() {
+    const endpointType = 'k8s';
+    favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IK8FavMetadata>(
+      new FavoriteConfig({
+        endpointType,
+        entityType: endpointSchemaKey
+      },
+        'Kubernetes',
+        (endpoint: IK8FavMetadata) => ({
+          type: endpointType,
+          routerLink: `/kubernetes/${endpoint.guid}`,
+          lines: [
+            ['Address', endpoint.address]
+          ],
+          name: endpoint.name,
+        }),
+        endpoint => ({
+          guid: endpoint.guid,
+          name: endpoint.name,
+          address: getFullEndpointApiUrl(endpoint),
+        })
+      )
+    );
+  }
+
+
+
+}

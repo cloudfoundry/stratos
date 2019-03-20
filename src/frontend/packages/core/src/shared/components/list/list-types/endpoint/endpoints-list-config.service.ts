@@ -112,8 +112,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
       (row: EndpointModel) => new UserFavoriteEndpoint(
-        row.guid,
-        row.cnsi_type,
         row
       )
     );
