@@ -184,5 +184,6 @@ export class DeleteUserProvidedInstance extends CFStartAction implements ICFActi
   entity = entityFactory(userProvidedServiceInstanceSchemaKey);
   entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
+  clearPaginationEntityKeys = [serviceBindingSchemaKey];
   removeEntityOnDelete = true;
 }
