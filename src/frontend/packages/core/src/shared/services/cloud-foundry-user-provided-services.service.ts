@@ -21,7 +21,7 @@ import { RequestInfoState } from '../../../../store/src/reducers/api-request-red
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { IUserProvidedService } from '../../core/cf-api-svc.types';
+import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { EntityMonitor } from '../monitors/entity-monitor';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
@@ -39,7 +39,7 @@ export class CloudFoundryUserProvidedServicesService {
 
   }
 
-  public getUserProvidedServices(cfGuid: string, spaceGuid?: string): Observable<APIResource<IUserProvidedService>[]> {
+  public getUserProvidedServices(cfGuid: string, spaceGuid?: string): Observable<APIResource<IUserProvidedServiceInstance>[]> {
     const action = new GetAllUserProvidedServices(cfGuid, [], false, spaceGuid);
     const pagObs = getPaginationObservables({
       store: this.store,
@@ -52,8 +52,8 @@ export class CloudFoundryUserProvidedServicesService {
     return pagObs.entities$;
   }
 
-  public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedService>> {
-    const service = this.entityServiceFactory.create<APIResource<IUserProvidedService>>(
+  public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedServiceInstance>> {
+    const service = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       userProvidedServiceInstanceSchemaKey,
       entityFactory(userProvidedServiceInstanceSchemaKey),
       upsGuid,

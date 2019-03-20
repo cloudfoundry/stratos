@@ -13,12 +13,12 @@
     </div>
   </mat-form-field>
   <mat-form-field>
-    <input matInput class="" formControlName="syslog_drain_url" placeholder="Syslog Drain Url">
-    <mat-error *ngIf="formGroup.controls.syslog_drain_url?.hasError('pattern')">Invalid URL</mat-error>
-  </mat-form-field>
-  <mat-form-field>
     <input matInput formControlName="route_service_url" type="url" placeholder="Route Service URL">
     <mat-error *ngIf="formGroup.controls.route_service_url?.hasError('pattern')">Invalid URL</mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput class="" formControlName="syslog_drain_url" placeholder="Syslog Drain URL">
+    <mat-error *ngIf="formGroup.controls.syslog_drain_url?.hasError('pattern')">Invalid URL</mat-error>
   </mat-form-field>
   <mat-form-field class="stepper-form__tags">
     <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">

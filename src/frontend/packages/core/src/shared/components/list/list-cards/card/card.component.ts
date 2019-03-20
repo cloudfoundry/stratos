@@ -22,7 +22,7 @@ import {
   UserProvidedServiceInstanceCardComponent,
 } from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 import { CardCell } from '../../list.types';
-import { CardMultiActionComponents } from '../card.component.types';
+import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 
 export const listCards = [
   CardAppComponent,
@@ -37,11 +37,11 @@ export const listCards = [
   UserProvidedServiceInstanceCardComponent,
   EndpointCardComponent
 ];
-type cardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents;
+export type CardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents | CardDynamicComponent<T>;
 
 interface ISetupData<T> {
   dataSource: IListDataSource<T>;
-  componentType: cardTypes<T>;
+  componentType: CardTypes<T>;
   item: T | MultiActionListEntity;
 }
 @Component({
@@ -54,7 +54,7 @@ interface ISetupData<T> {
 })
 export class CardComponent<T> {
   private componentRef: ComponentRef<any>;
-  private pComponent: cardTypes<T>;
+  private pComponent: CardTypes<T>;
   private pDataSource: IListDataSource<T>;
 
   @Input() set dataSource(dataSource: IListDataSource<T>) {
@@ -64,7 +64,7 @@ export class CardComponent<T> {
     }
   }
 
-  @Input() set component(componentType: cardTypes<T>) {
+  @Input() set component(componentType: CardTypes<T>) {
     if (!this.pComponent) {
       this.componentCreator({ componentType });
       this.pComponent = componentType;
@@ -94,7 +94,7 @@ export class CardComponent<T> {
     };
   })();
 
-  private setupComponent(componentType: cardTypes<T>, item: T | MultiActionListEntity, dataSource: IListDataSource<T>) {
+  private setupComponent(componentType: CardTypes<T>, item: T | MultiActionListEntity, dataSource: IListDataSource<T>) {
     if (!componentType || !item) {
       return;
     }
@@ -121,17 +121,26 @@ export class CardComponent<T> {
     }
   }
 
-  private getComponent(component: any | CardMultiActionComponents, item: T | MultiActionListEntity) {
+  private getComponent(component: CardTypes<T>, item: T | MultiActionListEntity): {
+    component: Type<CardCell<T>>,
+    entity: T,
+    entityKey?: string;
+  } {
     const { entityKey, entity } = this.getEntity(item);
-    if (component instanceof CardMultiActionComponents && entityKey) {
+    if (component instanceof CardMultiActionComponents) {
       return {
-        component: component.getComponent(entityKey),
+        component: entityKey ? component.getComponent(entityKey) : null,
         entityKey,
+        entity
+      };
+    } else if (component instanceof CardDynamicComponent) {
+      return {
+        component: component.getComponent(entity),
         entity
       };
     }
     return {
-      component,
+      component: (component as Type<CardCell<T>>),
       entity
     };
   }

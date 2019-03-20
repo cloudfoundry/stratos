@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { MultiActionListEntity } from '../../../monitors/pagination-monitor';
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { CardCell } from '../list.types';
-import { CardMultiActionComponents } from './card.component.types';
+import { CardTypes } from './card/card.component';
 
 @Component({
   selector: 'app-cards',
@@ -13,10 +13,10 @@ import { CardMultiActionComponents } from './card.component.types';
 export class CardsComponent<T> {
   public columns = CardCell.columns;
   @Input() dataSource: IListDataSource<T>;
-  private pComponent: CardCell<T> | CardMultiActionComponents;
+  private pComponent: CardTypes<T>;
   @Input()
   get component() { return this.pComponent; }
-  set component(cardCell: CardCell<T> | CardMultiActionComponents) {
+  set component(cardCell: CardTypes<T>) {
     this.pComponent = cardCell;
   }
 

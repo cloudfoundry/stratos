@@ -4,6 +4,19 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
+import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
+import { DeleteApplication, GetApplication } from '../../../../../store/src/actions/application.actions';
+import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  serviceInstancesSchemaKey,
+} from '../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
 import {
@@ -14,12 +27,6 @@ import { ITableColumn } from '../../../shared/components/list/list-table/table.t
 import {
   CfAppRoutesListConfigService,
 } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
-import {
-  TableCellRouteComponent,
-} from '../../../shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
-import {
-  TableCellTCPRouteComponent,
-} from '../../../shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import {
   AppServiceBindingDataSource,
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
@@ -32,24 +39,18 @@ import {
 import {
   TableCellAppStatusComponent,
 } from '../../../shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
+import {
+  TableCellRouteComponent,
+} from '../../../shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
+import {
+  TableCellTCPRouteComponent,
+} from '../../../shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { isServiceInstance } from '../../cloud-foundry/cf.helpers';
 import { ApplicationService } from '../application.service';
-import { GetApplication, DeleteApplication } from '../../../../../store/src/actions/application.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
-import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
-import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  serviceInstancesSchemaKey,
-} from '../../../../../store/src/helpers/entity-factory';
 
 
 @Component({
@@ -77,7 +78,11 @@ export class ApplicationDeleteComponent<T> {
       columnId: 'service',
       headerCell: () => 'Service',
       cellDefinition: {
-        getValue: (row) => row.entity.service_instance.entity.service.entity.label
+        // TODO: RC
+        getValue: (row) => {
+          const si = isServiceInstance(row.entity.service_instance.entity);
+          return si ? si.service.entity.label : 'User Service';
+        }
       },
       cellFlex: '2'
     },
