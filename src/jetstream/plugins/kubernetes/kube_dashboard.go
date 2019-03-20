@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
-	// "time"
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strings"
 	"time"
 
@@ -22,6 +21,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/proxy"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/transport"
+
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/kubernetes/pkg/api/legacyscheme"
+	api "k8s.io/kubernetes/pkg/apis/core"
+	k8s_api_v1 "k8s.io/kubernetes/pkg/apis/core/v1"
 )
 
 // GET /api/v1/namespaces/{namespace}/pods/{name}/proxy
@@ -94,7 +99,7 @@ func normalizeLocation(location *url.URL) *url.URL {
 	return normalized
 }
 
-func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 	log.Debug("kubeDashboardTest request")
 
 	//	c.Response().Header().Set("X-FRAME-OPTIONS", "sameorigin")
@@ -106,7 +111,7 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 
 	log.Debug(c.Request().RequestURI)
 
-	var prefix = "/pp/v1/kubedash/" + cnsiGUID + "/"
+	var prefix = "/pp/v1/kubedash/ui/" + cnsiGUID + "/"
 
 	path := c.Request().RequestURI[len(prefix):]
 
@@ -218,4 +223,69 @@ func (k *KubernetesSpecification) kubeDashboardTest(c echo.Context) error {
 	log.Debugf("Finsihed proxying request: %s", target)
 
 	return nil
+}
+
+// Determine if the specified Kube endpoint has the dashboard installed and ready
+func (k *KubernetesSpecification) kubeDashboardStatus(c echo.Context) error {
+	log.Debug("kubeDashboardStatus request")
+
+	cnsiGUID := c.Param("guid")
+	userGUID := c.Get("user_id").(string)
+
+	var p = k.portalProxy
+	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/pods?labelSelector=app%3Dkubernetes-dashboard", nil, nil)
+
+	if err != nil {
+		return err
+	}
+
+	ok, list, err := tryDecodePodList(response.Response)
+	if !ok {
+		return err
+	}
+
+	// Should just be one pod
+	if len(list.Items) != 1 {
+		return errors.New("Too many pods returned")
+	}
+
+	pod := list.Items[0]
+	if pod.Status.Phase != "Running" {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Dashboard not running",
+			"Dashboard not running")
+	}
+
+	jsonString, err := json.Marshal(pod)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Unable Marshal pod",
+			"Unable Marshal pod")
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+	return nil
+}
+
+func tryDecodePodList(data []byte) (parsed bool, pods v1.PodList, err error) {
+	obj, err := runtime.Decode(legacyscheme.Codecs.UniversalDecoder(), data)
+	if err != nil {
+		return false, pods, err
+	}
+
+	newPods, ok := obj.(*api.PodList)
+	// Check whether the object could be converted to list of pods.
+	if !ok {
+		err = fmt.Errorf("invalid pods list: %#v", obj)
+		return false, pods, err
+	}
+
+	v1Pods := &v1.PodList{}
+	if err := k8s_api_v1.Convert_core_PodList_To_v1_PodList(newPods, v1Pods, nil); err != nil {
+		return true, pods, err
+	}
+	return true, *v1Pods, err
 }

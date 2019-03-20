@@ -60,7 +60,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.2.2 // indirect
 	gopkg.in/yaml.v2 v2.2.2
-	k8s.io/api v0.0.0-20190226013409-f951fa7b8c72 // indirect
+	k8s.io/api v0.0.0-20190226013409-f951fa7b8c72
 	k8s.io/apiextensions-apiserver v0.0.0-20190225215027-42f453e3c54a // indirect
 	k8s.io/apimachinery v0.0.0-20190117220443-572dfc7bdfcb
 	k8s.io/apiserver v0.0.0-20190225213950-239e48e34c98 // indirect
@@ -69,7 +69,7 @@ require (
 	k8s.io/helm v2.12.3+incompatible
 	k8s.io/klog v0.2.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20190225204428-d50a959ae76a // indirect
-	k8s.io/kubernetes v1.13.3 // indirect
+	k8s.io/kubernetes v1.13.3
 	k8s.io/utils v0.0.0-20190221042446-c2654d5206da // indirect
 	sigs.k8s.io/yaml v1.1.0 // indirect
 	vbom.ml/util v0.0.0-20180919145318-efcd4e0f9787 // indirect

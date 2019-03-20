@@ -52,7 +52,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     href = href.substr(index + 9);
     console.log(href);
     this.href = href;
-    this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/${guid}/`);
+    this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/ui/${guid}/`);
     console.log(window.location);
 
     this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
