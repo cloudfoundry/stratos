@@ -47,7 +47,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     }
   }
   actions = getActions('User Provided Services', 'Get all User Provided Services');
-  entity = entityFactory(userProvidedServiceInstanceSchemaKey);
+  entity = [entityFactory(userProvidedServiceInstanceSchemaKey)];
   entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
   initialParams = {

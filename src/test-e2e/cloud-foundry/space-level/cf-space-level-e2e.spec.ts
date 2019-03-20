@@ -27,6 +27,7 @@ describe('CF - Space Level -', () => {
   function testTabs() {
     spacePage.goToAppsTab();
     spacePage.goToSITab();
+    spacePage.goToUPSITab();
     spacePage.goToRoutesTab();
     spacePage.goToUsersTab();
     spacePage.goToSummaryTab();

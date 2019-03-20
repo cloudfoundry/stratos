@@ -13,6 +13,7 @@ export enum CreateServiceInstanceMode {
 
 export const CANCEL_SPACE_ID_PARAM = 'space-guid';
 export const CANCEL_ORG_ID_PARAM = 'org-guid';
+export const CANCEL_USER_PROVIDED = 'up';
 
 interface ViewDetail {
   showSelectCf: boolean;
@@ -47,6 +48,7 @@ export class CsiModeService {
     this.cancelUrl = `/services`;
     const spaceGuid = activatedRoute.snapshot.queryParams[CANCEL_SPACE_ID_PARAM];
     const orgGuid = activatedRoute.snapshot.queryParams[CANCEL_ORG_ID_PARAM];
+    const isUserProvided = activatedRoute.snapshot.queryParams[CANCEL_USER_PROVIDED];
     const cfId = getIdFromRoute(activatedRoute, 'endpointId');
     const id = getIdFromRoute(activatedRoute, 'id');
 
@@ -94,7 +96,8 @@ export class CsiModeService {
     }
 
     if (spaceGuid && orgGuid) {
-      this.cancelUrl = `/cloud-foundry/${cfId}/organizations/${orgGuid}/spaces/${spaceGuid}/service-instances`;
+      this.cancelUrl =
+        `/cloud-foundry/${cfId}/organizations/${orgGuid}/spaces/${spaceGuid}/${isUserProvided ? 'user-service-instances' : 'service-instances'}`;
     }
 
   }
