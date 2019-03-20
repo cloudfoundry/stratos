@@ -4,6 +4,8 @@ import { Observable, of as ObservableOf } from 'rxjs';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesService } from '../services/kubernetes.service';
+import { first, map } from 'rxjs/operators';
+import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
 
 @Component({
   selector: 'app-kubernetes-tab-base',
@@ -37,11 +39,18 @@ export class KubernetesTabBaseComponent implements OnInit {
   ];
 
   isFetching$: Observable<boolean>;
+  public favorite$: Observable<UserFavoriteEndpoint>;
 
   constructor(public kubeEndpointService: KubernetesEndpointService) { }
 
   ngOnInit() {
     this.isFetching$ = ObservableOf(false);
+    this.favorite$ = this.kubeEndpointService.endpoint$.pipe(
+      first(),
+      map(endpoint => new UserFavoriteEndpoint(
+        endpoint.entity
+      ))
+    );
   }
 
 }

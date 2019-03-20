@@ -84,7 +84,7 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
     if (parts.length < 3) {
       logger.error('Failed to determine entity guid from favorite guid: ', parts);
       return null;
-    } else if (parts.length === 3)  {
+    } else if (parts.length === 3) {
       return favoriteGuid.split(favoriteGuidSeparator)[0];
     } else {
       // cf guid may contain a hypen meaning there are more than 3 parts, so use everything prior to the 2nd to last part
@@ -97,16 +97,15 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
 
 export class UserFavoriteEndpoint extends UserFavorite<IEndpointFavMetadata> {
   constructor(
-    public endpointId: string,
-    public endpointType: string,
     endpoint: EndpointModel
   ) {
     super(
-      endpointId,
-      endpointType,
+      endpoint.guid,
+      endpoint.cnsi_type,
       endpointSchemaKey,
       null,
       endpoint
     );
   }
 }
+

@@ -50,8 +50,6 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       first(),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
       map(endpoint => new UserFavoriteEndpoint(
-        this.cfEndpointService.cfGuid,
-        'cf',
         endpoint
       ))
     );
