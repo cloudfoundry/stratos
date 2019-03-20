@@ -9,12 +9,14 @@ import { DeleteApplication, GetApplication } from '../../../../../store/src/acti
 import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
+import { DeleteUserProvidedInstance } from '../../../../../store/src/actions/user-provided-service.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceInstancesSchemaKey,
+  userProvidedServiceInstanceSchemaKey,
 } from '../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
@@ -49,7 +51,7 @@ import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { isServiceInstance } from '../../cloud-foundry/cf.helpers';
+import { isServiceInstance, isUserProvidedServiceInstance } from '../../cloud-foundry/cf.helpers';
 import { ApplicationService } from '../application.service';
 
 
@@ -78,7 +80,6 @@ export class ApplicationDeleteComponent<T> {
       columnId: 'service',
       headerCell: () => 'Service',
       cellDefinition: {
-        // TODO: RC
         getValue: (row) => {
           const si = isServiceInstance(row.entity.service_instance.entity);
           return si ? si.service.entity.label : 'User Service';
@@ -153,9 +154,11 @@ export class ApplicationDeleteComponent<T> {
   public selectedApplication$: Observable<APIResource<IApp>[]>;
   public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
   public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
+  public selectedUserServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   public fetchingApplicationData$: Observable<boolean>;
 
   public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
+  public userProvidedServiceInstanceSchemaKey = userProvidedServiceInstanceSchemaKey;
   public routeSchemaKey = routeSchemaKey;
   public applicationSchemaKey = applicationSchemaKey;
   public deletingState = AppMonitorComponentTypes.DELETE;
@@ -267,12 +270,21 @@ export class ApplicationDeleteComponent<T> {
     );
   }
 
-  private setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
+  public setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
     this.selectedServiceInstances = selected;
-    this.selectedServiceInstances$.next(selected);
+    const selectedServices = selected.reduce((res, binding) => {
+      if (isUserProvidedServiceInstance(binding.entity.service_instance.entity)) {
+        res.upsi.push(binding);
+      } else {
+        res.si.push(binding);
+      }
+      return res;
+    }, { si: [], upsi: [] });
+    this.selectedServiceInstances$.next(selectedServices.si);
+    this.selectedUserServiceInstances$.next(selectedServices.upsi);
   }
 
-  private setSelectedRoutes(selected: APIResource<IRoute>[]) {
+  public setSelectedRoutes(selected: APIResource<IRoute>[]) {
     this.selectedRoutes = selected;
     this.selectedRoutes$.next(selected);
   }
@@ -307,7 +319,11 @@ export class ApplicationDeleteComponent<T> {
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
             this.selectedServiceInstances.forEach(instance => {
-              this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.entity.service_instance_guid));
+              if (isUserProvidedServiceInstance(instance.entity.service_instance.entity)) {
+                this.store.dispatch(new DeleteUserProvidedInstance(this.applicationService.cfGuid, instance.entity.service_instance_guid));
+              } else {
+                this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.entity.service_instance_guid));
+              }
             });
           }
         }
