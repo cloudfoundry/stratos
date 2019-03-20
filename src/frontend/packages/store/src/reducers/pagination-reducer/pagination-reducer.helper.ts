@@ -219,7 +219,6 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
   const arrayAction = Array.isArray(paginationAction) ? paginationAction : [paginationAction];
-  // .pipe(distinctUntilChanged())
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 

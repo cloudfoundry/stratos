@@ -18,6 +18,9 @@ export interface ActionState {
  */
 export interface ListActionState extends ActionState {
   schemaKey?: string;
+  /**
+   * Does the collection size exceed the max allowed? Used in conjunction PaginationEntityState maxedMode.
+   */
   maxed?: boolean;
   entityKey?: string;
 }
