@@ -46,7 +46,6 @@ interface IFavoriteMappers {
   [key: string]: {
     mapper: TFavoriteMapperFunction<IFavoriteMetadata>,
     prettyName: string,
-    actionGenerator: TFavoriteActionGenerator<IFavoriteMetadata>
     entityToMetadata: TEntityToMetadata<any, any>,
     favoriteInfo: IFavoriteTypeInfo
   };
@@ -77,12 +76,11 @@ class FavoritesConfigMapper {
    * @param actionGenerator Takes a favorite and returns an action that can be used to hydrate the favorite
    */
   public registerFavoriteConfig<T, Q extends IFavoriteMetadata>(config: IFavoriteConfig<T, Q>) {
-    const { mapper, prettyName, actionGenerator, entityToMetadata, favoriteInfo } = config;
+    const { mapper, prettyName, entityToMetadata, favoriteInfo } = config;
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favoriteInfo);
     this.mappers[mapperKey] = {
       mapper,
       prettyName,
-      actionGenerator,
       entityToMetadata,
       favoriteInfo
     };
@@ -96,19 +94,18 @@ class FavoritesConfigMapper {
   }
 
   /**
+   * Is there config for the given favorite type?
+   */
+  public hasFavoriteConfigForType(favorite: IFavoriteTypeInfo) {
+    return !!this.getMapperFunction(favorite);
+  }
+
+  /**
    * For a given favorite, return the corresponding human readable type name
    */
   public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
     const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
     return this.mappers[mapperKey] ? this.mappers[mapperKey].prettyName : null;
-  }
-
-  /**
-   * For a given favorite, return the corresponding hydration action
-   */
-  public getActionFromFavorite<T extends IFavoriteMetadata>(favorite: UserFavorite<T>) {
-    const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
-    return this.mappers[mapperKey] ? this.mappers[mapperKey].actionGenerator(favorite) : null;
   }
 
   /**

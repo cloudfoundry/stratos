@@ -24,6 +24,7 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../../cf-endpoints/base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import { favoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -89,7 +90,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   ngOnInit() {
-    this.favorite = this.pRow.cnsi_type === 'cf' ? getFavoriteFromEndpointEntity(this.row) : null;
+    const favorite = getFavoriteFromEndpointEntity(this.row);
+    this.favorite = favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     this.hasDetails = !e ? false : !!e.listDetailsComponent;
   }
