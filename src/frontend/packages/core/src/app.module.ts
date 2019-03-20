@@ -250,7 +250,6 @@ export class AppModule {
           }
         ]
       }),
-      () => new GetAllEndpoints(false),
       endpoint => ({
         name: endpoint.name,
         guid: endpoint.guid,
@@ -274,7 +273,6 @@ export class AppModule {
           name: app.name
         };
       },
-      favorite => createGetApplicationAction(favorite.entityId, favorite.endpointId),
       app => ({
         guid: app.metadata.guid,
         cfGuid: app.entity.cfGuid,
@@ -296,7 +294,6 @@ export class AppModule {
           name: space.name
         };
       },
-      favorite => new GetSpace(favorite.entityId, favorite.endpointId),
       space => ({
         guid: space.metadata.guid,
         orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
@@ -318,7 +315,6 @@ export class AppModule {
         routerLink: `/cloud-foundry/${org.cfGuid}/organizations/${org.guid}`,
         name: org.name
       }),
-      favorite => new GetOrganization(favorite.entityId, favorite.endpointId),
       org => ({
         guid: org.metadata.guid,
         status: this.getOrgStatus(org),
