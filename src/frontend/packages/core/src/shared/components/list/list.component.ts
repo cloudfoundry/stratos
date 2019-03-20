@@ -113,11 +113,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
   initialEntitySelection$: Observable<number>;
+  pPaginator: MatPaginator;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
       return;
     }
+
+    this.pPaginator = paginator;
     // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
     // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
     // event which handles either page or pageSize changes.
@@ -632,6 +635,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   public setEntityPage(page: number) {
+    this.pPaginator.firstPage();
     this.store.dispatch(new SetPage(
       this.dataSource.entityKey,
       this.dataSource.paginationKey,
