@@ -138,6 +138,7 @@ export function requestDataReducer(state: IRequestDataState, action: Action) {
     [cfUserSchemaKey]: [userReducer, endpointDisconnectUserReducer],
     [routeSchemaKey]: [routeReducer],
     [serviceInstancesSchemaKey]: [serviceInstanceReducer],
+    [userProvidedServiceInstanceSchemaKey]: [serviceInstanceReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
     [appSummarySchemaKey]: [updateAppSummaryRoutesReducer],
     [applicationSchemaKey]: [

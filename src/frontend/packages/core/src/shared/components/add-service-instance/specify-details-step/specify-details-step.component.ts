@@ -313,24 +313,25 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           if (!!state.bindAppGuid) {
-            return this.createBinding(serviceInstanceGuid, state.cfGuid, state.bindAppGuid, state.bindAppParams)
-              .pipe(
-                filter(s => {
-                  return s && !s.creating;
-                }),
-                map(req => {
-                  if (req.error) {
-                    return { success: false, message: `Failed to create service instance binding: ${req.message}` };
-                  } else {
-                    // Refetch env vars for app, since they have been changed by CF
-                    this.store.dispatch(
-                      new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
-                    );
+            return this.modeService.createApplicationServiceBinding(
+              serviceInstanceGuid,
+              state.cfGuid,
+              state.bindAppGuid,
+              state.bindAppParams
+            ).pipe(
+              map(req => {
+                if (!req.success) {
+                  return req;
+                } else {
+                  // Refetch env vars for app, since they have been changed by CF
+                  this.store.dispatch(
+                    new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
+                  );
 
-                    return this.routeToServices(state.cfGuid, state.bindAppGuid);
-                  }
-                })
-              );
+                  return this.routeToServices(state.cfGuid, state.bindAppGuid);
+                }
+              })
+            );
           } else {
             return observableOf(this.routeToServices());
           }

@@ -7,6 +7,7 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { TileConfigManager } from '../../tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from './../../tile/tile-selector.types';
 import { BASE_REDIRECT_QUERY, SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
+import { ActivatedRoute, RouterState, Router } from '@angular/router';
 
 interface ICreateServiceTilesData extends ITileData {
   type: string;
@@ -35,6 +36,7 @@ export class AddServiceInstanceBaseStepComponent {
   ];
 
   private pSelectedTile: ITileConfig<ICreateServiceTilesData>;
+  private bindApp: boolean;
   get selectedTile() {
     return this.pSelectedTile;
   }
@@ -42,13 +44,16 @@ export class AddServiceInstanceBaseStepComponent {
     this.serviceType = tile ? tile.data.type : null;
     this.pSelectedTile = tile;
     if (tile) {
+      const baseUrl = this.bindApp ? this.router.routerState.snapshot.url : '/services/new';
       this.store.dispatch(new RouterNav({
-        path: `/services/new/${this.serviceType}`,
+        path: `${baseUrl}/${this.serviceType}`,
         query: {
-          [BASE_REDIRECT_QUERY]: true
+          [BASE_REDIRECT_QUERY]: baseUrl
         }
       }));
     }
   }
-  constructor(public store: Store<AppState>) { }
+  constructor(private route: ActivatedRoute, private router: Router, public store: Store<AppState>) {
+    this.bindApp = !!this.route.snapshot.data.bind;
+  }
 }

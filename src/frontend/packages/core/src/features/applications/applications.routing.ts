@@ -28,6 +28,7 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
+import { AddServiceInstanceBaseStepComponent } from '../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
 
 const applicationsRoutes: Routes = [
   {
@@ -71,7 +72,14 @@ const applicationsRoutes: Routes = [
           },
           {
             path: 'bind',
-            component: AddServiceInstanceComponent
+            component: AddServiceInstanceBaseStepComponent,
+            data: {
+              bind: true
+            }
+          },
+          {
+            path: 'bind/:type',
+            component: AddServiceInstanceComponent,
           },
           {
             path: '',
