@@ -67,29 +67,22 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
       cellComponent: TableCellSpaceNameComponent,
       cellFlex: '1'
     },
-    // {
-    //   columnId: 'service',
-    //   headerCell: () => 'Service',
-    //   cellComponent: TableCellServiceNameComponent,
-    //   cellFlex: '1'
-    // },
-    // {
-    //   columnId: 'servicePlan',
-    //   headerCell: () => 'Plan',
-    //   cellComponent: TableCellServicePlanComponent,
-    //   cellFlex: '1'
-    // },
-    // {
-    //   columnId: 'dashboard',
-    //   headerCell: () => 'Dashboard',
-    //   cellDefinition: {
-    //     externalLink: true,
-    //     getLink: (row: APIResource<IUserProvidedServiceInstance>) => row.entity.dashboard_url,
-    //     newTab: true,
-    //     showShortLink: true
-    //   },
-    //   cellFlex: '1'
-    // },
+    {
+      columnId: 'route',
+      headerCell: () => 'Route Service URL',
+      cellDefinition: {
+        getValue: (row) => `${row.entity.route_service_url}`
+      },
+      cellFlex: '2'
+    },
+    {
+      columnId: 'syslog',
+      headerCell: () => 'Syslog Drain URL',
+      cellDefinition: {
+        getValue: (row) => `${row.entity.syslog_drain_url}`
+      },
+      cellFlex: '2'
+    },
     {
       columnId: 'tags',
       headerCell: () => 'Tags',
