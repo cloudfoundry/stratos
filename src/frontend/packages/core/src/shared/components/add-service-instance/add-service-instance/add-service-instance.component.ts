@@ -2,8 +2,19 @@ import { TitleCasePipe } from '@angular/common';
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import {
+  delay,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  publishReplay,
+  refCount,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs/operators';
 
 import { GetApplication } from '../../../../../../store/src/actions/application.actions';
 import {
@@ -60,6 +71,7 @@ import { CsiModeService } from '../csi-mode.service';
 })
 export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit {
   initialisedService$: Observable<boolean>;
+  apps$: Observable<APIResource<IApp>[]>;
   skipApps$: Observable<boolean>;
   marketPlaceMode: boolean;
   cSIHelperService: CreateServiceInstanceHelper;
@@ -99,9 +111,11 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
     this.basePreviousRedirect = route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
-      path: 'services/new'
+      path: route.snapshot.queryParams[BASE_REDIRECT_QUERY]
     } : null;
   }
+
+  appsEmitted = new BehaviorSubject(null);
   ngAfterContentInit(): void {
     // Check if wizard has been initiated from the Services Marketplace
     if (this.inMarketplaceMode) {
@@ -120,17 +134,32 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       this.title$ = observableOf(`Create Service Instance`);
     }
 
-    this.skipApps$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
-      switchMap(createServiceInstance => {
-        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstance.spaceGuid);
+    if (!this.initialisedService$) {
+      this.initialisedService$ = observableOf(true);
+    }
+
+    this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
+      filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),
+      distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
+      switchMap(csi => {
+        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, csi.spaceGuid);
         return getPaginationObservables<APIResource<IApp>>({
           store: this.store,
-          action: new GetAllAppsInSpace(createServiceInstance.cfGuid, createServiceInstance.spaceGuid, paginationKey),
-          paginationMonitor: this.paginationMonitorFactory.create(paginationKey, entityFactory(applicationSchemaKey))
+          action: new GetAllAppsInSpace(csi.cfGuid, csi.spaceGuid, paginationKey),
+          paginationMonitor: this.paginationMonitorFactory.create(
+            paginationKey,
+            entityFactory(applicationSchemaKey)
+          )
         }, true).entities$;
       }),
-      map(apps => apps.length === 0)
+      publishReplay(1),
+      refCount(),
+    );
+    this.skipApps$ = this.apps$.pipe(
+      map(apps => apps.length === 0),
+      tap(() => this.appsEmitted.next(true)),
+      publishReplay(1),
+      refCount(),
     );
   }
 
@@ -140,7 +169,13 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       this.cfOrgSpaceService.org.select.getValue(),
       this.cfOrgSpaceService.space.select.getValue()
     ));
-    return observableOf({ success: true });
+    return this.appsEmitted.asObservable().pipe(
+      filter(emitted => emitted),
+      delay(1),
+      map(() => ({ success: true })),
+      tap(() => this.appsEmitted.next(false))
+
+    );
   }
 
   resetStoreData = () => {
@@ -161,7 +196,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       entityFactory(applicationSchemaKey),
       appId,
       new GetApplication(appId, cfId, [createEntityRelationKey(applicationSchemaKey, spaceSchemaKey)]),
-      true);
+      true
+    );
     return entityService.waitForEntity$.pipe(
       filter(p => !!p),
       tap(app => {
@@ -172,7 +208,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
         this.title$ = observableOf(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
       }),
       take(1),
-      map(o => false)
+      map(o => true)
     );
   }
 
@@ -215,7 +251,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           ).subscribe();
         }),
         take(1),
-        map(o => false),
+        map(o => true),
       );
     }
   }
@@ -263,7 +299,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       filter(p => !!p),
       first(),
       tap(e => this.cfOrgSpaceService.cf.select.next(endpointId)),
-      map(o => false),
+      map(o => true),
     );
   }
 }

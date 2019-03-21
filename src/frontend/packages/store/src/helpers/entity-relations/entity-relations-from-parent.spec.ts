@@ -41,7 +41,7 @@ describe('Entity Relations - populate from parent', () => {
       const testAction = new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true);
       populatePaginationFromParent(iStore, testAction)
         .pipe(first()).subscribe((action: GetAllOrganizationSpaces) => {
-          expect(action).toEqual(testAction);
+          expect(action).toBeUndefined();
           done();
         });
     })();

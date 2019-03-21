@@ -54,10 +54,6 @@ export class PaginationEntityState {
    * flattenPagination & flattenPaginationMax
    */
   maxedMode?: boolean;
-  /**
-   * Does the collection size exceed the max allowed? Used in conjunction maxedMode.
-   */
-  currentlyMaxed?: boolean;
 }
 
 export function isPaginatedAction(obj: any): PaginatedAction {

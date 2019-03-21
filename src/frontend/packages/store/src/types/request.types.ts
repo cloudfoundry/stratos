@@ -37,6 +37,12 @@ export interface IRequestAction extends RequestAction {
    * is going to be part of another entities pagination section
    */
   proxyPaginationEntityKey?: string;
+
+  /**
+   * For a delete action, clear the pagination section for the given keys.
+   * if proxyPaginationEntityKey isn't set, pagination sections for the entityKey will also be deleted.
+   */
+  clearPaginationEntityKeys?: string[];
   endpointGuid?: string;
   updatingKey?: string;
   /**

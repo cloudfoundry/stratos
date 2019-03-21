@@ -20,15 +20,15 @@
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_bindings?.length }} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
-    <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
-    <app-meta-card-value>
-      {{ serviceInstanceEntity.entity.syslog_drain_url || 'None' }}
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item>
     <app-meta-card-key>Route Service URL</app-meta-card-key>
     <app-meta-card-value>
       {{ serviceInstanceEntity.entity.route_service_url  || 'None' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceInstanceEntity.entity.syslog_drain_url || 'None' }}
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>

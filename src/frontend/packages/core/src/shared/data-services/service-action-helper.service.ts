@@ -13,6 +13,7 @@ import {
 } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
+import { DeleteServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
 
 
 @Injectable()
@@ -38,10 +39,8 @@ export class ServiceActionHelperService {
       }));
       return;
     }
-    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesSchemaKey) :
-      new DeleteServiceInstance(endpointGuid, serviceInstanceGuid);
+    const action = new DeleteServiceBinding(endpointGuid, serviceBindings[0].metadata.guid, serviceInstanceGuid);
     if (!noConfirm) {
-
       const confirmation = new ConfirmationDialogConfig(
         'Detach Service Instance',
         'Are you sure you want to detach the application from the service?',

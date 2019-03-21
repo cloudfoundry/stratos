@@ -1,27 +1,27 @@
 import { Store } from '@ngrx/store';
 
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import {
-  createEntityRelationPaginationKey,
-  createEntityRelationKey
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { GetAppServiceBindings } from '../../../../../../../store/src/actions/application-service-routes.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
-  serviceSchemaKey,
   servicePlanSchemaKey,
+  serviceSchemaKey,
 } from '../../../../../../../store/src/helpers/entity-factory';
-import { GetAppServiceBindings } from '../../../../../../../store/src/actions/application-service-routes.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
-export class AppServiceBindingDataSource extends ListDataSource<APIResource> {
+export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {
   static createGetAllServiceBindings(appGuid: string, cfGuid: string) {
     const paginationKey = createEntityRelationPaginationKey(serviceBindingSchemaKey, appGuid);
     return new GetAppServiceBindings(
@@ -33,7 +33,7 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource> {
       ]);
   }
 
-  constructor(store: Store<AppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<AppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource<IServiceBinding>>) {
     const action = AppServiceBindingDataSource.createGetAllServiceBindings(appService.appGuid, appService.cfGuid);
     super({
       store,

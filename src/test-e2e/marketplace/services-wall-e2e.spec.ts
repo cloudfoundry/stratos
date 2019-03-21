@@ -5,10 +5,10 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
-import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();

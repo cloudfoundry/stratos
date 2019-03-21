@@ -159,6 +159,11 @@ export class RequestEffect {
           } else {
             actions.unshift(new ClearPaginationOfType(entityKey));
           }
+
+          if (Array.isArray(apiAction.clearPaginationEntityKeys)) {
+            // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
+            actions.push(...apiAction.clearPaginationEntityKeys.map(key => new ClearPaginationOfType(key)));
+          }
         }
       }
       return actions;

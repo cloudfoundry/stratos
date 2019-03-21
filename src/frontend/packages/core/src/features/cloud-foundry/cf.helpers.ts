@@ -26,6 +26,7 @@ import {
   UserRoleInSpace,
 } from '../../../../store/src/types/user.types';
 import { UserRoleLabels } from '../../../../store/src/types/users-roles.types';
+import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
 import { pathGet } from '../../core/utils.service';
@@ -348,4 +349,12 @@ export function createCfOrgSpaceSteppersUrl(
   }
   route += stepperPath;
   return route;
+}
+
+export function isServiceInstance(obj: any): IServiceInstance {
+  return !!obj && !!obj.service_plan_url ? obj as IServiceInstance : null;
+}
+
+export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceInstance {
+  return !!obj && (obj.route_service_url !== null && obj.route_service_url !== undefined) ? obj as IUserProvidedServiceInstance : null;
 }
