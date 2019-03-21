@@ -32,11 +32,12 @@ describe('Create Service Instance', () => {
   it('- should reach create service instance page', () => {
     expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
+
   describe('Long running tests - ', () => {
     const timeout = 100000;
     extendE2ETestTime(timeout);
 
-    it('- should be able to to create a service instance', () => {
+    it('- should be able to create a service instance', () => {
 
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
       servicesWall.waitForPage();

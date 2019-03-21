@@ -3,10 +3,10 @@ import { browser } from 'protractor';
 import { e2e, E2ESetup } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
-import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 describe('Marketplace', () => {
   let setup: E2ESetup;

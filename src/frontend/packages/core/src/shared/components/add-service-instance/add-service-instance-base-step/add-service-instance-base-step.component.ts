@@ -1,5 +1,6 @@
 import { query } from '@angular/animations';
 import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -7,7 +8,6 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { TileConfigManager } from '../../tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from './../../tile/tile-selector.types';
 import { BASE_REDIRECT_QUERY, SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
-import { ActivatedRoute, RouterState, Router } from '@angular/router';
 
 interface ICreateServiceTilesData extends ITileData {
   type: string;
@@ -36,7 +36,7 @@ export class AddServiceInstanceBaseStepComponent {
   ];
 
   private pSelectedTile: ITileConfig<ICreateServiceTilesData>;
-  private bindApp: boolean;
+  public bindApp: boolean;
   get selectedTile() {
     return this.pSelectedTile;
   }
