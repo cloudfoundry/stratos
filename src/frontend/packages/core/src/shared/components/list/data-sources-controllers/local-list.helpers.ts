@@ -9,7 +9,7 @@ export class LocalPaginationHelpers {
     if (pagination.forcedLocalPage) {
       return !!pagination.pageRequests[pagination.forcedLocalPage].maxed;
     }
-    return pagination.currentlyMaxed || !!Object.values(pagination.pageRequests).find(request => request.maxed);
+    return !!Object.values(pagination.pageRequests).find(request => request.maxed);
   }
 
   /**

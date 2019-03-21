@@ -79,7 +79,9 @@ export class EntitySchemaTreeBuilder {
       // Service bindings
       applicationSchemaKey,
       serviceInstancesSchemaKey,
-      serviceSchemaKey
+      serviceSchemaKey,
+      organizationSchemaKey,
+      spaceSchemaKey
     ],
     // Remove a user role
     [cfUserSchemaKey]: [

@@ -1,10 +1,7 @@
-import { Type } from '@angular/core';
-
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { CardMultiActionComponents } from '../../list-cards/card.component.types';
+import { CardTypes } from '../../list-cards/card/card.component';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
-import { CardCell } from '../../list.types';
 
 
 export class BaseCfListConfig<T> implements IListConfig<T> {
@@ -12,7 +9,7 @@ export class BaseCfListConfig<T> implements IListConfig<T> {
   isLocal = true;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  cardComponent: Type<CardCell<any>> | CardMultiActionComponents;
+  cardComponent: CardTypes<T>;
   enableTextFilter = false;
   showMetricsRange = false;
   getColumns = () => [];

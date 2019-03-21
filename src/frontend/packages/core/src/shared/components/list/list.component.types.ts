@@ -1,4 +1,3 @@
-import { Type } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -9,9 +8,8 @@ import {
 } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
-import { CardMultiActionComponents } from './list-cards/card.component.types';
+import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { CardCell } from './list.types';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -83,7 +81,7 @@ export interface IListConfig<T> {
   /**
    * The card component used in card view
    */
-  cardComponent?: Type<CardCell<T>> | CardMultiActionComponents;
+  cardComponent?: CardTypes<T>;
   hideRefresh?: boolean;
   /**
    * Allow selection regardless of number or visibility of multi actions

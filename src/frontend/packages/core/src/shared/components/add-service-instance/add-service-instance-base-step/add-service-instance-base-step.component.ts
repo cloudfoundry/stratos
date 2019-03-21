@@ -1,5 +1,6 @@
 import { query } from '@angular/animations';
 import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -25,7 +26,6 @@ export class AddServiceInstanceBaseStepComponent {
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(
       'Marketplace Service',
       { matIcon: 'store' },
-      // { matIcon: 'service', matIconFont: 'stratos-icons' },
       { type: SERVICE_INSTANCE_TYPES.SERVICE }
     ),
     this.tileManager.getNextTileConfig<ICreateServiceTilesData>(
@@ -36,6 +36,7 @@ export class AddServiceInstanceBaseStepComponent {
   ];
 
   private pSelectedTile: ITileConfig<ICreateServiceTilesData>;
+  public bindApp: boolean;
   get selectedTile() {
     return this.pSelectedTile;
   }
@@ -43,13 +44,16 @@ export class AddServiceInstanceBaseStepComponent {
     this.serviceType = tile ? tile.data.type : null;
     this.pSelectedTile = tile;
     if (tile) {
+      const baseUrl = this.bindApp ? this.router.routerState.snapshot.url : '/services/new';
       this.store.dispatch(new RouterNav({
-        path: `/services/new/${this.serviceType}`,
+        path: `${baseUrl}/${this.serviceType}`,
         query: {
-          [BASE_REDIRECT_QUERY]: true
+          [BASE_REDIRECT_QUERY]: baseUrl
         }
       }));
     }
   }
-  constructor(public store: Store<AppState>) { }
+  constructor(private route: ActivatedRoute, private router: Router, public store: Store<AppState>) {
+    this.bindApp = !!this.route.snapshot.data.bind;
+  }
 }

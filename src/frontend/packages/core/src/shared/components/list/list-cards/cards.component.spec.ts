@@ -1,11 +1,12 @@
+import { Type } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { EntityInfo } from '../../../../../../store/src/types/api.types';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../shared.module';
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
-import { CardsComponent } from './cards.component';
 import { CardCell } from '../list.types';
-import { EntityInfo } from '../../../../../../store/src/types/api.types';
+import { CardsComponent } from './cards.component';
 
 describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;
@@ -24,7 +25,7 @@ describe('CardsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent<CardsComponent<EntityInfo>>(CardsComponent);
     component = fixture.componentInstance;
-    component.component = {} as CardCell<any>;
+    component.component = {} as Type<CardCell<EntityInfo>>;
     component.dataSource = {} as IListDataSource<EntityInfo>;
     fixture.detectChanges();
   });

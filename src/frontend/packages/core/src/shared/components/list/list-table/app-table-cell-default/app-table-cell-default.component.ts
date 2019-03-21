@@ -21,7 +21,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
   get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
-    if (row && this.pSchemaKey) {
+    if (row) {
       this.setValue(row, this.schemaKey);
     }
   }

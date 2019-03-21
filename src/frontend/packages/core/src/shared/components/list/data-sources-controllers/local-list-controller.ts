@@ -3,7 +3,6 @@ import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
-import { MultiActionListEntity } from '../../../monitors/pagination-monitor';
 import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
 import { LocalPaginationHelpers } from './local-list.helpers';
@@ -52,7 +51,9 @@ export class LocalListController<T = any> {
     ).pipe(
       map(([paginationEntity, entities]) => {
         this.pageSplitCache = null;
-        if (!entities || !entities.length) {
+        // `entities` can become out of sync with `paginationEntity.ids`. If either are empty just return empty,
+        // otherwise this leads to churn and result count flip flopping
+        if (!entities || !entities.length || Object.keys(paginationEntity.ids).length === 0) {
           return { paginationEntity, entities: [] };
         }
         if (dataFunctions && dataFunctions.length) {
@@ -73,13 +74,6 @@ export class LocalListController<T = any> {
       })
     );
 
-  }
-
-  private extractActualEntity(entity: any | MultiActionListEntity) {
-    if (entity instanceof MultiActionListEntity) {
-      return entity.entity;
-    }
-    return entity;
   }
 
   /*
@@ -104,7 +98,7 @@ export class LocalListController<T = any> {
 
   /*
    * Emit a page, which has been created by splitting up a local list, when either
-   * 1) the core pages 'entities' (covers entire list of all entities and their order)
+   * 1) the core pages 'entities' (covers entire list of all entities and their order) changes
    * 2) the client side page number changes
    * 3) the client size page size changes
    */

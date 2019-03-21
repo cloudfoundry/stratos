@@ -42,7 +42,7 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
     sort: {
       type: 'sort',
       orderKey: 'connection',
-      field: 'info.user'
+      field: 'user'
     },
     cellFlex: '1'
   },

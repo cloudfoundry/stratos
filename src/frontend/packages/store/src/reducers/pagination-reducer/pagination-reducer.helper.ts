@@ -1,4 +1,4 @@
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -202,6 +202,12 @@ function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
   return !hasError(pagination) && !hasValidOrGettingPage(pagination);
 }
 
+function safePopulatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+  return populatePaginationFromParent(store, action).pipe(
+    map(newAction => newAction || action)
+  );
+}
+
 function getObservables<T = any>(
   store: Store<AppState>,
   entityKey: string,
@@ -213,7 +219,6 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
   const arrayAction = Array.isArray(paginationAction) ? paginationAction : [paginationAction];
-  // .pipe(distinctUntilChanged())
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
@@ -224,9 +229,9 @@ function getObservables<T = any>(
     tap(([prevPag, newPag]: [PaginationEntityState, PaginationEntityState]) => {
       if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, newPag, prevPag)) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        combineLatest(arrayAction.map(action => populatePaginationFromParent(store, action))).pipe(
+        combineLatest(arrayAction.map(action => safePopulatePaginationFromParent(store, action))).pipe(
           first(),
-        ).subscribe(newAction => newAction.forEach(action => action && store.dispatch(action)));
+        ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
       }
     }),
     map(([prevPag, newPag]) => newPag)
@@ -242,7 +247,8 @@ function getObservables<T = any>(
         filter(([ent, pagination]) => {
           return !!pagination && isPageReady(pagination, isLocal);
         }),
-        publishReplay(1), refCount(),
+        publishReplay(1),
+        refCount(),
         tap(([ent, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
@@ -254,7 +260,7 @@ function getObservables<T = any>(
             )));
           }
         }),
-        switchMap(() => paginationMonitor.currentPage$)
+        switchMap(() => paginationMonitor.currentPage$),
       );
 
   return {
@@ -298,7 +304,7 @@ export function isPageReady(pagination: PaginationEntityState, isLocal = false) 
   if (!pagination.pageRequests[pagination.currentPage]) {
     return false;
   }
-  return pagination.pageRequests[pagination.currentPage].busy || false;
+  return !pagination.pageRequests[pagination.currentPage].busy || false;
 }
 
 export function isFetchingPage(pagination: PaginationEntityState): boolean {

@@ -21,7 +21,7 @@ export interface IServiceBinding {
   app_url: string;
   app?: APIResource<IApp>;
   service_instance_url: string;
-  service_instance?: APIResource<IServiceInstance>;
+  service_instance?: APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>;
   guid?: string;
   cfGuid?: string;
 }
@@ -148,7 +148,7 @@ export interface IServiceBroker {
   cfGuid?: string;
 }
 
-export interface IUserProvidedService {
+export interface IUserProvidedServiceInstance {
   name: string;
   credentials: { [name: string]: string };
   space_guid: string;
@@ -161,5 +161,6 @@ export interface IUserProvidedService {
   service_bindings_url: string;
   routes: APIResource<IRoute>[];
   routes_url: string;
+  route_service_url: string;
   cfGuid?: string;
 }
