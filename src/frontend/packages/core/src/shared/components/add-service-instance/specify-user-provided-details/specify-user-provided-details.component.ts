@@ -77,7 +77,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   constructor(
     route: ActivatedRoute,
     private upsService: CloudFoundryUserProvidedServicesService,
-    private modeService: CsiModeService,
+    public modeService: CsiModeService,
     private store: Store<AppState>,
   ) {
     const { endpointId, serviceInstanceId } =
