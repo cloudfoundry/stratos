@@ -4,3 +4,28 @@
   height: 100%;
   width: 100%;
 }
+.kube-details {
+  margin-bottom: 115px;
+  margin-left: 20px;
+  margin-top: 20px;
+  &__logo {
+    height: 350px;
+    opacity: .2;
+    position: absolute;
+    right: -120px;
+    top: 0;
+    z-index: -1;
+  }
+  &__sub-header {
+    font-size: 16px;
+    margin-top: -3px;
+    opacity: .6;
+  }
+  &__header {
+    margin: 0;
+  }
+  &__header-section {
+    margin-top: 10px;
+    max-width: 500px;
+  }
+}

@@ -1,3 +1,47 @@
-<a [routerLink]="dashboardLink">Open Dashboard</a>
+<div>
+  <div class="kube-details" *ngIf="endpointDetails$ | async as details">
+    <img class="kube-details__logo" src="{{details.imagePath}}" />
+    <div clas="kube-details__header-section">
+      <h1 class="kube-details__header">{{ details.name }}</h1>
+      <div class="kube-details__sub-header"> {{ details.label }}</div>
+    </div>
+    <div class="kube-details__header-section">
+      <app-tile-grid fit="true">
+        <app-tile-group>
+          <app-tile>
+            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/pods"
+              icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
+            </app-card-number-metric>
+          </app-tile>
+          <app-tile>
+            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
+              icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
+            </app-card-number-metric>
+          </app-tile>
+          <app-tile>
+            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/apps"
+              icon="apps" label="Applications" labelSingular="Application" value="{{ appCount$ | async }}">
+            </app-card-number-metric>
+          </app-tile>
+        </app-tile-group>
+      </app-tile-grid>
+    </div>
+  </div>
+</div>
 
+<app-tile-grid fit="true">
+  <app-tile-group>
+    <app-tile>
+      <mat-card></mat-card>
+    </app-tile>
+    <app-tile>
+      <mat-card></mat-card>
+    </app-tile>
+    <app-tile>
+      <mat-card></mat-card>
+    </app-tile>
+  </app-tile-group>
+</app-tile-grid>
+
+<a [routerLink]="dashboardLink">Open Dashboard</a>
 <button (click)="getDashboard()" matButton matRaisedButton>Get Dashboard Status</button>
