@@ -1,15 +1,20 @@
+import { PaginationMonitorFactory } from './../../../monitors/pagination-monitor.factory';
+import { CsiModeService } from './../csi-mode.service';
+import { AppState } from './../../../../../../store/src/app-state';
+import { Store } from '@ngrx/store';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Observable, Subscription, of as observableOf } from 'rxjs';
+import { first, map, switchMap, combineLatest, filter, share, tap, startWith } from 'rxjs/operators';
 
 import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
+  GetAllUserProvidedServices,
 } from '../../../../../../store/src/actions/user-provided-service.actions';
 import { urlValidationExpression } from '../../../../core/utils.service';
 import { environment } from '../../../../environments/environment';
@@ -17,6 +22,12 @@ import { AppNameUniqueChecking } from '../../../app-name-unique.directive/app-na
 import { isValidJsonValidator } from '../../../form-validators';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { StepOnNextResult } from '../../stepper/step/step.component';
+import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IServiceInstance } from '../../../../core/cf-api-svc.types';
+import { entityFactory, serviceInstancesSchemaKey, userProvidedServiceInstanceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -39,12 +50,21 @@ export class SpecifyUserProvidedDetailsComponent {
   @Input()
   public serviceInstanceId: string;
 
+  @Input()
+  public showModeSelection = false;
+
   public appNameChecking = new AppNameUniqueChecking();
+
+  public serviceBindingForApplication$ = this.serviceInstancesFroApplication();
 
   constructor(
     route: ActivatedRoute,
-    private upsService: CloudFoundryUserProvidedServicesService
+    private upsService: CloudFoundryUserProvidedServicesService,
+    private modeService: CsiModeService,
+    private store: Store<AppState>,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
+
     const { endpointId, serviceInstanceId } =
       route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;
@@ -58,6 +78,24 @@ export class SpecifyUserProvidedDetailsComponent {
     this.initUpdate(serviceInstanceId, endpointId);
   }
 
+  private serviceInstancesFroApplication() {
+    return this.store.select(selectCreateServiceInstance).pipe(
+      tap(console.log),
+      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
+      first(),
+      map(p => new GetAllUserProvidedServices(p.cfGuid, [], false, p.spaceGuid)),
+      tap((action) => this.store.dispatch(action)),
+      switchMap(action => {
+        return this.paginationMonitorFactory.create(
+          action.paginationKey,
+          action.entity
+        ).currentPage$;
+      }),
+      tap(console.log),
+      startWith(null)
+    );
+
+  }
   private initUpdate(serviceInstanceId: string, endpointId: string) {
     if (this.isUpdate) {
       this.formGroup.disable();
@@ -101,7 +139,7 @@ export class SpecifyUserProvidedDetailsComponent {
     return this.isUpdate ? this.onNextUpdate() : this.onNextCreate();
   }
 
-  private onNextCreate() {
+  private onNextCreate(): Observable<StepOnNextResult> {
     const data = this.getServiceData();
     const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
     return this.upsService.createUserProvidedService(
@@ -109,11 +147,37 @@ export class SpecifyUserProvidedDetailsComponent {
       guid,
       data as IUserProvidedServiceInstanceData,
     ).pipe(
-      map(er => ({
-        success: !er.error,
-        redirect: !er.error
-      }))
+      combineLatest(this.store.select(selectCreateServiceInstance)),
+      switchMap(([request, state]) => {
+        const guid = request.response.result[0];
+        const success = !request.error;
+        const redirect = !request.error;
+        if (!!state.bindAppGuid && success) {
+          return this.createApplicationServiceBinding(guid, state);
+        }
+        return observableOf({
+          success,
+          redirect
+        });
+      })
     );
+  }
+
+  private createApplicationServiceBinding(serviceGuid: string, data: any): Observable<StepOnNextResult> {
+    return this.modeService.createApplicationServiceBinding(serviceGuid, data.cfGuid, data.bindAppGuid, data.bindAppParams)
+      .pipe(
+        map(req => {
+          if (!req.success) {
+            return { success: false, message: `Failed to create service instance binding: ${req.message}` };
+          } else {
+            // Refetch env vars for app, since they have been changed by CF
+            this.store.dispatch(
+              new GetAppEnvVarsAction(data.bindAppGuid, data.cfGuid)
+            );
+            return { success: true, redirect: true };
+          }
+        })
+      );
   }
 
   private onNextUpdate() {

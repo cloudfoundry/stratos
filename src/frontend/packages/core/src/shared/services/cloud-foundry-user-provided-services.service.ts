@@ -16,6 +16,7 @@ import {
   serviceInstancesSchemaKey,
   serviceSchemaKey,
   userProvidedServiceInstanceSchemaKey,
+  serviceBindingSchemaKey,
 } from '../../../../store/src/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -25,6 +26,7 @@ import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { EntityMonitor } from '../monitors/entity-monitor';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { CreateServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
 
 
 @Injectable()

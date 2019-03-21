@@ -1,6 +1,18 @@
+{{ showModeSelection }}
+<div *ngIf="!modeService.isEditServiceInstanceMode() && showModeSelection && (serviceBindingForApplication$ | async)">
+  <div>
+    <mat-radio-group [(ngModel)]="formMode" class="specify-details__radio-group"
+      [disabled]="(serviceInstances$ | async)?.length === 0">
+      <mat-radio-button *ngFor="let mode of formModes" [value]="mode.key" class="specify-details__radio-group__radio"
+        (click)="resetForms(mode.key)">
+        {{ mode.label }}
+      </mat-radio-button>
+    </mat-radio-group>
+  </div>
+</div>
 <form class="stepper-form" [formGroup]="formGroup">
   <mat-form-field>
-    <input matInput class="" formControlName="name" placeholder="Name" [appApplicationNameUnique]="appNameChecking"
+    <input matInput formControlName="name" placeholder="Name" [appApplicationNameUnique]="appNameChecking"
       [appApplicationNameUniqueRequest]="getUniqueRequest" required>
     <mat-error *ngIf="formGroup.controls.name?.hasError('appNameTaken')">
       A service instance with this name already exists. Please enter a different one.
@@ -36,5 +48,15 @@
     <mat-error *ngIf="formGroup.controls.credentials.hasError('notValidJson')">
       Not valid JSON.
     </mat-error>
+  </mat-form-field>
+</form>
+
+<form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'"
+  [formGroup]="selectExistingInstanceForm">
+  <mat-form-field>
+    <mat-select class="form-control" placeholder="Service Instance" required formControlName="serviceInstances">
+      <mat-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid"
+        [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
+    </mat-select>
   </mat-form-field>
 </form>
