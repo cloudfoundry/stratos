@@ -1,7 +1,7 @@
 @import '../../../../sass/colors';
 @import '../../../../sass/mixins';
 
-$app-sub-header-height: 60px;
+$app-sub-header-height: 48px;
 .dashboard {
   background-color: transparent;
   display: flex;
@@ -26,6 +26,9 @@ $app-sub-header-height: 60px;
     display: flex;
     flex-direction: column;
     width: 100%;
+  }
+  &__side-nav {
+    overflow: hidden;
   }
 }
 
@@ -53,11 +56,11 @@ $app-sub-header-height: 60px;
   width: 100%;
   @include breakpoint(tablet) {
     margin: 0;
-    padding: 0 34px;
+    padding: 0 24px;
   }
   &__title {
     display: none;
-    $font-size: 22px;
+    $font-size: 20px;
     font-size: $font-size;
     font-weight: bold;
     line-height: $font-size;

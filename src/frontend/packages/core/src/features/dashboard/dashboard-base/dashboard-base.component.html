@@ -1,8 +1,4 @@
-<mat-sidenav-container class="dashboard">
-  <mat-sidenav #sidenav class="dashboard__side-nav" mode="over">
-    <app-side-nav [tabs]="sideNavTabs">
-    </app-side-nav>
-  </mat-sidenav>
+<mat-sidenav-container class="dashboard" [ngClass]="{'dashboard__icon-mode': iconMode, 'dashboard__icon-mode-open': iconModeOpen}">
   <div class="page-content">
     <div class="page-header" *ngIf="tabNavService.pageHeader$ | async as portal">
       <ng-container [cdkPortalOutlet]="portal"></ng-container>
@@ -30,4 +26,8 @@
       </div>
     </div>
   </div>
+  <mat-sidenav [style.width.px]="sideNavWidth" #sidenav class="dashboard__side-nav" mode="over" (mouseover)="iconModeMouse(true)" (mouseleave)="iconModeMouse(false)">
+    <app-side-nav [tabs]="sideNavTabs">
+    </app-side-nav>
+  </mat-sidenav>
 </mat-sidenav-container>

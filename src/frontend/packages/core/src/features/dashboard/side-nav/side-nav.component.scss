@@ -1,4 +1,4 @@
-$side-nav-padding-h: 20px;
+$side-nav-padding-h: 15px;
 $side-nav-mat-icon-width: 24px;
 $side-nav-mat-icon-padding-right: 15px;
 .side-nav {
@@ -14,7 +14,7 @@ $side-nav-mat-icon-padding-right: 15px;
     &-inner {
       display: flex;
       flex: 1;
-      padding: 10px;
+      padding: 5px;
     }
   }
   &__items {

@@ -1,1 +1,45 @@
 @mixin dashboard-page-theme($theme, $app-theme) {}
+
+.dashboard.dashboard__icon-mode {
+  .page-header__nav-toggle-wrapper {
+    display: none;
+  }
+
+  > mat-sidenav-content {
+    margin-left: 54px;
+  }
+
+  .dashboard__side-nav {
+    transform: none;
+    transition: width 0.25s ease;
+    visibility: visible !important;
+
+    > .mat-drawer-inner-container {
+      overflow: hidden;
+    }
+  }
+
+  .side-nav__logo-img, .side-nav__logo-icon-img {
+    position: absolute;
+  }
+
+  .side-nav__logo-img {
+    opacity: 0;
+  }
+  .side-nav__logo-icon-img {
+    opacity: 1;
+  }
+
+  &.dashboard__icon-mode-open {
+    .side-nav__logo-img {
+      opacity: 1;
+    }
+    .side-nav__logo-icon-img {
+      opacity: 0;
+    }
+  }
+}
+
+.side-nav__logo-icon-img {
+  opacity: 0;
+}

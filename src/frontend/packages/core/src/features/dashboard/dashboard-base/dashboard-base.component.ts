@@ -3,7 +3,7 @@ import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription, Observable, combineLatest } from 'rxjs';
-import { filter, withLatestFrom, tap, startWith } from 'rxjs/operators';
+import { filter, withLatestFrom, tap, startWith, debounceTime } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import { CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
@@ -17,6 +17,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { SideNavItem } from './../side-nav/side-nav.component';
 import { TabNavService } from '../../../../tab-nav.service';
 import { Portal } from '@angular/cdk/portal';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 
 @Component({
@@ -32,11 +33,18 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   constructor(
     public pageHeaderService: PageHeaderService,
     private store: Store<AppState>,
+    private breakpointObserver: BreakpointObserver,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService
-  ) { }
+  ) {
+    if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
+      this.enableMobileNav();
+    }
+  }
+
+  private iconMode = true;
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;
@@ -54,17 +62,31 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 
   sideNaveMode = 'side';
+
+  public iconModeOpen = false;
+  public sideNavWidth = 54;
+
   dispatchRelations() {
     this.store.dispatch(new GetCurrentUsersRelations());
   }
 
   ngOnInit() {
+    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
+      debounceTime(250)
+    ).subscribe(result => {
+      if (result.matches) {
+        this.enableMobileNav();
+      } else {
+        this.disableMobileNav();
+      }
+    });
+
     this.subNavData$ = combineLatest(
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
         startWith(null)
       ),
       this.tabNavService.tabSubNav$
-    )
+    );
     this.endpointsService.registerHealthCheck(
       new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
     );
@@ -84,6 +106,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
         this.sidenav.close();
       }
+
+      this.iconModeMouse(false);
     });
   }
 
@@ -153,5 +177,23 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       const navs = this.collectNavigationRoutes(route.path, route.children);
       return nav.concat(navs);
     }, []);
+  }
+
+  public iconModeMouse(expand: boolean) {
+    if (this.iconMode) {
+      this.sideNavWidth = expand ? 200 : 54;
+      this.iconModeOpen = expand;
+    }
+  }
+
+  private enableMobileNav() {
+    this.sideNavWidth = 200;
+    this.iconMode = false;
+  }
+
+  private disableMobileNav() {
+    this.sideNavWidth = 54;
+    this.iconMode = true;
+    this.sidenav.close();
   }
 }
