@@ -17,7 +17,7 @@ import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
 
 
-export abstract class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
+export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<AppState>;
   endpointType: string;
 
