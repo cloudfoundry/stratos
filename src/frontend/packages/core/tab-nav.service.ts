@@ -10,8 +10,8 @@ export class TabNavService {
   private tabNavsSubject: BehaviorSubject<ISubHeaderTabs[]>;
   public tabNavs$: Observable<ISubHeaderTabs[]>;
 
-  private tabHeaderSubject: BehaviorSubject<String>;
-  public tabHeader$: Observable<String>;
+  private tabHeaderSubject: BehaviorSubject<string>;
+  public tabHeader$: Observable<string>;
 
   private tabSubNavSubject: BehaviorSubject<Portal<any>>;
   public tabSubNav$: Observable<Portal<any>>;

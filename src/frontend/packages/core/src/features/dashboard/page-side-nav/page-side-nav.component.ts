@@ -27,13 +27,10 @@ export class PageSideNavComponent implements OnInit {
   public activeTab$: Observable<string>;
   public breadcrumbs$: Observable<IBreadcrumb[]>;
 
-  constructor(public tabNavService: TabNavService) {
-
-  }
+  constructor(public tabNavService: TabNavService) { }
 
   ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable(this.tabs);
-    this.breadcrumbs$ = this.tabNavService.breadcrumbs$;
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();
   }
 
 }
