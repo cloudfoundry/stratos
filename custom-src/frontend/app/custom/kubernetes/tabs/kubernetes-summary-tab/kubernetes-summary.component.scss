@@ -5,15 +5,14 @@
   width: 100%;
 }
 .kube-details {
-  margin-bottom: 115px;
   margin-left: 20px;
   margin-top: 20px;
   &__logo {
-    height: 350px;
+    height: 400px;
     opacity: .2;
     position: absolute;
     right: -120px;
-    top: 0;
+    top: 20px;
     z-index: -1;
   }
   &__sub-header {
@@ -25,7 +24,20 @@
     margin: 0;
   }
   &__header-section {
-    margin-top: 10px;
+    margin: 10px -10px;
     max-width: 500px;
+  }
+  &__graph {
+    display: flex;
+    height: 400px;
+    min-height: 0;
+    min-width: 0;
+    padding: 0;
+    &-wrapper {
+      display: grid;
+      grid-gap: 50px;
+      grid-template-columns: 1fr 1fr 1fr;
+      
+    }
   }
 }

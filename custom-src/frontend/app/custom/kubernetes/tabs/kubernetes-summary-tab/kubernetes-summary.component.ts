@@ -1,3 +1,5 @@
+import { KubernetesPod } from './../../store/kube.types';
+import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 import { GetKubernetesApps } from './../../store/kubernetes.actions';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Component, OnInit } from '@angular/core';
@@ -7,7 +9,7 @@ import { PaginatedAction } from '../../../../../../store/src/types/pagination.ty
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { map, startWith, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -34,12 +36,14 @@ export class KubernetesSummaryTabComponent implements OnInit {
         imagePath,
         label,
         name: endpoint.entity.name,
+
       }
     })
   );
   source: SafeResourceUrl;
 
   dashboardLink: string;
+  public podCapacity$: Observable<{ capacity: number; used: number; }>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -48,7 +52,7 @@ export class KubernetesSummaryTabComponent implements OnInit {
     private store: Store<AppState>
   ) { }
 
-  private getCountObservable(action: PaginatedAction) {
+  private getPaginationObservable(action: PaginatedAction) {
     const paginationMonitor = this.paginationMonitorFactory.create(
       action.paginationKey,
       entityFactory(action.entityKey)
@@ -57,20 +61,48 @@ export class KubernetesSummaryTabComponent implements OnInit {
       store: this.store,
       action,
       paginationMonitor
-    }).totalEntities$.pipe(
+    }).entities$
+  }
+
+  private getCountObservable(entities$: Observable<any[]>) {
+    return entities$.pipe(
+      map(entities => entities.length),
       startWith(null)
     );
   }
-
+  private getPodCapacity(nodes$: Observable<KubernetesNode[]>, pods$: Observable<KubernetesPod[]>) {
+    return combineLatest(nodes$, pods$).pipe(
+      map(([nodes, pods]) => {
+        const capacity = nodes.reduce((cap, node) => {
+          return cap + parseInt(node.status.capacity.pods, 10);
+        }, 0);
+        const used = pods.length;
+        console.log(used)
+        return {
+          capacity,
+          results: [{
+            name: '',
+            value: used
+          }]
+        }
+      })
+    )
+  }
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
     const podCountAction = new GetKubernetesPods(guid);
     const nodeCountAction = new GetKubernetesNodes(guid);
     const appCountAction = new GetKubernetesApps(guid);
-    this.podCount$ = this.getCountObservable(podCountAction);
-    this.nodeCount$ = this.getCountObservable(nodeCountAction);
-    this.appCount$ = this.getCountObservable(appCountAction);
+    const applications$ = this.getPaginationObservable(appCountAction)
+    const pods$ = this.getPaginationObservable(podCountAction);
+    const nodes$ = this.getPaginationObservable(nodeCountAction).pipe(tap(console.log));
+
+    this.podCount$ = this.getCountObservable(pods$);
+    this.nodeCount$ = this.getCountObservable(nodes$);
+    this.appCount$ = this.getCountObservable(applications$);
+
+    this.podCapacity$ = this.getPodCapacity(nodes$, pods$);
 
     this.dashboardLink = `/kubernetes/${guid}/dashboard`;
   }

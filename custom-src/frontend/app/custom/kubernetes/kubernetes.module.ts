@@ -1,3 +1,4 @@
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import {
@@ -95,6 +96,7 @@ import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernet
     CoreModule,
     CommonModule,
     SharedModule,
+    NgxChartsModule,
     KubernetesRoutingModule,
   ],
   declarations: [
