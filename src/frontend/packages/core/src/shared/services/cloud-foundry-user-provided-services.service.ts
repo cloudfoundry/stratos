@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, filter, map } from 'rxjs/operators';
 
 import {
   CreateUserProvidedServiceInstance,
   GetAllUserProvidedServices,
   GetUserProvidedService,
+  getUserProvidedServiceInstanceRelations,
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../store/src/actions/user-provided-service.actions';
@@ -16,7 +17,6 @@ import {
   serviceInstancesSchemaKey,
   serviceSchemaKey,
   userProvidedServiceInstanceSchemaKey,
-  serviceBindingSchemaKey,
 } from '../../../../store/src/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -26,7 +26,6 @@ import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { EntityMonitor } from '../monitors/entity-monitor';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { CreateServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
 
 
 @Injectable()
@@ -41,8 +40,9 @@ export class CloudFoundryUserProvidedServicesService {
 
   }
 
-  public getUserProvidedServices(cfGuid: string, spaceGuid?: string): Observable<APIResource<IUserProvidedServiceInstance>[]> {
-    const action = new GetAllUserProvidedServices(cfGuid, [], false, spaceGuid);
+  public getUserProvidedServices(cfGuid: string, spaceGuid?: string, relations = getUserProvidedServiceInstanceRelations)
+    : Observable<APIResource<IUserProvidedServiceInstance>[]> {
+    const action = new GetAllUserProvidedServices(cfGuid, relations, false, spaceGuid);
     const pagObs = getPaginationObservables({
       store: this.store,
       action,
@@ -51,7 +51,13 @@ export class CloudFoundryUserProvidedServicesService {
         entityFactory(action.entityKey)
       )
     });
-    return pagObs.entities$;
+    return combineLatest([
+      pagObs.entities$, // Ensure entities is subbed to the fetch kicks off
+      pagObs.fetchingEntities$
+    ]).pipe(
+      filter(([entities, fetching]) => !fetching),
+      map(([entities, fetching]) => entities)
+    );
   }
 
   public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedServiceInstance>> {

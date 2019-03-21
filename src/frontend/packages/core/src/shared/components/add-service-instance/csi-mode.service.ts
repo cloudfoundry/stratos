@@ -1,20 +1,25 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { filter, map } from 'rxjs/operators';
 
+import { CreateServiceBinding } from '../../../../../store/src/actions/service-bindings.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { serviceBindingSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { selectRequestInfo } from '../../../../../store/src/selectors/api.selectors';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { SpaceScopedService } from '../../../features/service-catalog/services.service';
-import { AppState } from '../../../../../store/src/app-state';
-import { Store } from '@ngrx/store';
-import { CreateServiceBinding } from '../../../../../store/src/actions/service-bindings.actions';
-import { selectRequestInfo } from '../../../../../store/src/selectors/api.selectors';
-import { serviceBindingSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { filter, map } from 'rxjs/operators';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
   APP_SERVICES_MODE = 'appServicesMode',
   SERVICES_WALL_MODE = 'servicesWallMode',
   EDIT_SERVICE_INSTANCE_MODE = 'editServiceInstanceMode'
+}
+
+export const enum CreateServiceFormMode {
+  CreateServiceInstance = 'create-service-instance',
+  BindServiceInstance = 'bind-service-instance',
 }
 
 export const CANCEL_SPACE_ID_PARAM = 'space-guid';
@@ -56,7 +61,7 @@ export class CsiModeService {
     const orgGuid = activatedRoute.snapshot.queryParams[CANCEL_ORG_ID_PARAM];
     const cfId = getIdFromRoute(activatedRoute, 'endpointId');
     const id = getIdFromRoute(activatedRoute, 'id');
-    debugger;
+
     if (!!serviceId && !!cfId) {
       this.mode = CreateServiceInstanceMode.MARKETPLACE_MODE;
       this.cancelUrl = `/marketplace/${cfId}/${serviceId}/instances`;

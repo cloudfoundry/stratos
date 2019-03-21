@@ -159,8 +159,9 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     this.serviceInstance$ = userProvidedServiceInstance$;
     this.service$ = of(null);
     this.listData = [{
-      label: 'Service Name',
-      data$: of('User Provided')
+      label: null,
+      data$: of('User Provided Service Instance'),
+      customStyle: 'long-text'
     }, {
       label: 'Route Service URL',
       data$: userProvidedServiceInstance$.pipe(

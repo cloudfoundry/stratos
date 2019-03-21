@@ -5,7 +5,6 @@ import {
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
 } from '../actions/service-bindings.actions';
-import { UPDATE_SERVICE_INSTANCE_SUCCESS, UpdateServiceInstance } from '../actions/service-instances.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
@@ -13,7 +12,7 @@ import { APISuccessOrFailedAction } from '../types/request.types';
 export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResource<IServiceInstance>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
     case DELETE_SERVICE_BINDING_ACTION_SUCCESS:
-      return handleDelete(state, action.apiAction as DeleteServiceBinding)
+      return handleDelete(state, action.apiAction as DeleteServiceBinding);
     // case UPDATE_SERVICE_INSTANCE_SUCCESS:
     //   const updateServiceInstance = (action.apiAction as UpdateServiceInstance);
     //   const tags = updateServiceInstance.tags;
