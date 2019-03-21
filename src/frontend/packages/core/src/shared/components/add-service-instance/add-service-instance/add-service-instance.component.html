@@ -23,7 +23,7 @@
       <app-step [title]="bindAppStepperText" *ngIf="modeService.viewDetail.showBindApp" [skip]="skipApps$ | async"
         [onEnter]="bindApp.onEnter" [onNext]="bindApp.submit " [valid]="bindApp.validate | async"
         cancelButtonText="Cancel">
-        <app-bind-apps-step #bindApp [boundAppId]="appId"></app-bind-apps-step>
+        <app-bind-apps-step #bindApp [boundAppId]="appId" [apps$]="apps$"></app-bind-apps-step>
       </app-step>
       <app-step title="Service Instance" [onNext]="specifyDetails.onNext" [onEnter]="specifyDetails.onEnter"
         [blocked]="!!(specifyDetails.serviceInstancesInit$  | async)" [valid]="specifyDetails.validate | async "
@@ -42,7 +42,7 @@
       <app-step [title]="bindAppStepperText" *ngIf="modeService.viewDetail.showBindApp" [skip]="skipApps$ | async"
         [onEnter]="bindApp.onEnter" [onNext]="bindApp.submit " [valid]="bindApp.validate | async"
         cancelButtonText="Cancel">
-        <app-bind-apps-step #bindApp [boundAppId]="appId"></app-bind-apps-step>
+        <app-bind-apps-step #bindApp [boundAppId]="appId" [apps$]="apps$"></app-bind-apps-step>
       </app-step>
       <app-step title="Service Instance" [onEnter]="supd.onEnter" [onNext]="supd.onNext" [valid]="supd.valid | async">
         <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="cfGuid$ | async"
