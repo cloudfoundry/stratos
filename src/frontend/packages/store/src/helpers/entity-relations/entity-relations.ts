@@ -495,7 +495,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     ),
     map(([entityInfo, entity, allEntities]: [RequestInfoState, any, IRequestDataState]) => {
       if (!entity) {
-        return action;
+        return;
       }
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
       /* tslint:disable-next-line:no-string-literal  */
@@ -508,7 +508,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
         if (arraySafeEntitySchema.key === action.entityKey) {
           // Found it! Does the entity contain a value for the property name?
           if (!entity.entity[paramName]) {
-            return action;
+            return;
           }
           // Yes? Let's create the action that will populate the pagination section with the value
           const config: HandleRelationsConfig = {
@@ -532,7 +532,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
           return createActionsForExistingEntities(config);
         }
       }
-      return action;
+      return;
     })
   );
 }

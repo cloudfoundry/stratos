@@ -1,34 +1,34 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { debounceTime, filter, first, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
+import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import {
-  CreateUserProvidedServiceInstance,
-  GetUserProvidedService,
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../../../store/src/actions/user-provided-service.actions';
-import { AppState } from '../../../../../../store/src/app-state';
 import {
-  entityFactory,
-  serviceInstancesSchemaKey,
-  serviceSchemaKey,
+  serviceBindingSchemaKey,
   userProvidedServiceInstanceSchemaKey,
 } from '../../../../../../store/src/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { EntityService } from '../../../../core/entity-service';
-import { urlValidationExpression } from '../../../../core/utils.service';
+import { IUserProvidedServiceInstance } from '../../../../core/cf-api-svc.types';
+import { safeUnsubscribe, urlValidationExpression } from '../../../../core/utils.service';
 import { environment } from '../../../../environments/environment';
-import { isValidJsonValidator } from '../../../form-validators';
-import { EntityMonitor } from '../../../monitors/entity-monitor';
-import { StepOnNextResult } from '../../stepper/step/step.component';
 import { AppNameUniqueChecking } from '../../../app-name-unique.directive/app-name-unique.directive';
+import { isValidJsonValidator } from '../../../form-validators';
+import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
+import { StepOnNextResult } from '../../stepper/step/step.component';
+import { AppState } from './../../../../../../store/src/app-state';
+import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -37,70 +37,144 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
   templateUrl: './specify-user-provided-details.component.html',
   styleUrls: ['./specify-user-provided-details.component.scss']
 })
-export class SpecifyUserProvidedDetailsComponent {
-  public formGroup: FormGroup;
+export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
+  public createEditServiceInstance: FormGroup;
+  public bindExistingInstance: FormGroup;
   public separatorKeysCodes = [ENTER, COMMA, SPACE];
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
   public tags: { label: string }[] = [];
+  public valid = new BehaviorSubject(false);
+  private subscriptions: Subscription[] = [];
   @Input()
   public cfGuid: string;
   @Input()
   public spaceGuid: string;
   @Input()
+  public appId: string;
+  @Input()
   public serviceInstanceId: string;
+
+  @Input()
+  public showModeSelection = false;
 
   public appNameChecking = new AppNameUniqueChecking();
 
+  public serviceBindingForApplication$ = this.serviceInstancesForApplication();
+  formModes = [
+    {
+      label: 'Create and Bind to a new User Provided Service Instance',
+      key: CreateServiceFormMode.CreateServiceInstance
+    },
+    {
+      label: 'Bind to an Existing User Provided Service Instance',
+      key: CreateServiceFormMode.BindServiceInstance
+    }
+  ];
+  formMode = CreateServiceFormMode.CreateServiceInstance;
+
   constructor(
-    private store: Store<AppState>,
     route: ActivatedRoute,
+    private upsService: CloudFoundryUserProvidedServicesService,
+    public modeService: CsiModeService,
+    private store: Store<AppState>,
   ) {
-    const { endpointId, serviceInstanceId } = route.snapshot.params;
+    const { endpointId, serviceInstanceId } =
+      route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;
-    this.formGroup = new FormGroup({
+
+    this.createEditServiceInstance = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
       syslog_drain_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
       credentials: new FormControl('', isValidJsonValidator()),
       route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
       tags: new FormControl([]),
     });
+    this.bindExistingInstance = new FormGroup({
+      serviceInstances: new FormControl('', [Validators.required]),
+    });
     this.initUpdate(serviceInstanceId, endpointId);
+    this.setupValidate();
   }
 
+  ngOnDestroy(): void {
+    safeUnsubscribe(...this.subscriptions);
+  }
+
+  private setupValidate() {
+    this.subscriptions.push(
+      obsCombineLatest([
+        this.createEditServiceInstance.statusChanges.pipe(startWith('INVALID')),
+        this.bindExistingInstance.statusChanges.pipe(startWith('INVALID')),
+      ]).pipe(
+        map(([createValid, bindValid]) => this.formMode === CreateServiceFormMode.CreateServiceInstance ?
+          this.formStatusToBool(createValid) :
+          this.formStatusToBool(bindValid))
+      )
+        .subscribe(valid => this.valid.next(valid))
+    );
+  }
+
+  private formStatusToBool(status: string): boolean {
+    return status === 'VALID';
+  }
+
+  resetForms = (mode: CreateServiceFormMode) => {
+    this.valid.next(false);
+    this.createEditServiceInstance.reset();
+    this.bindExistingInstance.reset();
+    if (mode === CreateServiceFormMode.CreateServiceInstance) {
+      this.tags = [];
+    }
+  }
+
+  private serviceInstancesForApplication() {
+    return this.store.select(selectCreateServiceInstance).pipe(
+      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
+      first(),
+      switchMap(p => this.upsService.getUserProvidedServices(
+        p.cfGuid,
+        p.spaceGuid,
+        [createEntityRelationKey(userProvidedServiceInstanceSchemaKey, serviceBindingSchemaKey)]
+      )),
+      map(upsis => upsis.map(upsi => {
+        const alreadyBound = !!upsi.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);
+        if (alreadyBound) {
+          const updatedSvc: APIResource<IUserProvidedServiceInstance> = {
+            entity: { ...upsi.entity },
+            metadata: { ...upsi.metadata }
+          };
+          updatedSvc.entity.name += ' (Already bound)';
+          updatedSvc.metadata.guid = null;
+          return updatedSvc;
+        }
+        return upsi;
+      })),
+      startWith(null),
+      publishReplay(1),
+      refCount()
+    );
+
+  }
   private initUpdate(serviceInstanceId: string, endpointId: string) {
     if (this.isUpdate) {
-      this.formGroup.disable();
-      const entityMonitor = new EntityMonitor(
-        this.store,
-        serviceInstanceId,
-        userProvidedServiceInstanceSchemaKey,
-        entityFactory(userProvidedServiceInstanceSchemaKey)
-      );
-      const entityService = new EntityService<APIResource>(
-        this.store,
-        entityMonitor,
-        new GetUserProvidedService(serviceInstanceId, endpointId)
-      );
-      entityService.entityObs$
-        .pipe(
-          filter(entityInfo => entityInfo.entity && !entityInfo.entityRequestInfo.fetching),
-          map(entityInfo => entityInfo.entity),
-          first()
-        )
-        .subscribe(entity => {
-          this.formGroup.enable();
-          const serviceEntity = entity.entity;
-          this.formGroup.setValue({
-            name: serviceEntity.name,
-            syslog_drain_url: serviceEntity.syslog_drain_url,
-            credentials: JSON.stringify(serviceEntity.credentials),
-            route_service_url: serviceEntity.route_service_url,
-            tags: []
-          });
-          this.tags = this.tagsArrayToChips(serviceEntity.tags);
+      this.createEditServiceInstance.disable();
+      this.upsService.getUserProvidedService(endpointId, serviceInstanceId).pipe(
+        first(),
+        map(entityInfo => entityInfo.entity)
+      ).subscribe(entity => {
+        this.createEditServiceInstance.enable();
+        const serviceEntity = entity;
+        this.createEditServiceInstance.setValue({
+          name: serviceEntity.name,
+          syslog_drain_url: serviceEntity.syslog_drain_url,
+          credentials: JSON.stringify(serviceEntity.credentials),
+          route_service_url: serviceEntity.route_service_url,
+          tags: []
         });
+        this.tags = this.tagsArrayToChips(serviceEntity.tags);
+      });
     }
   }
 
@@ -123,53 +197,66 @@ export class SpecifyUserProvidedDetailsComponent {
   }
 
   public onNext = (): Observable<StepOnNextResult> => {
-    return this.isUpdate ? this.onNextUpdate() : this.onNextCreate();
+    return this.isUpdate ?
+      this.onNextUpdate() :
+      this.formMode === CreateServiceFormMode.CreateServiceInstance ? this.onNextCreate() : this.onNextBind();
   }
 
-  private onNextCreate() {
+  private onNextCreate(): Observable<StepOnNextResult> {
     const data = this.getServiceData();
     const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
-    const action = new CreateUserProvidedServiceInstance(
+    return this.upsService.createUserProvidedService(
       this.cfGuid,
       guid,
       data as IUserProvidedServiceInstanceData,
-      serviceInstancesSchemaKey
+    ).pipe(
+      combineLatest(this.store.select(selectCreateServiceInstance)),
+      switchMap(([request, state]) => {
+        const newGuid = request.response.result[0];
+        const success = !request.error;
+        const redirect = !request.error;
+        if (!!state.bindAppGuid && success) {
+          return this.createApplicationServiceBinding(newGuid, state);
+        }
+        return observableOf({
+          success,
+          redirect,
+          message: success ? '' : 'Failed to create User Provided Service Instance. Reason: "' + request.message + '"'
+        });
+      })
     );
-    this.store.dispatch(action);
-    return new EntityMonitor(
-      this.store,
-      guid,
-      userProvidedServiceInstanceSchemaKey,
-      entityFactory(userProvidedServiceInstanceSchemaKey)
-    ).entityRequest$.pipe(
-      debounceTime(250),
-      filter(er => !er.creating),
-      map(er => ({
-        success: !er.error,
-        redirect: !er.error
-      }))
+  }
+
+  private onNextBind(): Observable<StepOnNextResult> {
+    return this.store.select(selectCreateServiceInstance).pipe(
+      switchMap(data => this.createApplicationServiceBinding(this.bindExistingInstance.controls.serviceInstances.value, data))
     );
+  }
+
+  private createApplicationServiceBinding(serviceGuid: string, data: any): Observable<StepOnNextResult> {
+    return this.modeService.createApplicationServiceBinding(serviceGuid, data.cfGuid, data.bindAppGuid, data.bindAppParams)
+      .pipe(
+        map(req => {
+          if (!req.success) {
+            return { success: false, message: `Failed to create service instance binding: ${req.message}` };
+          } else {
+            // Refetch env vars for app, since they have been changed by CF
+            this.store.dispatch(
+              new GetAppEnvVarsAction(data.bindAppGuid, data.cfGuid)
+            );
+            return { success: true, redirect: true };
+          }
+        })
+      );
   }
 
   private onNextUpdate() {
     const updateData = this.getServiceData();
-    const updateAction = new UpdateUserProvidedServiceInstance(
+    return this.upsService.updateUserProvidedService(
       this.cfGuid,
       this.serviceInstanceId,
-      updateData,
-      serviceSchemaKey
-    );
-    this.store.dispatch(updateAction);
-    return new EntityMonitor(
-      this.store,
-      this.serviceInstanceId,
-      userProvidedServiceInstanceSchemaKey,
-      entityFactory(userProvidedServiceInstanceSchemaKey)
-    ).entityRequest$.pipe(
-      filter(
-        er => er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance] &&
-          er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].busy
-      ),
+      updateData
+    ).pipe(
       map(er => ({
         success: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
         redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error
@@ -179,7 +266,7 @@ export class SpecifyUserProvidedDetailsComponent {
 
   private getServiceData() {
     const data = {
-      ...this.formGroup.value,
+      ...this.createEditServiceInstance.value,
       spaceGuid: this.spaceGuid
     };
     data.credentials = data.credentials ? JSON.parse(data.credentials) : {};

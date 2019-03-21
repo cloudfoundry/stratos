@@ -282,7 +282,7 @@ export class GetServiceInstancesForSpace
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'creation',
-    q: null
+    q: []
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);

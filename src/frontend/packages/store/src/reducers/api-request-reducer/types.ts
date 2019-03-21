@@ -12,10 +12,15 @@ export interface ActionState {
   message: string;
 }
 
-// Multi action lists can have different entity types per page
-// We use schemaKey to track this type
+/**
+ * Multi action lists can have different entity types per page
+ * We use schemaKey to track this type
+ */
 export interface ListActionState extends ActionState {
   schemaKey?: string;
+  /**
+   * Does the collection size exceed the max allowed? Used in conjunction PaginationEntityState maxedMode.
+   */
   maxed?: boolean;
   entityKey?: string;
 }

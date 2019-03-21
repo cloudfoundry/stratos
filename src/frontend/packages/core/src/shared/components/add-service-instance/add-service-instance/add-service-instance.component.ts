@@ -99,7 +99,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
     this.basePreviousRedirect = route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
-      path: 'services/new'
+      path: route.snapshot.queryParams[BASE_REDIRECT_QUERY]
     } : null;
   }
   ngAfterContentInit(): void {
@@ -118,6 +118,10 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.title$ = observableOf(`Create Service Instance`);
+    }
+
+    if (!this.initialisedService$) {
+      this.initialisedService$ = observableOf(true);
     }
 
     this.skipApps$ = this.store.select(selectCreateServiceInstance).pipe(
@@ -161,7 +165,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       entityFactory(applicationSchemaKey),
       appId,
       new GetApplication(appId, cfId, [createEntityRelationKey(applicationSchemaKey, spaceSchemaKey)]),
-      true);
+      true
+    );
     return entityService.waitForEntity$.pipe(
       filter(p => !!p),
       tap(app => {
@@ -172,7 +177,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
         this.title$ = observableOf(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
       }),
       take(1),
-      map(o => false)
+      map(o => true)
     );
   }
 
@@ -215,7 +220,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           ).subscribe();
         }),
         take(1),
-        map(o => false),
+        map(o => true),
       );
     }
   }
@@ -263,7 +268,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       filter(p => !!p),
       first(),
       tap(e => this.cfOrgSpaceService.cf.select.next(endpointId)),
-      map(o => false),
+      map(o => true),
     );
   }
 }

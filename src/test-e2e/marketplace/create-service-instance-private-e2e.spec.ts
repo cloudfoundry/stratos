@@ -1,9 +1,9 @@
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
-import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 
 describe('Create Service Instance of Private Service', () => {
   const createServiceInstance = new CreateServiceInstance();
@@ -12,12 +12,12 @@ describe('Create Service Instance of Private Service', () => {
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
-
   });
 
   beforeEach(() => {

@@ -20,9 +20,10 @@ describe('Edit Service Instance', () => {
   const serviceNamesToDelete = [];
 
   beforeAll(() => {
-    e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
   });

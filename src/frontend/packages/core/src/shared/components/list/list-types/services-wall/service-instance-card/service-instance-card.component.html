@@ -14,7 +14,7 @@
     <app-meta-card-key>Service</app-meta-card-key>
     <app-meta-card-value>{{ getServiceName() }} </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="!userProvided">
+  <app-meta-card-item>
     <app-meta-card-key>Service Plan</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_plan?.entity.name}} </app-meta-card-value>
   </app-meta-card-item>
@@ -22,12 +22,12 @@
     <app-meta-card-key>Applications Attached</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_bindings?.length }} </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="!userProvided">
+  <app-meta-card-item>
     <app-meta-card-key>Last Updated</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.last_operation?.updated_at | date:'medium' }}
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="!userProvided">
+  <app-meta-card-item>
     <app-meta-card-key>Dashboard</app-meta-card-key>
     <app-meta-card-value>
       <div *ngIf="!!serviceInstanceEntity.entity.dashboard_url ; then dashboardUrl; else none"></div>
@@ -41,18 +41,6 @@
         </div>
       </ng-template>
       <ng-template #none>None</ng-template>
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item *ngIf="userProvided">
-    <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
-    <app-meta-card-value>
-      {{ serviceInstanceEntity.entity.syslog_drain_url || 'None' }}
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item *ngIf="userProvided">
-    <app-meta-card-key>Route Service URL</app-meta-card-key>
-    <app-meta-card-value>
-      {{ serviceInstanceEntity.entity.route_service_url  || 'None' }}
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
