@@ -17,6 +17,11 @@ export class CfOrgSpaceLabelService {
   private org$: Observable<APIResource<IOrganization>>;
   private space$: Observable<APIResource<ISpace>>;
 
+  /**
+   * @param cfGuid Only important if using getValue
+   * @param orgGuid Only important if using getValue
+   * @param spaceGuid Only important if using getValue
+   */
   constructor(
     private store: Store<AppState>,
     private cfGuid?: string,

@@ -13,7 +13,7 @@ export class TableCellAppCfOrgSpaceHeaderComponent extends TableCellAppCfOrgSpac
 
   constructor(store: Store<AppState>) {
     super(store);
-    this.init()
+    this.init();
   }
 
 }
