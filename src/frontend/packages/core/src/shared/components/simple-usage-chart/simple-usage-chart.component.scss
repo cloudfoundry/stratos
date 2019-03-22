@@ -2,7 +2,10 @@
   align-items: center;
   display: flex;
   flex-direction: column;
-  height: 400px;
+  height: 300px;
+  &__title {
+    margin-top: 20px;
+  }
   &__counts {
     align-items: baseline;
     display: flex;

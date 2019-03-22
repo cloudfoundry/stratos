@@ -15,7 +15,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
 import { GetKubernetesPods, GetKubernetesNodes } from '../../store/kubernetes.actions';
 import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
-import { ISimpleUsageChartData } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.component';
+import { ISimpleUsageChartData, IChartThresholds } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
 interface IEndpointDetails {
   imagePath: string;
   label: string;
@@ -50,6 +50,13 @@ export class KubernetesSummaryTabComponent implements OnInit {
 
   dashboardLink: string;
   public podCapacity$: Observable<ISimpleUsageChartData>;
+  public diskPressure$: Observable<ISimpleUsageChartData>;
+  public memoryPressure$: Observable<ISimpleUsageChartData>;
+
+  public pressureChartThresholds: IChartThresholds = {
+    danger: 90,
+    warning: 0
+  };
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -78,33 +85,47 @@ export class KubernetesSummaryTabComponent implements OnInit {
   }
   private getPodCapacity(nodes$: Observable<KubernetesNode[]>, pods$: Observable<KubernetesPod[]>) {
     return combineLatest(nodes$, pods$).pipe(
-      map(([nodes, pods]) => {
-        const total = nodes.reduce((cap, node) => {
+      map(([nodes, pods]) => ({
+        total: nodes.reduce((cap, node) => {
           return cap + parseInt(node.status.capacity.pods, 10);
-        }, 0) - pods.length;
-        const used = pods.length;
-        return {
-          total,
-          used
-        };
-      })
+        }, 0),
+        used: pods.length
+      }))
     );
   }
+
+  private getNodeStatusCount(nodes$: Observable<KubernetesNode[]>, conditionType: string) {
+    return nodes$.pipe(
+      map(nodes => ({
+        total: nodes.length,
+        used: nodes.reduce((cap, node) => {
+          const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
+          if (!conditionStatus || !conditionStatus.status || conditionStatus.status === 'False') {
+            return cap;
+          }
+          return ++cap;
+        }, 0)
+      }))
+    );
+  }
+
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
     const podCountAction = new GetKubernetesPods(guid);
     const nodeCountAction = new GetKubernetesNodes(guid);
     const appCountAction = new GetKubernetesApps(guid);
-    const applications$ = this.getPaginationObservable(appCountAction)
+    const applications$ = this.getPaginationObservable(appCountAction);
     const pods$ = this.getPaginationObservable(podCountAction);
-    const nodes$ = this.getPaginationObservable(nodeCountAction);
+    const nodes$ = this.getPaginationObservable(nodeCountAction).pipe(tap(console.log));
 
     this.podCount$ = this.getCountObservable(pods$);
     this.nodeCount$ = this.getCountObservable(nodes$);
     this.appCount$ = this.getCountObservable(applications$);
 
     this.podCapacity$ = this.getPodCapacity(nodes$, pods$);
+    this.diskPressure$ = this.getNodeStatusCount(nodes$, 'DiskPressure');
+    this.memoryPressure$ = this.getNodeStatusCount(nodes$, 'MemoryPressure');
 
     this.dashboardLink = `/kubernetes/${guid}/dashboard`;
   }

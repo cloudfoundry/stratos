@@ -1,24 +1,7 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-export interface ISimpleUsageChartData {
-  total: number;
-  used: number;
-}
-interface IChartData {
-  colors: any;
-  total: number;
-  used: number;
-  results: [{
-    name: 'Used',
-    value: number
-  },
-    {
-      name: 'Remaining',
-      value: number
-    }]
-}
-interface IUsageColor {
-  domain: [string, string];
-}
+import { Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { IChartData, ISimpleUsageChartData, IChartThresholds } from './simple-usage-chart.types';
+
+
 @Component({
   selector: 'app-simple-usage-chart',
   templateUrl: './simple-usage-chart.component.html',
@@ -27,11 +10,30 @@ interface IUsageColor {
 export class SimpleUsageChartComponent {
   static BASE_COLOR_SELECTOR = 'simple-usage-graph-color';
   static BASE_BACKGROUND_COLOR_SELECTOR = 'background';
-  public chartData: IChartData;
+  public chartData: IChartData = {
+    colors: {
+      domain: ['#94949440', '#94949440']
+    },
+    total: 0,
+    used: 0,
+    results: [{
+      name: 'Used',
+      value: 0
+    },
+    {
+      name: 'Remaining',
+      value: 100
+    }]
+  };
 
   @ViewChild('colors') colorsElement: ElementRef;
 
   @Input() title = 'Usage';
+
+  @Input() thresholds: IChartThresholds = {
+    danger: 85,
+    warning: 70
+  };
 
   @Input() set data(usageData: ISimpleUsageChartData) {
     if (usageData) {
@@ -82,12 +84,14 @@ export class SimpleUsageChartComponent {
 
   private getColors(total: number, used: number) {
     const percentage = (used / total) * 100;
-    if (percentage > 85) {
-      return this.getColorScheme('danger');
-    }
+    if (this.thresholds) {
+      if (this.thresholds.hasOwnProperty('danger') && percentage > this.thresholds.danger) {
+        return this.getColorScheme('danger');
+      }
 
-    if (percentage > 70) {
-      return this.getColorScheme('warning');
+      if (this.thresholds.hasOwnProperty('danger') && percentage > this.thresholds.warning) {
+        return this.getColorScheme('warning');
+      }
     }
 
     return this.getColorScheme('ok');

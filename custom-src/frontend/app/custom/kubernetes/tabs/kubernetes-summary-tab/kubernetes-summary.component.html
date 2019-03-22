@@ -38,10 +38,27 @@
       <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
     </app-tile>
     <app-tile>
-      <app-simple-usage-chart [data]="podCapacity$ | async"></app-simple-usage-chart>
+      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
+        [data]="diskPressure$ | async"></app-simple-usage-chart>
     </app-tile>
     <app-tile>
-      <app-simple-usage-chart [data]="podCapacity$ | async"></app-simple-usage-chart>
+      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
+        [data]="memoryPressure$ | async">
+      </app-simple-usage-chart>
+    </app-tile>
+  </app-tile-group>
+  <app-tile-group>
+    <app-tile>
+      <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
+    </app-tile>
+    <app-tile>
+      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
+        [data]="diskPressure$ | async"></app-simple-usage-chart>
+    </app-tile>
+    <app-tile>
+      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
+        [data]="memoryPressure$ | async">
+      </app-simple-usage-chart>
     </app-tile>
   </app-tile-group>
 </app-tile-grid>

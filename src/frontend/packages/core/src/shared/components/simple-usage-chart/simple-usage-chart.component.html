@@ -1,15 +1,18 @@
 <div class="simple-graph__wrapper">
   <div class="simple-graph">
-    <div class="simple-graph__inner" *ngIf="chartData">
-      <h2>{{ title }}</h2>
+    <div class="simple-graph__inner">
+      <h2 class="simple-graph__title">{{ title }}</h2>
       <ngx-charts-pie-chart [scheme]="chartData.colors" [animations]="false" [view]="[250, 250]" [doughnut]="true"
         [results]="chartData.results" [gradient]="false">
       </ngx-charts-pie-chart>
-      <div class="simple-graph__counts">
+      <div class="simple-graph__counts" *ngIf="chartData.total; else noTotal">
         <div class="simple-graph__counts-count" ngx-charts-count-up [countTo]="chartData.used"></div>
         <span class="simple-graph__counts-divider">/</span>
         <div>{{ chartData.total }}</div>
       </div>
+      <ng-template #noTotal>
+        <div class="simple-graph__counts"> - </div>
+      </ng-template>
     </div>
   </div>
 </div>
