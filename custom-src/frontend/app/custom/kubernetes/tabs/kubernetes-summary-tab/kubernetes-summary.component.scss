@@ -27,17 +27,8 @@
     margin: 10px -10px;
     max-width: 500px;
   }
-  &__graph {
-    display: flex;
-    height: 400px;
-    min-height: 0;
-    min-width: 0;
-    padding: 0;
-    &-wrapper {
-      display: grid;
-      grid-gap: 50px;
-      grid-template-columns: 1fr 1fr 1fr;
-      
-    }
+  &__graphs {
+    background: linear-gradient(to bottom, #fff 0%, #fff 30%, transparent 60%);
+    margin: 20px 30px 0;
   }
 }

@@ -24,6 +24,7 @@
 @import '../src/shared/components/log-viewer/log-viewer.component.theme';
 @import '../src/shared/components/chips/chips.component.theme';
 @import '../src/shared/components/cards/card-number-metric/card-number-metric.component.theme';
+@import '../src/shared/components/simple-usage-chart/simple-usage-chart.component.theme.scss';
 @import '../src/core/dot-content/dot-content.component.theme';
 @import '../src/shared/components/stratos-title/stratos-title.component.theme';
 @import '../src/shared/components/page-header/page-header.component.theme';
@@ -130,6 +131,7 @@ $side-nav-light-active: #484848;
   @include app-multiline-title-theme($theme, $app-theme);
   @include tile-selector-theme($theme, $app-theme);
   @include app-markdown-preview-theme($theme, $app-theme);
+  @include app-simple-usage-chart($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

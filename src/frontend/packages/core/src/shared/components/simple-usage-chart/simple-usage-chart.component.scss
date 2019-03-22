@@ -1,0 +1,22 @@
+.simple-graph {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  &__counts {
+    align-items: baseline;
+    display: flex;
+    margin-top: -140px;
+    &-count {
+      font-size: 26px;
+    }
+    &-divider {
+      padding: 0 5px;
+    }
+  }
+  &__inner {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+}

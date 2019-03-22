@@ -1,7 +1,7 @@
 import { KubernetesPod } from './../../store/kube.types';
 import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 import { GetKubernetesApps } from './../../store/kubernetes.actions';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SafeResourceUrl } from '@angular/platform-browser';
 import { Component, OnInit } from '@angular/core';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { HttpClient } from '@angular/common/http';
@@ -15,6 +15,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
 import { GetKubernetesPods, GetKubernetesNodes } from '../../store/kubernetes.actions';
 import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
+import { ISimpleUsageChartData } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.component';
 interface IEndpointDetails {
   imagePath: string;
   label: string;
@@ -29,6 +30,12 @@ export class KubernetesSummaryTabComponent implements OnInit {
   public podCount$: Observable<number>;
   public nodeCount$: Observable<number>;
   public appCount$: Observable<number>;
+  public highUsageColors = {
+    domain: ['#00000026', '#00af00']
+  };
+  public normalUsageColors = {
+    domain: ['#00af00', '#00af002e']
+  };
   public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
     map(endpoint => {
       const { imagePath, label } = getEndpointType(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
@@ -36,14 +43,13 @@ export class KubernetesSummaryTabComponent implements OnInit {
         imagePath,
         label,
         name: endpoint.entity.name,
-
-      }
+      };
     })
   );
   source: SafeResourceUrl;
 
   dashboardLink: string;
-  public podCapacity$: Observable<{ capacity: number; used: number; }>;
+  public podCapacity$: Observable<ISimpleUsageChartData>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -73,20 +79,16 @@ export class KubernetesSummaryTabComponent implements OnInit {
   private getPodCapacity(nodes$: Observable<KubernetesNode[]>, pods$: Observable<KubernetesPod[]>) {
     return combineLatest(nodes$, pods$).pipe(
       map(([nodes, pods]) => {
-        const capacity = nodes.reduce((cap, node) => {
+        const total = nodes.reduce((cap, node) => {
           return cap + parseInt(node.status.capacity.pods, 10);
-        }, 0);
+        }, 0) - pods.length;
         const used = pods.length;
-        console.log(used)
         return {
-          capacity,
-          results: [{
-            name: '',
-            value: used
-          }]
-        }
+          total,
+          used
+        };
       })
-    )
+    );
   }
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
@@ -96,7 +98,7 @@ export class KubernetesSummaryTabComponent implements OnInit {
     const appCountAction = new GetKubernetesApps(guid);
     const applications$ = this.getPaginationObservable(appCountAction)
     const pods$ = this.getPaginationObservable(podCountAction);
-    const nodes$ = this.getPaginationObservable(nodeCountAction).pipe(tap(console.log));
+    const nodes$ = this.getPaginationObservable(nodeCountAction);
 
     this.podCount$ = this.getCountObservable(pods$);
     this.nodeCount$ = this.getCountObservable(nodes$);

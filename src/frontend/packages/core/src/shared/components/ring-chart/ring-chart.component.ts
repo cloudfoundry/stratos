@@ -12,7 +12,7 @@ export class RingChartComponent implements OnInit {
   domain: any[];
   colors: ColorHelper;
 
-  @Input() data: any;
+  @Input() data: any[];
   @Input() label = 'Total';
   @Input() scheme: any = 'cool';
 

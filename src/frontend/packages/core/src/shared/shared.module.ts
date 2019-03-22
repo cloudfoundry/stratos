@@ -161,6 +161,7 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
 import { BlurDirective } from './components/blur.directive';
+import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 
 /* tslint:disable:max-line-length */
 
@@ -285,7 +286,8 @@ import { BlurDirective } from './components/blur.directive';
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
     AppNameUniqueDirective,
-    EndpointCardComponent
+    EndpointCardComponent,
+    SimpleUsageChartComponent
   ],
   exports: [
     FormsModule,
@@ -390,7 +392,8 @@ import { BlurDirective } from './components/blur.directive';
     AddServiceInstanceBaseStepComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective
+    AppNameUniqueDirective,
+    SimpleUsageChartComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

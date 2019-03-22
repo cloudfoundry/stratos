@@ -23,56 +23,25 @@
               icon="apps" label="Applications" labelSingular="Application" value="{{ appCount$ | async }}">
             </app-card-number-metric>
           </app-tile>
+          <!-- <app-tile>
+            <a mat-button [routerLink]="dashboardLink">Dashboard</a>
+            <button (click)="getDashboard()" matButton matRaisedButton>Get Dashboard Status</button>
+          </app-tile> -->
         </app-tile-group>
       </app-tile-grid>
     </div>
   </div>
 </div>
-
-<!-- <app-tile-grid fit="true">
+<app-tile-grid class="kube-details__graphs">
   <app-tile-group>
     <app-tile>
-      <mat-card class="kube-details__graph">
-        <ngx-charts-gauge *ngIf="podCapacity$ | async as data" class="usage-chart" [animations]="true"
-          [max]="data.capacity" [results]="data.results" [showAxis]="false">
-        </ngx-charts-gauge>
-      </mat-card>
+      <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
     </app-tile>
     <app-tile>
-      <mat-card class="kube-details__graph">
-        <ngx-charts-gauge *ngIf="podCapacity$ | async as data" class="usage-chart" [animations]="true"
-          [max]="data.capacity" [results]="data.results" [showAxis]="false">
-        </ngx-charts-gauge>
-      </mat-card>
+      <app-simple-usage-chart [data]="podCapacity$ | async"></app-simple-usage-chart>
     </app-tile>
     <app-tile>
-      <mat-card class="kube-details__graph">
-        <ngx-charts-gauge *ngIf="podCapacity$ | async as data" class="usage-chart" [animations]="true"
-          [max]="data.capacity" [results]="data.results" [showAxis]="false">
-        </ngx-charts-gauge>
-      </mat-card>
+      <app-simple-usage-chart [data]="podCapacity$ | async"></app-simple-usage-chart>
     </app-tile>
   </app-tile-group>
-</app-tile-grid> -->
-<div>
-  <div class="kube-details__graph-wrapper">
-    <mat-card class="kube-details__graph">
-      <ngx-charts-gauge *ngIf="podCapacity$ | async as data" class="usage-chart" [animations]="true"
-        [max]="data.capacity" [results]="data.results" [showAxis]="false">
-      </ngx-charts-gauge>
-    </mat-card>
-    <mat-card class="kube-details__graph">
-      <ngx-charts-gauge *ngIf="podCapacity$ | async as data" class="usage-chart" [animations]="true"
-        [max]="data.capacity" [results]="data.results" [showAxis]="false">
-      </ngx-charts-gauge>
-    </mat-card>
-    <mat-card class="kube-details__graph">
-      <ngx-charts-gauge *ngIf="podCapacity$ | async as data" class="usage-chart" [animations]="true"
-        [max]="data.capacity" [results]="data.results" [showAxis]="false">
-      </ngx-charts-gauge>
-    </mat-card>
-  </div>
-</div>
-
-<a [routerLink]="dashboardLink">Open Dashboard</a>
-<button (click)="getDashboard()" matButton matRaisedButton>Get Dashboard Status</button>
+</app-tile-grid>
