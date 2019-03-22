@@ -9,9 +9,7 @@
           <mat-card-content>
             <div class="app-metadata">
               <div class="app-metadata__two-cols">
-                <mat-slide-toggle *ngIf="attachConfirmOk == 0" checked="false" (click)="createDefaultPolicy()">Policy
-                  undefined</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="attachConfirmOk == 1" checked="false" (click)="createDefaultPolicy()">Policy
+                <mat-slide-toggle checked="false" (click)="updatePolicyPage()">Policy
                   undefined</mat-slide-toggle>
               </div>
             </div>
@@ -36,17 +34,16 @@
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 1" checked="true"
                   (click)="diableAutoscaler()">Policy defined</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 2" checked="false"
-                  (click)="createDefaultPolicy()">Policy undefined</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="!(policy.enabled) && attachConfirmOk == 0" checked="false"
-                  (click)="createDefaultPolicy()">Policy undefined</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="!(policy.enabled) && attachConfirmOk == 1" checked="false"
-                  (click)="createDefaultPolicy()">Policy undefined</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="!(policy.enabled) && attachConfirmOk == 2" checked="true"
-                  (click)="diableAutoscaler()">Policy defined</mat-slide-toggle>
+                  (click)="updatePolicyPage()">Policy undefined</mat-slide-toggle>
+                <mat-slide-toggle *ngIf="!(policy.enabled)" checked="false" (click)="updatePolicyPage()">Policy
+                  undefined</mat-slide-toggle>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
+      </app-tile>
+      <app-tile *ngIf="!(policy.enabled)">
+        <app-card-app-instances></app-card-app-instances>
       </app-tile>
       <app-tile *ngIf="policy.enabled" class="app-auto-scaler-tile-1of3">
         <app-card-autoscaler-default></app-card-autoscaler-default>
@@ -62,7 +59,8 @@
                 <app-metadata-item *ngIf="appAutoscalerAppMetrics[metricName] | async as metricData"
                   label={{metricName}}>
                   <!-- {{ metricData[0].entity.latest.length > 0 && metricData[0].entity.latest[0].value ? metricData[0].entity.latest[0].value + " " + metricData[0].entity.unit : "NaN"}} -->
-                  <ngx-charts-gauge [view]="[80, 80]" [margin]="[5, 5, 0, 5]" [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
+                  <ngx-charts-gauge [view]="[80, 80]" [margin]="[5, 5, 0, 5]"
+                    [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
                     [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [textValue]=""
                     [scheme]="'cool'" [min]="0" [max]="metricData[0].entity.chartMaxValue"
                     [units]="metricData[0].entity.unit" [angleSpan]="240" [startAngle]="-120" [showAxis]="false"
@@ -80,121 +78,123 @@
         </mat-card>
       </app-tile>
     </app-tile-group>
-    <app-tile-group *ngIf="appAutoscalerPolicy$ | async as policy">
-      <app-tile *ngIf="policy.enabled" class="app-auto-scaler-policy-left">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Scaling Rules </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="app-metadata">
-              <table mat-table [dataSource]="policy && policy.scaling_rules">
-                <ng-container matColumnDef="metric">
-                  <th mat-header-cell *matHeaderCellDef> Metric </th>
-                  <td mat-cell *matCellDef="let element"> {{element.metric_type}} </td>
-                </ng-container>
-                <ng-container matColumnDef="condition">
-                  <th mat-header-cell *matHeaderCellDef> Condition </th>
-                  <td mat-cell *matCellDef="let element"> {{element.operator}} {{element.threshold}} for
-                    {{element.breach_duration_secs}} secs. </td>
-                </ng-container>
-                <ng-container matColumnDef="action">
-                  <th mat-header-cell *matHeaderCellDef> Action </th>
-                  <td mat-cell *matCellDef="let element"> {{element.adjustment}} instances </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="scalingRuleColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: scalingRuleColumns;"></tr>
-              </table>
-            </div>
-          </mat-card-content>
-          <mat-card-actions class="app-auto-scaler__actions">
-            <button (click)="updatePolicyPage()" mat-icon-button>
-              <mat-icon>edit</mat-icon>
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </app-tile>
-      <app-tile *ngIf="policy.enabled">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Scheduled Limit Rules</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="app-metadata">
-              <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.specific_date">
-                <ng-container matColumnDef="from">
-                  <th mat-header-cell *matHeaderCellDef> From </th>
-                  <td mat-cell *matCellDef="let element"> {{element.start_date_time}} </td>
-                </ng-container>
-                <ng-container matColumnDef="to">
-                  <th mat-header-cell *matHeaderCellDef> To </th>
-                  <td mat-cell *matCellDef="let element"> {{element.end_date_time}} </td>
-                </ng-container>
-                <ng-container matColumnDef="init">
-                  <th mat-header-cell *matHeaderCellDef> Initial </th>
-                  <td mat-cell *matCellDef="let element">
-                    {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}} </td>
-                </ng-container>
-                <ng-container matColumnDef="min">
-                  <th mat-header-cell *matHeaderCellDef> Min </th>
-                  <td mat-cell *matCellDef="let element"> {{element.instance_min_count}} </td>
-                </ng-container>
-                <ng-container matColumnDef="max">
-                  <th mat-header-cell *matHeaderCellDef> Max </th>
-                  <td mat-cell *matCellDef="let element"> {{element.instance_max_count}} </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="specificDateColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: specificDateColumns;"></tr>
-              </table>
-            </div>
-            <br />
-            <div class="app-metadata">
-              <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.recurring_schedule">
-                <ng-container matColumnDef="effect">
-                  <th mat-header-cell *matHeaderCellDef> Effective Duration </th>
-                  <td mat-cell *matCellDef="let element"> {{ element.start_date? element.start_date + ' ~ ' +
-                    element.end_date : 'Aways'}}</td>
-                </ng-container>
-                <ng-container matColumnDef="repeat">
-                  <th mat-header-cell *matHeaderCellDef> Repeats On </th>
-                  <td mat-cell *matCellDef="let element"> {{element.days_of_month}} {{element.days_of_week}} of
-                    the
-                    {{element.days_of_week? 'week': 'month'}} </td>
-                </ng-container>
-                <ng-container matColumnDef="from">
-                  <th mat-header-cell *matHeaderCellDef> From </th>
-                  <td mat-cell *matCellDef="let element"> {{element.start_time}} </td>
-                </ng-container>
-                <ng-container matColumnDef="to">
-                  <th mat-header-cell *matHeaderCellDef> To </th>
-                  <td mat-cell *matCellDef="let element"> {{element.end_time}} </td>
-                </ng-container>
-                <ng-container matColumnDef="init">
-                  <th mat-header-cell *matHeaderCellDef> Initial </th>
-                  <td mat-cell *matCellDef="let element">
-                    {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}} </td>
-                </ng-container>
-                <ng-container matColumnDef="min">
-                  <th mat-header-cell *matHeaderCellDef> Min </th>
-                  <td mat-cell *matCellDef="let element"> {{element.instance_min_count}} </td>
-                </ng-container>
-                <ng-container matColumnDef="max">
-                  <th mat-header-cell *matHeaderCellDef> Max </th>
-                  <td mat-cell *matCellDef="let element"> {{element.instance_max_count}} </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="recurringScheduleColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: recurringScheduleColumns;"></tr>
-              </table>
-            </div>
-          </mat-card-content>
-          <mat-card-actions class="app-auto-scaler__actions">
-            <button (click)="updatePolicyPage()" mat-icon-button>
-              <mat-icon>edit</mat-icon>
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </app-tile>
-    </app-tile-group>
+    <div *ngIf="appAutoscalerPolicy$ | async as policy" style="margin-bottom: 24px">
+      <app-tile-group *ngIf="policy.enabled">
+        <app-tile class="app-auto-scaler-policy-left">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Scaling Rules </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="app-metadata">
+                <table mat-table [dataSource]="policy && policy.scaling_rules">
+                  <ng-container matColumnDef="metric">
+                    <th mat-header-cell *matHeaderCellDef> Metric </th>
+                    <td mat-cell *matCellDef="let element"> {{element.metric_type}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="condition">
+                    <th mat-header-cell *matHeaderCellDef> Condition </th>
+                    <td mat-cell *matCellDef="let element"> {{element.operator}} {{element.threshold}} for
+                      {{element.breach_duration_secs}} secs. </td>
+                  </ng-container>
+                  <ng-container matColumnDef="action">
+                    <th mat-header-cell *matHeaderCellDef> Action </th>
+                    <td mat-cell *matCellDef="let element"> {{element.adjustment}} instances </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="scalingRuleColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: scalingRuleColumns;"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+            <mat-card-actions class="app-auto-scaler__actions">
+              <button (click)="updatePolicyPage()" mat-icon-button>
+                <mat-icon>edit</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </app-tile>
+        <app-tile>
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Scheduled Limit Rules</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="app-metadata">
+                <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.specific_date">
+                  <ng-container matColumnDef="from">
+                    <th mat-header-cell *matHeaderCellDef> From </th>
+                    <td mat-cell *matCellDef="let element"> {{element.start_date_time}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="to">
+                    <th mat-header-cell *matHeaderCellDef> To </th>
+                    <td mat-cell *matCellDef="let element"> {{element.end_date_time}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="init">
+                    <th mat-header-cell *matHeaderCellDef> Initial </th>
+                    <td mat-cell *matCellDef="let element">
+                      {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="min">
+                    <th mat-header-cell *matHeaderCellDef> Min </th>
+                    <td mat-cell *matCellDef="let element"> {{element.instance_min_count}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="max">
+                    <th mat-header-cell *matHeaderCellDef> Max </th>
+                    <td mat-cell *matCellDef="let element"> {{element.instance_max_count}} </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="specificDateColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: specificDateColumns;"></tr>
+                </table>
+              </div>
+              <br />
+              <div class="app-metadata">
+                <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.recurring_schedule">
+                  <ng-container matColumnDef="effect">
+                    <th mat-header-cell *matHeaderCellDef> Effective Duration </th>
+                    <td mat-cell *matCellDef="let element"> {{ element.start_date? element.start_date + ' ~ ' +
+                          element.end_date : 'Aways'}}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="repeat">
+                    <th mat-header-cell *matHeaderCellDef> Repeats On </th>
+                    <td mat-cell *matCellDef="let element"> {{element.days_of_month}} {{element.days_of_week}} of
+                      the
+                      {{element.days_of_week? 'week': 'month'}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="from">
+                    <th mat-header-cell *matHeaderCellDef> From </th>
+                    <td mat-cell *matCellDef="let element"> {{element.start_time}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="to">
+                    <th mat-header-cell *matHeaderCellDef> To </th>
+                    <td mat-cell *matCellDef="let element"> {{element.end_time}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="init">
+                    <th mat-header-cell *matHeaderCellDef> Initial </th>
+                    <td mat-cell *matCellDef="let element">
+                      {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="min">
+                    <th mat-header-cell *matHeaderCellDef> Min </th>
+                    <td mat-cell *matCellDef="let element"> {{element.instance_min_count}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="max">
+                    <th mat-header-cell *matHeaderCellDef> Max </th>
+                    <td mat-cell *matCellDef="let element"> {{element.instance_max_count}} </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="recurringScheduleColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: recurringScheduleColumns;"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+            <mat-card-actions class="app-auto-scaler__actions">
+              <button (click)="updatePolicyPage()" mat-icon-button>
+                <mat-icon>edit</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </app-tile>
+      </app-tile-group>
+    </div>
     <app-tile-group>
       <app-tile>
         <mat-card>
@@ -228,10 +228,10 @@
             </div>
           </mat-card-content>
           <mat-card-actions class="app-auto-scaler__actions">
-              <button (click)="scaleHistoryPage()" mat-icon-button>
-                <mat-icon>launch</mat-icon>
-              </button>
-            </mat-card-actions>
+            <button (click)="scaleHistoryPage()" mat-icon-button>
+              <mat-icon>launch</mat-icon>
+            </button>
+          </mat-card-actions>
         </mat-card>
       </app-tile>
     </app-tile-group>

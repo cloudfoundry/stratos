@@ -34,11 +34,11 @@ export class CfAppAutoscalerEventsDataSource extends ListDataSource<EntityInfo> 
 
   constructor(
     store: Store<AppState>,
-    _cfGuid: string,
-    _appGuid: string,
+    cfGuid: string,
+    appGuid: string,
   ) {
-    const paginationKey = `app-autoscaler-events:${_cfGuid}${_appGuid}`;
-    const action = new GetAppAutoscalerScalingHistoryAction(paginationKey, _appGuid, _cfGuid);
+    const paginationKey = `app-autoscaler-events:${cfGuid}${appGuid}`;
+    const action = new GetAppAutoscalerScalingHistoryAction(paginationKey, appGuid, cfGuid);
     super(
       {
         store,

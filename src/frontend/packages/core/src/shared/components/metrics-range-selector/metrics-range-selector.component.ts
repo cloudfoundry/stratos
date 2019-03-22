@@ -59,6 +59,9 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     );
     this.rangeSelectorManager.init(this.metricsMonitor, action);
   }
+  get baseAction() {
+    return this.baseActionValue;
+  }
 
   @Input()
   set times(customTimes: ITimeRange[]) {
@@ -77,11 +80,6 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
   set pollInterval(interval: number) {
     this.rangeSelectorManager.pollInterval = interval;
   }
-
-  get baseAction() {
-    return this.baseActionValue;
-  }
-
 
   set showOverlay(show: boolean) {
     this.showOverlayValue = show;
