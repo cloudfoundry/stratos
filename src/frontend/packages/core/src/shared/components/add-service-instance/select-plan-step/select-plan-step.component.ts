@@ -1,5 +1,4 @@
-import { registerLocaleData, TitleCasePipe } from '@angular/common';
-import localeFr from '@angular/common/locales/fr';
+import { TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,27 +24,27 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import {
+  SetCreateServiceInstanceCFDetails,
+  SetCreateServiceInstanceServicePlan,
+} from '../../../../../../store/src/actions/create-service-instance.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../core/cf-api-svc.types';
+import { safeUnsubscribe } from '../../../../core/utils.service';
+import {
+  canShowServicePlanCosts,
+  getServicePlanAccessibilityCardStatus,
+  getServicePlanName,
+  populateServicePlanExtraTyped,
+} from '../../../../features/service-catalog/services-helper';
+import { CardStatus } from '../../../shared.types';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
-import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import {
-  SetCreateServiceInstanceCFDetails,
-  SetCreateServiceInstanceServicePlan
-} from '../../../../../../store/src/actions/create-service-instance.actions';
-import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
-import { CardStatus } from '../../../shared.types';
-import {
-  populateServicePlanExtraTyped,
-  getServicePlanAccessibilityCardStatus,
-  getServicePlanName,
-  canShowServicePlanCosts
-} from '../../../../features/service-catalog/services-helper';
-import { safeUnsubscribe } from '../../../../core/utils.service';
 
 @Component({
   selector: 'app-select-plan-step',
@@ -76,8 +75,6 @@ export class SelectPlanStepComponent implements OnDestroy {
     private modeService: CsiModeService
 
   ) {
-    registerLocaleData(localeFr);
-
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
     });
