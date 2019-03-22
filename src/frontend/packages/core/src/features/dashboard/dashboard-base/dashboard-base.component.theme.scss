@@ -38,8 +38,28 @@
       opacity: 0;
     }
   }
+
+  .side-nav__copyright {
+    display: none;
+  }
+  .side-nav__copyright-icon {
+    display: block;
+  }
+
+  &.dashboard__icon-mode-open {
+    .side-nav__copyright {
+      display: block;
+    }
+    .side-nav__copyright-icon {
+      display: none;
+    }
+  }
 }
 
 .side-nav__logo-icon-img {
   opacity: 0;
+}
+
+.side-nav__copyright-icon {
+  display: none;
 }

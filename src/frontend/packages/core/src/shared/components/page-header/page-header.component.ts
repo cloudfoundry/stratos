@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, TemplateRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, Input, ViewChild, TemplateRef, OnInit, OnDestroy, AfterViewInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';

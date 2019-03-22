@@ -171,6 +171,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
         if (item.requiresEndpointType) {
           item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         }
+        // Backwards compatibility (text became label)
+        if (!item.label && !!item.text) {
+          item.label = item.text;
+        }
         nav.push(item);
       }
 

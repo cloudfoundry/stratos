@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Applications" [favorite]="favorite$ | async">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Application" [favorite]="favorite$ | async">
   <h1>{{ (applicationService.application$ | async)?.app?.entity?.name }} </h1>
 </app-page-header>
 <!-- <app-page-sub-nav>

@@ -28,11 +28,15 @@ export class ServiceTabsBaseComponent {
     },
     {
       link: 'instances',
-      label: 'Instances'
+      label: 'Instances',
+      matIcon: 'service_instance',
+      matIconFont: 'stratos-icons'
     },
     {
       link: 'plans',
-      label: 'Plans'
+      label: 'Plans',
+      matIcon: 'service_plan',
+      matIconFont: 'stratos-icons'
     }
   ];
 

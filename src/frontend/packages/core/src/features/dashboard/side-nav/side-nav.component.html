@@ -17,6 +17,7 @@
     </li>
   </ul>
   <div *ngIf="!!customizations.copyright" class="side-nav__bottom">
-    <div [innerHTML]="customizations.copyright"></div>
+    <div class="side-nav__copyright-icon">&copy;</div>
+    <div class="side-nav__copyright" [innerHTML]="customizations.copyright"></div>
   </div>
 </nav>
