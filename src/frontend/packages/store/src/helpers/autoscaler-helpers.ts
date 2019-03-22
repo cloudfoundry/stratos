@@ -119,26 +119,25 @@ function setLowerColor(array) {
 
 export function autoscalerTransformMapToArray(newPolicy) {
   if (newPolicy.scaling_rules_form) {
-    const scaling_rules = [];
+    const scalingRules = [];
     newPolicy.scaling_rules_form.map((trigger) => {
       deleteIf(trigger, 'breach_duration_secs', trigger.breach_duration_secs === PolicyDefaultSetting.breach_duration_secs_default);
       deleteIf(trigger, 'cool_down_secs', trigger.cool_down_secs === PolicyDefaultSetting.cool_down_secs_default);
-      scaling_rules.push(trigger);
+      delete trigger.color;
+      scalingRules.push(trigger);
     });
-    if (scaling_rules.length > 0) {
-      newPolicy.scaling_rules = scaling_rules;
+    if (scalingRules.length > 0) {
+      newPolicy.scaling_rules = scalingRules;
     }
   }
-  delete newPolicy['scaling_rules_form'];
-  delete newPolicy['scaling_rules_map'];
+  delete newPolicy.scaling_rules_form;
+  delete newPolicy.scaling_rules_map;
   if (newPolicy.schedules) {
     deleteIf(
-      newPolicy.schedules,
-      'recurring_schedule',
+      newPolicy.schedules, 'recurring_schedule',
       newPolicy.schedules.recurring_schedule && newPolicy.schedules.recurring_schedule.length === 0);
     deleteIf(
-      newPolicy.schedules,
-      'specific_date',
+      newPolicy.schedules, 'specific_date',
       newPolicy.schedules.specific_date && newPolicy.schedules.specific_date.length === 0);
     deleteIf(newPolicy, 'schedules', !newPolicy.schedules.recurring_schedule && !newPolicy.schedules.specific_date);
   }
@@ -216,7 +215,7 @@ function initMeticData(metricName) {
       colorTarget: []
     },
     markline: [],
-    unit: metricMap[metricName]['unit_internal'],
+    unit: metricMap[metricName].unit_internal,
     chartMaxValue: 0,
   };
 }
@@ -233,7 +232,7 @@ export function buildMetricData(metricName, data, startTime, endTime, skipFormat
       const target = transformMetricData(data.resources, basicInfo.interval, startTime, endTime);
       const colorTarget = buildMetricColorData(target, trigger);
       result.formated = {
-        target: target,
+        target,
         colorTarget
       };
       result.markline = buildMarkLineData(target, trigger);
@@ -289,7 +288,7 @@ function transformMetricData(source, interval, startTime, endTime) {
       targetIndex++;
       targetTimestamp += interval;
     } else {
-      target[targetIndex]['value'] = Number(metric.value);
+      target[targetIndex].value = Number(metric.value);
       sourceIndex++;
     }
   }
@@ -384,14 +383,14 @@ export function buildLegendData(trigger) {
 }
 
 function buildUpperLegendData(legendData, upper, nolower) {
-  let latestUl = {};
+  let latestUl: any = {};
   upper.map((item, index) => {
     let name = '';
     if (index === 0) {
       name = `${item.metric_type} ${item.operator} ${item.threshold}`;
     } else {
       name = `${item.threshold} ${getLeftOperator(item.operator)} ${item.
-        metric_type} ${getRightOperator(latestUl['operator'])} ${latestUl['threshold']}`;
+        metric_type} ${getRightOperator(latestUl.operator)} ${latestUl.threshold}`;
     }
     legendData.push({
       name,
@@ -401,7 +400,7 @@ function buildUpperLegendData(legendData, upper, nolower) {
   });
   if (nolower) {
     legendData.push({
-      name: `${upper[0].metric_type} ${getOppositeOperator(latestUl['operator'])} ${latestUl['threshold']}`,
+      name: `${upper[0].metric_type} ${getOppositeOperator(latestUl.operator)} ${latestUl.threshold}`,
       value: normalColor
     });
   }
@@ -411,11 +410,11 @@ function buildUpperLegendData(legendData, upper, nolower) {
 function buildLowerLegendData(legendData, lower, latestUl) {
   lower.map((item, index) => {
     let name = '';
-    if (!latestUl['threshold']) {
+    if (!latestUl.threshold) {
       name = `${item.metric_type} ${getOppositeOperator(item.operator)} ${item.threshold}`;
     } else {
       name = `${item.threshold} ${getLeftOperator(item.operator)} ${item.
-        metric_type} ${getRightOperator(latestUl['operator'])} ${latestUl['threshold']}`;
+        metric_type} ${getRightOperator(latestUl.operator)} ${latestUl.threshold}`;
     }
     legendData.push({
       name,
@@ -424,8 +423,8 @@ function buildLowerLegendData(legendData, lower, latestUl) {
     latestUl = item;
   });
   legendData.push({
-    name: `${lower[0].metric_type} ${latestUl['operator']} ${latestUl['threshold']}`,
-    value: latestUl['color']
+    name: `${lower[0].metric_type} ${latestUl.operator} ${latestUl.threshold}`,
+    value: latestUl.color
   });
   return {};
 }
@@ -482,14 +481,15 @@ function getColor(trigger, value) {
 
 function getMetricBasicInfo(metricName, source, trigger) {
   const map = {};
-  let interval = metricMap[metricName]['interval'];
-  let maxCount = 1, preTimestamp = 0;
+  let interval = metricMap[metricName].interval;
+  let maxCount = 1;
+  let preTimestamp = 0;
   let maxValue = -1;
-  let unit = metricMap[metricName]['unit_internal'];
+  let unit = metricMap[metricName].unit_internal;
   map[interval] = 1;
-  for (let i = 0; i < source.length; i++) {
-    maxValue = Number(source[i].value) > maxValue ? Number(source[i].value) : maxValue;
-    const thisTimestamp = Math.round(parseInt(source[i].timestamp, 10) / S2NS);
+  for (const item of source) {
+    maxValue = Number(item.value) > maxValue ? Number(item.value) : maxValue;
+    const thisTimestamp = Math.round(parseInt(item.timestamp, 10) / S2NS);
     const currentInterval = thisTimestamp - preTimestamp;
     if (map[currentInterval] === undefined) {
       map[currentInterval] = 1;
@@ -501,17 +501,19 @@ function getMetricBasicInfo(metricName, source, trigger) {
       maxCount = map[currentInterval];
     }
     preTimestamp = thisTimestamp;
-    unit = source[i].unit === '' ? unit : source[i].unit;
+    unit = item.unit === '' ? unit : item.unit;
   }
   return {
-    interval: interval,
-    unit: unit,
+    interval,
+    unit,
     chartMaxValue: getChartMax(trigger, maxValue)
   };
 }
 
 function getChartMax(trigger, maxValue) {
-  let thresholdCount = 0, maxThreshold = 0, thresholdmax = 0;
+  let thresholdCount = 0;
+  let maxThreshold = 0;
+  let thresholdmax = 0;
   if (trigger.upper && trigger.upper.length > 0) {
     thresholdCount += trigger.upper.length;
     maxThreshold = trigger.upper[0].threshold;
