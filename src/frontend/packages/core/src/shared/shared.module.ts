@@ -10,6 +10,7 @@ import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import {
   AddServiceInstanceBaseStepComponent,
 } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
@@ -40,7 +41,6 @@ import { CardAppStatusComponent } from './components/cards/card-app-status/card-
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
-import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/card-cf-org-usage.component';
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
@@ -157,7 +157,6 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 
 /* tslint:disable:max-line-length */
 
@@ -221,7 +220,6 @@ import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-uni
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
     CardCfSpaceDetailsComponent,
@@ -327,7 +325,6 @@ import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-uni
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
     RingChartComponent,

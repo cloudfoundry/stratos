@@ -18,12 +18,15 @@ import {
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
-import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
+import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -40,7 +43,8 @@ export class CloudFoundrySpaceService {
   allowSsh$: Observable<string>;
   totalMem$: Observable<number>;
   routes$: Observable<APIResource<IRoute>[]>;
-  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstancesCount$: Observable<number>;
+  userProvidedServiceInstancesCount$: Observable<number>;
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   appCount$: Observable<number>;
@@ -55,6 +59,7 @@ export class CloudFoundrySpaceService {
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,
+    private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService
   ) {
 
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
@@ -90,7 +95,6 @@ export class CloudFoundrySpaceService {
     this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
-          createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
           createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
           createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
           createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
@@ -119,7 +123,14 @@ export class CloudFoundrySpaceService {
       refCount()
     );
 
-    this.serviceInstances$ = this.space$.pipe(map(o => o.entity.entity.service_instances));
+    this.serviceInstancesCount$ = fetchServiceInstancesCount(
+      this.cfGuid,
+      this.orgGuid,
+      this.spaceGuid,
+      this.store,
+      this.paginationMonitorFactory);
+    this.userProvidedServiceInstancesCount$ =
+      this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
     this.quotaDefinition$ = this.space$.pipe(map(q => {
