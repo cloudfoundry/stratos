@@ -6,6 +6,7 @@ import {
   appAutoscalerScalingHistorySchemaKey,
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerInsMetricSchemaKey,
+  appAutoscalerUpdatedPolicySchemaKey,
   entityFactory
 } from '../helpers/entity-factory';
 import { IRequestAction } from '../types/request.types';
@@ -68,7 +69,7 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
     public policy: any,
   ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY;
-  entityKey = appAutoscalerPolicySchemaKey;
+  entityKey =  appAutoscalerUpdatedPolicySchemaKey; // appAutoscalerPolicySchemaKey;
 }
 
 export class DetachAppAutoscalerPolicyAction implements IRequestAction {
@@ -76,7 +77,6 @@ export class DetachAppAutoscalerPolicyAction implements IRequestAction {
   constructor(
     public appGuid: string,
     public cfGuid: string,
-    public policy: any,
   ) { }
   type = DETACH_APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerPolicySchemaKey;

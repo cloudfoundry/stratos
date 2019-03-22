@@ -65,9 +65,6 @@ import { MetricTypes } from '../../../../../../../../store/src/helpers/autoscale
     CfOrgSpaceDataService
   ]
 })
-
-
-
 export class AutoscalerTabComponent implements OnInit, OnDestroy {
 
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
@@ -78,25 +75,14 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
 
   appAutoscalerPolicyService: EntityService;
   appAutoscalerScalingHistoryService: EntityService;
-
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
 
-  private currentPolicy: any;
-  public isEditing = false;
-  public instanceMinCountCurrent: number;
-  public instanceMinCountEdit: number;
-  public instanceMaxCountCurrent: any;
-  public instanceMaxCountEdit: any;
-
-  appAutoscalerPolicyErrorSub: Subscription;
-  appAutoscalerScalingHistoryErrorSub: Subscription;
-
+  private appAutoscalerPolicyErrorSub: Subscription;
+  private appAutoscalerScalingHistoryErrorSub: Subscription;
   private appAutoscalerPolicySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
   private appAutoscalerScalingHistorySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
-  // private confirmDialog: ConfirmationDialogService;
-  private attachConfirmOk = 0;
   private detachConfirmOk = 0;
 
   appAutoscalerAppMetrics = {};
@@ -242,14 +228,9 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       'Detach and Delete',
       true
     );
-    if (this.detachConfirmOk === 1) {
-      this.detachConfirmOk = 0;
-    } else {
-      this.detachConfirmOk = 1;
-    }
+    this.detachConfirmOk = this.detachConfirmOk === 1 ? 0 : 1;
     this.confirmDialog.open(confirmation, () => {
       this.detachConfirmOk = 2;
-      this.isEditing = false;
       const doUpdate = () => this.detachPolicy();
       doUpdate().pipe(
         first(),
@@ -260,99 +241,11 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
         }
       });
     });
-    this.attachConfirmOk = 0;
-  }
-
-  createDefaultPolicy() {
-    const confirmation = new ConfirmationDialogConfig(
-      'Attach Default Policy',
-      'Confirm to attach a default AutoScaler policy, you can update it later.',
-      'Attach',
-    );
-    if (this.attachConfirmOk === 1) {
-      this.attachConfirmOk = 0;
-    } else {
-      this.attachConfirmOk = 1;
-    }
-    this.confirmDialog.open(confirmation, () => {
-      this.attachConfirmOk = 2;
-      this.isEditing = false;
-      this.currentPolicy = {
-        'instance_min_count': 1,
-        'instance_max_count': 10,
-        'scaling_rules': [
-          {
-            'metric_type': 'memoryused',
-            'stat_window_secs': 300,
-            'breach_duration_secs': 600,
-            'threshold': 10,
-            'operator': '<=',
-            'cool_down_secs': 300,
-            'adjustment': '-2'
-          },
-          {
-            'metric_type': 'responsetime',
-            'stat_window_secs': 300,
-            'breach_duration_secs': 600,
-            'threshold': 40,
-            'operator': '<',
-            'cool_down_secs': 300,
-            'adjustment': '-5'
-          }
-        ],
-        'schedules': {
-          'timezone': 'Asia/Shanghai',
-          'recurring_schedule': [
-            {
-              'start_time': '10:00',
-              'end_time': '18:00',
-              'days_of_week': [
-                1,
-                2,
-                3
-              ],
-              'instance_min_count': 1,
-              'instance_max_count': 10,
-              'initial_min_instance_count': 5
-            }
-          ],
-          'specific_date': [
-            {
-              'start_date_time': '2099-06-02T10:00',
-              'end_date_time': '2099-06-15T13:59',
-              'instance_min_count': 1,
-              'instance_max_count': 4,
-              'initial_min_instance_count': 2
-            }
-          ]
-        }
-      };
-      const doUpdate = () => this.updatePolicy();
-      doUpdate().pipe(
-        first(),
-      ).subscribe(actionState => {
-        if (actionState.error) {
-          this.appAutoscalerPolicySnackBarRef =
-            this.appAutoscalerPolicySnackBar.open(`Failed to create policy: ${actionState.message}`, 'Dismiss');
-        }
-      });
-      this.detachConfirmOk = 0;
-    });
-  }
-
-  updatePolicy(): Observable<ActionState> {
-    this.store.dispatch(
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
-    );
-    const actionState = selectUpdateInfo(appAutoscalerPolicySchemaKey,
-      this.applicationService.appGuid,
-      UpdateAppAutoscalerPolicyAction.updateKey);
-    return this.store.select(actionState).pipe(filter(item => !!item));
   }
 
   detachPolicy(): Observable<ActionState> {
     this.store.dispatch(
-      new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
+      new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
     const actionState = selectUpdateInfo(appAutoscalerPolicySchemaKey,
       this.applicationService.appGuid,
@@ -367,10 +260,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
         'edit-autoscaler-policy'
-      ],
-      query: {
-        // spaceGuid: app.app.entity.space_guid
-      }
+      ]
     }));
   }
 
@@ -392,10 +282,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
         'app-autoscaler-scale-history-page'
-      ],
-      query: {
-        // spaceGuid: app.app.entity.space_guid
-      }
+      ]
     }));
   }
 }

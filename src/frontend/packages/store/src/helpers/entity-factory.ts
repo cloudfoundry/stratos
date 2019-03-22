@@ -38,6 +38,7 @@ export const userFavoritesSchemaKey = 'userFavorites';
 export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
 export const appAutoscalerHealthSchemaKey = 'autoscalerHealth';
 export const appAutoscalerPolicySchemaKey = 'autoscalerPolicy';
+export const appAutoscalerUpdatedPolicySchemaKey = 'autoscalerUpdatedPolicy';
 export const appAutoscalerScalingHistorySchemaKey = 'autoscalerScalingHistory';
 export const appAutoscalerAppMetricSchemaKey = 'autoscalerAppMetric';
 export const appAutoscalerInsMetricSchemaKey = 'autoscalerInsMetric';
@@ -320,6 +321,9 @@ entityCache[userFavoritesSchemaKey] = UserFavoritesSchemaKey;
 
 const AppAutoscalerPolicySchema = new EntitySchema(appAutoscalerPolicySchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appAutoscalerPolicySchemaKey] = AppAutoscalerPolicySchema;
+
+const AppAutoscalerUpdatedPolicySchema = new EntitySchema(appAutoscalerUpdatedPolicySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerUpdatedPolicySchemaKey] = AppAutoscalerUpdatedPolicySchema;
 
 const AppAutoscalerHealthSchema = new EntitySchema(appAutoscalerHealthSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appAutoscalerHealthSchemaKey] = AppAutoscalerHealthSchema;

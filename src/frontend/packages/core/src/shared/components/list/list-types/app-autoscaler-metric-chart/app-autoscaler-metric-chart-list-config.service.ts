@@ -21,7 +21,7 @@ export class AppAutoscalerMetricChartListConfigService extends ListConfig<Entity
       columnId: 'name',
       headerCell: () => 'Metric type',
       cellDefinition: {
-        getValue: (row) => row['metadata']['guid']
+        getValue: (row: any) => row.metadata.guid
       },
       cellFlex: '2'
     }

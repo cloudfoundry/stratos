@@ -33,11 +33,11 @@ export class AppAutoscalerMetricChartDataSource extends ListDataSource<EntityInf
 
   constructor(
     store: Store<AppState>,
-    _cfGuid: string,
-    _appGuid: string,
+    cfGuid: string,
+    appGuid: string,
   ) {
-    const paginationKey = `app-autoscaler-policy-triggers:${_cfGuid}${_appGuid}`;
-    const action = new GetAppAutoscalerPolicyTriggerAction(paginationKey, _appGuid, _cfGuid);
+    const paginationKey = `app-autoscaler-policy-triggers:${cfGuid}${appGuid}`;
+    const action = new GetAppAutoscalerPolicyTriggerAction(paginationKey, appGuid, cfGuid);
     super(
       {
         store,

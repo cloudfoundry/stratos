@@ -280,7 +280,7 @@ export class AutoscalerEffects {
               this.transformEventData(action.entityKey, mappedData, action.appGuid, histories);
             }
             return [
-              new WrapperRequestActionSuccess(mappedData, apiAction, actionType, histories['total_results'], histories['total_pages'])
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType, histories.total_results, histories.total_pages)
             ];
           }),
           catchError(err => [
@@ -359,7 +359,7 @@ export class AutoscalerEffects {
   transformTriggerData(key: string, mappedData: NormalizedResponse, data: any, query: any) {
     mappedData.entities[key] = [];
     Object.keys(data.scaling_rules_map).map((metricType) => {
-      data.scaling_rules_map[metricType]['query'] = query;
+      data.scaling_rules_map[metricType].query = query;
       mappedData.entities[key][metricType] = {
         entity: data.scaling_rules_map[metricType],
         metadata: {

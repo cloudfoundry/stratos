@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { IServiceBinding } from '../../../../../../core/cf-api-svc.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
@@ -31,7 +30,7 @@ interface EnvVarData {
   templateUrl: './app-autoscaler-metric-chart-card.component.html',
   styleUrls: ['./app-autoscaler-metric-chart-card.component.scss']
 })
-export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
+export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<any>> implements OnInit, IListRowCell {
 
   listData: IListRowCellData[];
   envVarUrl: string;
@@ -53,9 +52,9 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   public paramsMetrics = {
     'start-time': this.current - 30 * 60 * 1000 + '000000',
     'end-time': this.current + '000000',
-    'page': '1',
+    page: '1',
     'results-per-page': '10000000',
-    'order': 'asc'
+    order: 'asc'
   };
 
   constructor(
@@ -87,9 +86,9 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   }
 
   ngOnInit(): void {
-    if (this.row.entity['query'] && this.row.entity['query']['params']) {
-      this.paramsMetrics['start-time'] = this.row.entity['query']['params']['start'] + '000000000';
-      this.paramsMetrics['end-time'] = this.row.entity['query']['params']['end'] + '000000000';
+    if (this.row.entity.query && this.row.entity.query.params) {
+      this.paramsMetrics['start-time'] = this.row.entity.query.params.start + '000000000';
+      this.paramsMetrics['end-time'] = this.row.entity.query.params.end + '000000000';
     }
     this.appAutoscalerAppMetricLegend = this.getLegend2(this.row.entity);
     this.metricData$ = this.getAppMetric(this.row.metadata.guid, this.row.entity, this.paramsMetrics);
@@ -113,7 +112,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   edit = () => this.serviceActionHelperService.editServiceBinding(
     this.row.entity.service_instance_guid,
     this.appService.cfGuid,
-    { 'appId': this.appService.appGuid }
+    { appId: this.appService.appGuid }
   )
 
   getAppMetric(metricName: string, trigger: any, params: any) {
