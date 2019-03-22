@@ -32,33 +32,35 @@
     </div>
   </div>
 </div>
-<app-tile-grid class="kube-details__graphs">
-  <app-tile-group>
-    <app-tile>
-      <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
-    </app-tile>
-    <app-tile>
-      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
-        [data]="diskPressure$ | async"></app-simple-usage-chart>
-    </app-tile>
-    <app-tile>
-      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
-        [data]="memoryPressure$ | async">
-      </app-simple-usage-chart>
-    </app-tile>
-  </app-tile-group>
-  <app-tile-group>
-    <app-tile>
-      <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
-    </app-tile>
-    <app-tile>
-      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
-        [data]="diskPressure$ | async"></app-simple-usage-chart>
-    </app-tile>
-    <app-tile>
-      <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
-        [data]="memoryPressure$ | async">
-      </app-simple-usage-chart>
-    </app-tile>
-  </app-tile-group>
-</app-tile-grid>
+<mat-card class="kube-details__graphs">
+  <app-tile-grid>
+    <app-tile-group>
+      <app-tile>
+        <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
+      </app-tile>
+      <app-tile>
+        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
+          [data]="diskPressure$ | async"></app-simple-usage-chart>
+      </app-tile>
+      <app-tile>
+        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
+          [data]="memoryPressure$ | async">
+        </app-simple-usage-chart>
+      </app-tile>
+    </app-tile-group>
+    <app-tile-group>
+      <app-tile>
+        <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
+      </app-tile>
+      <app-tile>
+        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
+          [data]="diskPressure$ | async"></app-simple-usage-chart>
+      </app-tile>
+      <app-tile>
+        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
+          [data]="memoryPressure$ | async">
+        </app-simple-usage-chart>
+      </app-tile>
+    </app-tile-group>
+  </app-tile-grid>
+</mat-card>
