@@ -74,7 +74,6 @@ export class CloudFoundryEndpointService {
 
   private getAllAppsAction: GetAllApplications;
 
-  // TODO: RC USES
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)

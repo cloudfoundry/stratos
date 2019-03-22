@@ -54,7 +54,6 @@ export class CloudFoundryOrganizationService {
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
-  // serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   serviceInstancesCount$: Observable<number>;
   userProvidedServiceInstancesCount$: Observable<number>;
   spaces$: Observable<APIResource<ISpace>[]>;
