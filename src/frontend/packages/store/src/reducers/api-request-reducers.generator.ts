@@ -28,6 +28,7 @@ import {
   spaceSchemaKey,
   userFavoritesSchemaKey,
   userProfileSchemaKey,
+  userProvidedServiceInstanceSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { IRequestDataState, IRequestState } from '../types/entity.types';
@@ -114,7 +115,8 @@ const entities = [
   userProfileSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceBrokerSchemaKey,
-  userFavoritesSchemaKey
+  userFavoritesSchemaKey,
+  userProvidedServiceInstanceSchemaKey
 ];
 
 export function registerAPIRequestEntity(schemaKey: string) {
@@ -136,6 +138,7 @@ export function requestDataReducer(state: IRequestDataState, action: Action) {
     [cfUserSchemaKey]: [userReducer, endpointDisconnectUserReducer],
     [routeSchemaKey]: [routeReducer],
     [serviceInstancesSchemaKey]: [serviceInstanceReducer],
+    [userProvidedServiceInstanceSchemaKey]: [serviceInstanceReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
     [appSummarySchemaKey]: [updateAppSummaryRoutesReducer],
     [applicationSchemaKey]: [

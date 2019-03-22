@@ -4,6 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -17,8 +19,6 @@ import { IListConfig, IListMultiFilterConfig } from '../../list.component.types'
 import { CfRoutesDataSource } from './cf-routes-data-source';
 import { ListCfRoute } from './cf-routes-data-source-base';
 import { CfRoutesListConfigBase } from './cf-routes-list-config-base';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 
 @Injectable()
@@ -70,8 +70,8 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
     initCfOrgSpaceService(store, cfOrgSpaceService,
-      this.dataSource.action.entityKey,
-      this.dataSource.action.paginationKey).subscribe();
+      this.dataSource.masterAction.entityKey,
+      this.dataSource.masterAction.paginationKey).subscribe();
     cfOrgSpaceService.cf.select.next(cfService.cfGuid);
   }
 }

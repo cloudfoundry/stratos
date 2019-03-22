@@ -1,7 +1,7 @@
 import { RequestMethod } from '@angular/http';
 import { Action } from '@ngrx/store';
 
-import { ActionState } from '../reducers/api-request-reducer/types';
+import { ListActionState } from '../reducers/api-request-reducer/types';
 import { IRequestAction } from './request.types';
 
 export class QParam {
@@ -31,14 +31,18 @@ export interface PaginationClientPagination {
   totalResults: number;
 }
 
-export interface PaginationEntityState {
-  currentPage: number;
-  totalResults: number;
-  pageCount: number;
-  ids: { [id: number]: string[] };
+export class PaginationEntityState {
+  /**
+   * For multi action lists, this is used to force a particular entity type.
+   */
+  forcedLocalPage?: number;
+  currentPage = 0;
+  totalResults = 0;
+  pageCount = 0;
+  ids = {};
   params: PaginationParam;
   pageRequests: {
-    [pageNumber: string]: ActionState
+    [pageNumber: string]: ListActionState
   };
   clientPagination?: PaginationClientPagination;
   /**
@@ -50,10 +54,10 @@ export interface PaginationEntityState {
    * flattenPagination & flattenPaginationMax
    */
   maxedMode?: boolean;
-  /**
-   * Does the collection size exceed the max allowed? Used in conjunction maxedMode.
-   */
-  currentlyMaxed?: boolean;
+}
+
+export function isPaginatedAction(obj: any): PaginatedAction {
+  return obj && Object.keys(obj).indexOf('paginationKey') >= 0 ? obj as PaginatedAction : null;
 }
 
 export interface BasePaginatedAction extends Action {
@@ -80,6 +84,9 @@ export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
     method?: RequestMethod | string | null
   };
   skipValidation?: boolean;
+  // Internal, used for local multi action lists
+  __forcedPageNumber__?: number;
+  __forcedPageSchemaKey__?: string;
 }
 
 export interface PaginationEntityTypeState {

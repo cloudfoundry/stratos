@@ -1,10 +1,11 @@
-import { Observable, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
-
-import { splitCurrentPage } from './local-list-controller.helpers';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
+import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+
 import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { DataFunction } from './list-data-source';
+import { splitCurrentPage } from './local-list-controller.helpers';
+import { LocalPaginationHelpers } from './local-list.helpers';
 
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;
@@ -44,15 +45,15 @@ export class LocalListController<T = any> {
     cleanPage$: Observable<T[]>,
     cleanPagination$: Observable<PaginationEntityState>,
     dataFunctions?: DataFunction<any>[]) {
-    return combineLatest(
+    const fullPageObs$ = combineLatest(
       cleanPagination$,
       cleanPage$
     ).pipe(
-      // If currentlyMaxed is set the entities list contains junk, so don't continue
-      filter(([paginationEntity, entities]) => !paginationEntity.currentlyMaxed),
       map(([paginationEntity, entities]) => {
         this.pageSplitCache = null;
-        if (!entities || !entities.length) {
+        // `entities` can become out of sync with `paginationEntity.ids`. If either are empty just return empty,
+        // otherwise this leads to churn and result count flip flopping
+        if (!entities || !entities.length || Object.keys(paginationEntity.ids).length === 0) {
           return { paginationEntity, entities: [] };
         }
         if (dataFunctions && dataFunctions.length) {
@@ -65,6 +66,14 @@ export class LocalListController<T = any> {
       tap(({ paginationEntity, entities }) => this.setResultCount(paginationEntity, entities)),
       map(({ entities }) => entities)
     );
+    return cleanPagination$.pipe(
+      map(pagination => LocalPaginationHelpers.isPaginationMaxed(pagination)),
+      distinctUntilChanged(),
+      switchMap(maxed => {
+        return maxed ? observableOf([]) : fullPageObs$;
+      })
+    );
+
   }
 
   /*
@@ -89,7 +98,7 @@ export class LocalListController<T = any> {
 
   /*
    * Emit a page, which has been created by splitting up a local list, when either
-   * 1) the core pages 'entities' (covers entire list of all entities and their order)
+   * 1) the core pages 'entities' (covers entire list of all entities and their order) changes
    * 2) the client side page number changes
    * 3) the client size page size changes
    */
@@ -103,7 +112,7 @@ export class LocalListController<T = any> {
       currentPageSizeObservable$.pipe(tap(() => {
         this.pageSplitCache = null;
       })),
-      currentPageNumber$.pipe(),
+      currentPageNumber$,
     ).pipe(
       map(([entities, pageSize, currentPage]) => {
         const pages = this.pageSplitCache ? this.pageSplitCache : entities;
@@ -127,6 +136,7 @@ export class LocalListController<T = any> {
       + (paginationEntity.params['order-direction-field'] || '') + ','
       + (paginationEntity.params['order-direction'] || '') + ','
       + paginationEntity.clientPagination.filter.string + ','
+      + paginationEntity.forcedLocalPage
       + Object.values(paginationEntity.clientPagination.filter.items);
     // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }

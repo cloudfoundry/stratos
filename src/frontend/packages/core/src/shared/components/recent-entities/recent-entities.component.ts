@@ -163,10 +163,10 @@ export class RecentEntitiesComponent {
   constructor(store: Store<AppState>) {
     const recentEntities$ = store.select(recentlyVisitedSelector);
     this.hasHits$ = recentEntities$.pipe(
-      map(recentEntities => !!recentEntities.hits && recentEntities.hits.length > 0)
+      map(recentEntities => recentEntities && !!recentEntities.hits && recentEntities.hits.length > 0)
     );
     const entitiesManager$ = recentEntities$.pipe(
-      filter(recentEntities => !!recentEntities.hits && recentEntities.hits.length > 0),
+      filter(recentEntities => recentEntities && !!recentEntities.hits && recentEntities.hits.length > 0),
       map(recentEntities => new CountedRecentEntitiesManager(recentEntities, store)),
     );
     this.frecentEntities$ = entitiesManager$.pipe(
