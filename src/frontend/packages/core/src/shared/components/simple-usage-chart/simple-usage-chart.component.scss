@@ -4,14 +4,21 @@
   flex-direction: column;
   height: 300px;
   &__title {
-    margin-top: 20px;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   &__counts {
+    $line-height: 30px;
     align-items: baseline;
     display: flex;
-    margin-top: -140px;
+    margin-top: -#{$line-height / 2};
+    position: absolute;
+    top: 50%;
     &-count {
       font-size: 26px;
+      line-height: $line-height;
     }
     &-divider {
       padding: 0 5px;
@@ -21,5 +28,8 @@
     align-items: center;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    position: relative;
+    width: 100%;
   }
 }

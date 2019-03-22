@@ -1,12 +1,9 @@
-.kube-dashboard {
-  border: 1px solid blue;
-  display: flex;
-  height: 100%;
-  width: 100%;
-}
 .kube-details {
+  border-bottom: 1px solid #00000026;
+  margin-bottom: 20px;
   margin-left: 20px;
   margin-top: 20px;
+  padding-bottom: 10px;
   &__logo {
     height: 400px;
     opacity: .2;
@@ -28,6 +25,11 @@
     max-width: 350px;
   }
   &__graphs {
-    margin: 20px;
+    margin: 10px;
+  }
+  &__graph {
+    width: 33%;
+    padding: 10px;
+    display: inline-block;
   }
 }

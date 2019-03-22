@@ -2,14 +2,14 @@ import { KubernetesPod } from './../../store/kube.types';
 import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 import { GetKubernetesApps } from './../../store/kubernetes.actions';
 import { SafeResourceUrl } from '@angular/platform-browser';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { HttpClient } from '@angular/common/http';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { map, startWith, tap } from 'rxjs/operators';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable, combineLatest, interval, Subscription } from 'rxjs';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -26,7 +26,7 @@ interface IEndpointDetails {
   templateUrl: './kubernetes-summary.component.html',
   styleUrls: ['./kubernetes-summary.component.scss']
 })
-export class KubernetesSummaryTabComponent implements OnInit {
+export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public podCount$: Observable<number>;
   public nodeCount$: Observable<number>;
   public appCount$: Observable<number>;
@@ -52,17 +52,38 @@ export class KubernetesSummaryTabComponent implements OnInit {
   public podCapacity$: Observable<ISimpleUsageChartData>;
   public diskPressure$: Observable<ISimpleUsageChartData>;
   public memoryPressure$: Observable<ISimpleUsageChartData>;
+  public outOfDisk$: Observable<ISimpleUsageChartData>;
+  public nodesReady$: Observable<ISimpleUsageChartData>;
+  public networkUnavailable$: Observable<ISimpleUsageChartData>;
 
   public pressureChartThresholds: IChartThresholds = {
     danger: 90,
-    warning: 0
+    warning: 0,
   };
+
+  public nominalPressureChartThresholds: IChartThresholds = {
+    warning: 100,
+    inverted: true
+  };
+
+  public criticalPressureChartThresholds: IChartThresholds = {
+    danger: 0
+  };
+
+  public criticalPressureChartThresholdsInverted: IChartThresholds = {
+    danger: 100,
+    inverted: true
+  };
+
+  private polls: Subscription[] = [];
+
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
     public httpClient: HttpClient,
     public paginationMonitorFactory: PaginationMonitorFactory,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private ngZone: NgZone
   ) { }
 
   private getPaginationObservable(action: PaginatedAction) {
@@ -70,6 +91,17 @@ export class KubernetesSummaryTabComponent implements OnInit {
       action.paginationKey,
       entityFactory(action.entityKey)
     );
+
+    this.ngZone.runOutsideAngular(() => {
+      this.polls.push(
+        interval(5000).subscribe(() => {
+          this.ngZone.run(() => {
+            this.store.dispatch(action);
+          });
+        })
+      );
+    });
+
     return getPaginationObservables({
       store: this.store,
       action,
@@ -94,13 +126,17 @@ export class KubernetesSummaryTabComponent implements OnInit {
     );
   }
 
-  private getNodeStatusCount(nodes$: Observable<KubernetesNode[]>, conditionType: string) {
+  private getNodeStatusCount(nodes$: Observable<KubernetesNode[]>, conditionType: string, countStatus = 'False') {
     return nodes$.pipe(
       map(nodes => ({
         total: nodes.length,
         used: nodes.reduce((cap, node) => {
           const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
-          if (!conditionStatus || !conditionStatus.status || conditionStatus.status === 'False') {
+          if (conditionType === 'Ready') {
+            console.log(conditionStatus);
+            console.log(countStatus)
+          }
+          if (!conditionStatus || !conditionStatus.status || conditionStatus.status === countStatus) {
             return cap;
           }
           return ++cap;
@@ -117,7 +153,7 @@ export class KubernetesSummaryTabComponent implements OnInit {
     const appCountAction = new GetKubernetesApps(guid);
     const applications$ = this.getPaginationObservable(appCountAction);
     const pods$ = this.getPaginationObservable(podCountAction);
-    const nodes$ = this.getPaginationObservable(nodeCountAction).pipe(tap(console.log));
+    const nodes$ = this.getPaginationObservable(nodeCountAction);
 
     this.podCount$ = this.getCountObservable(pods$);
     this.nodeCount$ = this.getCountObservable(nodes$);
@@ -126,8 +162,17 @@ export class KubernetesSummaryTabComponent implements OnInit {
     this.podCapacity$ = this.getPodCapacity(nodes$, pods$);
     this.diskPressure$ = this.getNodeStatusCount(nodes$, 'DiskPressure');
     this.memoryPressure$ = this.getNodeStatusCount(nodes$, 'MemoryPressure');
+    this.outOfDisk$ = this.getNodeStatusCount(nodes$, 'OutOfDisk');
+    this.networkUnavailable$ = this.getNodeStatusCount(nodes$, 'NetworkUnavailable', 'True');
+    this.nodesReady$ = this.getNodeStatusCount(nodes$, 'Ready');
 
     this.dashboardLink = `/kubernetes/${guid}/dashboard`;
+  }
+
+  ngOnDestroy() {
+    if (this.polls && this.polls.length) {
+      this.polls.forEach(sub => sub.unsubscribe());
+    }
   }
 
   public getDashboard() {

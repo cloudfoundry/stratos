@@ -32,35 +32,48 @@
     </div>
   </div>
 </div>
-<mat-card class="kube-details__graphs">
-  <app-tile-grid>
-    <app-tile-group>
-      <app-tile>
-        <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
-      </app-tile>
-      <app-tile>
+<div class="kube-details__graphs">
+  <div class="kube-details__graphs-group">
+    <div class="kube-details__graph">
+      <mat-card>
+        <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async">
+        </app-simple-usage-chart>
+      </mat-card>
+    </div>
+    <div class="kube-details__graph">
+      <mat-card>
         <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
-          [data]="diskPressure$ | async"></app-simple-usage-chart>
-      </app-tile>
-      <app-tile>
+          [data]="diskPressure$ | async">
+        </app-simple-usage-chart>
+      </mat-card>
+    </div>
+    <div class="kube-details__graph">
+      <mat-card>
         <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
           [data]="memoryPressure$ | async">
         </app-simple-usage-chart>
-      </app-tile>
-    </app-tile-group>
-    <app-tile-group>
-      <app-tile>
-        <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async"></app-simple-usage-chart>
-      </app-tile>
-      <app-tile>
-        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
-          [data]="diskPressure$ | async"></app-simple-usage-chart>
-      </app-tile>
-      <app-tile>
-        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
-          [data]="memoryPressure$ | async">
+      </mat-card>
+    </div>
+    <div class="kube-details__graph">
+      <mat-card>
+        <app-simple-usage-chart title="Nodes Out Of Disk" [thresholds]="criticalPressureChartThresholds"
+          [data]="outOfDisk$ | async">
         </app-simple-usage-chart>
-      </app-tile>
-    </app-tile-group>
-  </app-tile-grid>
-</mat-card>
+      </mat-card>
+    </div>
+    <div class="kube-details__graph">
+      <mat-card>
+        <app-simple-usage-chart [thresholds]="nominalPressureChartThresholds" title="Nodes Ready"
+          [data]="nodesReady$ | async">
+        </app-simple-usage-chart>
+      </mat-card>
+    </div>
+    <div class="kube-details__graph">
+      <mat-card>
+        <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
+          title="Nodes With Network Available" [data]="networkUnavailable$ | async">
+        </app-simple-usage-chart>
+      </mat-card>
+    </div>
+  </div>
+</div>
