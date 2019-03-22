@@ -8,7 +8,7 @@ import { RegisterDialog } from './register-dialog.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
-  const tileSelectorStep = new TileSelector();
+  const tileSelector = new TileSelector();
   const register = new RegisterDialog();
 
   const validEndpoint = e2e.secrets.getDefaultCFEndpoint();
@@ -26,7 +26,7 @@ describe('Endpoints', () => {
     beforeEach(() => {
       endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
       endpointsPage.register();
-      tileSelectorStep.select('Cloud Foundry');
+      tileSelector.select('Cloud Foundry');
       expect(register.isRegisterDialog()).toBeTruthy();
       expect(register.stepper.canCancel()).toBeTruthy();
     });

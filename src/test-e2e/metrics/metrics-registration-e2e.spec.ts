@@ -3,11 +3,13 @@ import { EndpointMetadata, EndpointsPage } from '../endpoints/endpoints.po';
 import { RegisterDialog } from '../endpoints/register-dialog.po';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
+import { TileSelector } from '../po/tile-selector.po';
 
 describe('Metrics', () => {
 
   const endpointsPage = new EndpointsPage();
   const register = new RegisterDialog();
+  const tileSelector = new TileSelector();
 
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
@@ -18,17 +20,17 @@ describe('Metrics', () => {
   it('Should be able to register a Metrics endpoint', () => {
     endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
     endpointsPage.register();
+    tileSelector.select('Metrics');
     expect(register.isRegisterDialog()).toBeTruthy();
     expect(register.stepper.canCancel()).toBeTruthy();
     expect(register.stepper.canNext()).toBeFalsy();
 
     register.form.getControlsMap().then(fields => {
-      expect(fields.client_id).toBeDefined();
-      expect(fields.client_secret).toBeDefined();
+      expect(fields.client_id).toBeUndefined();
+      expect(fields.client_secret).toBeUndefined();
     });
 
     register.form.fill({
-      'ep-type': 'Metrics',
       name: 'MetricsTest',
       url: 'https://www.google.com',
       skipsll: false
