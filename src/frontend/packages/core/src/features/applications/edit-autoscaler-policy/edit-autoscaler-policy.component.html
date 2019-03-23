@@ -25,9 +25,8 @@
       </mat-form-field>
     </form>
   </app-step>
-  <app-step [title]="'Scaling Rules'" [disablePrevious]="editIndex!=-1" [showAdd]="true"
-    [disableAdd]="editIndex!=-1" [onAdd]="addTrigger"
-    [valid]="editIndex==-1 && policy.scaling_rules_form && policy.scaling_rules_form.length > 0">
+  <app-step [title]="'Scaling Rules'" [disablePrevious]="editIndex!=-1" [showAdd]="true" [disableAdd]="editIndex!=-1"
+    [onAdd]="addTrigger" [valid]="editIndex==-1 && policy.scaling_rules_form && policy.scaling_rules_form.length > 0">
     <app-tile-grid>
       <app-tile-group *ngFor="let rule of policy && policy.scaling_rules_form; let index = index">
         <app-tile>
@@ -66,7 +65,7 @@
                   <mat-form-field>
                     <input matInput placeholder="Breach Duration" type="number" formControlName="breach_duration_secs">
                   </mat-form-field>
-                  seconsds, then {{rule.operator=='>'||rule.operator=='>='?'add':'remove'}}
+                  seconsds, then {{editScaleType=='upper'?'add':'remove'}}
                   <mat-form-field>
                     <input matInput placeholder="Adjustment" type="number" formControlName="adjustment" required>
                   </mat-form-field>
@@ -86,12 +85,10 @@
                 <mat-error *ngIf="editTriggerForm.get('threshold').hasError('required')">
                   Threshold is required
                 </mat-error>
-                <mat-error
-                  *ngIf="editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThreshold100')">
+                <mat-error *ngIf="editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThreshold100')">
                   {{alertInvalidPolicyTriggerThreshold100}}
                 </mat-error>
-                <mat-error
-                  *ngIf="editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThresholdRange')">
+                <mat-error *ngIf="editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThresholdRange')">
                   <span *ngIf="editScaleType=='upper'">
                     {{alertInvalidPolicyTriggerUpperThresholdRange}}
                   </span>
@@ -106,8 +103,7 @@
                 <mat-error *ngIf="editTriggerForm.get('adjustment').hasError('required')">
                   Adjustment is required
                 </mat-error>
-                <mat-error
-                  *ngIf="editTriggerForm.get('adjustment').hasError('alertInvalidPolicyTriggerStepRange')">
+                <mat-error *ngIf="editTriggerForm.get('adjustment').hasError('alertInvalidPolicyTriggerStepRange')">
                   <span *ngIf="editAdjustmentType=='value'">
                     {{alertInvalidPolicyTriggerStepRange}}
                   </span>
@@ -122,8 +118,7 @@
               </div>
             </mat-card-content>
             <mat-card-actions class="app-auto-scaler__actions">
-              <button *ngIf="editIndex!=index" (click)="editTrigger(index)" [disabled]="editIndex!=-1"
-                mat-icon-button>
+              <button *ngIf="editIndex!=index" (click)="editTrigger(index)" [disabled]="editIndex!=-1" mat-icon-button>
                 <mat-icon>edit</mat-icon>
               </button>
               <button *ngIf="editIndex==index" (click)="finishTrigger()" [disabled]="editTriggerForm.invalid"
@@ -309,8 +304,8 @@
       </app-tile-group>
     </app-tile-grid>
   </app-step>
-  <app-step [title]="'Specific Dates'" [disablePrevious]="editIndex!=-1" [showAdd]="true"
-    [disableAdd]="editIndex!=-1" [onAdd]="addSpecificDate" [onNext]="updatePolicy" [valid]="editIndex==-1">
+  <app-step [title]="'Specific Dates'" [disablePrevious]="editIndex!=-1" [showAdd]="true" [disableAdd]="editIndex!=-1"
+    [onAdd]="addSpecificDate" [onNext]="updatePolicy" [valid]="editIndex==-1">
     <app-tile-grid>
       <app-tile-group *ngFor="let rule of policy && policy.schedules.specific_date; let index = index">
         <app-tile>
@@ -400,12 +395,12 @@
               </div>
             </mat-card-content>
             <mat-card-actions class="app-auto-scaler__actions">
-              <button *ngIf="editIndex!=index" (click)="editSpecificDate()" [disabled]="editIndex!=-1"
+              <button *ngIf="editIndex!=index" (click)="editSpecificDate(index)" [disabled]="editIndex!=-1"
                 mat-icon-button>
                 <mat-icon>edit</mat-icon>
               </button>
-              <button *ngIf="editIndex==index" (click)="finishSpecificDate()"
-                [disabled]="editSpecificDateForm.invalid" mat-icon-button>
+              <button *ngIf="editIndex==index" (click)="finishSpecificDate()" [disabled]="editSpecificDateForm.invalid"
+                mat-icon-button>
                 <mat-icon>done</mat-icon>
               </button>
               <button (click)="removeSpecificDate(index)" mat-icon-button>
