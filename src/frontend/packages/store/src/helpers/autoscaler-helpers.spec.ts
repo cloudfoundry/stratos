@@ -323,7 +323,7 @@ describe('Autoscaler Helper', () => {
           ]
         }
       },
-      'scaling_rules_form': [
+      scaling_rules_form: [
         {
           metric_type: 'memoryused',
           stat_window_secs: 300,

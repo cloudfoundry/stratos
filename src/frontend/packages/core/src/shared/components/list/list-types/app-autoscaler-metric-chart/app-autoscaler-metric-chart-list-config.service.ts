@@ -6,12 +6,14 @@ import { Store } from '@ngrx/store';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { ListViewTypes } from '../../list.component.types';
 import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import { ITableColumn } from '../../list-table/table.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 @Injectable()
-export class AppAutoscalerMetricChartListConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
+export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource<any>> {
   autoscalerMetricSource: AppAutoscalerMetricChartDataSource;
   cardComponent = AppAutoscalerMetricChartCardComponent;
   viewType = ListViewTypes.CARD_ONLY;
