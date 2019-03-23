@@ -24,10 +24,6 @@ import {
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 import {
-  AppServiceBindingCardComponent
-} from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
-import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
-import {
   AppAutoscalerMetricChartCardComponent
 } from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
 import {

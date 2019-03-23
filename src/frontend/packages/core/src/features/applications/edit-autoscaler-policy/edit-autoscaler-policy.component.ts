@@ -96,90 +96,43 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     private entityServiceFactory: EntityServiceFactory,
   ) {
     this.editLimitForm = this.fb.group({
-      instance_min_count: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      instance_max_count: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]]
+      instance_min_count: [0, [Validators.required, this.validateGlobalLimitMin()]],
+      instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]]
     });
     this.editTriggerForm = this.fb.group({
-      metric_type: [0, [
-      ]],
-      operator: [0, [
-      ]],
-      threshold: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      adjustment: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
+      metric_type: [0],
+      operator: [0],
+      threshold: [0, [Validators.required, Validators.min(1), this.validateTriggerThreshold()]],
+      adjustment: [0, [Validators.required, Validators.min(1), this.validateTriggerAdjustment()]],
       breach_duration_secs: [0, [
         Validators.min(PolicyDefaultSetting.breach_duration_secs_min),
         Validators.max(PolicyDefaultSetting.breach_duration_secs_max)
       ]],
       cool_down_secs: [0, [
         Validators.min(PolicyDefaultSetting.cool_down_secs_min),
-        Validators.max(PolicyDefaultSetting.cool_down_secs_max),
+        Validators.max(PolicyDefaultSetting.cool_down_secs_max)
       ]],
-      adjustment_type: [0, [
-      ]],
+      adjustment_type: [0]
     });
     this.editRecurringScheduleForm = this.fb.group({
       days_of_week: [0],
       days_of_month: [0],
-      instance_min_count: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      instance_max_count: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      initial_min_instance_count: [0, [
-        Validators.min(1)
-      ]],
-      start_date: [0, [
-      ]],
-      end_date: [0, [
-      ]],
-      start_time: [0, [
-        Validators.required
-      ]],
-      end_time: [0, [
-        Validators.required
-      ]],
-      effective_type: [0, [
-        Validators.required,
-      ]],
-      repeat_type: [0, [
-        Validators.required,
-      ]],
+      instance_min_count: [0, [Validators.required, this.validateRecurringScheduleMin()]],
+      instance_max_count: [0, [Validators.required, this.validateRecurringScheduleMax()]],
+      initial_min_instance_count: [0, [this.validateRecurringScheduleInitialMin()]],
+      start_date: [0],
+      end_date: [0],
+      start_time: [0, [Validators.required, this.validateRecurringScheduleStartTime()]],
+      end_time: [0, [Validators.required, this.validateRecurringScheduleEndTime()]],
+      effective_type: [0, [Validators.required]],
+      repeat_type: [0, [Validators.required]],
     });
     this.editSpecificDateForm = this.fb.group({
-      instance_min_count: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      instance_max_count: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      initial_min_instance_count: [0, [
-        Validators.min(1)
-      ]],
-      start_date_time: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      end_date_time: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]]
+      instance_min_count: [0, [Validators.required, this.validateSpecificDateMin()]],
+      instance_max_count: [0, [Validators.required, this.validateSpecificDateMax()]],
+      initial_min_instance_count: [0, [this.validateSpecificDateInitialMin()]],
+      start_date_time: [0, [Validators.required, this.validateSpecificDateStartDateTime()]],
+      end_date_time: [0, [Validators.required, this.validateSpecificDateEndDateTime()]]
     });
   }
 
@@ -257,6 +210,9 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       .subscribe(entity => {
         this.submitStatus = true;
         this.submitMessage = 'Policy is saved.';
+        this.store.dispatch(
+          new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
+        );
       });
     this.appAutoscalerPolicyErrorSub = updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       filter(request => !!request.error),
@@ -266,9 +222,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       this.submitStatus = false;
       this.submitMessage = errorMessage;
     });
-    this.store.dispatch(
-      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-    );
     return observableOf({ success: this.submitStatus, message: this.submitMessage });
   }
 
@@ -281,14 +234,15 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateGlobalLimitMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.get('instance_max_count').value, true);
+      const invalid = this.editLimitForm &&
+        this.numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.get('instance_max_count').value - 1, true);
       return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
     };
   }
   validateGlobalLimitMax(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value,
-        this.editLimitForm.get('instance_min_count').value, Number.MAX_VALUE, true);
+      const invalid = this.editLimitForm && this.numberWithFractionOrExceedRange(control.value,
+        this.editLimitForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
       return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
     };
   }
@@ -324,8 +278,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs,
       adjustment_type: this.currentPolicy.scaling_rules_form[index].adjustment.indexOf('%') >= 0 ? 'percentage' : 'value'
     });
-    this.editTriggerForm.controls.adjustment.setValidators([Validators.required, Validators.min(1), this.validateTriggerAdjustment()]);
-    this.editTriggerForm.controls.threshold.setValidators([Validators.required, Validators.min(1), this.validateTriggerThreshold()]);
   }
   finishTrigger: StepOnNextFunction = () => {
     if (this.editIndex !== -1) {
@@ -340,12 +292,12 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
           this.editTriggerForm.get('breach_duration_secs').value;
       } else {
-        delete this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs;
+        this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs = PolicyDefaultSetting.breach_duration_secs_default;
       }
       if (this.editTriggerForm.get('cool_down_secs').value) {
         this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = this.editTriggerForm.get('cool_down_secs').value;
       } else {
-        delete this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs;
+        this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = PolicyDefaultSetting.cool_down_secs_default;
       }
       this.editIndex = -1;
     }
@@ -354,6 +306,9 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateTriggerThreshold(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
+      if (!this.editTriggerForm) {
+        return null;
+      }
       const metricType = this.editTriggerForm.get('metric_type').value;
       this.editScaleType = this.getScaleType(this.editTriggerForm.get('operator').value);
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
@@ -373,6 +328,9 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateTriggerAdjustment(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
+      if (!this.editTriggerForm) {
+        return null;
+      }
       this.editScaleType = this.getScaleType(this.editTriggerForm.get('operator').value);
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
       const errors: any = {};
@@ -421,19 +379,14 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       effective_type: this.editEffectiveType,
       repeat_type: this.editRepeatType,
     });
-    this.editRecurringScheduleForm.controls.instance_min_count.setValidators([Validators.required, this.validateRecurringScheduleMin()]);
-    this.editRecurringScheduleForm.controls.instance_max_count.setValidators([Validators.required, this.validateRecurringScheduleMax()]);
-    this.editRecurringScheduleForm.controls.initial_min_instance_count.setValidators([this.validateRecurringScheduleInitialMin()]);
-    this.editRecurringScheduleForm.controls.start_time.setValidators([Validators.required, this.validateRecurringScheduleStartTime()]);
-    this.editRecurringScheduleForm.controls.end_time.setValidators([Validators.required, this.validateRecurringScheduleEndTime()]);
     if (this.editEffectiveType === 'custom') {
       this.editRecurringScheduleForm.controls.start_date.setValidators([Validators.required, this.validateRecurringScheduleStartDate()]);
       this.editRecurringScheduleForm.controls.end_date.setValidators([Validators.required, this.validateRecurringScheduleEndDate()]);
     }
     if (this.editRepeatType === 'week') {
-      this.editRecurringScheduleForm.controls.days_of_week.setValidators([Validators.required, this.validateRecurringScheduleWeek()]);
+      this.editRecurringScheduleForm.controls.days_of_week.setValidators([Validators.required, this.validateRecurringScheduleWeekMonth()]);
     } else {
-      this.editRecurringScheduleForm.controls.days_of_month.setValidators([Validators.required, this.validateRecurringScheduleMonth()]);
+      this.editRecurringScheduleForm.controls.days_of_month.setValidators([Validators.required, this.validateRecurringScheduleWeekMonth()]);
     }
   }
   finishRecurringSchedule() {
@@ -445,15 +398,10 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_date;
       delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].end_date;
     }
-    if (this.editRecurringScheduleForm.get('repeat_type').value === 'week') {
-      this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_week =
-        this.shiftArray(this.editRecurringScheduleForm.get('days_of_week').value, 1);
-      delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_month;
-    } else {
-      this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_month =
-        this.shiftArray(this.editRecurringScheduleForm.get('days_of_month').value, 1);
-      delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_week;
-    }
+    delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_month;
+    delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_week;
+    this.currentPolicy.schedules.recurring_schedule[this.editIndex]['days_of_' + this.editRepeatType] =
+      this.shiftArray(this.editRecurringScheduleForm.get('days_of_' + this.editRepeatType).value, 1);
     if (this.editRecurringScheduleForm.get('initial_min_instance_count').value) {
       this.currentPolicy.schedules.recurring_schedule[this.editIndex].initial_min_instance_count =
         this.editRecurringScheduleForm.get('initial_min_instance_count').value;
@@ -471,22 +419,24 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateRecurringScheduleMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value, 1,
-        this.editRecurringScheduleForm.get('instance_max_count').value - 1, true);
+      const invalid = this.editRecurringScheduleForm &&
+        this.editRecurringScheduleForm && this.numberWithFractionOrExceedRange(control.value, 1,
+          this.editRecurringScheduleForm.get('instance_max_count').value - 1, true);
       return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
     };
   }
   validateRecurringScheduleMax(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value,
+      const invalid = this.editRecurringScheduleForm && this.numberWithFractionOrExceedRange(control.value,
         this.editRecurringScheduleForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
       return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
     };
   }
   validateRecurringScheduleInitialMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value, this.editRecurringScheduleForm.get('instance_min_count').value,
-        this.editRecurringScheduleForm.get('instance_max_count').value + 1, false);
+      const invalid = this.editRecurringScheduleForm &&
+        this.numberWithFractionOrExceedRange(control.value, this.editRecurringScheduleForm.get('instance_min_count').value,
+          this.editRecurringScheduleForm.get('instance_max_count').value + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
   }
@@ -522,45 +472,35 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateRecurringScheduleStartTime(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.timeIsSameOrAfter(control.value, this.editRecurringScheduleForm.get('end_time').value);
+      const invalid = this.editRecurringScheduleForm && this.editRecurringScheduleForm &&
+        this.timeIsSameOrAfter(control.value, this.editRecurringScheduleForm.get('end_time').value);
       return invalid ? { alertInvalidPolicyScheduleEndTimeBeforeStartTime: { value: control.value } } : null;
     };
   }
   validateRecurringScheduleEndTime(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time').value, control.value);
+      const invalid = this.editRecurringScheduleForm &&
+        this.timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time').value, control.value);
       return invalid ? { alertInvalidPolicyScheduleEndTimeBeforeStartTime: { value: control.value } } : null;
     };
   }
-  validateRecurringScheduleWeek(): ValidatorFn {
+  validateRecurringScheduleWeekMonth(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const newSchedule: any = {
-        days_of_week: this.shiftArray(control.value, 1),
         start_time: this.editRecurringScheduleForm.get('start_time').value,
         end_time: this.editRecurringScheduleForm.get('end_time').value
       };
+      if (this.editRepeatType === 'week') {
+        newSchedule.days_of_week = this.shiftArray(control.value, 1);
+      } else {
+        newSchedule.days_of_month = this.shiftArray(control.value, 1);
+      }
       if (this.editEffectiveType === 'custom') {
         newSchedule.start_date = this.editRecurringScheduleForm.get('start_date').value;
         newSchedule.end_date = this.editRecurringScheduleForm.get('end_date').value;
       }
       const invalid = this.recurringSchedulesOverlapping(newSchedule, this.editIndex,
-        this.currentPolicy.schedules.recurring_schedule, 'days_of_week');
-      return invalid ? { alertInvalidPolicyScheduleRecurringConflict: { value: control.value } } : null;
-    };
-  }
-  validateRecurringScheduleMonth(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
-      const newSchedule: any = {
-        days_of_month: this.shiftArray(control.value, 1),
-        start_time: this.editRecurringScheduleForm.get('start_time').value,
-        end_time: this.editRecurringScheduleForm.get('end_time').value
-      };
-      if (this.editEffectiveType === 'custom') {
-        newSchedule.start_date = this.editRecurringScheduleForm.get('start_date').value;
-        newSchedule.end_date = this.editRecurringScheduleForm.get('end_date').value;
-      }
-      const invalid = this.recurringSchedulesOverlapping(newSchedule, this.editIndex,
-        this.currentPolicy.schedules.recurring_schedule, 'days_of_month');
+        this.currentPolicy.schedules.recurring_schedule, 'days_of_' + this.editRepeatType);
       return invalid ? { alertInvalidPolicyScheduleRecurringConflict: { value: control.value } } : null;
     };
   }
@@ -595,7 +535,7 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         this.editRecurringScheduleForm.controls.days_of_week.value.length === 0) {
         this.editRecurringScheduleForm.controls.days_of_week.setValue([0]);
       }
-      this.editRecurringScheduleForm.controls.days_of_week.setValidators([Validators.required, this.validateRecurringScheduleWeek()]);
+      this.editRecurringScheduleForm.controls.days_of_week.setValidators([Validators.required, this.validateRecurringScheduleWeekMonth()]);
       this.editRecurringScheduleForm.controls.days_of_month.clearValidators();
       this.editRecurringScheduleForm.controls.days_of_month.setValue(this.editRecurringScheduleForm.get('days_of_month').value);
     } else {
@@ -603,7 +543,7 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         this.editRecurringScheduleForm.controls.days_of_month.value.length === 0) {
         this.editRecurringScheduleForm.controls.days_of_month.setValue([0]);
       }
-      this.editRecurringScheduleForm.controls.days_of_month.setValidators([Validators.required, this.validateRecurringScheduleMonth()]);
+      this.editRecurringScheduleForm.controls.days_of_month.setValidators([Validators.required, this.validateRecurringScheduleWeekMonth()]);
       this.editRecurringScheduleForm.controls.days_of_week.clearValidators();
       this.editRecurringScheduleForm.controls.days_of_week.setValue(this.editRecurringScheduleForm.get('days_of_week').value);
     }
@@ -634,7 +574,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   editSpecificDate(index) {
     this.editIndex = index;
-    console.log(this.currentPolicy.schedules.specific_date[index]);
     this.editSpecificDateForm.setValue({
       instance_min_count: this.currentPolicy.schedules.specific_date[index].instance_min_count,
       instance_max_count: Math.abs(Number(this.currentPolicy.schedules.specific_date[index].instance_max_count)),
@@ -642,11 +581,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       start_date_time: this.currentPolicy.schedules.specific_date[index].start_date_time,
       end_date_time: this.currentPolicy.schedules.specific_date[index].end_date_time,
     });
-    this.editSpecificDateForm.controls.instance_min_count.setValidators([Validators.required, this.validateSpecificDateMin()]);
-    this.editSpecificDateForm.controls.instance_max_count.setValidators([Validators.required, this.validateSpecificDateMax()]);
-    this.editSpecificDateForm.controls.initial_min_instance_count.setValidators([this.validateSpecificDateInitialMin()]);
-    this.editSpecificDateForm.controls.start_date_time.setValidators([Validators.required, this.validateSpecificDateStartDateTime()]);
-    this.editSpecificDateForm.controls.end_date_time.setValidators([Validators.required, this.validateSpecificDateEndDateTime()]);
   }
   finishSpecificDate() {
     if (this.editSpecificDateForm.get('initial_min_instance_count').value) {
@@ -666,27 +600,30 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateSpecificDateMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value, 1,
+      const invalid = this.editSpecificDateForm && this.numberWithFractionOrExceedRange(control.value, 1,
         this.editSpecificDateForm.get('instance_max_count').value - 1, true);
       return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
     };
   }
   validateSpecificDateMax(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value,
+      const invalid = this.editSpecificDateForm && this.numberWithFractionOrExceedRange(control.value,
         this.editSpecificDateForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
       return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
     };
   }
   validateSpecificDateInitialMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.numberWithFractionOrExceedRange(control.value, this.editSpecificDateForm.get('instance_min_count').value,
-        this.editSpecificDateForm.get('instance_max_count').value + 1, false);
+      const invalid = this.editSpecificDateForm && this.numberWithFractionOrExceedRange(control.value,
+        this.editSpecificDateForm.get('instance_min_count').value, this.editSpecificDateForm.get('instance_max_count').value + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
   }
   validateSpecificDateStartDateTime(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
+      if (!this.editSpecificDateForm) {
+        return null;
+      }
       const newSchedule = {
         start_date_time: control.value,
         end_date_time: this.editSpecificDateForm.get('end_date_time').value
@@ -708,6 +645,9 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateSpecificDateEndDateTime(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
+      if (!this.editSpecificDateForm) {
+        return null;
+      }
       const newSchedule = {
         start_date_time: this.editSpecificDateForm.get('start_date_time').value,
         end_date_time: control.value
@@ -769,16 +709,18 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
 
   recurringSchedulesOverlapping(newSchedule, index, inputRecurringSchedules, property) {
-    for (let i = 0; i !== index && i < inputRecurringSchedules.length; i++) {
-      if (inputRecurringSchedules[i].hasOwnProperty(property) && newSchedule.hasOwnProperty(property)) {
-        if (inputRecurringSchedules[i].hasOwnProperty('start_date') && newSchedule.hasOwnProperty('start_date')) {
-          if (!this.dateOverlaps(inputRecurringSchedules, newSchedule)) {
-            continue;
+    for (let i = 0; i < inputRecurringSchedules.length; i++) {
+      if (index !== i) {
+        if (inputRecurringSchedules[i].hasOwnProperty(property)) {
+          if (inputRecurringSchedules[i].hasOwnProperty('start_date') && newSchedule.hasOwnProperty('start_date')) {
+            if (!this.dateOverlaps(inputRecurringSchedules[i], newSchedule)) {
+              continue;
+            }
           }
-        }
-        if (this.timeOverlaps(inputRecurringSchedules[i], newSchedule)) {
-          const intersects = intersect(inputRecurringSchedules[i][property], newSchedule[property]);
-          return intersects.length > 0;
+          if (this.timeOverlaps(inputRecurringSchedules[i], newSchedule)) {
+            const intersects = intersect(inputRecurringSchedules[i][property], newSchedule[property]);
+            return intersects.length > 0;
+          }
         }
       }
     }
@@ -790,13 +732,15 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     const start = moment(newSchedule.start_date_time, this.MomentFormateDateTimeT);
     const end = moment(newSchedule.end_date_time, this.MomentFormateDateTimeT);
     if (inputSpecificDates && inputSpecificDates.length > 1) {
-      for (let i = 0; i !== index && i < inputSpecificDates.length; i++) {
-        const starti = moment(inputSpecificDates[i].start_date_time, this.MomentFormateDateTimeT);
-        const endi = moment(inputSpecificDates[i].end_date_time, this.MomentFormateDateTimeT);
-        dateRangeList.push({
-          start: starti,
-          end: endi
-        });
+      for (let i = 0; i < inputSpecificDates.length; i++) {
+        if (i !== index) {
+          const starti = moment(inputSpecificDates[i].start_date_time, this.MomentFormateDateTimeT);
+          const endi = moment(inputSpecificDates[i].end_date_time, this.MomentFormateDateTimeT);
+          dateRangeList.push({
+            start: starti,
+            end: endi
+          });
+        }
       }
       for (const item of dateRangeList) {
         if (this.dateTimeOverlaps(start, end, item.start, item.end)) {
@@ -823,7 +767,11 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
 
   dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ) {
-    return !(startDateTimeJ.isAfter(endDateTimeI) && startDateTimeI.isAfter(endDateTimeJ));
+    if (startDateTimeJ.isAfter(startDateTimeI)) {
+      return endDateTimeI.isAfter(startDateTimeJ);
+    } else {
+      return endDateTimeJ.isAfter(startDateTimeI);
+    }
   }
 
   getThresthodMin(policyTriggers, metricType, scaleType, index) {
