@@ -1,7 +1,10 @@
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { Component, Input } from '@angular/core';
 
-import { IServicePlan, IServicePlanCost } from '../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServicePlan, IServicePlanCost } from '../../../core/cf-api-svc.types';
+
 
 @Component({
   selector: 'app-service-plan-price',
@@ -11,6 +14,10 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 export class ServicePlanPriceComponent {
 
   @Input() servicePlan: APIResource<IServicePlan>;
+
+  constructor() {
+    registerLocaleData(localeFr);
+  }
 
   /*
  * Pick the first country listed in the amount object. It's unclear whether there could be a different number of these depending on

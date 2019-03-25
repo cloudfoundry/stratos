@@ -26,11 +26,15 @@ import {
   UserRoleInSpace,
 } from '../../../../store/src/types/user.types';
 import { UserRoleLabels } from '../../../../store/src/types/users-roles.types';
+import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
 import { pathGet } from '../../core/utils.service';
+import { extractActualListEntity } from '../../shared/components/list/data-sources-controllers/local-filtering-sorting';
+import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
+
 
 export interface IUserRole<T> {
   string: string;
@@ -164,7 +168,12 @@ function hasRole(user: CfUser, guid: string, roleType: string) {
   return false;
 }
 
-export const getRowMetadata = (entity: APIResource) => entity.metadata ? entity.metadata.guid : null;
+export const getRowMetadata = (entity: APIResource | MultiActionListEntity) => {
+  if (entity instanceof MultiActionListEntity) {
+    return entity.entity.metadata ? entity.entity.metadata.guid : null;
+  }
+  return entity.metadata ? entity.metadata.guid : null;
+};
 
 export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   if (activatedRoute.snapshot.params[id]) {
@@ -317,6 +326,7 @@ export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: Pagin
   const orgGuid = paginationState.clientPagination.filter.items.org;
   const spaceGuid = paginationState.clientPagination.filter.items.space;
   return !cfGuid && !orgGuid && !spaceGuid ? entities : entities.filter(e => {
+    e = extractActualListEntity(e);
     const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
     const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
     const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
@@ -339,4 +349,12 @@ export function createCfOrgSpaceSteppersUrl(
   }
   route += stepperPath;
   return route;
+}
+
+export function isServiceInstance(obj: any): IServiceInstance {
+  return !!obj && !!obj.service_plan_url ? obj as IServiceInstance : null;
+}
+
+export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceInstance {
+  return !!obj && (obj.route_service_url !== null && obj.route_service_url !== undefined) ? obj as IUserProvidedServiceInstance : null;
 }

@@ -35,6 +35,8 @@ import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 export class PageHeaderEventsComponent implements OnInit {
   @Input()
   public endpointIds$: Observable<string[]>;
+  @Input()
+  public simpleErrorMessage = false;
 
   public eventMinimized$: Observable<boolean>;
   public errorMessage$: Observable<string>;
@@ -69,17 +71,16 @@ export class PageHeaderEventsComponent implements OnInit {
       ).pipe(
         filter(([errors]) => !!errors && !!errors.length),
         map(([errors, endpoints]) => {
-          const endpointString = errors.map(
-            id => endpoints.find(endpoint => endpoint.guid === id)
-          )
-            .map(endpoint => endpoint.name)
-            .reduce((message, endpointName, index, { length }) => {
+          const endpointString = errors
+            .map(id => endpoints.find(endpoint => endpoint.guid === id))
+            .map(endpoint => endpoint.name).reduce((message, endpointName, index, { length }) => {
               if (index === 0) {
                 return endpointName;
               }
               return index + 1 === length ? `${message} & ${endpointName}` : `${message}, ${endpointName}`;
             }, '');
-          return `We've been having trouble communicating with ${endpointString} - You may be seeing out-of-date information`;
+          return `We've been having trouble communicating with ${endpointString}` +
+            `${this.simpleErrorMessage ? '' : ' - You may be seeing out-of-date information'}`;
         })
       );
     }

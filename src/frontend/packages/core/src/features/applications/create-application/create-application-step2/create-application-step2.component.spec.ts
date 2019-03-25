@@ -7,9 +7,10 @@ import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { appReducers } from '../../../../../../store/src/reducers.module';
 import { CreateApplicationStep2Component } from './create-application-step2.component';
-import { AppNameUniqueDirective } from '../../app-name-unique.directive/app-name-unique.directive';
 import { HttpModule, ConnectionBackend, Http } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CreateApplicationStep2Component', () => {
   let component: CreateApplicationStep2Component;
@@ -18,8 +19,7 @@ describe('CreateApplicationStep2Component', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        CreateApplicationStep2Component,
-        AppNameUniqueDirective,
+        CreateApplicationStep2Component
       ],
       imports: [
         CommonModule,
@@ -30,6 +30,8 @@ describe('CreateApplicationStep2Component', () => {
           appReducers
         ),
         HttpModule,
+        HttpClientModule,
+        HttpClientTestingModule,
       ],
       providers: [
         {

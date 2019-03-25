@@ -16,10 +16,9 @@ function generateCacheKey(entityKey: string, action: EntityInlineParentAction): 
 }
 
 export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {
-  const actionEntity = action.entity;
-  /* tslint:disable-next-line:no-string-literal  */
-  const isArray = actionEntity['length'] > 0;
-  const entity: EntitySchema = isArray ? actionEntity[0] : actionEntity;
+  const entityOrArray = action.entity;
+  const isArray = Array.isArray(entityOrArray);
+  const entity: EntitySchema = isArray ? entityOrArray[0] : entityOrArray;
   const entityKey = entity.key;
   const cacheKey = generateCacheKey(entityKey, action);
   const cachedTree = entityTreeCache[cacheKey];
@@ -31,8 +30,9 @@ export function fetchEntityTree(action: EntityInlineParentAction, fromCache = tr
 }
 
 function createEntityTree(entity: EntitySchema, isArray: boolean) {
+
   const rootEntityRelation = new EntityTreeRelation(
-    entity as EntitySchema,
+    entity,
     isArray,
     null,
     '',
@@ -49,11 +49,11 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
 
 function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
   const rootEntitySchema = schemaObj || entityRelation.entity.schema;
+
   Object.keys(rootEntitySchema).forEach(key => {
     let value = rootEntitySchema[key];
     const isArray = value.length > 0;
     value = isArray ? value[0] : value;
-
     const newPath = path ? path + '.' + key : key;
     if (value instanceof schema.Entity) {
       const newEntityRelation = new EntityTreeRelation(

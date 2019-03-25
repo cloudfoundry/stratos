@@ -49,13 +49,19 @@ import {
   ListView,
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
+import { SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { EntityMonitor } from '../../monitors/entity-monitor';
-import { getDefaultRowState, IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
+import {
+  EntitySelectConfig,
+  getDefaultRowState,
+  IListDataSource,
+  RowState,
+} from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
@@ -94,6 +100,7 @@ import {
 })
 export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
+  public entitySelectConfig: EntitySelectConfig;
 
   @Input() addForm: NgForm;
 
@@ -105,17 +112,23 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
+  initialEntitySelection$: Observable<number>;
+  pPaginator: MatPaginator;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
-    if (!paginator) {
+    if (!paginator || this.paginationWidgetToStore) {
       return;
     }
+
+    this.pPaginator = paginator;
     // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
     // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
     // event which handles either page or pageSize changes.
-    this.paginationWidgetToStore = paginator.page.pipe(startWith(this.initialPageEvent)).pipe(
+    this.paginationWidgetToStore = paginator.page.pipe(
+      startWith(this.initialPageEvent),
       pairwise(),
     ).subscribe(([oldV, newV]) => {
+
       const pageSizeChanged = oldV.pageSize !== newV.pageSize;
       const pageChanged = oldV.pageIndex !== newV.pageIndex;
       if (pageSizeChanged) {
@@ -130,7 +143,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   @ViewChild('filter') set setFilter(filterValue: NgModel) {
-    if (!filterValue) {
+    if (!filterValue || this.filterWidgetToStore) {
       return;
     }
     this.filterWidgetToStore = filterValue.valueChanges.pipe(
@@ -273,6 +286,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
+    this.entitySelectConfig = this.dataSource.entitySelectConfig;
+    this.initialEntitySelection$ = this.dataSource.pagination$.pipe(
+      first(),
+      map(pag => pag.forcedLocalPage)
+    );
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
@@ -328,7 +346,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
 
     const hasPages$ = this.dataSource.page$.pipe(
-      map(pag => !!(pag && pag.length))
+      map(pag => !!(pag && pag.length)),
+      distinctUntilChanged()
     );
 
     this.hasRows$ = observableCombineLatest(hasPages$, this.dataSource.maxedResults$).pipe(
@@ -575,9 +594,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
     const result = listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
     if (isObservable(result)) {
-      const actionObs = result as Observable<ActionState>;
-      const sub = this.getActionSub(actionObs);
-      this.pendingActions.set(actionObs, sub);
+      const sub = this.getActionSub(result);
+      this.pendingActions.set(result, sub);
     } else {
       this.dataSource.selectClear();
     }
@@ -614,6 +632,17 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         takeWhile(isLoading => isLoading)
       );
     }
+  }
+
+  public setEntityPage(page: number) {
+    this.pPaginator.firstPage();
+    this.store.dispatch(new SetPage(
+      this.dataSource.entityKey,
+      this.dataSource.paginationKey,
+      page,
+      true,
+      true
+    ));
   }
 
   private setupActionsDefaultObservables<Y extends IOptionalAction<T>>(actions: Y[]) {

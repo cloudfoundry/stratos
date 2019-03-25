@@ -1,6 +1,7 @@
 import { SortDirection } from '@angular/material';
 import { Action } from '@ngrx/store';
-import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination-reducer.helper';
+
+import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination-reducer-reset-pagination';
 
 
 export class ListPagination {

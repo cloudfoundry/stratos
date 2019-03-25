@@ -21,6 +21,7 @@ import { PageHeaderComponent } from './page-header.component';
     ExtensionButtonsComponent,
     PageSubheaderComponent,
     PageHeaderComponent,
+    PageHeaderEventsComponent
   ]
 })
 export class PageHeaderModule { }
