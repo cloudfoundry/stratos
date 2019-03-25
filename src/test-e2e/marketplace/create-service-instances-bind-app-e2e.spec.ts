@@ -9,25 +9,29 @@ import { ServicesWallPage } from './services-wall.po';
 
 describe('Create Service Instance with binding', () => {
   const createServiceInstance = new CreateServiceInstance();
+  let createMarketplaceServiceInstance;
+  let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+
   });
 
   beforeEach(() => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
+    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance, servicesHelperE2E);
   });
 
   it('- should reach create service instance page', () => {
-    expect(createServiceInstance.isActivePage()).toBeTruthy();
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
 
   describe('Long running tests - ', () => {

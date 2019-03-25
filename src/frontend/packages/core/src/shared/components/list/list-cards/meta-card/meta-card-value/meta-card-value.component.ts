@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-meta-card-value',
@@ -6,14 +6,7 @@ import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild } fr
   styleUrls: ['./meta-card-value.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetaCardValueComponent implements OnInit {
-
+export class MetaCardValueComponent {
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
 }

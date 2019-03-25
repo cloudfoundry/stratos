@@ -11,6 +11,7 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
 })
 export class MetaCardItemComponent implements OnInit {
 
+  defaultStyle = 'row';
   styles = {
     row: 'meta-card-item-row',
     'row-top': 'meta-card-item-row-top',
@@ -27,10 +28,10 @@ export class MetaCardItemComponent implements OnInit {
 
   @ViewChild('content') content: TemplateRef<any>;
 
-  @Input() customStyle = 'row';
+  @Input() customStyle = this.defaultStyle;
 
   ngOnInit() {
-    this.itemStyle = this.styles[this.customStyle];
+    this.itemStyle = this.styles[this.customStyle || this.defaultStyle];
   }
 
 }

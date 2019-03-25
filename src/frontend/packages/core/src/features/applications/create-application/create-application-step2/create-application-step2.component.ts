@@ -8,9 +8,9 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { Store } from '@ngrx/store';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { AppNameUniqueChecking } from '../../app-name-unique.directive/app-name-unique.directive';
 import { AppState } from '../../../../../../store/src/app-state';
 import { SetNewAppName } from '../../../../../../store/src/actions/create-applications-page.actions';
+import { AppNameUniqueChecking } from '../../../../shared/app-name-unique.directive/app-name-unique.directive';
 
 @Component({
   selector: 'app-create-application-step2',

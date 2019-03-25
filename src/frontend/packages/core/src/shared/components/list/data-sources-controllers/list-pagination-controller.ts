@@ -15,7 +15,7 @@ import {
 import { AppState } from '../../../../../../store/src/app-state';
 import {
   defaultClientPaginationPageSize,
-} from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+} from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { PaginationClientFilter, PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
