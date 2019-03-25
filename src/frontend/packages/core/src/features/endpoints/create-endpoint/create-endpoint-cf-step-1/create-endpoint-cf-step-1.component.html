@@ -1,12 +1,5 @@
 <form #form="ngForm" class="stepper-form">
-  <h1 class="create-endpoint__section-title">Endpoint Information</h1>
-  <mat-form-field>
-    <mat-select placeholder="Endpoint Type" id="ep-type" name="ep-type" [(ngModel)]="typeValue" (selectionChange)="setUrlValidation($event.value)" #typeField="ngModel" required>
-      <mat-option *ngFor="let type of endpointTypes" [value]="type.value">
-        {{ type.label }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+  <h1 class="create-endpoint__section-title">{{endpoint.label}} Information</h1>
   <mat-form-field>
     <input matInput id="name" name="name" ngModel #nameField="ngModel" required placeholder="Name" [appUnique]="(existingEndpoints | async)?.names">
     <mat-error *ngIf="nameField.errors && nameField.errors.required">Name is required</mat-error>

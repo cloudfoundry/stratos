@@ -10,6 +10,7 @@ import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import {
   AddServiceInstanceBaseStepComponent,
 } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
@@ -157,7 +158,6 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 
 /* tslint:disable:max-line-length */
 
@@ -279,7 +279,7 @@ import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-uni
     SpecifyUserProvidedDetailsComponent,
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective,
-    EndpointCardComponent,
+    EndpointCardComponent
   ],
   exports: [
     FormsModule,
