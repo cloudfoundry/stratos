@@ -27,7 +27,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
-  private pTabs: ISubHeaderTabs[]
+  private pTabs: ISubHeaderTabs[];
 
   @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
 
