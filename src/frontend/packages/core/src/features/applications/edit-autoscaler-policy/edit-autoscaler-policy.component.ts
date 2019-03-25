@@ -20,12 +20,24 @@ import {
   UpperOperators,
   LowerOperators,
   PolicyDefaultSetting,
-  autoscalerTransformArrayToMap,
-  MetricTypes
-} from '../../../../../store/src/helpers/autoscaler-helpers';
-// import * as moment from 'moment';
-import intersect from 'intersect';
-import moment from 'moment-timezone';
+  MetricTypes,
+  getScaleType,
+  getAdjustmentType,
+  MomentFormateDate,
+  MomentFormateDateTimeT
+} from '../../../../../store/src/helpers/autoscaler/autoscaler-util';
+import { autoscalerTransformArrayToMap } from '../../../../../store/src/helpers/autoscaler/autoscaler-transform-policy';
+import {
+  numberWithFractionOrExceedRange,
+  getThresthodMin,
+  getThresthodMax,
+  dateIsAfter,
+  timeIsSameOrAfter,
+  dateTimeIsSameOrAfter,
+  recurringSchedulesOverlapping,
+  specificDateRangeOverlapping
+} from '../../../../../store/src/helpers/autoscaler/autoscaler-validation';
+import * as moment from 'moment-timezone';
 
 @Component({
   selector: 'app-edit-autoscaler-policy',
@@ -73,9 +85,8 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     }
     return days;
   })();
-  MomentFormateDateTimeT = 'YYYY-MM-DDTHH:mm';
-  MomentFormateDate = 'YYYY-MM-DD';
-  MomentFormateTime: 'HH:mm';
+  timezoneOptions = moment.tz.names();
+
   metricTypes = MetricTypes;
   operatorTypes = UpperOperators.concat(LowerOperators);
 
@@ -97,7 +108,8 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   ) {
     this.editLimitForm = this.fb.group({
       instance_min_count: [0, [Validators.required, this.validateGlobalLimitMin()]],
-      instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]]
+      instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]],
+      timezone: [0, [Validators.required]]
     });
     this.editTriggerForm = this.fb.group({
       metric_type: [0],
@@ -160,18 +172,21 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         if (entity && entity.entity) {
           this.currentPolicy = entity.entity;
         } else {
-          const defaultPolicy = this.currentPolicy = {
+          this.currentPolicy = {
             instance_min_count: 1,
             instance_max_count: 10,
             scaling_rules: [],
             schedules: {
-              timezone: 'Asia/Shanghai',
+              timezone: moment.tz.guess(),
               recurring_schedule: [],
               specific_date: []
             }
           };
-          this.currentPolicy = autoscalerTransformArrayToMap(defaultPolicy);
         }
+        if (!this.currentPolicy.scaling_rules_form) {
+          this.currentPolicy = autoscalerTransformArrayToMap(this.currentPolicy);
+        }
+        this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules.timezone);
         this.editLimitForm.controls.instance_min_count.setValue(this.currentPolicy.instance_min_count);
         this.editLimitForm.controls.instance_max_count.setValue(this.currentPolicy.instance_max_count);
         this.editLimitForm.controls.instance_min_count.setValidators([Validators.required, this.validateGlobalLimitMin()]);
@@ -210,6 +225,7 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       .subscribe(entity => {
         this.submitStatus = true;
         this.submitMessage = 'Policy is saved.';
+        this.currentPolicy = entity.entity;
         this.store.dispatch(
           new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
         );
@@ -229,19 +245,20 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   finishLimit: StepOnNextFunction = () => {
     this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count').value);
     this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count').value);
+    this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone').value;
     console.log('finishLimit', this.currentPolicy);
     return observableOf({ success: true });
   }
   validateGlobalLimitMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editLimitForm &&
-        this.numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.get('instance_max_count').value - 1, true);
+        numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.get('instance_max_count').value - 1, true);
       return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
     };
   }
   validateGlobalLimitMax(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.editLimitForm && this.numberWithFractionOrExceedRange(control.value,
+      const invalid = this.editLimitForm && numberWithFractionOrExceedRange(control.value,
         this.editLimitForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
       return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
     };
@@ -267,8 +284,8 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   editTrigger(index) {
     this.editIndex = index;
-    this.editScaleType = this.getScaleType(this.currentPolicy.scaling_rules_form[index].operator);
-    this.editAdjustmentType = this.getAdjustmentType(this.currentPolicy.scaling_rules_form[index].adjustment);
+    this.editScaleType = getScaleType(this.currentPolicy.scaling_rules_form[index].operator);
+    this.editAdjustmentType = getAdjustmentType(this.currentPolicy.scaling_rules_form[index].adjustment);
     this.editTriggerForm.setValue({
       metric_type: this.currentPolicy.scaling_rules_form[index].metric_type,
       operator: this.currentPolicy.scaling_rules_form[index].operator,
@@ -310,17 +327,17 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         return null;
       }
       const metricType = this.editTriggerForm.get('metric_type').value;
-      this.editScaleType = this.getScaleType(this.editTriggerForm.get('operator').value);
+      this.editScaleType = getScaleType(this.editTriggerForm.get('operator').value);
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
       const errors: any = {};
       if (metricType === 'memoryutil') {
-        if (this.numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
+        if (numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
           errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
         }
       }
-      const thresthodMin = this.getThresthodMin(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
-      const thresthodMax = this.getThresthodMax(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
-      if (this.numberWithFractionOrExceedRange(control.value, thresthodMin, thresthodMax, true)) {
+      const thresthodMin = getThresthodMin(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
+      const thresthodMax = getThresthodMax(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
+      if (numberWithFractionOrExceedRange(control.value, thresthodMin, thresthodMax, true)) {
         errors.alertInvalidPolicyTriggerThresholdRange = { value: control.value };
       }
       return Object.keys(errors).length === 0 ? null : errors;
@@ -331,11 +348,11 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       if (!this.editTriggerForm) {
         return null;
       }
-      this.editScaleType = this.getScaleType(this.editTriggerForm.get('operator').value);
+      this.editScaleType = getScaleType(this.editTriggerForm.get('operator').value);
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
       const errors: any = {};
       const max = this.editAdjustmentType === 'value' ? this.currentPolicy.instance_max_count - 1 : Number.MAX_VALUE;
-      if (this.numberWithFractionOrExceedRange(control.value, 1, max, true)) {
+      if (numberWithFractionOrExceedRange(control.value, 1, max, true)) {
         errors.alertInvalidPolicyTriggerStepRange = {};
       }
       return Object.keys(errors).length === 0 ? null : errors;
@@ -390,44 +407,41 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     }
   }
   finishRecurringSchedule() {
+    const currentSchedule = this.currentPolicy.schedules.recurring_schedule[this.editIndex];
+    const repeatOn = 'days_of_' + this.editRepeatType;
     if (this.editRecurringScheduleForm.get('effective_type').value === 'custom') {
-      this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_date =
-        this.editRecurringScheduleForm.get('start_date').value;
-      this.currentPolicy.schedules.recurring_schedule[this.editIndex].end_date = this.editRecurringScheduleForm.get('end_date').value;
+      currentSchedule.start_date = this.editRecurringScheduleForm.get('start_date').value;
+      currentSchedule.end_date = this.editRecurringScheduleForm.get('end_date').value;
     } else {
-      delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_date;
-      delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].end_date;
+      delete currentSchedule.start_date;
+      delete currentSchedule.end_date;
     }
-    delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_month;
-    delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].days_of_week;
-    this.currentPolicy.schedules.recurring_schedule[this.editIndex]['days_of_' + this.editRepeatType] =
-      this.shiftArray(this.editRecurringScheduleForm.get('days_of_' + this.editRepeatType).value, 1);
+    delete currentSchedule.days_of_month;
+    delete currentSchedule.days_of_week;
+    currentSchedule[repeatOn] = this.shiftArray(this.editRecurringScheduleForm.get(repeatOn).value, 1);
     if (this.editRecurringScheduleForm.get('initial_min_instance_count').value) {
-      this.currentPolicy.schedules.recurring_schedule[this.editIndex].initial_min_instance_count =
-        this.editRecurringScheduleForm.get('initial_min_instance_count').value;
+      currentSchedule.initial_min_instance_count = this.editRecurringScheduleForm.get('initial_min_instance_count').value;
     } else {
-      delete this.currentPolicy.schedules.recurring_schedule[this.editIndex].initial_min_instance_count;
+      delete currentSchedule.initial_min_instance_count;
     }
-    this.currentPolicy.schedules.recurring_schedule[this.editIndex].instance_min_count =
-      this.editRecurringScheduleForm.get('instance_min_count').value;
-    this.currentPolicy.schedules.recurring_schedule[this.editIndex].instance_max_count =
-      this.editRecurringScheduleForm.get('instance_max_count').value;
-    this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_time = this.editRecurringScheduleForm.get('start_time').value;
-    this.currentPolicy.schedules.recurring_schedule[this.editIndex].end_time = this.editRecurringScheduleForm.get('end_time').value;
+    currentSchedule.instance_min_count = this.editRecurringScheduleForm.get('instance_min_count').value;
+    currentSchedule.instance_max_count = this.editRecurringScheduleForm.get('instance_max_count').value;
+    currentSchedule.start_time = this.editRecurringScheduleForm.get('start_time').value;
+    currentSchedule.end_time = this.editRecurringScheduleForm.get('end_time').value;
     this.editIndex = -1;
     console.log('finishRecurringSchedule', this.currentPolicy.schedules.recurring_schedule);
   }
   validateRecurringScheduleMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editRecurringScheduleForm &&
-        this.editRecurringScheduleForm && this.numberWithFractionOrExceedRange(control.value, 1,
+        this.editRecurringScheduleForm && numberWithFractionOrExceedRange(control.value, 1,
           this.editRecurringScheduleForm.get('instance_max_count').value - 1, true);
       return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
     };
   }
   validateRecurringScheduleMax(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.editRecurringScheduleForm && this.numberWithFractionOrExceedRange(control.value,
+      const invalid = this.editRecurringScheduleForm && numberWithFractionOrExceedRange(control.value,
         this.editRecurringScheduleForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
       return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
     };
@@ -435,7 +449,7 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   validateRecurringScheduleInitialMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editRecurringScheduleForm &&
-        this.numberWithFractionOrExceedRange(control.value, this.editRecurringScheduleForm.get('instance_min_count').value,
+        numberWithFractionOrExceedRange(control.value, this.editRecurringScheduleForm.get('instance_min_count').value,
           this.editRecurringScheduleForm.get('instance_max_count').value + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
@@ -446,10 +460,10 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         return null;
       }
       const errors: any = {};
-      if (this.dateIsAfter(moment().format(this.MomentFormateDate), control.value)) {
+      if (dateIsAfter(moment().format(MomentFormateDate), control.value)) {
         errors.alertInvalidPolicyScheduleStartDateBeforeNow = { value: control.value };
       }
-      if (this.dateIsAfter(control.value, this.editRecurringScheduleForm.get('end_date').value)) {
+      if (dateIsAfter(control.value, this.editRecurringScheduleForm.get('end_date').value)) {
         errors.alertInvalidPolicyScheduleEndDateBeforeStartDate = { value: control.value };
       }
       return Object.keys(errors).length === 0 ? null : errors;
@@ -461,10 +475,10 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         return null;
       }
       const errors: any = {};
-      if (this.dateIsAfter(moment().format(this.MomentFormateDate), control.value)) {
+      if (dateIsAfter(moment().format(MomentFormateDate), control.value)) {
         errors.alertInvalidPolicyScheduleEndDateBeforeNow = { value: control.value };
       }
-      if (this.dateIsAfter(this.editRecurringScheduleForm.get('start_date').value, control.value)) {
+      if (dateIsAfter(this.editRecurringScheduleForm.get('start_date').value, control.value)) {
         errors.alertInvalidPolicyScheduleEndDateBeforeStartDate = { value: control.value };
       }
       return Object.keys(errors).length === 0 ? null : errors;
@@ -473,14 +487,14 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   validateRecurringScheduleStartTime(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editRecurringScheduleForm && this.editRecurringScheduleForm &&
-        this.timeIsSameOrAfter(control.value, this.editRecurringScheduleForm.get('end_time').value);
+        timeIsSameOrAfter(control.value, this.editRecurringScheduleForm.get('end_time').value);
       return invalid ? { alertInvalidPolicyScheduleEndTimeBeforeStartTime: { value: control.value } } : null;
     };
   }
   validateRecurringScheduleEndTime(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editRecurringScheduleForm &&
-        this.timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time').value, control.value);
+        timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time').value, control.value);
       return invalid ? { alertInvalidPolicyScheduleEndTimeBeforeStartTime: { value: control.value } } : null;
     };
   }
@@ -499,7 +513,7 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         newSchedule.start_date = this.editRecurringScheduleForm.get('start_date').value;
         newSchedule.end_date = this.editRecurringScheduleForm.get('end_date').value;
       }
-      const invalid = this.recurringSchedulesOverlapping(newSchedule, this.editIndex,
+      const invalid = recurringSchedulesOverlapping(newSchedule, this.editIndex,
         this.currentPolicy.schedules.recurring_schedule, 'days_of_' + this.editRepeatType);
       return invalid ? { alertInvalidPolicyScheduleRecurringConflict: { value: control.value } } : null;
     };
@@ -516,8 +530,8 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     if (key === 'custom') {
       if (!this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_date &&
         !this.editRecurringScheduleForm.get('start_date').value) {
-        this.editRecurringScheduleForm.controls.start_date.setValue(moment().add(1, 'days').format(this.MomentFormateDate));
-        this.editRecurringScheduleForm.controls.end_date.setValue(moment().add(1, 'days').format(this.MomentFormateDate));
+        this.editRecurringScheduleForm.controls.start_date.setValue(moment().add(1, 'days').format(MomentFormateDate));
+        this.editRecurringScheduleForm.controls.end_date.setValue(moment().add(1, 'days').format(MomentFormateDate));
       }
       this.editRecurringScheduleForm.controls.start_date.setValidators([Validators.required, this.validateRecurringScheduleStartDate()]);
       this.editRecurringScheduleForm.controls.end_date.setValidators([Validators.required, this.validateRecurringScheduleEndDate()]);
@@ -558,8 +572,8 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     nextEndDateTime.set('hour', 18);
     nextEndDateTime.set('minute', 0);
     this.currentPolicy.schedules.specific_date.push({
-      start_date_time: nextStartDateTime.format(this.MomentFormateDateTimeT),
-      end_date_time: nextEndDateTime.format(this.MomentFormateDateTimeT),
+      start_date_time: nextStartDateTime.format(MomentFormateDateTimeT),
+      end_date_time: nextEndDateTime.format(MomentFormateDateTimeT),
       instance_min_count: 1,
       instance_max_count: 10,
       initial_min_instance_count: 5
@@ -600,21 +614,21 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
   validateSpecificDateMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.editSpecificDateForm && this.numberWithFractionOrExceedRange(control.value, 1,
+      const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value, 1,
         this.editSpecificDateForm.get('instance_max_count').value - 1, true);
       return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
     };
   }
   validateSpecificDateMax(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.editSpecificDateForm && this.numberWithFractionOrExceedRange(control.value,
+      const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
         this.editSpecificDateForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
       return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
     };
   }
   validateSpecificDateInitialMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.editSpecificDateForm && this.numberWithFractionOrExceedRange(control.value,
+      const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
         this.editSpecificDateForm.get('instance_min_count').value, this.editSpecificDateForm.get('instance_max_count').value + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
@@ -629,15 +643,13 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         end_date_time: this.editSpecificDateForm.get('end_date_time').value
       };
       const errors: any = {};
-      // if (this.dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone)
-      // .format(this.MomentFormateDateTimeT), control.value, this.currentPolicy.schedules.timezone)) {
-      if (this.dateTimeIsSameOrAfter(moment().format(this.MomentFormateDateTimeT), control.value, this.currentPolicy.schedules.timezone)) {
+      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).format(MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleStartDateTimeBeforeNow = { value: control.value };
       }
-      if (this.dateTimeIsSameOrAfter(control.value, this.editSpecificDateForm.get('end_date_time').value)) {
+      if (dateTimeIsSameOrAfter(control.value, this.editSpecificDateForm.get('end_date_time').value)) {
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
-      if (this.specificDateRangeOverlapping(newSchedule, this.editIndex, this.currentPolicy.schedules.specific_date)) {
+      if (specificDateRangeOverlapping(newSchedule, this.editIndex, this.currentPolicy.schedules.specific_date)) {
         errors.alertInvalidPolicyScheduleSpecificConflict = { value: control.value };
       }
       return Object.keys(errors).length === 0 ? null : errors;
@@ -653,149 +665,18 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
         end_date_time: control.value
       };
       const errors: any = {};
-      if (this.dateTimeIsSameOrAfter(moment().format(this.MomentFormateDateTimeT), control.value, this.currentPolicy.schedules.timezone)) {
+      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).format(MomentFormateDateTimeT),
+        control.value)) {
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeNow = { value: control.value };
       }
-      if (this.dateTimeIsSameOrAfter(this.editSpecificDateForm.get('start_date_time').value, control.value)) {
+      if (dateTimeIsSameOrAfter(this.editSpecificDateForm.get('start_date_time').value,
+        control.value)) {
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
-      if (this.specificDateRangeOverlapping(newSchedule, this.editIndex, this.currentPolicy.schedules.specific_date)) {
+      if (specificDateRangeOverlapping(newSchedule, this.editIndex, this.currentPolicy.schedules.specific_date)) {
         errors.alertInvalidPolicyScheduleSpecificConflict = { value: control.value };
       }
       return Object.keys(errors).length === 0 ? null : errors;
     };
   }
-
-  getScaleType(operator) {
-    if (LowerOperators.indexOf(operator) >= 0) {
-      return 'lower';
-    } else {
-      return 'upper';
-    }
-  }
-  getAdjustmentType(adjustment) {
-    return adjustment.indexOf('%') >= 0 ? 'percentage' : 'value';
-  }
-
-  numberWithFractionOrExceedRange(value, min, max, required) {
-    if ((!value || isNaN(value)) && !required) {
-      return false;
-    }
-    if ((!value || isNaN(value)) && required) {
-      return true;
-    }
-    return value.toString().indexOf('.') > -1 || value > max || value < min;
-  }
-
-  timeIsSameOrAfter(startTime, endTime) {
-    startTime = moment('2000-01-01T' + startTime, this.MomentFormateDateTimeT);
-    endTime = moment('2000-01-01T' + endTime, this.MomentFormateDateTimeT);
-    return startTime.isSameOrAfter(endTime);
-  }
-
-  dateIsAfter(startDate, endDate) {
-    return moment(startDate, this.MomentFormateDate).isAfter(moment(endDate, this.MomentFormateDate));
-  }
-
-  dateTimeIsSameOrAfter(startDateTime, endDateTime, timezone?) {
-    // return moment.tz(startDateTime, timezone).isSameOrAfter(moment.tz(endDateTime, timezone));
-    return moment(startDateTime).isSameOrAfter(moment(endDateTime));
-  }
-
-  recurringSchedulesInvalidRepeatOn(inputRecurringSchedules) {
-    const weekdayCount = inputRecurringSchedules.hasOwnProperty('days_of_week') ? inputRecurringSchedules.days_of_week.length : 0;
-    const monthdayCount = inputRecurringSchedules.hasOwnProperty('days_of_month') ? inputRecurringSchedules.days_of_month.length : 0;
-    return (weekdayCount > 0 && monthdayCount > 0) || (weekdayCount === 0 && monthdayCount === 0);
-  }
-
-  recurringSchedulesOverlapping(newSchedule, index, inputRecurringSchedules, property) {
-    for (let i = 0; i < inputRecurringSchedules.length; i++) {
-      if (index !== i) {
-        if (inputRecurringSchedules[i].hasOwnProperty(property)) {
-          if (inputRecurringSchedules[i].hasOwnProperty('start_date') && newSchedule.hasOwnProperty('start_date')) {
-            if (!this.dateOverlaps(inputRecurringSchedules[i], newSchedule)) {
-              continue;
-            }
-          }
-          if (this.timeOverlaps(inputRecurringSchedules[i], newSchedule)) {
-            const intersects = intersect(inputRecurringSchedules[i][property], newSchedule[property]);
-            return intersects.length > 0;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  specificDateRangeOverlapping(newSchedule, index, inputSpecificDates) {
-    const dateRangeList = [];
-    const start = moment(newSchedule.start_date_time, this.MomentFormateDateTimeT);
-    const end = moment(newSchedule.end_date_time, this.MomentFormateDateTimeT);
-    if (inputSpecificDates && inputSpecificDates.length > 1) {
-      for (let i = 0; i < inputSpecificDates.length; i++) {
-        if (i !== index) {
-          const starti = moment(inputSpecificDates[i].start_date_time, this.MomentFormateDateTimeT);
-          const endi = moment(inputSpecificDates[i].end_date_time, this.MomentFormateDateTimeT);
-          dateRangeList.push({
-            start: starti,
-            end: endi
-          });
-        }
-      }
-      for (const item of dateRangeList) {
-        if (this.dateTimeOverlaps(start, end, item.start, item.end)) {
-          return true;
-        }
-      }
-    }
-  }
-
-  timeOverlaps(timeI, tiemJ) {
-    const startDateTimeI = moment('1970-01-01T' + timeI.start_time, this.MomentFormateDateTimeT);
-    const endDateTimeI = moment('1970-01-01T' + timeI.end_time, this.MomentFormateDateTimeT);
-    const startDateTimeJ = moment('1970-01-01T' + tiemJ.start_time, this.MomentFormateDateTimeT);
-    const endDateTimeJ = moment('1970-01-01T' + tiemJ.end_time, this.MomentFormateDateTimeT);
-    return this.dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ);
-  }
-
-  dateOverlaps(dateI, dateJ) {
-    const startDateTimeI = moment(dateI.start_date + 'T00:00', this.MomentFormateDateTimeT);
-    const endDateTimeI = moment(dateI.end_date + 'T23:59', this.MomentFormateDateTimeT);
-    const startDateTimeJ = moment(dateJ.start_date + 'T00:00', this.MomentFormateDateTimeT);
-    const endDateTimeJ = moment(dateJ.end_date + 'T23:59', this.MomentFormateDateTimeT);
-    return this.dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ);
-  }
-
-  dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ) {
-    if (startDateTimeJ.isAfter(startDateTimeI)) {
-      return endDateTimeI.isAfter(startDateTimeJ);
-    } else {
-      return endDateTimeJ.isAfter(startDateTimeI);
-    }
-  }
-
-  getThresthodMin(policyTriggers, metricType, scaleType, index) {
-    let thresholdMin = 1;
-    if (scaleType === 'upper') {
-      policyTriggers.map((trigger, triggerIndex) => {
-        if (triggerIndex !== index && trigger.metric_type === metricType && LowerOperators.indexOf(trigger.operator) >= 0) {
-          thresholdMin = Math.max(trigger.threshold + 1, thresholdMin);
-        }
-      });
-    }
-    return thresholdMin;
-  }
-
-  getThresthodMax(policyTriggers, metricType, scaleType, index) {
-    let thresholdMax = Number.MAX_VALUE;
-    if (scaleType === 'lower') {
-      policyTriggers.map((trigger, triggerIndex) => {
-        if (triggerIndex !== index && trigger.metric_type === metricType && UpperOperators.indexOf(trigger.operator) >= 0) {
-          thresholdMax = Math.min(trigger.threshold - 1, thresholdMax);
-        }
-      });
-    }
-    return thresholdMax;
-  }
-
 }

@@ -78,7 +78,9 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
 
   @Input()
   set pollInterval(interval: number) {
-    this.rangeSelectorManager.pollInterval = interval;
+    if (interval) {
+      this.rangeSelectorManager.pollInterval = interval;
+    }
   }
 
   set showOverlay(show: boolean) {

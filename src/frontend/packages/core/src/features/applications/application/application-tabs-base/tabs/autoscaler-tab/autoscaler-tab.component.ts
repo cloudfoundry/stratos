@@ -42,7 +42,7 @@ import {
 } from '../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { CfOrgSpaceDataService } from '../../../../../../shared/data-services/cf-org-space-service.service';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { MetricTypes } from '../../../../../../../../store/src/helpers/autoscaler-helpers';
+import { MetricTypes } from '../../../../../../../../store/src/helpers/autoscaler/autoscaler-util';
 
 @Component({
   selector: 'app-autoscaler-tab',

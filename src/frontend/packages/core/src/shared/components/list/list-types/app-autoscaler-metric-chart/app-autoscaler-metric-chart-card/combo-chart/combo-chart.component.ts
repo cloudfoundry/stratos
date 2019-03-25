@@ -351,15 +351,11 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
         if (domain.indexOf(d.value) < 0) {
           domain.push(d.value);
         }
-        if (d.min !== undefined) {
-          if (domain.indexOf(d.min) < 0) {
+        if (d.min !== undefined && domain.indexOf(d.min) < 0) {
             domain.push(d.min);
-          }
         }
-        if (d.max !== undefined) {
-          if (domain.indexOf(d.max) < 0) {
+        if (d.max !== undefined && domain.indexOf(d.max) < 0) {
             domain.push(d.max);
-          }
         }
       }
     }

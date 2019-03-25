@@ -23,6 +23,13 @@
           {{alertInvalidPolicyMaximumRange}}
         </mat-error>
       </mat-form-field>
+      <mat-form-field>
+        <mat-select class="reset-margin" placeholder="Timezone" formControlName="timezone" required>
+          <mat-option *ngFor="let timezone of timezoneOptions" [value]="timezone">
+            {{ timezone }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </form>
   </app-step>
   <app-step [title]="'Scaling Rules'" [disablePrevious]="editIndex!=-1" [showAdd]="true" [disableAdd]="editIndex!=-1"
@@ -137,7 +144,7 @@
   <app-step [title]="'Recurring Schedules'" [disablePrevious]="editIndex!=-1" [showAdd]="true"
     [disableAdd]="editIndex!=-1" [onAdd]="addRecurringSchedule" [valid]="editIndex==-1">
     <app-tile-grid>
-      <app-tile-group *ngFor="let rule of policy && policy.schedules.recurring_schedule; let index = index">
+      <app-tile-group *ngFor="let rule of policy && policy.schedules && policy.schedules.recurring_schedule; let index = index">
         <app-tile>
           <mat-card>
             <mat-card-header>
@@ -307,7 +314,7 @@
   <app-step [title]="'Specific Dates'" [disablePrevious]="editIndex!=-1" [showAdd]="true" [disableAdd]="editIndex!=-1"
     [onAdd]="addSpecificDate" [onNext]="updatePolicy" [valid]="editIndex==-1">
     <app-tile-grid>
-      <app-tile-group *ngFor="let rule of policy && policy.schedules.specific_date; let index = index">
+      <app-tile-group *ngFor="let rule of policy && policy.schedules && policy.schedules.specific_date; let index = index">
         <app-tile>
           <mat-card>
             <mat-card-header>
