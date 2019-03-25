@@ -1,11 +1,14 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
-import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
-import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
-import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import { StratosActionType } from '../../core/extension/extension-service';
+import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
+import {
+  CreateEndpointBaseStepComponent,
+} from './create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
+import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
+import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 
 const endpointsRoutes: Routes = [
   {
@@ -14,7 +17,14 @@ const endpointsRoutes: Routes = [
       extensionsActionsKey: StratosActionType.Endpoints
     }
   },
-  { path: 'new', component: CreateEndpointComponent },
+  {
+    path: 'new',
+    component: CreateEndpointBaseStepComponent
+  },
+  {
+    path: 'new/:type',
+    component: CreateEndpointComponent
+  },
   {
     path: '**',
     component: PageNotFoundComponentComponent,
@@ -30,4 +40,4 @@ const endpointsRoutes: Routes = [
     RouterModule.forChild(endpointsRoutes),
   ]
 })
-export class EndointsRoutingModule { }
+export class EndpointsRoutingModule { }
