@@ -2,6 +2,8 @@
   "compileOnSave": false,
   "preserveWhitespaces": "off",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "*": ["types/*"] },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
