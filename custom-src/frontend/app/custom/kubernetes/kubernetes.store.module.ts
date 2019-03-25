@@ -18,7 +18,8 @@ const enum KubeEndpointAuthTypes {
   CERT_AUTH = 'kube-cert-auth',
   CONFIG = 'kubeconfig',
   CONFIG_AZ = 'kubeconfig-az',
-  AWS_IAM = 'aws-iam'
+  AWS_IAM = 'aws-iam',
+  GKE = 'gke-auth'
 }
 
 const kubernetesEndpointTypes: EndpointTypeExtensionConfig[] = [{
@@ -39,6 +40,11 @@ const kubernetesEndpointTypes: EndpointTypeExtensionConfig[] = [{
     label: 'AWS EKS',
     authTypes: [KubeEndpointAuthTypes.AWS_IAM],
     imagePath: '/core/assets/custom/eks.svg'
+  }, {
+    subType: 'gke',
+    label: 'Google GKE',
+    authTypes: [KubeEndpointAuthTypes.GKE],
+    imagePath: '/core/assets/custom/gke.svg'
   }],
   authTypes: [KubeEndpointAuthTypes.CERT_AUTH],
   icon: 'kubernetes',
@@ -90,15 +96,14 @@ const kubernetesAuthTypes: EndpointAuthTypeConfig[] = [{
   component: KubernetesCertsAuthFormComponent
 },
 {
-  value: 'gke-auth',
+  value: KubeEndpointAuthTypes.GKE,
   name: 'GKE',
   form: {
     gkeconfig: ['', Validators.required],
   },
-  types: new Array<EndpointType>('k8s'),
+  types: new Array<EndpointType>(),
   component: KubernetesGKEAuthFormComponent
-}
-];
+}];
 
 @StratosExtension({
   endpointTypes: kubernetesEndpointTypes,
