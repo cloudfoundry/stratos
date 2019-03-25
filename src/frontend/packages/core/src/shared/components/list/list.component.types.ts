@@ -5,11 +5,11 @@ import { ListView } from '../../../../../store/src/actions/list.actions';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import {
   defaultClientPaginationPageSize,
-} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
+import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
-
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -26,11 +26,11 @@ export interface IListConfig<T> {
   /**
    * List of actions that are presented as individual buttons when one or more rows are selected. For example `Delete` of selected rows.
    */
-  getMultiActions: () => IMultiListAction<T>[];
+  getMultiActions: (schemaKey: string) => IMultiListAction<T>[];
   /**
    * List of actions that are presented in a mat-menu for an individual entity. For example `unmap` an application route
    */
-  getSingleActions: () => IListAction<T>[];
+  getSingleActions: (schemaKey: string) => IListAction<T>[];
   /**
    * Collection of column definitions to show when the list is in table mode
    */
@@ -81,7 +81,7 @@ export interface IListConfig<T> {
   /**
    * The card component used in card view
    */
-  cardComponent?: any;
+  cardComponent?: CardTypes<T>;
   hideRefresh?: boolean;
   /**
    * Allow selection regardless of number or visibility of multi actions

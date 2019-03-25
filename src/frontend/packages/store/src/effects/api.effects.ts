@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
-import { RequestArgs } from '@angular/http/src/interfaces';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
@@ -136,16 +135,14 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
-      if (paginatedAction.flattenPaginationMax < (paginatedAction.initialParams['results-per-page'] || 100)) {
-        throw new Error(`Action cannot contain a maximum amount of results smaller than the page size: ${JSON.stringify(paginatedAction)}`);
-      }
       request = flattenPagination(
         this.store,
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
         paginatedAction.flattenPaginationMax,
         paginatedAction.entityKey,
-        paginatedAction.paginationKey
+        paginatedAction.paginationKey,
+        paginatedAction.__forcedPageSchemaKey__ ? entityFactory(paginatedAction.__forcedPageSchemaKey__).key : null
       );
     }
 
@@ -442,12 +439,17 @@ export class APIEffect {
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
     let entityArray;
-    /* tslint:disable-next-line:no-string-literal  */
-    if (apiAction.entity['length'] > 0) {
-      entityArray = apiAction.entity;
+    const pagAction = apiAction as PaginatedAction;
+    if (pagAction.__forcedPageSchemaKey__) {
+      entityArray = [entityFactory(pagAction.__forcedPageSchemaKey__)];
     } else {
-      entityArray = new Array<Schema>();
-      entityArray.push(apiAction.entity);
+      /* tslint:disable-next-line:no-string-literal  */
+      if (apiAction.entity['length'] > 0) {
+        entityArray = apiAction.entity;
+      } else {
+        entityArray = new Array<Schema>();
+        entityArray.push(apiAction.entity);
+      }
     }
 
     return {
@@ -496,7 +498,7 @@ export class APIEffect {
       : {};
   }
 
-  private makeRequest(options: RequestArgs): Observable<any> {
+  private makeRequest(options): Observable<any> {
     return this.http.request(new Request(options)).pipe(
       map(response => {
         let resData;
@@ -548,9 +550,7 @@ export class APIEffect {
 
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
-      const relationInfo = listEntityRelations(
-        action as EntityInlineParentAction,
-      );
+      const relationInfo = this.getEntityRelations(action);
       options.params = options.params || new URLSearchParams();
       if (relationInfo.maxDepth > 0) {
         options.params.set(
@@ -565,6 +565,22 @@ export class APIEffect {
         );
       }
     }
+  }
+
+  private getEntityRelations(action: any) {
+    if (action.__forcedPageSchemaKey__) {
+      const forcedSchema = entityFactory(action.__forcedPageSchemaKey__);
+      return listEntityRelations(
+        {
+          ...action,
+          entity: [forcedSchema],
+          entityKey: forcedSchema.key
+        }
+      );
+    }
+    return listEntityRelations(
+      action as EntityInlineParentAction,
+    );
   }
 
   private setRequestParams(

@@ -1,3 +1,4 @@
+import { first } from 'rxjs/operators';
 import { browser, by, element, Key, promise, protractor } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
@@ -105,7 +106,9 @@ export class ListTableComponent extends Component {
 
   openRowActionMenuByRow(row: ElementFinder): MenuComponent {
     row.element(by.css('app-table-cell-actions button')).click();
-    return new MenuComponent();
+    const menu = new MenuComponent()
+    menu.waitUntilShown();
+    return menu;
   }
 
   toggleSort(headerTitle: string): promise.Promise<any> {
@@ -209,7 +212,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getSearchInputField(): ElementFinder {
-    return this.getRightHeaderSection().all(by.css('.filter')).first().element(by.css('input'));
+    return this.getRightHeaderSection().all(by.css('#listSearchFilter')).first().element(by.css('input'));
   }
 
   setSearchText(text: string): promise.Promise<void> {

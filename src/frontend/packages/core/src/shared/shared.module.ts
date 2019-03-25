@@ -11,6 +11,9 @@ import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
 import {
+  AddServiceInstanceBaseStepComponent,
+} from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
+import {
   AddServiceInstanceComponent,
 } from './components/add-service-instance/add-service-instance/add-service-instance.component';
 import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
@@ -20,6 +23,9 @@ import { SelectServiceComponent } from './components/add-service-instance/select
 import {
   SpecifyDetailsStepComponent,
 } from './components/add-service-instance/specify-details-step/specify-details-step.component';
+import {
+  SpecifyUserProvidedDetailsComponent,
+} from './components/add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -124,6 +130,7 @@ import { StartEndDateComponent } from './components/start-end-date/start-end-dat
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
@@ -147,8 +154,10 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
@@ -268,6 +277,10 @@ import { PageSubNavSectionComponent } from './components/page-sub-nav-section/pa
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
     MultilineTitleComponent,
+    TileSelectorComponent,
+    SpecifyUserProvidedDetailsComponent,
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective,
     EndpointCardComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,
@@ -373,7 +386,10 @@ import { PageSubNavSectionComponent } from './components/page-sub-nav-section/pa
     MultilineTitleComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,
-    PageSubNavSectionComponent
+    PageSubNavSectionComponent,
+    TileSelectorComponent,
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -393,7 +409,8 @@ import { PageSubNavSectionComponent } from './components/page-sub-nav-section/pa
     ServiceActionHelperService,
     MetricsRangeSelectorService,
     GitSCMService,
-    MetricsRangeSelectorService
+    MetricsRangeSelectorService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class SharedModule { }

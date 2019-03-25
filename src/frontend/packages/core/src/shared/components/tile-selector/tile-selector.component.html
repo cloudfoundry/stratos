@@ -1,0 +1,12 @@
+<div class="tile-selectors">
+  <div class="tile-selector"
+    [ngClass]="{'tile-selector__selected': selected === tile, 'tile-selector__active': !selected}"
+    (click)="selectionChange(tile)" *ngFor="let tile of options">
+    <div class="tile-selector__header">
+      <mat-icon class="tile-selector__icon" [fontSet]="tile.icon.matIconFont">{{ tile.icon.matIcon }}</mat-icon>
+    </div>
+    <div class="tile-selector__content">
+      <h3>{{ tile.label }}</h3>
+    </div>
+  </div>
+</div>
