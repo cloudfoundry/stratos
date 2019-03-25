@@ -8,17 +8,16 @@
   position: absolute;
   width: 200px;
   z-index: 1;
-  &:hover {
-    .page-side-nav__items {
-      display: block;
-    }
-  }
   @include breakpoint(tablet) {
     border-bottom: 0;
     height: 100%;
     position: relative;
   }
-
+  &:hover {
+    .page-side-nav__items {
+      display: block;
+    }
+  }
   &__icon {
     font-size: 18px;
     height: 18px;

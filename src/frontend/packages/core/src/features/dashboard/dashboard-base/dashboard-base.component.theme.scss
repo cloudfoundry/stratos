@@ -11,7 +11,7 @@
 
   .dashboard__side-nav {
     transform: none;
-    transition: width 0.25s ease;
+    transition: width .25s ease;
     visibility: visible !important;
 
     > .mat-drawer-inner-container {
@@ -19,7 +19,8 @@
     }
   }
 
-  .side-nav__logo-img, .side-nav__logo-icon-img {
+  .side-nav__logo-img,
+  .side-nav__logo-icon-img {
     position: absolute;
   }
 
@@ -37,6 +38,12 @@
     .side-nav__logo-icon-img {
       opacity: 0;
     }
+    .side-nav__copyright {
+      display: block;
+    }
+    .side-nav__copyright-icon {
+      display: none;
+    }
   }
 
   .side-nav__copyright {
@@ -44,15 +51,6 @@
   }
   .side-nav__copyright-icon {
     display: block;
-  }
-
-  &.dashboard__icon-mode-open {
-    .side-nav__copyright {
-      display: block;
-    }
-    .side-nav__copyright-icon {
-      display: none;
-    }
   }
 }
 

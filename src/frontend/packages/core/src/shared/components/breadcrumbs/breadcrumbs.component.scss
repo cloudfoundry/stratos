@@ -2,7 +2,8 @@ $breadcrumb-opacity: .7;
 $breadcrumb-hover-opacity: 1;
 $breadcrumb-padding: 3px;
 .breadcrumb {
-  &, &__separator {
+  &,
+  &__separator {
     opacity: $breadcrumb-opacity;
   }
   &__separator {
