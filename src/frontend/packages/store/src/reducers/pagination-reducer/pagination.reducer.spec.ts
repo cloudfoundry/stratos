@@ -83,7 +83,14 @@ describe('PaginationReducer', () => {
           pageCount: 0,
           currentPage: 1,
           ids: {},
-          pageRequests: { 1: { busy: true, error: false, message: '' } },
+          pageRequests: {
+            1: {
+              busy: true, error: false, message: '',
+              schemaKey: undefined,
+              entityKey: applicationSchemaKey,
+              maxed: false
+            }
+          },
           clientPagination: {
             ...defaultClientPagination
           }

@@ -1,12 +1,51 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { OperatorFunction, Observable } from 'rxjs';
+import { Observable, OperatorFunction } from 'rxjs';
 
+import { AppState } from '../../../../../../store/src/app-state';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
+import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
-import { IListConfig } from '../list.component.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+
+
+/**
+ * Allows a list to manage separate actions and/or separate entity types.
+ * Also used to configure the entity type dropdown.
+ * @export
+ */
+export class MultiActionConfig {
+  /**
+   * Creates an instance of MultiActionConfig.
+   * @param schemaConfigs configs to drive a multi action list
+   * @param [selectPlaceholder='Select entity type'] The message that will be show in the select.
+   * If this is null then the dropdown will be hidden
+   * @param [deselectText=null] What string should be shown for the "deselect" select item.
+   * A null value will show an empty item
+   */
+  constructor(
+    public schemaConfigs: ActionSchemaConfig[],
+    public selectPlaceholder: string = 'Select entity type',
+    public deselectText: string = 'All'
+  ) { }
+}
+
+/**
+ * Gives information for an action and entity type used in multi action list. *
+ * @export
+ */
+export class ActionSchemaConfig {
+  /**
+   * Creates an instance of ActionSchemaConfig.
+   * @param [prettyName] The value that will be shown in the entity dropdown.
+   */
+  constructor(
+    public paginationAction: PaginatedAction,
+    public schemaKey: string,
+    public prettyName?: string
+  ) { }
+}
 
 export interface IListDataSourceConfig<A, T> {
   store: Store<AppState>;
@@ -18,7 +57,7 @@ export interface IListDataSourceConfig<A, T> {
   /**
    * The entity which will be fetched via the action
    */
-  schema: schema.Entity;
+  schema: EntitySchema | MultiActionConfig;
   /**
    * A function which will return a unique id for the given row/entity
    */

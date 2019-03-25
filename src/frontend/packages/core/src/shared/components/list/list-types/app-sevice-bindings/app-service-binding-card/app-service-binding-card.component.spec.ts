@@ -1,12 +1,14 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  ApplicationEnvVarsHelper,
-} from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
+import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import {
+  ApplicationEnvVarsHelper,
+} from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
@@ -51,6 +53,9 @@ describe('AppServiceBindingCardComponent', () => {
         volume_mounts: [],
         app_url: '',
         service_instance_url: '',
+        service_instance: {
+          entity: {}
+        } as APIResource<IServiceInstance>
       },
       metadata: {
         guid: '',

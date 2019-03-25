@@ -4,7 +4,7 @@ import { BaseTestModules } from '../../../../../../../test-framework/cloud-found
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details.component';
 
-fdescribe('TableCellEndpointDetailsComponent', () => {
+describe('TableCellEndpointDetailsComponent', () => {
   let component: TableCellEndpointDetailsComponent;
   let fixture: ComponentFixture<TableCellEndpointDetailsComponent>;
 

@@ -54,13 +54,9 @@ import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
-import { CsiModeService } from '../csi-mode.service';
+import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 
 
-const enum FormMode {
-  CreateServiceInstance = 'create-service-instance',
-  BindServiceInstance = 'bind-service-instance',
-}
 @Component({
   selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
@@ -76,11 +72,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   formModes = [
     {
       label: 'Create and Bind to a new Service Instance',
-      key: FormMode.CreateServiceInstance
+      key: CreateServiceFormMode.CreateServiceInstance
     },
     {
       label: 'Bind to an Existing Service Instance',
-      key: FormMode.BindServiceInstance
+      key: CreateServiceFormMode.BindServiceInstance
     }
   ];
   @Input()
@@ -88,7 +84,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   @Input() appId: string;
 
-  formMode: FormMode;
+  formMode: CreateServiceFormMode;
 
   selectExistingInstanceForm: FormGroup;
   createNewInstanceForm: FormGroup;
@@ -200,7 +196,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       };
     }
 
-    this.formMode = FormMode.CreateServiceInstance;
+    this.formMode = CreateServiceFormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
       this.store.select(selectCreateServiceInstance).pipe(
@@ -230,14 +226,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.serviceParamsValid.next(valid);
   }
 
-  resetForms = (mode: FormMode) => {
+  resetForms = (mode: CreateServiceFormMode) => {
     this.validate.next(false);
     this.createNewInstanceForm.reset();
     this.selectExistingInstanceForm.reset();
-    if (mode === FormMode.CreateServiceInstance) {
+    if (mode === CreateServiceFormMode.CreateServiceInstance) {
       this.tags = [];
       this.bindExistingInstance = false;
-    } else if (mode === FormMode.BindServiceInstance) {
+    } else if (mode === CreateServiceFormMode.BindServiceInstance) {
       this.bindExistingInstance = true;
     }
   }
@@ -259,7 +255,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           )), tap(o => {
             this.allServiceInstanceNames = o.map(s => s.entity.name);
           }));
-      })).subscribe();
+      })
+    ).subscribe();
   }
 
   private setupForms() {
@@ -312,24 +309,25 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           if (!!state.bindAppGuid) {
-            return this.createBinding(serviceInstanceGuid, state.cfGuid, state.bindAppGuid, state.bindAppParams)
-              .pipe(
-                filter(s => {
-                  return s && !s.creating;
-                }),
-                map(req => {
-                  if (req.error) {
-                    return { success: false, message: `Failed to create service instance binding: ${req.message}` };
-                  } else {
-                    // Refetch env vars for app, since they have been changed by CF
-                    this.store.dispatch(
-                      new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
-                    );
+            return this.modeService.createApplicationServiceBinding(
+              serviceInstanceGuid,
+              state.cfGuid,
+              state.bindAppGuid,
+              state.bindAppParams
+            ).pipe(
+              map(req => {
+                if (!req.success) {
+                  return req;
+                } else {
+                  // Refetch env vars for app, since they have been changed by CF
+                  this.store.dispatch(
+                    new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
+                  );
 
-                    return this.routeToServices(state.cfGuid, state.bindAppGuid);
-                  }
-                })
-              );
+                  return this.routeToServices(state.cfGuid, state.bindAppGuid);
+                }
+              })
+            );
           } else {
             return observableOf(this.routeToServices());
           }
