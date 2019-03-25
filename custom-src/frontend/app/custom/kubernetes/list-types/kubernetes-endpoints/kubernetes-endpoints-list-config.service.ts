@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
@@ -14,6 +13,7 @@ import { IListConfig, ListViewTypes } from '../../../../shared/components/list/l
 import { EntityMonitorFactory } from '../../../../shared/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../shared/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { KubernetesEndpointsDataSource } from './kubernetes-endpoints-data-source';
 
 @Injectable()
 export class KubernetesEndpointsListConfigService implements IListConfig<EndpointModel> {
@@ -40,11 +40,9 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
     this.columns = endpointColumns.filter(column => {
       return column.columnId !== 'type';
     });
-    this.dataSource = new BaseEndpointsDataSource(
+    this.dataSource = new KubernetesEndpointsDataSource(
       this.store,
       this,
-      new GetAllEndpoints(),
-      'k8s',
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory
