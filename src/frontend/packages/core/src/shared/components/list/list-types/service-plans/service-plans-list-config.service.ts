@@ -24,8 +24,6 @@ import {
 
 
 /**
- * Service instance list shown for `service / service instances` component
- *
  * @export
  */
 @Injectable()
