@@ -27,6 +27,7 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 
 
 @NgModule({
@@ -53,6 +54,7 @@ import { WindowRef } from './window-ref/window-ref.service';
     PageNotFoundComponentComponent,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
+    NoContentMessageComponent,
     DisableRouterLinkDirective
   ],
   providers: [
@@ -81,7 +83,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     PageNotFoundComponentComponent,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
-    DisableRouterLinkDirective
+    DisableRouterLinkDirective,
+    NoContentMessageComponent
   ],
   entryComponents: [
     LogOutDialogComponent

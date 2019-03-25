@@ -31,6 +31,7 @@
     cursor: pointer;
   }
   &__header {
+    display: flex;
     white-space: nowrap;
   }
 }

@@ -106,7 +106,6 @@ import {
 import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
 import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
-import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
@@ -181,7 +180,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CodeBlockComponent,
     EventTabActorIconPipe,
     LogViewerComponent,
-    NoContentMessageComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,
     SshViewerComponent,
@@ -289,7 +287,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     UniqueDirective,
     CodeBlockComponent,
     LogViewerComponent,
-    NoContentMessageComponent,
     EndpointsMissingComponent,
     ApplicationStateComponent,
     SshViewerComponent,

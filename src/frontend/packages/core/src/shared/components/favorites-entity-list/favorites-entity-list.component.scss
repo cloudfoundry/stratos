@@ -35,4 +35,8 @@
     margin-top: 10px;
     width: $bottom-space;
   }
+  &__hide-filters {
+    height: 0;
+    visibility: hidden;
+  }
 }

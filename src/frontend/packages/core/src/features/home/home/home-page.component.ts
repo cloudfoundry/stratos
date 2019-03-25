@@ -15,11 +15,17 @@ export class HomePageComponent {
   public allEndpointIds$: Observable<string[]>;
   public haveRegistered$: Observable<boolean>;
 
+  public showFilters = false;
+
   constructor(endpointsService: EndpointsService, store: Store<AppState>) {
     this.allEndpointIds$ = endpointsService.endpoints$.pipe(
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
     this.haveRegistered$ = endpointsService.haveRegistered$;
+  }
+
+  public toggleShowFilters() {
+    this.showFilters = !this.showFilters;
   }
 }
 
