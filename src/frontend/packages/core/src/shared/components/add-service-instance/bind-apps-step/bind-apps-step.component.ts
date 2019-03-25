@@ -2,22 +2,16 @@ import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
 
+import { SetCreateServiceInstanceApp } from '../../../../../../store/src/actions/create-service-instance.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../core/cf-api-svc.types';
 import { IApp } from '../../../../core/cf-api.types';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
-import { StepOnNextResult } from '../../stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
-import { createEntityRelationPaginationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { spaceSchemaKey, entityFactory, applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetAllAppsInSpace } from '../../../../../../store/src/actions/space.actions';
-import { SetCreateServiceInstanceApp } from '../../../../../../store/src/actions/create-service-instance.actions';
 import { pathGet, safeUnsubscribe } from '../../../../core/utils.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { StepOnNextResult } from '../../stepper/step/step.component';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -29,11 +23,13 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   @Input()
   boundAppId: string;
 
+  @Input()
+  apps$: Observable<APIResource<IApp>[]>;
+
   validateSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(true);
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
-  apps$: Observable<APIResource<IApp>[]>;
   guideText = 'Specify the application to bind (Optional)';
   selectedServicePlan: APIResource<IServicePlan>;
   bindingParams: object = {};
@@ -57,19 +53,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
-      switchMap(createServiceInstance => {
-        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstance.spaceGuid);
-        return getPaginationObservables<APIResource<IApp>>({
-          store: this.store,
-          action: new GetAllAppsInSpace(createServiceInstance.cfGuid, createServiceInstance.spaceGuid, paginationKey),
-          paginationMonitor: this.paginationMonitorFactory.create(
-            paginationKey,
-            entityFactory(applicationSchemaKey)
-          )
-        }, true).entities$;
-      }));
     this.setBoundApp();
   }
 
@@ -80,7 +63,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     }
 
     // Start
-    this.validateSubscription = this.stepperForm.controls['apps'].valueChanges.subscribe(app => {
+    this.validateSubscription = this.stepperForm.controls.apps.valueChanges.subscribe(app => {
       if (!app) {
         // If there's no app selected the step will always be valid
         this.validate.next(true);

@@ -5,17 +5,15 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
-import { IDomain, ISpace } from '../../../../core/cf-api.types';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { pathGet } from '../../../../core/utils.service';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { RouteMode, Route } from '../../../../../../store/src/types/route.types';
-import { ApplicationService } from '../../application.service';
-import { AppState } from '../../../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import {
+  AssociateRouteWithAppApplication,
+  GetAppRoutes,
+} from '../../../../../../store/src/actions/application-service-routes.actions';
 import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { GetSpace } from '../../../../../../store/src/actions/space.actions';
+import { AppState } from '../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   domainSchemaKey,
@@ -23,13 +21,18 @@ import {
   routeSchemaKey,
   spaceSchemaKey,
 } from '../../../../../../store/src/helpers/entity-factory';
-import { GetSpace } from '../../../../../../store/src/actions/space.actions';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../../../store/src/actions/application-service-routes.actions';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { Route, RouteMode } from '../../../../../../store/src/types/route.types';
+import { IDomain, ISpace } from '../../../../core/cf-api.types';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { pathGet } from '../../../../core/utils.service';
+import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { ApplicationService } from '../../application.service';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
@@ -74,11 +77,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
     this.addRouteMode = this.addRouteModes[0];
     this.domainFormGroup = new FormGroup({
-      domain: new FormControl('', [<any>Validators.required])
+      domain: new FormControl('', [Validators.required as any])
     });
 
     this.addHTTPRoute = new FormGroup({
-      host: new FormControl('', [<any>Validators.required, Validators.pattern(hostPattern), Validators.maxLength(63)]),
+      host: new FormControl('', [Validators.required as any, Validators.pattern(hostPattern), Validators.maxLength(63)]),
       path: new FormControl('', [Validators.pattern(pathPattern), Validators.maxLength(128)])
     });
 
@@ -95,18 +98,18 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscriptions.push(this.addTCPRoute.valueChanges.subscribe(val => {
-      const useRandomPort = val['useRandomPort'];
+      const useRandomPort = val.useRandomPort;
       if (useRandomPort !== this.useRandomPort) {
         this.useRandomPort = useRandomPort;
         const validators = [
           Validators.required,
           Validators.pattern('[0-9]*'),
         ];
-        this.addTCPRoute.controls['port'].setValidators(useRandomPort ? [] : validators);
+        this.addTCPRoute.controls.port.setValidators(useRandomPort ? [] : validators);
         if (useRandomPort) {
-          this.addTCPRoute.controls['port'].disable();
+          this.addTCPRoute.controls.port.disable();
         } else {
-          this.addTCPRoute.controls['port'].enable();
+          this.addTCPRoute.controls.port.enable();
         }
       }
     }));
@@ -183,7 +186,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   isTCPRouteCreation(): boolean {
-    return this.domainFormGroup.value['domain'] && this.domainFormGroup.value['domain'].entity.router_group_type === 'tcp';
+    return this.domainFormGroup.value.domain && this.domainFormGroup.value.domain.entity.router_group_type === 'tcp';
   }
 
   submit: StepOnNextFunction = () => {
@@ -196,13 +199,13 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): Observable<StepOnNextResult> {
-    const domainGuid = this.domainFormGroup.value['domain'].metadata.guid;
+    const domainGuid = this.domainFormGroup.value.domain.metadata.guid;
     const isTcpRoute = this.isTCPRouteCreation();
     const formGroup = isTcpRoute ? this.addTCPRoute : this.addHTTPRoute;
 
     // Set port to -1 to indicate that we should generate a random port number
     let port = this._getValue('port', formGroup);
-    if (isTcpRoute && formGroup.value['useRandomPort']) {
+    if (isTcpRoute && formGroup.value.useRandomPort) {
       port = -1;
     }
 

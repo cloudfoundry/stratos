@@ -2,9 +2,9 @@ import { MetricsAction } from '../../../../../store/src/actions/metrics.actions'
 
 export interface IMetricsConfig<T = any> {
   metricsAction: MetricsAction;
-  getSeriesName: (T) => string;
-  mapSeriesItemName?: (any) => any;
-  mapSeriesItemValue?: (any) => any;
+  getSeriesName: (obj: T) => string;
+  mapSeriesItemName?: (anything: any) => any;
+  mapSeriesItemValue?: (anything: any) => any;
 }
 
 export enum MetricsChartTypes {
@@ -12,7 +12,7 @@ export enum MetricsChartTypes {
 }
 
 export type YAxisTickFormattingFunc = (label: string) => string;
-interface IMetricsChartConfig {
+export interface IMetricsChartConfig {
   chartType: MetricsChartTypes;
   xAxisLabel?: string;
   yAxisLabel?: string;

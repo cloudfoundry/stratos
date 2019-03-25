@@ -1,3 +1,4 @@
+import { first } from 'rxjs/operators';
 import { browser, by, element, Key, promise, protractor } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
@@ -105,7 +106,9 @@ export class ListTableComponent extends Component {
 
   openRowActionMenuByRow(row: ElementFinder): MenuComponent {
     row.element(by.css('app-table-cell-actions button')).click();
-    return new MenuComponent();
+    const menu = new MenuComponent()
+    menu.waitUntilShown();
+    return menu;
   }
 
   toggleSort(headerTitle: string): promise.Promise<any> {
@@ -142,7 +145,7 @@ export class ListCardComponent extends Component {
   }
 
   private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
-    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+    const card = this.locator.all(by.css(`${ListCardComponent.cardsCss} ${metaType}`)).filter(elem =>
       elem.getText().then(text => text === title)
     ).first();
     browser.wait(until.presenceOf(card));
@@ -209,7 +212,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getSearchInputField(): ElementFinder {
-    return this.getRightHeaderSection().all(by.css('.filter')).first().element(by.css('input'));
+    return this.getRightHeaderSection().all(by.css('#listSearchFilter')).first().element(by.css('input'));
   }
 
   setSearchText(text: string): promise.Promise<void> {
@@ -426,7 +429,7 @@ export class ListComponent extends Component {
 
   public empty: ListEmptyComponent;
 
-  constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
+  constructor(public locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.header = new ListHeaderComponent(locator);

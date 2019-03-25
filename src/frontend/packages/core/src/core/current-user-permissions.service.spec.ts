@@ -24,13 +24,13 @@ const initialState = {
         currentPage: 1,
         totalResults: 2,
         ids: {
-          '1': [
+          1: [
             '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
             'c80420ca-204b-4879-bf69-b6b7a202ad87'
           ]
         },
         pageRequests: {
-          '1': {
+          1: {
             busy: false,
             error: false,
             message: ''
@@ -73,7 +73,7 @@ const initialState = {
         currentPage: 1,
         totalResults: 13,
         ids: {
-          '1': [
+          1: [
             '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0',
             '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1',
             '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2',
@@ -90,7 +90,7 @@ const initialState = {
           ]
         },
         pageRequests: {
-          '1': {
+          1: {
             busy: false,
             error: false,
             message: ''
@@ -112,7 +112,7 @@ const initialState = {
         currentPage: 1,
         totalResults: 13,
         ids: {
-          '1': [
+          1: [
             'c80420ca-204b-4879-bf69-b6b7a202ad87-0',
             'c80420ca-204b-4879-bf69-b6b7a202ad87-1',
             'c80420ca-204b-4879-bf69-b6b7a202ad87-2',
@@ -129,7 +129,7 @@ const initialState = {
           ]
         },
         pageRequests: {
-          '1': {
+          1: {
             busy: false,
             error: false,
             message: ''
@@ -695,7 +695,7 @@ const initialState = {
           }
         }
       },
-      'READ_ONLY_ADMIN': {
+      READ_ONLY_ADMIN: {
         global: {
           isAdmin: false,
           isReadOnlyAdmin: true,
@@ -759,7 +759,7 @@ const initialState = {
           }
         }
       },
-      'READ_ONLY_USER': {
+      READ_ONLY_USER: {
         global: {
           isAdmin: false,
           isReadOnlyAdmin: false,

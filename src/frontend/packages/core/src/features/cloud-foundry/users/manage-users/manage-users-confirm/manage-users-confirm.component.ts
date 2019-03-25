@@ -98,7 +98,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     const guid = isSpace ? row.spaceGuid : row.orgGuid;
     return {
       entityKey: schema.key,
-      schema: schema,
+      schema,
       monitorState: AppMonitorComponentTypes.UPDATE,
       updateKey: ChangeUserRole.generateUpdatingKey(row.role, row.userGuid),
       getId: () => guid

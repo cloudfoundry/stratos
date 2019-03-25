@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
@@ -57,8 +57,9 @@ export class EndpointsEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
-    .pipe(mergeMap(action => {
+  @Effect() getAllEndpoints$ = this.actions$.pipe(
+    ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
+    mergeMap(action => {
       const { associatedAction } = action;
       const actionType = 'fetch';
       const endpoints = action.payload.endpoints;
@@ -90,7 +91,8 @@ export class EndpointsEffect {
       ];
     }));
 
-  @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS).pipe(
+  @Effect() connectEndpoint$ = this.actions$.pipe(
+    ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
     mergeMap(action => {
       const actionType = 'update';
 
@@ -106,10 +108,10 @@ export class EndpointsEffect {
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
-          ...<any>action.authValues,
-          'cnsi_guid': action.guid,
-          'connect_type': action.authType,
-          'system_shared': action.systemShared,
+          ...action.authValues as any,
+          cnsi_guid: action.guid,
+          connect_type: action.authType,
+          system_shared: action.systemShared,
         },
         // Fix for #angular/18261
         encoder: new BrowserStandardEncoder()
@@ -126,13 +128,14 @@ export class EndpointsEffect {
       );
     }));
 
-  @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS).pipe(
+  @Effect() disconnect$ = this.actions$.pipe(
+    ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS),
     mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
-          'cnsi_guid': action.guid
+          cnsi_guid: action.guid
         }
       });
 
@@ -146,13 +149,14 @@ export class EndpointsEffect {
       );
     }));
 
-  @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS).pipe(
+  @Effect() unregister$ = this.actions$.pipe(
+    ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS),
     mergeMap(action => {
 
       const apiAction = this.getEndpointDeleteAction(action.guid, action.type);
       const params: HttpParams = new HttpParams({
         fromObject: {
-          'cnsi_guid': action.guid
+          cnsi_guid: action.guid
         }
       });
 
@@ -166,19 +170,26 @@ export class EndpointsEffect {
       );
     }));
 
-  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS).pipe(
+  @Effect() register$ = this.actions$.pipe(
+    ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
     mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
+      const paramsObj = {
+        cnsi_name: action.name,
+        api_endpoint: action.endpoint,
+        skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
+        cnsi_client_id: action.clientID,
+        cnsi_client_secret: action.clientSecret,
+        sso_allowed: action.ssoAllowed ? 'true' : 'false'
+      };
+      // Do not include sub_type in HttpParams if it doesn't exist (falsies get stringified and sent)
+      if (action.endpointSubType) {
+        /* tslint:disable-next-line:no-string-literal  */
+        paramsObj['sub_type'] = action.endpointSubType;
+      }
       const params: HttpParams = new HttpParams({
-        fromObject: {
-          'cnsi_name': action.name,
-          'api_endpoint': action.endpoint,
-          'skip_ssl_validation': action.skipSslValidation ? 'true' : 'false',
-          'cnsi_client_id': action.clientID,
-          'cnsi_client_secret': action.clientSecret,
-          'sso_allowed': action.ssoAllowed ? 'true' : 'false',
-        }
+        fromObject: paramsObj
       });
 
       return this.doEndpointAction(
@@ -195,7 +206,8 @@ export class EndpointsEffect {
 
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
-      `Please ensure the endpoint address is correct and try again (${e.error.error})`;
+      `Please ensure the endpoint address is correct and try again` +
+      `${e.error.error ? '(' + e.error.error + ').' : '.'}`;
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
     }
@@ -226,7 +238,7 @@ export class EndpointsEffect {
     actionStrings: [string, string] = [null, null],
     endpointType: EndpointType = 'cf',
     body?: string,
-    errorMessageHandler?: Function,
+    errorMessageHandler?: (e: any) => string,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');

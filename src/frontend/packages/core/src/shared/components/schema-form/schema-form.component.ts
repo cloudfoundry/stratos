@@ -1,32 +1,16 @@
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { JsonPointer } from 'stratos-angular6-json-schema-form';
 
 import { safeStringToObj } from '../../../core/utils.service';
+import { isValidJsonValidator } from '../../form-validators';
 
 export interface SchemaFormValidationError {
   dataPath: {};
   message: string;
-}
-
-export function isValidJsonValidator(): ValidatorFn {
-  return (formField: AbstractControl): { [key: string]: any } => {
-    try {
-      if (formField.value) {
-        const jsonObj = JSON.parse(formField.value);
-        // Check if jsonObj is actually an obj
-        if (jsonObj.constructor !== {}.constructor) {
-          throw new Error('not an object');
-        }
-      }
-    } catch (e) {
-      return { 'notValidJson': { value: formField.value } };
-    }
-    return null;
-  };
 }
 
 export class SchemaFormConfig {
@@ -60,7 +44,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     if (this.mode === 'JSON') {
       this.setJsonFormData(config.initialData);
       if (!config.initialData) {
-        this._validChange.next(true);
+        this.pValidChange.next(true);
       }
     } else if (this.mode === 'schema') {
       this.formInitialData = config.initialData;
@@ -69,13 +53,13 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
 
   @Output()
   dataChange = new EventEmitter<object>();
-  _dataChange = new BehaviorSubject<object>(null);
+  pDataChange = new BehaviorSubject<object>(null);
 
   @Input()
   valid = false;
   @Output()
   validChange = new EventEmitter<boolean>();
-  _validChange = new BehaviorSubject<boolean>(false);
+  pValidChange = new BehaviorSubject<boolean>(false);
 
 
   cleanSchema: object;
@@ -97,14 +81,14 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   }
 
   ngAfterContentInit() {
-    this.subs.push(this.jsonForm.controls['json'].valueChanges.subscribe(jsonStr => {
+    this.subs.push(this.jsonForm.controls.json.valueChanges.subscribe(jsonStr => {
       this.jsonData = safeStringToObj(jsonStr);
-      this._dataChange.next(this.jsonData);
-      this._validChange.next(this.isJsonFormValid());
+      this.pDataChange.next(this.jsonData);
+      this.pValidChange.next(this.isJsonFormValid());
     }));
 
-    this.subs.push(this._dataChange.asObservable().pipe(delay(0)).subscribe(data => this.dataChange.emit(data)));
-    this.subs.push(this._validChange.asObservable().pipe(delay(0)).subscribe(valid => this.validChange.emit(valid)));
+    this.subs.push(this.pDataChange.asObservable().pipe(delay(0)).subscribe(data => this.dataChange.emit(data)));
+    this.subs.push(this.pValidChange.asObservable().pipe(delay(0)).subscribe(valid => this.validChange.emit(valid)));
   }
 
   ngOnDestroy() {
@@ -124,12 +108,12 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   setJsonFormData(data: object) {
     if (this.jsonForm) {
       const jsonString = data ? JSON.stringify(data) : '';
-      this.jsonForm.controls['json'].setValue(jsonString);
+      this.jsonForm.controls.json.setValue(jsonString);
     }
   }
 
   private isJsonFormValid(): boolean {
-    return !this.jsonForm.controls['json'].value || this.jsonForm.controls['json'].valid;
+    return !this.jsonForm.controls.json.value || this.jsonForm.controls.json.valid;
   }
 
   private filterSchema = (schema?: object): any => {
@@ -145,13 +129,13 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
 
   onFormChange(formData) {
     this.formData = formData;
-    this._dataChange.next(formData);
+    this.pDataChange.next(formData);
   }
 
   onFormValidationErrors(data: SchemaFormValidationError[]): void {
     this.formValidationErrors = data || [];
     this.formValidationErrorsStr = this.prettyValidationErrorsFn(this.formValidationErrors);
-    this._validChange.next(!this.formValidationErrors.length);
+    this.pValidChange.next(!this.formValidationErrors.length);
   }
 
   private prettyValidationErrorsFn = (formValidationErrors: SchemaFormValidationError[]): string => {

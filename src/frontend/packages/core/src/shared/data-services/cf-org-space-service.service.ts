@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -9,36 +9,34 @@ import {
   publishReplay,
   refCount,
   startWith,
-  switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { IOrganization, ISpace } from '../../core/cf-api.types';
-
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { AppState } from '../../../../store/src/app-state';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { GetAllOrganizations } from '../../../../store/src/actions/organization.actions';
+import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../store/src/app-state';
+import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { organizationSchemaKey, spaceSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import {
-  getPaginationObservables,
   getCurrentPageRequestInfo,
-  spreadPaginationParams
+  getPaginationObservables,
+  spreadPaginationParams,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/src/types/api.types';
 import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { PaginatedAction, QParam, PaginationParam } from '../../../../store/src/types/pagination.types';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { PaginatedAction, PaginationParam, QParam } from '../../../../store/src/types/pagination.types';
+import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
 import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
-import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
   return {
-    key: key,
-    label: label,
+    key,
+    label,
     ...cfOrgSpaceItem,
     list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
       return entities.map(entity => ({
@@ -69,9 +67,9 @@ export const enum CfOrgSpaceSelectMode {
 
 
 export const initCfOrgSpaceService = (store: Store<AppState>,
-  cfOrgSpaceService: CfOrgSpaceDataService,
-  schemaKey: string,
-  paginationKey: string): Observable<any> => {
+                                      cfOrgSpaceService: CfOrgSpaceDataService,
+                                      schemaKey: string,
+                                      paginationKey: string): Observable<any> => {
   return store.select(selectPaginationState(schemaKey, paginationKey)).pipe(
     filter((pag) => !!pag),
     first(),
@@ -173,15 +171,16 @@ export class CfOrgSpaceDataService implements OnDestroy {
     public paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.createCf();
-    this.init();
     this.createOrg();
     this.createSpace();
 
     // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
     this.org.list$.pipe(
       first(),
-    ).subscribe(null, null, () => {
-      this.setupAutoSelectors();
+    ).subscribe({
+      complete: () => {
+        this.setupAutoSelectors();
+      }
     });
 
     this.isLoading$ = combineLatest(
@@ -192,23 +191,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
     );
 
-  }
-
-  private init() {
-    const orgs = this.allOrgs.pagination$.pipe(
-      filter(paginationEntity => {
-        return !getCurrentPageRequestInfo(paginationEntity).busy;
-      }),
-      first()
-    );
-    this.getEndpointsAndOrgs$ = this.cf.list$.pipe(
-      switchMap(endpoints => {
-        return combineLatest(
-          observableOf(endpoints),
-          orgs
-        );
-      })
-    );
   }
 
   private createCf() {
@@ -224,8 +206,8 @@ export class CfOrgSpaceDataService implements OnDestroy {
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
         // Ensure we have at least one connected cf
         filter(cfs => {
-          for (let i = 0; i < cfs.length; i++) {
-            if (cfs[i].connectionStatus === 'connected') {
+          for (const cf of cfs) {
+            if (cf.connectionStatus === 'connected') {
               return true;
             }
           }
@@ -244,27 +226,18 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createOrg() {
-    const orgList$ = this.getEndpointsAndOrgs$.pipe(
-      switchMap(endpoints => {
-        return combineLatest(
-          this.cf.select.asObservable(),
-          observableOf(endpoints),
-          this.allOrgs.entities$
-        );
-      }),
-      map(
-        ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
-          const [pag, cfList] = endpointsAndOrgs;
-          if (selectedCF && entities) {
-            return entities
-              .map(org => org.entity)
-              .filter(org => org.cfGuid === selectedCF)
-              .sort((a, b) => a.name.localeCompare(b.name));
-          }
-          return [];
-        }
-      )
-    );
+    const orgList$ = combineLatest(
+      this.cf.select.asObservable(),
+      this.allOrgs.entities$
+    ).pipe(map(([selectedCF, entities]) => {
+      if (selectedCF && entities) {
+        return entities
+          .map(org => org.entity)
+          .filter(org => org.cfGuid === selectedCF)
+          .sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return [];
+    }));
 
     this.org = {
       list$: orgList$,
@@ -274,16 +247,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createSpace() {
-    const spaceList$ = this.getEndpointsAndOrgs$.pipe(
-      switchMap(endpoints => {
-        return combineLatest(
-          this.org.select.asObservable(),
-          observableOf(endpoints),
-          this.allOrgs.entities$
-        );
-      }),
-      map(([selectedOrgGuid, data, orgs]) => {
-        const [orgList, cfList] = data;
+    const spaceList$ = combineLatest(
+      this.org.select.asObservable(),
+      this.allOrgs.entities$
+    ).pipe(
+      map(([selectedOrgGuid, orgs]) => {
         const selectedOrg = orgs.find(org => {
           return org.metadata.guid === selectedOrgGuid;
         });

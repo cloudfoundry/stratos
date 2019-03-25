@@ -77,7 +77,7 @@ function endpointHasMetrics(endpoint: EndpointModel) {
 
 function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
   guid: string
-}, connectionStatus: endpointConnectionStatus) {
+},                                      connectionStatus: endpointConnectionStatus) {
   if (!action.guid) {
     return state;
   }

@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Store, Action } from '@ngrx/store';
+import { Store } from '@ngrx/store';
+
+import {
+  LoggerDebugAction,
+  LoggerErrorAction,
+  LoggerInfoAction,
+  LoggerWarnAction,
+  LogLevel,
+} from '../../../store/src/actions/log.actions';
 import { AppState } from '../../../store/src/app-state';
-import { LoggerInfoAction, LoggerDebugAction, LoggerWarnAction, LoggerErrorAction, LogLevel } from '../../../store/src/actions/log.actions';
 import { environment } from '../environments/environment.prod';
 
 export enum LogLevelStringToNumber {
@@ -34,6 +41,7 @@ export class LoggerService {
         this.store.dispatch(new LoggerWarnAction(message));
         break;
       case LogLevel.INFO:
+        // tslint:disable-next-line:no-console
         func = console.info;
         this.store.dispatch(new LoggerInfoAction(message));
         break;

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
-import { RequestArgs } from '@angular/http/src/interfaces';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
@@ -60,14 +59,13 @@ export class APIEffect {
   ) { }
 
   @Effect()
-  apiRequest$ = this.actions$
-    .ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
-    .pipe(
-      withLatestFrom(this.store),
-      mergeMap(([action, state]) => {
-        return this.doApiRequest(action, state);
-      }),
-    );
+  apiRequest$ = this.actions$.pipe(
+    ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
+    withLatestFrom(this.store),
+    mergeMap(([action, state]) => {
+      return this.doApiRequest(action, state);
+    }),
+  );
 
   private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
     const actionClone = { ...action };
@@ -137,16 +135,14 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
-      if (paginatedAction.flattenPaginationMax < (paginatedAction.initialParams['results-per-page'] || 100)) {
-        throw new Error(`Action cannot contain a maximum amount of results smaller than the page size: ${JSON.stringify(paginatedAction)}`);
-      }
       request = flattenPagination(
         this.store,
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
         paginatedAction.flattenPaginationMax,
         paginatedAction.entityKey,
-        paginatedAction.paginationKey
+        paginatedAction.paginationKey,
+        paginatedAction.__forcedPageSchemaKey__ ? entityFactory(paginatedAction.__forcedPageSchemaKey__).key : null
       );
     }
 
@@ -168,7 +164,8 @@ export class APIEffect {
           this.handleApiEvents(errorsCheck);
         }
 
-        let fakedAction, errorMessage;
+        let fakedAction;
+        let errorMessage;
         errorsCheck.forEach(error => {
           if (error.error) {
             // Dispatch a error action for the specific endpoint that's failed
@@ -284,7 +281,7 @@ export class APIEffect {
       }
       : {
         entity: { ...resource, cfGuid },
-        metadata: { guid: guid },
+        metadata: { guid },
       };
 
     // Inject `cfGuid` in nested entities
@@ -355,7 +352,7 @@ export class APIEffect {
         errorCode: succeeded ? '200' : errorCode,
         guid: cfGuid,
         url: action.options.url,
-        errorResponse: errorResponse,
+        errorResponse,
       };
     });
   }
@@ -425,8 +422,8 @@ export class APIEffect {
                 apiAction.guid,
               );
             }
-            totalResults += cfData['total_results'];
-            totalPages += cfData['total_pages'];
+            totalResults += cfData.total_results;
+            totalPages += cfData.total_pages;
             if (!cfData.resources.length) {
               return null;
             }
@@ -442,11 +439,17 @@ export class APIEffect {
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
     let entityArray;
-    if (apiAction.entity['length'] > 0) {
-      entityArray = apiAction.entity;
+    const pagAction = apiAction as PaginatedAction;
+    if (pagAction.__forcedPageSchemaKey__) {
+      entityArray = [entityFactory(pagAction.__forcedPageSchemaKey__)];
     } else {
-      entityArray = new Array<Schema>();
-      entityArray.push(apiAction.entity);
+      /* tslint:disable-next-line:no-string-literal  */
+      if (apiAction.entity['length'] > 0) {
+        entityArray = apiAction.entity;
+      } else {
+        entityArray = new Array<Schema>();
+        entityArray.push(apiAction.entity);
+      }
     }
 
     return {
@@ -495,7 +498,7 @@ export class APIEffect {
       : {};
   }
 
-  private makeRequest(options: RequestArgs): Observable<any> {
+  private makeRequest(options): Observable<any> {
     return this.http.request(new Request(options)).pipe(
       map(response => {
         let resData;
@@ -547,9 +550,7 @@ export class APIEffect {
 
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
-      const relationInfo = listEntityRelations(
-        action as EntityInlineParentAction,
-      );
+      const relationInfo = this.getEntityRelations(action);
       options.params = options.params || new URLSearchParams();
       if (relationInfo.maxDepth > 0) {
         options.params.set(
@@ -564,6 +565,22 @@ export class APIEffect {
         );
       }
     }
+  }
+
+  private getEntityRelations(action: any) {
+    if (action.__forcedPageSchemaKey__) {
+      const forcedSchema = entityFactory(action.__forcedPageSchemaKey__);
+      return listEntityRelations(
+        {
+          ...action,
+          entity: [forcedSchema],
+          entityKey: forcedSchema.key
+        }
+      );
+    }
+    return listEntityRelations(
+      action as EntityInlineParentAction,
+    );
   }
 
   private setRequestParams(

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 
@@ -14,12 +14,7 @@ import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../action
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
 import { AppState } from './../app-state';
-import {
-  IRequestAction,
-  StartRequestAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess,
-} from './../types/request.types';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 @Injectable()
 export class MetricsEffect {
@@ -30,7 +25,8 @@ export class MetricsEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
+  @Effect() metrics$ = this.actions$.pipe(
+    ofType<MetricsAction>(METRICS_START),
     mergeMap(action => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
       const { guid } = action;
@@ -73,7 +69,8 @@ export class MetricsEffect {
       }));
     }));
 
-  @Effect() metricsAPI$ = this.actions$.ofType<MetricsAPIAction>(METRIC_API_START).pipe(
+  @Effect() metricsAPI$ = this.actions$.pipe(
+    ofType<MetricsAPIAction>(METRIC_API_START),
     mergeMap(action => {
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(action.url, {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }

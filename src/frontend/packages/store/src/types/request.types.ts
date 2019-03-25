@@ -21,7 +21,6 @@ export interface RequestAction extends Action, SingleEntityAction {
 /**
  * The entities in the response can live in a few different places. This will tell us where to look in the response to gather the entities
  * @export
- * @enum {number}
  */
 export enum RequestEntityLocation {
   RESOURCE, // The response is an object and the entities list is within a 'resource' param. Falls back to 'OBJECT' if missing.
@@ -33,9 +32,22 @@ export type IRequestActionEntity = EntitySchema | EntitySchema[];
 export interface IRequestAction extends RequestAction {
   entity?: IRequestActionEntity;
   entityKey: string;
+  /**
+   * This is used for multiaction lists where the deleted entity
+   * is going to be part of another entities pagination section
+   */
+  proxyPaginationEntityKey?: string;
+
+  /**
+   * For a delete action, clear the pagination section for the given keys.
+   * if proxyPaginationEntityKey isn't set, pagination sections for the entityKey will also be deleted.
+   */
+  clearPaginationEntityKeys?: string[];
   endpointGuid?: string;
   updatingKey?: string;
-  // For single entity requests
+  /**
+   * For single entity requests
+   */
   guid?: string;
   entityLocation?: RequestEntityLocation;
   /**

@@ -55,7 +55,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
     this.editOrgName = new FormGroup({
-      orgName: new FormControl('', [<any>Validators.required, this.nameTakenValidator()])
+      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()])
       // toggleStatus: new FormControl(false),
     });
     this.org$ = this.cfOrgService.org$.pipe(
@@ -75,7 +75,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
       const nameValid = this.validate(formField.value);
-      return !nameValid ? { 'nameTaken': { value: formField.value } } : null;
+      return !nameValid ? { nameTaken: { value: formField.value } } : null;
     };
   }
 

@@ -4,15 +4,15 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, share } from 'rxjs/operators';
 
-import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesApp, KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
 import { GetKubernetesApps, GetKubernetesServices } from '../store/kubernetes.actions';
-import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 import { kubernetesAppsSchemaKey, kubernetesServicesSchemaKey } from '../store/kubernetes.entities';
+import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
 @Injectable()
 export class HelmReleaseService {
@@ -37,7 +37,7 @@ export class HelmReleaseService {
 
     this.helmRelease$ = getPaginationObservables<KubernetesApp>({
       store: this.store,
-      action: action,
+      action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
         entityFactory(kubernetesAppsSchemaKey)
@@ -71,7 +71,7 @@ export class HelmReleaseService {
       filter(p => !!p),
       map(p => {
         return p.filter(r => {
-          return r.metadata.labels['release'] === this.helmReleaseName;
+          return r.metadata.labels.release === this.helmReleaseName;
         });
 
       }),

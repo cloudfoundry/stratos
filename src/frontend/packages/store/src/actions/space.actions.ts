@@ -184,7 +184,7 @@ export class CreateSpace extends BaseSpaceAction {
     this.options.url = `spaces`;
     this.options.method = 'post';
     this.options.body = {
-      name: name,
+      name,
       organization_guid: orgGuid
     };
   }
@@ -269,7 +269,7 @@ export class GetServiceInstancesForSpace
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     if (q) {
-      this.initialParams['q'] = q;
+      this.initialParams.q = q;
     }
     this.parentGuid = spaceGuid;
   }
@@ -282,6 +282,7 @@ export class GetServiceInstancesForSpace
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'creation',
+    q: []
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);

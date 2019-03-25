@@ -13,6 +13,7 @@ type Repository interface {
 	Delete(guid string) error
 	Save(guid string, cnsiRecord interfaces.CNSIRecord, encryptionKey []byte) error
 	Update(guid string, ssoAllowed bool) error
+	UpdateMetadata(guid string, metadata string) error
 }
 
 type Endpoint interface {

@@ -1,10 +1,12 @@
-import { SharedModule } from '../../../../shared/shared.module';
-import { CoreModule } from '../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
+
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../../core/core.module';
+import { SharedModule } from '../../../../shared/shared.module';
+import { initEndpointTypes } from '../../endpoint-helpers';
+import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
 
 describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
@@ -18,9 +20,19 @@ describe('CreateEndpointCfStep1Component', () => {
         SharedModule,
         createBasicStoreModule(),
         NoopAnimationsModule
-      ]
+      ],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            queryParams: {},
+            params: { type: 'metrics' }
+          }
+        }
+      }]
     })
       .compileComponents();
+    initEndpointTypes([]);
   }));
 
   beforeEach(() => {

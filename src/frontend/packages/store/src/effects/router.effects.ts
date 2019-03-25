@@ -1,10 +1,10 @@
-
-import {tap, map} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { map, tap } from 'rxjs/operators';
 
 import { RouterActions, RouterNav } from '../actions/router.actions';
+
 
 
 @Injectable()
@@ -16,7 +16,8 @@ export class RouterEffect {
   ) { }
 
   @Effect({ dispatch: false })
-  routerGoUrl$ = this.actions$.ofType<RouterNav>(RouterActions.GO).pipe(
+  routerGoUrl$ = this.actions$.pipe(
+    ofType<RouterNav>(RouterActions.GO),
     map((action: RouterNav) => action.payload),
     tap(({ path, query: queryParams, extras = {} }) => {
       const extraParams = { ...extras, queryParams };
@@ -24,5 +25,5 @@ export class RouterEffect {
         path = path.split('/');
       }
       this.router.navigate(path, extraParams);
-    }), );
+    }));
 }

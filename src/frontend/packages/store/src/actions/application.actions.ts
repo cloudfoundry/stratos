@@ -1,4 +1,6 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
+
+import { IApp } from '../../../core/src/core/cf-api.types';
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
@@ -6,7 +8,6 @@ import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
-import { IApp } from '../../../core/src/core/cf-api.types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -62,7 +63,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     'results-per-page': 100,
   };
   flattenPagination = true;
-  flattenPaginationMax = 500;
+  flattenPaginationMax = 600;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
@@ -113,12 +114,9 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
 
   /**
    * Creates an instance of UpdateExistingApplication.
-   * @param {string} guid
-   * @param {string} endpointGuid
-   * @param {UpdateApplication} newApplication Sparsely populated application containing updated settings
-   * @param {IApp} [existingApplication] Existing application. Used in a few specific cases
-   * @param {AppMetadataTypes[]} [updateEntities] List of metadata calls to make if we successfully update the application
-   * @memberof UpdateExistingApplication
+   * @param newApplication Sparsely populated application containing updated settings
+   * @param [existingApplication] Existing application. Used in a few specific cases
+   * @param [updateEntities] List of metadata calls to make if we successfully update the application
    */
   constructor(
     public guid: string,
@@ -141,7 +139,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
     const keepFromOld = pick(
       oldEntities[applicationSchemaKey][this.guid].entity,
-      Object.keys(applicationEntitySchema['schema'])
+      Object.keys(applicationEntitySchema.schema)
     );
     newEntities[applicationSchemaKey][this.guid].entity = {
       ...newEntities[applicationSchemaKey][this.guid].entity,

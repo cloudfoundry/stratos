@@ -2,7 +2,6 @@ import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../../../store/src/actions/request.actions';
 import { AppState } from '../../../store/src/app-state';
 import {
@@ -14,6 +13,7 @@ import {
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
 import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
+import { EntityMonitor } from '../shared/monitors/entity-monitor';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -38,7 +38,7 @@ export class EntityService<T = any> {
     public validateRelations = true,
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
-    this.actionDispatch = (updatingKey) => {
+    this.actionDispatch = (updatingKey?: string) => {
       if (updatingKey) {
         action.updatingKey = updatingKey;
       }
@@ -87,9 +87,9 @@ export class EntityService<T = any> {
 
   refreshKey = 'updating';
 
-  private actionDispatch: Function;
+  private actionDispatch: (key: string) => void;
 
-  updateEntity: Function;
+  updateEntity: () => void;
 
   entityObs$: Observable<EntityInfo<T>>;
 
@@ -102,7 +102,7 @@ export class EntityService<T = any> {
   updatingSection$: Observable<UpdatingSection>;
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
-    actionDispatch: Function
+    actionDispatch: (key?: string) => void
   ): Observable<EntityInfo> => {
     const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
     return entityMonitor.entityRequest$.pipe(

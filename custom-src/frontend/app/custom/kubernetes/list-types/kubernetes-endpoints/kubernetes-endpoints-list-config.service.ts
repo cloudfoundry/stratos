@@ -1,15 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
-import {
-  EndpointCardComponent,
-} from '../../../../shared/components/list/list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
-import { endpointColumns } from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
-import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { BaseEndpointsDataSource } from '../../../../shared/components/list/list-types/cf-endpoints/base-endpoints-data-source';
+import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import { BaseEndpointsDataSource } from '../../../../shared/components/list/list-types/endpoint/base-endpoints-data-source';
+import {
+  EndpointCardComponent,
+} from '../../../../shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
+import { endpointColumns } from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
+import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
+import { EntityMonitorFactory } from '../../../../shared/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../shared/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { KubernetesEndpointsDataSource } from './kubernetes-endpoints-data-source';
 
 @Injectable()
 export class KubernetesEndpointsListConfigService implements IListConfig<EndpointModel> {
@@ -29,11 +33,20 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
 
   constructor(
     private store: Store<AppState>,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    entityMonitorFactory: EntityMonitorFactory,
+    internalEventMonitorFactory: InternalEventMonitorFactory
   ) {
     this.columns = endpointColumns.filter(column => {
       return column.columnId !== 'type';
     });
-    this.dataSource = new BaseEndpointsDataSource(this.store, this, 'k8s');
+    this.dataSource = new KubernetesEndpointsDataSource(
+      this.store,
+      this,
+      paginationMonitorFactory,
+      entityMonitorFactory,
+      internalEventMonitorFactory
+    );
   }
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];

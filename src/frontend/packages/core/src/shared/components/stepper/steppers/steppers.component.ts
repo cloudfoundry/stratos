@@ -13,12 +13,12 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../core/logger.service';
-import { SteppersService } from '../steppers.service';
-import { StepComponent } from './../step/step.component';
+import { IRouterNavPayload, RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { LoggerService } from '../../../../core/logger.service';
+import { SteppersService } from '../steppers.service';
+import { StepComponent, StepOnNextResult } from './../step/step.component';
 
 
 
@@ -34,10 +34,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private nextSub: Subscription;
   cancel$: Observable<string>;
 
-  @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
+  @ContentChildren(StepComponent) stepComponents: QueryList<StepComponent>;
 
   @Input() cancel = null;
   @Input() nextButtonProgress = true;
+  @Input() basePreviousRedirect: IRouterNavPayload;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
@@ -65,7 +66,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       map(previousState => {
         // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
         // cancel state is
-        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : this.cancel;
+        if (this.cancel) {
+          return this.cancel;
+        }
+        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home';
       })
     );
     this.cancelQueryParams$ = previousRoute$.pipe(
@@ -84,7 +88,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   ngAfterContentInit() {
-    this.allSteps = this._steps.toArray();
+    this.allSteps = this.stepComponents.toArray();
     this.setActive(0);
 
     this.allSteps.forEach((step => {
@@ -104,7 +108,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.snackBarRef) {
       this.snackBar.dismiss();
     }
-
     this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
@@ -118,9 +121,16 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         first(),
         catchError(err => {
           this.logger.warn('Stepper failed: ', err);
-          return observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false });
+          return observableOf({
+            success: false,
+            message: 'Failed',
+            redirectPayload: null,
+            redirect: false,
+            data: {},
+            ignoreSuccess: false
+          } as StepOnNextResult);
         }),
-        switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
+        switchMap(({ success, data, message, redirect, redirectPayload, ignoreSuccess }) => {
           this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
@@ -128,7 +138,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           if (success && !ignoreSuccess) {
             if (redirect) {
               // Must sub to this
-              return this.redirect();
+              return this.redirect(redirectPayload);
             } else {
               this.setActive(this.currentIndex + 1);
             }
@@ -140,18 +150,28 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  redirect() {
+  redirect(redirectPayload?: IRouterNavPayload) {
+    if (redirectPayload) {
+      return observableOf(this.dispatchRedirect(redirectPayload));
+    }
     return combineLatest(
       this.cancel$,
       this.cancelQueryParams$
     ).pipe(
       map(([path, params]) => {
-        this.store.dispatch(new RouterNav({ path: path, query: params }));
+        this.dispatchRedirect({ path, query: params });
       })
     );
   }
 
+  private dispatchRedirect(redirectPayload: IRouterNavPayload) {
+    this.store.dispatch(new RouterNav(redirectPayload));
+  }
+
   setActive(index: number) {
+    if (this.basePreviousRedirect && index < 0) {
+      this.dispatchRedirect(this.basePreviousRedirect);
+    }
     if (!this.canGoto(index)) {
       if (index === 0) {
         if (this.allSteps && this.allSteps.length > 0) {
@@ -159,7 +179,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           const timer = setInterval(() => {
             if (this.allSteps[index].blocked === false) {
               this.allSteps[index].active = true;
-              this.allSteps[index]._onEnter(this.enterData);
+              if (this.allSteps[index].onEnter) {
+                this.allSteps[index].onEnter(this.enterData);
+              }
               clearInterval(timer);
             }
           }, 5);
@@ -179,12 +201,14 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
 
     // 3) Set stepper state WRT required step
-    this.steps.forEach((_step, i) => {
-      _step.complete = i < index;
-      _step.active = i === index;
+    this.steps.forEach((s, i) => {
+      s.complete = i < index;
+      s.active = i === index;
     });
     this.currentIndex = index;
-    this.steps[this.currentIndex]._onEnter(this.enterData);
+    if (this.steps[this.currentIndex].onEnter) {
+      this.steps[this.currentIndex].onEnter(this.enterData);
+    }
     this.enterData = undefined;
   }
 
@@ -213,6 +237,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   canGoto(index: number): boolean {
+    if (index < 0 && this.basePreviousRedirect) {
+      return true;
+    }
     const step = this.steps[this.currentIndex];
     if (!step || step.busy || step.disablePrevious || step.skip) {
       return false;
@@ -235,7 +262,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  canGoNext(index) {
+  canGoNext(index: number) {
     if (
       !this.steps[index] ||
       !this.steps[index].valid ||
@@ -246,7 +273,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  canCancel(index) {
+  canCancel(index: number) {
     if (
       !this.steps[index] ||
       !this.steps[index].canClose

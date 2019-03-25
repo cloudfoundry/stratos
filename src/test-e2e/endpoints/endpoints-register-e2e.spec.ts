@@ -2,11 +2,13 @@ import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
 import { SnackBarComponent } from '../po/snackbar.po';
+import { TileSelector } from '../po/tile-selector.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 import { RegisterDialog } from './register-dialog.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
+  const tileSelector = new TileSelector();
   const register = new RegisterDialog();
 
   const validEndpoint = e2e.secrets.getDefaultCFEndpoint();
@@ -24,6 +26,7 @@ describe('Endpoints', () => {
     beforeEach(() => {
       endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
       endpointsPage.register();
+      tileSelector.select('Cloud Foundry');
       expect(register.isRegisterDialog()).toBeTruthy();
       expect(register.stepper.canCancel()).toBeTruthy();
     });
@@ -31,7 +34,7 @@ describe('Endpoints', () => {
     it('should show add form detail view when btn in tile is pressed', () => {
       expect(register.stepper.canNext()).toBeFalsy();
       expect(register.stepper.canCancel()).toBeTruthy();
-      expect(register.stepper.canPrevious()).toBeFalsy();
+      expect(register.stepper.canPrevious()).toBeTruthy();
     });
 
     describe('Form -', () => {
@@ -155,7 +158,7 @@ describe('Endpoints', () => {
         expect(snackBar.hasMessage('SSL error - x509: certificate')).toBeTruthy();
         /* tslint:disable-line:max-line-length*/
         expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"'))
-        .toBeTruthy();
+          .toBeTruthy();
       });
 
       it('Successful register', () => {
@@ -169,9 +172,9 @@ describe('Endpoints', () => {
         register.stepper.next();
 
         expect(endpointsPage.isActivePage()).toBeTruthy();
-        expect(endpointsPage.table.isPresent()).toBeTruthy();
+        expect(endpointsPage.cards.isPresent()).toBeTruthy();
 
-        endpointsPage.table.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
+        endpointsPage.cards.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
           expect(data.name).toEqual(validEndpoint.name);
           expect(data.url).toEqual(validEndpoint.url);
           expect(data.connected).toBeFalsy();

@@ -1,6 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
@@ -9,8 +11,6 @@ import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -28,14 +28,16 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
+
     if (row) {
-      this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, entityFactory(serviceInstancesSchemaKey));
       this.serviceInstanceEntity = row;
+      const schema = entityFactory(serviceInstancesSchemaKey);
+      this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
       this.serviceInstanceTags = row.entity.tags.map(t => ({
         value: t
       }));
       this.cfGuid = row.entity.cfGuid;
-      this.hasMultipleBindings.next(!(row.entity.service_bindings.length > 0));
+      this.hasMultipleBindings.next(!(row.entity.service_bindings && row.entity.service_bindings.length > 0));
       this.cardMenu = [
         {
           label: 'Edit',
@@ -77,10 +79,12 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
   detach = () => {
-    this.serviceActionHelperService.detachServiceBinding
-      (this.serviceInstanceEntity.entity.service_bindings,
+    this.serviceActionHelperService.detachServiceBinding(
+      this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
-      this.serviceInstanceEntity.entity.cfGuid);
+      this.serviceInstanceEntity.entity.cfGuid,
+      false
+    );
   }
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(
@@ -91,7 +95,8 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   edit = () => this.serviceActionHelperService.editServiceBinding(
     this.serviceInstanceEntity.metadata.guid,
-    this.serviceInstanceEntity.entity.cfGuid
+    this.serviceInstanceEntity.entity.cfGuid,
+    null
   )
 
   getServiceName = () => {
@@ -117,6 +122,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     this.serviceInstanceEntity.entity.space_guid,
     'summary'
   ]
-  getSpaceBreadcrumbs = () => ({ 'breadcrumbs': 'services-wall' });
+  getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
 }

@@ -6,6 +6,7 @@ import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router
 import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
 
+import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { GetAllEndpoints } from '../../store/src/actions/endpoint.actions';
 import { GetOrganization } from '../../store/src/actions/organization.actions';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
@@ -38,6 +39,7 @@ import { CurrentUserPermissionsService } from './core/current-user-permissions.s
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
+import { LoggerService } from './core/logger.service';
 import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
@@ -112,6 +114,7 @@ export class CustomRouterStateSerializer
     AboutModule,
     CustomImportModule,
     XSRFModule,
+    CloudFoundryModule
   ],
   providers: [
     LoggedInService,
@@ -130,13 +133,14 @@ export class AppModule {
     private permissionService: CurrentUserPermissionsService,
     private appStateService: ApplicationStateService,
     private store: Store<AppState>,
+    private logger: LoggerService
   ) {
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     initEndpointExtensions(ext);
     // Once the CF modules become an extension point, these should be moved to a CF specific module
     this.registerCfFavoriteMappers();
-    this.userFavoriteManager = new UserFavoriteManager(store);
+    this.userFavoriteManager = new UserFavoriteManager(store, logger);
     const allFavs$ = this.userFavoriteManager.getAllFavorites();
     const recents$ = this.store.select(recentlyVisitedSelector);
     const debouncedApiRequestData$ = this.store.select(getAPIRequestDataState).pipe(debounceTime(2000));

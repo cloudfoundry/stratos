@@ -1,7 +1,7 @@
 import { CreatePagination } from '../../actions/pagination.actions';
-import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { PaginationState } from '../../types/pagination.types';
-import { getDefaultPaginationEntityState } from './pagination-reducer.helper';
+import { createNewPaginationSection } from './pagination-reducer-create-pagination';
+import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
 describe('CreatePaginationActionReducer', () => {
   const entityKey = 'entityKey';
@@ -66,8 +66,8 @@ describe('CreatePaginationActionReducer', () => {
       'paginationKey'
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
-    expect(paginationState[entityKey]['paginationKey'].ids).toEqual(state[entityKey][paginationKey].ids);
-    expect(paginationState[entityKey]['paginationKey'].pageRequests).toEqual(state[entityKey][paginationKey].pageRequests);
+    expect(paginationState[entityKey].paginationKey.ids).toEqual(state[entityKey][paginationKey].ids);
+    expect(paginationState[entityKey].paginationKey.pageRequests).toEqual(state[entityKey][paginationKey].pageRequests);
   });
 
 });

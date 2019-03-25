@@ -34,6 +34,7 @@ export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 export const userFavoritesSchemaKey = 'userFavorites';
+export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -48,19 +49,17 @@ export const entityCache: {
  * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
  *
  * @export
- * @class EntitySchema
  * @extends {schema.Entity}
  */
 export class EntitySchema extends schema.Entity {
   schema: Schema;
   public getId: (input, parent?, key?) => string;
   /**
-   * @param {string} entityKey As per schema.Entity ctor
-   * @param {Schema} [definition] As per schema.Entity ctor
-   * @param {schema.EntityOptions} [options] As per schema.Entity ctor
-   * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
+   * @param entityKey As per schema.Entity ctor
+   * @param [definition] As per schema.Entity ctor
+   * @param [options] As per schema.Entity ctor
+   * @param [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
    * spaces, manager spaces, auditor space, etc
-   * @memberof EntitySchema
    */
   constructor(
     private entityKey: string,
@@ -389,6 +388,16 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
     }
   });
 entityCache[cfUserSchemaKey] = CFUserSchema;
+
+
+const UserProvidedServiceInstanceSchema = new EntitySchema(userProvidedServiceInstanceSchemaKey, {
+  entity: {
+    space: SpaceWithOrgsEntitySchema,
+    service_bindings: [ServiceBindingsSchema],
+    routes: [RouteSchema]
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[userProvidedServiceInstanceSchemaKey] = UserProvidedServiceInstanceSchema;
 
 
 export function entityFactory(key: string): EntitySchema {

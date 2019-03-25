@@ -9,7 +9,8 @@ export function paginationPageBusy(state: PaginationEntityState, action): Pagina
     pageRequests: {
       ...state.pageRequests,
       [page]: {
-        busy: busy,
+        ...state.pageRequests[page],
+        busy,
         error: !!error,
         message: error
       }

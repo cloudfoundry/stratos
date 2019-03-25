@@ -1,21 +1,21 @@
-
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
-import { withLatestFrom, skipWhile, map, first, filter } from 'rxjs/operators';
+import { RouterNav } from '../../../store/src/actions/router.actions';
+import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import {
   endpointEntitiesSelector,
+  endpointsEntityRequestDataSelector,
   endpointStatusSelector,
-  endpointsEntityRequestDataSelector
 } from '../../../store/src/selectors/endpoint.selectors';
-import { Injectable } from '@angular/core';
-import { EndpointState, EndpointModel } from '../../../store/src/types/endpoint.types';
-import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
+import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
+import { getEndpointType } from '../features/endpoints/endpoint-helpers';
 import { UserService } from './user.service';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { RouterNav } from '../../../store/src/actions/router.actions';
-import { endpointHealthChecks, EndpointHealthCheck } from '../../endpoints-health-checks';
 
 
 @Injectable()
@@ -24,6 +24,17 @@ export class EndpointsService implements CanActivate {
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
+
+  static getLinkForEndpoint(endpoint: EndpointModel): string {
+    if (!endpoint) {
+      return '';
+    }
+    const ext = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
+    if (ext && ext.homeLink) {
+      return ext.homeLink(endpoint.guid).join('/');
+    }
+    return '';
+  }
 
   constructor(
     private store: Store<AppState>,
@@ -100,6 +111,5 @@ export class EndpointsService implements CanActivate {
       })
     );
   }
-
 
 }

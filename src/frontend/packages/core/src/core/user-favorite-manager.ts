@@ -23,6 +23,7 @@ import {
   favoritesConfigMapper,
   TFavoriteMapperFunction,
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
+import { LoggerService } from './logger.service';
 
 export interface IFavoriteEntity {
   type: string;
@@ -51,7 +52,10 @@ export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetada
 }
 
 export class UserFavoriteManager {
-  constructor(private store: Store<AppState>) { }
+  constructor(
+    private store: Store<AppState>,
+    private logger: LoggerService
+    ) { }
 
   private getTypeAndID(favorite: UserFavorite<IFavoriteMetadata>) {
     const type = favorite.entityType;
@@ -122,7 +126,7 @@ export class UserFavoriteManager {
     if (!endpointFav) {
       return this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
-          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
+          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid, this.logger);
           const endpointEntity = endpoints[endpointGuid];
           return new UserFavoriteEndpoint(
             endpointGuid,

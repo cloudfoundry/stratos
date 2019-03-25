@@ -1,6 +1,7 @@
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import { CardTypes } from '../../list-cards/card/card.component';
+import { IListConfig, ListViewTypes } from '../../list.component.types';
 
 
 export class BaseCfListConfig<T> implements IListConfig<T> {
@@ -8,7 +9,7 @@ export class BaseCfListConfig<T> implements IListConfig<T> {
   isLocal = true;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  cardComponent;
+  cardComponent: CardTypes<T>;
   enableTextFilter = false;
   showMetricsRange = false;
   getColumns = () => [];

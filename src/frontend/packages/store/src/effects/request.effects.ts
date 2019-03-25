@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { LoggerService } from '../../../core/src/core/logger.service';
+import { UtilsService } from '../../../core/src/core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
 import {
   APIResponse,
@@ -22,8 +24,6 @@ import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
 import { UpdateCfAction } from '../types/request.types';
-import { UtilsService } from '../../../core/src/core/utils.service';
-import { LoggerService } from '../../../core/src/core/logger.service';
 
 
 @Injectable()
@@ -66,9 +66,9 @@ export class RequestEffect {
    * 5) alternatively... if we've reached here for the same space but from an api request for that space.. ensure that the routes have not
    *    been dropped because their count is over 50
    *
-   * @memberof RequestEffect
    */
-  @Effect() validateEntities$ = this.actions$.ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE).pipe(
+  @Effect() validateEntities$ = this.actions$.pipe(
+    ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
     mergeMap(action => {
       const validateAction: ValidateEntitiesStart = action;
       const apiAction = validateAction.action;
@@ -80,8 +80,6 @@ export class RequestEffect {
         withLatestFrom(this.store.select(getPaginationState)),
         first(),
         map(([allEntities, allPagination]) => {
-          // The apiResponse will be null if we're validating as part of the entity service, not during an api request
-          const entities = apiResponse ? apiResponse.response.entities : null;
           return apiAction.skipValidation ? {
             started: false,
             completed: Promise.resolve(apiResponse),
@@ -116,19 +114,21 @@ export class RequestEffect {
             independentUpdates
           )];
         })
-      ).pipe(catchError(error => {
-        this.logger.warn(`Entity validation process failed`, error);
-        if (validateAction.apiRequestStarted) {
-          return getFailApiRequestActions(apiAction, error, requestType);
-        } else {
-          this.update(apiAction, false, error.message);
-          return [];
-        }
-      }));
+      )
+        .pipe(catchError(error => {
+          this.logger.warn(`Entity validation process failed`, error);
+          if (validateAction.apiRequestStarted) {
+            return getFailApiRequestActions(apiAction, error, requestType);
+          } else {
+            this.update(apiAction, false, error.message);
+            return [];
+          }
+        }));
     })
   );
 
-  @Effect() completeEntities$ = this.actions$.ofType<EntitiesPipelineCompleted>(EntitiesPipelineActionTypes.COMPLETE).pipe(
+  @Effect() completeEntities$ = this.actions$.pipe(
+    ofType<EntitiesPipelineCompleted>(EntitiesPipelineActionTypes.COMPLETE),
     mergeMap(action => {
       const completeAction: EntitiesPipelineCompleted = action;
       const actions = [];
@@ -153,10 +153,16 @@ export class RequestEffect {
           (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
+          const entityKey = apiAction.proxyPaginationEntityKey || apiAction.entityKey;
           if (apiAction.removeEntityOnDelete) {
-            actions.unshift(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+            actions.unshift(new ClearPaginationOfEntity(entityKey, apiAction.guid));
           } else {
-            actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
+            actions.unshift(new ClearPaginationOfType(entityKey));
+          }
+
+          if (Array.isArray(apiAction.clearPaginationEntityKeys)) {
+            // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
+            actions.push(...apiAction.clearPaginationEntityKeys.map(key => new ClearPaginationOfType(key)));
           }
         }
       }
@@ -165,11 +171,11 @@ export class RequestEffect {
 
 
   update(apiAction, busy: boolean, error: string) {
-    if (apiAction['paginationKey']) {
+    if (apiAction.paginationKey) {
       this.store.dispatch({
         type: SET_PAGE_BUSY,
-        busy: busy,
-        error: error,
+        busy,
+        error,
         apiAction
       });
     } else {
@@ -184,7 +190,3 @@ export class RequestEffect {
   }
 
 }
-
-
-
-

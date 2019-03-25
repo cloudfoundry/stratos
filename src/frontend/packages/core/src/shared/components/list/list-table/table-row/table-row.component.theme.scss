@@ -38,4 +38,9 @@
       border-left-color: $primary-color;
     }
   }
+  .meta-card {
+    &.error {
+      background-color: transparentize($error-color, .9);
+    }
+  }
 }

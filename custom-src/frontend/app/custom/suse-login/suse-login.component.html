@@ -17,7 +17,8 @@
           <mat-form-field *ngIf="!ssoLogin">
             <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
           </mat-form-field>
-          <button class="suse-login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!loginForm.valid">
+          <button class="suse-login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button
+            [disabled]="!loginForm.valid">
             {{ !ssoLogin ? 'Login' : 'Login with SSO' }}
           </button>
         </form>
@@ -25,7 +26,8 @@
       <div id="login__loading" class="suse-login__loading">
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
       </div>
-      <div id="login-error-message" class="suse-login__message" [ngClass]="{'suse-login__message--show': !!message, 'suse-login__message-error': this.error}">
+      <div id="login-error-message" class="suse-login__message"
+        [ngClass]="{'suse-login__message--show': !!message, 'suse-login__message-error': this.error}">
         {{ message }}
       </div>
     </div>
@@ -35,7 +37,7 @@
       <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
     </div>
     <div class="suse-login__logo">
-      <a href="https://www.suse.com" target="_blank"><img src="/assets/custom/suse_logo.png"></a>
+      <a href="https://www.suse.com" target="_blank"><img src="/core/assets/custom/suse_logo.png"></a>
     </div>
   </div>
 </div>

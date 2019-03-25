@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -11,6 +10,10 @@ import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
+import {
+  AddServiceInstanceBaseStepComponent,
+} from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
 import {
   AddServiceInstanceComponent,
 } from './components/add-service-instance/add-service-instance/add-service-instance.component';
@@ -21,6 +24,9 @@ import { SelectServiceComponent } from './components/add-service-instance/select
 import {
   SpecifyDetailsStepComponent,
 } from './components/add-service-instance/specify-details-step/specify-details-step.component';
+import {
+  SpecifyUserProvidedDetailsComponent,
+} from './components/add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -94,6 +100,7 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -124,6 +131,7 @@ import { StartEndDateComponent } from './components/start-end-date/start-end-dat
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
@@ -147,9 +155,11 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
+/* tslint:disable:max-line-length */
 
 @NgModule({
   imports: [
@@ -264,7 +274,12 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesGlobalListComponent,
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
-    MultilineTitleComponent
+    MultilineTitleComponent,
+    TileSelectorComponent,
+    SpecifyUserProvidedDetailsComponent,
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective,
+    EndpointCardComponent
   ],
   exports: [
     FormsModule,
@@ -363,7 +378,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     StackedInputActionComponent,
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
-    MultilineTitleComponent
+    MultilineTitleComponent,
+    TileSelectorComponent,
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -383,7 +401,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     ServiceActionHelperService,
     MetricsRangeSelectorService,
     GitSCMService,
-    MetricsRangeSelectorService
+    MetricsRangeSelectorService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class SharedModule { }

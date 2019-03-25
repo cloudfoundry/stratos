@@ -5,6 +5,7 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { LoggerService } from '../../../../../../core/logger.service';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
@@ -16,7 +17,7 @@ import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.compo
 export interface MetaCardMenuItem {
   icon?: string;
   label: string;
-  action: Function;
+  action: () => void;
   can?: Observable<boolean>;
   disabled?: Observable<boolean>;
 }
@@ -51,6 +52,8 @@ export class MetaCardComponent {
   statusIconByTitle = false;
   @Input()
   statusIconTooltip: string;
+  @Input()
+  statusBackground = false;
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
@@ -76,7 +79,7 @@ export class MetaCardComponent {
   @Input('actionMenu')
   set actionMenu(actionMenu: MetaCardMenuItem[]) {
     if (actionMenu) {
-      this._actionMenu = actionMenu.map(menuItem => {
+      this.pActionMenu = actionMenu.map(menuItem => {
         if (!menuItem.can) {
           menuItem.can = observableOf(true);
         }
@@ -87,16 +90,20 @@ export class MetaCardComponent {
       );
     }
   }
+  get actionMenu(): MetaCardMenuItem[] {
+    return this.pActionMenu;
+  }
 
-  public _actionMenu: MetaCardMenuItem[];
+  private pActionMenu: MetaCardMenuItem[];
   public showMenu$: Observable<boolean>;
 
   @Input()
-  clickAction: Function = null;
+  clickAction: () => void = null;
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
-    store: Store<AppState>
+    store: Store<AppState>,
+    private logger: LoggerService
   ) {
     if (this.actionMenu) {
       this.actionMenu = this.actionMenu.map(element => {
@@ -106,7 +113,7 @@ export class MetaCardComponent {
         return element;
       });
     }
-    this.userFavoriteManager = new UserFavoriteManager(store);
+    this.userFavoriteManager = new UserFavoriteManager(store, logger);
   }
 
   cancelPropagation = (event) => {

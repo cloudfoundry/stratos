@@ -2,6 +2,23 @@
 
 Weekly status updates are published here.
 
+## 8 March 2019
+
+This week:
+
+- Added a card view to the endpoints view
+- Continued to refine the support for User Provided Service Instances
+- Working on support to allow list views to show different entity types in the same list
+- Ensured features requiring persistence database are not enabled when using SQLite
+
+## 1 March 2019
+
+This week:
+
+- Updated the front-end code to use Angular 7 (in review)
+- Continued to add support for User Provided Service Instances
+- Reviewed, tweaked and merged our first phase of work on improving extensions support
+
 ## 22 February 2019
 
 This week:

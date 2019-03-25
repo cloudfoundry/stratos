@@ -45,8 +45,6 @@ export class ResetPagination implements BasePaginatedAction {
 
 export class CreatePagination implements BasePaginatedAction {
   /**
-   * @param entityKey
-   * @param paginationKey
    * @param seed The pagination key for the section we should use as a seed when creating the new pagination section.
    */
   constructor(public entityKey: string, public paginationKey: string, public seed?: string) {
@@ -66,8 +64,12 @@ export class SetPage implements BasePaginatedAction {
     public entityKey: string,
     public paginationKey: string,
     public pageNumber: number,
-    public keepPages = false
+    public keepPages = false,
+    public forceLocalPage = false
   ) {
+    if (forceLocalPage) {
+      keepPages = true;
+    }
   }
   type = SET_PAGE;
 }
@@ -165,6 +167,7 @@ export class UpdatePaginationMaxedState implements Action {
     public max: number,
     public allEntities: number,
     public entityKey: string,
-    public paginationKey: string
+    public paginationKey: string,
+    public forcedEntityKey?: string
   ) { }
 }

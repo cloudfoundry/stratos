@@ -1,11 +1,35 @@
 import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
-import { PaginationEntityState, PaginatedAction, PaginationParam } from '../../../../../../store/src/types/pagination.types';
-import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 
+import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
+import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
+import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
+
+export interface IEntitySelectItem {
+  page: number;
+  label: string;
+  schemaKey: string;
+}
+
+/**
+ * Drives the entity list entity select
+ */
+export class EntitySelectConfig {
+  /**
+   * Creates an instance of EntitySelectConfig.
+   * @param selectPlaceholder Placeholder text to show.
+   * @param selectEmptyText The text shown when no value is selected
+   * @param entitySelectItems Dictates which pagination page
+   * is storing which entity ids. Used in the pagination monitor.
+   */
+  constructor(
+    public selectPlaceholder: string,
+    public selectEmptyText: string,
+    public entitySelectItems: IEntitySelectItem[]
+  ) { }
+}
 export interface AppEvent {
   actee_name: string;
   actee_type: string;
@@ -13,7 +37,7 @@ export interface AppEvent {
   actor_name: string;
   actor_type: string;
   actor_username: string;
-  metadata: Object;
+  metadata: object;
   organization_guid: string;
   space_guid: string;
   timestamp: string;
@@ -34,7 +58,8 @@ export class ListActionConfig<T> {
 
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
-  getRowState?(row: T): Observable<RowState>;
+
+  getRowState?(row: T, schemaKey?: string): Observable<RowState>;
   trackBy(index: number, item: T);
 }
 
@@ -49,11 +74,14 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
     entities: T[],
     paginationState: PaginationEntityState
   ) => T[])[];
-  action: PaginatedAction;
+  action: PaginatedAction | PaginatedAction[];
   entityKey: string;
   paginationKey: string;
 
+
   page$: Observable<T[]>;
+
+  isMultiAction$?: Observable<boolean>;
 
   addItem: T;
   isAdding$: BehaviorSubject<boolean>;
@@ -70,6 +98,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
+  entitySelectConfig?: EntitySelectConfig; // For multi action lists, this is used to configure the entity select.
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
   selectClear();

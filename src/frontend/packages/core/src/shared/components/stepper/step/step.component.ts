@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 
+import { IRouterNavPayload } from '../../../../../../store/src/actions/router.actions';
+
 export interface IStepperStep {
   validate: Observable<boolean>;
   onNext: StepOnNextFunction;
@@ -12,6 +14,7 @@ export interface StepOnNextResult {
   message?: string;
   // Should we redirect to the store previous state?
   redirect?: boolean;
+  redirectPayload?: IRouterNavPayload;
   // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
   ignoreSuccess?: boolean;
   data?: any;
@@ -27,13 +30,13 @@ export type StepOnNextFunction = () => Observable<StepOnNextResult>;
 })
 export class StepComponent {
 
-  public _onEnter: (data?: any) => void;
+  public pOnEnter: (data?: any) => void;
   active = false;
   complete = false;
   error = false;
   busy = false;
 
-  _hidden = false;
+  pHidden = false;
 
   @Input()
   title: string;
@@ -42,12 +45,12 @@ export class StepComponent {
 
   @Input()
   set hidden(hidden: boolean) {
-    this._hidden = hidden;
-    this.onHidden.emit(this._hidden);
+    this.pHidden = hidden;
+    this.onHidden.emit(this.pHidden);
   }
 
   get hidden() {
-    return this._hidden;
+    return this.pHidden;
   }
 
   @Input()
@@ -55,6 +58,9 @@ export class StepComponent {
 
   @Input()
   canClose = true;
+
+  @Input()
+  hideNextButton = false;
 
   @Input()
   nextButtonText = 'Next';
@@ -90,14 +96,16 @@ export class StepComponent {
   onLeave: (isNext?: boolean) => void = () => { }
 
   constructor() {
-    this._onEnter = (data?: any) => {
-      if (this.destructiveStep) {
-        this.busy = true;
-        setTimeout(() => {
-          this.busy = false;
-        }, 1000);
+    this.pOnEnter = (data?: any) => {
+      if (this.onEnter) {
+        if (this.destructiveStep) {
+          this.busy = true;
+          setTimeout(() => {
+            this.busy = false;
+          }, 1000);
+        }
+        this.onEnter(data);
       }
-      this.onEnter(data);
     };
   }
 

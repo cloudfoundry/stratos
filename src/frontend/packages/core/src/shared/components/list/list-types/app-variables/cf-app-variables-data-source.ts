@@ -1,17 +1,22 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../features/applications/application.service';
-
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IListConfig } from '../../list.component.types';
+import { GetAppEnvVarsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
+import { AppVariablesAdd, AppVariablesEdit } from '../../../../../../../store/src/actions/app-variables.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import {
+  appEnvVarsSchemaKey,
+  applicationSchemaKey,
+  entityFactory,
+} from '../../../../../../../store/src/helpers/entity-factory';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppEnvVarsState } from '../../../../../../../store/src/types/app-metadata.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { GetAppEnvVarsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
-import { entityFactory, appEnvVarsSchemaKey, applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { AppVariablesAdd, AppVariablesEdit } from '../../../../../../../store/src/actions/app-variables.actions';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 export interface ListAppEnvVar {
   name: string;
@@ -25,16 +30,16 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
 
   constructor(
     store: Store<AppState>,
-    _appService: ApplicationService,
+    appService: ApplicationService,
     listConfig: IListConfig<ListAppEnvVar>
   ) {
     super({
       store,
-      action: new GetAppEnvVarsAction(_appService.appGuid, _appService.cfGuid),
+      action: new GetAppEnvVarsAction(appService.appGuid, appService.cfGuid),
       schema: entityFactory(appEnvVarsSchemaKey),
       getRowUniqueId: object => object.name,
       getEmptyType: () => ({ name: '', value: '', }),
-      paginationKey: createEntityRelationPaginationKey(applicationSchemaKey, _appService.appGuid),
+      paginationKey: createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
       transformEntity: map(variables => {
         if (!variables || variables.length === 0) {
           return [];
@@ -48,8 +53,8 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
       listConfig
     });
 
-    this.cfGuid = _appService.cfGuid;
-    this.appGuid = _appService.appGuid;
+    this.cfGuid = appService.cfGuid;
+    this.appGuid = appService.appGuid;
   }
 
   saveAdd() {

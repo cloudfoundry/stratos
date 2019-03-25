@@ -27,8 +27,8 @@ export class ApplicationE2eHelper {
 
   /**
    * Get default sanitized URL name for App
-   * @param {string} appName Name of the app
-   * @returns {string} URL friendly name
+   * @param appName Name of the app
+   * @returns URL friendly name
    */
   static getHostName = (appName) => appName.replace(/[\.:-]/g, '_');
 

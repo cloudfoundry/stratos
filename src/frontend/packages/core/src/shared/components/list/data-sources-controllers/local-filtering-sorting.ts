@@ -1,4 +1,5 @@
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
+import { MultiActionListEntity } from '../../../monitors/pagination-monitor';
 
 export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFunctionDefinition)[]): DataFunction<any>[] {
   return entityFunctions.map(functionOrDef => {
@@ -23,7 +24,11 @@ function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
   const fieldArray = getFieldArray(def);
   return (entities, paginationState) => {
     const upperCaseFilter = paginationState.clientPagination.filter.string.toUpperCase();
+    if (upperCaseFilter && upperCaseFilter.length === 0) {
+      return entities;
+    }
     return entities.filter(e => {
+      e = extractActualListEntity(e);
       const value = getValue(e, fieldArray, 0, true);
       if (!value) {
         return false;
@@ -44,6 +49,8 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
       }
 
       return entities.sort((a, b) => {
+        a = extractActualListEntity(a);
+        b = extractActualListEntity(b);
         const valueA = checkAndUpperCase(getValue(a, fieldArray));
         const valueB = checkAndUpperCase(getValue(b, fieldArray));
         if (valueA > valueB) {
@@ -68,6 +75,8 @@ export function getIntegerFieldSortFunction(field: string): DataFunction<any> {
   return (entities, paginationState) => {
     const orderDirection = paginationState.params['order-direction'] || 'asc';
     return entities.sort((a, b) => {
+      a = extractActualListEntity(a);
+      b = extractActualListEntity(b);
       const valueA = parseInt(getValue(a, fieldArray), 10);
       const valueB = parseInt(getValue(b, fieldArray), 10);
       if (valueA > valueB) {
@@ -87,6 +96,7 @@ function checkAndUpperCase(value: any) {
   }
   return value;
 }
+
 function getValue(obj, fieldArray: string[], index = 0, castToString = false): string {
   const field = fieldArray[index];
   if (!field) {
@@ -99,4 +109,11 @@ function getValue(obj, fieldArray: string[], index = 0, castToString = false): s
     return '';
   }
   return getValue(obj[field], fieldArray, ++index);
+}
+
+export function extractActualListEntity(entity: any | MultiActionListEntity) {
+  if (entity instanceof MultiActionListEntity) {
+    return entity.entity;
+  }
+  return entity;
 }

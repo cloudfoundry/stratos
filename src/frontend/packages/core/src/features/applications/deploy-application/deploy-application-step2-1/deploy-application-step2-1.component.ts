@@ -52,7 +52,7 @@ export class DeployApplicationStep21Component {
   onEnter = () => {
     // Wrap the list component in another component. This means it's recreated every time to include changes in the github repo
     this.wrapperRef = this.target.createComponent(this.wrapperFactory);
-    const wrapper = <CommitListWrapperComponent>this.wrapperRef.instance;
+    const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
     this.selectedCommit$ = wrapper.selectedCommit$;
     this.validate = this.selectedCommit$.pipe(
       map(selectedCommit => !!selectedCommit)

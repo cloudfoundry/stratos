@@ -3,6 +3,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { DeleteRoute, UnmapRoute } from '../../../../../../../store/src/actions/route.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn, ITableText } from '../../list-table/table.types';
@@ -20,9 +23,6 @@ import {
 import { TableCellRouteComponent } from '../cf-routes/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from '../cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 import { CfRoutesDataSourceBase, ListCfRoute } from './cf-routes-data-source-base';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { DeleteRoute, UnmapRoute } from '../../../../../../../store/src/actions/route.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 
 export abstract class CfRoutesListConfigBase implements IListConfig<APIResource> {
@@ -138,7 +138,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
         routeGuid,
         appGuid,
         this.cfGuid,
-        this.removeEntityOnUnmap ? this.getDataSource().action.paginationKey : null
+        this.removeEntityOnUnmap ? this.getDataSource().masterAction.paginationKey : null
       ));
     });
   }
@@ -204,13 +204,12 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   getMultiFiltersConfigs = () => [];
 
   /**
-   *Creates an instance of CfRoutesListConfigBase.
+   * Creates an instance of CfRoutesListConfigBase.
    * @param isLocal Is the list all local or paginated via the cf api
    * @param [hasActions=true] Should actions such as unmap and delete be shown
-   * @param {(route: Observable<APIResource<ListCfRoute>>) => Observable<boolean>} [canEditRoute] User can edit route?
-   * @param {Observable<boolean>} [canEditSpace$] User can edit space?
+   * @param [canEditRoute] User can edit route?
+   * @param [canEditSpace$] User can edit space?
    * @param [removeEntityOnUnmap=false] On unmap remove the entity from the list
-   * @memberof CfRoutesListConfigBase
    */
   constructor(
     private store: Store<AppState>,
