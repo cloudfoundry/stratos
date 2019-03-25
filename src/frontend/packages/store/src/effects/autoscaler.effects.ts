@@ -29,11 +29,11 @@ import { AppState } from '../app-state';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { PaginatedAction } from './../types/pagination.types';
+import { buildMetricData } from '../helpers/autoscaler/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,
   autoscalerTransformMapToArray,
-  buildMetricData
-} from '../helpers/autoscaler-helpers';
+} from '../helpers/autoscaler/autoscaler-transform-policy';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
@@ -107,7 +107,7 @@ export class AutoscalerEffects {
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {
-            const policyInfo = autoscalerTransformArrayToMap(response.json(), undefined);
+            const policyInfo = autoscalerTransformArrayToMap(response.json());
             const mappedData = {
               entities: { [action.entityKey]: {} },
               result: []

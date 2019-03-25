@@ -17,7 +17,7 @@ import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagi
 import {
   AppAutoscalerAppMetric,
 } from '../../../../../../../../store/src/types/app-autoscaler.types';
-import { buildLegendData } from '../../../../../../../../store/src/helpers/autoscaler-helpers';
+import { buildLegendData } from '../../../../../../../../store/src/helpers/autoscaler/autoscaler-util';
 
 @Component({
   selector: 'app-app-autoscaler-metric-chart-card',
