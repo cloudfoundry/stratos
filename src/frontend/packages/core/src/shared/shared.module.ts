@@ -277,7 +277,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     SpecifyUserProvidedDetailsComponent,
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective,
-    EndpointCardComponent,
+    EndpointCardComponent
   ],
   exports: [
     FormsModule,
