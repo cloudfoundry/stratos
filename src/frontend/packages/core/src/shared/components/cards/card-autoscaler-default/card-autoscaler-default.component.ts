@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, first, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
@@ -12,10 +12,10 @@ import {
   appAutoscalerPolicySchemaKey,
 } from '../../../../../../store/src/helpers/entity-factory';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../../../../store/src/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../../../../store/src/types/app-autoscaler.types';
 import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { CardStatus } from '../../../shared.types';
+import { autoscalerTransformArrayToMap } from '../../../../../../store/src/helpers/autoscaler/autoscaler-transform-policy';
 
 @Component({
   selector: 'app-card-autoscaler-default',
@@ -41,12 +41,9 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
   status$: Observable<CardStatus>;
   appAutoscalerPolicyService: EntityService;
   appAutoscalerPolicyUpdateService: EntityService;
-  public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  public appAutoscalerPolicy$: Observable<any>;
 
-  currentPolicy = {
-    instance_min_count: 0,
-    instance_max_count: 0
-  };
+  currentPolicy: any;
   public isEditing = false;
   public instanceMinCountCurrent: number;
   public instanceMinCountEdit: number;
@@ -54,6 +51,9 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
   public instanceMaxCountEdit: any;
 
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+
+  @Input()
+  onUpdate: () => void = () => { }
 
   ngOnInit() {
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
@@ -69,6 +69,9 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
           this.instanceMinCountCurrent = entity.entity.instance_min_count;
           this.instanceMaxCountCurrent = entity.entity.instance_max_count;
           this.currentPolicy = entity.entity;
+          if (!this.currentPolicy.scaling_rules_form) {
+            this.currentPolicy = autoscalerTransformArrayToMap(this.currentPolicy);
+          }
         }
         return entity && entity.entity;
       })
@@ -110,6 +113,9 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
     const actionState = selectUpdateInfo(appAutoscalerPolicySchemaKey,
       this.applicationService.appGuid,
       UpdateAppAutoscalerPolicyAction.updateKey);
+    this.store.dispatch(
+      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
+    );
     return this.store.select(actionState).pipe(filter(item => !!item));
   }
 

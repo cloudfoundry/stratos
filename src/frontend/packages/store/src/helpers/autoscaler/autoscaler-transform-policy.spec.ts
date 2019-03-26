@@ -396,12 +396,12 @@ describe('Autoscaler Transform Policy Helper', () => {
         }
       ]
     };
-    const mapPolicyFromArray = autoscalerTransformArrayToMap(arrayPolicy, undefined);
+    const mapPolicyFromArray = autoscalerTransformArrayToMap(arrayPolicy);
     const arrayPolicyFromMap = autoscalerTransformMapToArray(mapPolicy);
     expect(isEqual(mapPolicyFromArray, mapPolicy)).toBe(true);
-    expect(isEqual(arrayPolicyFromMap, autoscalerTransformMapToArray(autoscalerTransformArrayToMap(arrayPolicy, undefined)))).toBe(true);
+    expect(isEqual(arrayPolicyFromMap, autoscalerTransformMapToArray(autoscalerTransformArrayToMap(arrayPolicy)))).toBe(true);
     delete arrayPolicy.scaling_rules;
-    expect(isPolicyMapEqual(arrayPolicy, autoscalerTransformArrayToMap(arrayPolicy, undefined))).toBe(true);
+    expect(isPolicyMapEqual(arrayPolicy, autoscalerTransformArrayToMap(arrayPolicy))).toBe(true);
     delete mapPolicy.scaling_rules_map;
     delete mapPolicy.scaling_rules_form;
     expect(isEqual(mapPolicy, autoscalerTransformMapToArray(mapPolicy))).toBe(true);

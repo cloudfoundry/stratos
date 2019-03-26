@@ -12,11 +12,11 @@ import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.fac
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ApplicationStateService } from '../../../../application-state/application-state.service';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
-import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
+import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
 
 describe('AppServiceBindingCardComponent', () => {
-  let component: AppServiceBindingCardComponent;
-  let fixture: ComponentFixture<AppServiceBindingCardComponent>;
+  let component: AppAutoscalerMetricChartCardComponent;
+  let fixture: ComponentFixture<AppAutoscalerMetricChartCardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -39,7 +39,7 @@ describe('AppServiceBindingCardComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AppServiceBindingCardComponent);
+    fixture = TestBed.createComponent(AppAutoscalerMetricChartCardComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {
