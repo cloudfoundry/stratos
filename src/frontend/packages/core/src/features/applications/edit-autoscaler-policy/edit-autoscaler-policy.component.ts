@@ -29,8 +29,8 @@ import {
 import { autoscalerTransformArrayToMap } from '../../../../../store/src/helpers/autoscaler/autoscaler-transform-policy';
 import {
   numberWithFractionOrExceedRange,
-  getThresthodMin,
-  getThresthodMax,
+  getThresholdMin,
+  getThresholdMax,
   dateIsAfter,
   timeIsSameOrAfter,
   dateTimeIsSameOrAfter,
@@ -126,6 +126,11 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       ]],
       adjustment_type: [0]
     });
+    this.editTriggerForm.updateValueAndValidity();
+    this.editTriggerForm.controls['a'].updateValueAndValidity
+    const subToUnsubOnDestroy = this.editTriggerForm.controls.a.valueChanges.subscribe(change => {
+      this.editTriggerForm.controls.b.updateValueAndValidity()
+    })
     this.editRecurringScheduleForm = this.fb.group({
       days_of_week: [0],
       days_of_month: [0],
@@ -203,7 +208,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   }
 
   updatePolicy: StepOnNextFunction = () => {
-    console.log('submit', this.currentPolicy);
     this.submitStatus = true;
     this.submitMessage = '';
     let updateAppAutoscalerPolicyService: EntityService;
@@ -246,7 +250,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count').value);
     this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count').value);
     this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone').value;
-    console.log('finishLimit', this.currentPolicy);
     return observableOf({ success: true });
   }
   validateGlobalLimitMin(): ValidatorFn {
@@ -318,7 +321,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       }
       this.editIndex = -1;
     }
-    console.log('finishTrigger', this.currentPolicy.scaling_rules_form);
     return observableOf({ success: true });
   }
   validateTriggerThreshold(): ValidatorFn {
@@ -335,9 +337,9 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
           errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
         }
       }
-      const thresthodMin = getThresthodMin(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
-      const thresthodMax = getThresthodMax(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
-      if (numberWithFractionOrExceedRange(control.value, thresthodMin, thresthodMax, true)) {
+      const thresholdMin = getThresholdMin(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
+      const thresholdMax = getThresholdMax(this.currentPolicy.scaling_rules_form, metricType, this.editScaleType, this.editIndex);
+      if (numberWithFractionOrExceedRange(control.value, thresholdMin, thresholdMax, true)) {
         errors.alertInvalidPolicyTriggerThresholdRange = { value: control.value };
       }
       return Object.keys(errors).length === 0 ? null : errors;
@@ -429,7 +431,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     currentSchedule.start_time = this.editRecurringScheduleForm.get('start_time').value;
     currentSchedule.end_time = this.editRecurringScheduleForm.get('end_time').value;
     this.editIndex = -1;
-    console.log('finishRecurringSchedule', this.currentPolicy.schedules.recurring_schedule);
   }
   validateRecurringScheduleMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
@@ -610,7 +611,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
     this.currentPolicy.schedules.specific_date[this.editIndex].start_date_time = this.editSpecificDateForm.get('start_date_time').value;
     this.currentPolicy.schedules.specific_date[this.editIndex].end_date_time = this.editSpecificDateForm.get('end_date_time').value;
     this.editIndex = -1;
-    console.log('finishSpecificDate', this.currentPolicy.schedules.specific_date);
   }
   validateSpecificDateMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {

@@ -54,20 +54,20 @@ app-tile-grid {
   height: 250px;
   margin-top: 1em;
   width: 80%;
-}
 
-.autoscaler-chart-bar-combo {
-  display: inline-block;
-  height: 250px;
-  margin-top: 1em;
-  width: 75%;
-}
+  &-combo {
+    display: inline-block;
+    height: 250px;
+    margin-top: 1em;
+    width: 75%;
+  }
 
-.autoscaler-chart-bar-legend {
-  display: inline-block;
-  margin-left: 1.75em;
-  margin-top: 1em;
-  position: absolute;
+  &-legend {
+    display: inline-block;
+    margin-left: 1.75em;
+    margin-top: 1em;
+    position: absolute;
+  }
 }
 
 .autoscaler-metric-subtitle {

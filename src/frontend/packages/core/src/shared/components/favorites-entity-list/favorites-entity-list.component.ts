@@ -107,6 +107,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
         return entities.filter(entity => entity.favorite.entityType === type);
       })
     );
+
     this.searchedEntities$ = combineLatest(
       typesEntities$,
       this.nameChange.valueChanges.pipe(startWith('')),

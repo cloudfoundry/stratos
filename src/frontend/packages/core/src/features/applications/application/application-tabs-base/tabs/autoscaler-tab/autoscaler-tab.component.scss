@@ -44,16 +44,16 @@ table {
   flex: 0 0 40%;
 }
 
-.app-auto-scaler-tile-1of2 {
-  flex: 0 0 50%;
-}
-
-.app-auto-scaler-tile-1of3 {
-  flex: 0 0 30%;
-}
-
-.app-auto-scaler-tile-1of6 {
-  flex: 0 0 16.78%;
+.app-auto-scaler-tile {
+  &-1of2 {
+    flex: 0 0 50%;
+  }
+  &-1of3 {
+    flex: 0 0 30%;
+  }
+  &-1of6 {
+    flex: 0 0 16.78%;
+  }
 }
 
 .app-auto-scaler-limit {

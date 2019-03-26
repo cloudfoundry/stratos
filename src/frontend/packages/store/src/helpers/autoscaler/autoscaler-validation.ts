@@ -97,7 +97,7 @@ function dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateT
   }
 }
 
-export function getThresthodMin(policyTriggers, metricType, scaleType, index) {
+export function getThresholdMin(policyTriggers, metricType, scaleType, index) {
   let thresholdMin = 1;
   if (scaleType === 'upper') {
     policyTriggers.map((trigger, triggerIndex) => {
@@ -109,7 +109,7 @@ export function getThresthodMin(policyTriggers, metricType, scaleType, index) {
   return thresholdMin;
 }
 
-export function getThresthodMax(policyTriggers, metricType, scaleType, index) {
+export function getThresholdMax(policyTriggers, metricType, scaleType, index) {
   let thresholdMax = Number.MAX_VALUE;
   if (scaleType === 'lower') {
     policyTriggers.map((trigger, triggerIndex) => {
