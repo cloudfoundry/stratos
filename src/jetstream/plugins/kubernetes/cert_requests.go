@@ -45,6 +45,7 @@ func (c *KubernetesSpecification) extractCerts(ec echo.Context) (*KubeCertAuth, 
 	kubeCertAuth := &KubeCertAuth{}
 
 	bodyReader := ec.Request().Body
+	defer bodyReader.Close()
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bodyReader)
 	body := buf.String()
@@ -137,6 +138,9 @@ func (c *KubernetesSpecification) doCertAuthFlowRequest(cnsiRequest *interfaces.
 		}
 
 		res, err := kubeCertClient.Do(req)
+
+		kubeCertClient.CloseIdleConnections()
+
 		if err != nil {
 			return nil, fmt.Errorf("Request failed: %v", err)
 		}

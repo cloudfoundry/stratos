@@ -1,6 +1,6 @@
 import { KubernetesPod } from './../../store/kube.types';
 import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
-import { GetKubernetesApps } from './../../store/kubernetes.actions';
+import { GetKubernetesApps, GetKubernetesDashboard } from './../../store/kubernetes.actions';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { map, startWith, tap } from 'rxjs/operators';
+import { map, startWith, tap, filter } from 'rxjs/operators';
 import { Observable, combineLatest, interval, Subscription } from 'rxjs';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { Store } from '@ngrx/store';
@@ -16,6 +16,8 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { GetKubernetesPods, GetKubernetesNodes } from '../../store/kubernetes.actions';
 import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
 import { ISimpleUsageChartData, IChartThresholds } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
+import { selectEntity } from '../../../../../../store/src/selectors/api.selectors';
+import { kubernetesDashboardSchemaKey } from '../../store/kubernetes.entities';
 interface IEndpointDetails {
   imagePath: string;
   label: string;
@@ -55,6 +57,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public outOfDisk$: Observable<ISimpleUsageChartData>;
   public nodesReady$: Observable<ISimpleUsageChartData>;
   public networkUnavailable$: Observable<ISimpleUsageChartData>;
+  public kubeNodeVersions$: Observable<string>;
 
   public pressureChartThresholds: IChartThresholds = {
     danger: 90,
@@ -77,6 +80,9 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   private polls: Subscription[] = [];
 
+  public dashboardAvailable$: Observable<boolean>;
+
+
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -94,7 +100,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
     this.ngZone.runOutsideAngular(() => {
       this.polls.push(
-        interval(5000).subscribe(() => {
+        interval(10000).subscribe(() => {
           this.ngZone.run(() => {
             this.store.dispatch(action);
           });
@@ -102,11 +108,14 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       );
     });
 
+    // Dispatch action straight away
+    this.store.dispatch(action);
+
     return getPaginationObservables({
       store: this.store,
       action,
       paginationMonitor
-    }).entities$
+    }).entities$;
   }
 
   private getCountObservable(entities$: Observable<any[]>) {
@@ -128,22 +137,44 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   private getNodeStatusCount(nodes$: Observable<KubernetesNode[]>, conditionType: string, countStatus = 'False') {
     return nodes$.pipe(
-      map(nodes => ({
-        total: nodes.length,
-        used: nodes.reduce((cap, node) => {
-          const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
-          if (conditionType === 'Ready') {
-            console.log(conditionStatus);
-            console.log(countStatus)
-          }
-          if (!conditionStatus || !conditionStatus.status || conditionStatus.status === countStatus) {
-            return cap;
-          }
-          return ++cap;
-        }, 0)
-      }))
+      map(nodes => {
+        const result = {
+          total: nodes.length,
+          supported: true,
+          // Depends on K8S version as to what is supported
+          unavailable: nodes.reduce((cap, node) => {
+            const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
+            return !conditionStatus ? ++cap : cap;
+          }, 0),
+          used: nodes.reduce((cap, node) => {
+            const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
+            if (!conditionStatus || !conditionStatus.status || conditionStatus.status === countStatus) {
+              return cap;
+            }
+            return ++cap;
+          }, 0)
+        };
+        result.supported = result.total !== result.unavailable;
+        return result;
+      })
     );
   }
+
+  private getNodeKubeVersions(nodes$: Observable<KubernetesNode[]>) {
+    return nodes$.pipe(
+      map(nodes => {
+        const versions = {};
+        nodes.forEach(node => {
+          const v = node.status.nodeInfo.kubeletVersion;
+          if (!versions[v]) {
+            versions[v] = v;
+          }
+        });
+        return Object.keys(versions).join(',');
+      })
+    );
+  }
+
 
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
@@ -167,6 +198,17 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     this.nodesReady$ = this.getNodeStatusCount(nodes$, 'Ready');
 
     this.dashboardLink = `/kubernetes/${guid}/dashboard`;
+
+    this.store.dispatch(new GetKubernetesDashboard(guid));
+
+    this.dashboardAvailable$ = this.store.select(selectEntity(kubernetesDashboardSchemaKey, guid)).pipe(
+      startWith(false),
+      filter(p => !!p),
+      map((p: any) => p.installed)
+    );
+
+    this.kubeNodeVersions$ = this.getNodeKubeVersions(nodes$).pipe(startWith('-'));
+
   }
 
   ngOnDestroy() {
@@ -175,12 +217,5 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     }
   }
 
-  public getDashboard() {
-    const guid = this.kubeEndpointService.baseKube.guid;
-    this.httpClient.get(`/pp/v1/kubedash/${guid}/status`).subscribe(a => {
-      console.log('Kube dashboard status');
-      console.log(a);
-    });
-  }
 
 }

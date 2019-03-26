@@ -4,6 +4,7 @@
     <div clas="kube-details__header-section">
       <h1 class="kube-details__header">{{ details.name }}</h1>
       <div class="kube-details__sub-header"> {{ details.label }}</div>
+      <div class="kube-details__sub-header kube-details__spacing">Kubernetes Node Version: {{ (kubeNodeVersions$ | async) }}</div>
     </div>
     <div class="kube-details__header-section">
       <app-tile-grid fit="true">
@@ -31,6 +32,11 @@
       </app-tile-grid>
     </div>
   </div>
+</div>
+<div>
+  <div *ngIf="dashboardAvailable$ | async" class="kube-details__dashboard">
+    <button [routerLink]="dashboardLink" color="primary" mat-button>Open Kubernetes Dashboard</button>
+</div>
 </div>
 <div class="kube-details__graphs">
   <div class="kube-details__graphs-group">
@@ -69,7 +75,7 @@
       </mat-card>
     </div>
     <div class="kube-details__graph">
-      <mat-card>
+      <mat-card *ngIf="(networkUnavailable$ | async)?.supported">
         <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
           title="Nodes With Network Available" [data]="networkUnavailable$ | async">
         </app-simple-usage-chart>

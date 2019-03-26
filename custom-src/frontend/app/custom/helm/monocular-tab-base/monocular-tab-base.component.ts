@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { UserFavoriteEndpoint, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-monocular-tab-base',
@@ -13,6 +15,11 @@ export class MonocularTabBaseComponent implements OnInit {
     { link: 'releases', label: 'Releases' },
     { link: 'config', label: 'Config' },
   ];
+
+  public favorite = new UserFavorite('JPuffnBo2-DH_5ATdrbBlh-08xc', 'helm', endpointSchemaKey, null, {
+    guid: 'JPuffnBo2-DH_5ATdrbBlh-08xc',
+    name: 'Test',
+  });
 
   constructor() { }
 

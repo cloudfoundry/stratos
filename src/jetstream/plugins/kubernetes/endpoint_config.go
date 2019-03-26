@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -51,10 +52,21 @@ func GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*rest
 func addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
 
 	log.Debug("addAuthInfoForEndpoint")
-	log.Debug(tokenRec.AuthType)
+	log.Warn(tokenRec.AuthType)
 
-	// Assume certificate for now
+	switch {
+	case tokenRec.AuthType == "gke-auth":
+		log.Warn("GKE AUTH")
+		return addGKEAuth(info, tokenRec)
+	case tokenRec.AuthType == AuthConnectTypeCertAuth, tokenRec.AuthType == AuthConnectTypeKubeConfigAz:
+		return addCertAuth(info, tokenRec)
+	default:
+		log.Error("Unsupported auth type")
+	}
+	return errors.New("Unsupported auth type")
+}
 
+func addCertAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
 	kubeAuthToken := &KubeCertAuth{}
 	err := json.NewDecoder(strings.NewReader(tokenRec.AuthToken)).Decode(kubeAuthToken)
 	if err != nil {
@@ -65,5 +77,18 @@ func addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.Tok
 	info.ClientKeyData = []byte(kubeAuthToken.CertificateKey)
 	info.Token = kubeAuthToken.Token
 
+	return nil
+}
+
+func addGKEAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+	gkeInfo := &GKEConfig{}
+	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &gkeInfo)
+	if err != nil {
+		return err
+	}
+
+	log.Warn("HERE")
+
+	info.Token = tokenRec.AuthToken
 	return nil
 }

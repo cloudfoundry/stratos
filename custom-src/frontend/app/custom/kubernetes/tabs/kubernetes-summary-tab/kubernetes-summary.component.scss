@@ -1,6 +1,6 @@
 .kube-details {
-  border-bottom: 1px solid #00000026;
-  margin-bottom: 20px;
+  // border-bottom: 1px solid #00000026;
+  margin-bottom: 48px;
   margin-left: 20px;
   margin-top: 20px;
   padding-bottom: 10px;
@@ -31,5 +31,13 @@
     width: 33%;
     padding: 10px;
     display: inline-block;
+  }
+  &__dashboard {
+    font-size: 14px;
+    margin: -24px 20px 24px 24px;
+  }
+  &__spacing {
+    font-size: 14px;
+    margin: 12px 0;
   }
 }

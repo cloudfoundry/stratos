@@ -41,7 +41,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
+	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1 // indirect
@@ -67,7 +67,7 @@ require (
 	k8s.io/cli-runtime v0.0.0-20190223141024-b5efea9a9c9c // indirect
 	k8s.io/client-go v10.0.0+incompatible
 	k8s.io/helm v2.12.3+incompatible
-	k8s.io/klog v0.2.0 // indirect
+	k8s.io/klog v0.2.0
 	k8s.io/kube-openapi v0.0.0-20190225204428-d50a959ae76a // indirect
 	k8s.io/kubernetes v1.13.3
 	k8s.io/utils v0.0.0-20190221042446-c2654d5206da // indirect

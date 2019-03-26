@@ -10,6 +10,7 @@ import {
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
+  kubernetesDashboardSchemaKey,
 } from './kubernetes.entities';
 import { PaginatedAction, PaginationParam } from '../../../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../../../store/src/types/request.types';
@@ -66,6 +67,11 @@ export const GET_KUBE_STATEFULSETS_FAILURE = '[KUBERNETES Endpoint] Get Stateful
 export const GET_KUBE_DEPLOYMENT = '[KUBERNETES Endpoint] Get K8S Deployments Info';
 export const GET_KUBE_DEPLOYMENT_SUCCESS = '[KUBERNETES Endpoint] Get Deployments Success';
 export const GET_KUBE_DEPLOYMENT_FAILURE = '[KUBERNETES Endpoint] Get Deployments Failure';
+
+export const GET_KUBE_DASHBOARD = '[KUBERNETES Endpoint] Get K8S Dashboard Info';
+export const GET_KUBE_DASHBOARD_SUCCESS = '[KUBERNETES Endpoint] Get Dashboard Success';
+export const GET_KUBE_DASHBOARD_FAILURE = '[KUBERNETES Endpoint] Get Dashboard Failure';
+
 
 const sortPodsByName = {
   'order-direction': 'desc' as SortDirection,
@@ -318,6 +324,20 @@ export class GeKubernetesDeployments implements KubePaginationAction {
     GET_KUBE_DEPLOYMENT_FAILURE
   ];
   paginationKey: string;
+}
+
+export class GetKubernetesDashboard implements KubeAction {
+  constructor(public kubeGuid: string) {
+  }
+  type = GET_KUBE_DASHBOARD;
+  entityKey = kubernetesDashboardSchemaKey;
+  entity = [entityFactory(kubernetesDashboardSchemaKey)];
+
+  actions = [
+    GET_KUBE_DASHBOARD,
+    GET_KUBE_DASHBOARD_SUCCESS,
+    GET_KUBE_DASHBOARD_FAILURE
+  ];
 }
 
 function getKubeMetricsAction(guid: string) {

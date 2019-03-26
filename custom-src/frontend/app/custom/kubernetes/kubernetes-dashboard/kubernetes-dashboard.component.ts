@@ -94,10 +94,8 @@ export class KubernetesDashboardTabComponent implements OnInit {
         h2 = h2.replace('%3D', '=');
         console.log(h2);
         h2 = '#!' + h2;
-        const h = '#!/overview?namespace=scf';
         console.log('Changing location hash');
-        console.log(h);
-        iframeWindow.location.hash = h;
+        iframeWindow.location.hash = h2;
         this.href = '';
       }
     });

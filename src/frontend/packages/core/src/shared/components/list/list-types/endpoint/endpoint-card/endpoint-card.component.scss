@@ -18,14 +18,18 @@
   }
 
   &__title {
+    align-items: center;
     display: flex;
+    margin-top: 16px;
     &-subtext {
-      font-size: 13px;
+      font-size: 14px;
+      margin-top: 4px;
       opacity: .6;
     }
     &-text {
       display: flex;
       flex-direction: column;
+      font-size: 16px
     }
   }
 }

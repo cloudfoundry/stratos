@@ -10,6 +10,7 @@ export const kubernetesServicesSchemaKey = 'kubernetesService';
 export const kubernetesStatefulSetsSchemaKey = 'kubernetesStatefulSet';
 export const kubernetesDeploymentsSchemaKey = 'kubernetesDeployment';
 export const kubernetesAppsSchemaKey = 'kubernetesApp';
+export const kubernetesDashboardSchemaKey = 'kubernetesDahboard';
 
 export const kubernetesEntities: ExtensionEntitySchema[] = [
   {
@@ -51,6 +52,11 @@ export const kubernetesEntities: ExtensionEntitySchema[] = [
     entityKey: kubernetesServicesSchemaKey,
     definition: {},
     options: { idAttribute: getKubeAPIResourceGuid }
+  },
+  {
+    entityKey: kubernetesDashboardSchemaKey,
+    definition: {},
+    options: { idAttribute: getKubeAPIResourceGuid }
   }
 ];
 
@@ -63,4 +69,5 @@ export const kubernetesEntityKeys: string[] = [
   kubernetesNodesSchemaKey,
   kubernetesNamespacesSchemaKey,
   kubernetesServicesSchemaKey,
+  kubernetesDashboardSchemaKey,
 ];

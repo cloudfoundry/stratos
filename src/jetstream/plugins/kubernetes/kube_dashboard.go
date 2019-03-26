@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"context"
+	//"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,6 +39,12 @@ const defaultFlushInterval = 200 * time.Millisecond
 
 type responder struct{}
 
+type dashboardStatusResponse struct {
+	Endpoint  string  `json:"guid"`
+	Installed bool    `json:"installed"`
+	Pod       *v1.Pod `json:"pod"`
+}
+
 func (r *responder) Error(w http.ResponseWriter, req *http.Request, err error) {
 	log.Errorf("Error while proxying request: %v", err)
 	http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -46,6 +52,12 @@ func (r *responder) Error(w http.ResponseWriter, req *http.Request, err error) {
 
 // Get the config for the certificate authentication
 func getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
+	masterURL := cnsiRecord.APIEndpoint.String()
+	return GetConfigForEndpoint(masterURL, *tokenRecord)
+}
+
+// Get the config for the certificate authentication
+func __getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
 
 	config := rest.Config{}
 	config.Host = cnsiRecord.APIEndpoint.String()
@@ -140,6 +152,8 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 	// target := fmt.Sprintf("%s/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/", apiEndpoint)
 	//target := fmt.Sprintf("%s/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/", apiEndpoint)
 	// target := http://localhost:8001/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy
+
+	// TODO: Need namespace and whether it is https or http
 	target := fmt.Sprintf("%s/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/%s", apiEndpoint, path)
 	log.Debug(target)
 	targetURL, _ := url.Parse(target)
@@ -150,12 +164,12 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 		return errors.New("Could not get config for this auth type")
 	}
 
-	log.Debug("Config")
-	log.Debug(config.Host)
-	log.Debug("Making request")
+	log.Info("Config")
+	log.Info(config.Host)
+	log.Info("Making request")
 	req := c.Request()
 	w := c.Response().Writer
-	log.Debugf("%v+", req)
+	log.Info("%v+", req)
 
 	// if h.tryUpgrade(w, req) {
 	// 	return
@@ -174,11 +188,14 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 		loc.Path += "/"
 	}
 
+	log.Info(loc)
+
 	// From pkg/genericapiserver/endpoints/handlers/proxy.go#ServeHTTP:
 	// Redirect requests with an empty path to a location that ends with a '/'
 	// This is essentially a hack for http://issue.k8s.io/4958.
 	// Note: Keep this code after tryUpgrade to not break that flow.
 	if len(loc.Path) == 0 {
+		log.Info("Redirecting")
 		var queryPart string
 		if len(req.URL.RawQuery) > 0 {
 			queryPart = "?" + req.URL.RawQuery
@@ -194,13 +211,23 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 
 	transport, err := rest.TransportFor(config)
 	if err != nil {
+		log.Info("Could not get transport")
 		return err
 	}
 
+	log.Info(transport)
+
 	// WithContext creates a shallow clone of the request with the new context.
-	newReq := req.WithContext(context.Background())
+	newReq := req.WithContext(req.Context())
+	//newReq := req.WithContext(context.Background())
 	newReq.Header = utilnet.CloneHeader(req.Header)
 	newReq.URL = loc
+
+	// Set auth header so we log in if needed
+	if len(tokenRec.AuthToken) > 0 {
+		newReq.Header.Add("Authorization", "Bearer "+tokenRec.AuthToken)
+		log.Info("Setting auth header")
+	}
 
 	proxy := httputil.NewSingleHostReverseProxy(&url.URL{Scheme: loc.Scheme, Host: loc.Host})
 	proxy.Transport = transport
@@ -217,57 +244,104 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 		return nil
 	}
 
+	log.Errorf("Proxy: %s", target)
+
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(w, newReq)
 
-	log.Debugf("Finsihed proxying request: %s", target)
+	// We need this to be blocking
+
+	// select {
+	// case <-newReq.Context().Done():
+	// 	return newReq.Context().Err()
+	// }
+
+	log.Errorf("Finished proxying request: %s", target)
 
 	return nil
 }
 
 // Determine if the specified Kube endpoint has the dashboard installed and ready
 func (k *KubernetesSpecification) kubeDashboardStatus(c echo.Context) error {
+	endpointGUID := c.Param("guid")
+
+	status := dashboardStatusResponse{
+		Endpoint:  endpointGUID,
+		Installed: false,
+	}
+
+	pod, err := k.getKubeDashboardPod(c, "app%3Dkubernetes-dashboard")
+	if err != nil {
+		pod, err = k.getKubeDashboardPod(c, "k8s-app%3Dkubernetes-dashboard")
+	}
+
+	status.Pod = pod
+	if err == nil {
+		status.Installed = true
+	}
+
+	jsonString, err := json.Marshal(status)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Unable Marshal status response",
+			"Unable Marshal status response")
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+	return nil
+}
+
+// Determine if the specified Kube endpoint has the dashboard installed and ready
+func (k *KubernetesSpecification) getKubeDashboardPod(c echo.Context, labelSelector string) (*v1.Pod, error) {
 	log.Debug("kubeDashboardStatus request")
 
 	cnsiGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
 
 	var p = k.portalProxy
-	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/pods?labelSelector=app%3Dkubernetes-dashboard", nil, nil)
+	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/pods?labelSelector="+labelSelector, nil, nil)
 
 	if err != nil {
-		return err
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"Could not fetch pod list",
+			"Could not fetch pod list")
 	}
 
 	ok, list, err := tryDecodePodList(response.Response)
 	if !ok {
-		return err
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"Kube dashboard not installed - could not decode pod list",
+			"Kube dashboard not installed - could not decode pod list")
+	}
+
+	if len(list.Items) == 0 {
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusOK,
+			"Kube dashboard not installed",
+			"Kube dashboard not installed")
 	}
 
 	// Should just be one pod
 	if len(list.Items) != 1 {
-		return errors.New("Too many pods returned")
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"Kube dashboard not installed - too many pods",
+			"Kube dashboard not installed - too many pods")
 	}
 
 	pod := list.Items[0]
 	if pod.Status.Phase != "Running" {
-		return interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
 			"Dashboard not running",
 			"Dashboard not running")
 	}
 
-	jsonString, err := json.Marshal(pod)
-	if err != nil {
-		return interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Unable Marshal pod",
-			"Unable Marshal pod")
-	}
-
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	return &pod, nil
 }
 
 func tryDecodePodList(data []byte) (parsed bool, pods v1.PodList, err error) {

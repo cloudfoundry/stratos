@@ -23,6 +23,7 @@ import {
   KubeService,
 } from './kube.types';
 import {
+  GetKubernetesDashboard,
   GeKubernetesDeployments,
   GET_KUBE_DEPLOYMENT,
   GET_KUBE_POD,
@@ -51,6 +52,7 @@ import {
   GetKubernetesStatefulSets,
   KubeAction,
   KubePaginationAction,
+  GET_KUBE_DASHBOARD,
 } from './kubernetes.actions';
 import {
   kubernetesAppsSchemaKey,
@@ -60,7 +62,12 @@ import {
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
+  kubernetesDashboardSchemaKey,
 } from './kubernetes.entities';
+
+interface DashboardStatus {
+  guid: string;
+}
 
 export type GetID<T> = (p: T) => string;
 export type Filter<T> = (p: T) => boolean;
@@ -73,6 +80,44 @@ export class KubernetesEffects {
     private actions$: Actions,
     private store: Store<AppState>
   ) { }
+
+  @Effect()
+  fetchDashboardInfo$ = this.actions$.pipe(
+    ofType<GetKubernetesDashboard>(GET_KUBE_DASHBOARD),
+    flatMap(action => {
+      // const getUid: GetID<KubernetesDashbaordStatus> = (p) => p.guid;
+
+      this.store.dispatch(new StartRequestAction(action));
+      const headers = new HttpHeaders({});
+      const requestArgs = {
+        headers
+      };
+      const url = `/pp/${this.proxyAPIVersion}/kubedash/${action.kubeGuid}/status`;
+      return this.http
+        .get(url, requestArgs)
+        .pipe(mergeMap(response => {
+          const result = {
+            entities: { [kubernetesDashboardSchemaKey]: {} },
+            result: []
+          } as NormalizedResponse;
+          const status = response as DashboardStatus;
+          const id = status.guid;
+          result.entities[kubernetesDashboardSchemaKey][id] = status;
+          result.result.push(id);
+          return [
+            new WrapperRequestActionSuccess(result, action)
+          ];
+        }), catchError(error => [
+          new WrapperRequestActionFailed(error.message, action, 'fetch', {
+            endpointIds: [action.kubeGuid],
+            url: error.url || url,
+            eventCode: error.status ? error.status + '' : '500',
+            message: 'Kubernetes API request error',
+            error
+          })
+        ]));
+      })
+  );
 
   @Effect()
   fetchReleasePodsInfo$ = this.actions$.pipe(
@@ -382,4 +427,5 @@ export class KubernetesEffects {
         })
       ]));
   }
+
 }

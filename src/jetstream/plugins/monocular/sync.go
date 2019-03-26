@@ -30,14 +30,14 @@ func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.
 }
 
 func (m *Monocular) processSyncRequests() {
-	log.Warn("Repository Sync init")
+	log.Info("Helm Repository Sync init")
 	for job := range syncChan {
-		log.Warn("Processing Job")
-		log.Warn(job.Endpoint.Name)
+		log.Info("Processing Job")
+		log.Info(job.Endpoint.Name)
 
 		// Could be delete or sync
 		if job.Action == 0 {
-			log.Warn("Syncing new repository")
+			log.Info("Syncing new repository")
 			err := chartrepo.SyncRepo(m.Store, job.Endpoint.Name, job.Endpoint.APIEndpoint.String(), "")
 			if err != nil {
 				log.Warn("Failed to sync repository: %v+", err)
@@ -47,5 +47,5 @@ func (m *Monocular) processSyncRequests() {
 		}
 	}
 
-	log.Warn("processSyncRequests finished")
+	log.Info("processSyncRequests finished")
 }

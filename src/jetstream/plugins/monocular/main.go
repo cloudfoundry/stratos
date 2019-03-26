@@ -95,8 +95,6 @@ func (m *Monocular) syncOnStartup() {
 		return
 	}
 
-	log.Info("Hello")
-
 	helmRepos := make([]string, 0)
 	for _, ep := range endpoints {
 		if ep.CNSIType == "helm" {
