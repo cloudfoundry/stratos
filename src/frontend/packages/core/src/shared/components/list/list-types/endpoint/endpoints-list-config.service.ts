@@ -20,7 +20,7 @@ import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
-  return getNameForEndpointType(endpoint.cnsi_type);
+  return getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type);
 }
 
 export const endpointColumns: ITableColumn<EndpointModel>[] = [

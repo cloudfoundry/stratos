@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
 
-import { EndpointAuthTypeConfig, EndpointTypeConfig, ExtensionEntitySchema } from './extension-types';
+import { EndpointAuthTypeConfig, EndpointTypeExtensionConfig, ExtensionEntitySchema } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -13,7 +13,7 @@ export interface EndpointTypeExtension {
 
 export interface StratosExtensionConfig {
   routes?: Route[];
-  endpointTypes?: EndpointTypeConfig[];
+  endpointTypes?: EndpointTypeExtensionConfig[];
   authTypes?: EndpointAuthTypeConfig[];
   entities?: ExtensionEntitySchema[];
 }
@@ -59,7 +59,7 @@ export interface StratosEndpointMetadata {
 }
 
 export interface StratosEndpointExtensionConfig {
-  endpointTypes?: EndpointTypeConfig[];
+  endpointTypes?: EndpointTypeExtensionConfig[];
   authTypes?: EndpointAuthTypeConfig[];
 }
 
