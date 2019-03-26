@@ -7,22 +7,19 @@ import {
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
   appAutoscalerAppMetricSchemaKey,
-  appAutoscalerInsMetricSchemaKey,
 } from '../../../../../../../../store/src/helpers/entity-factory';
 import { ApplicationService } from '../../../../application.service';
 import {
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerScalingHistoryAction,
   GetAppAutoscalerAppMetricAction,
-  GetAppAutoscalerInsMetricAction,
   UpdateAppAutoscalerPolicyAction,
   DetachAppAutoscalerPolicyAction,
 } from '../../../../../../../../store/src/actions/app-autoscaler.actions';
 import {
   AppAutoscalerPolicy,
   AppAutoscalerScalingHistory,
-  AppAutoscalerAppMetric,
-  AppAutoscalerInsMetric
+  AppAutoscalerAppMetric
 } from '../../../../../../../../store/src/types/app-autoscaler.types';
 import { map, filter, distinctUntilChanged, first } from 'rxjs/operators';
 import { getPaginationObservables } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -150,7 +147,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       map(({ entity }) => {
         if (entity && entity.entity) {
           this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
-          this.loadLatestMetricsUponPolicy(entity);
+          this.loadLatestMetricsUponPolicy(entity.entity);
         }
         return entity && entity.entity;
       })
@@ -174,25 +171,12 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
     }, false).entities$;
   }
 
-  getInsMetric(metricName: string, trigger: any, params: any) {
-    const action = new GetAppAutoscalerInsMetricAction(this.applicationService.appGuid,
-      this.applicationService.cfGuid, metricName, true, trigger, params);
-    return getPaginationObservables<AppAutoscalerInsMetric>({
-      store: this.store,
-      action,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        action.paginationKey,
-        entityFactory(appAutoscalerInsMetricSchemaKey)
-      )
-    }, false).entities$;
-  }
-
   loadLatestMetricsUponPolicy(policyEntity) {
-    if (policyEntity && policyEntity.entity && policyEntity.entity.scaling_rules_map) {
+    if (policyEntity.scaling_rules_map) {
       this.appAutoscalerAppMetrics = {};
-      Object.keys(policyEntity.entity.scaling_rules_map).map((metricName) => {
+      Object.keys(policyEntity.scaling_rules_map).map((metricName) => {
         this.appAutoscalerAppMetrics[metricName] =
-          this.getAppMetric(metricName, policyEntity.entity.scaling_rules_map[metricName], this.paramsMetrics);
+          this.getAppMetric(metricName, policyEntity.scaling_rules_map[metricName], this.paramsMetrics);
       });
     }
   }
@@ -253,7 +237,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
     return this.store.select(actionState).pipe(filter(item => !!item));
   }
 
-  updatePolicyPage() {
+  updatePolicyPage = () => {
     this.store.dispatch(new RouterNav({
       path: [
         'applications',

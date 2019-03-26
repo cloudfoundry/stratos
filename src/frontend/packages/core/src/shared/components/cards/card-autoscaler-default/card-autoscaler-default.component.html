@@ -52,7 +52,7 @@
     </mat-card-content>
   </div>
   <mat-card-actions *ngIf="(appAutoscalerPolicy$ | async) && !isEditing" class="card-autoscaler-default__actions">
-      <button (click)="edit()" mat-icon-button>
+      <button (click)="onUpdate()" mat-icon-button>
         <mat-icon>edit</mat-icon>
       </button>
     </mat-card-actions>

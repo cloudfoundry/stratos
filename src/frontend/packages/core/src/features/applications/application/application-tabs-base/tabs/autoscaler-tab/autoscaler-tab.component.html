@@ -46,7 +46,7 @@
         <app-card-app-instances></app-card-app-instances>
       </app-tile>
       <app-tile *ngIf="policy.enabled" class="app-auto-scaler-tile-1of3">
-        <app-card-autoscaler-default></app-card-autoscaler-default>
+        <app-card-autoscaler-default [onUpdate]="updatePolicyPage"></app-card-autoscaler-default>
       </app-tile>
       <app-tile *ngIf="policy.enabled" class="app-auto-scaler-tile-1of2">
         <mat-card>
@@ -116,7 +116,12 @@
         <app-tile>
           <mat-card>
             <mat-card-header>
-              <mat-card-title>Scheduled Limit Rules in {{policy.schedules.timezone}}</mat-card-title>
+              <mat-card-title>
+                Scheduled Limit Rules
+                <span *ngIf="policy.schedules">
+                  in {{policy.schedules.timezone}}
+                </span>
+              </mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div class="app-metadata">
