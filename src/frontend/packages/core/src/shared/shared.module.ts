@@ -281,7 +281,7 @@ import { PageSubNavSectionComponent } from './components/page-sub-nav-section/pa
     SpecifyUserProvidedDetailsComponent,
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective,
-    EndpointCardComponent
+    EndpointCardComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,
     PageSubNavSectionComponent
