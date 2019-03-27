@@ -4,6 +4,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../store/src/app-state';
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -17,6 +18,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 export class CloudFoundryOrganizationSummaryComponent {
   appLink: () => void;
   detailsLoading$: Observable<boolean>;
+  public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
 
   constructor(
     store: Store<AppState>,

@@ -1,13 +1,9 @@
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import {
-  GetAppStatsAction,
-  GetAppSummaryAction,
-} from '../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
@@ -30,13 +26,12 @@ import {
 } from '../../../../core/extension/extension-service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
-import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
+import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -108,10 +103,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
-        this.tabLinks = [ ...this.tabLinks,
+        this.tabLinks = [
+          ...this.tabLinks,
           {
             link: 'metrics',
-            label: 'Metrics'
+            label: 'Metrics',
+            matIcon: 'insert_chart'
           }
         ];
       }
@@ -140,7 +137,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
             tab.matIconFont = iconInfo.fontName;
             tab.matIcon = iconInfo.iconName;
           }
-          this.tabLinks = [ ...this.tabLinks ];
+          this.tabLinks = [...this.tabLinks];
         }
       });
   }

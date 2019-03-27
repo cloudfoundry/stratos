@@ -1,18 +1,6 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Organization"
   [favorite]="favorite$ | async">
   <h1> {{ name$ | async }}</h1>
-  <div class="page-header-right">
-    <button mat-icon-button name="edit-org" *appUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid"
-      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org"
-      matTooltip="Edit Organization">
-      <mat-icon>mode_edit</mat-icon>
-    </button>
-    <button mat-icon-button name="cli"
-      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli"
-      matTooltip="CLI Info">
-      <mat-icon>keyboard</mat-icon>
-    </button>
-  </div>
 </app-page-header>
 <app-loading-page [entityId]="cfOrgService.orgGuid" [entitySchema]="schema" deleteText="Deleting organization"
   [text]="'Retrieving organization'">

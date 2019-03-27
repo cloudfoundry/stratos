@@ -8,7 +8,6 @@ import { AppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
-import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import {
   getActionsFromExtensions,
   getTabsFromExtensions,
@@ -22,11 +21,11 @@ import { ConfirmationDialogConfig } from '../../../../../../shared/components/co
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
+import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -79,9 +78,6 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
-
-  public permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
-  public permsSpaceDelete = CurrentUserPermissions.SPACE_DELETE;
 
   public schema = entityFactory(spaceSchemaKey);
 
