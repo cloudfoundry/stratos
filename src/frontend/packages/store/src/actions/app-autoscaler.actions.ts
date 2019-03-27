@@ -1,16 +1,16 @@
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction } from '../types/request.types';
+import { RequestOptions } from '@angular/http';
+
 import {
+  appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
+  appAutoscalerInsMetricSchemaKey,
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
-  appAutoscalerAppMetricSchemaKey,
-  appAutoscalerInsMetricSchemaKey,
   appAutoscalerUpdatedPolicySchemaKey,
-  entityFactory
+  entityFactory,
 } from '../helpers/entity-factory';
-import { IRequestAction } from '../types/request.types';
-import { RequestOptions } from '@angular/http';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, IRequestAction } from '../types/request.types';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -69,7 +69,7 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
     public policy: any,
   ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY;
-  entityKey =  appAutoscalerUpdatedPolicySchemaKey; // appAutoscalerPolicySchemaKey;
+  entityKey = appAutoscalerUpdatedPolicySchemaKey;
 }
 
 export class DetachAppAutoscalerPolicyAction implements IRequestAction {

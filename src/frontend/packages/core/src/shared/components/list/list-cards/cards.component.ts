@@ -18,6 +18,8 @@ export class CardsComponent<T> {
   get component() { return this.pComponent; }
   set component(cardCell: CardTypes<T>) {
     this.pComponent = cardCell;
+    /* tslint:disable-next-line */
+    this.columns = cardCell['columns'];
   }
 
   public multiActionTrackBy(index: number, item: any | MultiActionListEntity) {

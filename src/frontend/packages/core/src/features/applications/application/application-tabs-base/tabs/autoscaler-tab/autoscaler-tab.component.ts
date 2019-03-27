@@ -192,7 +192,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
   diableAutoscaler() {
     const confirmation = new ConfirmationDialogConfig(
       'Detach And Delete Policy',
-      'Are you sure you want to detach and delete the policy?.',
+      'Are you sure you want to detach and delete the policy?',
       'Detach and Delete',
       true
     );

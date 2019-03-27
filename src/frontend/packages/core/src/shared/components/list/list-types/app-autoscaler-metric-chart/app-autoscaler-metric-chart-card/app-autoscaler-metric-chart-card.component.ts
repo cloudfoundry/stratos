@@ -1,23 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { CardCell, IListRowCell } from '../../../list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import {
-  entityFactory,
-  appAutoscalerAppMetricSchemaKey
-} from '../../../../../../../../store/src/helpers/entity-factory';
-import {
-  GetAppAutoscalerAppMetricAction,
-} from '../../../../../../../../store/src/actions/app-autoscaler.actions';
-import { getPaginationObservables } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { Observable } from 'rxjs';
-import { AppState } from '../../../../../../../../store/src/app-state';
 import { Store } from '@ngrx/store';
-import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
-import {
-  AppAutoscalerAppMetric,
-} from '../../../../../../../../store/src/types/app-autoscaler.types';
+import { Observable } from 'rxjs';
+import { filter, first, publishReplay, refCount } from 'rxjs/operators';
+
+import { GetAppAutoscalerAppMetricAction } from '../../../../../../../../store/src/actions/app-autoscaler.actions';
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { buildLegendData } from '../../../../../../../../store/src/helpers/autoscaler/autoscaler-util';
+import { appAutoscalerAppMetricSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
+import {
+  getPaginationObservables,
+} from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppAutoscalerAppMetric } from '../../../../../../../../store/src/types/app-autoscaler.types';
+import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { CardCell, IListRowCell } from '../../../list.types';
 
 @Component({
   selector: 'app-app-autoscaler-metric-chart-card',
@@ -26,6 +23,7 @@ import { buildLegendData } from '../../../../../../../../store/src/helpers/autos
 })
 
 export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<any>> implements OnInit, IListRowCell {
+  static columns = 1;
   listData: {
     label: string;
     data$: Observable<string>;
@@ -102,7 +100,12 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
         action.paginationKey,
         entityFactory(appAutoscalerAppMetricSchemaKey)
       )
-    }, false).entities$;
+    }, false).entities$.pipe(
+      filter(entities => !!entities),
+      first(),
+      publishReplay(1),
+      refCount(),
+    );
   }
 
 }

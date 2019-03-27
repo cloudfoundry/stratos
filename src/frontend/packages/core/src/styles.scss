@@ -66,34 +66,10 @@ button.mat-simple-snackbar-action {
 //   flex-direction: column;
 // }
 
-.autoscaler-chart-legend {
-  .ngx-charts {
-    display: none;
-  }
-  header {
-    display: none;
-  }
-  li {
-    display: inline-block;
-  }
-  .legend-wrap {
-    width: unset;
-    .legend-labels {
-      width: unset;
-    }
-  }
-}
-
 .autoscaler-chart-bar-legend {
   .ngx-charts {
     display: none;
   }
-  // header {
-  //   display: none;
-  // }
-  // li {
-  //   display: inline-block;
-  // }
   .legend-wrap {
     width: unset;
     .legend-labels {
@@ -102,16 +78,3 @@ button.mat-simple-snackbar-action {
   }
 }
 
-.autoscaler-metric-page .cards__columns-3 app-card {
-  width: 100%;
-}
-
-app-edit-autoscaler-policy {
-  .steppers__contents {
-    display: unset;
-    height: unset;
-  }
-  .app-autoscaler-edit-specific-date .mat-form-field-infix {
-    width: unset;
-  }
-}

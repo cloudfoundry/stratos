@@ -126,11 +126,6 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
       ]],
       adjustment_type: [0]
     });
-    this.editTriggerForm.updateValueAndValidity();
-    this.editTriggerForm.controls['a'].updateValueAndValidity
-    const subToUnsubOnDestroy = this.editTriggerForm.controls.a.valueChanges.subscribe(change => {
-      this.editTriggerForm.controls.b.updateValueAndValidity()
-    })
     this.editRecurringScheduleForm = this.fb.group({
       days_of_week: [0],
       days_of_month: [0],
