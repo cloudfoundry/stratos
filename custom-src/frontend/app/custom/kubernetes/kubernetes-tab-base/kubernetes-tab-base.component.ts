@@ -30,11 +30,11 @@ import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favori
 export class KubernetesTabBaseComponent implements OnInit {
 
   tabLinks = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'nodes', label: 'Nodes' },
-    { link: 'namespaces', label: 'Namespaces' },
-    { link: 'pods', label: 'Pods' },
-    { link: 'apps', label: 'Applications' }
+    { link: 'summary', label: 'Summary', matIcon: 'kubernetes', matIconFont: 'stratos-icons' },
+    { link: 'nodes', label: 'Nodes', matIcon: 'developer_board' },
+    { link: 'namespaces', label: 'Namespaces', matIcon: 'language' },
+    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
+    { link: 'apps', label: 'Applications', matIcon: 'apps' }
   ];
 
   isFetching$: Observable<boolean>;

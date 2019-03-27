@@ -1,25 +1,23 @@
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, Inject, Renderer2, ElementRef } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Portal } from '@angular/cdk/portal';
+import { DOCUMENT } from '@angular/common';
+import { AfterContentInit, Component, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription, Observable } from 'rxjs';
-import { debounceTime, filter, withLatestFrom, first, map } from 'rxjs/operators';
-
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { debounceTime, filter, startWith, withLatestFrom } from 'rxjs/operators';
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import { CloseSideHelp, CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
+import { TabNavService } from '../../../../tab-nav.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { TabNavService } from '../../../../tab-nav.service';
-import { Portal } from '@angular/cdk/portal';
-import { DOCUMENT } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -174,7 +172,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   public sideHelpClosed() {
     this.hideShowOverlays(false);
     this.store.dispatch(new CloseSideHelp());
-
   }
 
   private hideShowOverlays(hide: boolean) {

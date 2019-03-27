@@ -1,4 +1,4 @@
-<app-page-header [tabs]="tabLinks" [favorite]="favorite$ | async">
+<app-page-header [tabs]="tabLinks" [favorite]="favorite$ | async" tabsHeader="Kubernetes">
   <h1>{{ (kubeEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
   </div>

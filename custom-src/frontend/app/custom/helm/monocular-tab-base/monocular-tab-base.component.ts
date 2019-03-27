@@ -10,10 +10,10 @@ import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-facto
 export class MonocularTabBaseComponent implements OnInit {
 
   tabLinks = [
-    { link: 'charts', label: 'Charts' },
-    { link: 'repos', label: 'Repositories' },
-    { link: 'releases', label: 'Releases' },
-    { link: 'config', label: 'Config' },
+    { link: 'charts', label: 'Charts', matIcon: 'folder_open' },
+    { link: 'repos', label: 'Repositories', matIcon: 'products', matIconFont: 'stratos-icons' },
+    { link: 'releases', label: 'Releases', matIcon: 'apps' },
+    { link: 'config', label: 'Config', matIcon: 'build' },
   ];
 
   public favorite = new UserFavorite('JPuffnBo2-DH_5ATdrbBlh-08xc', 'helm', endpointSchemaKey, null, {

@@ -1,4 +1,10 @@
 <div>
+  <app-page-sub-nav>
+    <button *ngIf="dashboardAvailable$ | async" [routerLink]="dashboardLink" mat-button>
+      <mat-icon>dashboard</mat-icon> View Dashboard
+    </button>
+  </app-page-sub-nav>
+
   <div class="kube-details" *ngIf="endpointDetails$ | async as details">
     <img class="kube-details__logo" src="{{details.imagePath}}" />
     <div clas="kube-details__header-section">
@@ -32,11 +38,6 @@
       </app-tile-grid>
     </div>
   </div>
-</div>
-<div>
-  <div *ngIf="dashboardAvailable$ | async" class="kube-details__dashboard">
-    <button [routerLink]="dashboardLink" color="primary" mat-button>Open Kubernetes Dashboard</button>
-</div>
 </div>
 <div class="kube-details__graphs">
   <div class="kube-details__graphs-group">
