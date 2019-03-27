@@ -52,7 +52,7 @@ export class HelmReleaseTabBaseComponent implements OnInit {
   public title = '';
 
   tabLinks = [
-    { link: 'summary', label: 'Summary' },
+    { link: 'summary', label: 'Summary', matIcon: 'helm', matIconFont: 'stratos-icons' },
   ];
   constructor(
     private helmRelease: HelmReleaseGuid,

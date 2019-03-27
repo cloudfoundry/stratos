@@ -1,3 +1,9 @@
+<app-page-sub-nav *ngIf="!(isFetching$ | async)">
+  <button mat-icon-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
+    <mat-icon>delete</mat-icon>
+  </button>
+</app-page-sub-nav>
+
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Release details'">
   <div class="summary" *ngIf="release$ | async as release">
     <app-tile-grid>
