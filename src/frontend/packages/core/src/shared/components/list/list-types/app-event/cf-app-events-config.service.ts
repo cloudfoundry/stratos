@@ -9,14 +9,14 @@ import { TableCellEventActionComponent } from './table-cell-event-action/table-c
 import { TableCellEventDetailComponent } from './table-cell-event-detail/table-cell-event-detail.component';
 import { TableCellEventTimestampComponent } from './table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { TableCellEventTypeComponent } from './table-cell-event-type/table-cell-event-type.component';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { EntityInfo, APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
-export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
+export class CfAppEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
 
   eventSource: CfAppEventsDataSource;
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
       columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent, sort: true, cellFlex: '3'
     },

@@ -22,14 +22,16 @@ export class CardsComponent<T> {
     this.columns = cardCell['columns'];
   }
 
-  public multiActionTrackBy(index: number, item: any | MultiActionListEntity) {
-    if (!this.dataSource) {
-      return null;
+  public multiActionTrackBy() {
+    return (index: number, item: any | MultiActionListEntity) => {
+      if (!this.dataSource) {
+        return null;
+      }
+      if (this.isMultiActionItem(item)) {
+        return this.dataSource.trackBy(index, item.entity);
+      }
+      return this.dataSource.trackBy(index, item);
     }
-    if (this.isMultiActionItem(item)) {
-      return this.dataSource.trackBy(index, item.entity);
-    }
-    return this.dataSource.trackBy(index, item);
   }
 
   public isMultiActionItem(component: any | MultiActionListEntity) {

@@ -1,25 +1,36 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+
 import { AppState } from '../../../../../../../store/src/app-state';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
-import { TableCellAutoscalerEventActionComponent } from './table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
 import {
-  TableCellAutoscalerEventTimestampComponent
+  TableCellAutoscalerEventActionComponent,
+} from './table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
+import {
+  TableCellAutoscalerEventChangeComponent,
+} from './table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
+import {
+  TableCellAutoscalerEventErrorComponent,
+} from './table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
+import {
+  TableCellAutoscalerEventStatusComponent,
+} from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
+import {
+  TableCellAutoscalerEventTimestampComponent,
 } from './table-cell-autoscaler-event-timestamp/table-cell-autoscaler-event-timestamp.component';
-import { TableCellAutoscalerEventTypeComponent } from './table-cell-autoscaler-event-type/table-cell-autoscaler-event-type.component';
-import { TableCellAutoscalerEventStatusComponent } from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
-import { TableCellAutoscalerEventChangeComponent } from './table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
-import { TableCellAutoscalerEventErrorComponent } from './table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
-import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
+import {
+  TableCellAutoscalerEventTypeComponent,
+} from './table-cell-autoscaler-event-type/table-cell-autoscaler-event-type.component';
 
 @Injectable()
-export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
+export class CfAppAutoscalerEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
   autoscalerEventSource: CfAppAutoscalerEventsDataSource;
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
       columnId: 'timestamp', headerCell: () =>
         'Timestamp', cellComponent: TableCellAutoscalerEventTimestampComponent, sort: true, cellFlex: '3'
