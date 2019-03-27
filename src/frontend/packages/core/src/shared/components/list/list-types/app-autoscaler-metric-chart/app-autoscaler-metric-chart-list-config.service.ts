@@ -1,19 +1,21 @@
-import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
-import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { ListViewTypes } from '../../list.component.types';
+import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import { ITableColumn } from '../../list-table/table.types';
+import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import {
+  AppAutoscalerMetricChartCardComponent,
+} from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
+import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
 
 @Injectable()
-export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource<any>> {
+export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource> {
   autoscalerMetricSource: AppAutoscalerMetricChartDataSource;
   cardComponent = AppAutoscalerMetricChartCardComponent;
   viewType = ListViewTypes.CARD_ONLY;

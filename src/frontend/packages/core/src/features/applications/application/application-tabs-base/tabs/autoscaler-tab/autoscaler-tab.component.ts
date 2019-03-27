@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import {
   DetachAppAutoscalerPolicyAction,
@@ -134,7 +134,9 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
           this.loadLatestMetricsUponPolicy(entity.entity);
         }
         return entity && entity.entity;
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
       map(({ entity }) => entity && entity.entity)

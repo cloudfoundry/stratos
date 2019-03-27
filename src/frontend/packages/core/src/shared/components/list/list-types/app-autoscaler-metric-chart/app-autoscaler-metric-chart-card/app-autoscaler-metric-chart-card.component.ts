@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, publishReplay, refCount } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { GetAppAutoscalerAppMetricAction } from '../../../../../../../../store/src/actions/app-autoscaler.actions';
 import { AppState } from '../../../../../../../../store/src/app-state';
@@ -92,7 +92,6 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   getAppMetric(metricName: string, trigger: any, params: any) {
     const action = new GetAppAutoscalerAppMetricAction(this.appService.appGuid,
       this.appService.cfGuid, metricName, false, trigger, params);
-    this.store.dispatch(action);
     return getPaginationObservables<AppAutoscalerAppMetric>({
       store: this.store,
       action,
@@ -101,10 +100,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
         entityFactory(appAutoscalerAppMetricSchemaKey)
       )
     }, false).entities$.pipe(
-      filter(entities => !!entities),
-      first(),
-      publishReplay(1),
-      refCount(),
+      filter(entities => !!entities)
     );
   }
 

@@ -1,12 +1,13 @@
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { entityFactory, appAutoscalerPolicySchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { GetAppAutoscalerPolicyTriggerAction } from '../../../../../../../store/src/actions/app-autoscaler.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 
-export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResource<any>> {
+import { getRowMetadata } from '../../../../../../../core/src/features/cloud-foundry/cf.helpers';
+import { GetAppAutoscalerPolicyTriggerAction } from '../../../../../../../store/src/actions/app-autoscaler.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { appAutoscalerPolicySchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+
+export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResource> {
   action: any;
   constructor(
     store: Store<AppState>,
@@ -20,10 +21,9 @@ export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResour
         store,
         action,
         schema: entityFactory(appAutoscalerPolicySchemaKey),
-        getRowUniqueId: (object: EntityInfo) => {
-          return object.entity.metadata ? object.entity.metadata.guid : null;
-        },
+        getRowUniqueId: getRowMetadata,
         paginationKey,
+        isLocal: true
       }
     );
   }

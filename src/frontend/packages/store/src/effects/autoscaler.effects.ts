@@ -1,42 +1,43 @@
 import { Injectable } from '@angular/core';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
+
 import { LoggerService } from '../../../core/src/core/logger.service';
+import { environment } from '../../../core/src/environments/environment.prod';
 import {
-  GetAppAutoscalerPolicyAction,
+  APP_AUTOSCALER_HEALTH,
+  APP_AUTOSCALER_POLICY,
+  APP_AUTOSCALER_SCALING_HISTORY,
+  DETACH_APP_AUTOSCALER_POLICY,
+  DetachAppAutoscalerPolicyAction,
+  FETCH_APP_AUTOSCALER_METRIC,
   GetAppAutoscalerHealthAction,
+  GetAppAutoscalerMetricAction,
+  GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
   GetAppAutoscalerScalingHistoryAction,
-  GetAppAutoscalerMetricAction,
-  UpdateAppAutoscalerPolicyAction,
-  DetachAppAutoscalerPolicyAction,
-  APP_AUTOSCALER_POLICY,
-  APP_AUTOSCALER_HEALTH,
-  APP_AUTOSCALER_SCALING_HISTORY,
-  FETCH_APP_AUTOSCALER_METRIC,
   UPDATE_APP_AUTOSCALER_POLICY,
-  DETACH_APP_AUTOSCALER_POLICY,
+  UpdateAppAutoscalerPolicyAction,
 } from '../actions/app-autoscaler.actions';
+import { AppState } from '../app-state';
+import { buildMetricData } from '../helpers/autoscaler/autoscaler-transform-metric';
+import {
+  autoscalerTransformArrayToMap,
+  autoscalerTransformMapToArray,
+} from '../helpers/autoscaler/autoscaler-transform-policy';
+import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
+import { selectPaginationState } from '../selectors/pagination.selectors';
 import { NormalizedResponse } from '../types/api.types';
+import { PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import {
   ICFAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { AppState } from '../app-state';
-import { environment } from '../../../core/src/environments/environment.prod';
-import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { PaginatedAction } from './../types/pagination.types';
-import { buildMetricData } from '../helpers/autoscaler/autoscaler-transform-metric';
-import {
-  autoscalerTransformArrayToMap,
-  autoscalerTransformMapToArray,
-} from '../helpers/autoscaler/autoscaler-transform-policy';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 
 const { proxyAPIVersion, autoscalerAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/proxy/${autoscalerAPIVersion}`;

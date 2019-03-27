@@ -10,7 +10,7 @@ import {
   entityFactory,
 } from '../helpers/entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, IRequestAction } from '../types/request.types';
+import { IRequestAction } from '../types/request.types';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -82,14 +82,13 @@ export class DetachAppAutoscalerPolicyAction implements IRequestAction {
   entityKey = appAutoscalerPolicySchemaKey;
 }
 
-export class GetAppAutoscalerPolicyTriggerAction extends CFStartAction implements PaginatedAction {
+export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
   constructor(
     public paginationKey: string,
     public appGuid: string,
     public cfGuid: string,
     public normalFormat?,
   ) {
-    super();
     this.query = {
       metric: 'policy'
     };
@@ -107,7 +106,7 @@ export class GetAppAutoscalerPolicyTriggerAction extends CFStartAction implement
   windowValue: string;
 }
 
-export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implements PaginatedAction {
+export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   private static sortField = 'timestamp';
   constructor(
     public paginationKey: string,
@@ -116,7 +115,6 @@ export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implemen
     public normalFormat?,
     public params?,
   ) {
-    super();
     this.query = {
       metric: 'history'
     };
