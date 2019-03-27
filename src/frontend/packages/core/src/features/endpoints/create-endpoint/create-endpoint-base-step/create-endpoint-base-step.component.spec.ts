@@ -1,22 +1,26 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
+import { CreateEndpointBaseStepComponent } from './create-endpoint-base-step.component';
 
-describe('CreateEndpointCfStep1Component', () => {
-  let component: CreateEndpointCfStep1Component;
-  let fixture: ComponentFixture<CreateEndpointCfStep1Component>;
+describe('CreateEndpointBaseStepComponent', () => {
+  let component: CreateEndpointBaseStepComponent;
+  let fixture: ComponentFixture<CreateEndpointBaseStepComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CreateEndpointCfStep1Component],
+      declarations: [
+        CreateEndpointBaseStepComponent,
+      ],
       imports: [
         CoreModule,
         SharedModule,
+        RouterTestingModule,
         createBasicStoreModule(),
         NoopAnimationsModule
       ],
@@ -34,12 +38,12 @@ describe('CreateEndpointCfStep1Component', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CreateEndpointCfStep1Component);
+    fixture = TestBed.createComponent(CreateEndpointBaseStepComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should be created', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 });
