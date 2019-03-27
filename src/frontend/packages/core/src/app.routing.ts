@@ -33,7 +33,8 @@ const appRoutes: Routes = [
             label: 'Home',
             matIcon: 'home',
             position: 10
-          }
+          },
+          uiNoMargin: true
         }
       },
       {

@@ -30,11 +30,14 @@ export class CloudFoundryCellBaseComponent {
     },
     {
       link: 'charts',
-      label: 'Metrics'
+      label: 'Metrics',
+      matIcon: 'bar_chart'
     },
     {
       link: CloudFoundryCellBaseComponent.AppsLinks,
-      label: 'App Instances'
+      label: 'App Instances',
+      matIcon: 'application_instance',
+      matIconFont: 'stratos-icons'
     },
   ];
 

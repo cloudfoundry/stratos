@@ -1,28 +1,46 @@
 @import '../../../../sass/mixins';
 
 .favorites-list {
+  display: flex;
   flex: 2;
-  @include breakpoint(tablet) {
-    margin-right: 40px;
+  flex-direction: column;
+  padding: 24px;
+  &__header {
+    align-items: center;
+    display: flex;
+    margin-bottom: 12px;
   }
 }
 .recent-list {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  padding: 24px;
 }
-.stats-panel {
-  flex: 40%;
-  margin-left: 20px;
-  padding-left: 24px;
-}
-
 .home-page {
   display: flex;
   flex-direction: column;
+  height: 100%;
   &__header {
+    font-size: 18px;
     margin-top: 0;
+  }
+  &__list-header {
+    display: flex;
+    line-height: 40px;
+    .home-page__header {
+      flex: 1;
+      margin-bottom: 12px;
+    }
   }
 
   @include breakpoint(tablet) {
     flex-direction: row;
+  }
+
+  &__scroller {
+    margin: 0 -24px;
+    overflow: auto;
+    padding: 0 24px;
   }
 }

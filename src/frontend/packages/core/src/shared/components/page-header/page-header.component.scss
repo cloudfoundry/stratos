@@ -37,6 +37,7 @@ $bottom-index: $top-index - 1;
   }
   &__breadcrumb-link {
     cursor: pointer;
+    outline: none;
     &:hover {
       opacity: $breadcrumb-hover-opacity;
     }

@@ -28,6 +28,7 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { PortalModule } from '@angular/cdk/portal';
+import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 
 @NgModule({
   imports: [
@@ -54,6 +55,7 @@ import { PortalModule } from '@angular/cdk/portal';
     PortalModule,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
+    NoContentMessageComponent,
     DisableRouterLinkDirective
   ],
   providers: [
@@ -82,7 +84,8 @@ import { PortalModule } from '@angular/cdk/portal';
     PageNotFoundComponentComponent,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
-    DisableRouterLinkDirective
+    DisableRouterLinkDirective,
+    NoContentMessageComponent
   ],
   entryComponents: [
     LogOutDialogComponent

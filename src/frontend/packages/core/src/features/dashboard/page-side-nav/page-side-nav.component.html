@@ -13,7 +13,7 @@
         [routerLinkActive]="['page-side-nav__item--active']">
         <mat-icon class="page-side-nav__icon" *ngIf="tab.matIcon" [fontSet]="tab.matIconFont">{{ tab.matIcon }}</mat-icon>
         <mat-icon class="page-side-nav__icon" *ngIf="!tab.matIcon"></mat-icon>
-        {{ tab.label }}
+        <span>{{ tab.label }}</span>
       </a>
     </li>
   </ul>

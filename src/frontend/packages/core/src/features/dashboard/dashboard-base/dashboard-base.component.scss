@@ -39,6 +39,9 @@ $app-sub-header-height: 48px;
   &__side-help {
     width: 600px;
   }  
+  &__noMargin {
+    padding: 0;
+  }
 }
 
 .page-content {

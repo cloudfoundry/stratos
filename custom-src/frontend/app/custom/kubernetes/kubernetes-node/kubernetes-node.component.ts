@@ -34,9 +34,9 @@ import { KubernetesService } from '../services/kubernetes.service';
 export class KubernetesNodeComponent {
 
   tabLinks = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'metrics', label: 'Metrics' },
-    { link: 'pods', label: 'Pods' },
+    { link: 'summary', label: 'Summary', matIcon: 'kubernetes', matIconFont: 'stratos-icons' },
+    { link: 'metrics', label: 'Metrics', matIcon: 'bar_chart' },
+    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
   ];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
@@ -50,10 +50,8 @@ export class KubernetesNodeComponent {
       first(),
       tap(haveMetrics => {
         if (!haveMetrics) {
-          this.tabLinks = [
-            { link: 'summary', label: 'Summary' },
-            { link: 'pods', label: 'Pods' },
-          ];
+          // Remove metrics tab
+          this.tabLinks = this.tabLinks.filter(tab => tab.link !== 'metrics');
         }
       })
     ).subscribe();

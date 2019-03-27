@@ -32,7 +32,7 @@ import { map } from 'rxjs/operators';
 export class KubernetesNamespaceComponent {
 
   tabLinks = [
-    { link: 'pods', label: 'Pods' },
+    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
   ];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
