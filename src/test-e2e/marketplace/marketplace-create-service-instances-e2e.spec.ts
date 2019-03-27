@@ -3,7 +3,7 @@ import { browser } from 'protractor';
 import { e2e, E2ESetup } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
-import { CreateServiceInstance } from './create-service-instance.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -142,7 +142,7 @@ function init(
     const service = response.resources.find(e => e.entity.label === serviceName);
     const serviceGuid = service.metadata.guid;
     servicesHelperE2E.setCreateServiceInstance(
-      new CreateServiceInstance('/marketplace/' + endpointGuid + '/' + serviceGuid +
+      new CreateMarketplaceServiceInstance('/marketplace/' + endpointGuid + '/' + serviceGuid +
         '/create?isSpaceScoped=' + (spaceScoped ? 'true' : 'false')));
     const marketplaceSummaryPage = new MarketplaceSummaryPage(endpointGuid, serviceGuid);
     return { servicesHelper: servicesHelperE2E, summaryPage: marketplaceSummaryPage };

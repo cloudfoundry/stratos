@@ -11,13 +11,13 @@ import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
 
 
 /**
- * Allows a list to manage separate actions an/or separate entity types.
+ * Allows a list to manage separate actions and/or separate entity types.
  * Also used to configure the entity type dropdown.
  * @export
  */
 export class MultiActionConfig {
   /**
-   * Creates an instance of Multi̦Actio̦nConfig.
+   * Creates an instance of MultiActionConfig.
    * @param schemaConfigs configs to drive a multi action list
    * @param [selectPlaceholder='Select entity type'] The message that will be show in the select.
    * If this is null then the dropdown will be hidden

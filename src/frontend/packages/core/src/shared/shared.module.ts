@@ -162,7 +162,9 @@ import { MarkdownPreviewComponent } from './components/markdown-preview/markdown
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
 import { BlurDirective } from './components/blur.directive';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
-
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
+import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
+import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 /* tslint:disable:max-line-length */
 
 @NgModule({
@@ -286,8 +288,12 @@ import { SimpleUsageChartComponent } from './components/simple-usage-chart/simpl
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
     AppNameUniqueDirective,
+    AppNameUniqueDirective,
     EndpointCardComponent,
-    SimpleUsageChartComponent
+    SimpleUsageChartComponent,
+    PageSubNavComponent,
+    BreadcrumbsComponent,
+    PageSubNavSectionComponent
   ],
   exports: [
     FormsModule,
@@ -388,6 +394,9 @@ import { SimpleUsageChartComponent } from './components/simple-usage-chart/simpl
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
     MultilineTitleComponent,
+    PageSubNavComponent,
+    BreadcrumbsComponent,
+    PageSubNavSectionComponent,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
     MarkdownPreviewComponent,

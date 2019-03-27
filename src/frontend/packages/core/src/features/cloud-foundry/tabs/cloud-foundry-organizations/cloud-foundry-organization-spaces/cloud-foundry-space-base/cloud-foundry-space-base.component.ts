@@ -26,6 +26,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
+import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -40,26 +41,33 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
 })
 export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
-  tabLinks = [
+  tabLinks: IPageSideNavTab[] = [
     {
       link: 'summary',
       label: 'Summary',
+      matIcon: 'description'
     },
     {
       link: 'apps',
       label: 'Applications',
+      matIcon: 'apps'
     },
     {
       link: 'service-instances',
-      label: 'Service Instances'
+      label: 'Services',
+      matIconFont: 'stratos-icons',
+      matIcon: 'service'
     },
     {
       link: 'routes',
       label: 'Routes',
+      matIconFont: 'stratos-icons',
+      matIcon: 'network_route'
     },
     {
       link: 'users',
       label: 'Users',
+      matIcon: 'people'
     }
   ];
 

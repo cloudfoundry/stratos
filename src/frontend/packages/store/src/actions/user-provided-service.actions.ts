@@ -65,9 +65,7 @@ export class GetUserProvidedService extends CFStartAction implements EntityInlin
   constructor(
     public guid: string,
     public endpointGuid: string,
-    public includeRelations: string[] = [
-      // createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
-    ],
+    public includeRelations: string[] = [],
     public populateMissing = true
   ) {
     super();
@@ -81,7 +79,7 @@ export class GetUserProvidedService extends CFStartAction implements EntityInlin
   entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
 }
-export interface TUserProvidedServiceInstanceDataCredentials {
+export interface IUserProvidedServiceInstanceDataCredentials {
   [name: string]: string;
 }
 export interface IUserProvidedServiceInstanceData {
@@ -90,7 +88,7 @@ export interface IUserProvidedServiceInstanceData {
   route_service_url?: string;
   syslog_drain_url?: string;
   tags?: string[];
-  credentials?: TUserProvidedServiceInstanceDataCredentials;
+  credentials?: IUserProvidedServiceInstanceDataCredentials;
 }
 
 export class CreateUserProvidedServiceInstance extends CFStartAction implements ICFAction {
@@ -186,5 +184,6 @@ export class DeleteUserProvidedInstance extends CFStartAction implements ICFActi
   entity = entityFactory(userProvidedServiceInstanceSchemaKey);
   entityKey = userProvidedServiceInstanceSchemaKey;
   options: RequestOptions;
+  clearPaginationEntityKeys = [serviceBindingSchemaKey];
   removeEntityOnDelete = true;
 }

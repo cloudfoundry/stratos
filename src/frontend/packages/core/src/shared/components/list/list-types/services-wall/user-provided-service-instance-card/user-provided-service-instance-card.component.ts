@@ -6,7 +6,7 @@ import {
   userProvidedServiceInstanceSchemaKey,
 } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IUserProvidedService } from '../../../../../../core/cf-api-svc.types';
+import { IUserProvidedServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
@@ -21,8 +21,8 @@ import { CardCell } from '../../../list.types';
   templateUrl: './user-provided-service-instance-card.component.html',
   styleUrls: ['./user-provided-service-instance-card.component.scss'],
 })
-export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResource<IUserProvidedService>> {
-  serviceInstanceEntity: APIResource<IUserProvidedService>;
+export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResource<IUserProvidedServiceInstance>> {
+  serviceInstanceEntity: APIResource<IUserProvidedServiceInstance>;
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
 
@@ -31,13 +31,13 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
   entityConfig: ComponentEntityMonitorConfig;
 
   @Input('row')
-  set row(row: APIResource<IUserProvidedService>) {
+  set row(row: APIResource<IUserProvidedServiceInstance>) {
     if (row) {
       this.setup(row);
     }
   }
 
-  private setup(row: APIResource<IUserProvidedService>) {
+  private setup(row: APIResource<IUserProvidedServiceInstance>) {
     this.serviceInstanceEntity = row;
     const schema = entityFactory(userProvidedServiceInstanceSchemaKey);
     this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);

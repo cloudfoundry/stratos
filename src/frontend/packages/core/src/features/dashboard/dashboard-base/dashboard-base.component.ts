@@ -1,4 +1,3 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, Inject, Renderer2, ElementRef } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
@@ -7,7 +6,7 @@ import { Subscription, Observable } from 'rxjs';
 import { debounceTime, filter, withLatestFrom, first, map } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { ChangeSideNavMode, CloseSideNav, OpenSideNav, ShowSideHelp, CloseSideHelp } from '../../../../../store/src/actions/dashboard-actions';
+import { CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
@@ -16,8 +15,11 @@ import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { TabNavService } from '../../../../tab-nav.service';
+import { Portal } from '@angular/cdk/portal';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -26,6 +28,8 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentInit {
+  public activeTabLabel$: Observable<string>;
+  public subNavData$: Observable<[string, Portal<any>]>;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -34,6 +38,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private endpointsService: EndpointsService,
+    public tabNavService: TabNavService,
     @Inject(DOCUMENT) private document: Document,
     private renderer: Renderer2
   ) {
@@ -43,6 +48,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   public helpDocumentUrl: string;
+  private iconMode = true;
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;
@@ -57,14 +63,36 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
   @ViewChild('sideHelp') public sideHelp: MatDrawer;
+  @ViewChild('content') public content;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 
   sideNaveMode = 'side';
+
+  public iconModeOpen = false;
+  public sideNavWidth = 54;
+
   dispatchRelations() {
     this.store.dispatch(new GetCurrentUsersRelations());
   }
+
   ngOnInit() {
+    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
+      debounceTime(250)
+    ).subscribe(result => {
+      if (result.matches) {
+        this.enableMobileNav();
+      } else {
+        this.disableMobileNav();
+      }
+    });
+
+    this.subNavData$ = combineLatest(
+      this.tabNavService.getCurrentTabHeaderObservable().pipe(
+        startWith(null)
+      ),
+      this.tabNavService.tabSubNav$
+    );
     this.endpointsService.registerHealthCheck(
       new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
     );
@@ -77,6 +105,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       filter((event) => event instanceof NavigationEnd),
       withLatestFrom(dashboardState$)
     ).subscribe(([event, dashboard]) => {
+      if (this.content) {
+        // Ensure we always end up at the of the page when we navigate.
+        this.content.nativeElement.scrollTop = 0;
+      }
       this.fullView = this.isFullView(this.activatedRoute.snapshot);
       this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
       if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
@@ -85,7 +117,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       if (dashboard.sideHelpOpen) {
         this.sideHelp.close();
       }
-
+      this.iconModeMouse(false);
     });
   }
 
@@ -117,16 +149,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
-      debounceTime(250)
-    ).subscribe(result => {
-      if (result.matches) {
-        this.enableMobileNav();
-      } else {
-        this.disableMobileNav();
-      }
-    });
-
     this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
       this.store.dispatch(new CloseSideNav());
     });
@@ -163,24 +185,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     }
   }
 
-  private enableMobileNav() {
-    this.store.dispatch(new CloseSideNav());
-    this.store.dispatch(new ChangeSideNavMode('over'));
-  }
-
-  private disableMobileNav() {
-    this.store.dispatch(new OpenSideNav());
-    this.store.dispatch(new ChangeSideNavMode('side'));
-  }
-
   private getNavigationRoutes(): SideNavItem[] {
     let navItems = this.collectNavigationRoutes('', this.router.config);
 
     // Sort by name
-    navItems = navItems.sort((a: any, b: any) => a.text.localeCompare(b.text));
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => a.label.localeCompare(b.label));
 
     // Sort by position
-    navItems = navItems.sort((a: any, b: any) => {
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => {
       const posA = a.position ? a.position : 99;
       const posB = b.position ? b.position : 99;
       return posA - posB;
@@ -202,11 +214,33 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
         if (item.requiresEndpointType) {
           item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         }
+        // Backwards compatibility (text became label)
+        if (!item.label && !!item.text) {
+          item.label = item.text;
+        }
         nav.push(item);
       }
 
       const navs = this.collectNavigationRoutes(route.path, route.children);
       return nav.concat(navs);
     }, []);
+  }
+
+  public iconModeMouse(expand: boolean) {
+    if (this.iconMode) {
+      this.sideNavWidth = expand ? 200 : 54;
+      this.iconModeOpen = expand;
+    }
+  }
+
+  private enableMobileNav() {
+    this.sideNavWidth = 200;
+    this.iconMode = false;
+  }
+
+  private disableMobileNav() {
+    this.sideNavWidth = 54;
+    this.iconMode = true;
+    this.sidenav.close();
   }
 }

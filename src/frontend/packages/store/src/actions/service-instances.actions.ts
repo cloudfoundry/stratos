@@ -90,6 +90,7 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
   entity = [entityFactory(serviceInstancesSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
+  clearPaginationEntityKeys = [serviceBindingSchemaKey];
   removeEntityOnDelete = true;
 }
 export class CreateServiceInstance extends CFStartAction implements ICFAction {

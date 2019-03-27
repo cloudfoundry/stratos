@@ -16,11 +16,11 @@ import {
 import { getFavoriteFromCfEntity } from '../../../../../core/user-favorite-helpers';
 import { environment } from '../../../../../environments/environment.prod';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
-import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { IPageSideNavTab } from '../../../../dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -35,21 +35,23 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 })
 export class CloudFoundryOrganizationBaseComponent {
 
-  tabLinks: ISubHeaderTabs[] = [
+  tabLinks: IPageSideNavTab[] = [
     {
       link: 'summary',
-      label: 'Summary'
+      label: 'Summary',
+      matIcon: 'description'
     },
     {
       link: 'spaces',
-      label: 'Spaces'
+      label: 'Spaces',
+      matIcon: 'language'
     },
     {
       link: 'users',
       label: 'Users',
+      matIcon: 'people'
     }
   ];
-
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   public name$: Observable<string>;

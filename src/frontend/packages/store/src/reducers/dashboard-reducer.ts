@@ -18,7 +18,7 @@ export interface DashboardState {
 }
 
 export const defaultDashboardState: DashboardState = {
-  sidenavOpen: true,
+  sidenavOpen: false,
   sideNavMode: 'over',
   headerEventMinimized: false,
   sideHelpOpen: false,

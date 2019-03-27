@@ -1,10 +1,8 @@
-<app-page-header [tabs]="tabLinks" [favorite]="favorite$ | async">
+<app-page-header [tabs]="tabLinks" [tabsHeader]="tabsHeader" [favorite]="favorite$ | async">
   <h1>{{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
-    <button mat-icon-button name="add-org" *ngIf="canAddOrg$ | async" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
-      <mat-icon>add</mat-icon>
-    </button>
-    <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/cli" matTooltip="CLI Info">
+    <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/cli"
+      matTooltip="CLI Info">
       <mat-icon>keyboard</mat-icon>
     </button>
   </div>

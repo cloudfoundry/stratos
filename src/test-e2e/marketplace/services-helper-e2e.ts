@@ -6,7 +6,6 @@ import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
-import { CreateServiceInstance } from './create-service-instance.po';
 import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
@@ -19,10 +18,10 @@ export class ServicesHelperE2E {
   createServiceInstance: CreateMarketplaceServiceInstance;
   serviceInstanceName: string;
 
-  constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateMarketplaceServiceInstance = null) {
-    this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
-    this.cfHelper = new CFHelpers(e2eSetup);
-    this.serviceInstanceName = E2EHelpers.createCustomName(customServiceLabel).toLowerCase();
+  constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateMarketplaceServiceInstance = null, seed?: ServicesHelperE2E) {
+    this.cfRequestHelper = seed ? seed.cfRequestHelper : new CFRequestHelpers(e2eSetup);
+    this.cfHelper = seed ? seed.cfHelper : new CFHelpers(e2eSetup);
+    this.serviceInstanceName = seed ? seed.serviceInstanceName : E2EHelpers.createCustomName(customServiceLabel).toLowerCase();
     expect(this.serviceInstanceName.length)
       .toBeLessThanOrEqual(50, `Service name should not exceed 50 characters: ${this.serviceInstanceName}`);
     if (!!createServiceInstance) {
