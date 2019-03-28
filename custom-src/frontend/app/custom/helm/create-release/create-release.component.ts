@@ -1,24 +1,24 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription, of as observableOf } from 'rxjs';
+import { of as observableOf, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-create-release',
   templateUrl: './create-release.component.html',
   styleUrls: ['./create-release.component.scss'],
 })
-export class CreateReleaseComponent implements OnInit, OnDestroy {
+export class CreateReleaseComponent {
 
   isLoading$ = observableOf(false);
   paginationStateSub: Subscription;
+
+  public cancelUrl: string;
+
   constructor(
     private route: ActivatedRoute,
-  ) { }
-
-  ngOnInit() {
-    console.log('Create Release Component');
-  }
-  ngOnDestroy(): void {
+  ) {
+    const chart = this.route.snapshot.params;
+    this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
   }
 
 }

@@ -6,11 +6,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/helm/monocular/chartsvc"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/helm/monocular/chartsvc/models"
-	"github.com/kubeapps/common/datastore"
 
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
@@ -22,6 +20,7 @@ type installRequest struct {
 	Endpoint  string `json:"endpoint"`
 	Name      string `json:"releaseName"`
 	Namespace string `json:"releaseNamespace"`
+	Values    string `json:"values"`
 	Chart     struct {
 		Name       string `json:"chartName"`
 		Repository string `json:"repo"`
@@ -31,7 +30,7 @@ type installRequest struct {
 
 // Monocular is a plugin for Monocular
 type Monocular interface {
-	GetDBSession() datastore.Session
+	GetChartStore() chartsvc.ChartSvcDatastore
 }
 
 // InstallRelease will install a release
@@ -48,6 +47,9 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	}
 
 	chartID := fmt.Sprintf("%s/%s", params.Chart.Repository, params.Chart.Name)
+
+	log.Info("Installing release")
+	log.Info(chartID)
 
 	downloadURL, err := c.GetChart(chartID, params.Chart.Version)
 	if err != nil {
@@ -100,7 +102,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	installResponse, err := client.InstallReleaseFromChart(
 		chart,
 		params.Namespace,
-		helm.ValueOverrides(nil),
+		helm.ValueOverrides([]byte(params.Values)),
 		helm.ReleaseName(params.Name),
 		helm.InstallDryRun(false),
 		helm.InstallReuseName(false),
@@ -130,11 +132,9 @@ func (c *KubernetesSpecification) GetChart(chartID, version string) (string, err
 		return "", errors.New("Could not find monocular plugin interface")
 	}
 
-	dbSession := monocular.GetDBSession()
-	db, closer := dbSession.DB()
-	defer closer()
-	var chart models.Chart
-	if err := db.C(chartCollection).FindId(chartID).One(&chart); err != nil {
+	store := monocular.GetChartStore()
+	chart, err := store.GetChart(chartID)
+	if err != nil {
 		log.Error("Could not find chart")
 	}
 

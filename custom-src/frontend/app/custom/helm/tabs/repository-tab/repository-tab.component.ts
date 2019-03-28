@@ -1,5 +1,5 @@
+import { Component } from '@angular/core';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { Component, OnInit } from '@angular/core';
 import { MonocularRepositoryListConfig } from '../../list-types/monocular-repository-list-config.service';
 
 @Component({
@@ -11,11 +11,6 @@ import { MonocularRepositoryListConfig } from '../../list-types/monocular-reposi
     useClass: MonocularRepositoryListConfig,
   }]
 })
-export class RepositoryTabComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
+export class RepositoryTabComponent {
 
 }

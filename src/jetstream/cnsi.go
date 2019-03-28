@@ -280,6 +280,7 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 
 func (p *portalProxy) UpdateEndointMetadata(guid string, metadata string) error {
 	log.Debug("UpdateEndointMetadata")
+
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf(dbReferenceError, err)

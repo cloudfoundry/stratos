@@ -1,11 +1,12 @@
-<app-page-sub-nav *ngIf="!(isFetching$ | async)">
-  <button mat-icon-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
+<app-page-sub-nav *ngIf="!(helmReleaseHelper.isFetching$ | async)">
+  <button mat-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
     <mat-icon>delete</mat-icon>
+    <span>Delete</span>
   </button>
 </app-page-sub-nav>
 
-<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Release details'">
-  <div class="summary" *ngIf="release$ | async as release">
+<app-loading-page [isLoading]="helmReleaseHelper.isFetching$" [text]="'Retrieving Release details'">
+  <div class="summary" *ngIf="helmReleaseHelper.release$ | async as release">
     <app-tile-grid>
       <app-tile-group>
         <app-tile>

@@ -1,15 +1,14 @@
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { helmReleasesSchemaKey } from '../../../store/helm.entities';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { GetHelmReleases } from '../../../store/helm.actions';
-import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
-import { PaginationMonitor } from '../../../../../shared/monitors/pagination-monitor';
-import { getPaginationObservables } from '../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { map } from 'rxjs/operators';
-import { HelmReleaseGuid, HelmRelease } from '../../../store/helm.types';
-import { Observable } from 'rxjs';
+import { ConfirmationDialogConfig } from '../../../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
+import { helmReleasesSchemaKey } from '../../../store/helm.entities';
+import { HelmReleaseGuid } from '../../../store/helm.types';
+import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
   selector: 'app-helm-release-summary-tab',
@@ -18,24 +17,28 @@ import { Observable } from 'rxjs';
 })
 export class HelmReleaseSummaryTabComponent {
 
-  isFetching$: Observable<boolean>;
-
-  release$: Observable<any>;
+  // Confirmation dialogs
+  deleteReleaseConfirmation = new ConfirmationDialogConfig(
+    'Delete Release',
+    'Are you sure you want to delete this Release?',
+    'Delete'
+  );
 
   constructor(
-    helmReleaseGuid: HelmReleaseGuid,
-    store: Store<AppState>,
-  ) {
-    const guid = helmReleaseGuid.guid;
+    public helmReleaseHelper: HelmReleaseHelperService,
+    private store: Store<AppState>,
+    private confirmDialog: ConfirmationDialogService,
+    private httpClient: HttpClient,
+  ) { }
 
-    const action = new GetHelmReleases();
-    const paginationMonitor = new PaginationMonitor(store, action.paginationKey, entityFactory(helmReleasesSchemaKey));
-    const svc = getPaginationObservables({store, action, paginationMonitor});
-    this.isFetching$ = svc.fetchingEntities$;
-
-    this.release$ = svc.entities$.pipe(
-      map((items: HelmRelease[]) => items.find(item => item.guid === guid))
-    );
+  public deleteRelease() {
+    this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
+      // Make the http request to delete the release
+      const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
+      this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe(d => {
+        this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
+        this.store.dispatch(new RouterNav({ path: ['monocular/releases']}));
+      });
+    });
   }
-
 }

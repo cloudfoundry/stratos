@@ -16,4 +16,13 @@
   <mat-form-field>
     <input matInput placeholder="Namespace" name="releaseNamespace" formControlName="releaseNamespace" autocomplete="off">
   </mat-form-field>
+
+  <br>
+
+  <h3 class="helm-create-release">Enter YAML Value Overrides</h3>
+
+  <mat-form-field>
+    <textarea matInput formControlName="values" placeholder="Values" name="Values" matAutosizeMinRows="6" matAutosizeMaxRows="8"></textarea>
+  </mat-form-field>
+  
 </form>

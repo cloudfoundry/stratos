@@ -1,6 +1,8 @@
 package kubernetes
 
 import (
+	//"encoding/json"
+	//"fmt"
 	"net/url"
 
 	"github.com/labstack/echo"
@@ -65,6 +67,30 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 
 	response.Result = res
 	done <- response
+}
+
+// ListReleases will list the helm releases for all endpoints
+func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
+
+	// Need to get a config object for the target endpoint
+	endpointGUID := ec.Param("endpoint")
+	release := ec.Param("name")
+	userID := ec.Get("user_id").(string)
+
+	client, _, tiller, err := c.GetHelmClient(endpointGUID, userID)
+	if err != nil {
+		return err
+	}
+
+	defer tiller.Close()
+
+	res, err := client.ReleaseStatus(release, helm.StatusReleaseVersion(0))
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ec.JSON(200, res)
 }
 
 // ListReleases will list the helm releases for all endpoints

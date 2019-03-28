@@ -49,7 +49,8 @@ export class CreateApplicationStepDestinationComponent implements OnInit, AfterC
     this.form = new FormGroup({
       endpoint: new FormControl('', Validators.required),
       releaseName: new FormControl('', Validators.required),
-      releaseNamespace: new FormControl('', Validators.required)
+      releaseNamespace: new FormControl('', Validators.required),
+      values: new FormControl('')
     });
 
     this.validate$ = this.form.statusChanges.pipe(

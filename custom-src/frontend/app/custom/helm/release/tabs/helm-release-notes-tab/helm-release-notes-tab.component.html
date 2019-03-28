@@ -1,0 +1,8 @@
+<app-loading-page [isLoading]="helmReleaseHelper.isFetching$" [text]="'Retrieving Release details'">
+  <div *ngIf="notes$ | async as notes; else noNotes" class="helm-release-notes">
+    <div [innerHtml]="notes"></div>
+  </div>
+</app-loading-page>
+<ng-template #noNotes>
+No release notes
+</ng-template>

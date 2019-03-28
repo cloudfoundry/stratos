@@ -38,6 +38,10 @@ func (m *Monocular) GetDBSession() datastore.Session {
 	return m.dbSession
 }
 
+func (m *Monocular) GetChartStore() chartsvc.ChartSvcDatastore {
+	return m.QueryStore
+}
+
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
 

@@ -1,3 +1,4 @@
+import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';
 import { NgModule } from '@angular/core';
@@ -26,18 +27,19 @@ const monocular: Routes = [
       { path: 'repos/:guid', component: RepositoryTabComponent },
       { path: 'config', component: HelmConfigurationComponent },
       { path: 'releases', component: HelmReleasesTabComponent },
-      {
-        // Helm Release Views
-        path: 'releases/:guid',
-        component: HelmReleaseTabBaseComponent,
-        data: {
-          uiFullView: true,
-        },
-        children: [
-          { path: '', redirectTo: 'summary', pathMatch: 'full' },
-          { path: 'summary', component: HelmReleaseSummaryTabComponent },
-        ]
-      }
+    ]
+  },
+  {
+    // Helm Release Views
+    path: 'releases/:guid',
+    component: HelmReleaseTabBaseComponent,
+    data: {
+      uiFullView: true,
+    },
+    children: [
+      { path: '', redirectTo: 'summary', pathMatch: 'full' },
+      { path: 'summary', component: HelmReleaseSummaryTabComponent },
+      { path: 'notes', component: HelmReleaseNotesTabComponent },
     ]
   },
   { pathMatch: 'full', path: 'charts/:repo/:chartName/:version', component: MonocularChartViewComponent },

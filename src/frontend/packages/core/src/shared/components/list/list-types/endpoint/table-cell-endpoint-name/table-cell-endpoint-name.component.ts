@@ -1,35 +1,54 @@
-import { Component, Input, OnInit } from '@angular/core';
-
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { Component, Input } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/internal/operators/map';
+import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
+import { endpointSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { TableCellCustom } from '../../../list.types';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
+import { TableCellCustom } from '../../../list.types';
+
+export interface RowWithEndpointId {
+  endpointId: string;
+}
 
 @Component({
   selector: 'app-table-cell-endpoint-name',
   templateUrl: './table-cell-endpoint-name.component.html',
   styleUrls: ['./table-cell-endpoint-name.component.scss']
 })
-export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel> implements OnInit {
+export class TableCellEndpointNameComponent extends TableCellCustom<RowWithEndpointId>  {
 
-  public canShowLink = false;
+  private id: string;
 
-  private tableRow: EndpointModel;
+  public endpoint$: Observable<any>;
+
+  constructor(private entityServiceFactory: EntityServiceFactory) {
+    super();
+  }
+
   @Input('row')
-  set row(row: EndpointModel) {
-    this.tableRow = row;
+  set row(row: RowWithEndpointId) {
+    this.id = row.endpointId;
+    this.endpoint$ = this.entityServiceFactory.create(
+      endpointSchemaKey,
+      entityFactory(endpointSchemaKey),
+      this.id,
+      new GetAllEndpoints(),
+      false
+    ).waitForEntity$.pipe(
+      map(data => data.entity),
+      map((data: any) => {
+        const ep = getEndpointType(data.cnsi_type, data.sub_type);
+        data.canShowLink = data.connectionStatus === 'connected' || ep.doesNotSupportConnect;
+        data.link = EndpointsService.getLinkForEndpoint(data);
+        return data;
+      })
+    );
   }
-  get row(): EndpointModel {
-    return this.tableRow;
+  get row(): RowWithEndpointId {
+    return {
+      endpointId: this.id
+    };
   }
-
-  getLinkForEndpoint(row = this.tableRow) {
-    return EndpointsService.getLinkForEndpoint(row);
-  }
-
-  ngOnInit() {
-    const ep = getEndpointType(this.row.cnsi_type, this.row.sub_type);
-    this.canShowLink = (this.row as any).connectionStatus === 'connected' || ep.doesNotSupportConnect;
-  }
-
 }

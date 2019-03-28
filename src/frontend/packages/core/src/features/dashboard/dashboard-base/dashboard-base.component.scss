@@ -13,7 +13,7 @@ $app-sub-header-height: 48px;
   }
   &__inner {
     display: flex;
-    height: 100%;
+    height: calc(100% - 56px);
   }
   &__content {
     flex: auto;

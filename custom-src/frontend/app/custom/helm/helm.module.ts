@@ -34,6 +34,8 @@ import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/hel
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseLinkComponent } from './list-types/helm-release-link/helm-release-link.component';
 import { HelmReleaseEndpointLinkComponent } from './list-types/helm-release-endpoint-link/helm-release-endpoint-link.component';
+import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
+import { HelmReleaseHelperService } from './release/tabs/helm-release-helper.service';
 
 @NgModule({
   imports: [
@@ -69,7 +71,8 @@ import { HelmReleaseEndpointLinkComponent } from './list-types/helm-release-endp
     HelmReleaseTabBaseComponent,
     HelmReleaseSummaryTabComponent,
     HelmReleaseLinkComponent,
-    HelmReleaseEndpointLinkComponent
+    HelmReleaseEndpointLinkComponent,
+    HelmReleaseNotesTabComponent,
   ],
   providers: [
     ChartsService,

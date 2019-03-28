@@ -1,7 +1,8 @@
 <div>
   <app-page-sub-nav>
     <button *ngIf="dashboardAvailable$ | async" [routerLink]="dashboardLink" mat-button>
-      <mat-icon>dashboard</mat-icon> View Dashboard
+      <mat-icon>dashboard</mat-icon>
+      <span class="kube-details__button">View Dashboard</span>
     </button>
   </app-page-sub-nav>
 

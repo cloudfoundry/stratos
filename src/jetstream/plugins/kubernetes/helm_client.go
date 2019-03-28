@@ -60,6 +60,7 @@ func (c *KubernetesSpecification) GetHelmClient(endpointGUID, userID string) (he
 	tillerTunnel, err := portforwarder.New("kube-system", kubeClient, config)
 	if err != nil {
 		log.Error("Could not establish port forwarding for Tiller")
+		log.Error(err)
 		return nil, nil, nil, err
 	}
 

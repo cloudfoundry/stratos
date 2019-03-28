@@ -54,7 +54,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
         orderKey: 'namespace',
         field: 'namespace'
       },
-      cellFlex: '2'
+      cellFlex: '1'
     },
     {
       columnId: 'status',
@@ -93,7 +93,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
         orderKey: 'lastDeployed',
         field: 'lastDeployed'
       },
-      cellFlex: '2'
+      cellFlex: '3'
     },
   ] as ITableColumn<HelmRelease>[];
 

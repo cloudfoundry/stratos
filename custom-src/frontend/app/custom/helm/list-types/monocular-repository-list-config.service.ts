@@ -50,13 +50,18 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
         orderKey: 'address',
         field: 'api_endpoint.Host'
       },
-      cellFlex: '8'
+      cellFlex: '7'
     },
     {
-      columnId: 'chartCount',
-      headerCell: () => 'Charts',
-      cellComponent: HelmRepositoryCountComponent,
-      cellFlex: '1'
+      columnId: 'status',
+      headerCell: () => 'Status',
+      cellDefinition: {
+        getValue: (row) => {
+          return row.endpoint_metadata ? row.endpoint_metadata.status : '-';
+        }
+      },
+//      cellComponent: HelmRepositoryCountComponent,
+      cellFlex: '2'
     },
   ] as ITableColumn<EndpointModel>[];
 
