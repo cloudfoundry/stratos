@@ -27,7 +27,8 @@ export class EndpointsDataSource extends BaseEndpointsDataSource {
       null,
       paginationMonitorFactory,
       entityMonitorFactory,
-      internalEventMonitorFactory
+      internalEventMonitorFactory,
+      false
     );
   }
 }

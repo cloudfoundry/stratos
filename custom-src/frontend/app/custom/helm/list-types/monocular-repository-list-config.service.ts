@@ -1,16 +1,21 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
-import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { EndpointModel, endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
-import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
-import { pairwise } from 'rxjs/operators';
-import { getFullEndpointApiUrl } from '../../../features/endpoints/endpoint-helpers';
-import { MonocularRepositoryDataSource } from './monocular-repository-list-source';
 import { ActivatedRoute } from '@angular/router';
-import { HelmRepositoryCountComponent } from './helm-repository-count/helm-repository-count.component';
-import { EndpointCardComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
+import { Store } from '@ngrx/store';
+import { pairwise } from 'rxjs/operators';
+
+import { AppState } from '../../../../../store/src/app-state';
+import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
+import { EndpointModel, endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
+import { getFullEndpointApiUrl } from '../../../features/endpoints/endpoint-helpers';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
+import {
+  EndpointCardComponent,
+} from '../../../shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
+import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
+import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { MonocularRepositoryDataSource } from './monocular-repository-list-source';
 
 @Injectable()
 export class MonocularRepositoryListConfig implements IListConfig<EndpointModel> {
@@ -60,7 +65,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
           return row.endpoint_metadata ? row.endpoint_metadata.status : '-';
         }
       },
-//      cellComponent: HelmRepositoryCountComponent,
+      //      cellComponent: HelmRepositoryCountComponent,
       cellFlex: '2'
     },
   ] as ITableColumn<EndpointModel>[];
@@ -83,9 +88,18 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
   constructor(
     private store: Store<AppState>,
     public activatedRoute: ActivatedRoute,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    entityMonitorFactory: EntityMonitorFactory,
+    internalEventMonitorFactory: InternalEventMonitorFactory,
   ) {
     const highlighted = activatedRoute.snapshot.params.guid;
-    this.dataSource = new MonocularRepositoryDataSource(this.store, this, 'helm', highlighted);
+    this.dataSource = new MonocularRepositoryDataSource(
+      this.store,
+      this,
+      highlighted,
+      paginationMonitorFactory,
+      entityMonitorFactory,
+      internalEventMonitorFactory);
   }
 
   public getColumns = () => this.columns;
