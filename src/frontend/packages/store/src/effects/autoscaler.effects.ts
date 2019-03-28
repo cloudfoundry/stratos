@@ -40,8 +40,9 @@ import {
 import { PaginatedAction } from './../types/pagination.types';
 
 const { proxyAPIVersion, autoscalerAPIVersion } = environment;
-const commonPrefix = `/pp/${proxyAPIVersion}/proxy/${autoscalerAPIVersion}`;
-const healthPrefix = `/pp/${proxyAPIVersion}/proxy`;
+const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
+// const commonPrefix = `/pp/${proxyAPIVersion}/proxy/${autoscalerAPIVersion}`;
+// const healthPrefix = `/pp/${proxyAPIVersion}/proxy`;
 
 export function createAutoscalerRequestMessage(requestType, error) {
   return `Unable to ${requestType}: ${error.status} ${error._body}`;
@@ -68,7 +69,7 @@ export class AutoscalerEffects {
       } as ICFAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const options = new RequestOptions();
-      options.url = `${healthPrefix}/health`;
+      options.url = `${commonPrefix}/health`;
       options.method = 'get';
       options.headers = this.addHeaders(action.cfGuid);
       return this.http
@@ -237,7 +238,7 @@ export class AutoscalerEffects {
       const paginatedAction = action as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const options = new RequestOptions();
-      options.url = `${commonPrefix}/apps/${action.appGuid}/scaling_histories`;
+      options.url = `${commonPrefix}/apps/${action.appGuid}/event`;
       options.method = 'get';
       options.headers = this.addHeaders(action.cfGuid);
       // Set params from store

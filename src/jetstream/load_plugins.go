@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/autoscaler"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfappssh"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
@@ -32,6 +33,7 @@ func (pp *portalProxy) loadPlugins() {
 		// userinvite depends on cloudfoundry & cloudfoundryhosting
 		{"userinvite", userinvite.Init},
 		{"userfavorites", userfavorites.Init},
+		{"autoscaler", autoscaler.Init},
 	} {
 		plugin, err := p.Init(pp)
 		pp.Plugins[p.Name] = plugin

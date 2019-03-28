@@ -171,7 +171,7 @@ export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricActio
     public params
   ) {
     super(appGuid, cfGuid, metricName, skipFormat, trigger, params);
-    this.url = `apps/${appGuid}/aggregated_metric_histories/${metricName}`;
+    this.url = `apps/${appGuid}/metric/${metricName}`;
   }
   entityKey = appAutoscalerAppMetricSchemaKey;
 }
