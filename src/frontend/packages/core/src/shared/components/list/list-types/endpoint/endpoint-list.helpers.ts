@@ -17,6 +17,7 @@ import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { getEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
@@ -94,7 +95,10 @@ export class EndpointListHelper {
         },
         label: 'Connect',
         description: '',
-        createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
+        createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
+          const ep = getEndpointType(row.cnsi_type, row.sub_type);
+          return !ep.doesNotSupportConnect && row.connectionStatus === 'disconnected';
+        }))
       },
       {
         action: (item) => {
