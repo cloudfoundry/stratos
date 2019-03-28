@@ -44,7 +44,10 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
       orderKey: 'connection',
       field: 'user'
     },
-    cellFlex: '1'
+    cellFlex: '1',
+    cellConfig: {
+      showLabel: false
+    }
   },
   {
     columnId: 'type',

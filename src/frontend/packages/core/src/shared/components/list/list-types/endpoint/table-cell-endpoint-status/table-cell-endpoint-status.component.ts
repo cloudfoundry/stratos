@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { TableCellCustom } from '../../../list.types';
-import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
+import { TableCellCustom } from '../../../list.types';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -15,6 +15,9 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   public connectable = true;
 
   @Input() row: EndpointModel;
+  @Input() config: { showLabel: boolean } = {
+    showLabel: true
+  };
 
   constructor() {
     super();

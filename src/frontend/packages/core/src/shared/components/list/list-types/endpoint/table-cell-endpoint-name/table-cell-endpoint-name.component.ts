@@ -1,8 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
+
 import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
 import { endpointSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
+import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
@@ -17,9 +19,7 @@ export interface RowWithEndpointId {
   templateUrl: './table-cell-endpoint-name.component.html',
   styleUrls: ['./table-cell-endpoint-name.component.scss']
 })
-export class TableCellEndpointNameComponent extends TableCellCustom<RowWithEndpointId>  {
-
-  private id: string;
+export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 
   public endpoint$: Observable<any>;
 
@@ -28,12 +28,13 @@ export class TableCellEndpointNameComponent extends TableCellCustom<RowWithEndpo
   }
 
   @Input('row')
-  set row(row: RowWithEndpointId) {
-    this.id = row.endpointId;
+  set row(row: EndpointModel | RowWithEndpointId) {
+    /* tslint:disable-next-line:no-string-literal */
+    const id = row['endpointId'] || row['guid'];
     this.endpoint$ = this.entityServiceFactory.create(
       endpointSchemaKey,
       entityFactory(endpointSchemaKey),
-      this.id,
+      id,
       new GetAllEndpoints(),
       false
     ).waitForEntity$.pipe(
@@ -45,10 +46,5 @@ export class TableCellEndpointNameComponent extends TableCellCustom<RowWithEndpo
         return data;
       })
     );
-  }
-  get row(): RowWithEndpointId {
-    return {
-      endpointId: this.id
-    };
   }
 }
