@@ -2,7 +2,37 @@
   Install Chart
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
-  <app-step [title]="'Kubernetes'" [valid]="step1.validate$ | async" [onNext]="step1.onNext">
-    <app-create-release-step-dest #step1></app-create-release-step-dest>
+  <app-step [title]="'Kubernetes'" [valid]="validate$ | async">
+    <form [formGroup]="details" class="stepper-form">
+      <b>Select the Kubernetes cluster to install to</b>
+      <mat-form-field>
+        <mat-select formControlName="endpoint" name="endpoint">
+          <mat-option *ngFor="let kube of kubeEndpoints$ | async" [value]="kube.guid">
+            <span>{{ kube.name }}</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <br>
+      <b>Specify name and namespace for the installation</b>
+      <mat-form-field>
+        <input matInput placeholder="Name" name="releaseName" formControlName="releaseName" autocomplete="off">
+      </mat-form-field>
+
+      <mat-form-field>
+        <input matInput placeholder="Namespace" name="releaseNamespace" formControlName="releaseNamespace"
+          autocomplete="off">
+      </mat-form-field>
+    </form>
+    <!-- <app-create-release-step-dest #step1></app-create-release-step-dest> -->
+  </app-step>
+  <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'">
+    <form [formGroup]="overrides" class="stepper-form">
+      <h3 class="helm-create-release">Enter YAML Value Overrides</h3>
+
+      <mat-form-field>
+        <textarea matInput formControlName="values" placeholder="Values" name="Values" matAutosizeMinRows="6"
+          matAutosizeMaxRows="8"></textarea>
+      </mat-form-field>
+    </form>
   </app-step>
 </app-steppers>
