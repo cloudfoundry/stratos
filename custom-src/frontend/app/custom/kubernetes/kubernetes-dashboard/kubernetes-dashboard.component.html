@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
   <h1>Dashboard</h1>
   <div class="page-header-right" [ngClass]="{'kube-dashboard__hidden': isLoading$ | async }">
     <span>

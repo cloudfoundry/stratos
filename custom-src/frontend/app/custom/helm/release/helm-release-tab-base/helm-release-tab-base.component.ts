@@ -67,10 +67,7 @@ export class HelmReleaseTabBaseComponent {
   }
 
   private parseResources(res: string) {
-    console.log(res);
-
     const lines = res.split('\n');
-    console.log(lines);
     const result = {
       fields: [],
       data: {}
@@ -79,12 +76,9 @@ export class HelmReleaseTabBaseComponent {
     // Process
     let i = 0;
     while (i < lines.length) {
-      console.log('Looking for resource');
-      console.log(i);
-      console.log(lines[i]);
       if (lines[i].indexOf('==>') === 0 ) {
         // Got a resource type
-        const resType = lines[i].substr(4).trim();
+        const resType = this.getResourceName(lines[i].substr(4));
         // Read fields
         i++;
         i = this.readFields(result, lines, i);
@@ -94,15 +88,19 @@ export class HelmReleaseTabBaseComponent {
       }
     }
 
-    console.log('done');
+    this.calculateStats(result);
 
+    console.log('done');
     console.log(result);
   }
 
-  private readFields(result, lines, i): number {
-    console.log('Read fields: ' + i + ' ' + lines[i]);
-    let read = result.fields.length === 0;
+  private getResourceName(name: string): string {
+    const parts = name.trim().split('(');
+    return parts[0].trim();
+  }
 
+  private readFields(result, lines, i): number {
+    let read = result.fields.length === 0;
     if (!read && lines[i].length === 0) {
       i++;
       read = true;
@@ -112,31 +110,19 @@ export class HelmReleaseTabBaseComponent {
       const params = lines[i].replace(/  +/g, ' ');
       result.fields = params.split(' ');
       i++;
-      console.log('read fields: ' + result.fields.join(', '));
     }
-
-    console.log('Read fields done: ' + i + ' ' + lines[i]);
-
     return i;
   }
 
-
   private readResType(result, resType, lines, i): number {
-
     const data = result.data;
-
-    console.log('-----');
-    console.log('read: ' + i);
     data[resType] = [];
     while (i < lines.length) {
-      console.log( i + ' ' + lines[i]);
       if (lines[i].length === 0) {
-        console.log('Done: ' + i);
         return i + 1;
       }
       let values = lines[i];
       values = values.replace(/  +/g, ' ');
-      console.log(values);
       const value = {};
       values.split(' ').forEach((v, index) => {
         let p = result.fields[index].trim();
@@ -147,8 +133,32 @@ export class HelmReleaseTabBaseComponent {
       i++;
     }
 
-    console.log('read done: ' + i);
-
     return i;
+  }
+
+  private calculateStats(res) {
+
+    // Calculate Pod Stats
+
+    if (!!res.data['v1/Pod']) {
+      this.calculatePodStats(res, res.data['v1/Pod']);
+    }
+
+  }
+
+  private calculatePodStats(data, pods) {
+    data.pods = {
+      status: {},
+      containers: 0,
+      ready: 0,
+    };
+
+    pods.forEach(pod => {
+      //if (pod.)
+
+    });
+
+
+
   }
 }

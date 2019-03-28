@@ -46,7 +46,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   public helpDocumentUrl: string;
-  private iconMode = true;
+  public iconMode = true;
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;

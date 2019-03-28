@@ -3,7 +3,6 @@ import { ChartsService } from '../../shared/services/charts.service';
 import { Chart } from '../../shared/models/chart';
 import { Maintainer } from '../../shared/models/maintainer';
 import { ChartVersion } from '../../shared/models/chart-version';
-import * as urljoin from 'url-join';
 
 @Component({
   selector: 'app-chart-details-info',
