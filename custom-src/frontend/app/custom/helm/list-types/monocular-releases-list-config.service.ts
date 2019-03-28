@@ -1,17 +1,20 @@
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
-import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
-import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
-import { pairwise } from 'rxjs/operators';
-import { ActivatedRoute } from '@angular/router';
-import { HelmReleasesDataSource } from './monocular-releases-list-source';
-import { HelmRelease } from '../store/helm.types';
 import { DatePipe } from '@angular/common';
+import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { pairwise } from 'rxjs/operators';
+
+import { AppState } from '../../../../../store/src/app-state';
+import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
+import { endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
+import {
+  TableCellEndpointNameComponent,
+} from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
+import { HelmRelease } from '../store/helm.types';
 import { HelmReleaseLinkComponent } from './helm-release-link/helm-release-link.component';
-import { TableCellEndpointNameComponent } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { HelmReleasesDataSource } from './monocular-releases-list-source';
 
 @Injectable()
 export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
