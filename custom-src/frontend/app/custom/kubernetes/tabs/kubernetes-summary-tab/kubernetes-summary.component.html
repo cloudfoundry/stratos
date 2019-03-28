@@ -6,82 +6,86 @@
     </button>
   </app-page-sub-nav>
 
-  <div class="kube-details" *ngIf="endpointDetails$ | async as details">
-    <img class="kube-details__logo" src="{{details.imagePath}}" />
-    <div clas="kube-details__header-section">
-      <h1 class="kube-details__header">{{ details.name }}</h1>
-      <div class="kube-details__sub-header"> {{ details.label }}</div>
-      <div class="kube-details__sub-header kube-details__spacing">Kubernetes Node Version: {{ (kubeNodeVersions$ | async) }}</div>
-    </div>
-    <div class="kube-details__header-section">
-      <app-tile-grid fit="true">
-        <app-tile-group>
-          <app-tile>
-            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/pods"
-              icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
-            </app-card-number-metric>
-          </app-tile>
-          <app-tile>
-            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
-              icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
-            </app-card-number-metric>
-          </app-tile>
-          <app-tile>
-            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/apps"
-              icon="apps" label="Applications" labelSingular="Application" value="{{ appCount$ | async }}">
-            </app-card-number-metric>
-          </app-tile>
-          <!-- <app-tile>
+  <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving kubernetes details'">
+    <div class="kube-details" *ngIf="endpointDetails$ | async as details">
+      <img class="kube-details__logo" src="{{details.imagePath}}" />
+      <div clas="kube-details__header-section">
+        <h1 class="kube-details__header">{{ details.name }}</h1>
+        <div class="kube-details__sub-header"> {{ details.label }}</div>
+        <div class="kube-details__sub-header kube-details__spacing">Kubernetes Node Version:
+          {{ (kubeNodeVersions$ | async) }}</div>
+      </div>
+      <div class="kube-details__header-section">
+        <app-tile-grid fit="true">
+          <app-tile-group>
+            <app-tile>
+              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/pods"
+                icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
+              </app-card-number-metric>
+            </app-tile>
+            <app-tile>
+              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
+                icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
+              </app-card-number-metric>
+            </app-tile>
+            <app-tile>
+              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/apps"
+                icon="apps" label="Applications" labelSingular="Application" value="{{ appCount$ | async }}">
+              </app-card-number-metric>
+            </app-tile>
+            <!-- <app-tile>
             <a mat-button [routerLink]="dashboardLink">Dashboard</a>
             <button (click)="getDashboard()" matButton matRaisedButton>Get Dashboard Status</button>
           </app-tile> -->
-        </app-tile-group>
-      </app-tile-grid>
+          </app-tile-group>
+        </app-tile-grid>
+      </div>
     </div>
-  </div>
-</div>
-<div class="kube-details__graphs">
-  <div class="kube-details__graphs-group">
-    <div class="kube-details__graph">
-      <mat-card>
-        <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async">
-        </app-simple-usage-chart>
-      </mat-card>
+
+    <div class="kube-details__graphs">
+      <div class="kube-details__graphs-group">
+        <div class="kube-details__graph">
+          <mat-card>
+            <app-simple-usage-chart title="Pod Usage" [data]="podCapacity$ | async">
+            </app-simple-usage-chart>
+          </mat-card>
+        </div>
+        <div class="kube-details__graph">
+          <mat-card>
+            <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
+              [data]="diskPressure$ | async">
+            </app-simple-usage-chart>
+          </mat-card>
+        </div>
+        <div class="kube-details__graph">
+          <mat-card>
+            <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
+              [data]="memoryPressure$ | async">
+            </app-simple-usage-chart>
+          </mat-card>
+        </div>
+        <div class="kube-details__graph">
+          <mat-card>
+            <app-simple-usage-chart title="Nodes Out Of Disk" [thresholds]="criticalPressureChartThresholds"
+              [data]="outOfDisk$ | async">
+            </app-simple-usage-chart>
+          </mat-card>
+        </div>
+        <div class="kube-details__graph">
+          <mat-card>
+            <app-simple-usage-chart [thresholds]="nominalPressureChartThresholds" title="Nodes Ready"
+              [data]="nodesReady$ | async">
+            </app-simple-usage-chart>
+          </mat-card>
+        </div>
+        <div class="kube-details__graph">
+          <mat-card *ngIf="(networkUnavailable$ | async)?.supported">
+            <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
+              title="Nodes With Network Available" [data]="networkUnavailable$ | async">
+            </app-simple-usage-chart>
+          </mat-card>
+        </div>
+      </div>
     </div>
-    <div class="kube-details__graph">
-      <mat-card>
-        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Disk Pressure"
-          [data]="diskPressure$ | async">
-        </app-simple-usage-chart>
-      </mat-card>
-    </div>
-    <div class="kube-details__graph">
-      <mat-card>
-        <app-simple-usage-chart [thresholds]="pressureChartThresholds" title="Nodes With Memory Pressure"
-          [data]="memoryPressure$ | async">
-        </app-simple-usage-chart>
-      </mat-card>
-    </div>
-    <div class="kube-details__graph">
-      <mat-card>
-        <app-simple-usage-chart title="Nodes Out Of Disk" [thresholds]="criticalPressureChartThresholds"
-          [data]="outOfDisk$ | async">
-        </app-simple-usage-chart>
-      </mat-card>
-    </div>
-    <div class="kube-details__graph">
-      <mat-card>
-        <app-simple-usage-chart [thresholds]="nominalPressureChartThresholds" title="Nodes Ready"
-          [data]="nodesReady$ | async">
-        </app-simple-usage-chart>
-      </mat-card>
-    </div>
-    <div class="kube-details__graph">
-      <mat-card *ngIf="(networkUnavailable$ | async)?.supported">
-        <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
-          title="Nodes With Network Available" [data]="networkUnavailable$ | async">
-        </app-simple-usage-chart>
-      </mat-card>
-    </div>
-  </div>
+  </app-loading-page>
 </div>

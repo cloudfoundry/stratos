@@ -1,23 +1,28 @@
-import { KubernetesPod } from './../../store/kube.types';
-import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
-import { GetKubernetesApps, GetKubernetesDashboard } from './../../store/kubernetes.actions';
-import { SafeResourceUrl } from '@angular/platform-browser';
-import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
-import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { HttpClient } from '@angular/common/http';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { SafeResourceUrl } from '@angular/platform-browser';
+import { Store } from '@ngrx/store';
+import { combineLatest, interval, Observable, Subscription } from 'rxjs';
+import { filter, map, startWith } from 'rxjs/operators';
+
+import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { map, startWith, tap, filter } from 'rxjs/operators';
-import { Observable, combineLatest, interval, Subscription } from 'rxjs';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/src/app-state';
-import { GetKubernetesPods, GetKubernetesNodes } from '../../store/kubernetes.actions';
-import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
-import { ISimpleUsageChartData, IChartThresholds } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
 import { selectEntity } from '../../../../../../store/src/selectors/api.selectors';
+import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
+import {
+  IChartThresholds,
+  ISimpleUsageChartData,
+} from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
 import { kubernetesDashboardSchemaKey } from '../../store/kubernetes.entities';
+import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
+import { KubernetesPod } from './../../store/kube.types';
+import { GetKubernetesApps, GetKubernetesDashboard } from './../../store/kubernetes.actions';
+
 interface IEndpointDetails {
   imagePath: string;
   label: string;
@@ -82,6 +87,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   public dashboardAvailable$: Observable<boolean>;
 
+  public isLoading$: Observable<boolean>;
 
 
   constructor(
@@ -90,7 +96,8 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     public paginationMonitorFactory: PaginationMonitorFactory,
     private store: Store<AppState>,
     private ngZone: NgZone
-  ) { }
+  ) {
+  }
 
   private getPaginationObservable(action: PaginatedAction) {
     const paginationMonitor = this.paginationMonitorFactory.create(
@@ -209,6 +216,21 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
     this.kubeNodeVersions$ = this.getNodeKubeVersions(nodes$).pipe(startWith('-'));
 
+    this.isLoading$ = combineLatest([
+      this.endpointDetails$,
+      this.podCount$,
+      this.nodeCount$,
+      this.appCount$,
+      this.podCapacity$,
+      this.diskPressure$,
+      this.memoryPressure$,
+      this.outOfDisk$,
+      this.nodesReady$,
+      this.networkUnavailable$,
+    ]).pipe(
+      map(() => false),
+      startWith(true),
+    );
   }
 
   ngOnDestroy() {
