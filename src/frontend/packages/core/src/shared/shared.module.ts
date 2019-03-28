@@ -35,7 +35,9 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { BlurDirective } from './components/blur.directive';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
@@ -105,6 +107,8 @@ import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
+import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
+import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 import {
@@ -114,6 +118,8 @@ import { MetricsRangeSelectorComponent } from './components/metrics-range-select
 import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
+import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
+import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
@@ -121,6 +127,7 @@ import { SchemaFormComponent } from './components/schema-form/schema-form.compon
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
+import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import {
   StackedInputActionComponent,
@@ -157,13 +164,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
-import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
-import { BlurDirective } from './components/blur.directive';
-import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
-import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
-import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
-import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
+
 /* tslint:disable:max-line-length */
 
 @NgModule({

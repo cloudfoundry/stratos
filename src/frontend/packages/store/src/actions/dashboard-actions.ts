@@ -1,13 +1,17 @@
-import { SideNavModes } from '../types/dashboard.types';
 import { Action } from '@ngrx/store';
+
+import { SideNavModes } from '../types/dashboard.types';
 
 export const OPEN_SIDE_NAV = '[Dashboard] Open side nav';
 export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';
 export const TOGGLE_SIDE_NAV = '[Dashboard] Toggle side nav';
 export const CHANGE_SIDE_NAV_MODE = '[Dashboard] Change side nav mode';
 export const TOGGLE_HEADER_EVENT = '[Dashboard] Toggle header event';
+export const SET_HEADER_EVENT = '[Dashboard] Set header event';
+
 export const SHOW_SIDE_HELP = '[Dashboard] Show side help';
 export const CLOSE_SIDE_HELP = '[Dashboard] Close side help';
+
 
 export class OpenSideNav implements Action {
   constructor() { }
@@ -35,14 +39,19 @@ export class ToggleHeaderEvent implements Action {
 
 export class ShowSideHelp implements Action {
 
-  constructor(public document: string) {}
+  constructor(public document: string) { }
 
   type = SHOW_SIDE_HELP;
 }
 
 export class CloseSideHelp implements Action {
 
-  constructor() {}
+  constructor() { }
 
   type = CLOSE_SIDE_HELP;
+}
+
+export class SetHeaderEvent implements Action {
+  constructor(public minimised = false) { }
+  type = SET_HEADER_EVENT;
 }

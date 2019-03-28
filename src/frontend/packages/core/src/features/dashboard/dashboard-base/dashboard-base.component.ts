@@ -7,6 +7,7 @@ import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } 
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, filter, startWith, withLatestFrom } from 'rxjs/operators';
+
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import { CloseSideHelp, CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
@@ -18,6 +19,7 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
+
 
 @Component({
   selector: 'app-dashboard-base',
@@ -167,7 +169,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     this.hideShowOverlays(true);
     this.helpDocumentUrl = documentUrl;
     this.sideHelp.open();
-   }
+  }
 
   public sideHelpClosed() {
     this.hideShowOverlays(false);

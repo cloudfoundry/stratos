@@ -138,7 +138,7 @@ $side-nav-light-active: #484848;
   @include home-page-theme($theme, $app-theme);
   @include favorites-global-list-theme($theme, $app-theme);
   @include page-side-nav-theme($theme, $app-theme);
-  // @include cf-admin-add-user-warning($theme, $app-theme);
+  @include cf-admin-add-user-warning($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
