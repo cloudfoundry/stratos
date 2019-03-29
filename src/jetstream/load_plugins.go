@@ -6,6 +6,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfappssh"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundryhosting"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/demo"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/metrics"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular"
@@ -37,6 +38,7 @@ func (pp *portalProxy) loadPlugins() {
 		{"kubernetes", kubernetes.Init},
 		{"monocular", monocular.Init},
 		{"userfavorites", userfavorites.Init},
+		{"demo", demo.Init},
 		//		{"caasp", caasp.Init},
 	} {
 		plugin, err := p.Init(pp)

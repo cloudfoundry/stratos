@@ -29,6 +29,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
     filter: 'Filter Repositories',
     noEntries: 'There are no repositories'
   };
+  pageSizeOptions = [9, 45, 90];
   enableTextFilter = true;
   tableFixedRowHeight = true;
   columns = [

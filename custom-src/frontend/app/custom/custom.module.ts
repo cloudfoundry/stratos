@@ -15,6 +15,7 @@ import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
 import { EndpointHealthCheck } from '../../endpoints-health-checks';
 import { HelmModule } from './helm/helm.module';
 import { HelmSetupModule } from './helm/helm.setup.module';
+import { DemoHelperComponent } from './demo/demo-helper/demo-helper.component';
 
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
@@ -33,11 +34,13 @@ const SuseCustomizations: CustomizationsMetadata = {
   ],
   declarations: [
     SuseLoginComponent,
-    SuseAboutInfoComponent
+    SuseAboutInfoComponent,
+    DemoHelperComponent
   ],
   entryComponents: [
     SuseLoginComponent,
-    SuseAboutInfoComponent
+    SuseAboutInfoComponent,
+    DemoHelperComponent,
   ],
   providers: [
     { provide: Customizations, useValue: SuseCustomizations }

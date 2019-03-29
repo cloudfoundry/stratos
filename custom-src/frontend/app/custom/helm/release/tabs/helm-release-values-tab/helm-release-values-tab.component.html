@@ -1,0 +1,11 @@
+<app-loading-page [isLoading]="helmReleaseHelper.isFetching$" [text]="'Retrieving Release details'">
+    <div *ngIf="values$ | async as values; else noValues">
+      <app-code-block codeBlockStyle="pre">
+        <pre [innerHtml]="values">
+      </pre>
+      </app-code-block>
+    </div>
+  </app-loading-page>
+  <ng-template #noValues>
+  No release values
+  </ng-template>

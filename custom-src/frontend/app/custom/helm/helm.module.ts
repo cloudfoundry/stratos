@@ -37,6 +37,7 @@ import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 import { HelmConfigurationComponent } from './tabs/configuration-tab/helm-configuration.component';
 import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
+import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 
 @NgModule({
   imports: [
@@ -73,6 +74,7 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmReleaseSummaryTabComponent,
     HelmReleaseLinkComponent,
     HelmReleaseNotesTabComponent,
+    HelmReleaseValuesTabComponent,
   ],
   providers: [
     ChartsService,

@@ -1,11 +1,11 @@
-<app-page-sub-nav *ngIf="!(helmReleaseHelper.isFetching$ | async)">
+<app-page-sub-nav *ngIf="!(isBusy$ | async)">
   <button mat-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
     <mat-icon>delete</mat-icon>
     <span>Delete</span>
   </button>
 </app-page-sub-nav>
 
-<app-loading-page [isLoading]="helmReleaseHelper.isFetching$" [text]="'Retrieving Release details'">
+<app-loading-page [isLoading]="isBusy$" [text]="loadingMessage">
   <div class="summary" *ngIf="helmReleaseHelper.release$ | async as release">
     <app-tile-grid>
       <app-tile-group>
@@ -33,10 +33,25 @@
               <app-metadata-item icon="title" label="Name">{{ release.chart.metadata.name }}</app-metadata-item>
               <app-metadata-item icon="title" label="Description">{{ release.chart.metadata.description }}</app-metadata-item>
               <app-metadata-item icon="title" label="Version">{{ release.chart.metadata.version }}</app-metadata-item>
-              <app-metadata-item icon="title" label="App Version">{{ release.chart.metadata.appVersion }}</app-metadata-item>
+              <app-metadata-item icon="title" label="App Version">{{ release.chart.metadata.appVersion || '-' }}</app-metadata-item>
             </mat-card-content>
           </mat-card>
         </app-tile>
+      </app-tile-group>
+
+      <!-- Release statud charts -->
+
+      <app-tile-group>
+        <app-tile>
+          <mat-card class="full-card">
+            <app-ring-chart [data]="podsChartData" label="Pods"></app-ring-chart>
+          </mat-card>
+        </app-tile>      
+        <app-tile>
+          <mat-card class="full-card">
+            <app-ring-chart [data]="containersChartData" label="Containers"></app-ring-chart>
+          </mat-card>
+        </app-tile>      
       </app-tile-group>
     </app-tile-grid>
   </div>

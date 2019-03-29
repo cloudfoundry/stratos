@@ -61,7 +61,7 @@ func (m *Monocular) processSyncRequests() {
 			}
 			log.Infof("Sync completed for repository: %s", job.Endpoint.APIEndpoint.String())
 		} else if job.Action == 1 {
-			log.Infof("Deleting Helm Repository: %ss", job.Endpoint.Name)
+			log.Infof("Deleting Helm Repository: %s", job.Endpoint.Name)
 			m.Store.DeleteRepo(job.Endpoint.Name)
 		}
 	}

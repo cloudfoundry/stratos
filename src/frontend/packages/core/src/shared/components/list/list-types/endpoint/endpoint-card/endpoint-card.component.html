@@ -9,8 +9,11 @@
       </div>
       <div class="endpoint-card__title-text">
         <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
-        <div class="endpoint-card__title-subtext">{{!endpointConfig ? 'Unknown' : endpointConfig.label}}<ng-container *ngIf="endpointParentType">
+        <div class="endpoint-card__title-subtext">{{!endpointConfig ? 'Unknown' : endpointConfig.label}}
+          <!--
+          <ng-container *ngIf="endpointParentType">
             ({{ endpointParentType }})</ng-container>
+          -->
         </div>
       </div>
     </div>

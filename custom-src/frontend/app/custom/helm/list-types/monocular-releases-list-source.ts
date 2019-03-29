@@ -18,7 +18,7 @@ export class HelmReleasesDataSource extends ListDataSource<HelmRelease> {
     const action = new GetHelmReleases();
     super({
       store,
-      action: action,
+      action,
       schema: entityFactory(helmReleasesSchemaKey),
       getRowUniqueId: object => object.guid,
       paginationKey: action.paginationKey,

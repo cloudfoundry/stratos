@@ -26,6 +26,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
     filter: 'Filter Releases',
     noEntries: 'There are no releases'
   };
+  pageSizeOptions = [9, 45, 90];
   enableTextFilter = true;
   tableFixedRowHeight = true;
   columns = [

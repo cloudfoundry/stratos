@@ -10,6 +10,10 @@ $suse-blue: #073155;
 $suse-side-nav: $suse-secondary;
 $suse-side-nav-active: #003358;
 
+.stratos .page-content > .page-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 .stratos img.stratos-title__logo {
   width: 160px;
 }
