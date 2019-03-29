@@ -7,11 +7,8 @@ import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
 
 import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
-import { GetAllEndpoints } from '../../store/src/actions/endpoint.actions';
-import { GetOrganization } from '../../store/src/actions/organization.actions';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { RouterNav } from '../../store/src/actions/router.actions';
-import { GetSpace } from '../../store/src/actions/space.actions';
 import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
@@ -29,6 +26,7 @@ import { APIResource } from '../../store/src/types/api.types';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IRequestDataState } from '../../store/src/types/entity.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
+import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { IAppFavMetadata, IOrgFavMetadata, ISpaceFavMetadata } from './cf-favourite-types';
@@ -43,7 +41,6 @@ import { LoggerService } from './core/logger.service';
 import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
-import { createGetApplicationAction } from './features/applications/application.service';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { getFullEndpointApiUrl, initEndpointExtensions } from './features/endpoints/endpoint-helpers';
@@ -55,10 +52,9 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { ApplicationStateService } from './shared/components/application-state/application-state.service';
-import { favoritesConfigMapper, FavoriteConfig } from './shared/components/favorites-meta-card/favorite-config-mapper';
+import { FavoriteConfig, favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { TabNavService } from '../tab-nav.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68

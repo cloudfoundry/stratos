@@ -16,6 +16,8 @@ import {
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
   EndpointActionComplete,
+  GET_ENDPOINTS,
+  GetAllEndpoints,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
   REGISTER_ENDPOINTS_FAILED,
@@ -56,6 +58,11 @@ export class EndpointsEffect {
     private actions$: Actions,
     private store: Store<AppState>
   ) { }
+
+  @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
+    ofType<GetAllEndpoints>(GET_ENDPOINTS),
+    mergeMap((action: GetAllEndpoints) => [new GetSystemInfo(false, action)])
+  );
 
   @Effect() getAllEndpoints$ = this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),

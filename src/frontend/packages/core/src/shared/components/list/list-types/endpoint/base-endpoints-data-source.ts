@@ -3,7 +3,6 @@ import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
@@ -79,7 +78,6 @@ export abstract class BaseEndpointsDataSource extends ListDataSource<EndpointMod
           field: 'name'
         },
       ],
-      refresh: () => this.store.dispatch(new GetSystemInfo(false, action)),
     });
     this.endpointType = endpointType;
   }

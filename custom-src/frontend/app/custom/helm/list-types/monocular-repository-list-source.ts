@@ -1,9 +1,11 @@
+import { NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { interval, Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { safeUnsubscribe } from '../../../core/utils.service';
 import { RowState } from '../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import {
   BaseEndpointsDataSource,
@@ -16,6 +18,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 
 export class MonocularRepositoryDataSource extends BaseEndpointsDataSource {
 
+  private polls: Subscription[];
   private highlighted;
   constructor(
     store: Store<AppState>,
@@ -24,6 +27,7 @@ export class MonocularRepositoryDataSource extends BaseEndpointsDataSource {
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
+    ngZone: NgZone,
   ) {
     const action = new GetAllEndpoints();
     const paginationKey = 'mono-endpoints';
@@ -41,6 +45,20 @@ export class MonocularRepositoryDataSource extends BaseEndpointsDataSource {
       false);
     this.highlighted = highlighted;
     this.getRowState = (row: any): Observable<RowState> => observableOf({ highlighted: row.guid === this.highlighted });
+    this.polls = [];
+    ngZone.runOutsideAngular(() => {
+      this.polls.push(
+        interval(10000).subscribe(() => {
+          ngZone.run(() => {
+            store.dispatch(action);
+          });
+        })
+      );
+    });
+  }
+
+  destroy() {
+    safeUnsubscribe(...(this.polls || []));
   }
 
 }

@@ -10,6 +10,7 @@ import { entityFactory } from '../../../../../../store/src/helpers/entity-factor
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectEntity } from '../../../../../../store/src/selectors/api.selectors';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { safeUnsubscribe } from '../../../../core/utils.service';
 import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
 import {
   IChartThresholds,
@@ -234,10 +235,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.polls && this.polls.length) {
-      this.polls.forEach(sub => sub.unsubscribe());
-    }
+    safeUnsubscribe(...(this.polls || []));
   }
-
 
 }
