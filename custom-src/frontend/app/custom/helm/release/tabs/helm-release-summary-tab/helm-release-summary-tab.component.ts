@@ -32,6 +32,20 @@ export class HelmReleaseSummaryTabComponent {
   public podsChartData = [];
   public containersChartData = [];
 
+  public containersChartColors = [
+    {
+      name: 'Ready',
+      value: '#4DD3A7'
+    },
+    {
+      name: 'Not Ready',
+      value: '#E7727D'
+    }
+  ];
+
+  // Blue: #00B2E2
+  // Yellow: #FFC107
+
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
     private store: Store<AppState>,

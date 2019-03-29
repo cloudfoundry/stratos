@@ -109,10 +109,8 @@ export class HelmReleaseHelperService {
       if (lines[i].length === 0) {
         return i + 1;
       }
-      let values = lines[i];
-      values = values.replace(/  +/g, ' ');
       const value = {};
-      values.split(' ').forEach((v, index) => {
+      this.splitLine(lines[i]).forEach((v, index) => {
         let p = result.fields[index].trim();
         p = p.toLowerCase();
         value[p] = v.trim();
@@ -122,6 +120,41 @@ export class HelmReleaseHelperService {
     }
 
     return i;
+  }
+
+  private splitLine(line: string): string[] {
+    const parts = [];
+
+    let part = '';
+
+    let inSquareBrackets = false;
+
+    for (const c of line) {
+      if (inSquareBrackets) {
+        if (c === ']') {
+          inSquareBrackets = false;
+        }
+        part += c;
+      } else {
+        if (c === ']') {
+          inSquareBrackets = true;
+        }
+        if (c === ' ') {
+          if (part.length > 0) {
+            parts.push(part);
+            part = '';
+          }
+        } else {
+          part += c;
+        }
+      }
+    }
+
+    if (part.length > 0) {
+      parts.push(part);
+    }
+
+    return parts;
   }
 
   private calculateStats(res) {
