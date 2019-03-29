@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+
 import { HelmReleaseGuid } from '../../store/helm.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
@@ -12,11 +13,9 @@ import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
     HelmReleaseHelperService,
     {
       provide: HelmReleaseGuid,
-      useFactory: (activatedRoute: ActivatedRoute) => {
-        return {
-          guid: activatedRoute.snapshot.params.guid
-        };
-      },
+      useFactory: (activatedRoute: ActivatedRoute) => ({
+        guid: activatedRoute.snapshot.params.guid
+      }),
       deps: [
         ActivatedRoute
       ]
@@ -29,10 +28,10 @@ export class HelmReleaseTabBaseComponent {
 
   public breadcrumbs = [{
     breadcrumbs: [
-    { value: 'Helm', routerLink: '/monocular' },
-    { value: 'Releases', routerLink: '/monocular/releases' }
-  ]
-}];
+      { value: 'Helm', routerLink: '/monocular' },
+      { value: 'Releases', routerLink: '/monocular/releases' }
+    ]
+  }];
 
   public title = '';
 

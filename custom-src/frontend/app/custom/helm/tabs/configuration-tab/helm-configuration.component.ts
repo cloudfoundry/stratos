@@ -1,28 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
+
+import { ListConfig } from '../../../../shared/components/list/list.component.types';
+import { HelmVersionsListConfig } from '../../list-types/monocular-versions-list-config.service';
 
 @Component({
   selector: 'app-helm-configuration',
   templateUrl: './helm-configuration.component.html',
-  styleUrls: ['./helm-configuration.component.scss']
+  styleUrls: ['./helm-configuration.component.scss'],
+  providers: [{
+    provide: ListConfig,
+    useClass: HelmVersionsListConfig,
+  }]
 })
-export class HelmConfigurationComponent implements OnInit {
+export class HelmConfigurationComponent { }
 
-  constructor(private httpClient: HttpClient) { }
-
-  ngOnInit() {
-  }
-
-  public getVersions() {
-
-    console.log('Fetching Helm versions for all Kube endpoints');
-
-    this.httpClient.get('/pp/v1/helm/versions').subscribe(a => {
-      console.log('Helm Versions response');
-      console.log(a);
-    });
-
-
-  }
-
-}

@@ -40,6 +40,15 @@ export interface HelmRelease {
   lastDeployed: Date;
 }
 
+export interface HelmVersion {
+  endpointId: string;
+  Version: {
+    git_commit: string;
+    git_tree_state: string;
+    sem_ver: string;
+  };
+}
+
 export enum HelmStatus {
   Unknown = 0,
   Deployed = 1,
