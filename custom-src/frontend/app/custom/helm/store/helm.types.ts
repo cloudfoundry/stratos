@@ -42,7 +42,7 @@ export interface HelmRelease {
 
 export interface HelmVersion {
   endpointId: string;
-  Version: {
+  Version?: {
     git_commit: string;
     git_tree_state: string;
     sem_ver: string;

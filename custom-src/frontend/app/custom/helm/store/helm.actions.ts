@@ -71,7 +71,7 @@ export class GetHelmVersions implements MonocularPaginationAction {
   ];
   paginationKey: string;
   initialParams = {
-    'order-direction': 'desc',
-    'order-direction-field': 'name',
+    'order-direction': 'asc',
+    'order-direction-field': 'version',
   };
 }

@@ -108,10 +108,7 @@ export class HelmEffects {
 
         // Go through each endpoint ID
         Object.keys(response).forEach(endpoint => {
-          const endpointData = response[endpoint];
-          if (!endpointData) {
-            return;
-          }
+          const endpointData = response[endpoint] || {};
           processedData.entities[action.entityKey][endpoint] = {
             endpointId: endpoint,
             ...endpointData

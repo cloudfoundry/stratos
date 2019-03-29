@@ -16,30 +16,19 @@ export class HelmVersionsListConfig implements IListConfig<HelmVersion> {
   isLocal = true;
   dataSource: HelmVersionsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: '',
-    filter: 'Filter Kubernetes',
-    noEntries: 'There are no helm versions'
-  };
-  enableTextFilter = true;
   tableFixedRowHeight = true;
   columns = [
     {
       columnId: 'name',
       headerCell: () => 'Cluster',
       cellComponent: TableCellEndpointNameComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'name',
-        field: 'name'
-      },
       cellFlex: '2'
     },
     {
       columnId: 'version',
       headerCell: () => 'Helm Version',
       cellDefinition: {
-        valuePath: 'Version.sem_ver'
+        getValue: (version) => version.Version ? version.Version.sem_ver : 'Not installed'
       },
       sort: {
         type: 'sort',
