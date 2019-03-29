@@ -368,6 +368,10 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
+	// Lookup the endpoint, so can pass the information to the plugins
+	endpoint, lookupErr := cnsiRepo.Find(guid, p.Config.EncryptionKeyInBytes)
+
+	// Delete the endpoint
 	err = cnsiRepo.Delete(guid)
 	if err != nil {
 		msg := "Unable to delete a CNSI record: %v"
@@ -375,9 +379,7 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 		return fmt.Errorf(msg, err)
 	}
 
-	// Lookup the endpoint, so can pass the information to the plugins
-	endpoint, err := cnsiRepo.Find(guid, p.Config.EncryptionKeyInBytes)
-	if err == nil {
+	if lookupErr == nil {
 		// Notify plugins if they support the notification interface
 		for _, plugin := range p.Plugins {
 			if notifier, ok := plugin.(interfaces.EndpointNotificationPlugin); ok {

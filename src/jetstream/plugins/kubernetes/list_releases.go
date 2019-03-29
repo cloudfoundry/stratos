@@ -31,13 +31,16 @@ type kubeReleasesResponse map[string]kubeReleasesData
 
 // ListReleases will list the helm releases for all endpoints
 func (c *KubernetesSpecification) ListReleases(ec echo.Context) error {
+	log.Debug("ListReleases")
 
 	// Need to get a config object for the target endpoint
 	// endpointGUID := ec.Param("endpoint")
 	userID := ec.Get("user_id").(string)
 
 	resp, err := c.ProxyKubernetesAPI(userID, c.listReleases)
-	log.Warn(err)
+	if err != nil {
+		return err
+	}
 	return ec.JSON(200, resp)
 }
 
@@ -49,27 +52,35 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 		Result:   nil,
 	}
 
+	log.Warnf("listReleases: START: %s", ep.GUID)
 	client, _, tiller, err := c.GetHelmClient(ep.GUID, ep.Account)
 	if err != nil {
+		log.Warnf("listReleases: CLIENT_ERROR: %s", ep.GUID)
 		done <- response
 		return
 	}
 
 	defer tiller.Close()
 
+	log.Warnf("listReleases: REQUEST: %s", ep.GUID)
+
 	res, err := client.ListReleases(
 		helm.ReleaseListStatuses(nil),
 	)
 	if err != nil {
+		log.Warnf("listReleases: ERROR: %s", ep.GUID)
+		log.Error(err)
+
 		done <- response
 		return
 	}
 
+	log.Warnf("listReleases: OK: %s", ep.GUID)
 	response.Result = res
 	done <- response
 }
 
-// ListReleases will list the helm releases for all endpoints
+// GetRelease will get release status for the given release
 func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
 	// Need to get a config object for the target endpoint

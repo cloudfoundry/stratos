@@ -64,7 +64,7 @@ func (c *KubernetesSpecification) GetHelmClient(endpointGUID, userID string) (he
 		return nil, nil, nil, err
 	}
 
-	log.Debugf("Tiller tunnel is using Port: %d", tillerTunnel.Local)
+	log.Warnf("Tiller tunnel is using Port: %d", tillerTunnel.Local)
 
 	// TODO: Concurrency?
 	tillerHost := fmt.Sprintf("127.0.0.1:%d", tillerTunnel.Local)

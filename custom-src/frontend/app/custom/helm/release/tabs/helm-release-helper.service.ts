@@ -56,6 +56,8 @@ export class HelmReleaseHelperService {
       data: {}
     };
 
+    console.log(res);
+
     // Process
     let i = 0;
     while (i < lines.length) {
@@ -85,6 +87,10 @@ export class HelmReleaseHelperService {
     let read = result.fields.length === 0;
     if (!read && lines[i].length === 0) {
       i++;
+      read = true;
+    }
+
+    if (lines[i].indexOf('NAME') === 0 ) {
       read = true;
     }
 

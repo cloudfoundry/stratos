@@ -81,7 +81,5 @@ func (m *Monocular) updateMetadata(endpoint string, metadata SyncMetadata) {
 	err := m.portalProxy.UpdateEndointMetadata(endpoint, marshalSyncMetadata(metadata))
 	if err != nil {
 		log.Errorf("Failed to update endpoint metadata: %v+", err)
-	} else {
-		log.Warn("Endpoint metadata updated ok")
 	}
 }

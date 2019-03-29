@@ -185,27 +185,8 @@ func (m *Monocular) ConfigureSQL() error {
 	return nil
 }
 
-// func test() {
-// 	str := "{\"n_ame\":\"metrics\",\"repo\":{\"name\":\"suse\",\"url\":\"https://cloudfoundry-incubator.github.io/stratos\",\"AuthorizationHeader\":\"\"},\"description\":\"A Helm chart for Stratos Metrics\",\"home\":\"\",\"keywords\":null,\"maintainers\":null,\"sources\":null,\"icon\":\"\",\"chart_versions\":[{\"version\":\"1.0.0\",\"appVersion\":\"1\",\"created\":\"2018-11-01T20:17:41.728556672Z\",\"digest\":\"63c633669260908fbc27c75c9d118d43e640a1aa741ebddba2a8451aefaa83af\",\"urls\":[\"https://github.com/SUSE/stratos-metrics/releases/download/1.0.0/console-metrics-helm-chart-v1.0.0-ddbf0c5.tgz\"]}]} "
-
-// 	log.Info(str)
-// 	chart := &models.Chart{}
-// 	if err := json.Unmarshal([]byte(str), chart); err == nil {
-// 		log.Warn(chart)
-// 	}
-
-// }
-
 func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
-	log.Warn("ENDPOINT NOTIFICATION")
-	log.Warnf("%d", action)
-
-	log.Warn(endpoint.CNSIType)
-
 	if endpoint.CNSIType == EndpointType {
-		log.Warn("Helm Repository detected")
-		log.Warn(endpoint.Name)
-		log.Warn(endpoint.APIEndpoint)
 		m.Sync(action, endpoint)
 	}
 }
