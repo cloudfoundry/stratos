@@ -3,6 +3,7 @@ import { PaginatedAction } from './../../../../../store/src/types/pagination.typ
 import { IRequestAction } from './../../../../../store/src/types/request.types';
 import {
   helmReleasePod,
+  helmReleaseService,
   helmReleasesSchemaKey,
   helmReleaseStatusSchemaKey,
   helmVersionsSchemaKey,
@@ -28,6 +29,10 @@ export const GET_HELM_RELEASE_STATUS_FAILURE = '[Helm] Get Release Status Failur
 export const GET_HELM_RELEASE_PODS = '[Helm] Get Release Pods';
 export const GET_HELM_RELEASE_PODS_SUCCESS = '[Helm] Get Release Pods Success';
 export const GET_HELM_RELEASE_PODS_FAILURE = '[Helm] Get Release Pods Failure';
+
+export const GET_HELM_RELEASE_SERVICES = '[Helm] Get Release Services';
+export const GET_HELM_RELEASE_SERVICES_SUCCESS = '[Helm] Get Release Pods Services';
+export const GET_HELM_RELEASE_SERVICES_FAILURE = '[Helm] Get Release Pods Services';
 
 export interface MonocularPaginationAction extends PaginatedAction, IRequestAction { }
 
@@ -108,7 +113,6 @@ export class GetHelmReleaseStatus implements IRequestAction {
 }
 
 export class GetHelmReleasePods implements MonocularPaginationAction {
-
   constructor(
     public endpointGuid: string,
     public releaseTitle: string
@@ -122,6 +126,31 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
     GET_HELM_RELEASE_PODS,
     GET_HELM_RELEASE_PODS_SUCCESS,
     GET_HELM_RELEASE_PODS_FAILURE
+  ];
+  paginationKey: string;
+  initialParams = {
+    'order-direction': 'asc',
+    'order-direction-field': 'name',
+  };
+  static createKey = (endpointGuid: string, releaseTitle: string, name: string): string => {
+    return `${endpointGuid}/${releaseTitle}/${name}`;
+  }
+}
+
+export class GetHelmReleaseServices implements MonocularPaginationAction {
+  constructor(
+    public endpointGuid: string,
+    public releaseTitle: string
+  ) {
+    this.paginationKey = `${endpointGuid}/${releaseTitle}/services`;
+  }
+  type = GET_HELM_RELEASE_SERVICES;
+  entityKey = helmReleaseService;
+  entity = [entityFactory(helmReleaseService)];
+  actions = [
+    GET_HELM_RELEASE_SERVICES,
+    GET_HELM_RELEASE_SERVICES_SUCCESS,
+    GET_HELM_RELEASE_SERVICES_FAILURE
   ];
   paginationKey: string;
   initialParams = {

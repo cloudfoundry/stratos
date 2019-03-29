@@ -1,7 +1,9 @@
-import { combineLatest, tap, map, startWith, catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf } from 'rxjs';
+import { map, startWith, tap } from 'rxjs/operators';
+
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
@@ -9,7 +11,6 @@ import { ConfirmationDialogConfig } from '../../../../../shared/components/confi
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
 import { helmReleasesSchemaKey } from '../../../store/helm.entities';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
-import { Observable, of as observableOf } from 'rxjs';
 
 @Component({
   selector: 'app-helm-release-summary-tab',
@@ -77,7 +78,7 @@ export class HelmReleaseSummaryTabComponent {
         }
       ];
     });
-   }
+  }
 
   public deleteRelease() {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
@@ -87,19 +88,19 @@ export class HelmReleaseSummaryTabComponent {
       this.loadingMessage = 'Deleting Release';
       this.isBusy$ = deleting$.pipe(
         tap(d => {
-        console.log(d);
-      }),
-      map(d => false),
-      startWith(true),
+          console.log(d);
+        }),
+        map(d => false),
+        startWith(true),
       );
 
       deleting$.subscribe(d => {
         this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
-        this.store.dispatch(new RouterNav({ path: ['monocular/releases']}));
+        this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
       },
-      () => {
-        this.isBusy$ = observableOf(false);
-      });
+        () => {
+          this.isBusy$ = observableOf(false);
+        });
     });
   }
 }

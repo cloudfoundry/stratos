@@ -17,18 +17,20 @@ import { environment } from '../../../environments/environment';
 import { parseHelmReleaseStatus } from '../release/tabs/helm-release-helper.service';
 import {
   GET_HELM_RELEASE_PODS,
+  GET_HELM_RELEASE_SERVICES,
   GET_HELM_RELEASE_STATUS,
   GET_HELM_RELEASES,
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHARTS,
   GetHelmReleasePods,
   GetHelmReleases,
+  GetHelmReleaseServices,
   GetHelmReleaseStatus,
   GetHelmVersions,
   GetMonocularCharts,
 } from './helm.actions';
 import { helmReleasesSchemaKey, monocularChartsSchemaKey } from './helm.entities';
-import { HelmStatus } from './helm.types';
+import { HelmReleaseStatus, HelmStatus } from './helm.types';
 
 @Injectable()
 export class HelmEffects {
@@ -88,7 +90,7 @@ export class HelmEffects {
             const id = endpoint + ':' + data.name;
             data.guid = id;
             // Make a note of the guid of the endpoint for the release
-            data.endpointId = endpoint;
+            data.endpointGuid = endpoint;
             data.status = mapHelmStatus(data.info.status.code);
             data.lastDeployed = mapHelmModifiedDate(data.info.last_deployed);
             data.firstDeployed = mapHelmModifiedDate(data.info.first_deployed);
@@ -141,31 +143,13 @@ export class HelmEffects {
 
           const status = parseHelmReleaseStatus(response.info.status.resources);
 
-          const releasePodsAction = new GetHelmReleasePods(action.endpointGuid, action.releaseTitle);
-          const pods = Object.values(status.data['v1/Pod']).reduce((res, pod) => {
-            res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, pod.name)] = {
-              endpointId: action.endpointGuid,
-              releaseTitle: action.releaseTitle,
-              ...pod
-            };
-            return res;
-          }, {});
-          const keys = Object.keys(pods);
-          const releasePods = {
-            entities: { [releasePodsAction.entityKey]: pods },
-            result: keys
-          } as NormalizedResponse;
-          this.store.dispatch(new WrapperRequestActionSuccess(
-            releasePods,
-            releasePodsAction,
-            'fetch',
-            keys.length,
-            1)
-          );
+          this.updateReleasePods(action, status);
+
+          this.updateReleaseServices(action, status);
 
           // Go through each endpoint ID
           processedData.entities[action.entityKey][action.key] = {
-            endpointId: action.endpointGuid,
+            endpointGuid: action.endpointGuid,
             releaseTitle: action.releaseTitle,
             ...status
           };
@@ -181,7 +165,13 @@ export class HelmEffects {
     mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
   );
 
-  makeRequest(
+  @Effect()
+  fetchHelmReleaseServices$ = this.actions$.pipe(
+    ofType<GetHelmReleaseServices>(GET_HELM_RELEASE_SERVICES),
+    mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
+  );
+
+  private makeRequest(
     action: IRequestAction,
     url: string,
     mapResult: (response: any) => NormalizedResponse
@@ -205,8 +195,55 @@ export class HelmEffects {
       ])
     );
   }
-}
 
+  private updateReleasePods(action: GetHelmReleaseStatus, status: HelmReleaseStatus) {
+    const releasePodsAction = new GetHelmReleasePods(action.endpointGuid, action.releaseTitle);
+    const pods = Object.values(status.data['v1/Pod']).reduce((res, pod) => {
+      res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, pod.name)] = {
+        endpointGuid: action.endpointGuid,
+        releaseTitle: action.releaseTitle,
+        ...pod
+      };
+      return res;
+    }, {});
+    const keys = Object.keys(pods);
+    const releasePods = {
+      entities: { [releasePodsAction.entityKey]: pods },
+      result: keys
+    } as NormalizedResponse;
+    this.store.dispatch(new WrapperRequestActionSuccess(
+      releasePods,
+      releasePodsAction,
+      'fetch',
+      keys.length,
+      1)
+    );
+  }
+
+  private updateReleaseServices(action: GetHelmReleaseStatus, status: HelmReleaseStatus) {
+    const releaseServiceAction = new GetHelmReleaseServices(action.endpointGuid, action.releaseTitle);
+    const pods = Object.values(status.data['v1/Service']).reduce((res, service) => {
+      res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, service.name)] = {
+        endpointGuid: action.endpointGuid,
+        releaseTitle: action.releaseTitle,
+        ...service
+      };
+      return res;
+    }, {});
+    const keys = Object.keys(pods);
+    const releasePods = {
+      entities: { [releaseServiceAction.entityKey]: pods },
+      result: keys
+    } as NormalizedResponse;
+    this.store.dispatch(new WrapperRequestActionSuccess(
+      releasePods,
+      releaseServiceAction,
+      'fetch',
+      keys.length,
+      1)
+    );
+  }
+}
 
 function mapHelmStatus(status: number) {
   return HelmStatus[status].replace('_', ' ');
@@ -217,3 +254,4 @@ function mapHelmModifiedDate(date: any) {
   unix = Math.floor(unix);
   return new Date(unix);
 }
+

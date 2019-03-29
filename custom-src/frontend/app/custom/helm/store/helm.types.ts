@@ -61,6 +61,11 @@ export interface HelmReleaseStatus {
         status: string;
       }
     }
+    'v1/Service': {
+      [key: string]: {
+        name: string;
+      }
+    },
     [dataKey: string]: any
   };
   fields: string[];
@@ -68,13 +73,19 @@ export interface HelmReleaseStatus {
 }
 
 export interface HelmReleasePod {
-  endpointGuid?: string;
-  releaseTitle?: string;
+  endpointGuid: string;
+  releaseTitle: string;
   name: string;
   ready: string;
   status: string;
   restarts: string;
   age: string;
+}
+
+export interface HelmReleaseService {
+  endpointGuid: string;
+  releaseTitle: string;
+  name: string;
 }
 
 export interface HelmVersion {

@@ -40,6 +40,7 @@ export class HelmReleaseTabBaseComponent {
     { link: 'notes', label: 'Notes', matIcon: 'subject' },
     { link: 'values', label: 'Values', matIcon: 'list' },
     { link: 'pods', label: 'Pods', matIcon: 'adjust' },
+    { link: 'services', label: 'Services', matIcon: 'service', matIconFont: 'stratos-icons' }
   ];
   constructor(
     private helmRelease: HelmReleaseGuid,

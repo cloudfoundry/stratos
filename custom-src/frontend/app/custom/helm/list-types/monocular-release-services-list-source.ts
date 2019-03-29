@@ -4,24 +4,24 @@ import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../shared/components/list/list.component.types';
-import { GetHelmReleasePods } from '../store/helm.actions';
-import { HelmReleasePod } from '../store/helm.types';
+import { GetHelmReleaseServices } from '../store/helm.actions';
+import { HelmReleaseService } from '../store/helm.types';
 
-export class HelmReleasePodsDataSource extends ListDataSource<HelmReleasePod> {
+export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseService> {
 
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<HelmReleasePod>,
+    listConfig: IListConfig<HelmReleaseService>,
     endpointGuid: string,
     releaseTitle: string
   ) {
-    const action = new GetHelmReleasePods(endpointGuid, releaseTitle);
+    const action = new GetHelmReleaseServices(endpointGuid, releaseTitle);
     super({
       store,
       action,
       schema: entityFactory(action.entityKey),
       // TODO: RC Fix
-      getRowUniqueId: (object: HelmReleasePod) => object.endpointGuid,
+      getRowUniqueId: (object: HelmReleaseService) => object.endpointGuid,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

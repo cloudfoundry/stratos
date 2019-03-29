@@ -23,8 +23,8 @@ import {
   KubeService,
 } from './kube.types';
 import {
-  GetKubernetesDashboard,
   GeKubernetesDeployments,
+  GET_KUBE_DASHBOARD,
   GET_KUBE_DEPLOYMENT,
   GET_KUBE_POD,
   GET_KUBE_STATEFULSETS,
@@ -38,7 +38,9 @@ import {
   GET_PODS_ON_NODE_INFO,
   GET_RELEASE_POD_INFO,
   GET_SERVICE_INFO,
+  GET_SERVICES_IN_NAMESPACE_INFO,
   GetKubernetesApps,
+  GetKubernetesDashboard,
   GetKubernetesNamespace,
   GetKubernetesNamespaces,
   GetKubernetesNode,
@@ -49,20 +51,20 @@ import {
   GetKubernetesPodsOnNode,
   GetKubernetesReleasePods,
   GetKubernetesServices,
+  GetKubernetesServicesInNamespace,
   GetKubernetesStatefulSets,
   KubeAction,
   KubePaginationAction,
-  GET_KUBE_DASHBOARD,
 } from './kubernetes.actions';
 import {
   kubernetesAppsSchemaKey,
+  kubernetesDashboardSchemaKey,
   kubernetesDeploymentsSchemaKey,
   kubernetesNamespacesSchemaKey,
   kubernetesNodesSchemaKey,
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
-  kubernetesDashboardSchemaKey,
 } from './kubernetes.entities';
 
 interface DashboardStatus {
@@ -116,7 +118,7 @@ export class KubernetesEffects {
             error
           })
         ]));
-      })
+    })
   );
 
   @Effect()
@@ -198,6 +200,19 @@ export class KubernetesEffects {
       return this.processListAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods`,
         kubernetesPodsSchemaKey,
+        getUid
+      );
+    })
+  );
+
+  @Effect()
+  fetchServicesInNamespaceInfo$ = this.actions$.pipe(
+    ofType<GetKubernetesServicesInNamespace>(GET_SERVICES_IN_NAMESPACE_INFO),
+    flatMap(action => {
+      const getUid: GetID<KubeService> = (p) => p.metadata.uid;
+      return this.processListAction<KubeService>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/services`,
+        kubernetesServicesSchemaKey,
         getUid
       );
     })

@@ -7,6 +7,7 @@ import { MonocularChartViewComponent } from './chart-view/monocular.component';
 import { CreateReleaseModule } from './create-release/create-release.module';
 import { HelmRoutingModule } from './helm.routing';
 import { HelmReleaseLinkComponent } from './list-types/helm-release-link/helm-release-link.component';
+import { HelmReleaseServiceCardComponent } from './list-types/helm-release-service-card/helm-release-service-card.component';
 import { HelmRepositoryCountComponent } from './list-types/helm-repository-count/helm-repository-count.component';
 import { MonocularChartCardComponent } from './list-types/monocular-chart-card/monocular-chart-card.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';
@@ -33,6 +34,7 @@ import { ReposService } from './monocular/shared/services/repos.service';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
 import { HelmReleasePodsTabComponent } from './release/tabs//helm-release-pods/helm-release-pods-tab.component';
 import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
+import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-services/helm-release-services-tab.component';
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
@@ -69,6 +71,7 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmReleasesTabComponent,
     HelmConfigurationComponent,
     MonocularChartCardComponent,
+    HelmReleaseServiceCardComponent,
     MonocularChartViewComponent,
     HelmRepositoryCountComponent,
     HelmReleaseTabBaseComponent,
@@ -76,7 +79,8 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmReleaseLinkComponent,
     HelmReleaseNotesTabComponent,
     HelmReleaseValuesTabComponent,
-    HelmReleasePodsTabComponent
+    HelmReleasePodsTabComponent,
+    HelmReleaseServicesTabComponent
   ],
   providers: [
     ChartsService,
@@ -87,6 +91,7 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
   ],
   entryComponents: [
     MonocularChartCardComponent,
+    HelmReleaseServiceCardComponent,
     HelmRepositoryCountComponent,
     HelmReleaseLinkComponent
   ]

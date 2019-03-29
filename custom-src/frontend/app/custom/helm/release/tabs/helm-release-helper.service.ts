@@ -60,7 +60,8 @@ export const parseHelmReleaseStatus = (res: string): HelmReleaseStatus => {
     pods: {},
     fields: [],
     data: {
-      'v1/Pod': {}
+      'v1/Pod': {},
+      'v1/Service': {}
     }
   };
 

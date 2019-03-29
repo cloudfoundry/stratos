@@ -7,6 +7,7 @@ import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-ba
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
 import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
 import { HelmReleasePodsTabComponent } from './release/tabs/helm-release-pods/helm-release-pods-tab.component';
+import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-services/helm-release-services-tab.component';
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
@@ -44,6 +45,7 @@ const monocular: Routes = [
       { path: 'notes', component: HelmReleaseNotesTabComponent },
       { path: 'values', component: HelmReleaseValuesTabComponent },
       { path: 'pods', component: HelmReleasePodsTabComponent },
+      { path: 'services', component: HelmReleaseServicesTabComponent }
     ]
   },
   { pathMatch: 'full', path: 'charts/:repo/:chartName/:version', component: MonocularChartViewComponent },

@@ -1,13 +1,14 @@
 import { getAPIResourceGuid } from '../../../../../store/src/selectors/api.selectors';
 import { ExtensionEntitySchema } from '../../../core/extension/extension-types';
-import { HelmReleasePod, HelmReleaseStatus, HelmVersion } from './helm.types';
+import { HelmReleasePod, HelmReleaseService, HelmReleaseStatus, HelmVersion } from './helm.types';
 
 export const monocularChartsSchemaKey = 'monocularCharts';
 
 export const helmReleasesSchemaKey = 'helmReleases';
 export const helmVersionsSchemaKey = 'helmVersions';
-export const helmReleaseStatusSchemaKey = 'helmVersions';
+export const helmReleaseStatusSchemaKey = 'helmReleaseStatus';
 export const helmReleasePod = 'helmReleasePod';
+export const helmReleaseService = 'helmReleaseService';
 
 export const monocularEntities: ExtensionEntitySchema[] = [
   {
@@ -35,7 +36,14 @@ export const monocularEntities: ExtensionEntitySchema[] = [
   {
     entityKey: helmReleasePod,
     definition: {},
+    // TODO: RC Fix
     options: { idAttribute: (entity: HelmReleasePod) => entity.name }
+  },
+  {
+    entityKey: helmReleaseService,
+    definition: {},
+    // TODO: RC Fix
+    options: { idAttribute: (entity: HelmReleaseService) => entity.name }
   }
 ];
 
