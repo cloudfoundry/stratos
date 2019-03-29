@@ -14,11 +14,16 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/types/request.types';
 import { environment } from '../../../environments/environment';
+import { parseHelmReleaseStatus } from '../release/tabs/helm-release-helper.service';
 import {
+  GET_HELM_RELEASE_PODS,
+  GET_HELM_RELEASE_STATUS,
   GET_HELM_RELEASES,
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHARTS,
+  GetHelmReleasePods,
   GetHelmReleases,
+  GetHelmReleaseStatus,
   GetHelmVersions,
   GetMonocularCharts,
 } from './helm.actions';
@@ -87,6 +92,7 @@ export class HelmEffects {
             data.status = mapHelmStatus(data.info.status.code);
             data.lastDeployed = mapHelmModifiedDate(data.info.last_deployed);
             data.firstDeployed = mapHelmModifiedDate(data.info.first_deployed);
+            // data.info =
             processedData.entities[helmReleasesSchemaKey][id] = data;
             processedData.result.push(id);
           });
@@ -120,6 +126,61 @@ export class HelmEffects {
     })
   );
 
+  @Effect()
+  fetchHelmReleaseStatus$ = this.actions$.pipe(
+    ofType<GetHelmReleaseStatus>(GET_HELM_RELEASE_STATUS),
+    flatMap(action => {
+      return this.makeRequest(
+        action,
+        `/pp/${this.proxyAPIVersion}/helm/releases/${action.endpointGuid}/${action.releaseTitle}`,
+        (response) => {
+          const processedData = {
+            entities: { [action.entityKey]: {} },
+            result: []
+          } as NormalizedResponse;
+
+          const status = parseHelmReleaseStatus(response.info.status.resources);
+
+          const releasePodsAction = new GetHelmReleasePods(action.endpointGuid, action.releaseTitle);
+          const pods = Object.values(status.data['v1/Pod']).reduce((res, pod) => {
+            res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, pod.name)] = {
+              endpointId: action.endpointGuid,
+              releaseTitle: action.releaseTitle,
+              ...pod
+            };
+            return res;
+          }, {});
+          const keys = Object.keys(pods);
+          const releasePods = {
+            entities: { [releasePodsAction.entityKey]: pods },
+            result: keys
+          } as NormalizedResponse;
+          this.store.dispatch(new WrapperRequestActionSuccess(
+            releasePods,
+            releasePodsAction,
+            'fetch',
+            keys.length,
+            1)
+          );
+
+          // Go through each endpoint ID
+          processedData.entities[action.entityKey][action.key] = {
+            endpointId: action.endpointGuid,
+            releaseTitle: action.releaseTitle,
+            ...status
+          };
+          processedData.result.push(action.key);
+          return processedData;
+        });
+    })
+  );
+
+  @Effect()
+  fetchHelmReleasePods$ = this.actions$.pipe(
+    ofType<GetHelmReleasePods>(GET_HELM_RELEASE_PODS),
+    mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
+  );
+
   makeRequest(
     action: IRequestAction,
     url: string,
@@ -134,8 +195,8 @@ export class HelmEffects {
       mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
       catchError(error => [
         new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          // TODO: RC This will cause issues in error bar handlers when trying to find the endpoint with id 'monocular'
-          endpointIds: ['monocular'],
+          // TODO: RC monocular will cause issues in error bar handlers when trying to find the endpoint with id 'monocular'
+          endpointIds: [action.endpointGuid || 'monocular'],
           url: error.url || url,
           eventCode: error.status ? error.status + '' : '500',
           message: 'Monocular API request error',

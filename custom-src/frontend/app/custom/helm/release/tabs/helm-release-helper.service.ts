@@ -2,36 +2,41 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitor } from '../../../../shared/monitors/pagination-monitor';
-import { GetHelmReleases } from '../../store/helm.actions';
+import { GetHelmReleases, GetHelmReleaseStatus } from '../../store/helm.actions';
 import { helmReleasesSchemaKey } from '../../store/helm.entities';
-import { HelmReleaseGuid, HelmRelease } from '../../store/helm.types';
+import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus } from '../../store/helm.types';
 import { AppState } from './../../../../../../store/src/app-state';
-import { getPaginationObservables } from './../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { HttpClient } from '@angular/common/http';
+import {
+  getPaginationObservables,
+} from './../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Injectable()
 export class HelmReleaseHelperService {
 
   public isFetching$: Observable<boolean>;
 
-  public release$: Observable<any>;
+  public release$: Observable<HelmRelease>;
 
   public guid: string;
-
-  public releaseStatus: any;
+  public endpointGuid: string;
+  public releaseTitle: string;
 
   constructor(
     helmReleaseGuid: HelmReleaseGuid,
     store: Store<AppState>,
-    private httpClient: HttpClient,
+    private esf: EntityServiceFactory
   ) {
     this.guid = helmReleaseGuid.guid;
+    this.releaseTitle = this.guid.split(':')[1];
+    this.endpointGuid = this.guid.split(':')[0];
 
     const action = new GetHelmReleases();
     const paginationMonitor = new PaginationMonitor(store, action.paginationKey, entityFactory(helmReleasesSchemaKey));
-    const svc = getPaginationObservables({store, action, paginationMonitor});
+    const svc = getPaginationObservables({ store, action, paginationMonitor });
     this.isFetching$ = svc.fetchingEntities$;
 
     this.release$ = svc.entities$.pipe(
@@ -39,155 +44,123 @@ export class HelmReleaseHelperService {
     );
   }
 
-  public fetchReleaseStatus(): Observable<any> {
-    const title = this.guid.split(':')[1];
-    const endpoint = this.guid.split(':')[0];
-
+  public fetchReleaseStatus(): Observable<HelmReleaseStatus> {
     // Get helm release
-    return this.httpClient.get(`/pp/v1/helm/releases/${endpoint}/${title}`).pipe(
-      map((data: any) => this.parseResources(data.info.status.resources))
+    const action = new GetHelmReleaseStatus(this.endpointGuid, this.releaseTitle);
+
+    return this.esf.create<HelmReleaseStatus>(action.entityKey, action.entity, action.key, action, false).waitForEntity$.pipe(
+      map(entity => entity.entity)
     );
   }
+}
 
-  private parseResources(res: string) {
-    const lines = res.split('\n');
-    const result = {
-      fields: [],
-      data: {}
-    };
-
-    console.log(res);
-
-    // Process
-    let i = 0;
-    while (i < lines.length) {
-      if (lines[i].indexOf('==>') === 0 ) {
-        // Got a resource type
-        const resType = this.getResourceName(lines[i].substr(4));
-        // Read fields
-        i++;
-        i = this.readFields(result, lines, i);
-        i = this.readResType(result, resType, lines, i);
-      } else {
-        i++;
-      }
+export const parseHelmReleaseStatus = (res: string): HelmReleaseStatus => {
+  const lines = res.split('\n');
+  const result = {
+    pods: {},
+    fields: [],
+    data: {
+      'v1/Pod': {}
     }
+  };
 
-    this.calculateStats(result);
-    this.releaseStatus = result;
-    return result;
-  }
+  console.log(res);
 
-  private getResourceName(name: string): string {
-    const parts = name.trim().split('(');
-    return parts[0].trim();
-  }
-
-  private readFields(result, lines, i): number {
-    let read = result.fields.length === 0;
-    if (!read && lines[i].length === 0) {
+  // Process
+  let i = 0;
+  while (i < lines.length) {
+    if (lines[i].indexOf('==>') === 0) {
+      // Got a resource type
+      const resType = getResourceName(lines[i].substr(4));
+      // Read fields
       i++;
-      read = true;
-    }
-
-    if (lines[i].indexOf('NAME') === 0 ) {
-      read = true;
-    }
-
-    if (read) {
-      const params = lines[i].replace(/  +/g, ' ');
-      result.fields = params.split(' ');
+      i = readFields(result, lines, i);
+      i = readResType(result, resType, lines, i);
+    } else {
       i++;
     }
-    return i;
   }
 
-  private readResType(result, resType, lines, i): number {
-    const data = result.data;
-    data[resType] = [];
-    while (i < lines.length) {
-      if (lines[i].length === 0) {
-        return i + 1;
-      }
-      const value = {};
-      this.splitLine(lines[i]).forEach((v, index) => {
-        let p = result.fields[index].trim();
-        p = p.toLowerCase();
-        value[p] = v.trim();
-      });
-      data[resType].push(value);
-      i++;
-    }
+  calculateStats(result);
+  return result;
+};
 
-    return i;
+function getResourceName(name: string): string {
+  const parts = name.trim().split('(');
+  return parts[0].trim();
+}
+
+function readFields(result, lines, i): number {
+  let read = result.fields.length === 0;
+  if (!read && lines[i].length === 0) {
+    i++;
+    read = true;
   }
 
-  private splitLine(line: string): string[] {
-    const parts = [];
-
-    let part = '';
-
-    let inSquareBrackets = false;
-
-    for (const c of line) {
-      if (inSquareBrackets) {
-        if (c === ']') {
-          inSquareBrackets = false;
-        }
-        part += c;
-      } else {
-        if (c === ']') {
-          inSquareBrackets = true;
-        }
-        if (c === ' ') {
-          if (part.length > 0) {
-            parts.push(part);
-            part = '';
-          }
-        } else {
-          part += c;
-        }
-      }
-    }
-
-    if (part.length > 0) {
-      parts.push(part);
-    }
-
-    return parts;
+  if (lines[i].indexOf('NAME') === 0) {
+    read = true;
   }
 
-  private calculateStats(res) {
-    // Calculate Pod Stats
-    if (!!res.data['v1/Pod']) {
-      this.calculatePodStats(res, res.data['v1/Pod']);
-    }
+  if (read) {
+    const params = lines[i].replace(/  +/g, ' ');
+    result.fields = params.split(' ');
+    i++;
   }
+  return i;
+}
 
-  private calculatePodStats(data, pods) {
-    data.pods = {
-      status: {},
-      containers: 0,
-      ready: 0,
-    };
-
-    pods.forEach(pod => {
-      let count = data.pods.status[pod.status];
-      if (!count) {
-        count = 0;
-      }
-      data.pods.status[pod.status] = count + 1;
-
-      // Parse the ready state if running
-      if (pod.status === 'Running') {
-        const readyParts = pod.ready.split('/');
-        if (readyParts.length === 2) {
-          const ready = parseInt(readyParts[0], 10);
-          const total = parseInt(readyParts[1], 10);
-          data.pods.ready += ready;
-          data.pods.containers += total;
-        }
-      }
+function readResType(result, resType, lines, i): number {
+  const data = result.data;
+  data[resType] = [];
+  while (i < lines.length) {
+    if (lines[i].length === 0) {
+      return i + 1;
+    }
+    let values = lines[i];
+    values = values.replace(/  +/g, ' ');
+    const value = {};
+    values.split(' ').forEach((v, index) => {
+      let p = result.fields[index].trim();
+      p = p.toLowerCase();
+      value[p] = v.trim();
     });
+    data[resType].push(value);
+    i++;
   }
+
+  return i;
+}
+
+function calculateStats(res) {
+  // Calculate Pod Stats
+  if (!!res.data['v1/Pod']) {
+    calculatePodStats(res, res.data['v1/Pod']);
+  }
+}
+
+function calculatePodStats(data, pods) {
+  data.pods = {
+    status: {},
+    containers: 0,
+    ready: 0,
+  };
+
+  pods.forEach(pod => {
+    let count = data.pods.status[pod.status];
+    if (!count) {
+      count = 0;
+    }
+    data.pods.status[pod.status] = count + 1;
+
+    // Parse the ready state if running
+    if (pod.status === 'Running') {
+      const readyParts = pod.ready.split('/');
+      if (readyParts.length === 2) {
+        const ready = parseInt(readyParts[0], 10);
+        const total = parseInt(readyParts[1], 10);
+        data.pods.ready += ready;
+        data.pods.containers += total;
+      }
+    }
+  });
 }

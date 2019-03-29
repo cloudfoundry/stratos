@@ -38,6 +38,43 @@ export interface HelmRelease {
   version: string;
   status: string;
   lastDeployed: Date;
+  info: {
+    status: {
+      notes: string;
+    }
+  };
+  config: {
+    raw: string;
+  };
+}
+
+export interface HelmReleaseStatus {
+  endpointGuid?: string;
+  releaseTitle?: string;
+  data: {
+    'v1/Pod': {
+      [key: string]: {
+        age: string;
+        name: string;
+        ready: string;
+        restarts: string;
+        status: string;
+      }
+    }
+    [dataKey: string]: any
+  };
+  fields: string[];
+  pods: any;
+}
+
+export interface HelmReleasePod {
+  endpointGuid?: string;
+  releaseTitle?: string;
+  name: string;
+  ready: string;
+  status: string;
+  restarts: string;
+  age: string;
 }
 
 export interface HelmVersion {

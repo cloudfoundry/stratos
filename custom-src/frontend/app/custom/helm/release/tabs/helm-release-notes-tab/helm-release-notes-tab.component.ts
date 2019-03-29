@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HelmReleaseHelperService } from '../helm-release-helper.service';
+
 import { AnsiColors } from '../../../../../shared/components/log-viewer/ansi-colors';
+import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
   selector: 'app-helm-release-notes-tab',

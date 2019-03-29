@@ -31,13 +31,14 @@ import { ConfigService } from './monocular/shared/services/config.service';
 import { MenuService } from './monocular/shared/services/menu.service';
 import { ReposService } from './monocular/shared/services/repos.service';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
+import { HelmReleasePodsTabComponent } from './release/tabs//helm-release-pods/helm-release-pods-tab.component';
 import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
+import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 import { HelmConfigurationComponent } from './tabs/configuration-tab/helm-configuration.component';
 import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
-import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 
 @NgModule({
   imports: [
@@ -75,13 +76,14 @@ import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-value
     HelmReleaseLinkComponent,
     HelmReleaseNotesTabComponent,
     HelmReleaseValuesTabComponent,
+    HelmReleasePodsTabComponent
   ],
   providers: [
     ChartsService,
     ConfigService,
     MenuService,
     AuthService,
-    ReposService,
+    ReposService
   ],
   entryComponents: [
     MonocularChartCardComponent,

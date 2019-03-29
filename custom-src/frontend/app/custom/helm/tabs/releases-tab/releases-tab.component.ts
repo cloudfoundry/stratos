@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { HelmReleasesListConfig } from '../../list-types/monocular-releases-list-config.service';
 
@@ -11,11 +12,5 @@ import { HelmReleasesListConfig } from '../../list-types/monocular-releases-list
     useClass: HelmReleasesListConfig,
   }]
 })
-export class HelmReleasesTabComponent implements OnInit {
+export class HelmReleasesTabComponent { }
 
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
