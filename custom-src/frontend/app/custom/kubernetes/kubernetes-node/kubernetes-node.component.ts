@@ -35,7 +35,7 @@ export class KubernetesNodeComponent {
 
   tabLinks = [
     { link: 'summary', label: 'Summary', matIcon: 'kubernetes', matIconFont: 'stratos-icons' },
-    { link: 'metrics', label: 'Metrics', matIcon: 'bar_chart' },
+    { link: 'metrics', label: 'Metrics', matIcon: 'equalizer' },
     { link: 'pods', label: 'Pods', matIcon: 'adjust' },
   ];
 

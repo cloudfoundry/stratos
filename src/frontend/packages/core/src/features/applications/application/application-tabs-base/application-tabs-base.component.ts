@@ -108,7 +108,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           {
             link: 'metrics',
             label: 'Metrics',
-            matIcon: 'insert_chart'
+            matIcon: 'equalizer'
           }
         ];
       }
