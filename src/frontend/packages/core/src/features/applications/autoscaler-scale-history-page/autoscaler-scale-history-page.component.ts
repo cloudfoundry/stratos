@@ -16,7 +16,7 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 })
 export class AutoscalerScaleHistoryPageComponent {
 
-  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/auto-scaler`;
+  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
 
   constructor(
     public applicationService: ApplicationService,

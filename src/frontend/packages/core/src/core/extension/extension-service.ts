@@ -30,6 +30,7 @@ export interface StratosTabMetadata {
   type: StratosTabType;
   label: string;
   link: string;
+  action: any;
 }
 
 // The different types of Action

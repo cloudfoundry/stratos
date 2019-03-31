@@ -48,6 +48,7 @@ export class GetAppAutoscalerHealthAction implements IRequestAction {
     public appGuid: string,
     public cfGuid: string,
   ) { }
+  onSucceed: any;
   type = APP_AUTOSCALER_HEALTH;
   entityKey = appAutoscalerHealthSchemaKey;
 }

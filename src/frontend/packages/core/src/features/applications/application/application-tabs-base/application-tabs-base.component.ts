@@ -134,13 +134,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
-    this.applicationService.waitForAppAutoscalerHealth$
-      .pipe(first())
-      .subscribe(entity => {
-        if (entity && entity.entity && entity.entity.entity && entity.entity.entity.uptime > 0) {
-          this.tabLinks.push({ link: 'auto-scaler', label: 'Autoscale' });
-        }
-      });
+    // this.applicationService.waitForAppAutoscalerHealth$
+    //   .pipe(first())
+    //   .subscribe(entity => {
+    //     if (entity && entity.entity && entity.entity.entity && entity.entity.entity.uptime > 0) {
+    //       this.tabLinks.push({ link: 'auto-scaler', label: 'Autoscale' });
+    //     }
+    //   });
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
@@ -152,7 +152,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
 
     // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
+    const tabs = getTabsFromExtensions(StratosTabType.Application);
+    tabs.map((extensionTab) => {
+      if (extensionTab.action) {
+        extensionTab.action.onSucceed = () => {
+          this.tabLinks.push(extensionTab);
+        };
+        this.store.dispatch(extensionTab.action);
+      } else {
+        this.tabLinks.push(extensionTab);
+      }
+    });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
     this.stratosProjectSub = this.applicationService.applicationStratProject$

@@ -49,7 +49,7 @@ import * as moment from 'moment-timezone';
 })
 export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
 
-  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/auto-scaler`;
+  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
 
   alertInvalidPolicyMinimumRange = 'The Minimum Instance Count must be a integer less than the Maximum Instance Count.';
   alertInvalidPolicyMaximumRange = 'The Maximum Instance Count must be a integer greater than the Minimum Instance Count.';

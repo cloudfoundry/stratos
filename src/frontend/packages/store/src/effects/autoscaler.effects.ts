@@ -3,8 +3,6 @@ import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angula
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
-
-import { LoggerService } from '../../../core/src/core/logger.service';
 import { environment } from '../../../core/src/environments/environment.prod';
 import {
   APP_AUTOSCALER_HEALTH,
@@ -54,7 +52,6 @@ export class AutoscalerEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
-    private logger: LoggerService,
   ) { }
 
   @Effect()
@@ -81,6 +78,9 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(action.entityKey, mappedData, action.appGuid, healthInfo);
+            if (healthInfo.uptime > 0 && action.onSucceed) {
+              action.onSucceed();
+            }
             return [
               new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
             ];
@@ -164,7 +164,6 @@ export class AutoscalerEffects {
             }
           }));
     }));
-
 
   @Effect()
   detachAppAutoscalerPolicy$ = this.actions$.pipe(

@@ -31,7 +31,7 @@ export class CardsComponent<T> {
         return this.dataSource.trackBy(index, item.entity);
       }
       return this.dataSource.trackBy(index, item);
-    }
+    };
   }
 
   public isMultiActionItem(component: any | MultiActionListEntity) {
