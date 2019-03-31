@@ -65,8 +65,6 @@ export const parseHelmReleaseStatus = (res: string): HelmReleaseStatus => {
     }
   };
 
-  console.log(res);
-
   // Process
   let i = 0;
   while (i < lines.length) {

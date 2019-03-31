@@ -9,3 +9,10 @@
     }
   }
 }
+
+.helm-release-summary {
+
+  &__chart-tile {
+    width: 50%;
+  }
+}

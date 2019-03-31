@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf, combineLatest } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
 
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
@@ -11,6 +11,12 @@ import { ConfirmationDialogConfig } from '../../../../../shared/components/confi
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
 import { helmReleasesSchemaKey } from '../../../store/helm.entities';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
+
+const podErrorStatus = {
+  Failed: true,
+  CrashLoopBackOff: true,
+  ErrImgPull: true,
+};
 
 @Component({
   selector: 'app-helm-release-summary-tab',
@@ -44,8 +50,16 @@ export class HelmReleaseSummaryTabComponent {
     }
   ];
 
-  // Blue: #00B2E2
-  // Yellow: #FFC107
+  public podsChartColors = [
+    {
+      name: 'OK',
+      value: '#4DD3A7'
+    },
+    {
+      name: 'Error',
+      value: '#E7727D'
+    }
+  ];
 
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
@@ -53,19 +67,23 @@ export class HelmReleaseSummaryTabComponent {
     private confirmDialog: ConfirmationDialogService,
     private httpClient: HttpClient,
   ) {
-    this.isBusy$ = this.helmReleaseHelper.isFetching$;
 
     // Async fetch release status
-    this.helmReleaseHelper.fetchReleaseStatus().subscribe(data => {
+    const fetchStatus = this.helmReleaseHelper.fetchReleaseStatus();
+    const isStatusBusy$ = fetchStatus.pipe(map(d => false));
+    this.isBusy$ = combineLatest(this.helmReleaseHelper.isFetching$, isStatusBusy$).pipe(
+      map(([a, b]) => a || b)
+    );
+
+    fetchStatus.subscribe(data => {
       const chart = [];
-      console.log(data);
       Object.keys(data.pods.status).forEach(status => {
         chart.push({
           name: status,
           value: data.pods.status[status]
         });
       });
-      this.podsChartData = chart;
+      this.podsChartData = this.collatePodStatus(data);
 
       this.containersChartData = [
         {
@@ -80,6 +98,30 @@ export class HelmReleaseSummaryTabComponent {
     });
   }
 
+  private collatePodStatus(data: any): any {
+    let okay = 0;
+    let error = 0;
+
+    Object.keys(data.pods.status).forEach(status => {
+      if (podErrorStatus[status]) {
+        error++;
+      } else {
+        okay++;
+      }
+    });
+
+    return [
+      {
+        name: 'OK',
+        value: okay
+      },
+      {
+        name: 'Error',
+        value: error
+      }
+    ];
+  }
+
   public deleteRelease() {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
       // Make the http request to delete the release
@@ -87,9 +129,6 @@ export class HelmReleaseSummaryTabComponent {
       const deleting$ = this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`);
       this.loadingMessage = 'Deleting Release';
       this.isBusy$ = deleting$.pipe(
-        tap(d => {
-          console.log(d);
-        }),
         map(d => false),
         startWith(true),
       );

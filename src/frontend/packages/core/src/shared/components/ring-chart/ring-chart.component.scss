@@ -10,7 +10,7 @@
   .advanced-pie-legend {
     display: flex;
     flex-direction: column;
-    margin-right: 36px;
+    margin-right: 24px;
     top: 0;
     transform: none;
 
@@ -19,6 +19,7 @@
     }
 
     .total-label {
+      font-size: 18px;
       margin: -8px 0 0;
     }
 

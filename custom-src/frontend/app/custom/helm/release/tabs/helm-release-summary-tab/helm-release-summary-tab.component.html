@@ -39,15 +39,14 @@
         </app-tile>
       </app-tile-group>
 
-      <!-- Release statud charts -->
-
+      <!-- Release status charts -->
       <app-tile-group>
-        <app-tile>
+        <app-tile class="helm-release-summary__chart-tile">
           <mat-card class="full-card">
-            <app-ring-chart [data]="podsChartData" label="Pods"></app-ring-chart>
+            <app-ring-chart [customColors]="podsChartColors" [data]="podsChartData" label="Pods"></app-ring-chart>
           </mat-card>
         </app-tile>      
-        <app-tile>
+        <app-tile class="helm-release-summary__chart-tile">
           <mat-card class="full-card">
             <app-ring-chart [customColors]="containersChartColors" [data]="containersChartData" label="Containers"></app-ring-chart>
           </mat-card>
