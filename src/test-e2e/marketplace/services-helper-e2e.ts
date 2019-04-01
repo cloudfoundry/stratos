@@ -22,6 +22,7 @@ export class ServicesHelperE2E {
     this.cfRequestHelper = seed ? seed.cfRequestHelper : new CFRequestHelpers(e2eSetup);
     this.cfHelper = seed ? seed.cfHelper : new CFHelpers(e2eSetup);
     this.serviceInstanceName = seed ? seed.serviceInstanceName : E2EHelpers.createCustomName(customServiceLabel).toLowerCase();
+    e2e.log('constructor: Setting Name', this.serviceInstanceName);
     expect(this.serviceInstanceName.length)
       .toBeLessThanOrEqual(50, `Service name should not exceed 50 characters: ${this.serviceInstanceName}`);
     if (!!createServiceInstance) {
@@ -31,6 +32,7 @@ export class ServicesHelperE2E {
 
   addPrefixToServiceName = (prefix: string) => {
     this.serviceInstanceName = `${prefix}-${this.serviceInstanceName}`;
+    e2e.log('addPrefixToServiceName: Setting Name', this.serviceInstanceName);
     expect(this.serviceInstanceName.length)
       .toBeLessThanOrEqual(50, `Service name should not exceed 50 characters: ${this.serviceInstanceName}`);
   }
@@ -53,10 +55,20 @@ export class ServicesHelperE2E {
   }
 
   deleteServiceInstance = (cfGuid: string, serviceGuid: string): promise.Promise<CFResponse> => {
+    const id = `${cfGuid}:${serviceGuid}`;
+    e2e.log(`Deleting service instance... ${id}`);
     return this.cfRequestHelper.sendCfDelete(
       cfGuid,
       `service_instances/${serviceGuid}?async=false&recursive=true`
-    );
+    )
+      .then(res => {
+        e2e.log(`Deleting service instance... Success... ${id}`, res);
+        return res;
+      })
+      .catch(err => {
+        e2e.log(`Deleting service instance... Failed... ${id}`, err);
+        throw err;
+      });
   }
 
   fetchServiceInstanceByName = (cfGuid: string, serviceInstanceName: string): promise.Promise<CFResponse> => {
@@ -134,6 +146,7 @@ export class ServicesHelperE2E {
       expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     }
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
+    e2e.log('setServiceInstanceDetail: Setting Name', this.serviceInstanceName);
     this.createServiceInstance.stepper.setServiceName(this.serviceInstanceName);
   }
 
@@ -187,6 +200,7 @@ export class ServicesHelperE2E {
   }
 
   cleanUpServiceInstances(serviceInstanceNames: string[]): promise.Promise<any> {
+    e2e.log('cleanUpServiceInstances: Cleaning up service instances... ', serviceInstanceNames);
     // Sleeping because the service instance may not be listed in the `get services` request
     browser.sleep(1000);
     if (serviceInstanceNames.length === 0) {
@@ -198,6 +212,7 @@ export class ServicesHelperE2E {
       cfGuid = guid;
       return this.fetchServicesInstances(cfGuid).catch(failure => {
         if (failure && failure.error && failure.error.statusCode === 404) {
+          e2e.log('cleanUpServiceInstances: Failed to fetch SI... ', failure.error);
           const emptyRes: CFResponse = {
             next_url: '',
             prev_url: '',
@@ -211,9 +226,22 @@ export class ServicesHelperE2E {
       });
     }).then(response => {
       const services = response.resources;
-      const serviceInstances = services.filter(serviceInstance => {
-        return serviceInstanceNames.findIndex(name => name === serviceInstance.entity.name) >= 0;
+      const serviceInstances = [];
+      const notFoundSI = [];
+      serviceInstanceNames.forEach(name => {
+        const serviceInstance = services.find(si => name === si.entity.name);
+        if (serviceInstance) {
+          serviceInstances.push(serviceInstance);
+        } else {
+          notFoundSI.push(name);
+        }
       });
+
+      if (!!notFoundSI.length) {
+        e2e.log('cleanUpServiceInstances: Failed to find some service instances... ', notFoundSI);
+        e2e.log('cleanUpServiceInstances: Found SI', services.map(service => service.entity.name));
+        e2e.log('cleanUpServiceInstances: cfGuid', cfGuid);
+      }
       return serviceInstances.length ?
         promise.all(serviceInstances.map(serviceInstance => this.cleanUpService(cfGuid, serviceInstance.metadata.guid))) :
         promise.fullyResolved(createEmptyCfResponse());
