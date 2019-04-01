@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ITileConfig } from '../tile/tile-selector.types';
 
 
@@ -8,13 +8,39 @@ import { ITileConfig } from '../tile/tile-selector.types';
   styleUrls: ['./tile-selector.component.scss']
 })
 export class TileSelectorComponent {
+  public pOptions: ITileConfig[];
+  public hiddenOptions: ITileConfig[];
+  public showingMore = false;
+  @Input() set options(options: ITileConfig[]) {
+    const groupedOptions = options.reduce((grouped, option) => {
+      if (option.hidden) {
+        grouped.hidden.push(option);
+      } else {
+        grouped.show.push(option);
+      }
+      return grouped;
+    }, {
+        show: [],
+        hidden: []
+      });
+    this.pOptions = groupedOptions.show;
+    this.hiddenOptions = groupedOptions.hidden;
+  }
 
-  @Input() options: ITileConfig[];
+  get options() {
+    return this.pOptions;
+  }
+
+
 
   @Output() selection = new EventEmitter<ITileConfig>();
   public selected: ITileConfig;
 
   constructor() { }
+
+  public toggleMore() {
+    this.showingMore = !this.showingMore;
+  }
 
   selectionChange(tile: ITileConfig) {
     if (tile && tile === this.selected) {

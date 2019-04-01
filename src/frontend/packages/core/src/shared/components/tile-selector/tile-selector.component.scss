@@ -30,9 +30,19 @@
     opacity: 1;
     transform: scale(1.02);
   }
+  &__more {
+    cursor: pointer;
+    font-size: 16px;
+  }
 
   &:active {
     transform: scale(.98);
+  }
+
+  &__more {
+    align-items: center;
+    display: flex;
+    justify-content: center;
   }
 
   &__selected,
