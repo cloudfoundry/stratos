@@ -81,7 +81,6 @@ export class HelmEffects {
         // Go through each endpoint ID
         Object.keys(response).forEach(endpoint => {
           const endpointData = response[endpoint];
-          console.log(endpointData);
           if (!endpointData) {
             return;
           }

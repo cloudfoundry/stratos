@@ -28,7 +28,7 @@ export class HelmReleaseSummaryTabComponent {
 
   public isBusy$: Observable<boolean>;
 
-  public loadingMessage = 'Retrieving Release details';
+  public loadingMessage = 'Retrieving Release Details';
 
   public podsChartData = [];
   public containersChartData = [];
