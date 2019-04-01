@@ -1,6 +1,6 @@
 <div class="simple-graph__wrapper">
   <h2 class="simple-graph__title">{{ title }}</h2>
-  <div class="simple-graph">
+  <div class="simple-graph" [ngStyle]="{height: height}">
     <div class="simple-graph__inner">
       <ngx-charts-pie-chart [scheme]="chartData.colors" [animations]="false" [doughnut]="true"
         [results]="chartData.results" [gradient]="false">

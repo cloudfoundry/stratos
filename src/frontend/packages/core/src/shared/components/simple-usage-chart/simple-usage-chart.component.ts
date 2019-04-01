@@ -30,6 +30,8 @@ export class SimpleUsageChartComponent {
 
   @Input() title = 'Usage';
 
+  @Input() height = '250px';
+
   @Input() thresholds: IChartThresholds = {
     danger: 85,
     warning: 70
