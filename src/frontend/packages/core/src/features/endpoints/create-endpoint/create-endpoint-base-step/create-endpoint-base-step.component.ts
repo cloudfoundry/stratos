@@ -3,12 +3,11 @@ import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import {
-  BASE_REDIRECT_QUERY,
-} from '../../../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
+
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { getEndpointTypes } from '../../endpoint-helpers';
+import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
@@ -35,7 +34,7 @@ export class CreateEndpointBaseStepComponent {
       this.store.dispatch(new RouterNav({
         path: `endpoints/new/${tile.data.type}`,
         query: {
-          [BASE_REDIRECT_QUERY]: true
+          [BASE_REDIRECT_QUERY]: 'endpoints/new'
         }
       }));
     }
