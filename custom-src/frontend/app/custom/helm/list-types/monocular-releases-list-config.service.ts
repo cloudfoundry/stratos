@@ -2,11 +2,8 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { pairwise } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
-import { endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import {
   TableCellEndpointNameComponent,
@@ -100,21 +97,6 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       cellFlex: '3'
     },
   ] as ITableColumn<HelmRelease>[];
-
-  private handleAction(item, effectKey, handleChange) {
-    const disSub = this.store.select(selectUpdateInfo(
-      endpointStoreNames.type,
-      item.guid,
-      effectKey,
-    )).pipe(
-      pairwise())
-      .subscribe(([oldVal, newVal]) => {
-        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-          handleChange([oldVal, newVal]);
-          disSub.unsubscribe();
-        }
-      });
-  }
 
   constructor(
     private store: Store<AppState>,

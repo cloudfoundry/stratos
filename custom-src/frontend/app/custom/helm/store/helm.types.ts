@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+import { KubeService } from '../../kubernetes/store/kube.types';
 
 export interface MonocularRepository {
   name: string;
@@ -32,12 +35,14 @@ export interface MonocularChart {
 }
 
 export interface HelmRelease {
+  endpointId: string;
   guid: string;
   name: string;
   namespace: string;
   version: string;
   status: string;
   lastDeployed: Date;
+  firstDeployed: Date;
   info: {
     status: {
       notes: string;
@@ -49,7 +54,7 @@ export interface HelmRelease {
 }
 
 export interface HelmReleaseStatus {
-  endpointGuid?: string;
+  endpointId?: string;
   releaseTitle?: string;
   data: {
     'v1/Pod': {
@@ -73,7 +78,7 @@ export interface HelmReleaseStatus {
 }
 
 export interface HelmReleasePod {
-  endpointGuid: string;
+  endpointId: string;
   releaseTitle: string;
   name: string;
   ready: string;
@@ -83,9 +88,10 @@ export interface HelmReleasePod {
 }
 
 export interface HelmReleaseService {
-  endpointGuid: string;
+  endpointId: string;
   releaseTitle: string;
   name: string;
+  kubeService$?: Observable<KubeService>;
 }
 
 export interface HelmVersion {

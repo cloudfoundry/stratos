@@ -31,7 +31,7 @@ export const monocularEntities: ExtensionEntitySchema[] = [
   {
     entityKey: helmReleaseStatusSchemaKey,
     definition: {},
-    options: { idAttribute: (entity: HelmReleaseStatus) => entity.endpointGuid }
+    options: { idAttribute: (entity: HelmReleaseStatus) => entity.endpointId }
   },
   {
     entityKey: helmReleasePod,

@@ -1,9 +1,19 @@
-<app-meta-card class="card">
-  <app-meta-card-title class="card__title">
+<app-meta-card class="card" *ngIf="(row?.kubeService$ | async) as kubeService">
+  <app-meta-card-title class=" card__title">
     <app-multiline-title class="card__title-link">{{ row.name }}</app-multiline-title>
   </app-meta-card-title>
   <app-meta-card-item>
-    <app-meta-card-key>Other</app-meta-card-key>
-    <app-meta-card-value>Things</app-meta-card-value>
+    <app-meta-card-key>Cluster IP</app-meta-card-key>
+    <app-meta-card-value>{{kubeService.spec.clusterIP}}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Port Type</app-meta-card-key>
+    <app-meta-card-value>{{kubeService.spec.type}}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item customStyle="column">
+    <app-meta-card-key>Ports</app-meta-card-key>
+    <app-meta-card-value>
+      <app-kubernetes-service-ports [row]="row"></app-kubernetes-service-ports>
+    </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

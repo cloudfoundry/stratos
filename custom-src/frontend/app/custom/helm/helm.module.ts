@@ -9,6 +9,7 @@ import { HelmRoutingModule } from './helm.routing';
 import { HelmReleaseLinkComponent } from './list-types/helm-release-link/helm-release-link.component';
 import { HelmReleaseServiceCardComponent } from './list-types/helm-release-service-card/helm-release-service-card.component';
 import { HelmRepositoryCountComponent } from './list-types/helm-repository-count/helm-repository-count.component';
+import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import { MonocularChartCardComponent } from './list-types/monocular-chart-card/monocular-chart-card.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';
 import { ChartDetailsInfoComponent } from './monocular/chart-details/chart-details-info/chart-details-info.component';
@@ -80,7 +81,8 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmReleaseNotesTabComponent,
     HelmReleaseValuesTabComponent,
     HelmReleasePodsTabComponent,
-    HelmReleaseServicesTabComponent
+    HelmReleaseServicesTabComponent,
+    KubernetesServicePortsComponent
   ],
   providers: [
     ChartsService,
@@ -93,7 +95,8 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     MonocularChartCardComponent,
     HelmReleaseServiceCardComponent,
     HelmRepositoryCountComponent,
-    HelmReleaseLinkComponent
+    HelmReleaseLinkComponent,
+    KubernetesServicePortsComponent
   ]
 })
 export class HelmModule { }

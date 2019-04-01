@@ -10,6 +10,7 @@ import { IListConfig, ListViewTypes } from '../../../shared/components/list/list
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseService } from '../store/helm.types';
 import { HelmReleaseServiceCardComponent } from './helm-release-service-card/helm-release-service-card.component';
+import { KubernetesServicePortsComponent } from './kubernetes-service-ports/kubernetes-service-ports.component';
 import { HelmReleaseServicesDataSource } from './monocular-release-services-list-source';
 
 @Injectable()
@@ -35,8 +36,37 @@ export class HelmReleaseServicesListConfig implements IListConfig<HelmReleaseSer
       },
       cellFlex: '4'
     },
+    {
+      columnId: 'clusterIp',
+      headerCell: () => 'Cluster IP',
+      cellDefinition: {
+        asyncValue: {
+          pathToObs: 'kubeService$',
+          pathToValue: 'spec.clusterIP'
+        }
+      },
+      cellFlex: '2'
+    },
+    {
+      columnId: 'portType',
+      headerCell: () => 'Port Type',
+      cellDefinition: {
+        asyncValue: {
+          pathToObs: 'kubeService$',
+          pathToValue: 'spec.type'
+        }
+      },
+      cellFlex: '2'
+    },
+    {
+      columnId: 'Ports',
+      headerCell: () => 'Ports',
+      cellComponent: KubernetesServicePortsComponent,
+      cellFlex: '4'
+    },
   ] as ITableColumn<HelmReleaseService>[];
   initialised$: Observable<boolean>;
+
 
   constructor(
     private store: Store<AppState>,
