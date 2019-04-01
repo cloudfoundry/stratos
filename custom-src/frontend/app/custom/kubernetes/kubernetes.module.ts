@@ -15,6 +15,9 @@ import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernet
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
+import {
+  KubernetesNamespaceServicesComponent,
+} from './kubernetes-namespace/kubernetes-namespace-services/kubernetes-namespace-services.component';
 import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
 import {
   KubernetesNodeMetricStatsCardComponent,
@@ -131,6 +134,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNamespaceLinkComponent,
     KubernetesNamespaceComponent,
     KubernetesNamespacePodsComponent,
+    KubernetesNamespaceServicesComponent,
     KubeAppcreatedDateComponent,
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,

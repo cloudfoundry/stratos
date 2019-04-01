@@ -8,6 +8,9 @@ import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernet
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
+import {
+  KubernetesNamespaceServicesComponent,
+} from './kubernetes-namespace/kubernetes-namespace-services/kubernetes-namespace-services.component';
 import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
 import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
 import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
@@ -86,6 +89,11 @@ const kubernetes: Routes = [{
       path: 'pods',
       component: KubernetesNamespacePodsComponent
     },
+    {
+      path: 'services',
+      component: KubernetesNamespaceServicesComponent
+    },
+
   ]
 },
 {
