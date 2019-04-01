@@ -1,4 +1,8 @@
-@mixin dashboard-page-theme($theme, $app-theme) {}
+@mixin dashboard-page-theme($theme, $app-theme) {
+  .page-header-sub-nav {
+    background-color: map-get($app-theme, app-background-color);
+  }
+}
 
 .dashboard.dashboard__icon-mode {
   .page-header__nav-toggle-wrapper {

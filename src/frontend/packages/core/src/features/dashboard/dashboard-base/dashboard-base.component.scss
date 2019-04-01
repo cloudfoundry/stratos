@@ -33,14 +33,11 @@ $app-sub-header-height: 48px;
   &__inline-help {
     width: 600px;
   }
-  &__noMargin {
+  &__no-margin {
     padding: 0;
   }
   &__side-help {
     width: 600px;
-  }  
-  &__noMargin {
-    padding: 0;
   }
 }
 
@@ -63,7 +60,6 @@ $app-sub-header-height: 48px;
   display: flex;
   height: $app-sub-header-height;
   margin-left: 200px;
-  opacity: .6;
   padding: 0;
   width: 100%;
   @include breakpoint(tablet) {
@@ -84,6 +80,7 @@ $app-sub-header-height: 48px;
   &__container {
     align-items: center;
     display: flex;
+    opacity: .6;
     width: 100%;
   }
 }
