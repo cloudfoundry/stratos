@@ -104,13 +104,25 @@ export class EndpointsService implements CanActivate {
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
+    return this.connectedEndpointsOfTypes(type).pipe(
+      map(eps => eps.length === 0)
+    );
+  }
+
+  hasConnectedEndpointType(type: string): Observable<boolean> {
+    return this.connectedEndpointsOfTypes(type).pipe(
+      map(eps => eps.length > 0)
+    );
+  }
+
+  connectedEndpointsOfTypes(type: string): Observable<EndpointModel[]> {
     return this.endpoints$.pipe(
-      map(endpoints => {
-        const haveAtLeastOne = Object.values(endpoints).find(ep => {
-          const epType = getEndpointType(ep.cnsi_type, ep.sub_type);
-          return ep.cnsi_type === type && (epType.doesNotSupportConnect || ep.connectionStatus === 'connected');
-        });
-        return !haveAtLeastOne;
+      map(ep => {
+        return Object.values(ep)
+          .filter(endpoint => {
+            const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
+            return endpoint.cnsi_type === type && (epType.doesNotSupportConnect || endpoint.connectionStatus === 'connected');
+          });
       })
     );
   }

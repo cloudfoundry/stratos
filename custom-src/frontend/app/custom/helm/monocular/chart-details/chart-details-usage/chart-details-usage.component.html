@@ -1,10 +1,10 @@
 <app-panel class="chart-details-usage" [border]=true>
   <h1>Install</h1>
   <mat-tab-group>
-    <mat-tab label="UI">
+    <mat-tab label="UI" *ngIf="endpointsService.hasConnectedEndpointType('k8s') | async">
       <p>You can install using this Helm Chart in the console.</p>
       <button class="chart-details-usage__install" color="primary" mat-button mat-raised-button
-      routerLink="/monocular/install/{{chart.id}}/{{currentVersion}}">Install</button>
+        routerLink="/monocular/install/{{chart.id}}/{{currentVersion}}">Install</button>
     </mat-tab>
 
     <mat-tab label="Helm CLI">
@@ -27,8 +27,8 @@
         </button>
       </div>
       <p class="help-link">
-        <a href="https://github.com/kubernetes/helm/blob/master/docs/quickstart.md"
-         target="_blank" title="How to install Helm">Need Helm?</a>
+        <a href="https://github.com/kubernetes/helm/blob/master/docs/quickstart.md" target="_blank"
+          title="How to install Helm">Need Helm?</a>
       </p>
     </mat-tab>
   </mat-tab-group>

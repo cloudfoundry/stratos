@@ -39,20 +39,7 @@ export class CreateReleaseComponent {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
 
-    this.kubeEndpoints$ = this.endpointsService.endpoints$.pipe(
-      map(ep => {
-        const kubes = [];
-        Object.values(ep).forEach(endpoint => {
-          if (endpoint.cnsi_type === 'k8s') {
-            kubes.push({
-              name: endpoint.name,
-              guid: endpoint.guid
-            });
-          }
-        });
-        return kubes;
-      })
-    );
+    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes('k8s');
 
     this.details = new FormGroup({
       endpoint: new FormControl('', Validators.required),
