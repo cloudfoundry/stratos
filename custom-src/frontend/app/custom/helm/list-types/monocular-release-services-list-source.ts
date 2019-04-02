@@ -50,8 +50,7 @@ export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseSer
       store,
       action,
       schema: entityFactory(action.entityKey),
-      // TODO: RC Fix
-      getRowUniqueId: (object: HelmReleaseService) => object.endpointId,
+      getRowUniqueId: (object: HelmReleaseService) => object.name,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

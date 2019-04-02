@@ -63,7 +63,7 @@ export class HelmEffects {
           return res;
         }, base);
         return processedData;
-      });
+      }, []);
     })
   );
 
@@ -102,7 +102,7 @@ export class HelmEffects {
           });
         });
         return processedData;
-      });
+      }, []);
     })
   );
 
@@ -129,7 +129,7 @@ export class HelmEffects {
           processedData.result.push(endpoint);
         });
         return processedData;
-      });
+      }, []);
     })
   );
 
@@ -161,7 +161,7 @@ export class HelmEffects {
           processedData.entities[action.entityKey][action.key] = newStatus;
           processedData.result.push(action.key);
           return processedData;
-        });
+        }, [action.endpointGuid]);
     })
   );
 
@@ -180,7 +180,8 @@ export class HelmEffects {
   private makeRequest(
     action: IRequestAction,
     url: string,
-    mapResult: (response: any) => NormalizedResponse
+    mapResult: (response: any) => NormalizedResponse,
+    endpointIds: string[]
   ): Observable<Action> {
     this.store.dispatch(new StartRequestAction(action));
     const requestArgs = {
@@ -191,8 +192,7 @@ export class HelmEffects {
       mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
       catchError(error => [
         new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          // TODO: RC monocular will cause issues in error bar handlers when trying to find the endpoint with id 'monocular'
-          endpointIds: [action.endpointGuid || 'monocular'],
+          endpointIds,
           url: error.url || url,
           eventCode: error.status ? error.status + '' : '500',
           message: 'Monocular API request error',

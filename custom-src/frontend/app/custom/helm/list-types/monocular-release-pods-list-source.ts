@@ -20,8 +20,7 @@ export class HelmReleasePodsDataSource extends ListDataSource<HelmReleasePod> {
       store,
       action,
       schema: entityFactory(action.entityKey),
-      // TODO: RC Fix
-      getRowUniqueId: (object: HelmReleasePod) => object.endpointId,
+      getRowUniqueId: (object: HelmReleasePod) => object.name,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

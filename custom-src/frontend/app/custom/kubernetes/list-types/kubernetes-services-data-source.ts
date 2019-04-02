@@ -21,7 +21,6 @@ export class BaseKubernetesServicesDataSource extends ListDataSource<KubeService
       store,
       action,
       schema: entityFactory(kubernetesServicesSchemaKey),
-      // TODO: RC is this right
       getRowUniqueId: object => object.name,
       paginationKey: action.paginationKey,
       transformEntity,
