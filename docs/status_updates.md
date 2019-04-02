@@ -2,6 +2,21 @@
 
 Weekly status updates are published here.
 
+## 22 March 2019
+
+This week:
+
+- Work continues to complete the addition of support for Cloud Foundry User Provided Services. This is almost done. A few small issues and corner-cases cropped up which we have been working on.
+- Added support for slide-in help content and wired this into the endpoint connection dialog
+- We continued to refine the visual presentation of endpoints within Stratos
+
+## 15 March 2019
+
+This week:
+
+- Enhancing the endpoint registration view to use a tile selector
+- Updating our docs on our use cases and requirements for the Cloud Foundry V3 API
+
 ## 8 March 2019
 
 This week:

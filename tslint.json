@@ -8,7 +8,7 @@
     "array-type": false,
     "arrow-parens": false,
     "deprecation": {
-      "severity": "warn"
+      "severity": "off"
     },
     "import-blacklist": [
       true,

@@ -7,22 +7,18 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../core/core.module';
-import {
-  CreateApplicationStep1Component,
-} from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
-import { FocusDirective } from '../../../shared/components/focus.directive';
-import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
-import { StatefulIconComponent } from '../../../shared/components/stateful-icon/stateful-icon.component';
-import { SteppersModule } from '../../../shared/components/stepper/steppers.module';
+
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 import { CreateApplicationComponent } from './create-application.component';
 import { appReducers } from '../../../../../store/src/reducers.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CreateApplicationComponent', () => {
   let component: CreateApplicationComponent;
@@ -32,12 +28,8 @@ describe('CreateApplicationComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CreateApplicationComponent,
-        CreateApplicationStep1Component,
         CreateApplicationStep2Component,
-        CreateApplicationStep3Component,
-        AppNameUniqueDirective,
-        StatefulIconComponent,
-        FocusDirective
+        CreateApplicationStep3Component
       ],
       imports: [
         CommonModule,
@@ -45,18 +37,14 @@ describe('CreateApplicationComponent', () => {
         HttpModule,
         RouterTestingModule,
         BrowserAnimationsModule,
-        PageHeaderModule,
-        SteppersModule,
+        SharedModule,
+        HttpClientModule,
+        HttpClientTestingModule,
         StoreModule.forRoot(
           appReducers
         )
       ],
       providers: [
-        Http,
-        {
-          provide: ConnectionBackend,
-          useClass: MockBackend
-        },
         PaginationMonitorFactory,
         EntityMonitorFactory,
         InternalEventMonitorFactory,

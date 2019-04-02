@@ -1,4 +1,5 @@
-<mat-card class="meta-card" [ngClass]="clickAction ? 'meta-card-pointer' : ''" (click)="clickAction ? clickAction() : null">
+<mat-card class="meta-card {{status$ && statusBackground? (status$ | async): '' }}" [ngClass]="{'meta-card-pointer': clickAction}"
+  (click)="clickAction ? clickAction() : null">
   <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
     <div class="meta-card__deleting-overlay-inner">
       <div class="meta-card__deleting-text">Deleting</div>
@@ -9,15 +10,15 @@
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
     <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
-      <div [ngClass]="statusIconByTitle ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
+      <div
+        [ngClass]="statusIconByTitle ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
         <ng-container *ngTemplateOutlet="title.content"></ng-container>
       </div>
       <div class="meta-card__header-container__title--with-icon__icon" *ngIf="statusIconByTitle">
         <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
       </div>
     </div>
-    <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval" class="meta-card__favorite" *ngIf="favorite"
-      [favorite]="favorite">
+    <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval" class="meta-card__favorite" *ngIf="favorite" [favorite]="favorite">
     </app-entity-favorite-star>
     <div class="meta-card__header-container__actions" *ngIf="actionMenu && (showMenu$ | async)" appClickStopPropagation>
       <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu" [disabled]="isDeleting$ | async">
@@ -46,5 +47,6 @@
   </mat-card-content>
 </mat-card>
 <ng-template #statusIconTmple>
-  <app-application-state-icon *ngIf="statusIcon && status$" [status]="status$ | async" matTooltip="{{statusIconTooltip}}"></app-application-state-icon>
+  <app-application-state-icon *ngIf="statusIcon && status$" [status]="status$ | async" matTooltip="{{statusIconTooltip}}">
+  </app-application-state-icon>
 </ng-template>

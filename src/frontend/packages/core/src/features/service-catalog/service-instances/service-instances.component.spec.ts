@@ -10,7 +10,7 @@ describe('ServiceInstancesComponent', () => {
   let component: ServiceInstancesComponent;
   let fixture: ComponentFixture<ServiceInstancesComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ServiceInstancesComponent],
       imports: [
@@ -22,7 +22,7 @@ describe('ServiceInstancesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceInstancesComponent);

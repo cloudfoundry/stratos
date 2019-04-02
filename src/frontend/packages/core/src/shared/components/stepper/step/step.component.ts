@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 
+import { IRouterNavPayload } from '../../../../../../store/src/actions/router.actions';
+
 export interface IStepperStep {
   validate: Observable<boolean>;
   onNext: StepOnNextFunction;
@@ -12,6 +14,7 @@ export interface StepOnNextResult {
   message?: string;
   // Should we redirect to the store previous state?
   redirect?: boolean;
+  redirectPayload?: IRouterNavPayload;
   // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
   ignoreSuccess?: boolean;
   data?: any;
@@ -57,6 +60,9 @@ export class StepComponent {
   canClose = true;
 
   @Input()
+  hideNextButton = false;
+
+  @Input()
   nextButtonText = 'Next';
 
   @Input()
@@ -91,13 +97,15 @@ export class StepComponent {
 
   constructor() {
     this.pOnEnter = (data?: any) => {
-      if (this.destructiveStep) {
-        this.busy = true;
-        setTimeout(() => {
-          this.busy = false;
-        }, 1000);
+      if (this.onEnter) {
+        if (this.destructiveStep) {
+          this.busy = true;
+          setTimeout(() => {
+            this.busy = false;
+          }, 1000);
+        }
+        this.onEnter(data);
       }
-      this.onEnter(data);
     };
   }
 

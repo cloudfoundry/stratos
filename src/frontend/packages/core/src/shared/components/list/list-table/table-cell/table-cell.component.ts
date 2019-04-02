@@ -3,10 +3,7 @@ import {
   Component,
   ComponentFactoryResolver,
   Input,
-  OnChanges,
   OnInit,
-  SimpleChange,
-  SimpleChanges,
   Type,
   ViewChild,
   ViewContainerRef,
@@ -118,6 +115,7 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
+import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
 /* tslint:enable:max-line-length */
 export const listTableCells = [
@@ -177,16 +175,31 @@ export const listTableCells = [
   // NgComponentOutlet (create in html with custom external module factory). Alternatively try marking as entry component where they live?
   entryComponents: [...listTableCells]
 })
-export class TableCellComponent<T> implements OnInit, OnChanges {
+export class TableCellComponent<T> implements OnInit {
   @ViewChild('target', { read: ViewContainerRef })
   target: ViewContainerRef;
+  private rcRow: T | MultiActionListEntity;
 
   @Input() dataSource = null as IListDataSource<T>;
 
   @Input() component: Type<{}>;
   @Input() cellDefinition: ICellDefinition<T>;
   @Input() func: () => string;
-  @Input() row: T;
+  @Input() set row(row: T | MultiActionListEntity) {
+    if (this.cellComponent) {
+      const { rowValue, entityKey } = this.getRowData(row);
+      this.cellComponent.row = rowValue;
+      this.cellComponent.entityKey = entityKey;
+      if (this.dataSource.getRowState) {
+        this.cellComponent.rowState = this.dataSource.getRowState(rowValue, entityKey);
+      }
+    }
+    this.rcRow = row;
+  }
+  get row() {
+    return this.rcRow;
+  }
+
   @Input() config: any;
 
   private cellComponent: TableCellCustom<T>;
@@ -211,18 +224,28 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
     return !!component ? this.target.createComponent(component) : null;
   }
 
+  private getRowData(rowData: T | MultiActionListEntity) {
+    const rowValue = MultiActionListEntity.getEntity(rowData);
+    const entityKey = MultiActionListEntity.getEntityKey(rowData);
+    return {
+      rowValue,
+      entityKey
+    };
+  }
+
   ngOnInit() {
     const component = this.createComponent();
     if (component) {
 
       // Add to target to ensure ngcontent is correct in new component
       this.cellComponent = component.instance as TableCellCustom<T>;
-
-      this.cellComponent.row = this.row;
+      const { rowValue, entityKey } = this.getRowData(this.row);
+      this.cellComponent.row = rowValue;
+      this.cellComponent.entityKey = entityKey;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
       if (this.dataSource.getRowState) {
-        this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+        this.cellComponent.rowState = this.dataSource.getRowState(rowValue, entityKey);
       }
       if (this.cellDefinition) {
         const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;
@@ -232,10 +255,4 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
     }
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.row;
-    if (row && this.cellComponent && row.previousValue !== row.currentValue) {
-      this.cellComponent.row = { ...row.currentValue };
-    }
-  }
 }
