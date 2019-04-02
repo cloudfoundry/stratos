@@ -50,7 +50,7 @@ import { getIdFromRoute } from '../../../../features/cloud-foundry/cf.helpers';
 import { servicesServiceFactoryProvider } from '../../../../features/service-catalog/service-catalog.helpers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
-import { BASE_REDIRECT_QUERY, SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
+import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
@@ -86,7 +86,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   public inMarketplaceMode: boolean;
   public serviceType: SERVICE_INSTANCE_TYPES;
   public serviceTypes = SERVICE_INSTANCE_TYPES;
-  public basePreviousRedirect: IRouterNavPayload;
   private cfDetails$ = this.store.select(selectCreateServiceInstance);
   public cfGuid$: Observable<string>;
   public spaceGuid$ = this.cfDetails$.pipe(
@@ -110,9 +109,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     );
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
-    this.basePreviousRedirect = route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
-      path: route.snapshot.queryParams[BASE_REDIRECT_QUERY]
-    } : null;
   }
 
   appsEmitted = new BehaviorSubject(null);

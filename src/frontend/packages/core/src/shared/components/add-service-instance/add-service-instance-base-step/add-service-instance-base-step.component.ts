@@ -1,4 +1,3 @@
-import { query } from '@angular/animations';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -7,7 +6,8 @@ import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { TileConfigManager } from '../../tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from './../../tile/tile-selector.types';
-import { BASE_REDIRECT_QUERY, SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
+import { SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
+import { BASE_REDIRECT_QUERY } from '../../stepper/stepper.types';
 
 interface ICreateServiceTilesData extends ITileData {
   type: string;

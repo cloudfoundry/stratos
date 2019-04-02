@@ -30,6 +30,13 @@
     opacity: 1;
     transform: scale(1.02);
   }
+  &__more {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    font-size: 16px;
+    justify-content: center;
+  }
 
   &:active {
     transform: scale(.98);

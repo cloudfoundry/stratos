@@ -1,0 +1,13 @@
+<app-page-header>
+  <h1>New Application</h1>
+</app-page-header>
+<app-steppers [cancel]="'/applications'">
+  <app-step [hideNextButton]="true">
+    <div class="">
+      <h3>Select application creation type</h3>
+      <p>Deploy will allow you to create an application from a source including: git url, github and folder.
+        Application shell will create an empty application with no package associated with it.</p>
+      <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
+    </div>
+  </app-step>
+</app-steppers>

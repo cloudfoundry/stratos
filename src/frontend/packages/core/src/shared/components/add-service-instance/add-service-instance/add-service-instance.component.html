@@ -2,7 +2,7 @@
   {{ title$ | async }}
 </app-page-header>
 <div *ngIf="initialisedService$ | async as inited" class="add-service-instance">
-  <app-steppers [basePreviousRedirect]="basePreviousRedirect" [cancel]="modeService.cancelUrl">
+  <app-steppers [cancel]="modeService.cancelUrl">
 
     <ng-container *ngIf="serviceType === serviceTypes.SERVICE">
       <app-step *ngIf="modeService.viewDetail.showSelectCf && !isSpaceScoped()" title="Cloud Foundry"
