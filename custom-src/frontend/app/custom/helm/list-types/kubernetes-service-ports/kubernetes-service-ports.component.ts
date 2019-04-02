@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
 import { CardCell } from '../../../../shared/components/list/list.types';
 import { KubeService } from '../../../kubernetes/store/kube.types';
@@ -11,6 +12,7 @@ import { HelmReleaseService } from '../../store/helm.types';
 })
 export class KubernetesServicePortsComponent extends CardCell<HelmReleaseService | KubeService> {
   private pRow: HelmReleaseService | KubeService;
+  public kubeService$: Observable<KubeService>;
   public endpointId: string;
 
   @Input() set row(row: HelmReleaseService | KubeService) {
@@ -21,8 +23,11 @@ export class KubernetesServicePortsComponent extends CardCell<HelmReleaseService
     // TODO: RC update with proper typing & somehow pipe in endpointId for `KubeService` world
     /* tslint:disable-next-line:no-string-literal */
     if (row['kubeService$']) {
+      this.kubeService$ = (row as HelmReleaseService).kubeService$;
       const helmReleaseService: HelmReleaseService = row as HelmReleaseService;
       this.endpointId = helmReleaseService.endpointId;
+    } else {
+      this.kubeService$ = of(row as KubeService);
     }
   }
   get row(): HelmReleaseService | KubeService {

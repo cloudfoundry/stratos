@@ -1,4 +1,4 @@
-<ng-container *ngIf="((row.kubeService$ | async) || row) as kubeService; else noPorts">
+<ng-container *ngIf="(kubeService$ | async) as kubeService; else noPorts">
   <table *ngIf="!!kubeService.spec?.ports.length; else noPorts">
     <tr>
       <th>Name</th>
