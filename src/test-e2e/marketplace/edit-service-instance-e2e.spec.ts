@@ -10,7 +10,7 @@ import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
-fdescribe('Edit Service Instance', () => {
+describe('Edit Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
   let createMarketplaceServiceInstance;
   let e2eSetup;
