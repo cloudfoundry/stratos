@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -10,11 +11,12 @@ import { IListConfig } from '../../../shared/components/list/list.component.type
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { KubeService } from '../../kubernetes/store/kube.types';
 import { GetKubernetesServicesInNamespace } from '../../kubernetes/store/kubernetes.actions';
+import { kubernetesServicesSchemaKey } from '../../kubernetes/store/kubernetes.entities';
 import { GetHelmReleases, GetHelmReleaseServices } from '../store/helm.actions';
 import { helmReleasesSchemaKey } from '../store/helm.entities';
 import { HelmRelease, HelmReleaseService } from '../store/helm.types';
 
-export const fetchHelmReleaseFromKubernetes = (store: Store<AppState>, helmService: HelmReleaseService): Observable<KubeService> => {
+export const fetchHelmReleaseServiceFromKubernetes = (store: Store<AppState>, helmService: HelmReleaseService): Observable<KubeService> => {
   return fetchRelease(store, helmService.endpointId, helmService.releaseTitle).pipe(
     switchMap(release => {
       const action = new GetKubernetesServicesInNamespace(helmService.endpointId, release.namespace);
@@ -50,19 +52,22 @@ export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseSer
       store,
       action,
       schema: entityFactory(action.entityKey),
-      // TODO: RC Fix
-      getRowUniqueId: (object: HelmReleaseService) => object.endpointId,
+      getRowUniqueId: (object: HelmReleaseService) => object.name,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,
       transformEntity: map((helmServices: HelmReleaseService[]) => {
         return helmServices.map(helmService => {
           if (!helmService.kubeService$) {
-            helmService.kubeService$ = fetchHelmReleaseFromKubernetes(store, helmService);
+            helmService.kubeService$ = fetchHelmReleaseServiceFromKubernetes(store, helmService);
           }
           return helmService;
         });
-      })
+      }),
+      refresh: () => {
+        store.dispatch(action);
+        store.dispatch(new ClearPaginationOfType(kubernetesServicesSchemaKey));
+      }
     });
   }
 }

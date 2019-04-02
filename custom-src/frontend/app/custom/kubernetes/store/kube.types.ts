@@ -15,12 +15,12 @@ export interface KubeAPIResource {
   spec: any;
 }
 export interface KubeService {
-  metadata: ServiceMetadata;
+  metadata: KubeServiceMetadata;
   status: ServiceStatus;
   spec: DeploymentSpec;
 }
 export interface KubernetesStatefulSet {
-  metadata: ServiceMetadata;
+  metadata: KubeServiceMetadata;
   status: ServiceStatus;
   spec: ServiceSpec;
 }
@@ -36,7 +36,7 @@ export interface DeploymentSpec {
 }
 
 export interface KubernetesDeployment {
-  metadata: ServiceMetadata;
+  metadata: KubeServiceMetadata;
   status: ServiceStatus;
   spec: ServiceSpec;
 }
@@ -270,7 +270,7 @@ export interface KubernetesConfigMap {
     },
     kind: string
   };
-  metadata: ServiceMetadata;
+  metadata: KubeServiceMetadata;
 }
 export interface Resources {
   limits?: Limits;
@@ -313,7 +313,7 @@ export interface Metadata extends BaseMetadata {
   generation?: number;
 }
 
-export interface ServiceMetadata extends Metadata {
+export interface KubeServiceMetadata extends Metadata {
   selfLink: string;
 }
 

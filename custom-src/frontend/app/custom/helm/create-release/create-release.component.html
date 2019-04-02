@@ -25,13 +25,14 @@
     </form>
     <!-- <app-create-release-step-dest #step1></app-create-release-step-dest> -->
   </app-step>
-  <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'">
+  <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
     <form [formGroup]="overrides" class="stepper-form">
       <h3 class="helm-create-release">Enter YAML Value Overrides</h3>
 
-      <mat-form-field>
-        <textarea matInput formControlName="values" placeholder="Values" name="Values" matAutosizeMinRows="6"
-          matAutosizeMaxRows="8"></textarea>
+      <mat-form-field [floatLabel]="'always'">
+        <mat-label>Values</mat-label>
+        <textarea #overridesYamlTextArea class="overrides__yaml" matInput formControlName="values" name="Values"
+          [matTextareaAutosize]="true" cdkAutosizeMinRows="6" cdkAutosizeMaxRows="8"></textarea>
       </mat-form-field>
     </form>
   </app-step>

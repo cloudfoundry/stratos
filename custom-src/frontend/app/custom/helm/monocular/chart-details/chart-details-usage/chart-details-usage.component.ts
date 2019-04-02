@@ -1,12 +1,9 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  ViewEncapsulation,
-} from '@angular/core';
-import { Chart } from '../../shared/models/chart';
-import { DomSanitizer } from '@angular/platform-browser';
+import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatIconRegistry, MatSnackBar } from '@angular/material';
+import { DomSanitizer } from '@angular/platform-browser';
+
+import { EndpointsService } from '../../../../../core/endpoints.service';
+import { Chart } from '../../shared/models/chart';
 
 @Component({
   selector: 'app-chart-details-usage',
@@ -23,8 +20,9 @@ export class ChartDetailsUsageComponent implements OnInit {
   constructor(
     private mdIconRegistry: MatIconRegistry,
     private sanitizer: DomSanitizer,
-    public snackBar: MatSnackBar
-  ) {}
+    public snackBar: MatSnackBar,
+    public endpointsService: EndpointsService
+  ) { }
 
   ngOnInit() {
     this.mdIconRegistry.addSvgIcon(
@@ -54,4 +52,5 @@ export class ChartDetailsUsageComponent implements OnInit {
   get installInstructions(): string {
     return `helm install ${this.chart.id} --version ${this.currentVersion}`;
   }
+
 }

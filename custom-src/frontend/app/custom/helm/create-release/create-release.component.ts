@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -30,6 +31,9 @@ export class CreateReleaseComponent {
   details: FormGroup;
   overrides: FormGroup;
 
+  @ViewChild('overridesYamlTextArea') overridesYamlTextArea: ElementRef;
+  @ViewChild(MatTextareaAutosize) overridesYamlAutosize: MatTextareaAutosize;
+
   constructor(
     private route: ActivatedRoute,
     public endpointsService: EndpointsService,
@@ -39,20 +43,7 @@ export class CreateReleaseComponent {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
 
-    this.kubeEndpoints$ = this.endpointsService.endpoints$.pipe(
-      map(ep => {
-        const kubes = [];
-        Object.values(ep).forEach(endpoint => {
-          if (endpoint.cnsi_type === 'k8s') {
-            kubes.push({
-              name: endpoint.name,
-              guid: endpoint.guid
-            });
-          }
-        });
-        return kubes;
-      })
-    );
+    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes('k8s');
 
     this.details = new FormGroup({
       endpoint: new FormControl('', Validators.required),
@@ -67,6 +58,13 @@ export class CreateReleaseComponent {
     this.validate$ = this.details.statusChanges.pipe(
       map(() => this.details.valid)
     );
+  }
+
+  onEnterOverrides = () => {
+    setTimeout(() => {
+      this.overridesYamlAutosize.resizeToFitContent(true);
+      this.overridesYamlTextArea.nativeElement.focus();
+    }, 1);
   }
 
   submit: StepOnNextFunction = () => {
