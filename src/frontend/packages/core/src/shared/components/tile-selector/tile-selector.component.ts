@@ -8,8 +8,8 @@ import { ITileConfig } from '../tile/tile-selector.types';
   styleUrls: ['./tile-selector.component.scss']
 })
 export class TileSelectorComponent {
-  public pOptions: ITileConfig[];
-  public hiddenOptions: ITileConfig[];
+  public pOptions: ITileConfig[] = [];
+  public hiddenOptions: ITileConfig[] = [];
   public showingMore = false;
   @Input() set options(options: ITileConfig[]) {
     const groupedOptions = options.reduce((grouped, option) => {
