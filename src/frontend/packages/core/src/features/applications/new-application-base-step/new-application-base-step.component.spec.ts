@@ -4,6 +4,7 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step.com
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('NewApplicationBaseStepComponent', () => {
   let component: NewApplicationBaseStepComponent;
@@ -16,6 +17,7 @@ describe('NewApplicationBaseStepComponent', () => {
         CoreModule,
         SharedModule,
         createBasicStoreModule(),
+        RouterTestingModule
       ]
     })
       .compileComponents();
