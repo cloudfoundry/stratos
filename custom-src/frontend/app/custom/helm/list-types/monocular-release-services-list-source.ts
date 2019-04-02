@@ -14,7 +14,7 @@ import { GetHelmReleases, GetHelmReleaseServices } from '../store/helm.actions';
 import { helmReleasesSchemaKey } from '../store/helm.entities';
 import { HelmRelease, HelmReleaseService } from '../store/helm.types';
 
-export const fetchHelmReleaseFromKubernetes = (store: Store<AppState>, helmService: HelmReleaseService): Observable<KubeService> => {
+export const fetchHelmReleaseServiceFromKubernetes = (store: Store<AppState>, helmService: HelmReleaseService): Observable<KubeService> => {
   return fetchRelease(store, helmService.endpointId, helmService.releaseTitle).pipe(
     switchMap(release => {
       const action = new GetKubernetesServicesInNamespace(helmService.endpointId, release.namespace);
@@ -57,7 +57,7 @@ export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseSer
       transformEntity: map((helmServices: HelmReleaseService[]) => {
         return helmServices.map(helmService => {
           if (!helmService.kubeService$) {
-            helmService.kubeService$ = fetchHelmReleaseFromKubernetes(store, helmService);
+            helmService.kubeService$ = fetchHelmReleaseServiceFromKubernetes(store, helmService);
           }
           return helmService;
         });
