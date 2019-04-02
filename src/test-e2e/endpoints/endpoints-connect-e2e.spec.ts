@@ -71,13 +71,13 @@ describe('Endpoints', () => {
 
       it('should update endpoints data on register', () => {
         connectDialog.connect();
+        connectDialog.waitUntilNotShown();
         // Wait for snackbar
         connectDialog.snackBar.waitForMessage(`Connected endpoint '${toConnect.name}'`);
         endpointsPage.cards.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });
-        connectDialog.waitUntilNotShown();
         endpointsPage.cards.findCardByTitle(toConnect.name)
           .then(card => card.openActionMenu())
           .then(menu => {
