@@ -61,7 +61,7 @@ export class TabNavService {
     if (!tabs) {
       return null;
     }
-    const activeTab = tabs.find(tab => this.router.isActive(tab.link, true));
+    const activeTab = tabs.find(tab => this.router.isActive(tab.link, false));
     if (!activeTab) {
       return null;
     }
