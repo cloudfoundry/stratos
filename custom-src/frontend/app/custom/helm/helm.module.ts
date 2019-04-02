@@ -82,7 +82,7 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmReleaseValuesTabComponent,
     HelmReleasePodsTabComponent,
     HelmReleaseServicesTabComponent,
-    KubernetesServicePortsComponent
+    KubernetesServicePortsComponent,
   ],
   providers: [
     ChartsService,

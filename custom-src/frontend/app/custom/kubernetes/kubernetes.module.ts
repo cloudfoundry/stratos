@@ -86,6 +86,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
+import { KubernetesServiceProxyComponent } from './kubernetes-svcproxy/kubernetes-svcproxy.component';
 
 /* tslint:disable:max-line-length */
 /* tslint:enable */
@@ -139,6 +140,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
+    KubernetesServiceProxyComponent,
   ],
   providers: [
     KubernetesService,

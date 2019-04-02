@@ -2,7 +2,6 @@
   <app-meta-card-title class=" card__title">
     <app-multiline-title class="card__title-link">{{ row.name }}</app-multiline-title>
   </app-meta-card-title>
-  <!--
   <app-meta-card-item>
     <app-meta-card-key>Cluster IP</app-meta-card-key>
     <app-meta-card-value>{{(row?.kubeService$ | async)?.spec.clusterIP}}</app-meta-card-value>
@@ -15,15 +14,6 @@
     <app-meta-card-key>Ports</app-meta-card-key>
     <app-meta-card-value>
       <app-kubernetes-service-ports [row]="row"></app-kubernetes-service-ports>
-    </app-meta-card-value>
-  </app-meta-card-item>
-  -->
-  <app-meta-card-item>
-    <app-meta-card-key>Ports</app-meta-card-key>
-    <app-meta-card-value>
-      <div *ngFor="let port of ports">
-        <div>{{ port.name }}</div>
-      </div>
     </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>
