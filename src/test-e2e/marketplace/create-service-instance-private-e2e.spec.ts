@@ -12,6 +12,8 @@ describe('Create Service Instance of Private Service', () => {
   let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
+  let serviceInstanceName: string;
+
   beforeAll(() => {
     e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
@@ -37,12 +39,13 @@ describe('Create Service Instance of Private Service', () => {
     extendE2ETestTime(timeout);
 
     it('- should be able to to create a service instance', () => {
+      serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
 
-      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.privateService.name, false);
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.privateService.name, serviceInstanceName, false);
 
       servicesWall.waitForPage();
 
-      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
+      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, serviceInstanceName);
 
     }, timeout);
   });
@@ -85,5 +88,5 @@ describe('Create Service Instance of Private Service', () => {
 
   });
 
-  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
 });
