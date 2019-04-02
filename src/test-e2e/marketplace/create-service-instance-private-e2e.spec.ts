@@ -6,7 +6,7 @@ import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
-fdescribe('Create Service Instance of Private Service', () => {
+describe('Create Service Instance of Private Service', () => {
   const createServiceInstance = new CreateServiceInstance();
   let createMarketplaceServiceInstance;
   let e2eSetup;
@@ -47,7 +47,7 @@ fdescribe('Create Service Instance of Private Service', () => {
     }, timeout);
   });
 
-  xit('- should return user to Service summary when cancelled on CFOrgSpace selection', () => {
+  it('- should return user to Service summary when cancelled on CFOrgSpace selection', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
@@ -57,7 +57,7 @@ fdescribe('Create Service Instance of Private Service', () => {
 
   });
 
-  xit('- should return user to Service summary when cancelled on Service selection', () => {
+  it('- should return user to Service summary when cancelled on Service selection', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
@@ -73,7 +73,7 @@ fdescribe('Create Service Instance of Private Service', () => {
 
   });
 
-  xit('- should not show service plan if wrong org/space are selected', () => {
+  it('- should not show service plan if wrong org/space are selected', () => {
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace(e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidOrgName,
