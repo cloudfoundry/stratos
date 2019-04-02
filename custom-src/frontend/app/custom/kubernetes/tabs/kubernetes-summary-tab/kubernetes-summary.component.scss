@@ -1,9 +1,7 @@
 .kube-details {
-  // border-bottom: 1px solid #00000026;
   margin-bottom: 0;
   margin-left: 20px;
-  margin-top: 20px;
-  padding-bottom: 10px;
+  margin-top: 10px;
   &__logo {
     height: 400px;
     opacity: .2;
@@ -20,6 +18,15 @@
   &__header {
     margin: 0;
   }
+  &__header-wrapper {
+    align-items: baseline;
+    display: flex;
+  }
+  &__header-info {
+    font-size: 20px;
+    margin-left: 10px;
+    opacity: .4;
+  }
   &__header-section {
     margin: 10px -10px;
     max-width: 350px;
@@ -28,9 +35,9 @@
     margin: 10px;
   }
   &__graph {
-    width: 33%;
-    padding: 10px;
     display: inline-block;
+    padding: 10px;
+    width: 33%;
   }
   &__dashboard {
     font-size: 14px;
