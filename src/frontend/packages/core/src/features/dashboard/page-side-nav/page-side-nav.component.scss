@@ -1,6 +1,6 @@
 @import '../../../../sass/mixins';
-
 .page-side-nav {
+  $item-header-padding: 20px;
   $border-color: rgba(0, 0, 0, .1);
   border-right: 1px solid $border-color;
   display: flex;
@@ -30,10 +30,10 @@
     display: flex;
     font-size: 14px;
     letter-spacing: .01em;
-    line-height: 18px;    
+    line-height: 18px;
     outline: 0;
     padding: 10px;
-    padding-left: 25px;
+    padding-left: $item-header-padding;
     text-decoration: none;
     mat-icon {
       margin-right: 10px;
@@ -54,7 +54,6 @@
     }
   }
   &__items-header {
-    $item-header-padding: 25px;
     align-items: center;
     border-bottom: 1px solid $border-color;
     display: none;

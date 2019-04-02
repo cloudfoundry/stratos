@@ -1,10 +1,9 @@
 @import '../../../../sass/mixins';
-
+$page-padding: 20px;
 .favorites-list {
   display: flex;
   flex: 2;
   flex-direction: column;
-  padding: 24px;
   &__header {
     align-items: center;
     display: flex;
@@ -15,14 +14,18 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  margin: 0 -#{$page-padding} -#{$page-padding};
   padding: 24px;
+  @include breakpoint(tablet) {
+    margin: -#{$page-padding} -#{$page-padding} -#{$page-padding} $page-padding;
+  }
 }
+
 .home-page {
   display: flex;
   flex-direction: column;
   height: 100%;
   &__header {
-    font-size: 18px;
     margin-top: 0;
   }
   &__list-header {
@@ -39,8 +42,8 @@
   }
 
   &__scroller {
-    margin: 0 -24px;
+    margin: 0 -#{$page-padding} -#{$page-padding};
     overflow: auto;
-    padding: 0 24px;
+    padding: 0 $page-padding $page-padding;
   }
 }

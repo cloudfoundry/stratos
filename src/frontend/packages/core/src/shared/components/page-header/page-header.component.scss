@@ -6,6 +6,9 @@ $bottom-index: $top-index - 1;
   $breadcrumb-padding: 3px;
   position: relative;
   z-index: $top-index;
+  &__toolbar {
+    padding: 0 20px;
+  }
   &__history {
     padding: 0 20px 20px;
   }
@@ -91,7 +94,6 @@ $bottom-index: $top-index - 1;
     min-width: 200px;
   }
   &__favorite {
-    margin-bottom: -2px;
     margin-left: 10px;
   }
 }

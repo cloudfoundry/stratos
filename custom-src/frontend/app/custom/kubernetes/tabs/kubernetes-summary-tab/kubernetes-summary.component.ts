@@ -116,9 +116,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       );
     });
 
-    // Dispatch action straight away
-    this.store.dispatch(action);
-
     return getPaginationObservables({
       store: this.store,
       action,
