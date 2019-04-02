@@ -31,18 +31,15 @@
     transform: scale(1.02);
   }
   &__more {
+    align-items: center;
     cursor: pointer;
+    display: flex;
     font-size: 16px;
+    justify-content: center;
   }
 
   &:active {
     transform: scale(.98);
-  }
-
-  &__more {
-    align-items: center;
-    display: flex;
-    justify-content: center;
   }
 
   &__selected,

@@ -4,7 +4,7 @@
   $background: map-get($theme, background);
   $foreground: map-get($theme, foreground);
   $border-color: darken($background-color, 10%);
-  $primary: map-get($theme, primary);    
+  $primary: map-get($theme, primary);
   .tile-selector {
     @include mat-elevation-transition;
     background: mat-color($background, card);
