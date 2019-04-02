@@ -30,9 +30,9 @@ export class HelmReleaseServiceCardComponent extends CardCell<HelmReleaseService
   @Input() set row(row: HelmReleaseService) {
     this.pRow = row;
     if (!this.svcSub && row) {
-      this.svcSub = this.fetchRelease(row.endpointGuid, row.releaseTitle).pipe(
+      this.svcSub = this.fetchRelease(row.endpointId, row.releaseTitle).pipe(
         switchMap((release: any) => {
-          const action = new GetKubernetesServicesInNamespace(row.endpointGuid, release.namespace);
+          const action = new GetKubernetesServicesInNamespace(row.endpointId, release.namespace);
           const paginationMonitor = new PaginationMonitor<KubeService>(this.store, action.paginationKey, entityFactory(action.entityKey));
           return getPaginationObservables<KubeService>({ store: this.store, action, paginationMonitor }).entities$;
         }),

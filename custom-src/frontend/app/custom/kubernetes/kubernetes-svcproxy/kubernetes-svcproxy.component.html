@@ -1,0 +1,8 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1>Service Proxy</h1>
+</app-page-header>
+
+<app-loading-page [isLoading]="isLoading$" [text]="'Proxying Kubernetes Service'">
+  <iframe #kubeDash (load)="iframeLoaded()" id="kubedash" [src]="source" class="kube-dashboard"></iframe>
+</app-loading-page>
+
