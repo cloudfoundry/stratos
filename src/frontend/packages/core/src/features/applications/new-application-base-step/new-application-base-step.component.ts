@@ -16,7 +16,6 @@ interface IAppTileData extends ITileData {
 })
 export class NewApplicationBaseStepComponent implements OnInit {
 
-  private tileManager = new TileConfigManager();
   public serviceType: string;
 
   public tileSelectorConfig = [
@@ -45,7 +44,7 @@ export class NewApplicationBaseStepComponent implements OnInit {
     }
   }
 
-  constructor(private route: ActivatedRoute, private router: Router, public store: Store<AppState>) { }
+  constructor(public store: Store<AppState>) { }
 
   ngOnInit() {
   }
