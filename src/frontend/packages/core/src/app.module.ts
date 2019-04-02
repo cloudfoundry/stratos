@@ -244,8 +244,8 @@ export class AppModule {
         name: endpoint.name,
         menuItems: [
           {
-            label: 'Deploy application',
-            action: () => this.store.dispatch(new RouterNav({ path: ['applications/deploy'], query: { endpointGuid: endpoint.guid } })),
+            label: 'Create application',
+            action: () => this.store.dispatch(new RouterNav({ path: ['applications/new'], query: { endpointGuid: endpoint.guid } })),
             can: this.permissionService.can(CurrentUserPermissions.APPLICATION_CREATE)
           }
         ]
