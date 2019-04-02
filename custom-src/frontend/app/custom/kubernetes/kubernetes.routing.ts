@@ -1,3 +1,4 @@
+import { KubernetesServiceProxyComponent } from './kubernetes-svcproxy/kubernetes-svcproxy.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -162,6 +163,22 @@ const kubernetes: Routes = [{
     {
       path: '**',
       component: KubernetesDashboardTabComponent,
+      data: {
+        uiNoMargin: true
+      }
+    }
+  ]
+},
+{
+  path: ':endpointId/svcproxy',
+  component: KubernetesServiceProxyComponent,
+  data: {
+    uiNoMargin: true
+  },
+  children: [
+    {
+      path: '**',
+      component: KubernetesServiceProxyComponent,
       data: {
         uiNoMargin: true
       }

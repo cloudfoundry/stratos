@@ -1,3 +1,5 @@
+import { Observable } from "rxjs";
+
 export interface KubernetesInfo {
   nodes: {};
   pods: {};
@@ -18,7 +20,9 @@ export interface KubeService {
   metadata: KubeServiceMetadata;
   status: ServiceStatus;
   spec: DeploymentSpec;
+  kubeService$?: Observable<KubeService>;
 }
+
 export interface KubernetesStatefulSet {
   metadata: KubeServiceMetadata;
   status: ServiceStatus;
