@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NewApplicationBaseStepComponent } from './new-application-base-step.component';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 describe('NewApplicationBaseStepComponent', () => {
   let component: NewApplicationBaseStepComponent;
@@ -8,9 +11,14 @@ describe('NewApplicationBaseStepComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NewApplicationBaseStepComponent ]
+      declarations: [NewApplicationBaseStepComponent],
+      imports: [
+        CoreModule,
+        SharedModule,
+        createBasicStoreModule(),
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
