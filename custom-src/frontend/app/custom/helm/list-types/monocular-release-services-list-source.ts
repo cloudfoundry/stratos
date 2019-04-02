@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -10,6 +11,7 @@ import { IListConfig } from '../../../shared/components/list/list.component.type
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { KubeService } from '../../kubernetes/store/kube.types';
 import { GetKubernetesServicesInNamespace } from '../../kubernetes/store/kubernetes.actions';
+import { kubernetesServicesSchemaKey } from '../../kubernetes/store/kubernetes.entities';
 import { GetHelmReleases, GetHelmReleaseServices } from '../store/helm.actions';
 import { helmReleasesSchemaKey } from '../store/helm.entities';
 import { HelmRelease, HelmReleaseService } from '../store/helm.types';
@@ -61,7 +63,11 @@ export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseSer
           }
           return helmService;
         });
-      })
+      }),
+      refresh: () => {
+        store.dispatch(action);
+        store.dispatch(new ClearPaginationOfType(kubernetesServicesSchemaKey));
+      }
     });
   }
 }
