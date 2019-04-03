@@ -26,7 +26,7 @@ const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
-describe('Application Deploy -', function () {
+fdescribe('Application Deploy -', function () {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
   const testAppName = ApplicationE2eHelper.createApplicationName();
@@ -90,7 +90,7 @@ describe('Application Deploy -', function () {
       });
 
       it('Check deploy steps', () => {
-        expect(deployApp.header.getTitleText()).toBe('Deploy');
+        expect(deployApp.header.getTitleText()).toBe('Deploy from Public GitHub');
         // Check the steps
         e2e.debugLog(`${loggingPrefix} Checking Steps`);
         deployApp.stepper.getStepNames().then(steps => {
