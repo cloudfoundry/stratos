@@ -8,8 +8,9 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/use
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { favoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { UserFavoriteManager } from '../user-favorite-manager';
+import { EndpointsService } from '../endpoints.service';
 import { LoggerService } from '../logger.service';
+import { UserFavoriteManager } from '../user-favorite-manager';
 
 @Component({
   selector: 'app-entity-favorite-star',
@@ -40,7 +41,8 @@ export class EntityFavoriteStarComponent {
   constructor(
     store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
-    logger: LoggerService) {
+    logger: LoggerService,
+    public endpointsService: EndpointsService) {
     this.userFavoriteManager = new UserFavoriteManager(store, logger);
   }
 

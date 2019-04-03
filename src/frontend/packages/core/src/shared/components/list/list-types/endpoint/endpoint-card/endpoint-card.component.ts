@@ -110,7 +110,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   ngOnInit() {
     this.favorite = this.pRow.cnsi_type === 'cf' ? getFavoriteFromEndpointEntity(this.row) : null;
     const e = getEndpointType(this.pRow.cnsi_type);
-    this.hasDetails = !!e.listDetailsComponent;
+    this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
   ngOnDestroy(): void {
@@ -127,7 +127,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       return;
     }
     const e = getEndpointType(this.pRow.cnsi_type);
-    if (!e.listDetailsComponent) {
+    if (!!e || !e.listDetailsComponent) {
       return;
     }
 
