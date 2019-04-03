@@ -17,17 +17,12 @@ export class SnackBarEffects {
 
   @Effect({ dispatch: false }) showSnackBar$ = this.actions$.pipe(
     ofType<ShowSnackBar>(SHOW_SNACK_BAR),
-    map(action => {
-      this.snackBars.push(this.snackBar.open(action.message, action.closeMessage, {
-        duration: action.closeMessage ? null : 5000
-      }));
-    }));
+    map(action => this.snackBars.push(this.snackBar.open(action.message, action.closeMessage, {
+      duration: action.closeMessage ? null : 5000
+    }))));
 
   @Effect({ dispatch: false }) hideSnackBar$ = this.actions$.pipe(
     ofType<HideSnackBar>(HIDE_SNACK_BAR),
-    map(() => {
-      console.log('dsdad');
-      this.snackBars.forEach(snackBar => snackBar.dismiss());
-    })
+    map(() => this.snackBars.forEach(snackBar => snackBar.dismiss()))
   );
 }
