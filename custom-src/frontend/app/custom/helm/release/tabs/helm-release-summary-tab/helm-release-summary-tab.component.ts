@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { map, startWith, tap } from 'rxjs/operators';
+import { combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
+import { HideSnackBar, ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
+import { LoggerService } from '../../../../../core/logger.service';
 import { safeUnsubscribe } from '../../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
@@ -26,7 +28,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     'Delete'
   );
 
-  public isBusy$: Observable<boolean>;
+  private isBusy = new ReplaySubject<boolean>();
+  public isBusy$: Observable<boolean> = this.isBusy.asObservable();
 
   public loadingMessage = 'Retrieving Release Details';
 
@@ -48,23 +51,25 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Yellow: #FFC107
 
   private subs: Subscription[] = [];
+  private deleted = false;
 
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private httpClient: HttpClient,
+    private logService: LoggerService
   ) {
 
     const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
 
-    this.isBusy$ = combineLatest([
+    this.subs.push(combineLatest([
       this.helmReleaseHelper.isFetching$,
       releaseStatus$
     ]).pipe(
-      map(([isFetching, releaseStatus]) => isFetching || !releaseStatus)
-    );
-
+      map(([isFetching, releaseStatus]) => isFetching || !releaseStatus),
+      startWith(true)
+    ).subscribe(busy => this.isBusy.next(busy)));
 
     // Async fetch release status
     this.subs.push(releaseStatus$.subscribe(data => {
@@ -92,27 +97,27 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
       // Make the http request to delete the release
       const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
-      const deleting$ = this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`);
       this.loadingMessage = 'Deleting Release';
-      this.isBusy$ = deleting$.pipe(
-        tap(d => {
-          console.log(d);
-        }),
-        map(d => false),
-        startWith(true),
-      );
-
-      deleting$.subscribe(() => {
-        this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
-        this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
-      },
-        () => {
-          this.isBusy$ = observableOf(false);
-        });
+      this.isBusy.next(true);
+      this.deleted = true;
+      this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
+        next: () => {
+          this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
+          this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
+        },
+        error: (err: any) => {
+          this.store.dispatch(new ShowSnackBar('Failed to delete release', 'Close'));
+          this.logService.error('Failed to delete release: ', err);
+        },
+        complete: () => this.isBusy.next(false)
+      });
     });
   }
 
   ngOnDestroy() {
     safeUnsubscribe(...this.subs);
+    if (this.deleted) {
+      this.store.dispatch(new HideSnackBar());
+    }
   }
 }
