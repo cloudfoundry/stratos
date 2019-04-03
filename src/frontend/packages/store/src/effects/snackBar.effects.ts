@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
-import { SHOW_SNACK_BAR, ShowSnackBar } from '../actions/snackBar.actions';
+import { HIDE_SNACK_BAR, HideSnackBar, SHOW_SNACK_BAR, ShowSnackBar } from '../actions/snackBar.actions';
 
 
 @Injectable()
@@ -12,11 +12,17 @@ export class SnackBarEffects {
     private actions$: Actions,
     public snackBar: MatSnackBar
   ) { }
-  @Effect({ dispatch: false }) getInfo$ = this.actions$.pipe(
+
+  private snackBars: MatSnackBarRef<SimpleSnackBar>[] = [];
+
+  @Effect({ dispatch: false }) showSnackBar$ = this.actions$.pipe(
     ofType<ShowSnackBar>(SHOW_SNACK_BAR),
-    map(action => {
-      const snackBarRef = this.snackBar.open(action.message, null, {
-        duration: 5000
-      });
-    }));
+    map(action => this.snackBars.push(this.snackBar.open(action.message, action.closeMessage, {
+      duration: action.closeMessage ? null : 5000
+    }))));
+
+  @Effect({ dispatch: false }) hideSnackBar$ = this.actions$.pipe(
+    ofType<HideSnackBar>(HIDE_SNACK_BAR),
+    map(() => this.snackBars.forEach(snackBar => snackBar.dismiss()))
+  );
 }
