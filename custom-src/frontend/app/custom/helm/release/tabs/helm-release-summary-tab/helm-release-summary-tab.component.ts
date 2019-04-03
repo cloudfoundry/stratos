@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
 
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
+import { safeUnsubscribe } from '../../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
 import { helmReleasesSchemaKey } from '../../../store/helm.entities';
@@ -17,8 +18,7 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
   templateUrl: './helm-release-summary-tab.component.html',
   styleUrls: ['./helm-release-summary-tab.component.scss']
 })
-export class HelmReleaseSummaryTabComponent {
-
+export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Confirmation dialogs
   deleteReleaseConfirmation = new ConfirmationDialogConfig(
     'Delete Release',
@@ -47,25 +47,33 @@ export class HelmReleaseSummaryTabComponent {
   // Blue: #00B2E2
   // Yellow: #FFC107
 
+  private subs: Subscription[] = [];
+
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private httpClient: HttpClient,
   ) {
-    this.isBusy$ = this.helmReleaseHelper.isFetching$;
+
+    const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
+
+    this.isBusy$ = combineLatest([
+      this.helmReleaseHelper.isFetching$,
+      releaseStatus$
+    ]).pipe(
+      map(([isFetching, releaseStatus]) => isFetching || !releaseStatus)
+    );
+
 
     // Async fetch release status
-    this.helmReleaseHelper.fetchReleaseStatus().subscribe(data => {
-      const chart = [];
+    this.subs.push(releaseStatus$.subscribe(data => {
       console.log(data);
-      Object.keys(data.pods.status).forEach(status => {
-        chart.push({
-          name: status,
-          value: data.pods.status[status]
-        });
-      });
-      this.podsChartData = chart;
+
+      this.podsChartData = Object.keys(data.pods.status).map(status => ({
+        name: status,
+        value: data.pods.status[status]
+      }));
 
       this.containersChartData = [
         {
@@ -77,7 +85,7 @@ export class HelmReleaseSummaryTabComponent {
           value: data.pods.containers - data.pods.ready
         }
       ];
-    });
+    }));
   }
 
   public deleteRelease() {
@@ -94,7 +102,7 @@ export class HelmReleaseSummaryTabComponent {
         startWith(true),
       );
 
-      deleting$.subscribe(d => {
+      deleting$.subscribe(() => {
         this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
         this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
       },
@@ -102,5 +110,9 @@ export class HelmReleaseSummaryTabComponent {
           this.isBusy$ = observableOf(false);
         });
     });
+  }
+
+  ngOnDestroy() {
+    safeUnsubscribe(...this.subs);
   }
 }
