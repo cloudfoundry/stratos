@@ -10,9 +10,8 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <p *ngIf="!selectedSourceType && sourceType && sourceType.helpText"> {{sourceType.helpText}} </p>
     <div *ngIf="(sourceType$ | async) as sourceType">
-      <app-deploy-application-fs #fsChooser [hideTitle]='true'
+      <app-deploy-application-fs #fsChooser
         *ngIf="sourceType.id === DEPLOY_TYPES_IDS.FILE || sourceType.id === DEPLOY_TYPES_IDS.FOLDER"
         [sourceType]="sourceType.id" required name="fsLocalSource" [(ngModel)]="fsSourceData">
       </app-deploy-application-fs>

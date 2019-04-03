@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
-import { getApplicationDeploySourceTypes } from '../deploy-application/deploy-application.types';
+import { getApplicationDeploySourceTypes, AUTO_SELECT_DEPLOY_TYPE_URL_PARAM } from '../deploy-application/deploy-application.types';
 interface IAppTileData extends ITileData {
   type: string;
   subType?: string;
@@ -34,17 +34,21 @@ export class NewApplicationBaseStepComponent implements OnInit {
       { matIcon: 'border_clear' },
       { type: 'create' }
     )
-  ]
+  ];
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     const type = tile ? tile.data.type : null;
     if (tile) {
       const baseUrl = 'applications';
+      const query = {
+        [BASE_REDIRECT_QUERY]: `${baseUrl}/new`
+      };
+      if (tile.data.subType) {
+        query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
+      }
       this.store.dispatch(new RouterNav({
         path: `${baseUrl}/${type}`,
-        query: {
-          [BASE_REDIRECT_QUERY]: `${baseUrl}/new`
-        }
+        query
       }));
     }
   }

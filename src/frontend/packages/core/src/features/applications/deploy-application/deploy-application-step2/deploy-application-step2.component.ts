@@ -9,7 +9,7 @@ import {
   Subscription,
   timer as observableTimer,
 } from 'rxjs';
-import { catchError, filter, map, pairwise, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, map, pairwise, startWith, switchMap, take, tap, withLatestFrom, first } from 'rxjs/operators';
 
 import {
   FetchBranchesForProject,
@@ -40,7 +40,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { GitSCM } from '../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { AUTO_SELECT_DEPLOY_TYPE_URL_PARAM, DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes } from '../deploy-application.types';
+import { DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes, getAutoSelectedDeployType } from '../deploy-application.types';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -106,14 +106,13 @@ export class DeployApplicationStep2Component
   constructor(
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
-    private route: ActivatedRoute,
+    route: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private scmService: GitSCMService
   ) {
-    const typeId = route.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
-    this.selectedSourceType = this.sourceTypes.find(source => source.id === typeId);
+    this.selectedSourceType = getAutoSelectedDeployType(route);
     if (this.selectedSourceType) {
-      this.setSourceType(this.selectedSourceType);
+      this.stepperText = this.selectedSourceType.helpText;
     }
   }
 
@@ -250,9 +249,12 @@ export class DeployApplicationStep2Component
 
     const setInitialSourceType$ = this.store.select(selectSourceType).pipe(
       filter(p => !p),
-      take(1),
+      first(),
       tap(p => {
-        this.setSourceType(this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
+        this.setSourceType(this.selectedSourceType || this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
+        if (this.selectedSourceType) {
+          this.sourceType = this.selectedSourceType;
+        }
       })
     );
 
@@ -317,7 +319,7 @@ export class DeployApplicationStep2Component
     );
   }
 
-  setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));
+  setSourceType = (sourceType: SourceType) => this.store.dispatch(new SetAppSourceDetails(sourceType));
 
   updateBranchName(branch: GitBranch) {
     this.store.dispatch(new SetDeployBranch(branch.name));

@@ -5,8 +5,9 @@ import { ITileGraphic } from '../../../core/src/shared/components/tile/tile-sele
 export interface SourceType {
   name: string;
   id: string;
+  helpText?: string;
   group?: string;
-  graphic?: ITileGraphic
+  graphic?: ITileGraphic;
 }
 
 export enum DeployState {
