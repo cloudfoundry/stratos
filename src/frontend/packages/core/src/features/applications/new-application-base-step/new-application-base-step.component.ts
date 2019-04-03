@@ -1,3 +1,4 @@
+import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { TileConfigManager } from '../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
@@ -6,8 +7,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
+import { getApplicationDeploySourceTypes } from '../deploy-application/deploy-application.types';
 interface IAppTileData extends ITileData {
   type: string;
+  subType?: string;
 }
 @Component({
   selector: 'app-new-application-base-step',
@@ -17,19 +20,21 @@ interface IAppTileData extends ITileData {
 export class NewApplicationBaseStepComponent implements OnInit {
 
   public serviceType: string;
-
+  private sourceTypes = getApplicationDeploySourceTypes();
   public tileSelectorConfig = [
-    new ITileConfig<IAppTileData>(
-      'Deploy',
-      { matIcon: 'file_upload' },
-      { type: 'deploy' },
+    ...this.sourceTypes.map(type =>
+      new ITileConfig<IAppTileData>(
+        type.name,
+        type.graphic,
+        { type: 'deploy', subType: type.id },
+      ),
     ),
     new ITileConfig<IAppTileData>(
       'Application Shell',
       { matIcon: 'border_clear' },
       { type: 'create' }
     )
-  ];
+  ]
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     const type = tile ? tile.data.type : null;

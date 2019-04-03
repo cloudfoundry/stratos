@@ -40,6 +40,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { GitSCM } from '../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { AUTO_SELECT_DEPLOY_TYPE_URL_PARAM, DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes } from '../deploy-application.types';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -53,13 +54,8 @@ export class DeployApplicationStep2Component
 
   branchesSubscription: Subscription;
   commitInfo: GitCommit;
-  sourceTypes: SourceType[] = [
-    { name: 'Public GitHub', id: 'github', group: 'gitscm' },
-    { name: 'Public GitLab', id: 'gitlab', group: 'gitscm' },
-    { name: 'Public Git URL', id: 'giturl' },
-    { name: 'Application Archive File', id: 'file' },
-    { name: 'Application Folder', id: 'folder' },
-  ];
+  sourceTypes: SourceType[] = getApplicationDeploySourceTypes();
+  public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // GitHub by default
   repositoryBranches$: Observable<any>;
@@ -95,6 +91,7 @@ export class DeployApplicationStep2Component
   subscriptions: Array<Subscription> = [];
 
   @ViewChild('fsChooser') fsChooser;
+  public selectedSourceType: SourceType = null;
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -112,7 +109,13 @@ export class DeployApplicationStep2Component
     private route: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private scmService: GitSCMService
-  ) { }
+  ) {
+    const typeId = route.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
+    this.selectedSourceType = this.sourceTypes.find(source => source.id === typeId);
+    if (this.selectedSourceType) {
+      this.setSourceType(this.selectedSourceType);
+    }
+  }
 
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
@@ -123,7 +126,7 @@ export class DeployApplicationStep2Component
         branch: this.repositoryBranch,
         url: this.scm.getCloneURL(this.repository)
       };
-    } else if (this.sourceType.id === 'giturl') {
+    } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       details = {
         projectName: this.gitUrl,
         branch: {
@@ -150,7 +153,7 @@ export class DeployApplicationStep2Component
 
     this.sourceTypeNeedsUpload$ = this.sourceType$.pipe(
       filter(type => type && !!type.id),
-      map(type => type.id === 'folder' || type.id === 'file')
+      map(type => type.id === DEPLOY_TYPES_IDS.FOLDER || type.id === DEPLOY_TYPES_IDS.FILE)
     );
 
     const fetchBranches = this.store

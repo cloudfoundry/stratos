@@ -16,12 +16,12 @@
 }
 
 .tile-selector {
+  $tile-height: 200px;
   border-radius: 3px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  height: 200px;
-  min-width: 250px;
+  height: $tile-height;
   opacity: .5;
   transition: transform .2s ease;
   user-select: none;
@@ -35,6 +35,7 @@
     cursor: pointer;
     display: flex;
     font-size: 16px;
+    height: $tile-height;
     justify-content: center;
   }
 
