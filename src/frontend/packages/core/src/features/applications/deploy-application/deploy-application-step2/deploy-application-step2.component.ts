@@ -40,7 +40,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { GitSCM } from '../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes, getAutoSelectedDeployType } from '../deploy-application.types';
+import { DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes, getAutoSelectedDeployType } from '../deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application-step2',

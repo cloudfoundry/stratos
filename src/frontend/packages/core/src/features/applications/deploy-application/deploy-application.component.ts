@@ -15,7 +15,7 @@ import { DeployApplicationSource, SourceType } from '../../../../../store/src/ty
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { getApplicationDeploySourceTypes, AUTO_SELECT_DEPLOY_TYPE_URL_PARAM, getAutoSelectedDeployType } from './deploy-application.types';
+import { getApplicationDeploySourceTypes, getAutoSelectedDeployType } from './deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application',

@@ -1,13 +1,10 @@
-import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
-import { TileConfigManager } from '../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
-import { getApplicationDeploySourceTypes, AUTO_SELECT_DEPLOY_TYPE_URL_PARAM } from '../deploy-application/deploy-application.types';
+import { getApplicationDeploySourceTypes, AUTO_SELECT_DEPLOY_TYPE_URL_PARAM } from '../deploy-application/deploy-application-steps.types';
 interface IAppTileData extends ITileData {
   type: string;
   subType?: string;
@@ -17,7 +14,7 @@ interface IAppTileData extends ITileData {
   templateUrl: './new-application-base-step.component.html',
   styleUrls: ['./new-application-base-step.component.scss']
 })
-export class NewApplicationBaseStepComponent implements OnInit {
+export class NewApplicationBaseStepComponent {
 
   public serviceType: string;
   private sourceTypes = getApplicationDeploySourceTypes();
@@ -54,8 +51,4 @@ export class NewApplicationBaseStepComponent implements OnInit {
   }
 
   constructor(public store: Store<AppState>) { }
-
-  ngOnInit() {
-  }
-
 }
