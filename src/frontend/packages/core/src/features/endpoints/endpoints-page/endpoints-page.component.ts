@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { delay, filter, first, map } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { queryParamMap } from '../../../core/auth-guard.service';
@@ -13,11 +14,11 @@ import {
   StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
+import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -32,7 +33,23 @@ import { EndpointListHelper } from '../../../shared/components/list/list-types/e
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState>, private ngZone: NgZone) { }
+  constructor(public endpointsService: EndpointsService, public store: Store<AppState>, private ngZone: NgZone) {
+    // Redirect to /applications if not enabled.
+    endpointsService.disablePersistenceFeatures$.pipe(
+      map(off => {
+        if (off) {
+          // User should only get here if url is manually entered
+          this.store.dispatch(new RouterNav({
+            path: ['applications'],
+            extras: {
+              replaceUrl: true
+            }
+          }));
+        }
+      }),
+      first()
+    ).subscribe();
+  }
 
   sub: Subscription;
 

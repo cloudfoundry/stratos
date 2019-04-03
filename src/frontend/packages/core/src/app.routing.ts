@@ -54,7 +54,8 @@ const appRoutes: Routes = [
           stratosNavigation: {
             text: 'Endpoints',
             matIcon: 'settings_ethernet',
-            position: 100
+            position: 100,
+            requiresPersistence: true
           }
         },
         children: [{

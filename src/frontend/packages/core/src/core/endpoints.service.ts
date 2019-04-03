@@ -77,16 +77,20 @@ export class EndpointsService implements CanActivate {
         this.haveRegistered$,
         this.haveConnected$,
         this.userService.isAdmin$,
+        this.disablePersistenceFeatures$
       ),
-      map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
+      map(([state, haveRegistered, haveConnected, isAdmin, disablePersistenceFeatures]
+        : [[AuthState, EndpointState], boolean, boolean, boolean, boolean]) => {
         const [authState] = state;
         if (authState.sessionData.valid) {
           // Redirect to endpoints if there's no connected endpoints
           let redirect: string;
-          if (!haveRegistered) {
-            redirect = isAdmin ? '/endpoints' : '/noendpoints';
-          } else if (!haveConnected) {
-            redirect = '/endpoints';
+          if (!disablePersistenceFeatures) {
+            if (!haveRegistered) {
+              redirect = isAdmin ? '/endpoints' : '/noendpoints';
+            } else if (!haveConnected) {
+              redirect = '/endpoints';
+            }
           }
 
           // Abort redirect if there's no redirect needed (endpoints are ok or we're already heading to redirect)
