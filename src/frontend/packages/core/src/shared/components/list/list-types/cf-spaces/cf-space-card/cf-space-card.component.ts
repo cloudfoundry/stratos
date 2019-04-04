@@ -42,9 +42,7 @@ import { CardCell } from '../../../list.types';
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
   cardMenu: MetaCardMenuItem[];
   spaceGuid: string;
-  serviceInstancesCount: number;
   appInstancesCount: number;
-  serviceInstancesLimit: string;
   appInstancesLimit: string;
   orgGuid: string;
   normalisedMemoryUsage: number;
@@ -149,9 +147,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
       this.normalisedMemoryUsage = this.memoryTotal / quotaDefinition.entity.memory_limit * 100;
     }
     this.appInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.app_instance_limit);
-    this.serviceInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.total_services);
     this.memoryLimit = truthyIncludingZeroString(quotaDefinition.entity.memory_limit);
-    this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 
   ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());
