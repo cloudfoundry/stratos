@@ -23,7 +23,7 @@ import { defaultPaginationPageSizeOptionsTable, IListConfig } from '../../list.c
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
-    const action = new GetAllUserProvidedServices(cfGuid, [
+    const action = new GetAllUserProvidedServices(paginationKey, cfGuid, [
       createEntityRelationKey(userProvidedServiceInstanceSchemaKey, spaceWithOrgKey),
       createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
       createEntityRelationKey(userProvidedServiceInstanceSchemaKey, serviceBindingSchemaKey),
