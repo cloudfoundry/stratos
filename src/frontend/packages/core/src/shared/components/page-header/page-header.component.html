@@ -9,7 +9,8 @@
         </div>
         <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
           <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
-            <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink" [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+            <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
+              [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
             <span class="page-header__breadcrumb" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
             <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
           </ng-container>
@@ -39,7 +40,8 @@
             <app-recent-entities class="page-header__history-list" history="true"></app-recent-entities>
           </div>
         </mat-menu>
-        <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="menu">
+        <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button
+          [matMenuTriggerFor]="menu">
           <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
         </button>
         <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
@@ -57,6 +59,13 @@
               </button>
               <button mat-menu-item routerLink="/user-profile">
                 <span>Profile</span>
+              </button>
+              <button mat-menu-item>
+                <mat-checkbox color="warn" labelPosition="before" (change)="updateSessionKeepAlive($event.checked)"
+                  matTooltip="Keep the session alive. Page must be visible">
+                  Sticky
+                  Session
+                </mat-checkbox>
               </button>
               <div class="page-header__menu-separator"></div>
             </div>

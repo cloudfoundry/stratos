@@ -8,13 +8,21 @@ import { tap } from 'rxjs/operators';
 import { VerifySession } from '../../store/src/actions/auth.actions';
 import { AppState } from '../../store/src/app-state';
 import { AuthState } from '../../store/src/reducers/auth.reducer';
-import { SessionData } from '../../store/src/types/auth.types';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
+import { PageVisible } from './core/page-visible';
 
 @Injectable()
 export class LoggedInService {
 
-  private sessionData: SessionData;
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private store: Store<AppState>,
+    private dialog: MatDialog,
+    private ngZone: NgZone
+  ) {
+  }
+
+  private auth: AuthState;
   private userInteractionChecker: Subscription;
 
   private lastUserInteraction = Date.now();
@@ -41,14 +49,6 @@ export class LoggedInService {
 
   private destroying = false;
 
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private store: Store<AppState>,
-    private dialog: MatDialog,
-    private ngZone: NgZone
-  ) {
-  }
-
   init() {
     const eventStreams = this.userActiveEvents.map((eventName) => {
       return fromEvent(document, eventName);
@@ -56,7 +56,7 @@ export class LoggedInService {
 
     this.sub = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
-        this.sessionData = auth.sessionData;
+        this.auth = auth;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
           if (!this.sessionChecker || this.sessionChecker.closed) {
             this.openSessionCheckerPoll();
@@ -132,14 +132,15 @@ export class LoggedInService {
     }
 
     const now = Date.now();
-    const sessionExpiresOn = this.sessionData.sessionExpiresOn;
+    const sessionExpiresOn = this.auth.sessionData.sessionExpiresOn;
     const safeExpire = sessionExpiresOn - this.autoLogoutDelta;
     const delta = safeExpire - now;
     const aboutToExpire = delta < this.warnBeforeLogout;
     if (aboutToExpire) {
       const idleDelta = now - this.lastUserInteraction;
       const userIsActive = idleDelta < this.userIdlePeriod;
-      if (userIsActive) {
+      const pageVisible = new PageVisible(document);
+      if (userIsActive || (this.auth.keepAlive && pageVisible.isPageVisible())) {
         this.store.dispatch(new VerifySession(false, false));
       } else {
         this._promptInactiveUser(safeExpire);
@@ -148,3 +149,4 @@ export class LoggedInService {
     }
   }
 }
+

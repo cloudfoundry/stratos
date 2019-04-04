@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Logout } from '../../../../../store/src/actions/auth.actions';
+import { Logout, SessionKeepAlive } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -100,6 +100,10 @@ export class PageHeaderComponent {
 
   logout() {
     this.store.dispatch(new Logout());
+  }
+
+  updateSessionKeepAlive(keepAlive: boolean) {
+    this.store.dispatch(new SessionKeepAlive(keepAlive));
   }
 
   constructor(private store: Store<AppState>, private route: ActivatedRoute) {

@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { ApiActionTypes } from './request.actions';
+
 import { SessionData } from '../types/auth.types';
 
 export const LOGIN = '[Auth] Login';
@@ -13,6 +13,7 @@ export const LOGOUT_FAILED = '[Auth] Logout failed';
 export const VERIFY_SESSION = '[Auth] Verify session';
 export const SESSION_VERIFIED = '[Auth] Session verified';
 export const SESSION_INVALID = '[Auth] Session invalid';
+export const SESSION_KEEP_ALIVE = '[Auth] Session Keep Alive Changed';
 
 export const GET_INFO = '[Auth] Get session info';
 
@@ -45,7 +46,7 @@ export class VerifiedSession implements Action {
 
 export class InvalidSession implements Action {
   constructor(public uaaError: boolean = false, public upgradeInProgress = false,
-              public domainMismatch = false, public ssoOptions = '') { }
+    public domainMismatch = false, public ssoOptions = '') { }
   type = SESSION_INVALID;
 }
 
@@ -71,4 +72,9 @@ export class LogoutSuccess implements Action {
 export class LogoutFailed implements Action {
   constructor(public error: any) { }
   type = LOGOUT_FAILED;
+}
+
+export class SessionKeepAlive implements Action {
+  constructor(public keepAlive = false) { }
+  type = SESSION_KEEP_ALIVE;
 }
