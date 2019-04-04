@@ -1,12 +1,15 @@
 import { Component, Input } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -25,6 +28,8 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
   entityConfig: ComponentEntityMonitorConfig;
+
+  cfOrgSpace: CfOrgSpaceLabelService;
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
@@ -68,10 +73,18 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           )
         }
       ];
+      if (!this.cfOrgSpace) {
+        this.cfOrgSpace = new CfOrgSpaceLabelService(
+          this.store,
+          this.cfGuid,
+          row.entity.space.entity.organization_guid,
+          row.entity.space_guid);
+      }
     }
   }
 
   constructor(
+    private store: Store<AppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
@@ -112,16 +125,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     return displayName;
   }
 
-  getSpaceName = () => this.serviceInstanceEntity.entity.space.entity.name;
-  getSpaceURL = () => [
-    '/cloud-foundry',
-    this.serviceInstanceEntity.entity.cfGuid,
-    'organizations',
-    this.serviceInstanceEntity.entity.space.entity.organization_guid,
-    'spaces',
-    this.serviceInstanceEntity.entity.space_guid,
-    'summary'
-  ]
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
 }

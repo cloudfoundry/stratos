@@ -21,6 +21,8 @@ describe('Service Instances Wall', () => {
   const createServiceInstance = new CreateServiceInstance();
   let e2eSetup;
   let servicesHelperE2E: ServicesHelperE2E;
+  let serviceInstanceName: string;
+
   beforeAll(() => {
     e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -44,7 +46,8 @@ describe('Service Instances Wall', () => {
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
       createServiceInstance.selectMarketplace();
-      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+      serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
     });
   });
 
@@ -94,9 +97,9 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to search', () => {
-    servicesWallPage.serviceInstancesList.header.setSearchText(servicesHelperE2E.serviceInstanceName).then(
+    servicesWallPage.serviceInstancesList.header.setSearchText(serviceInstanceName).then(
       () => {
-        expect(servicesWallPage.serviceInstancesList.header.getSearchText()).toEqual(servicesHelperE2E.serviceInstanceName);
+        expect(servicesWallPage.serviceInstancesList.header.getSearchText()).toEqual(serviceInstanceName);
         servicesWallPage.getServiceInstances().then(s => {
           expect(s.length).toEqual(1);
         });
@@ -118,7 +121,7 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to Edit Service Instance', () => {
-    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, servicesHelperE2E.serviceInstanceName, false)
+    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, serviceInstanceName, false)
       .then(metaCard => metaCard.openActionMenu())
       .then(menu => {
         const editMenuItem = menu.getItem('Edit');
@@ -135,7 +138,7 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to delete Service Instance', () => {
-    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, servicesHelperE2E.serviceInstanceName, false)
+    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, serviceInstanceName, false)
       .then(metaCard => metaCard.openActionMenu())
       .then(menu => {
         const deleteMenuItem = menu.getItem('Delete');
@@ -144,5 +147,5 @@ describe('Service Instances Wall', () => {
       });
   });
 
-  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
 });
