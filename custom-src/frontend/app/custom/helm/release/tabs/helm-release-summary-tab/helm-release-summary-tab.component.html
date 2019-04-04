@@ -6,58 +6,45 @@
 </app-page-sub-nav>
 
 <app-loading-page [isLoading]="isBusy$" [text]="loadingMessage">
-  <div class="summary" *ngIf="helmReleaseHelper.release$ | async as release">
-    <app-tile-grid>
-      <app-tile-group>
-        <app-tile>
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Release Info</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <app-metadata-item icon="title" label="Name">{{ release.name }}</app-metadata-item>
-              <app-metadata-item icon="title" label="Namespace">{{ release.namespace }}</app-metadata-item>
-              <app-metadata-item icon="title" label="Version">{{ release.version }}</app-metadata-item>
-              <app-metadata-item icon="title" label="Status">{{ release.status }}</app-metadata-item>
-              <app-metadata-item icon="date_range" label="First Deployed">{{ release.firstDeployed | date:'medium' }}
-              </app-metadata-item>
-              <app-metadata-item icon="date_range" label="Last Deployed">{{ release.lastDeployed | date:'medium' }}
-              </app-metadata-item>
-            </mat-card-content>
-          </mat-card>
-        </app-tile>
-        <app-tile>
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Chart Info</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <app-metadata-item icon="title" label="Name">{{ release.chart.metadata.name }}</app-metadata-item>
-              <app-metadata-item icon="title" label="Description">{{ release.chart.metadata.description }}
-              </app-metadata-item>
-              <app-metadata-item icon="title" label="Version">{{ release.chart.metadata.version }}</app-metadata-item>
-              <app-metadata-item icon="title" label="App Version">{{ release.chart.metadata.appVersion || '-' }}
-              </app-metadata-item>
-            </mat-card-content>
-          </mat-card>
-        </app-tile>
-      </app-tile-group>
+  <ng-container *ngIf="helmReleaseHelper.release$ | async as release">
+    <app-entity-summary-title [imagePath]="release.chart.metadata.icon" [title]="release.name"
+      [subText]="release.chart.metadata.description" [subTitle]="release.chart.metadata.name">
+      <div class="summary">
+        <div class="chart-details">
+          <app-metadata-item class="chart-details__item" label="Chart Version">{{ release.chart.metadata.version }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Application Version">
+            {{ release.chart.metadata.appVersion || '-' }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Namespace">{{ release.namespace }}</app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Status">{{ release.status }}</app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="First Deployed">
+            {{ release.firstDeployed | date:'medium' }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Last Deployed">
+            {{ release.lastDeployed | date:'medium' }}
+          </app-metadata-item>
+        </div>
+        <app-tile-grid>
+          <app-tile-group *ngIf="chartData$ | async as chartData">
+            <app-tile>
+              <mat-card class="full-card">
+                <app-ring-chart [data]="chartData.podsChartData" label="Pods"></app-ring-chart>
+              </mat-card>
+            </app-tile>
+            <app-tile>
+              <mat-card class="full-card">
+                <app-ring-chart [customColors]="containersChartColors" [data]="chartData.containersChartData"
+                  label="Containers"></app-ring-chart>
+              </mat-card>
+            </app-tile>
+          </app-tile-group>
+        </app-tile-grid>
+      </div>
+    </app-entity-summary-title>
 
-      <!-- Release statud charts -->
 
-      <app-tile-group *ngIf="chartData$ | async as chartData">
-        <app-tile>
-          <mat-card class="full-card">
-            <app-ring-chart [data]="chartData.podsChartData" label="Pods"></app-ring-chart>
-          </mat-card>
-        </app-tile>
-        <app-tile>
-          <mat-card class="full-card">
-            <app-ring-chart [customColors]="containersChartColors" [data]="chartData.containersChartData"
-              label="Containers"></app-ring-chart>
-          </mat-card>
-        </app-tile>
-      </app-tile-group>
-    </app-tile-grid>
-  </div>
+  </ng-container>
 </app-loading-page>

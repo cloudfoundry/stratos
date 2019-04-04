@@ -2,35 +2,15 @@
   margin-bottom: 0;
   margin-left: 20px;
   margin-top: 10px;
-  &__logo {
-    height: 400px;
-    opacity: .2;
-    position: absolute;
-    right: -120px;
-    top: 20px;
-    z-index: -1;
+  
+  &__metrics {
+    max-width: 350px;
   }
-  &__sub-header {
-    font-size: 16px;
-    margin-top: -3px;
-    opacity: .6;
-  }
+  
   &__header {
     margin: 0;
   }
-  &__header-wrapper {
-    align-items: baseline;
-    display: flex;
-  }
-  &__header-info {
-    font-size: 20px;
-    margin-left: 10px;
-    opacity: .4;
-  }
-  &__header-section {
-    margin: 10px -10px;
-    max-width: 350px;
-  }
+  
   &__graphs {
     margin: 10px;
   }
