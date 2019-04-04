@@ -36,6 +36,6 @@ export class KubernetesServicePortsComponent extends CardCell<HelmReleaseService
 
 
   getServiceLink(service: KubeService, port: { name: string }): string {
-    return `/kubernetes/svcproxy/${this.endpointId}/${service.metadata.namespace}/${service.metadata.name}/${port.name}`;
+    return `/kubernetes/${this.endpointId}/svcproxy/${service.metadata.namespace}/${service.metadata.name}/${port.name}`;
   }
 }

@@ -87,18 +87,11 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
     // Async fetch release status
     this.subs.push(releaseStatus$.subscribe(data => {
-    const isStatusBusy$ = fetchStatus.pipe(map(d => false));
-    this.isBusy$ = combineLatest(this.helmReleaseHelper.isFetching$, isStatusBusy$).pipe(
-      map(([a, b]) => a || b)
-    );
 
-    fetchStatus.subscribe(data => {
+      // Pods status (grouped)
+      this.podsChartData = this.collatePodStatus(data);
 
-      this.podsChartData = Object.keys(data.pods.status).map(status => ({
-        name: status,
-        value: data.pods.status[status]
-      }));
-
+      // Container Readiness
       this.containersChartData = [
         {
           name: 'Ready',
