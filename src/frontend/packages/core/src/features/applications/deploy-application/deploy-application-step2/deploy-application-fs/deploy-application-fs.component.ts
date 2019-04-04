@@ -25,6 +25,8 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
 
   @Input() sourceType: string;
 
+  @Input() hideTitle = false;
+
   sourceData$ = new BehaviorSubject<FileScannerInfo>(undefined);
 
   // Handle result of a file input form field selection

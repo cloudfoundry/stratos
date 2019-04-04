@@ -13,7 +13,7 @@ export class BaseCreateApplicationStepper {
         this.tiles.select('Application Shell');
         return new CreateApplicationShellStepper();
       case APPLICATION_CREATION_TYPES.DEPLOY:
-        this.tiles.select('Deploy');
+        this.tiles.select('Public GitHub');
         return new DeployApplication();
     }
   }
