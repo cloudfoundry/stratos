@@ -8,7 +8,7 @@
     </tr>
     <tr *ngFor="let port of kubeService.spec?.ports">
       <td>
-        <a *ngIf="endpointId; else noLink" href="{{getServiceLink(kubeService, port)}}" target="_blank">
+        <a *ngIf="endpointId; else noLink" [routerLink]="getServiceLink(kubeService, port)">
           {{ port.name}}
         </a>
         <ng-template #noLink>{{port.name}}</ng-template>

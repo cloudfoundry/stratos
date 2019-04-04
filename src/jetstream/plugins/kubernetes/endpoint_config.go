@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -15,7 +16,7 @@ import (
 )
 
 // GetConfigForEndpoint gets a config for the Kubernetes go-client for the specified endpoint
-func GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*restclient.Config, error) {
+func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*restclient.Config, error) {
 	return clientcmd.BuildConfigFromKubeconfigGetter(masterURL, func() (*clientcmdapi.Config, error) {
 
 		log.Debug("GetConfigForEndpoint")
@@ -36,7 +37,7 @@ func GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*rest
 
 		// Configure auth information
 		authInfo := clientcmdapi.NewAuthInfo()
-		err := addAuthInfoForEndpoint(authInfo, token)
+		err := c.addAuthInfoForEndpoint(authInfo, token)
 
 		config := clientcmdapi.NewConfig()
 		config.Clusters[name] = cluster
@@ -49,7 +50,7 @@ func GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*rest
 
 }
 
-func addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
 
 	log.Debug("addAuthInfoForEndpoint")
 	log.Warn(tokenRec.AuthType)
@@ -57,16 +58,18 @@ func addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.Tok
 	switch {
 	case tokenRec.AuthType == "gke-auth":
 		log.Warn("GKE AUTH")
-		return addGKEAuth(info, tokenRec)
+		return c.addGKEAuth(info, tokenRec)
 	case tokenRec.AuthType == AuthConnectTypeCertAuth, tokenRec.AuthType == AuthConnectTypeKubeConfigAz:
-		return addCertAuth(info, tokenRec)
+		return c.addCertAuth(info, tokenRec)
+	case tokenRec.AuthType == AuthConnectTypeAWSIAM:
+		return c.addAWSAuth(info, tokenRec)
 	default:
 		log.Error("Unsupported auth type")
 	}
 	return errors.New("Unsupported auth type")
 }
 
-func addCertAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *KubernetesSpecification) addCertAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
 	kubeAuthToken := &KubeCertAuth{}
 	err := json.NewDecoder(strings.NewReader(tokenRec.AuthToken)).Decode(kubeAuthToken)
 	if err != nil {
@@ -80,15 +83,33 @@ func addCertAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) e
 	return nil
 }
 
-func addGKEAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *KubernetesSpecification) addGKEAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
 	gkeInfo := &GKEConfig{}
 	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &gkeInfo)
 	if err != nil {
 		return err
 	}
 
-	log.Warn("HERE")
-
 	info.Token = tokenRec.AuthToken
+	return nil
+}
+
+func (c *KubernetesSpecification) addAWSAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+
+	awsInfo := &AWSIAMUserInfo{}
+	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &awsInfo)
+	if err != nil {
+		return err
+	}
+
+	// NOTE: We really should check first to see if the token has expired before we try and get another
+
+	// Get an access token
+	token, err := c.getTokenIAM(*awsInfo)
+	if err != nil {
+		return fmt.Errorf("Could not get new token using the IAM info: %v+", err)
+	}
+
+	info.Token = token
 	return nil
 }

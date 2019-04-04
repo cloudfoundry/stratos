@@ -59,13 +59,14 @@ func (k *KubernetesSpecification) kubeServiceProxy(c echo.Context) error {
 	// Currently this is not cached, so we must get it each time
 	apiEndpoint := cnsiRecord.APIEndpoint
 	log.Debug(apiEndpoint)
+	absTarget := fmt.Sprintf("/api/v1/namespaces/%s/services/%s:%s/proxy/", namespace, serviceName, servicePortName)
 	target := fmt.Sprintf("%s/api/v1/namespaces/%s/services/%s:%s/proxy/%s", apiEndpoint, namespace, serviceName, servicePortName, path)
 	targetURL, _ := url.Parse(target)
 	targetURL = normalizeLocation(targetURL)
 
 	log.Infof("Target URL: %s", targetURL)
 
-	config, err := getConfig(&cnsiRecord, &tokenRec)
+	config, err := k.getConfig(&cnsiRecord, &tokenRec)
 	if err != nil {
 		return errors.New("Could not get config for this auth type")
 	}
@@ -139,6 +140,15 @@ func (k *KubernetesSpecification) kubeServiceProxy(c echo.Context) error {
 		response.Header.Del("X-FRAME-OPTIONS")
 		response.Header.Set("X-FRAME-OPTIONS", "sameorigin")
 		log.Debug("%v+", response)
+
+		if response.StatusCode == 302 {
+			redirect := response.Header.Get("Location")
+			if strings.Index(redirect, absTarget) == 0 {
+				redirect = redirect[len(absTarget):]
+				response.Header.Set("Location", redirect)
+			}
+
+		}
 		return nil
 	}
 

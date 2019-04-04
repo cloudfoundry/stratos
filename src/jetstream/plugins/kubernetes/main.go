@@ -152,6 +152,8 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// Kubernetes Dashboard Proxy
 	echoGroup.GET("/kubedash/ui/:guid/*", c.kubeDashboardProxy)
 	echoGroup.GET("/kubedash/:guid/status", c.kubeDashboardStatus)
+	echoGroup.GET("/kubesvc/:guid/:ns/:svc/:port/*", c.kubeServiceProxy)
+	echoGroup.GET("/kubesvc/:guid/:ns/:svc/:port", c.kubeServiceProxy)
 
 	// Helm Routes
 	echoGroup.GET("/helm/releases", c.ListReleases)
