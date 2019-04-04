@@ -1,10 +1,13 @@
 import { NewAppCFDetails } from './create-application.types';
 import { GitBranch, GitCommit } from './git.types';
+import { ITileGraphic } from '../../../core/src/shared/components/tile/tile-selector.types';
 
 export interface SourceType {
   name: string;
   id: string;
+  helpText?: string;
   group?: string;
+  graphic?: ITileGraphic;
 }
 
 export enum DeployState {

@@ -26,7 +26,7 @@ const cfName = e2e.secrets.getDefaultCFEndpoint().name;
 const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
 const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
-describe('Application Deploy -', function () {
+describe('Application Deploy -', () => {
 
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
   const testAppName = ApplicationE2eHelper.createApplicationName();
@@ -65,12 +65,12 @@ describe('Application Deploy -', function () {
     beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(function () {
+    beforeEach(function() {
       originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
       jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
     });
 
-    afterEach(function () {
+    afterEach(function() {
       jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });
 
@@ -90,7 +90,7 @@ describe('Application Deploy -', function () {
       });
 
       it('Check deploy steps', () => {
-        expect(deployApp.header.getTitleText()).toBe('Deploy');
+        expect(deployApp.header.getTitleText()).toBe('Deploy from Public GitHub');
         // Check the steps
         e2e.debugLog(`${loggingPrefix} Checking Steps`);
         deployApp.stepper.getStepNames().then(steps => {
@@ -119,9 +119,9 @@ describe('Application Deploy -', function () {
         });
 
         // Fill in form
-        deployApp.stepper.getStepperForm().fill({ 'cf': cfName });
-        deployApp.stepper.getStepperForm().fill({ 'org': orgName });
-        deployApp.stepper.getStepperForm().fill({ 'space': spaceName });
+        deployApp.stepper.getStepperForm().fill({ cf: cfName });
+        deployApp.stepper.getStepperForm().fill({ org: orgName });
+        deployApp.stepper.getStepperForm().fill({ space: spaceName });
         expect(deployApp.stepper.canNext()).toBeTruthy();
 
         // Press next to get to source step
@@ -132,7 +132,7 @@ describe('Application Deploy -', function () {
         e2e.debugLog(`${loggingPrefix} Source Step`);
         expect(deployApp.stepper.getActiveStepName()).toBe('Source');
         expect(deployApp.stepper.canNext()).toBeFalsy();
-        deployApp.stepper.getStepperForm().fill({ 'projectname': testApp });
+        deployApp.stepper.getStepperForm().fill({ projectname: testApp });
 
         // Press next to get to source config step
         deployApp.stepper.waitUntilCanNext('Next');
