@@ -7,18 +7,22 @@ import { map, switchMap } from 'rxjs/operators';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
+import { IUserProvidedServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
+import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
-import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM } from '../../../add-service-instance/csi-mode.service';
+import {
+  CANCEL_ORG_ID_PARAM,
+  CANCEL_SPACE_ID_PARAM,
+  CANCEL_USER_PROVIDED,
+} from '../../../add-service-instance/csi-mode.service';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../list-table/table.types';
 import { defaultPaginationPageSizeOptionsTable, IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import {
-  TableCellAppCfOrgSpaceHeaderComponent,
-} from '../app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
-import { TableCellAppCfOrgSpaceComponent } from '../app/table-cell-app-cforgspace/table-cell-app-cforgspace.component';
+  CfSpacesUserServiceInstancesDataSource,
+} from '../cf-spaces-service-instances/cf-spaces-user-service-instances-data-source';
 import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
@@ -26,18 +30,15 @@ import {
   TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import {
-  TableCellServiceNameComponent,
-} from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import {
-  TableCellServicePlanComponent,
-} from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+  TableCellSpaceNameComponent,
+} from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
 }
 
 @Injectable()
-export class CfServiceInstancesListConfigBase implements IListConfig<APIResource<IServiceInstance>> {
+export class CfUserServiceInstancesListConfigBase implements IListConfig<APIResource<IUserProvidedServiceInstance>> {
   viewType = ListViewTypes.TABLE_ONLY;
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: ListDataSource<APIResource>;
@@ -45,13 +46,13 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   text = {
     title: null,
     filter: null,
-    noEntries: 'There are no service instances'
+    noEntries: 'There are no user provided service instances'
   };
 
   private canDetachCache: CanCache = {};
   private canDeleteCache: CanCache = {};
 
-  protected serviceInstanceColumns: ITableColumn<APIResource<IServiceInstance>>[] = [
+  protected serviceInstanceColumns: ITableColumn<APIResource<IUserProvidedServiceInstance>>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Service Instance',
@@ -62,32 +63,25 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     },
     {
       columnId: 'space',
-      headerCellComponent: TableCellAppCfOrgSpaceHeaderComponent,
-      cellComponent: TableCellAppCfOrgSpaceComponent,
+      headerCell: () => 'Space',
+      cellComponent: TableCellSpaceNameComponent,
+      cellFlex: '1'
+    },
+    {
+      columnId: 'route',
+      headerCell: () => 'Route Service URL',
+      cellDefinition: {
+        getValue: (row) => `${row.entity.route_service_url}`
+      },
       cellFlex: '2'
     },
     {
-      columnId: 'service',
-      headerCell: () => 'Service',
-      cellComponent: TableCellServiceNameComponent,
-      cellFlex: '1'
-    },
-    {
-      columnId: 'servicePlan',
-      headerCell: () => 'Plan',
-      cellComponent: TableCellServicePlanComponent,
-      cellFlex: '1'
-    },
-    {
-      columnId: 'dashboard',
-      headerCell: () => 'Dashboard',
+      columnId: 'syslog',
+      headerCell: () => 'Syslog Drain URL',
       cellDefinition: {
-        externalLink: true,
-        getLink: (row: APIResource<IServiceInstance>) => row.entity.dashboard_url,
-        newTab: true,
-        showShortLink: true
+        getValue: (row) => `${row.entity.syslog_drain_url}`
       },
-      cellFlex: '1'
+      cellFlex: '2'
     },
     {
       columnId: 'tags',
@@ -119,7 +113,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     action: (item: APIResource) => this.deleteServiceInstance(item),
     label: 'Delete',
     description: 'Delete Service Instance',
-    createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
+    createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
           row => this.can(this.canDeleteCache, CurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
@@ -131,8 +125,9 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     action: (item: APIResource) => this.deleteServiceBinding(item),
     label: 'Unbind',
     description: 'Unbind Service Instance',
-    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
-    createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
+    createEnabled: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
+      row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
+    createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
           row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
@@ -141,14 +136,15 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   };
 
   private listActionEdit: IListAction<APIResource> = {
-    action: (item: APIResource<IServiceInstance>) =>
+    action: (item: APIResource<IUserProvidedServiceInstance>) =>
       this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid, {
         [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
-        [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid
-      }),
+        [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid,
+        [CANCEL_USER_PROVIDED]: true
+      }, true),
     label: 'Edit',
     description: 'Edit Service Instance',
-    createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
+    createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
           row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
@@ -167,25 +163,33 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
 
   constructor(
     protected store: Store<AppState>,
+    cfSpaceService: CloudFoundrySpaceService,
     protected datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService
   ) {
+    this.dataSource = new CfSpacesUserServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
+    this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
+      breadcrumbs: 'space-user-services'
+    };
   }
 
-  deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
+  deleteServiceInstance = (serviceInstance: APIResource<IUserProvidedServiceInstance>) =>
     this.serviceActionHelperService.deleteServiceInstance(
       serviceInstance.metadata.guid,
       serviceInstance.entity.name,
-      serviceInstance.entity.cfGuid
+      serviceInstance.entity.cfGuid,
+      true
     )
 
 
-  deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
+  deleteServiceBinding = (serviceInstance: APIResource<IUserProvidedServiceInstance>) => {
     this.serviceActionHelperService.detachServiceBinding(
       serviceInstance.entity.service_bindings,
       serviceInstance.metadata.guid,
-      serviceInstance.entity.cfGuid
+      serviceInstance.entity.cfGuid,
+      false,
+      true
     );
   }
 
@@ -194,6 +198,6 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
   getColumns = () => this.serviceInstanceColumns;
-  getDataSource = () => null;
+  getDataSource = () => this.dataSource;
 
 }

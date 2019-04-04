@@ -54,6 +54,10 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       label: 'Service Instances'
     },
     {
+      link: 'user-service-instances',
+      label: 'User Service Instances'
+    },
+    {
       link: 'routes',
       label: 'Routes',
     },
