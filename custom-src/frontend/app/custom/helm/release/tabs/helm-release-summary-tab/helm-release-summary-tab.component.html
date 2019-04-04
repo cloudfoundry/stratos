@@ -19,8 +19,10 @@
               <app-metadata-item icon="title" label="Namespace">{{ release.namespace }}</app-metadata-item>
               <app-metadata-item icon="title" label="Version">{{ release.version }}</app-metadata-item>
               <app-metadata-item icon="title" label="Status">{{ release.status }}</app-metadata-item>
-              <app-metadata-item icon="date_range" label="First Deployed">{{ release.firstDeployed | date:'medium' }}</app-metadata-item>
-              <app-metadata-item icon="date_range" label="Last Deployed">{{ release.lastDeployed | date:'medium' }}</app-metadata-item>
+              <app-metadata-item icon="date_range" label="First Deployed">{{ release.firstDeployed | date:'medium' }}
+              </app-metadata-item>
+              <app-metadata-item icon="date_range" label="Last Deployed">{{ release.lastDeployed | date:'medium' }}
+              </app-metadata-item>
             </mat-card-content>
           </mat-card>
         </app-tile>
@@ -31,9 +33,11 @@
             </mat-card-header>
             <mat-card-content>
               <app-metadata-item icon="title" label="Name">{{ release.chart.metadata.name }}</app-metadata-item>
-              <app-metadata-item icon="title" label="Description">{{ release.chart.metadata.description }}</app-metadata-item>
+              <app-metadata-item icon="title" label="Description">{{ release.chart.metadata.description }}
+              </app-metadata-item>
               <app-metadata-item icon="title" label="Version">{{ release.chart.metadata.version }}</app-metadata-item>
-              <app-metadata-item icon="title" label="App Version">{{ release.chart.metadata.appVersion || '-' }}</app-metadata-item>
+              <app-metadata-item icon="title" label="App Version">{{ release.chart.metadata.appVersion || '-' }}
+              </app-metadata-item>
             </mat-card-content>
           </mat-card>
         </app-tile>
@@ -41,19 +45,19 @@
 
       <!-- Release statud charts -->
 
-      <app-tile-group>
+      <app-tile-group *ngIf="chartData$ | async as chartData">
         <app-tile>
           <mat-card class="full-card">
-            <app-ring-chart [data]="podsChartData" label="Pods"></app-ring-chart>
+            <app-ring-chart [data]="chartData.podsChartData" label="Pods"></app-ring-chart>
           </mat-card>
-        </app-tile>      
+        </app-tile>
         <app-tile>
           <mat-card class="full-card">
-            <app-ring-chart [customColors]="containersChartColors" [data]="containersChartData" label="Containers"></app-ring-chart>
+            <app-ring-chart [customColors]="containersChartColors" [data]="chartData.containersChartData"
+              label="Containers"></app-ring-chart>
           </mat-card>
-        </app-tile>      
+        </app-tile>
       </app-tile-group>
     </app-tile-grid>
   </div>
 </app-loading-page>
-

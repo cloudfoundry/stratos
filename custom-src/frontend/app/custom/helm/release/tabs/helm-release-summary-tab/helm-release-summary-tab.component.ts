@@ -28,10 +28,10 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     'Delete'
   );
 
-  private isBusy = new ReplaySubject<boolean>();
-  public isBusy$: Observable<boolean> = this.isBusy.asObservable();
-
-  public loadingMessage = 'Retrieving Release Details';
+  private busyDeletingSubject = new ReplaySubject<boolean>();
+  public isBusy$: Observable<boolean>;
+  private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
+  public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
 
   public podsChartData = [];
   public containersChartData = [];
@@ -50,8 +50,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Blue: #00B2E2
   // Yellow: #FFC107
 
-  private subs: Subscription[] = [];
   private deleted = false;
+  public chartData$: Observable<{ podsChartData: { name: string; value: any; }[]; containersChartData: { name: string; value: any; }[]; }>;
 
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
@@ -63,59 +63,78 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
     const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
 
-    this.subs.push(combineLatest([
+    this.isBusy$ = combineLatest([
       this.helmReleaseHelper.isFetching$,
-      releaseStatus$
+      releaseStatus$,
+      this.busyDeletingSubject.asObservable().pipe(
+        startWith(false)
+      )
     ]).pipe(
-      map(([isFetching, releaseStatus]) => isFetching || !releaseStatus),
+      map(([isFetching, releaseStatus, isDeleting]) => isFetching || !releaseStatus || isDeleting),
       startWith(true)
-    ).subscribe(busy => this.isBusy.next(busy)));
+    );
 
     // Async fetch release status
-    this.subs.push(releaseStatus$.subscribe(data => {
-      console.log(data);
-
-      this.podsChartData = Object.keys(data.pods.status).map(status => ({
-        name: status,
-        value: data.pods.status[status]
-      }));
-
-      this.containersChartData = [
-        {
-          name: 'Ready',
-          value: data.pods.ready
-        },
-        {
-          name: 'Not Ready',
-          value: data.pods.containers - data.pods.ready
-        }
-      ];
-    }));
+    this.chartData$ = releaseStatus$.pipe(
+      map(data => ({
+        podsChartData: Object.keys(data.pods.status).map(status => ({
+          name: status,
+          value: data.pods.status[status]
+        })),
+        containersChartData: [
+          {
+            name: 'Ready',
+            value: data.pods.ready
+          },
+          {
+            name: 'Not Ready',
+            value: data.pods.containers - data.pods.ready
+          }
+        ]
+      }))
+    );
   }
+
+  private startDelete() {
+    this.loadingMessage = 'Deleting Release';
+    this.busyDeletingSubject.next(true);
+  }
+
+  private endDelete() {
+    this.loadingMessage = this.DEFAULT_LOADING_MESSAGE;
+    this.busyDeletingSubject.next(false);
+  }
+
+  private completeDelete() {
+    this.deleted = true;
+    this.endDelete();
+  }
+
 
   public deleteRelease() {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
       // Make the http request to delete the release
       const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
-      this.loadingMessage = 'Deleting Release';
-      this.isBusy.next(true);
-      this.deleted = true;
+      this.startDelete();
       this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
         next: () => {
-          this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
-          this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
+
         },
         error: (err: any) => {
+          this.endDelete();
           this.store.dispatch(new ShowSnackBar('Failed to delete release', 'Close'));
           this.logService.error('Failed to delete release: ', err);
         },
-        complete: () => this.isBusy.next(false)
+        complete: () => {
+          this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
+          this.completeDelete();
+          this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
+        }
       });
     });
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(...this.subs);
     if (this.deleted) {
       this.store.dispatch(new HideSnackBar());
     }

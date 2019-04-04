@@ -2,7 +2,7 @@
   <h1>Install</h1>
   <mat-tab-group>
     <mat-tab label="UI" *ngIf="endpointsService.hasConnectedEndpointType('k8s') | async">
-      <p>You can install using this Helm Chart in the console.</p>
+      <p>You can install this Helm Chart from here.</p>
       <button class="chart-details-usage__install" color="primary" mat-button mat-raised-button
         routerLink="/monocular/install/{{chart.id}}/{{currentVersion}}">Install</button>
     </mat-tab>
