@@ -41,7 +41,6 @@ import { CardAppStatusComponent } from './components/cards/card-app-status/card-
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
-import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/card-cf-org-usage.component';
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
@@ -222,7 +221,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
     CardCfSpaceDetailsComponent,
@@ -329,7 +327,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
     RingChartComponent,

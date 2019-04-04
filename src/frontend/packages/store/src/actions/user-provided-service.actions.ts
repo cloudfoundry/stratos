@@ -30,14 +30,15 @@ export const getUserProvidedServiceInstanceRelations = [
 
 export class GetAllUserProvidedServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
+    paginationKey: string = null,
     public endpointGuid: string = null,
     public includeRelations: string[] = getUserProvidedServiceInstanceRelations,
     public populateMissing = true,
     public spaceGuid?: string
   ) {
     super();
-    this.paginationKey = spaceGuid ? createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid) :
-      createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
+    this.paginationKey = paginationKey || (spaceGuid ? createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid) :
+      createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid));
     this.options = new RequestOptions();
     this.options.url = `user_provided_service_instances`;
     this.options.method = 'get';

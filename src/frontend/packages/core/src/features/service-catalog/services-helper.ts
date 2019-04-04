@@ -9,14 +9,17 @@ import { GetService, GetServicePlansForService } from '../../../../store/src/act
 import { AppState } from '../../../../store/src/app-state';
 import {
   entityFactory,
+  organizationSchemaKey,
   serviceBrokerSchemaKey,
   serviceInstancesSchemaKey,
   servicePlanSchemaKey,
   serviceSchemaKey,
+  spaceSchemaKey,
 } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { QParam } from '../../../../store/src/types/pagination.types';
 import {
   IService,
   IServiceBroker,
@@ -30,7 +33,7 @@ import { EntityServiceFactory } from '../../core/entity-service-factory.service'
 import { safeStringToObj } from '../../core/utils.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { CardStatus } from '../../shared/shared.types';
-import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 
 
@@ -83,6 +86,25 @@ export const getServiceInstancesInCf = (cfGuid: string, store: Store<AppState>, 
     action: new GetServiceInstances(cfGuid, paginationKey),
     paginationMonitor: paginationMonitorFactory.create(paginationKey, entityFactory(serviceInstancesSchemaKey))
   }, true).entities$;
+};
+
+export const fetchServiceInstancesCount = (
+  cfGuid: string,
+  orgGuid: string = null,
+  spaceGuid: string = null,
+  store: Store<AppState>,
+  paginationMonitorFactory: PaginationMonitorFactory): Observable<number> => {
+  const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
+  const uniqueKey = spaceGuid || orgGuid || cfGuid;
+  const action = new GetServiceInstances(cfGuid, createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), [], false);
+  action.initialParams.q = [];
+  if (orgGuid) {
+    action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
+  }
+  if (spaceGuid) {
+    action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
+  }
+  return fetchTotalResults(action, store, paginationMonitorFactory);
 };
 
 export const getServicePlans = (
