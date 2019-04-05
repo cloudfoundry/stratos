@@ -8,6 +8,9 @@
     top: 20px;
     z-index: -1;
   }
+  &__inline-logo {
+    padding-right: 20px;
+  }
   &__sub-header {
     font-size: 16px;
     margin-top: -3px;
@@ -16,6 +19,7 @@
   &__sub-text {
     font-size: 16px;
     opacity: .6;
+    padding-top: 10px;
   }
   &__header {
     margin: 0;
@@ -30,7 +34,9 @@
     opacity: .4;
   }
   &__header-section {
-    margin: 10px 10px;
+    align-items: center;
+    display: flex;
+    margin: 10px;
   }
   &__content {
     background: linear-gradient(to bottom, transparent 0%, whitesmoke 10%);

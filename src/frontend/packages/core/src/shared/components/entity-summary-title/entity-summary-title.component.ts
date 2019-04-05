@@ -11,5 +11,6 @@ export class EntitySummaryTitleComponent {
   @Input() info: string;
   @Input() subText: string;
   @Input() imagePath: string;
+  @Input() inlineImagePath: string;
   constructor() { }
 }
