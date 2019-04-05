@@ -6,4 +6,8 @@
   <app-step [title]="'Endpoint Details'" [valid]="step1.validate | async" [onNext]="step1.onNext">
     <app-create-endpoint-cf-step-1 #step1></app-create-endpoint-cf-step-1>
   </app-step>
+  <app-step [title]="'Connect to Endpoint (Optional)'" [valid]="connect.valid" [onNext]="connect.onNext"
+    [onEnter]="connect.onEnter" [disablePrevious]="true" [cancelButtonText]="'Close'" [finishButtonText]="'Connect'">
+    <app-create-endpoint-connect #connect></app-create-endpoint-connect>
+  </app-step>
 </app-steppers>

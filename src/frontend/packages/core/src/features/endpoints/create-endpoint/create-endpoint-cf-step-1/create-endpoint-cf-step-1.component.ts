@@ -16,6 +16,7 @@ import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.t
 import { EndpointTypeConfig } from '../../../../core/extension/extension-types';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
+import { ConnectEndpointConfig } from '../../connect.service';
 import { getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
 
 
@@ -97,11 +98,21 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     return update$.pipe(pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
       map(([oldVal, newVal]) => newVal),
-      map(result => ({
-        success: !result.error,
-        redirect: !result.error,
-        message: !result.error ? '' : result.message
-      })));
+      map(result => {
+        const data: ConnectEndpointConfig = {
+          guid: result.message,
+          name: this.nameField.value,
+          type: this.endpoint.value,
+          ssoAllowed: !!this.ssoAllowedField.value
+        };
+        return {
+          success: !result.error,
+          redirect: false,
+          message: !result.error ? '' : result.message,
+          data
+        };
+      })
+    );
   }
 
   private getUpdateSelector(guid) {
