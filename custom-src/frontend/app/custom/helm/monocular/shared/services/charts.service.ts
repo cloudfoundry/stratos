@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
+import { Http, Response } from '@angular/http';
+import { Observable } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { Chart } from '../models/chart';
 import { ChartVersion } from '../models/chart-version';
 import { ConfigService } from './config.service';
 
-import { Observable } from 'rxjs';
-import { catchError, filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { Http, Response } from '@angular/http';
 
-/* TODO, This is a mocked class. */
+/* Most of this code should be in an effect and we should store the data in the app store */
 @Injectable()
 export class ChartsService {
   hostname: string;
@@ -30,8 +30,8 @@ export class ChartsService {
    */
   getCharts(repo: string = "all"): Observable<Chart[]> {
     let url: string
-    switch(repo) {
-      case 'all' : {
+    switch (repo) {
+      case 'all': {
         url = `${this.hostname}/v1/charts`
         break
       }
@@ -73,20 +73,20 @@ export class ChartsService {
     let re = new RegExp(query, 'i');
     return this.getCharts(repo).pipe(
       map(charts => {
-      return charts.filter(chart => {
-        return chart.attributes.name.match(re) ||
-         chart.attributes.description.match(re) ||
-         chart.attributes.repo.name.match(re) ||
-         this.arrayMatch(chart.attributes.keywords, re) ||
-         this.arrayMatch((chart.attributes.maintainers || []).map((m)=> { return m.name }), re) ||
-         this.arrayMatch(chart.attributes.sources, re)
+        return charts.filter(chart => {
+          return chart.attributes.name.match(re) ||
+            chart.attributes.description.match(re) ||
+            chart.attributes.repo.name.match(re) ||
+            this.arrayMatch(chart.attributes.keywords, re) ||
+            this.arrayMatch((chart.attributes.maintainers || []).map((m) => { return m.name }), re) ||
+            this.arrayMatch(chart.attributes.sources, re)
+        })
       })
-    })
     );
   }
 
   arrayMatch(keywords: string[], re): boolean {
-    if(!keywords) return false
+    if (!keywords) return false
 
     return keywords.some((keyword) => {
       return !!keyword.match(re)
@@ -159,10 +159,10 @@ export class ChartsService {
 
   private extractData(res: Response) {
     let body = res.json();
-    return body.data || { };
+    return body.data || {};
   }
 
-  private handleError (error: any) {
+  private handleError(error: any) {
     let errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg); // log to console instead

@@ -3,10 +3,17 @@
 
 $header-height: 200px;
 $icon-height: 150px;
-
+.summary-title {
+  flex: 3;
+  display: block;
+}
 .chart-details {
   display: flex;
   flex-direction: column;
+
+  &__wrapper {
+    display: flex;
+  }
 
   &__header {
     margin-top: -80px;
@@ -74,24 +81,26 @@ $icon-height: 150px;
 
   &__content {
     width: 100%;
-    max-width: $layout-max-width;
-    margin: auto;
     display: flex;
     flex-direction: column-reverse;
     padding: 0 2em 2em 2em;
+    word-break: break-word;
   }
 
   @include mappy-bp(medium) {
-
+    display: block;
     &__content {
       flex-direction: row;
+      height: 100%;
+      
 
       &__info {
-        width: 35%;
-        padding-left: 1em;
+        margin-right: 50px;
+        overflow: auto;
       }
 
       &__docs {
+        overflow: auto;
         padding-right: 1em;
         min-width: 0;
         flex: 3;

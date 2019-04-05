@@ -1,8 +1,9 @@
 <div class="chartInfo">
 
-  <app-chart-details-usage [chart]=chart *ngIf="currentVersion" [currentVersion]=currentVersion.attributes.version></app-chart-details-usage>
+  <app-chart-details-usage [chart]=chart *ngIf="currentVersion" [currentVersion]=currentVersion.attributes.version>
+  </app-chart-details-usage>
 
-  <app-panel class="chartInfo__properties" [border]=true>
+  <mat-card class="chartInfo__properties">
     <div class="chartInfo__versions">
       <app-chart-details-versions [versions]=versions [currentVersion]=currentVersion></app-chart-details-versions>
     </div>
@@ -24,5 +25,5 @@
         <a href="{{ source }}" target="_blank">{{ source }}</a>
       </div>
     </div>
-  </app-panel>
+  </mat-card>
 </div>

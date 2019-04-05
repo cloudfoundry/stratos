@@ -22,18 +22,16 @@ export class ChartDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private chartsService: ChartsService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.route.params.forEach((params: Params) => {
-      let repo = params['repo'];
-      let chartName = params['chartName'];
+      const repo = params.repo;
+      const chartName = params.chartName;
       this.chartsService.getChart(repo, chartName).subscribe(chart => {
         this.loading = false;
         this.chart = chart;
-        let version =
-          params['version'] ||
-          this.chart.relationships.latestChartVersion.data.version;
+        const version = params.version || this.chart.relationships.latestChartVersion.data.version;
         this.chartsService
           .getVersion(repo, chartName, version)
           .subscribe(chartVersion => {

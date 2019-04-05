@@ -1,4 +1,4 @@
-<app-panel class="chart-details-usage" [border]=true>
+<mat-card class="chart-details-usage">
   <h1>Install</h1>
   <mat-tab-group>
     <mat-tab label="UI" *ngIf="endpointsService.hasConnectedEndpointType('k8s') | async">
@@ -32,4 +32,4 @@
       </p>
     </mat-tab>
   </mat-tab-group>
-</app-panel>
+</mat-card>

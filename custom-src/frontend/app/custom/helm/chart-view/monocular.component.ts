@@ -29,12 +29,12 @@ export class MonocularChartViewComponent implements OnInit {
 
     if (!!parts.version) {
       breadcrumbs.push(
-        { value: this.title, routerLink: `/monocular/charts/${parts.repo}/${parts.chartName}`}
+        { value: this.title, routerLink: `/monocular/charts/${parts.repo}/${parts.chartName}` }
       );
       this.title = parts.version;
     }
 
-    this.breadcrumbs = [{breadcrumbs}];
+    this.breadcrumbs = [{ breadcrumbs }];
   }
 
- }
+}
