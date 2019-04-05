@@ -19,6 +19,8 @@ import { getPreviousRoutingState } from '../../../../../../store/src/types/routi
 import { LoggerService } from '../../../../core/logger.service';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
+import { ActivatedRoute } from '@angular/router';
+import { BASE_REDIRECT_QUERY } from '../stepper.types';
 
 
 
@@ -38,7 +40,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @Input() cancel = null;
   @Input() nextButtonProgress = true;
-  @Input() basePreviousRedirect: IRouterNavPayload;
+  @Input() basePreviousRedirect: IRouterNavPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
+    path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
+  } : null;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
@@ -60,6 +64,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
     private logger: LoggerService,
+    private route: ActivatedRoute
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(

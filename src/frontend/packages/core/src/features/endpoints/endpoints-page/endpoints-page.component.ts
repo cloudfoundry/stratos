@@ -1,12 +1,10 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { delay, filter, first, map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { queryParamMap } from '../../../core/auth-guard.service';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
@@ -72,24 +70,25 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
 
   ngOnInit() {
     this.startEndpointHealthCheckPulse();
-    const params = queryParamMap();
-    if (params.cnsi_guid) {
-      const guid = params.cnsi_guid;
-      window.history.pushState({}, '', '/endpoints');
-      this.sub = this.endpointsService.endpoints$.pipe(
-        delay(0),
-        filter(ep => !!ep[guid]),
-        map(ep => {
-          const endpoint = ep[guid];
-          if (endpoint.connectionStatus === 'connected') {
-            this.store.dispatch(new ShowSnackBar(`Connected endpoint '${endpoint.name}'`));
-          } else {
-            this.store.dispatch(new ShowSnackBar(`A problem occurred connecting endpoint ${endpoint.name}`));
-          }
-        }),
-        first(),
-      ).subscribe();
-    }
+    // Doesn't look like this is used (see connect-endpoint-dialog.component for actual handler)
+    // const params = queryParamMap();
+    // if (params.cnsi_guid) {
+    //   const guid = params.cnsi_guid;
+    //   window.history.pushState({}, '', '/endpoints');
+    //   this.sub = this.endpointsService.endpoints$.pipe(
+    //     delay(0),
+    //     filter(ep => !!ep[guid]),
+    //     map(ep => {
+    //       const endpoint = ep[guid];
+    //       if (endpoint.connectionStatus === 'connected') {
+    //         this.store.dispatch(new ShowSnackBar(`Connected endpoint '${endpoint.name}'`));
+    //       } else {
+    //         this.store.dispatch(new ShowSnackBar(`A problem occurred connecting endpoint ${endpoint.name}`));
+    //       }
+    //     }),
+    //     first(),
+    //   ).subscribe();
+    // }
   }
 
   ngOnDestroy() {

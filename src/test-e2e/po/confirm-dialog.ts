@@ -39,7 +39,7 @@ export class ConfirmDialogComponent extends Component {
 
     dialog.confirm();
     // Wait until not shown
-    dialog.waitUntilNotShown();
+    return dialog.waitUntilNotShown();
   }
 
   constructor(locator = element(by.css('app-dialog-confirm'))) {

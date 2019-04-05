@@ -8,7 +8,6 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
-import { CreateApplicationStepper } from './po/create-application-stepper.po';
 
 describe('Application Create', function () {
 
@@ -39,8 +38,9 @@ describe('Application Create', function () {
     const testAppName = ApplicationE2eHelper.createApplicationName(testTime);
 
     // Press '+' button
-    appWall.clickCreateApp();
-    const createAppStepper = new CreateApplicationStepper();
+    const baseCreateAppStep = appWall.clickCreateApp();
+    baseCreateAppStep.waitForPage();
+    const createAppStepper = baseCreateAppStep.selectShell();
     createAppStepper.waitUntilShown();
 
     // Expect cf step

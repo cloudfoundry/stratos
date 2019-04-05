@@ -1,13 +1,12 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { browser, promise } from 'protractor';
+import * as request from 'request-promise-native';
 
 import { E2E, e2e } from '../e2e';
 import { ConsoleUserType } from './e2e-helpers';
 
-import * as request from 'request-promise-native';
-
-// This helper is used internaly - tests should not need to use this class
+// This helper is used internally - tests should not need to use this class
 
 export class RequestHelpers {
 
@@ -19,9 +18,9 @@ export class RequestHelpers {
   }
 
   /**
- * @newRequest
- * @description Create a new request
- */
+   * @newRequest
+   * @description Create a new request
+   */
   newRequest() {
     const cookieJar = request.jar();
     const skipSSLValidation = browser.params.skipSSLValidation;
@@ -44,9 +43,10 @@ export class RequestHelpers {
       },
       resolveWithFullResponse: true,
       agentOptions: {
-        ca: ca
+        ca
       },
-      jar: cookieJar
+      jar: cookieJar,
+      timeout: 30000
     });
   }
 
@@ -82,7 +82,7 @@ export class RequestHelpers {
       E2E.debugLog('OK');
 
       // Get XSRF Token
-      if (response.headers['x-xsrf-token'] ) {
+      if (response.headers['x-xsrf-token']) {
         reqObj._xsrfToken = response.headers['x-xsrf-token'];
       }
       p.fulfill(response.body);
