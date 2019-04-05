@@ -11,11 +11,11 @@ import { AppState } from '../../../../../store/src/app-state';
 import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { selectApplicationSource, selectCfDetails } from '../../../../../store/src/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
-import { DeployApplicationSource } from '../../../../../store/src/types/deploy-application.types';
+import { DeployApplicationSource, SourceType } from '../../../../../store/src/types/deploy-application.types';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-
+import { getApplicationDeploySourceTypes, getAutoSelectedDeployType } from './deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application',
@@ -33,7 +33,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   deployButtonText = 'Deploy';
   skipConfig$: Observable<boolean> = observableOf(false);
   isRedeploy: boolean;
-
+  sourceTypes: SourceType[] = getApplicationDeploySourceTypes();
+  selectedSourceType: SourceType;
   constructor(
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
@@ -41,6 +42,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   ) {
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
+
+    this.selectedSourceType = getAutoSelectedDeployType(activatedRoute);
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {
@@ -109,7 +112,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     if (this.appGuid) {
       return 'Redeploy';
     } else {
-      return 'Deploy';
+      return `Deploy ${this.selectedSourceType ? 'from ' + this.selectedSourceType.name : ''}`;
     }
   }
 }

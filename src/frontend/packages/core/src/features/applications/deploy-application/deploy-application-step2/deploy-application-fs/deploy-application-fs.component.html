@@ -1,13 +1,19 @@
 <div class="deploy-app-local">
-  <div *ngIf="sourceType === 'file'" class="deploy-app-local__title">Deploy from local Application File archive</div>
-  <div *ngIf="sourceType === 'folder'" class="deploy-app-local__title">Deploy from local Application Folder</div>
+  <ng-container *ngIf="!hideTitle">
+    <div *ngIf="sourceType === 'file'" class="deploy-app-local__title">Deploy from local Application File archive</div>
+    <div *ngIf="sourceType === 'folder'" class="deploy-app-local__title">Deploy from local Application Folder</div>
+  </ng-container>
   <div *ngIf="sourceType === 'file'">
-    <input #localPathSelectFile fileread="localPathFile" type="file" class="deploy-app-local__input" name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" /> Choose an
-    <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>Application Archive file</button>
+    <input #localPathSelectFile fileread="localPathFile" type="file" class="deploy-app-local__input"
+      name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" /> Choose an
+    <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>Application Archive
+      file</button>
   </div>
   <div *ngIf="sourceType === 'folder'">
-    <input #localPathSelectFolder webkitdirectory fileread="localPathFile" type="file" class="deploy-app-local__input" name="localPathSelectFolder" id="localPathSelectFolder" (change)="onFileChange($event)" /> Choose an
-    <button (click)="localPathSelectFolder.click()" color="primary" mat-button mat-raised-button>Application Folder</button>
+    <input #localPathSelectFolder webkitdirectory fileread="localPathFile" type="file" class="deploy-app-local__input"
+      name="localPathSelectFolder" id="localPathSelectFolder" (change)="onFileChange($event)" /> Choose an
+    <button (click)="localPathSelectFolder.click()" color="primary" mat-button mat-raised-button>Application
+      Folder</button>
   </div>
   <div *ngIf="(sourceData$ | async) as source" class="deploy-app-local__info">
     <div *ngIf="source.summaryType === 'file'">
