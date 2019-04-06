@@ -263,18 +263,18 @@
                   *ngIf="editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleEndDateBeforeNow')">
                   {{alertInvalidPolicyScheduleEndDateBeforeNow}}
                 </mat-error>
-                <mat-error
+                <!-- <mat-error
                   *ngIf="editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')">
                   {{alertInvalidPolicyScheduleEndDateBeforeStartDate}}
-                </mat-error>
+                </mat-error> -->
                 <mat-error
                   *ngIf="editRecurringScheduleForm.get('start_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')">
                   {{alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
                 </mat-error>
-                <mat-error
+                <!-- <mat-error
                   *ngIf="editRecurringScheduleForm.get('end_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')">
                   {{alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
-                </mat-error>
+                </mat-error> -->
                 <mat-error
                   *ngIf="editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')">
                   {{alertInvalidPolicyScheduleRepeatOn}}
@@ -388,13 +388,13 @@
                   {{alertInvalidPolicyScheduleSpecificConflict}}
                 </mat-error>
                 <mat-error
-                  *ngIf="editSpecificDateForm.get('end_date_time').hasError('alert_invalid_policy_schedule_start_endtime_before_now')">
-                  {{alert_invalid_policy_schedule_start_endtime_before_now}}
+                  *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeNow')">
+                  {{alertInvalidPolicyScheduleEndDateTimeBeforeNow}}
                 </mat-error>
-                <mat-error
+                <!-- <mat-error
                   *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime')">
                   {{alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime}}
-                </mat-error>
+                </mat-error> -->
                 <mat-error
                   *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleSpecificConflict')">
                   {{alertInvalidPolicyScheduleSpecificConflict}}

@@ -1,9 +1,21 @@
 
+import * as moment from 'moment-timezone';
+
+export const PolicyDefault = {
+  instance_min_count: 1,
+  instance_max_count: 10,
+  scaling_rules: [],
+  schedules: {
+    timezone: moment.tz.guess(),
+    recurring_schedule: [],
+    specific_date: []
+  }
+};
 export const PolicyDefaultSetting = {
   breach_duration_secs_default: 120,
   breach_duration_secs_min: 60,
   breach_duration_secs_max: 3600,
-  cool_down_secs_default: 120,
+  cool_down_secs_default: 300,
   cool_down_secs_min: 60,
   cool_down_secs_max: 3600,
 };
