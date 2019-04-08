@@ -1,6 +1,7 @@
 import { browser, by, element, ElementFinder, promise } from 'protractor';
 import { protractor } from 'protractor/built';
 
+import { e2e } from '../e2e';
 import { Component } from './component.po';
 
 const until = protractor.ExpectedConditions;
@@ -57,6 +58,15 @@ export class SnackBarComponent extends Component {
       until.presenceOf(mesgElm),
       10000,
       'Snackbar: "' + message + '" taking too long to appear in the DOM'
-    ).then(() => browser.driver.sleep(100));
+    )
+      .catch(e => this.getMessage()
+        .then(actualMessage => e2e.log('Actual snackbar text: ', actualMessage))
+        .then(() => { throw e; })
+        .catch(() => {
+          e2e.log('No snackbard text');
+          throw e;
+        })
+      )
+      .then(() => browser.driver.sleep(100));
   }
 }

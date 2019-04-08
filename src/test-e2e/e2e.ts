@@ -49,9 +49,9 @@ export class E2E {
   /**
    * Log message in the control flow
    */
-  log(log: string) {
+  log(log: string, ...optionalParams: any[]) {
     /* tslint:disable:no-console*/
-    protractor.promise.controlFlow().execute(() => console.log(log));
+    protractor.promise.controlFlow().execute(() => console.log(log, optionalParams));
     /* tslint:disable */
   }
 

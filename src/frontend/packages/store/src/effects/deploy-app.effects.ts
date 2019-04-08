@@ -33,8 +33,8 @@ import {
 import { AppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
 
-export function createFailedGithubRequestMessage(error) {
-  const response = parseHttpPipeError(error);
+export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {
+  const response = parseHttpPipeError(error, logger);
   const message = response.message || '';
   return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
     'Github ' + message.substring(0, message.indexOf('(')) :
@@ -62,7 +62,7 @@ export class DeployAppEffects {
         map(res => new ProjectExists(action.projectName, res)),
         catchError(err => observableOf(err.status === 404 ?
           new ProjectDoesntExist(action.projectName) :
-          new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err))
+          new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err, this.logger))
         ))
       );
     })
@@ -102,7 +102,7 @@ export class DeployAppEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
         ]));
     }));
 
@@ -128,7 +128,7 @@ export class DeployAppEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
         ]));
     }));
 
@@ -157,7 +157,7 @@ export class DeployAppEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
         ]));
     }));
 

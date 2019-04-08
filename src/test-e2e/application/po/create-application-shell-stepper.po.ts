@@ -4,7 +4,7 @@ import { StepperComponent } from '../../po/stepper.po';
 import { ApplicationE2eHelper } from '../application-e2e-helpers';
 
 
-export class CreateApplicationStepper extends StepperComponent {
+export class CreateApplicationShellStepper extends StepperComponent {
 
   private cfFieldName = 'cf';
   private orgFieldName = 'org';

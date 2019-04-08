@@ -1,21 +1,34 @@
-<app-meta-card class="cf-space-usage">
-  <app-meta-card-title>Summary</app-meta-card-title>
-  <app-meta-card-item>
-    <app-meta-card-key>User Space Role/s</app-meta-card-key>
-    <app-meta-card-value>{{ cfSpaceService.userRole$ | async }}</app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Quota Definition Name</app-meta-card-key>
-    <app-meta-card-value>{{ (cfSpaceService.quotaDefinition$ | async)?.entity.name }}</app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Provision Paid Services</app-meta-card-key>
-    <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no"></app-boolean-indicator>
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>SSH Access</app-meta-card-key>
-    <app-meta-card-value>{{ allowSshStatus$ | async }}</app-meta-card-value>
-  </app-meta-card-item>
-</app-meta-card>
+<div class="cf-space-usage">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Summary</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="app-metadata">
+        <div class="app-metadata__two-cols">
+          <app-metadata-item label="User Space Role/s">
+            {{ (cfSpaceService.userRole$ | async) }}
+          </app-metadata-item>
+          <app-metadata-item label="Quota Definition Name">
+            {{ (cfSpaceService.quotaDefinition$ | async)?.entity.name }}
+          </app-metadata-item>
+          <app-metadata-item label="Provision Paid Services">
+            <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no">
+            </app-boolean-indicator>
+          </app-metadata-item>
+        </div>
+        <div class="app-metadata__two-cols">
+          <app-metadata-item label="SSH Access">
+            {{ allowSshStatus$ | async }}
+          </app-metadata-item>
+          <app-metadata-item label="Created At">
+            {{ ((cfSpaceService.space$ | async)?.entity?.metadata?.created_at) | date: 'medium' }}
+          </app-metadata-item>
+          <app-metadata-item label="Updated At">
+            {{ ((cfSpaceService.space$ | async)?.entity?.metadata?.updated_at) | date: 'medium' }}
+          </app-metadata-item>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

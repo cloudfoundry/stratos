@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
 import { IUserFavoritesGroups } from '../../../../../store/src/types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
@@ -27,6 +28,21 @@ export class HomePageComponent {
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
     this.haveRegistered$ = endpointsService.haveRegistered$;
+
+    // Redirect to /applications if not enabled
+    endpointsService.disablePersistenceFeatures$.pipe(
+      map(off => {
+        if (off) {
+          store.dispatch(new RouterNav({
+            path: ['applications'],
+            extras: {
+              replaceUrl: true
+            }
+          }));
+        }
+      }),
+      first()
+    ).subscribe();
 
     const manager = new UserFavoriteManager(store, logger);
     this.showFilterToggle$ = manager.getAllFavorites().pipe(

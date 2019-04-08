@@ -5,13 +5,13 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { LoggerService } from '../../../../../../core/logger.service';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-import { LoggerService } from '../../../../../../core/logger.service';
 
 
 export interface MetaCardMenuItem {
@@ -52,6 +52,8 @@ export class MetaCardComponent {
   statusIconByTitle = false;
   @Input()
   statusIconTooltip: string;
+  @Input()
+  statusBackground = false;
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {

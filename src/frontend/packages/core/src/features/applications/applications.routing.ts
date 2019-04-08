@@ -31,10 +31,15 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
+import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 
 const applicationsRoutes: Routes = [
   {
     path: 'new',
+    component: NewApplicationBaseStepComponent,
+  },
+  {
+    path: 'create',
     component: CreateApplicationComponent,
   },
   {

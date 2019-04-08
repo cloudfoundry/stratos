@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import { LoggerService } from './logger.service';
+
 export const urlValidationExpression =
   '^' +
   // protocol identifier
@@ -233,14 +235,14 @@ export function pathSet(path: string, object: any, value: any) {
   }
 }
 
-export function parseHttpPipeError(res): { message?: string } {
+export function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
   if (!res.status) {
     return res;
   }
   try {
     return res.json();
   } catch (e) {
-    this.logger.warn('Failed to parse response body', e);
+    logger.warn('Failed to parse response body', e);
   }
   return {};
 }

@@ -1,22 +1,22 @@
-
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
-import { withLatestFrom, skipWhile, map, first, filter } from 'rxjs/operators';
+import { RouterNav } from '../../../store/src/actions/router.actions';
+import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import {
   endpointEntitiesSelector,
+  endpointsEntityRequestDataSelector,
   endpointStatusSelector,
-  endpointsEntityRequestDataSelector
 } from '../../../store/src/selectors/endpoint.selectors';
-import { Injectable } from '@angular/core';
-import { EndpointState, EndpointModel } from '../../../store/src/types/endpoint.types';
-import { Store } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { UserService } from './user.service';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { RouterNav } from '../../../store/src/actions/router.actions';
-import { endpointHealthChecks, EndpointHealthCheck } from '../../endpoints-health-checks';
+import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
+import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
 import { getEndpointTypes } from '../features/endpoints/endpoint-helpers';
+import { UserService } from './user.service';
+
 
 
 @Injectable()
@@ -25,6 +25,7 @@ export class EndpointsService implements CanActivate {
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
+  disablePersistenceFeatures$: Observable<boolean>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint) {
@@ -45,6 +46,10 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking')));
+
+    this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
+      map((auth) => auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true')
+    );
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {

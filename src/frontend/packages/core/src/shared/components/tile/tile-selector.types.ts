@@ -2,12 +2,19 @@ export interface ITileIconConfig {
   matIcon: string;
   matIconFont?: string;
 }
+
+export interface ITileImgConfig {
+  location: string;
+}
+
+export type ITileGraphic = ITileIconConfig | ITileImgConfig;
+
 export class ITileConfig<T extends ITileData = ITileData> {
   constructor(
-    readonly key: number,
     public label: string | number,
-    public icon: ITileIconConfig,
+    public graphic: ITileGraphic,
     public data?: T,
+    public hidden = false
   ) { }
 }
 
