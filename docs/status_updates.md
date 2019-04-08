@@ -2,6 +2,31 @@
 
 Weekly status updates are published here.
 
+## 5 April 2019
+This week the Stratos team have mostly been ...
+- Improving e2e reliability and merging existing PRs.
+- Improving the create/deploy app flow. Users will now only be presented with a single button to start the flow. Their first step is to decide where the source for the app will come from (github, gitlab, locally, etc) or to create without source.
+- Removing the endpoints page when there's no persistent storage. This is now on par with the home/favourites page.
+- Adding an option that will allow the user to stay signed in to the console (if option is checked and the page remains visible).
+- Starting working towards the ability to remove all roles from a cf user with a single click (after confirmation).
+- Starting working towards an optional 'connect' step when registering an endpoint.
+- Fixed a few minor trivial bugs
+
+## 22 March 2019
+
+This week:
+
+- Work continues to complete the addition of support for Cloud Foundry User Provided Services. This is almost done. A few small issues and corner-cases cropped up which we have been working on.
+- Added support for slide-in help content and wired this into the endpoint connection dialog
+- We continued to refine the visual presentation of endpoints within Stratos
+
+## 15 March 2019
+
+This week:
+
+- Enhancing the endpoint registration view to use a tile selector
+- Updating our docs on our use cases and requirements for the Cloud Foundry V3 API
+
 ## 8 March 2019
 
 This week:

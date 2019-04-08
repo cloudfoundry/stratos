@@ -1,7 +1,6 @@
 import { DataSource } from '@angular/cdk/table';
 import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import {
   BehaviorSubject,
   combineLatest,
@@ -12,12 +11,37 @@ import {
   Subscription,
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
-
-import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { IListDataSourceConfig } from './list-data-source-config';
 import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
+
+import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
+import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
+import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { entityFactory, EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationParam,
+  QParam,
+} from '../../../../../../store/src/types/pagination.types';
+import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
+import {
+  EntitySelectConfig,
   getRowUniqueId,
+  IEntitySelectItem,
   IListDataSource,
   ListPaginationMultiFilterChange,
   RowsState,
@@ -25,13 +49,7 @@ import {
 } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
-import { PaginationEntityState, PaginatedAction, PaginationParam, QParam } from '../../../../../../store/src/types/pagination.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
-import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
-
+import { LocalPaginationHelpers } from './local-list.helpers';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -79,7 +97,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public editRow: T;
 
   // Cached collections
-  public filteredRows: Array<T>;
   public transformedEntities: Array<T>;
 
   // Misc
@@ -94,8 +111,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private externalDestroy: () => void;
 
   protected store: Store<AppState>;
-  public action: PaginatedAction;
-  protected sourceScheme: schema.Entity;
+  public action: PaginatedAction | PaginatedAction[];
+  public masterAction: PaginatedAction;
+  protected sourceScheme: EntitySchema;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
@@ -107,9 +125,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
   private metricsAction: MetricsAction;
+  public entitySelectConfig: EntitySelectConfig;
 
   public refresh: () => void;
 
+  public isMultiAction$: Observable<boolean>;
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
   constructor(
@@ -120,7 +140,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const paginationMonitor = new PaginationMonitor(
       this.store,
       this.paginationKey,
-      this.sourceScheme
+      this.sourceScheme,
+      this.isLocal
     );
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
@@ -129,7 +150,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     },
       this.isLocal
     );
-
+    this.isMultiAction$ = paginationMonitor.isMultiAction$;
     const transformEntities = this.transformEntities || [];
     // Add any additional functions via an optional listConfig, such as sorting from the column definition
     const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
@@ -146,15 +167,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     const dataFunctions: DataFunction<any>[] = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
-    this.transformedEntitiesSubscription = transformedEntities$.pipe(
-      tap(items => this.transformedEntities = items)
-    ).subscribe();
-
-    const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
-      // if (paginationEntity.currentlyMaxed) {
-      //   // If we're currently maxed the entities are junk, don't try to update total counts
-      //   return;
-      // }
+    const setResultCount = (paginationEntity: PaginationEntityState, entities: any[]) => {
       const newLength = entities.length;
       if (
         paginationEntity.ids[paginationEntity.currentPage] &&
@@ -162,21 +175,35 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));
       }
     };
-    this.page$ = this.isLocal ?
-      new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
-      : transformedEntities$.pipe(publishReplay(1), refCount());
 
-    this.pageSubscription = this.page$.pipe(tap(items => this.filteredRows = items)).subscribe();
-    this.pagination$ = pagination$;
+    // NJ - We should avoid these kind on side-effect subscriptions
+    this.transformedEntitiesSubscription = transformedEntities$.pipe(
+      tap(items => this.transformedEntities = items)
+    ).subscribe();
+
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
+    const page$ = this.isLocal ?
+      new LocalListController<T>(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
+      : transformedEntities$;
+
+    this.page$ = page$.pipe(
+      withLatestFrom(this.isLoadingPage$.pipe(startWith(false))),
+      filter(([page, isLoading]) => !isLoading),
+      map(([page]) => page),
+      publishReplay(1),
+      refCount()
+    );
+
+    this.pagination$ = pagination$;
+
 
     this.sort$ = this.createSortObservable();
 
     this.filter$ = this.createFilterObservable();
 
-    this.maxedResults$ = !!this.action.flattenPaginationMax ?
+    this.maxedResults$ = !!this.masterAction.flattenPaginationMax ?
       this.pagination$.pipe(
-        map(pagination => pagination.currentlyMaxed),
+        map(LocalPaginationHelpers.isPaginationMaxed),
         distinctUntilChanged(),
       ) : observableOf(false);
   }
@@ -185,7 +212,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.store = config.store;
     this.action = config.action;
     this.refresh = this.getRefreshFunction(config);
-    this.sourceScheme = config.schema;
+    this.sourceScheme = config.schema instanceof MultiActionConfig ?
+      entityFactory(config.schema.schemaConfigs[0].schemaKey) : config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
@@ -197,12 +225,57 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+    this.masterAction = this.action as PaginatedAction;
+    this.setupAction(config);
     if (!this.isLocal && this.config.listConfig) {
       // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
       // (one for the page size in the action and another when the initial page size is set)
-      this.action.initialParams = this.action.initialParams || {};
-      this.action.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
+      this.masterAction.initialParams = this.masterAction.initialParams || {};
+      this.masterAction.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
     }
+  }
+  private setupAction(config: IListDataSourceConfig<A, T>) {
+    if (config.schema instanceof MultiActionConfig) {
+      if (!config.isLocal) {
+        // We cannot do multi action lists for none local lists
+        this.action = config.schema[0].paginationAction;
+        this.masterAction = this.action as PaginatedAction;
+      } else {
+        this.action = config.schema.schemaConfigs.map((multiActionConfig, i) => ({
+          ...multiActionConfig.paginationAction,
+          paginationKey: this.masterAction.paginationKey,
+          entityKey: this.masterAction.entityKey,
+          entity: this.masterAction.entity,
+          flattenPaginationMax: this.masterAction.flattenPaginationMax,
+          flattenPagination: this.masterAction.flattenPagination,
+          __forcedPageNumber__: i + 1,
+          __forcedPageSchemaKey__: multiActionConfig.schemaKey
+        }) as PaginatedAction);
+      }
+      this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
+    }
+  }
+
+  private getEntitySelectConfig(multiActionConfig: MultiActionConfig) {
+    if (!multiActionConfig.selectPlaceholder) {
+      return null;
+    }
+    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => ([
+      ...actionMap,
+      {
+        page: i + 1,
+        label: schemaConfig.prettyName,
+        schemaKey: schemaConfig.schemaKey
+      }
+    ]), [] as IEntitySelectItem[]);
+    if (Object.keys(pageToIdMap).length < 2) {
+      return null;
+    }
+    return new EntitySelectConfig(
+      multiActionConfig.selectPlaceholder,
+      multiActionConfig.deselectText,
+      pageToIdMap
+    );
   }
 
   private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
@@ -210,12 +283,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     return config.refresh ? config.refresh : () => {
-      this.store.dispatch(this.metricsAction || this.action);
+      if (Array.isArray(this.action)) {
+        this.action.forEach(action => this.store.dispatch(action));
+      } else {
+        this.store.dispatch(this.metricsAction || this.masterAction);
+      }
     };
   }
 
   disconnect() {
-    this.pageSubscription.unsubscribe();
     this.transformedEntitiesSubscription.unsubscribe();
     if (this.seedSyncSub) { this.seedSyncSub.unsubscribe(); }
     this.externalDestroy();
@@ -238,8 +314,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   selectedRowToggle(row: T, multiMode: boolean = true) {
     this.getRowState(row).pipe(
-      first()
-    ).subscribe(rowState => {
+      first(),
+      withLatestFrom(this.page$)
+    ).subscribe(([rowState, filteredRows]) => {
       if (rowState.disabled) {
         return;
       }
@@ -252,7 +329,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           this.selectedRows.clear();
         }
         this.selectedRows.set(this.getRowUniqueId(row), row);
-        this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
+        this.selectAllChecked = multiMode && this.selectedRows.size === filteredRows.length;
       }
       this.selectedRows$.next(this.selectedRows);
       this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
@@ -262,24 +339,26 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   selectAllFilteredRows() {
     this.selectAllChecked = !this.selectAllChecked;
 
-    const updatedAllRows = this.filteredRows.reduce((obs, row) => {
-      obs.push(this.getRowState(row).pipe(
-        first(),
-        tap(rowState => {
-          if (rowState.disabled) {
-            return;
-          }
-          if (this.selectAllChecked) {
-            this.selectedRows.set(this.getRowUniqueId(row), row);
-          } else {
-            this.selectedRows.delete(this.getRowUniqueId(row));
-          }
-        })
-      ));
-      return obs;
-    }, []);
+    const updatedAllRows$ = this.page$.pipe(switchMap((filterEntities) => {
+      return combineLatest(filterEntities.reduce((obs, row) => {
+        obs.push(this.getRowState(row).pipe(
+          first(),
+          tap(rowState => {
+            if (rowState.disabled) {
+              return;
+            }
+            if (this.selectAllChecked) {
+              this.selectedRows.set(this.getRowUniqueId(row), row);
+            } else {
+              this.selectedRows.delete(this.getRowUniqueId(row));
+            }
+          })
+        ));
+        return obs;
+      }, []));
+    }));
 
-    combineLatest(...updatedAllRows).pipe(
+    updatedAllRows$.pipe(
       first()
     ).subscribe(() => {
       this.selectedRows$.next(this.selectedRows);
@@ -308,7 +387,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
 
-  attachTransformEntity(entities$, entityLettable): Observable<T[]> {
+  attachTransformEntity<Y = T>(entities$, entityLettable): Observable<Y[]> {
     if (entityLettable) {
       return entities$.pipe(
         this.transformEntity

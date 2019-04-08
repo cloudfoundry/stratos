@@ -10,6 +10,10 @@ import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
+import {
+  AddServiceInstanceBaseStepComponent,
+} from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
 import {
   AddServiceInstanceComponent,
 } from './components/add-service-instance/add-service-instance/add-service-instance.component';
@@ -20,6 +24,9 @@ import { SelectServiceComponent } from './components/add-service-instance/select
 import {
   SpecifyDetailsStepComponent,
 } from './components/add-service-instance/specify-details-step/specify-details-step.component';
+import {
+  SpecifyUserProvidedDetailsComponent,
+} from './components/add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -28,13 +35,13 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { BlurDirective } from './components/blur.directive';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
-import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/card-cf-org-usage.component';
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
@@ -54,6 +61,7 @@ import {
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CfOrgSpaceLinksComponent } from './components/cf-org-space-links/cf-org-space-links.component';
 import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
@@ -98,6 +106,8 @@ import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
+import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
+import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 import {
@@ -124,6 +134,7 @@ import { StartEndDateComponent } from './components/start-end-date/start-end-dat
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
@@ -147,11 +158,9 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
-import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
-import { BlurDirective } from './components/blur.directive';
 
 /* tslint:disable:max-line-length */
 
@@ -216,7 +225,6 @@ import { BlurDirective } from './components/blur.directive';
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
     CardCfSpaceDetailsComponent,
@@ -270,9 +278,14 @@ import { BlurDirective } from './components/blur.directive';
     FavoritesMetaCardComponent,
     FavoritesEntityListComponent,
     MultilineTitleComponent,
+    TileSelectorComponent,
+    SpecifyUserProvidedDetailsComponent,
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective,
     EndpointCardComponent,
     MarkdownPreviewComponent,
-    MarkdownContentObserverDirective
+    MarkdownContentObserverDirective,
+    CfOrgSpaceLinksComponent
   ],
   exports: [
     FormsModule,
@@ -321,7 +334,6 @@ import { BlurDirective } from './components/blur.directive';
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
     RingChartComponent,
@@ -374,7 +386,10 @@ import { BlurDirective } from './components/blur.directive';
     FavoritesGlobalListComponent,
     MultilineTitleComponent,
     MarkdownPreviewComponent,
-    MarkdownContentObserverDirective
+    MarkdownContentObserverDirective,
+    TileSelectorComponent,
+    AddServiceInstanceBaseStepComponent,
+    AppNameUniqueDirective
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -394,7 +409,8 @@ import { BlurDirective } from './components/blur.directive';
     ServiceActionHelperService,
     MetricsRangeSelectorService,
     GitSCMService,
-    MetricsRangeSelectorService
+    MetricsRangeSelectorService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class SharedModule { }

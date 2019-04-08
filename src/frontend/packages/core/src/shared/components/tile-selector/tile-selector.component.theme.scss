@@ -1,0 +1,25 @@
+@import '~@angular/material/theming';
+@mixin tile-selector-theme($theme, $app-theme) {
+  $background-color: map-get($app-theme, app-background-color);
+  $background: map-get($theme, background);
+  $foreground: map-get($theme, foreground);
+  $border-color: darken($background-color, 10%);
+  $primary: map-get($theme, primary);
+  .tile-selector {
+    @include mat-elevation-transition;
+    background: mat-color($background, card);
+    border: 1px solid $border-color;
+    color: mat-color($foreground, text);
+    &__selected {
+      @include mat-elevation(1);
+    }
+    &__content {
+      background-color: darken($background-color, 2%);
+      border-top: 1px solid $border-color;
+    }
+    &__more {
+      border: 1px solid $border-color;
+      color: mat-color($primary);
+    }
+  }
+}

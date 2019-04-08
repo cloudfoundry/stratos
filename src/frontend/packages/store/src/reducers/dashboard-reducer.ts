@@ -1,13 +1,15 @@
-import { SideNavModes } from '../types/dashboard.types';
 import {
+  CHANGE_SIDE_NAV_MODE,
+  CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
   OPEN_SIDE_NAV,
-  TOGGLE_SIDE_NAV,
-  TOGGLE_HEADER_EVENT,
+  SET_HEADER_EVENT,
+  SetHeaderEvent,
   SHOW_SIDE_HELP,
-  CLOSE_SIDE_HELP
+  TOGGLE_HEADER_EVENT,
+  TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
-import { CHANGE_SIDE_NAV_MODE } from '../actions/dashboard-actions';
+import { SideNavModes } from '../types/dashboard.types';
 
 export interface DashboardState {
   sidenavOpen: boolean;
@@ -19,10 +21,10 @@ export interface DashboardState {
 
 export const defaultDashboardState: DashboardState = {
   sidenavOpen: true,
-  sideNavMode: 'over',
+  sideNavMode: 'side',
   headerEventMinimized: false,
   sideHelpOpen: false,
-  sideHelpDocument: ''
+  sideHelpDocument: null
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action) {
@@ -41,6 +43,9 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return { ...state, sideHelpOpen: true, sideHelpDocument: action.document };
     case CLOSE_SIDE_HELP:
       return { ...state, sideHelpOpen: false, sideHelpDocument: '' };
+    case SET_HEADER_EVENT:
+      const setHeaderEvent = action as SetHeaderEvent;
+      return { ...state, headerEventMinimized: setHeaderEvent.minimised };
     default:
       return state;
   }

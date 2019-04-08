@@ -1,12 +1,13 @@
 import { browser, promise, protractor } from 'protractor';
 
-import { CFResponse, createEmptyCfResponse } from '../../frontend/packages/store/src/types/api.types';
+import { IServiceInstance } from '../../frontend/packages/core/src/core/cf-api-svc.types';
+import { APIResource, CFResponse, createEmptyCfResponse } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
-import { CreateServiceInstance } from './create-service-instance.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
 const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
 const until = protractor.ExpectedConditions;
@@ -15,26 +16,34 @@ export class ServicesHelperE2E {
 
   cfRequestHelper: CFRequestHelpers;
   cfHelper: CFHelpers;
-  createServiceInstance: CreateServiceInstance;
-  serviceInstanceName: string;
+  createServiceInstance: CreateMarketplaceServiceInstance;
 
-  constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateServiceInstance = null) {
-    this.cfRequestHelper = new CFRequestHelpers(e2eSetup);
-    this.cfHelper = new CFHelpers(e2eSetup);
-    this.serviceInstanceName = E2EHelpers.createCustomName(customServiceLabel).toLowerCase();
-    expect(this.serviceInstanceName.length)
-      .toBeLessThanOrEqual(50, `Service name should not exceed 50 characters: ${this.serviceInstanceName}`);
+  constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateMarketplaceServiceInstance = null, seed?: ServicesHelperE2E) {
+    this.cfRequestHelper = seed ? seed.cfRequestHelper : new CFRequestHelpers(e2eSetup);
+    this.cfHelper = seed ? seed.cfHelper : new CFHelpers(e2eSetup);
     if (!!createServiceInstance) {
       this.createServiceInstance = createServiceInstance;
     }
   }
 
-  addPrefixToServiceName = (prefix: string) => {
-    this.serviceInstanceName = `${prefix}-${this.serviceInstanceName}`;
-    expect(this.serviceInstanceName.length)
-      .toBeLessThanOrEqual(50, `Service name should not exceed 50 characters: ${this.serviceInstanceName}`);
+  createServiceInstanceName(): string {
+    const serviceInstanceName = E2EHelpers.createCustomName(customServiceLabel).toLowerCase();
+    this.checkServiceInstanceName(serviceInstanceName);
+    return serviceInstanceName;
   }
-  setCreateServiceInstance = (createServiceInstance: CreateServiceInstance) => {
+
+  addPrefixToServiceName = (prefix: string, serviceInstanceName: string): string => {
+    const newServiceInstanceName = `${prefix}-${serviceInstanceName}`;
+    this.checkServiceInstanceName(newServiceInstanceName);
+    return newServiceInstanceName;
+  }
+
+  private checkServiceInstanceName(serviceInstanceName: string) {
+    expect(serviceInstanceName.length)
+      .toBeLessThanOrEqual(50, `Service name should not exceed 50 characters: ${serviceInstanceName}`);
+  }
+
+  setCreateServiceInstance = (createServiceInstance: CreateMarketplaceServiceInstance) => {
     this.createServiceInstance = createServiceInstance;
   }
 
@@ -53,10 +62,15 @@ export class ServicesHelperE2E {
   }
 
   deleteServiceInstance = (cfGuid: string, serviceGuid: string): promise.Promise<CFResponse> => {
+    const id = `${cfGuid}:${serviceGuid}`;
     return this.cfRequestHelper.sendCfDelete(
       cfGuid,
       `service_instances/${serviceGuid}?async=false&recursive=true`
-    );
+    )
+      .catch(err => {
+        e2e.log(`Deleting service instance '${id}' (cf:si guid) failed: `, err);
+        throw err;
+      });
   }
 
   fetchServiceInstanceByName = (cfGuid: string, serviceInstanceName: string): promise.Promise<CFResponse> => {
@@ -66,7 +80,7 @@ export class ServicesHelperE2E {
     );
   }
 
-  createService = (serviceName: string, marketplaceMode = false, bindApp: string = null) => {
+  createService = (serviceName: string, serviceInstanceName: string, marketplaceMode = false, bindApp: string = null) => {
     this.createServiceInstance.waitForPage();
 
     // Select CF/Org/Space
@@ -91,13 +105,13 @@ export class ServicesHelperE2E {
         this.createServiceInstance.stepper.next();
       }
 
-      this.setServiceInstanceDetail();
+      this.setServiceInstanceDetail(serviceInstanceName);
 
-      this.createInstanceAttempt(0, 3, serviceName);
+      this.createInstanceAttempt(0, 3, serviceName, serviceInstanceName);
     });
   }
 
-  createInstanceAttempt = (retryNumber: number, maxRetries: number, serviceName: string) => {
+  createInstanceAttempt = (retryNumber: number, maxRetries: number, serviceName: string, serviceInstanceName: string) => {
     this.createServiceInstance.stepper.next();
     browser.wait(until.or(
       until.invisibilityOf(this.createServiceInstance.stepper.nextButton()),
@@ -108,10 +122,10 @@ export class ServicesHelperE2E {
       if (canNext) {
         const attemptsLeft = maxRetries - retryNumber;
         if (!!attemptsLeft) {
-          e2e.log(`Failed to create service instance '${this.serviceInstanceName}' of type '${serviceName}'.
+          e2e.log(`Failed to create service instance '${serviceInstanceName}' of type '${serviceName}'.
            Attempting ${attemptsLeft} more time/s`);
           browser.sleep(1000);
-          this.createInstanceAttempt(retryNumber + 1, maxRetries, serviceName);
+          this.createInstanceAttempt(retryNumber + 1, maxRetries, serviceName, serviceInstanceName);
         } else {
           fail(`Failed to create service instance after ${maxRetries} retries`);
         }
@@ -125,7 +139,7 @@ export class ServicesHelperE2E {
       .then(totalAppsInSpace => !!totalAppsInSpace);
   }
 
-  setServiceInstanceDetail = (isEditServiceInstance = false) => {
+  setServiceInstanceDetail = (serviceInstanceName: string, isEditServiceInstance = false) => {
     this.createServiceInstance.stepper.waitForStep('Service Instance');
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     if (!isEditServiceInstance) {
@@ -134,7 +148,7 @@ export class ServicesHelperE2E {
       expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     }
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
-    this.createServiceInstance.stepper.setServiceName(this.serviceInstanceName);
+    this.createServiceInstance.stepper.setServiceName(serviceInstanceName);
   }
 
   setBindApp = (bindApp: string = null) => {
@@ -198,6 +212,7 @@ export class ServicesHelperE2E {
       cfGuid = guid;
       return this.fetchServicesInstances(cfGuid).catch(failure => {
         if (failure && failure.error && failure.error.statusCode === 404) {
+          e2e.log('cleanUpServiceInstances: Failed to fetch SI... ', failure.error);
           const emptyRes: CFResponse = {
             next_url: '',
             prev_url: '',
@@ -211,17 +226,53 @@ export class ServicesHelperE2E {
       });
     }).then(response => {
       const services = response.resources;
-      const serviceInstances = services.filter(serviceInstance => {
-        return serviceInstanceNames.findIndex(name => name === serviceInstance.entity.name) >= 0;
+      const serviceInstances: APIResource<IServiceInstance>[] = [];
+      const notFoundSI = [];
+      serviceInstanceNames.forEach(name => {
+        const serviceInstance = services.find(si => name === si.entity.name);
+        if (serviceInstance) {
+          serviceInstances.push(serviceInstance);
+        } else {
+          notFoundSI.push(name);
+        }
       });
+
+      if (!!notFoundSI.length) {
+        e2e.log('cleanUpServiceInstances: Failed to find some service instances... ', notFoundSI);
+        e2e.log('cleanUpServiceInstances: Found SI', services.map(service => service.entity.name));
+        e2e.log('cleanUpServiceInstances: cfGuid', cfGuid);
+      }
       return serviceInstances.length ?
-        promise.all(serviceInstances.map(serviceInstance => this.cleanUpService(cfGuid, serviceInstance.metadata.guid))) :
+        promise.all(serviceInstances.map(serviceInstance =>
+          this.cleanUpService(cfGuid, serviceInstance.metadata.guid, serviceInstance.entity.name))) :
         promise.fullyResolved(createEmptyCfResponse());
     });
   }
 
-  private cleanUpService(cfGuid: string, serviceGuid: string): promise.Promise<any> {
-    return this.deleteServiceInstance(cfGuid, serviceGuid).catch(e => e2e.log(`Ignoring failed service instance delete: ${e}`));
+  private cleanUpService(cfGuid: string, serviceInstanceGuid: string, serviceInstanceName: string): promise.Promise<any> {
+    return this.deleteInstanceAttempt(cfGuid, serviceInstanceGuid, 0, 3, serviceInstanceName);
+  }
+
+  private deleteInstanceAttempt = (
+    cfGuid: string,
+    serviceInstanceGuid: string,
+    retryNumber: number,
+    maxRetries: number,
+    serviceInstanceName: string) => {
+    return this.deleteServiceInstance(cfGuid, serviceInstanceGuid)
+      .catch(e => {
+        const attemptsLeft = maxRetries - retryNumber;
+        if (!!attemptsLeft) {
+          e2e.log(`Failed to delete service instance '${serviceInstanceName}''.
+         Attempting ${attemptsLeft} more time/s`);
+          browser.sleep(1000);
+          this.deleteInstanceAttempt(cfGuid, serviceInstanceGuid, retryNumber + 1, maxRetries, serviceInstanceName);
+        } else {
+          e2e.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+          e2e.log(`Failed to delete service instance after ${maxRetries} retries. Please delete manually`);
+          e2e.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+        }
+      });
   }
 
   getServiceCardWithTitle(list: ListComponent, serviceName: string, filter = true) {
@@ -230,6 +281,16 @@ export class ServicesHelperE2E {
       list.header.setSearchText(serviceName);
     }
     return list.cards.waitForCardByTitle(serviceName);
+  }
+
+  noServiceCardWithTitle(list: ListComponent, serviceName: string, filter = true): promise.Promise<number> {
+    if (filter) {
+      list.header.waitUntilShown();
+      list.header.setSearchText(serviceName);
+    }
+    const totalResults = list.getTotalResults();
+    expect(totalResults).toBe(0);
+    return totalResults;
   }
 
 }

@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -9,7 +9,6 @@ import {
   publishReplay,
   refCount,
   startWith,
-  switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -172,7 +171,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
     public paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.createCf();
-    this.init();
     this.createOrg();
     this.createSpace();
 
@@ -193,23 +191,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
     );
 
-  }
-
-  private init() {
-    const orgs = this.allOrgs.pagination$.pipe(
-      filter(paginationEntity => {
-        return !getCurrentPageRequestInfo(paginationEntity).busy;
-      }),
-      first()
-    );
-    this.getEndpointsAndOrgs$ = this.cf.list$.pipe(
-      switchMap(endpoints => {
-        return combineLatest(
-          observableOf(endpoints),
-          orgs
-        );
-      })
-    );
   }
 
   private createCf() {
@@ -245,27 +226,18 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createOrg() {
-    const orgList$ = this.getEndpointsAndOrgs$.pipe(
-      switchMap(endpoints => {
-        return combineLatest(
-          this.cf.select.asObservable(),
-          observableOf(endpoints),
-          this.allOrgs.entities$
-        );
-      }),
-      map(
-        ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
-          const [pag, cfList] = endpointsAndOrgs;
-          if (selectedCF && entities) {
-            return entities
-              .map(org => org.entity)
-              .filter(org => org.cfGuid === selectedCF)
-              .sort((a, b) => a.name.localeCompare(b.name));
-          }
-          return [];
-        }
-      )
-    );
+    const orgList$ = combineLatest(
+      this.cf.select.asObservable(),
+      this.allOrgs.entities$
+    ).pipe(map(([selectedCF, entities]) => {
+      if (selectedCF && entities) {
+        return entities
+          .map(org => org.entity)
+          .filter(org => org.cfGuid === selectedCF)
+          .sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return [];
+    }));
 
     this.org = {
       list$: orgList$,
@@ -275,16 +247,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createSpace() {
-    const spaceList$ = this.getEndpointsAndOrgs$.pipe(
-      switchMap(endpoints => {
-        return combineLatest(
-          this.org.select.asObservable(),
-          observableOf(endpoints),
-          this.allOrgs.entities$
-        );
-      }),
-      map(([selectedOrgGuid, data, orgs]) => {
-        const [orgList, cfList] = data;
+    const spaceList$ = combineLatest(
+      this.org.select.asObservable(),
+      this.allOrgs.entities$
+    ).pipe(
+      map(([selectedOrgGuid, orgs]) => {
         const selectedOrg = orgs.find(org => {
           return org.metadata.guid === selectedOrgGuid;
         });

@@ -4,13 +4,21 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM } from '../../../add-service-instance/csi-mode.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { defaultPaginationPageSizeOptionsTable, IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import {
+  TableCellAppCfOrgSpaceHeaderComponent,
+} from '../app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import { TableCellAppCfOrgSpaceComponent } from '../app/table-cell-app-cforgspace/table-cell-app-cforgspace.component';
 import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
@@ -23,12 +31,6 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import {
-  TableCellSpaceNameComponent,
-} from '../cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
@@ -52,7 +54,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   protected serviceInstanceColumns: ITableColumn<APIResource<IServiceInstance>>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Service Instances',
+      headerCell: () => 'Service Instance',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
       },
@@ -60,9 +62,9 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     },
     {
       columnId: 'space',
-      headerCell: () => 'Space',
-      cellComponent: TableCellSpaceNameComponent,
-      cellFlex: '1'
+      headerCellComponent: TableCellAppCfOrgSpaceHeaderComponent,
+      cellComponent: TableCellAppCfOrgSpaceComponent,
+      cellFlex: '2'
     },
     {
       columnId: 'service',
@@ -140,7 +142,10 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
 
   private listActionEdit: IListAction<APIResource> = {
     action: (item: APIResource<IServiceInstance>) =>
-      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid),
+      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid, {
+        [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
+        [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid
+      }),
     label: 'Edit',
     description: 'Edit Service Instance',
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>

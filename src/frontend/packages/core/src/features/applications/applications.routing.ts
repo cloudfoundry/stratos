@@ -5,6 +5,9 @@ import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-r
 import { StratosActionType, StratosTabType } from '../../core/extension/extension-service';
 import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import {
+  AddServiceInstanceBaseStepComponent,
+} from '../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
+import {
   AddServiceInstanceComponent,
 } from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
@@ -28,10 +31,15 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
+import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 
 const applicationsRoutes: Routes = [
   {
     path: 'new',
+    component: NewApplicationBaseStepComponent,
+  },
+  {
+    path: 'create',
     component: CreateApplicationComponent,
   },
   {
@@ -71,7 +79,14 @@ const applicationsRoutes: Routes = [
           },
           {
             path: 'bind',
-            component: AddServiceInstanceComponent
+            component: AddServiceInstanceBaseStepComponent,
+            data: {
+              bind: true
+            }
+          },
+          {
+            path: 'bind/:type',
+            component: AddServiceInstanceComponent,
           },
           {
             path: '',

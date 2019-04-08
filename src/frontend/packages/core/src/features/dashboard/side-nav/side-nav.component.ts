@@ -1,11 +1,12 @@
-
-import { filter, map, buffer, debounceTime } from 'rxjs/operators';
 import { Component, Inject, InjectionToken, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
-import { AppState } from '../../../../../store/src/app-state';
+import { buffer, debounceTime, filter, map } from 'rxjs/operators';
+
 import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
+
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
@@ -15,6 +16,8 @@ export interface SideNavItem {
   matIconFont?: string;
   link: string;
   hidden?: Observable<boolean>;
+  requiresEndpointType?: string;
+  requiresPersistence?: boolean;
 }
 
 @Component({

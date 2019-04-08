@@ -3,7 +3,7 @@ import { browser } from 'protractor';
 import { e2e, E2ESetup } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
-import { CreateServiceInstance } from './create-service-instance.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -12,6 +12,7 @@ describe('Marketplace', () => {
   let setup: E2ESetup;
   const servicesWall = new ServicesWallPage();
   const timeout = 60000;
+  let serviceInstanceName: string;
 
   beforeAll(() => {
     setup = e2e.setup(ConsoleUserType.admin)
@@ -43,11 +44,12 @@ describe('Marketplace', () => {
     describe('Long running test', () => {
       extendE2ETestTime(timeout);
       it('- should be able to create a new service instance', () => {
-        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+        serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
+        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall, serviceInstanceName);
       }, timeout);
     });
 
-    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
   });
 
   describe('Create Private Service Instance', () => {
@@ -71,11 +73,12 @@ describe('Marketplace', () => {
     describe('Long running test', () => {
       extendE2ETestTime(timeout);
       it('- should be able to create a new service instance', () => {
-        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+        serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
+        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall, serviceInstanceName);
       }, timeout);
     });
 
-    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
   });
 
   describe('Create Space Scoped Service Instance', () => {
@@ -99,11 +102,12 @@ describe('Marketplace', () => {
     describe('Long running test', () => {
       extendE2ETestTime(timeout);
       it('- should be able to create a new service instance', () => {
-        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall);
+        serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
+        createService(marketplaceSummaryPage, servicesHelperE2E, serviceName, servicesWall, serviceInstanceName);
       }, timeout);
     });
 
-    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+    afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
   });
 });
 
@@ -111,18 +115,20 @@ function createService(
   marketplaceSummaryPage: MarketplaceSummaryPage,
   servicesHelperE2E: ServicesHelperE2E,
   serviceName: string,
-  servicesWall: ServicesWallPage) {
+  servicesWall: ServicesWallPage,
+  serviceInstanceName: string
+) {
   const button = marketplaceSummaryPage.header.getIconButton('add');
   expect(button).toBeDefined();
   button.then(bt => bt.click());
   browser.getCurrentUrl().then(url => {
     expect(url.endsWith('create?isSpaceScoped=false')).toBeTruthy();
     // Proceed to create a service instance
-    servicesHelperE2E.createService(serviceName, true);
+    servicesHelperE2E.createService(serviceName, serviceInstanceName, true);
 
     servicesWall.waitForPage();
 
-    servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
+    servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, serviceInstanceName);
 
   });
 }
@@ -141,7 +147,7 @@ function init(
     const service = response.resources.find(e => e.entity.label === serviceName);
     const serviceGuid = service.metadata.guid;
     servicesHelperE2E.setCreateServiceInstance(
-      new CreateServiceInstance('/marketplace/' + endpointGuid + '/' + serviceGuid +
+      new CreateMarketplaceServiceInstance('/marketplace/' + endpointGuid + '/' + serviceGuid +
         '/create?isSpaceScoped=' + (spaceScoped ? 'true' : 'false')));
     const marketplaceSummaryPage = new MarketplaceSummaryPage(endpointGuid, serviceGuid);
     return { servicesHelper: servicesHelperE2E, summaryPage: marketplaceSummaryPage };

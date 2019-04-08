@@ -51,6 +51,7 @@ export class GetServiceInstances
     'results-per-page': 100,
     'order-direction': 'asc',
     'order-direction-field': 'creation',
+    q: []
   };
   flattenPagination = true;
 }
@@ -90,6 +91,7 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
   entity = [entityFactory(serviceInstancesSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
+  clearPaginationEntityKeys = [serviceBindingSchemaKey];
   removeEntityOnDelete = true;
 }
 export class CreateServiceInstance extends CFStartAction implements ICFAction {

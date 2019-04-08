@@ -14,18 +14,20 @@ import {
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
-  serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { OrgUserRoleNames } from '../../../../../store/src/types/user.types';
-import { IServiceInstance } from '../../../core/cf-api-svc.types';
 import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
+import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -52,7 +54,8 @@ export class CloudFoundryOrganizationService {
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
-  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstancesCount$: Observable<number>;
+  userProvidedServiceInstancesCount$: Observable<number>;
   spaces$: Observable<APIResource<ISpace>[]>;
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
@@ -68,6 +71,7 @@ export class CloudFoundryOrganizationService {
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,
+    private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
@@ -91,7 +95,6 @@ export class CloudFoundryOrganizationService {
           createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
           createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
           createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
-          createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         ];
         if (!isAdmin) {
@@ -129,10 +132,13 @@ export class CloudFoundryOrganizationService {
       map(u => getOrgRolesString(u))
     );
 
+    this.serviceInstancesCount$ = fetchServiceInstancesCount(this.cfGuid, this.orgGuid, null, this.store, this.paginationMonitorFactory);
+    this.userProvidedServiceInstancesCount$ =
+      this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid);
+
   }
 
   private initialiseSpaceObservables() {
-    this.serviceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
     this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
   }
 

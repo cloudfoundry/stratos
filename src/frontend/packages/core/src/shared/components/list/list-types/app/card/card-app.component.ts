@@ -4,20 +4,14 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  endpointSchemaKey,
-  entityFactory,
-} from '../../../../../../../../store/src/helpers/entity-factory';
-import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
+import { applicationSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { IAppFavMetadata } from '../../../../../../cf-favourite-types';
-import { IApp } from '../../../../../../core/cf-api.types';
+import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { haveMultiConnectedCfs } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
@@ -33,9 +27,8 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   applicationState$: Observable<ApplicationStateData>;
 
   appStatus$: Observable<CardStatus>;
-  endpointName$: Observable<string>;
-  multipleConnectedEndpoints$: Observable<boolean>;
   entityConfig: ComponentEntityMonitorConfig;
+  cfOrgSpace: CfOrgSpaceLabelService;
 
   public favorite: UserFavorite<IAppFavMetadata>;
 
@@ -48,10 +41,11 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
 
   ngOnInit() {
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(applicationSchemaKey));
-    this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
-
-    this.endpointName$ = this.store.select<EndpointModel>(selectEntity(endpointSchemaKey, this.row.entity.cfGuid)).pipe(
-      map(endpoint => endpoint ? endpoint.name : '')
+    this.cfOrgSpace = new CfOrgSpaceLabelService(
+      this.store,
+      this.row.entity.cfGuid,
+      (this.row.entity.space as APIResource<ISpace>).entity.organization_guid,
+      this.row.entity.space_guid
     );
 
     this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey);

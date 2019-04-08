@@ -6,8 +6,8 @@ import { AppChipsComponent } from '../../../../chips/chips.component';
 import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
 
 describe('TableCellServiceInstanceTagsComponent', () => {
-  let component: TableCellServiceInstanceTagsComponent<any>;
-  let fixture: ComponentFixture<TableCellServiceInstanceTagsComponent<any>>;
+  let component: TableCellServiceInstanceTagsComponent;
+  let fixture: ComponentFixture<TableCellServiceInstanceTagsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

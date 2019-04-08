@@ -51,6 +51,9 @@ import {
   CloudFoundrySpaceSummaryComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-summary/cloud-foundry-space-summary.component';
 import {
+  CloudFoundrySpaceUserServiceInstancesComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-user-service-instances/cloud-foundry-space-user-service-instances.component';
+import {
   CloudFoundrySpaceUsersComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-users/cloud-foundry-space-users.component';
 import {
@@ -296,6 +299,10 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'service-instances',
                   component: CloudFoundrySpaceServiceInstancesComponent
+                },
+                {
+                  path: 'user-service-instances',
+                  component: CloudFoundrySpaceUserServiceInstancesComponent
                 },
                 {
                   path: 'routes',

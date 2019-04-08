@@ -22,7 +22,17 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
   set row(row: T) {
     this.pRow = row;
     if (row) {
-      this.setValue(row);
+      this.setValue(row, this.schemaKey);
+    }
+  }
+
+  private pSchemaKey: string;
+  @Input('schemaKey')
+  get schemaKey() { return this.pSchemaKey; }
+  set schemaKey(schemaKey: string) {
+    this.pSchemaKey = schemaKey;
+    if (this.row) {
+      this.setValue(this.row, schemaKey);
     }
   }
 
@@ -33,7 +43,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
   public isExternalLink = false;
   public linkValue: string;
   public linkTarget = '_self';
-  public valueGenerator: (row: T) => string;
+  public valueGenerator: (row: T, schemaKey?: string) => string;
   public showShortLink = false;
 
   public init() {
@@ -82,11 +92,11 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     });
   }
 
-  private setValue(row: T) {
+  private setValue(row: T, schemaKey?: string) {
     if (this.cellDefinition && this.cellDefinition.asyncValue) {
       this.setupAsync(row);
     } else if (this.valueGenerator) {
-      this.valueContext.value = this.valueGenerator(row);
+      this.valueContext.value = this.valueGenerator(row, schemaKey);
     }
   }
 
