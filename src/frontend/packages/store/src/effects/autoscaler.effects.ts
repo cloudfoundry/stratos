@@ -36,6 +36,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { PaginatedAction } from './../types/pagination.types';
+import { UpdateAutoscalerPolicyState } from '../types/app-autoscaler.types';
 
 const { proxyAPIVersion, autoscalerAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -412,3 +413,5 @@ export class AutoscalerEffects {
   }
 
 }
+
+export const selectUpdateAutoscalerPolicyState = (state: AppState): UpdateAutoscalerPolicyState => state.updateAutoscalerPolicy;

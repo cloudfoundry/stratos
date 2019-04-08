@@ -1,5 +1,5 @@
 import { RequestOptions } from '@angular/http';
-
+import { Action } from '@ngrx/store';
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
@@ -42,6 +42,8 @@ export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy'
 export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
 export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
 export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
+
+export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Polict] Step';
 
 export class GetAppAutoscalerHealthAction implements IRequestAction {
   constructor(
@@ -190,4 +192,11 @@ export class GetAppAutoscalerInsMetricAction extends GetAppAutoscalerMetricActio
     this.url = `apps/${appGuid}/metric_histories/${metricName}`;
   }
   entityKey = appAutoscalerInsMetricSchemaKey;
+}
+
+export class UpdateAppAutoscalerPolicyStepAction implements Action {
+  constructor(
+    public policy: any
+    ) { }
+  type = UPDATE_APP_AUTOSCALER_POLICY_STEP;
 }

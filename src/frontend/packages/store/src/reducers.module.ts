@@ -21,6 +21,7 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
+import { updateAutoscalerPolicyReducer } from './reducers/edit-autoscaler-policy.reducer';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -50,7 +51,8 @@ export const appReducers = {
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,
-  recentlyVisited: recentlyVisitedReducer
+  recentlyVisited: recentlyVisitedReducer,
+  updateAutoscalerPolicy: updateAutoscalerPolicyReducer,
 } as ActionReducerMap<{}>;
 
 const metaReducers = [];

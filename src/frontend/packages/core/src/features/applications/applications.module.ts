@@ -26,6 +26,18 @@ import { VariablesTabComponent } from './application/application-tabs-base/tabs/
 import { ApplicationsRoutingModule } from './applications.routing';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy/edit-autoscaler-policy.component';
+import {
+  EditAutoscalerPolicyStep1Component
+} from './edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
+import {
+  EditAutoscalerPolicyStep2Component
+} from './edit-autoscaler-policy/edit-autoscaler-policy-step2/edit-autoscaler-policy-step2.component';
+import {
+  EditAutoscalerPolicyStep3Component
+} from './edit-autoscaler-policy/edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';
+import {
+  EditAutoscalerPolicyStep4Component
+} from './edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 import { AutoscalerMetricPageComponent } from './autoscaler-metric-page/autoscaler-metric-page.component';
 import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page/autoscaler-scale-history-page.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
@@ -61,6 +73,10 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     SshApplicationComponent,
     EditApplicationComponent,
     EditAutoscalerPolicyComponent,
+    EditAutoscalerPolicyStep1Component,
+    EditAutoscalerPolicyStep2Component,
+    EditAutoscalerPolicyStep3Component,
+    EditAutoscalerPolicyStep4Component,
     AutoscalerMetricPageComponent,
     AutoscalerScaleHistoryPageComponent,
     InstancesTabComponent,

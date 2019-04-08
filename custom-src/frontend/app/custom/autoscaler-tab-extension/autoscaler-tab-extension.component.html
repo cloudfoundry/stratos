@@ -80,13 +80,13 @@
                 <app-metadata-item *ngIf="appAutoscalerAppMetrics[metricName] | async as metricData"
                   label={{metricName}}>
                   <!-- {{ metricData[0].entity.latest.length > 0 && metricData[0].entity.latest[0].value ? metricData[0].entity.latest[0].value + " " + metricData[0].entity.unit : "NaN"}} -->
-                  <!-- <ngx-charts-gauge [view]="[80, 80]" [margin]="[5, 5, 0, 5]"
+                  <ngx-charts-gauge [view]="[80, 80]" [margin]="[5, 5, 0, 5]"
                     [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
                     [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [textValue]=""
                     [scheme]="'cool'" [min]="0" [max]="metricData[0].entity.chartMaxValue"
                     [units]="metricData[0].entity.unit" [angleSpan]="240" [startAngle]="-120" [showAxis]="false"
                     [bigSegments]="10" [smallSegments]="5" [tooltipDisabled]="false" (select)="select($event)">
-                  </ngx-charts-gauge> -->
+                  </ngx-charts-gauge>
                 </app-metadata-item>
               </div>
             </div>

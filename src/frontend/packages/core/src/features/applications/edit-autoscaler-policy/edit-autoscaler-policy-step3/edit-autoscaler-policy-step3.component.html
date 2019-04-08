@@ -1,0 +1,170 @@
+<div *ngIf="appAutoscalerPolicy$ | async as policy">
+  <app-tile-grid>
+    <app-tile-group
+      *ngFor="let rule of policy && policy.schedules && policy.schedules.recurring_schedule; let index = index">
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              Schedule {{index+1}}:
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="editIndex!=index">
+              <span *ngIf="rule.initial_min_instance_count">The initial number of application instance is
+                {{rule.initial_min_instance_count}}, and the range </span>
+              <span *ngIf="!rule.initial_min_instance_count">The number of application instance </span>
+              <span>is limited to from {{rule.instance_min_count}} to {{rule.instance_max_count}} during
+                {{rule.start_time}} ~ {{rule.end_time}} every </span>
+              <span *ngIf="rule.days_of_month">{{rule.days_of_month}} of the month</span>
+              <span *ngIf="rule.days_of_week">{{rule.days_of_week}} of the week</span>
+              <span *ngIf="rule.start_date">, effective from {{rule.start_date}} to {{rule.end_date}}.</span>
+              <span *ngIf="!rule.start_date">.</span>
+            </div>
+            <div *ngIf="editIndex==index">
+              <form [formGroup]="editRecurringScheduleForm" validate class="edit-recurring-schedule">
+                <div class="app-metadata">
+                  <div class="app-metadata__two-cols">
+                    <app-metadata-item label="Effective Duration">
+                      <mat-radio-group formControlName="effective_type">
+                        <mat-radio-button value="always" (click)="resetEffectiveType('always')"
+                          style="margin-right: 0.5em">Always
+                        </mat-radio-button>
+                        <mat-radio-button value="custom" (click)="resetEffectiveType('custom')">
+                          <span *ngIf="editEffectiveType=='always'">
+                            Custom
+                          </span>
+                          <mat-form-field *ngIf="editEffectiveType=='custom'" class="autoscaler-date-input"
+                            style="width:50%">
+                            <input matInput placeholder="From" type="date" formControlName="start_date" required>
+                          </mat-form-field>
+                          <mat-form-field *ngIf="editEffectiveType=='custom'" class="autoscaler-date-input"
+                            style="width:50%">
+                            <input matInput placeholder="To" type="date" formControlName="end_date" required>
+                          </mat-form-field>
+                        </mat-radio-button>
+                      </mat-radio-group>
+                    </app-metadata-item>
+                    <app-metadata-item label="Repeat By">
+                      <mat-radio-group formControlName="repeat_type">
+                        <mat-radio-button value="week" (click)="resetRepeatType('week')" style="margin-right: 0.5em">
+                          Week
+                        </mat-radio-button>
+                        <mat-radio-button value="month" (click)="resetRepeatType('month')">
+                          Month
+                        </mat-radio-button>
+                      </mat-radio-group>
+                    </app-metadata-item>
+                    <mat-form-field>
+                      <mat-select *ngIf="editRepeatType=='week'" placeholder="Repeat On" multiple
+                        formControlName="days_of_week" required>
+                        <mat-option *ngFor="let day of weekdayOptions; let dayIndex = index" [value]="dayIndex">
+                          {{day}}
+                        </mat-option>
+                      </mat-select>
+                      <mat-select *ngIf="editRepeatType=='month'" placeholder="Repeat On" multiple
+                        formControlName="days_of_month" required>
+                        <mat-option *ngFor="let day of monthdayOptions; let dayIndex = index" [value]="dayIndex">
+                          {{day}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="app-metadata__two-cols">
+                    <app-metadata-item label="Repeat Time">
+                      <mat-form-field>
+                        <input matInput placeholder="Start" type="time" formControlName="start_time" required>
+                      </mat-form-field>
+                      <mat-form-field style="margin-left: 0.5em">
+                        <input matInput placeholder="End" type="time" formControlName="end_time" required>
+                      </mat-form-field>
+                    </app-metadata-item>
+                    <app-metadata-item label="Instance Count">
+                      <mat-form-field style="width:30%; ">
+                        <input matInput placeholder="Minimum" type="number" formControlName="instance_min_count"
+                          required>
+                      </mat-form-field>
+                      <mat-form-field style="width:30%; margin-left: 0.5em">
+                        <input matInput placeholder="Initial Minimum" type="number"
+                          formControlName="initial_min_instance_count">
+                      </mat-form-field>
+                      <mat-form-field style="width:30%; margin-left: 0.5em">
+                        <input matInput placeholder="Maximum" type="number" formControlName="instance_max_count"
+                          required>
+                      </mat-form-field>
+                    </app-metadata-item>
+                  </div>
+                </div>
+              </form>
+              <mat-error
+                *ngIf="editRecurringScheduleForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')">
+                {{policyAlert.alertInvalidPolicyMinimumRange}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRecurringScheduleForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')">
+                {{policyAlert.alertInvalidPolicyMaximumRange}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRecurringScheduleForm.get('initial_min_instance_count').hasError('alertInvalidPolicyInitialMaximumRange')">
+                {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleStartDateBeforeNow')">
+                {{policyAlert.alertInvalidPolicyScheduleStartDateBeforeNow}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')">
+                {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleEndDateBeforeNow')">
+                {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeNow}}
+              </mat-error>
+              <!-- <mat-error
+                    *ngIf="editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')">
+                    {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
+                  </mat-error> -->
+              <mat-error
+                *ngIf="editRecurringScheduleForm.get('start_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')">
+                {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
+              </mat-error>
+              <!-- <mat-error
+                    *ngIf="editRecurringScheduleForm.get('end_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')">
+                    {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
+                  </mat-error> -->
+              <mat-error
+                *ngIf="editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')">
+                {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('alertInvalidPolicyScheduleRecurringConflict')">
+                days_of_week {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('required')">
+                {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
+              </mat-error>
+              <mat-error
+                *ngIf="editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('alertInvalidPolicyScheduleRecurringConflict')">
+                days_of_month {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
+              </mat-error>
+            </div>
+          </mat-card-content>
+          <mat-card-actions class="app-auto-scaler__actions">
+            <button *ngIf="editIndex!=index" (click)="editRecurringSchedule(index)" [disabled]="editIndex!=-1"
+              mat-icon-button>
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button *ngIf="editIndex==index" (click)="finishRecurringSchedule()"
+              [disabled]="editRecurringScheduleForm.invalid" mat-icon-button>
+              <mat-icon>done</mat-icon>
+            </button>
+            <button (click)="removeRecurringSchedule(index)" mat-icon-button>
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+  </app-tile-grid>
+</div>

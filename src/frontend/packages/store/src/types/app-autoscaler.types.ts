@@ -1,6 +1,8 @@
 export interface AppAutoscalerPolicy {
   instance_min_count: number;
   instance_max_count: number;
+  scaling_rules_form: any;
+  schedules: any;
 }
 
 export interface AppAutoscalerHealth {
@@ -19,4 +21,8 @@ export interface AppAutoscalerAppMetric {
 
 export interface AppAutoscalerInsMetric {
   total_results: number;
+}
+
+export interface UpdateAutoscalerPolicyState {
+  policy: AppAutoscalerPolicy;
 }

@@ -1,0 +1,23 @@
+<div *ngIf="appAutoscalerPolicy$ | async as policy">
+  <form [formGroup]="editLimitForm" validate class="stepper-form edit-app">
+    <mat-form-field>
+      <input matInput placeholder="Minimum Instance Count" formControlName="instance_min_count" type="number" required>
+      <mat-error *ngIf="editLimitForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')">
+        {{policyAlert.alertInvalidPolicyMinimumRange}}
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field style="margin-top: 0.5em">
+      <input matInput placeholder="Maximum Instance Count" formControlName="instance_max_count" type="number" required>
+      <mat-error *ngIf="editLimitForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')">
+        {{policyAlert.alertInvalidPolicyMaximumRange}}
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select class="reset-margin" placeholder="Timezone" formControlName="timezone" required>
+        <mat-option *ngFor="let timezone of timezoneOptions" [value]="timezone">
+          {{ timezone }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</div>

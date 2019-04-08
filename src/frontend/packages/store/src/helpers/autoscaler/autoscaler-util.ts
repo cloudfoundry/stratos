@@ -51,6 +51,34 @@ export const metricMap = {
 
 export const S2NS = 1000000000;
 
+export const PolicyAlert = {
+  alertInvalidPolicyMinimumRange: 'The Minimum Instance Count must be a integer less than the Maximum Instance Count.',
+  alertInvalidPolicyMaximumRange: 'The Maximum Instance Count must be a integer greater than the Minimum Instance Count.',
+  alertInvalidPolicyInitialMaximumRange:
+    'The Initial Minimum Instance Count must be a integer in the range of Minimum Instance Count to Maximum Instance Count.',
+  alertInvalidPolicyTriggerUpperThresholdRange: 'The Upper Threshold value must be an integer greater than the Lower Threshold value.',
+  alertInvalidPolicyTriggerLowerThresholdRange: 'The Lower Threshold value must be an integer in the range of 1 to (Upper Threshold-1).',
+  alertInvalidPolicyTriggerThreshold100: 'The Lower/Upper Threshold value of memoryutil must be an integer below or equal to 100.',
+  alertInvalidPolicyTriggerStepPercentageRange: 'The Instance Step Up/Down percentage must be a integer greater than 1.',
+  alertInvalidPolicyTriggerStepRange: 'The Instance Step Up/Down value must be a integer in the range of 1 to (Maximum Instance-1).',
+  alertInvalidPolicyTriggerBreachDurationRange:
+    `The breach duration value must be an integer in the range of ${PolicyDefaultSetting.breach_duration_secs_min} to
+    ${PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
+  alertInvalidPolicyTriggerCooldownRange:
+    `The cooldown period value must be an integer in the range of ${PolicyDefaultSetting.cool_down_secs_min} to
+    ${PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
+  alertInvalidPolicyScheduleStartDateBeforeNow: 'Start date should be after or equal to current date.',
+  alertInvalidPolicyScheduleEndDateBeforeNow: 'End date should be after or equal to current date.',
+  alertInvalidPolicyScheduleEndDateBeforeStartDate: 'Start date must be earlier than the end date.',
+  alertInvalidPolicyScheduleEndTimeBeforeStartTime: 'Start time must be earlier than the end time.',
+  alertInvalidPolicyScheduleRepeatOn: 'Please select at least one "Repeat On" day.',
+  alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime: 'Start date and time must be earlier than the end date and time.',
+  alertInvalidPolicyScheduleStartDateTimeBeforeNow: 'Start date and time must be after or equal to current date time.',
+  alertInvalidPolicyScheduleEndDateTimeBeforeNow: 'End date and time must be after or equal the current date and time.',
+  alertInvalidPolicyScheduleRecurringConflict: 'Recurring schedule configuration conflict occurs.',
+  alertInvalidPolicyScheduleSpecificConflict: 'Specific date configuration conflict occurs.',
+};
+
 export function isEqual(a, b) {
   if (typeof (a) !== typeof (b)) {
     return false;

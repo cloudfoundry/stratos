@@ -21853,7 +21853,19 @@ function getDefaultInitialTestStoreState(): AppState {
         [testSCFGuid]: getDefaultEndpointRoles()
       },
       state: getDefaultRolesRequestState()
-    }
+    },
+    updateAutoscalerPolicy: {
+      policy: {
+        instance_min_count: 1,
+        instance_max_count: 10,
+        scaling_rules_form: [],
+        schedules: {
+          timezone: '',
+          recurring_schedule: [],
+          specific_date: []
+        }
+      }
+    },
   };
 }
 
