@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import * as markdown from 'marked';
 
 import { LoggerService } from '../../../core/logger.service';
@@ -26,16 +27,21 @@ export class MarkdownPreviewComponent {
 
   @ViewChild('markdown') public markdown: ElementRef;
 
-  constructor(private httpClient: HttpClient, private logger: LoggerService) { }
+  constructor(private httpClient: HttpClient, private logger: LoggerService, private domSanitizer: DomSanitizer) { }
 
   private loadDocument() {
     this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe(
       (markText) => {
         if (markText && markText.length > 0) {
-          // Ensure links in the readme open in a new tab
+          // Basic sanitization
+          markdown.setOptions({
+            sanitize: true,
+            sanitizer: dirty => this.domSanitizer.sanitize(SecurityContext.HTML, dirty),
+          });
           const renderer = new markdown.Renderer();
-          renderer.link = function(href, title, text) {
-            const link = markdown.Renderer.prototype.link.call(this, href, title, text);
+          // Ensure links in the readme open in a new tab
+          renderer.link = (href, title, text) => {
+            const link = markdown.Renderer.prototype.link.call(renderer, href, title, text);
             return link.replace('<a', '<a target="_blank" ');
           };
           this.markdownHtml = markdown(markText, { renderer });
