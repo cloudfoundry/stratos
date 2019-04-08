@@ -65,7 +65,7 @@
     "core-js": "^2.6.5",
     "hammerjs": "^2.0.8",
     "lodash-es": "^4.17.11",
-    "marked": "^0.6.1",
+    "marked": "^0.6.2",
     "moment": "^2.24.0",
     "ngx-moment": "^3.3.0",
     "normalizr": "^3.2.3",
