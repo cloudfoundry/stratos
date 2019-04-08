@@ -33,6 +33,7 @@ export class SideNavComponent implements OnInit {
   ) { }
 
   @Input() tabs: SideNavItem[];
+  @Input() iconMode = false;
   // Button is not always visible on load, so manually push through an event
   logoClicked: BehaviorSubject<any> = new BehaviorSubject(true);
 

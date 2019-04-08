@@ -1,11 +1,11 @@
-$side-nav-padding-h: 15px;
-$side-nav-mat-icon-width: 24px;
-$side-nav-mat-icon-padding-right: 15px;
+$side-nav-padding-h: 12px;
+$side-nav-mat-icon-height: 18px;
+$side-nav-mat-icon-padding-right: 10px;
 .side-nav {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 200px;
+  width: 175px;
   &__top {
     display: flex;
     flex: 0 0 56px;
@@ -39,12 +39,18 @@ $side-nav-mat-icon-padding-right: 15px;
     display: flex;
     font-size: 15px;
     letter-spacing: .01em;
+    line-height: $side-nav-mat-icon-height;
     outline: 0;
     padding: 15px $side-nav-padding-h;
     text-decoration: none;
     mat-icon {
       margin-right: $side-nav-mat-icon-padding-right;
       text-align: center;
+    }
+    &-icon {
+      font-size: $side-nav-mat-icon-height;
+      height: $side-nav-mat-icon-height;
+      width: $side-nav-mat-icon-height;
     }
   }
   &__logo {
@@ -58,11 +64,17 @@ $side-nav-mat-icon-padding-right: 15px;
       text-align: center;
       text-transform: uppercase;
     }
+    &-img {
+      width: 100%;
+    }
+    &-icon-img {
+      display: none;
+    }
   }
   &__bottom {
     flex: 0 0 auto;
-    font-weight: 300;
     font-size: 14px;
+    font-weight: 300;
     padding: 12px;
     pointer-events: none;
   }

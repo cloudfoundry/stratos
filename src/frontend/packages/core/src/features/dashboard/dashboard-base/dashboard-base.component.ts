@@ -101,24 +101,24 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
-    this.routeChangeSubscription = this.router.events.pipe(
-      filter((event) => event instanceof NavigationEnd),
-      withLatestFrom(dashboardState$)
-    ).subscribe(([event, dashboard]) => {
-      if (this.content) {
-        // Ensure we always end up at the of the page when we navigate.
-        this.content.nativeElement.scrollTop = 0;
-      }
-      this.fullView = this.isFullView(this.activatedRoute.snapshot);
-      this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
-      if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
-        this.sidenav.close();
-      }
-      if (dashboard.sideHelpOpen) {
-        this.sideHelp.close();
-      }
-      this.iconModeMouse(false);
-    });
+    // this.routeChangeSubscription = this.router.events.pipe(
+    //   filter((event) => event instanceof NavigationEnd),
+    //   withLatestFrom(dashboardState$)
+    // ).subscribe(([event, dashboard]) => {
+    //   if (this.content) {
+    //     // Ensure we always end up at the of the page when we navigate.
+    //     this.content.nativeElement.scrollTop = 0;
+    //   }
+    //   this.fullView = this.isFullView(this.activatedRoute.snapshot);
+    //   this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
+    //   if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
+    //     this.sidenav.close();
+    //   }
+    //   if (dashboard.sideHelpOpen) {
+    //     this.sideHelp.close();
+    //   }
+    //   this.iconModeMouse(false);
+    // });
   }
 
   ngOnDestroy() {
@@ -149,15 +149,16 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
-      this.store.dispatch(new CloseSideNav());
-    });
+    // this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
+    //   this.store.dispatch(new CloseSideNav());
+    // });
 
     const dashboardState$ = this.store.select('dashboard');
     this.openCloseSub = dashboardState$
       .subscribe((dashboard: DashboardState) => {
         dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
-        this.sidenav.mode = dashboard.sideNavMode;
+        // this.sidenav.mode = dashboard.sideNavMode;
+        this.iconMode = true;
         if (dashboard.sideHelpOpen) {
           this.showSideHelp(dashboard.sideHelpDocument);
         }
@@ -233,13 +234,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   private enableMobileNav() {
-    this.sideNavWidth = 200;
+    // this.sideNavWidth = 200;
     this.iconMode = false;
   }
 
   private disableMobileNav() {
-    this.sideNavWidth = 54;
-    this.iconMode = true;
-    this.sidenav.close();
+    // this.sideNavWidth = 54;
+    // this.iconMode = true;
+    // this.sidenav.close();
   }
 }

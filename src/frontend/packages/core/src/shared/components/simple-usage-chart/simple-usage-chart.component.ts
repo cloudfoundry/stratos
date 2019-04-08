@@ -38,9 +38,11 @@ export class SimpleUsageChartComponent {
   };
 
   @Input() set data(usageData: ISimpleUsageChartData) {
+    console.log(usageData)
     if (usageData) {
       const { total, used } = usageData;
       const remaining = total - used;
+      console.log(this.getColors(total, used))
       this.chartData = {
         colors: this.getColors(total, used),
         total,
