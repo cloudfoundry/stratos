@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map, first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { EndpointsService } from '../../../core/endpoints.service';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
+import { IUserFavoritesGroups } from '../../../../../store/src/types/favorite-groups.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { EndpointsService } from '../../../core/endpoints.service';
+import { LoggerService } from '../../../core/logger.service';
+import { UserFavoriteManager } from '../../../core/user-favorite-manager';
 
 @Component({
   selector: 'app-home-page',
@@ -16,7 +20,10 @@ export class HomePageComponent {
   public allEndpointIds$: Observable<string[]>;
   public haveRegistered$: Observable<boolean>;
 
-  constructor(endpointsService: EndpointsService, private store: Store<AppState>) {
+  public showFilterToggle$: Observable<boolean>;
+  public showFilters = false;
+
+  constructor(endpointsService: EndpointsService, store: Store<AppState>, logger: LoggerService) {
     this.allEndpointIds$ = endpointsService.endpoints$.pipe(
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
@@ -26,7 +33,7 @@ export class HomePageComponent {
     endpointsService.disablePersistenceFeatures$.pipe(
       map(off => {
         if (off) {
-          this.store.dispatch(new RouterNav({
+          store.dispatch(new RouterNav({
             path: ['applications'],
             extras: {
               replaceUrl: true
@@ -36,6 +43,22 @@ export class HomePageComponent {
       }),
       first()
     ).subscribe();
+
+    const manager = new UserFavoriteManager(store, logger);
+    this.showFilterToggle$ = manager.getAllFavorites().pipe(
+      map(([, favEntities]: [IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite<IFavoriteMetadata, any>>]) => {
+        for (const favEntity of Object.values(favEntities)) {
+          if (favEntity.entityType !== 'endpoint') {
+            return true;
+          }
+        }
+        return false;
+      })
+    );
+  }
+
+  public toggleShowFilters() {
+    this.showFilters = !this.showFilters;
   }
 }
 

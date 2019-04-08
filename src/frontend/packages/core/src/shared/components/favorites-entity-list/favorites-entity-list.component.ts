@@ -23,6 +23,9 @@ export class FavoritesEntityListComponent implements AfterViewInit {
   public placeholder = false;
 
   @Input()
+  public showFilters = false;
+
+  @Input()
   public endpointDisconnected = false;
 
   @Input()
