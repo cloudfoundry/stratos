@@ -1,13 +1,15 @@
-import { Component, OnInit, Input, Renderer2, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import * as markdown from 'marked';
+
+import { LoggerService } from '../../../core/logger.service';
 
 @Component({
   selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
   styleUrls: ['./markdown-preview.component.scss']
 })
-export class MarkdownPreviewComponent implements OnInit {
+export class MarkdownPreviewComponent {
 
   markdownHtml: string;
   documentUrl: string;
@@ -24,22 +26,22 @@ export class MarkdownPreviewComponent implements OnInit {
 
   @ViewChild('markdown') public markdown: ElementRef;
 
-  constructor(private httpClient: HttpClient) { }
-
-  ngOnInit() { }
+  constructor(private httpClient: HttpClient, private logger: LoggerService) { }
 
   private loadDocument() {
-    this.httpClient.get(this.documentUrl, {responseType: 'text'}).subscribe((markText) => {
-      if (markText && markText.length > 0) {
-        // Ensure links in the readme open in a new tab
-        const renderer = new markdown.Renderer();
-        renderer.link = function(href, title, text) {
-          const link = markdown.Renderer.prototype.link.call(this, href, title, text);
-          return link.replace('<a', '<a target="_blank" ');
-        };
-        this.markdownHtml = markdown(markText, { renderer });
-      }
-    });
+    this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe(
+      (markText) => {
+        if (markText && markText.length > 0) {
+          // Ensure links in the readme open in a new tab
+          const renderer = new markdown.Renderer();
+          renderer.link = function(href, title, text) {
+            const link = markdown.Renderer.prototype.link.call(this, href, title, text);
+            return link.replace('<a', '<a target="_blank" ');
+          };
+          this.markdownHtml = markdown(markText, { renderer });
+        }
+      },
+      (error) => this.logger.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
   }
 
   public markdownRendered() {
