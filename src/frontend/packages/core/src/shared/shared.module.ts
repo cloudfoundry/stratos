@@ -35,6 +35,7 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { BlurDirective } from './components/blur.directive';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
@@ -105,6 +106,8 @@ import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
+import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
+import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 import {
@@ -186,6 +189,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     LoadingPageComponent,
     DetailsCardComponent,
     FocusDirective,
+    BlurDirective,
     UniqueDirective,
     CodeBlockComponent,
     EventTabActorIconPipe,
@@ -279,6 +283,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective,
     EndpointCardComponent,
+    MarkdownPreviewComponent,
+    MarkdownContentObserverDirective,
     CfOrgSpaceLinksComponent
   ],
   exports: [
@@ -299,6 +305,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     UptimePipe,
     SteppersModule,
     FocusDirective,
+    BlurDirective,
     UniqueDirective,
     CodeBlockComponent,
     LogViewerComponent,
@@ -378,6 +385,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     FavoritesMetaCardComponent,
     FavoritesGlobalListComponent,
     MultilineTitleComponent,
+    MarkdownPreviewComponent,
+    MarkdownContentObserverDirective,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective
