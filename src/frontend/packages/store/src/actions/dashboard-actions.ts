@@ -7,6 +7,8 @@ export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';
 export const TOGGLE_SIDE_NAV = '[Dashboard] Toggle side nav';
 export const CHANGE_SIDE_NAV_MODE = '[Dashboard] Change side nav mode';
 export const TOGGLE_HEADER_EVENT = '[Dashboard] Toggle header event';
+export const SHOW_SIDE_HELP = '[Dashboard] Show side help';
+export const CLOSE_SIDE_HELP = '[Dashboard] Close side help';
 export const SET_HEADER_EVENT = '[Dashboard] Set header event';
 
 export class OpenSideNav implements Action {
@@ -31,6 +33,15 @@ export class ChangeSideNavMode implements Action {
 
 export class ToggleHeaderEvent implements Action {
   type = TOGGLE_HEADER_EVENT;
+}
+
+export class ShowSideHelp implements Action {
+  constructor(public document: string) { }
+  type = SHOW_SIDE_HELP;
+}
+
+export class CloseSideHelp implements Action {
+  type = CLOSE_SIDE_HELP;
 }
 
 export class SetHeaderEvent implements Action {
