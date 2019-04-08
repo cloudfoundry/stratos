@@ -32,7 +32,8 @@ const appRoutes: Routes = [
           stratosNavigation: {
             label: 'Home',
             matIcon: 'home',
-            position: 10
+            position: 10,
+            requiresPersistence: true
           }
         }
       },

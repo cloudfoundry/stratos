@@ -1,13 +1,13 @@
 # Associate a Cloud Foundry database service
 
-As described in the standard `cf push` instructions [here](../README.md) the console when deployed via `cf push`
- does not contain any way to persist data over application restarts and db entries such as registered endpoints
- and user tokens are lost. To resolve this a Cloud Foundry db service can be bound to the console. Run through 
- the steps below to implement.
+As described in the standard `cf push` instructions [here](../README.md) Stratos, when deployed via `cf push`,
+does not contain any way to persist data over application restarts and db entries such as registered endpoints
+and user tokens are lost. To resolve this a Cloud Foundry db service can be bound to to it. Run through
+the steps below to implement.
 
-1. Create a Service Instance for the Console Database
+1. Create a Database Service Instance
 
-    > **NOTE** The console supports postgresql and mysql DBs. The console will enumerate the bound service instances to detect the database type - see  [below](#note-on-service-bindings) for more detail.
+    > **NOTE** Stratos supports postgresql and mysql DBs. Stratos will enumerate the bound service instances to detect the database type - see  [below](#note-on-service-bindings) for more detail.
 
     Use `cf create-service` to create a service instance for the DB - for example:
     ```
@@ -23,19 +23,17 @@ As described in the standard `cf push` instructions [here](../README.md) the con
     ```bash
     cf cups console_db  -p '{"uri": "postgres://", "username":"console_appuser", "password":"***", "hostname":"192.168.12.34", "port":"5432", "dbname":"console_db" }'
     ```
-1. Update the Console's Manifest
+2. Associate the new service with Stratos via the Manifest
 
-   * The the Console `manifest.yml` file and add the following:
+   * Add the service name to the `services` section of Stratos's `manifest.yml`, for example:
     ```
-    env:
-        FORCE_ENDPOINT_DASHBOARD: true
     services:
     - console_db
     ```
 
-    * This enables the endpoints dashboard UI and specifies that the Console should bind to the service instance named `console_db`
+    * This specifies that Stratos should bind to the service instance named `console_db`
 
-1. Push the app via cf push
+3. Push the app via cf push
     ```
     cf push
     ```
@@ -43,12 +41,12 @@ As described in the standard `cf push` instructions [here](../README.md) the con
     
 ## Note on Service Bindings
 
-The Console will look through all service instances that are bound to it and filter those to determine which are database services. It determines:
+Stratos will look through all service instances that are bound to it and filter those to determine which are database services. It determines:
 
 * A Postgres database service if it has a uri field in the credentials object which begins with the string "postgres://" or it has a tag "postgresql"
 
 * A MySQL database service if it has a uri field in the credentials object which begins with the string "mysql://" or it has a tag "mysql"
 
-If there is a single database service instance, the Console will use that.
+If there is a single database service instance, Stratos will use that.
 
-If there are multiple database service instances, the Console will look for one with a tag of "stratos".
+If there are multiple database service instances, Stratos will look for one with a tag of "stratos".

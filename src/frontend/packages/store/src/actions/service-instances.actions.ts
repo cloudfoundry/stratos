@@ -51,6 +51,7 @@ export class GetServiceInstances
     'results-per-page': 100,
     'order-direction': 'asc',
     'order-direction-field': 'creation',
+    q: []
   };
   flattenPagination = true;
 }

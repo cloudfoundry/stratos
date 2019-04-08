@@ -11,10 +11,10 @@ export type ITileGraphic = ITileIconConfig | ITileImgConfig;
 
 export class ITileConfig<T extends ITileData = ITileData> {
   constructor(
-    readonly key: number,
     public label: string | number,
     public graphic: ITileGraphic,
     public data?: T,
+    public hidden = false
   ) { }
 }
 

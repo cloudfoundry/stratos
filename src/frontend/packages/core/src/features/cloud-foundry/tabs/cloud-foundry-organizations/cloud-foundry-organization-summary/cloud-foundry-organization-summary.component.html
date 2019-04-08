@@ -54,8 +54,12 @@
         </app-tile>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="service" label="Service Instances"
-            value="{{ (cfOrgService.serviceInstances$ | async)?.length }}"
+            value="{{ (cfOrgService.serviceInstancesCount$ | async) }}"
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="(cfOrgService.userProvidedServiceInstancesCount$ | async) > 0">
+          <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
+            value="{{ (cfOrgService.userProvidedServiceInstancesCount$ | async) }}"></app-card-number-metric>
         </app-tile>
         <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
           <app-card-number-metric icon="memory" label="Memory Usage" units="mb"

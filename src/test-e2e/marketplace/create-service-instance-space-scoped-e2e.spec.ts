@@ -11,6 +11,8 @@ describe('Create Service Instance of Space Scoped Service', () => {
   let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
+  let serviceInstanceName: string;
+
   beforeAll(() => {
     e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
@@ -37,11 +39,12 @@ describe('Create Service Instance of Space Scoped Service', () => {
     extendE2ETestTime(timeout);
 
     it('- should be able to to create a service instance', () => {
+      serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
 
-      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name);
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name, serviceInstanceName);
       servicesWall.waitForPage();
 
-      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
+      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, serviceInstanceName);
 
     }, timeout);
   });
@@ -59,5 +62,5 @@ describe('Create Service Instance of Space Scoped Service', () => {
   });
 
 
-  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
 });

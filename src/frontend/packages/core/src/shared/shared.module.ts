@@ -36,12 +36,12 @@ import { ApplicationStateIconPipe } from './components/application-state/applica
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
-import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/card-cf-org-usage.component';
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
@@ -61,6 +61,7 @@ import {
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CfOrgSpaceLinksComponent } from './components/cf-org-space-links/cf-org-space-links.component';
 import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
@@ -115,6 +116,8 @@ import { MultilineTitleComponent } from './components/multiline-title/multiline-
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
+import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
+import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
@@ -158,9 +161,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
-import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
-import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
+
 /* tslint:disable:max-line-length */
 
 @NgModule({
@@ -223,7 +224,6 @@ import { PageSubNavSectionComponent } from './components/page-sub-nav-section/pa
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
     CardCfSpaceDetailsComponent,
@@ -284,7 +284,8 @@ import { PageSubNavSectionComponent } from './components/page-sub-nav-section/pa
     EndpointCardComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,
-    PageSubNavSectionComponent
+    PageSubNavSectionComponent,
+    CfOrgSpaceLinksComponent
   ],
   exports: [
     FormsModule,
@@ -332,7 +333,6 @@ import { PageSubNavSectionComponent } from './components/page-sub-nav-section/pa
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
     RingChartComponent,

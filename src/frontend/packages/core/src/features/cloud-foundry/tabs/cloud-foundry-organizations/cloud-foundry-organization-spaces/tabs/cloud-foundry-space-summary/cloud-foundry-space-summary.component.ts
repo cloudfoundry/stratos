@@ -31,6 +31,7 @@ export class CloudFoundrySpaceSummaryComponent {
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
+      cfSpaceService.userProvidedServiceInstancesCount$
     ]).pipe(
       map(() => false),
       startWith(true)
