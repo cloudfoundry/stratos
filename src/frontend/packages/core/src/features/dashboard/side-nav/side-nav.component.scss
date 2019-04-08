@@ -1,5 +1,6 @@
 $side-nav-padding-h: 12px;
 $side-nav-mat-icon-height: 18px;
+$side-nav-mat-icon-height-large: 24px;
 $side-nav-mat-icon-padding-right: 10px;
 .side-nav {
   display: flex;
@@ -24,14 +25,6 @@ $side-nav-mat-icon-padding-right: 10px;
     overflow-y: auto;
     padding: 0;
   }
-  &__itemContainer {
-    height: 54px;
-    overflow: hidden;
-    transition: height .3s ease-in-out;
-    &-hidden {
-      height: 0;
-    }
-  }
   &__item {
     align-items: center;
     border-color: transparent;
@@ -43,13 +36,11 @@ $side-nav-mat-icon-padding-right: 10px;
     outline: 0;
     padding: 15px $side-nav-padding-h;
     text-decoration: none;
-    mat-icon {
-      margin-right: $side-nav-mat-icon-padding-right;
-      text-align: center;
-    }
     &-icon {
       font-size: $side-nav-mat-icon-height;
       height: $side-nav-mat-icon-height;
+      margin-right: $side-nav-mat-icon-padding-right;
+      text-align: center;
       width: $side-nav-mat-icon-height;
     }
   }
@@ -70,6 +61,9 @@ $side-nav-mat-icon-padding-right: 10px;
     &-icon-img {
       display: none;
     }
+    &__copyright-icon {
+      display: none;
+    }
   }
   &__bottom {
     flex: 0 0 auto;
@@ -77,5 +71,35 @@ $side-nav-mat-icon-padding-right: 10px;
     font-weight: 300;
     padding: 12px;
     pointer-events: none;
+  }
+}
+
+.side-nav__icon-mode {
+  &.side-nav {
+   
+    width: auto;
+  }
+  .side-nav {
+    &__item-icon {
+      font-size: $side-nav-mat-icon-height-large;
+      height: $side-nav-mat-icon-height-large;
+      margin-right: 0;
+      width: $side-nav-mat-icon-height-large;
+    }
+    &__item-label {
+      display: none;
+    }
+    &__logo-icon-img {
+      display: block;
+    }
+    &__logo-img {
+      display: none;
+    }
+    &__copyright-icon {
+      display: block;
+    }
+    &__copyright {
+      display: none;
+    }
   }
 }
