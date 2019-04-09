@@ -22,6 +22,7 @@ import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../s
 import { EndpointModel, endpointStoreNames } from '../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../core/endpoints.service';
 import { EndpointType } from '../../core/extension/extension-types';
+import { safeUnsubscribe } from '../../core/utils.service';
 
 export interface ConnectEndpointConfig {
   name: string;
@@ -39,7 +40,6 @@ export interface ConnectEndpointData {
 
 export class ConnectEndpointService {
 
-
   public connectingError$: Observable<string>;
   private hasConnected = new Subject<boolean>();
   public hasConnected$: Observable<boolean> = this.hasConnected.asObservable();
@@ -50,9 +50,7 @@ export class ConnectEndpointService {
   private fetchingInfo$: Observable<boolean>;
   private update$: Observable<ActionState>;
 
-
-  private connectingSub: Subscription;
-  private fetchSub: Subscription;
+  private subs: Subscription[] = [];
 
   private hasAttemptedConnect: boolean;
   private pData: ConnectEndpointData;
@@ -72,24 +70,22 @@ export class ConnectEndpointService {
   }
 
   private setupSubscriptions() {
-    this.fetchSub = this.update$.pipe(
-      pairwise())
-      .subscribe(([oldVal, newVal]) => {
-        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-          // Has finished fetching
-          this.store.dispatch(new GetSystemInfo());
-        }
-      });
+    this.subs.push(this.update$.pipe(
+      pairwise()
+    ).subscribe(([oldVal, newVal]) => {
+      if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+        // Has finished fetching
+        this.store.dispatch(new GetSystemInfo());
+      }
+    }));
 
-    this.connectingSub = this.connected$.pipe(
+    this.subs.push(this.connected$.pipe(
       filter(([connected]) => connected),
       delay(this.connectDelay),
-      tap(() => {
-        this.hasConnected.next(true);
-      }),
+      tap(() => this.hasConnected.next(true)),
       distinctUntilChanged(([connected], [oldConnected]) => connected && oldConnected),
-      tap(([connected, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
-    ).subscribe();
+    ).subscribe(([connected, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
+    );
   }
 
   private setupObservables() {
@@ -126,10 +122,8 @@ export class ConnectEndpointService {
     );
     this.connectingError$ = this.update$.pipe(
       filter(() => this.hasAttemptedConnect),
-      // TODO: RC tweak
-      map(update => update.error ? update.message || 'Could not connect to the endpointDEFAULTMESSAGE' : null)
+      map(update => update.error ? update.message || 'Could not connect to the endpoint' : null)
     );
-
 
     this.setupCombinedObservables();
   }
@@ -196,7 +190,6 @@ export class ConnectEndpointService {
   }
 
   public destroy() {
-    this.fetchSub.unsubscribe();
-    this.connectingSub.unsubscribe();
+    safeUnsubscribe(...this.subs);
   }
 }

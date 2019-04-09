@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { ShowSideHelp } from '../../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
@@ -18,7 +19,6 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
   public validate: Observable<boolean>;
   public valid = false;
-  // TODO: RC
   public helpDocumentUrl: string;
   public connectService: ConnectEndpointService;
 
@@ -27,6 +27,10 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     private endpointsService: EndpointsService
   ) {
 
+  }
+
+  showHelp() {
+    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
   }
 
   onEnter = (data: ConnectEndpointConfig) => {

@@ -103,7 +103,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
           guid: result.message,
           name: this.nameField.value,
           type: this.endpoint.value,
-          ssoAllowed: !!this.ssoAllowedField.value
+          ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
         };
         return {
           success: !result.error,

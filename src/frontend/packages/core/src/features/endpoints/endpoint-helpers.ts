@@ -49,7 +49,8 @@ let endpointAuthTypes: EndpointAuthTypeConfig[] = [
       password: ['', Validators.required],
     },
     types: new Array<EndpointType>('cf', 'metrics'),
-    component: CredentialsAuthFormComponent
+    component: CredentialsAuthFormComponent,
+    help: 'core/assets/cf-api-v3.md'
   },
   {
     name: 'Single Sign-On (SSO)',

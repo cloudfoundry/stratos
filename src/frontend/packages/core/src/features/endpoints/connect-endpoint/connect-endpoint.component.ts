@@ -27,16 +27,6 @@ import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoi
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
-  // private config: ConnectEndpointConfig;
-  // private pConfig: ConnectEndpointConfig;
-  // @Input() set config(config: ConnectEndpointConfig) {
-  //   if (this.pConfig || !config) {
-  //     return;
-  //   }
-  //   this.pConfig = config;
-
-  //   this.setup();
-  // }
   private pConnectService: ConnectEndpointService;
   @Input() set connectService(service: ConnectEndpointService) {
     if (!service || this.pConnectService) {
@@ -49,6 +39,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     return this.pConnectService;
   }
 
+  /**
+   * Make the form submit as if it had a button - aka on pressing return
+   */
   @Input() formSubmit = false;
 
   @Output() valid = new EventEmitter<boolean>();
@@ -107,22 +100,17 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       authValues: this.fb.group(this.autoSelected.form || {}),
       systemShared: false
     });
+    this.authChanged();
 
     // Template container reference is not available at construction
     this.createComponent(this.autoSelected.component);
 
-    // TODO: RC
-    const a = this.endpointForm.valueChanges.pipe(
-      map(() =>
-        this.endpointForm.valid
-      )
-    ).subscribe(
-      res => {
-        this.setData();
-        this.valid.next(res);
-      }
-    );
-    this.subs.push(a);
+    this.subs.push(this.endpointForm.valueChanges.pipe(
+      map(() => this.endpointForm.valid)
+    ).subscribe(res => {
+      this.setData();
+      this.valid.next(res);
+    }));
 
   }
 
@@ -151,6 +139,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     this.bodyContent = '';
     this.authType.next(authType);
   }
+
   // Dynamically create the component for the selected auth type
   createComponent(component: Type<IAuthForm>) {
     if (!component || !this.container) {
@@ -190,7 +179,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   setData() {
     if (this.connectService) {
-      // Push data into service such that it's ready to go on submit. This removes a lot of plumbing of data outsife of component to parent
+      // Push data into service such that it's ready to go on submit. This removes a lot of plumbing of data outside of component to parent
       // and then back in to service
       this.connectService.setData(this.getData());
     }

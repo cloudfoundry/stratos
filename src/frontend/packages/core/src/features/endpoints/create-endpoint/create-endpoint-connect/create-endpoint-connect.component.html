@@ -1,3 +1,9 @@
+<div class="title">
+  <span class="title__text">Connect to '{{ connectService?.config.name }}'</span>
+  <button *ngIf="helpDocumentUrl" [appBlur]="true" class="title__help" mat-icon-button (click)="showHelp()">
+    <mat-icon>help</mat-icon>
+  </button>
+</div>
 <app-connect-endpoint class="stepper-form" (valid)="valid = $event" (authType)="helpDocumentUrl = $event.help"
   [connectService]="connectService">
 </app-connect-endpoint>

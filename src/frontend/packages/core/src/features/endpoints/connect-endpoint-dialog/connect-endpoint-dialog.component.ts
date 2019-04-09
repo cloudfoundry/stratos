@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
+import { ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -34,6 +35,10 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.store.dispatch(new ShowSnackBar(`Connected endpoint '${this.data.name}'`));
       this.dialogRef.close();
     });
+  }
+
+  showHelp() {
+    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
   }
 
   ngOnDestroy(): void {

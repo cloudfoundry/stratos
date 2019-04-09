@@ -5,12 +5,15 @@
   </mat-progress-bar>
 </div>
 <div class="connection-dialog">
-  <h2 mat-dialog-title>
-    Connect to {{ data.name }}
-  </h2>
-  <button *ngIf="helpDocumentUrl" [appBlur]="true" class="connection-dialog__help" mat-icon-button (click)="showHelp()">
-    <mat-icon>help</mat-icon>
-  </button>
+  <div class="connection-dialog__title">
+    <h2 mat-dialog-title>
+      Connect to {{ data.name }}
+    </h2>
+    <button *ngIf="helpDocumentUrl" [appBlur]="true" class="connection-dialog__help" mat-icon-button
+      (click)="showHelp()">
+      <mat-icon>help</mat-icon>
+    </button>
+  </div>
   <app-connect-endpoint (valid)="valid = $event" (authType)="helpDocumentUrl = $event.help"
     [connectService]="connectService" [formSubmit]="true">
   </app-connect-endpoint>
@@ -18,8 +21,6 @@
     [show]="(connectService.connectingError$ | async) && !(connectService.isBusy$ | async)">
   </app-dialog-error>
   <mat-dialog-actions class="connection-dialog__actions">
-    {{(connectService.isBusy$ | async) }} ||
-    {{!valid}} // TODO: RC remove
     <button [mat-dialog-close]="true" mat-button color="warn"
       [disabled]="(connectService.isBusy$ | async)">Cancel</button>
     <button (click)="connectService.submit()" [disabled]="(connectService.isBusy$ | async) || !valid" mat-button
