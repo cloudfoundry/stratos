@@ -1,15 +1,14 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, Component, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { debounceTime, filter, startWith, withLatestFrom } from 'rxjs/operators';
-
+import { distinctUntilChanged, map, startWith, withLatestFrom } from 'rxjs/operators';
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { CloseSideHelp, CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import { CloseSideHelp, DisableMobileNav, EnableMobileNav, CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
@@ -21,6 +20,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { SideNavItem } from './../side-nav/side-nav.component';
 
 
+
 @Component({
   selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
@@ -30,6 +30,9 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentInit {
   public activeTabLabel$: Observable<string>;
   public subNavData$: Observable<[string, Portal<any>]>;
+  public isMobile$: Observable<boolean>;
+  public sideNavMode$: Observable<string>;
+  public sideNavMode: string;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -40,15 +43,18 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     @Inject(DOCUMENT) private document: Document,
-    private renderer: Renderer2
   ) {
-    if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
-      this.enableMobileNav();
-    }
+    this.isMobile$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
+      map(breakpoint => breakpoint.matches),
+      startWith(false),
+      distinctUntilChanged()
+    );
+
+    this.mobileSub = this.isMobile$
+      .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
   }
 
   public helpDocumentUrl: string;
-  public iconMode = true;
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;
@@ -58,7 +64,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   private routeChangeSubscription: Subscription;
 
-  private breakpointSub: Subscription;
+  private mobileSub: Subscription;
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
@@ -77,16 +83,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngOnInit() {
-    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
-      debounceTime(250)
-    ).subscribe(result => {
-      if (result.matches) {
-        this.enableMobileNav();
-      } else {
-        this.disableMobileNav();
-      }
-    });
-
     this.subNavData$ = combineLatest(
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
         startWith(null)
@@ -98,32 +94,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     );
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());
-    const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
-    // this.routeChangeSubscription = this.router.events.pipe(
-    //   filter((event) => event instanceof NavigationEnd),
-    //   withLatestFrom(dashboardState$)
-    // ).subscribe(([event, dashboard]) => {
-    //   if (this.content) {
-    //     // Ensure we always end up at the of the page when we navigate.
-    //     this.content.nativeElement.scrollTop = 0;
-    //   }
-    //   this.fullView = this.isFullView(this.activatedRoute.snapshot);
-    //   this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
-    //   if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
-    //     this.sidenav.close();
-    //   }
-    //   if (dashboard.sideHelpOpen) {
-    //     this.sideHelp.close();
-    //   }
-    //   this.iconModeMouse(false);
-    // });
   }
 
   ngOnDestroy() {
     this.routeChangeSubscription.unsubscribe();
-    this.breakpointSub.unsubscribe();
+    this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
     this.openCloseSub.unsubscribe();
   }
@@ -149,16 +126,22 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    // this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
-    //   this.store.dispatch(new CloseSideNav());
-    // });
-
     const dashboardState$ = this.store.select('dashboard');
+    // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
+    this.closeSub = this.sidenav.closedStart.pipe(withLatestFrom(dashboardState$)).subscribe(([change, state]) => {
+      if (state.isMobile) {
+        this.store.dispatch(new CloseSideNav());
+      }
+    });
     this.openCloseSub = dashboardState$
       .subscribe((dashboard: DashboardState) => {
-        dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
-        // this.sidenav.mode = dashboard.sideNavMode;
-        this.iconMode = true;
+        if (dashboard.isMobile) {
+          this.sideNavMode = 'over';
+          dashboard.isMobileNavOpen ? this.sidenav.open() : this.sidenav.close();
+        } else {
+          this.sideNavMode = 'side';
+          dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
+        }
         if (dashboard.sideHelpOpen) {
           this.showSideHelp(dashboard.sideHelpDocument);
         }
@@ -166,23 +149,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   private showSideHelp(documentUrl: string) {
-    // Need to hide any open dialogs first
-    this.hideShowOverlays(true);
     this.helpDocumentUrl = documentUrl;
     this.sideHelp.open();
   }
 
   public sideHelpClosed() {
-    this.hideShowOverlays(false);
     this.store.dispatch(new CloseSideHelp());
-  }
-
-  private hideShowOverlays(hide: boolean) {
-    const overlay = this.document.querySelector('.cdk-overlay-container');
-    if (!!overlay) {
-      const display = hide ? 'none' : 'unset';
-      this.renderer.setStyle(overlay, 'display', display);
-    }
   }
 
   private getNavigationRoutes(): SideNavItem[] {
@@ -224,23 +196,5 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       const navs = this.collectNavigationRoutes(route.path, route.children);
       return nav.concat(navs);
     }, []);
-  }
-
-  public iconModeMouse(expand: boolean) {
-    if (this.iconMode) {
-      this.sideNavWidth = expand ? 200 : 54;
-      this.iconModeOpen = expand;
-    }
-  }
-
-  private enableMobileNav() {
-    // this.sideNavWidth = 200;
-    this.iconMode = false;
-  }
-
-  private disableMobileNav() {
-    // this.sideNavWidth = 54;
-    // this.iconMode = true;
-    // this.sidenav.close();
   }
 }

@@ -1,6 +1,6 @@
 <mat-drawer-container class="dashboard">
-  <mat-drawer #sidenav class="dashboard__side-nav" mode="side" opened="true">
-    <app-side-nav [tabs]="sideNavTabs">
+  <mat-drawer #sidenav class="dashboard__side-nav" [mode]="sideNavMode">
+    <app-side-nav [iconMode]="!(isMobile$ | async)" [tabs]="sideNavTabs">
     </app-side-nav>
   </mat-drawer>
   <mat-drawer-content>

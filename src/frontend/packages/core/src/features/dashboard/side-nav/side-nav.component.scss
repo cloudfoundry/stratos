@@ -80,6 +80,9 @@ $side-nav-mat-icon-padding-right: 10px;
     width: auto;
   }
   .side-nav {
+    &__item {
+      justify-content: center;
+    }
     &__item-icon {
       font-size: $side-nav-mat-icon-height-large;
       height: $side-nav-mat-icon-height-large;
@@ -100,6 +103,9 @@ $side-nav-mat-icon-padding-right: 10px;
     }
     &__copyright {
       display: none;
+    }
+    &__bottom {
+      text-align: center;
     }
   }
 }

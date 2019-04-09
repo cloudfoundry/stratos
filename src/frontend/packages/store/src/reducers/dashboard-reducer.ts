@@ -8,20 +8,23 @@ import {
   SHOW_SIDE_HELP,
   TOGGLE_HEADER_EVENT,
   TOGGLE_SIDE_NAV,
+  ENABLE_SIDE_NAV_MOBILE_MODE,
+  DISABLE_SIDE_NAV_MOBILE_MODE,
 } from '../actions/dashboard-actions';
-import { SideNavModes } from '../types/dashboard.types';
 
 export interface DashboardState {
   sidenavOpen: boolean;
-  sideNavMode: SideNavModes;
+  isMobile: boolean;
+  isMobileNavOpen: boolean;
   headerEventMinimized: boolean;
   sideHelpOpen: boolean;
   sideHelpDocument: string;
 }
 
 export const defaultDashboardState: DashboardState = {
-  sidenavOpen: false,
-  sideNavMode: 'over',
+  sidenavOpen: true,
+  isMobile: false,
+  isMobileNavOpen: false,
   headerEventMinimized: false,
   sideHelpOpen: false,
   sideHelpDocument: ''
@@ -30,13 +33,26 @@ export const defaultDashboardState: DashboardState = {
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action) {
   switch (action.type) {
     case OPEN_SIDE_NAV:
+      if (state.isMobile) {
+        return { ...state, isMobileNavOpen: true };
+      }
       return { ...state, sidenavOpen: true };
     case CLOSE_SIDE_NAV:
+      if (state.isMobile) {
+        return { ...state, isMobileNavOpen: false };
+      }
       return { ...state, sidenavOpen: false };
     case TOGGLE_SIDE_NAV:
+      if (state.isMobile) {
+        return { ...state, isMobileNavOpen: !state.isMobileNavOpen };
+      }
       return { ...state, sidenavOpen: !state.sidenavOpen };
     case CHANGE_SIDE_NAV_MODE:
       return { ...state, sideNavMode: action.mode };
+    case ENABLE_SIDE_NAV_MOBILE_MODE:
+      return { ...state, isMobile: true, isMobileNavOpen: false };
+    case DISABLE_SIDE_NAV_MOBILE_MODE:
+      return { ...state, isMobile: false, isMobileNavOpen: false };
     case TOGGLE_HEADER_EVENT:
       return { ...state, headerEventMinimized: !state.headerEventMinimized };
     case SHOW_SIDE_HELP:
