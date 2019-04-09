@@ -1,14 +1,20 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, startWith, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, withLatestFrom, tap } from 'rxjs/operators';
+
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { CloseSideHelp, DisableMobileNav, EnableMobileNav, CloseSideNav } from '../../../../../store/src/actions/dashboard-actions';
+import {
+  CloseSideHelp,
+  CloseSideNav,
+  DisableMobileNav,
+  EnableMobileNav,
+} from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
@@ -20,19 +26,21 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { SideNavItem } from './../side-nav/side-nav.component';
 
 
-
 @Component({
   selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentInit {
+export class DashboardBaseComponent implements OnInit, OnDestroy {
   public activeTabLabel$: Observable<string>;
   public subNavData$: Observable<[string, Portal<any>]>;
   public isMobile$: Observable<boolean>;
   public sideNavMode$: Observable<string>;
   public sideNavMode: string;
+  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean }>;
+  public rightNavState$: Observable<{ opened: boolean; documentUrl: string; }>;
+  private dashboardState$: Observable<DashboardState>;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -49,26 +57,54 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       startWith(false),
       distinctUntilChanged()
     );
-
+    this.dashboardState$ = this.store.select('dashboard');
+    this.mainNavState$ = this.dashboardState$.pipe(
+      map(state => {
+        if (state.isMobile) {
+          return {
+            mode: 'over',
+            opened: state.isMobileNavOpen || false,
+            iconMode: false
+          };
+        } else {
+          return {
+            mode: state.sideNavPinned ? 'side' : 'over',
+            opened: state.sidenavOpen || false,
+            iconMode: state.sideNavPinned
+          };
+        }
+      })
+    );
+    this.rightNavState$ = this.dashboardState$.pipe(
+      map(state => ({
+        opened: !!state.sideHelpDocument && state.sideHelpOpen,
+        documentUrl: state.sideHelpDocument
+      }))
+    );
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
   }
 
   public helpDocumentUrl: string;
 
-  private openCloseSub: Subscription;
   private closeSub: Subscription;
 
   public fullView: boolean;
   public noMargin: boolean;
 
-  private routeChangeSubscription: Subscription;
-
   private mobileSub: Subscription;
 
-  @ViewChild('sidenav') public sidenav: MatDrawer;
+  @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
+    if (!this.closeSub) {
+      // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
+      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]) => {
+        if (state.isMobile) {
+          this.store.dispatch(new CloseSideNav());
+        }
+      });
+    }
+  }
 
-  @ViewChild('sideHelp') public sideHelp: MatDrawer;
   @ViewChild('content') public content;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
@@ -99,10 +135,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngOnDestroy() {
-    this.routeChangeSubscription.unsubscribe();
     this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
-    this.openCloseSub.unsubscribe();
   }
 
   isFullView(route: ActivatedRouteSnapshot): boolean {
@@ -123,34 +157,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       }
     }
     return false;
-  }
-
-  ngAfterContentInit() {
-    const dashboardState$ = this.store.select('dashboard');
-    // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
-    this.closeSub = this.sidenav.closedStart.pipe(withLatestFrom(dashboardState$)).subscribe(([change, state]) => {
-      if (state.isMobile) {
-        this.store.dispatch(new CloseSideNav());
-      }
-    });
-    this.openCloseSub = dashboardState$
-      .subscribe((dashboard: DashboardState) => {
-        if (dashboard.isMobile) {
-          this.sideNavMode = 'over';
-          dashboard.isMobileNavOpen ? this.sidenav.open() : this.sidenav.close();
-        } else {
-          this.sideNavMode = 'side';
-          dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
-        }
-        if (dashboard.sideHelpOpen) {
-          this.showSideHelp(dashboard.sideHelpDocument);
-        }
-      });
-  }
-
-  private showSideHelp(documentUrl: string) {
-    this.helpDocumentUrl = documentUrl;
-    this.sideHelp.open();
   }
 
   public sideHelpClosed() {

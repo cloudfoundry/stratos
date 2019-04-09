@@ -1,6 +1,7 @@
 <mat-drawer-container class="dashboard">
-  <mat-drawer #sidenav class="dashboard__side-nav" [mode]="sideNavMode">
-    <app-side-nav [iconMode]="!(isMobile$ | async)" [tabs]="sideNavTabs">
+  <mat-drawer #sidenav *ngIf="mainNavState$ | async as navState" class="dashboard__side-nav" [mode]="navState.mode"
+    [opened]="navState.opened">
+    <app-side-nav [iconMode]="navState.iconMode" [tabs]="sideNavTabs">
     </app-side-nav>
   </mat-drawer>
   <mat-drawer-content>
@@ -31,9 +32,10 @@
         </div>
       </div>
     </div>
-    <mat-drawer #sideHelp mode="over" position="end" (closedStart)="sideHelpClosed()">
+    <mat-drawer #sideHelp *ngIf="rightNavState$ | async as rightNavState" mode="over" position="end"
+      [opened]="rightNavState.opened" (closedStart)="sideHelpClosed()">
       <div class="dashboard__side-help">
-        <app-markdown-preview [documentUrl]="helpDocumentUrl"></app-markdown-preview>
+        <app-markdown-preview [documentUrl]="rightNavState.documentUrl"></app-markdown-preview>
       </div>
     </mat-drawer>
   </mat-drawer-content>

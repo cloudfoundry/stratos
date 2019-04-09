@@ -16,6 +16,7 @@ export interface DashboardState {
   sidenavOpen: boolean;
   isMobile: boolean;
   isMobileNavOpen: boolean;
+  sideNavPinned: boolean;
   headerEventMinimized: boolean;
   sideHelpOpen: boolean;
   sideHelpDocument: string;
@@ -25,6 +26,7 @@ export const defaultDashboardState: DashboardState = {
   sidenavOpen: true,
   isMobile: false,
   isMobileNavOpen: false,
+  sideNavPinned: true,
   headerEventMinimized: false,
   sideHelpOpen: false,
   sideHelpDocument: ''
