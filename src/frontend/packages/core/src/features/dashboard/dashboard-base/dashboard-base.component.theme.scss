@@ -10,12 +10,26 @@
   }
 
   .dashboard__side-nav {
+    $side-nave-delay: .5s;
     transform: none;
     transition: width .25s ease;
+    transition-delay: $side-nave-delay;
     visibility: visible !important;
 
     > .mat-drawer-inner-container {
       overflow: hidden;
+    }
+
+    .side-nav__logo-icon-img {
+      opacity: 1;
+      transition: opacity ;
+      transition-delay: $side-nave-delay;
+    }
+
+    .side-nav__logo-img {
+      opacity: 0;
+      transition: opacity ;
+      transition-delay: $side-nave-delay;
     }
   }
 
