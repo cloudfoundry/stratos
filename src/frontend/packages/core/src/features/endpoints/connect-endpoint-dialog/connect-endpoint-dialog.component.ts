@@ -8,6 +8,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
+
 @Component({
   selector: 'app-connect-endpoint-dialog',
   templateUrl: './connect-endpoint-dialog.component.html',

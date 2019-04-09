@@ -17,6 +17,12 @@ $app-header-height: 56px;
   &___subHeader {
     margin-top: 102px;
   }
+  &__noMargin {
+    padding: 0;
+  }
+  &__side-help {
+    width: 600px;
+  }
 }
 
 .routing-indicator {

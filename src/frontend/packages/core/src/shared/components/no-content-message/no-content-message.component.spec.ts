@@ -9,7 +9,7 @@ describe('NoContentMessageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [NoContentMessageComponent],
+      declarations: [],
       imports: [
         CoreModule
       ]
