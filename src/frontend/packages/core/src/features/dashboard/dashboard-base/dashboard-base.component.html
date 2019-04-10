@@ -5,8 +5,13 @@
     </app-side-nav>
   </mat-sidenav>
   <div class="dashboard__inner">
-    <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView}">
+    <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView, 'dashboard__noMargin': noMargin}">
       <router-outlet></router-outlet>
     </div>
   </div>
+  <mat-sidenav #sideHelp mode="over" position="end" (closedStart)="sideHelpClosed()">
+    <div class="dashboard__side-help">
+      <app-markdown-preview [documentUrl]="helpDocumentUrl"></app-markdown-preview>
+    </div>    
+  </mat-sidenav>
 </mat-sidenav-container>

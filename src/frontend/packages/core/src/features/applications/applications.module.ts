@@ -32,6 +32,7 @@ import { ApplicationDeleteComponent } from './application-delete/application-del
 import { DeleteAppRoutesComponent } from './application-delete/delete-app-routes/delete-app-routes.component';
 import { DeleteAppServiceInstancesComponent } from './application-delete/delete-app-instances/delete-app-instances.component';
 import { CustomImportModule } from '../../custom-import.module';
+import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 
 @NgModule({
   imports: [
@@ -63,6 +64,7 @@ import { CustomImportModule } from '../../custom-import.module';
     ApplicationDeleteComponent,
     DeleteAppRoutesComponent,
     DeleteAppServiceInstancesComponent,
+    NewApplicationBaseStepComponent,
   ],
   providers: [
     ApplicationService,

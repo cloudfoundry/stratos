@@ -116,7 +116,7 @@ export class GitLabSCM implements GitSCM {
       html_url: prj.web_url,
       owner: {
         name: prj.namespace.name,
-        avatar_url: prj.avatar_url || '/assets/gitlab-logo.svg'
+        avatar_url: prj.avatar_url || '/core/assets/gitlab-logo.svg'
       }
     };
   }

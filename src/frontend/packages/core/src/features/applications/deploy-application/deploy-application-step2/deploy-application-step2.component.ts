@@ -9,7 +9,7 @@ import {
   Subscription,
   timer as observableTimer,
 } from 'rxjs';
-import { catchError, filter, map, pairwise, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, map, pairwise, startWith, switchMap, take, tap, withLatestFrom, first } from 'rxjs/operators';
 
 import {
   FetchBranchesForProject,
@@ -40,6 +40,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { GitSCM } from '../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes, getAutoSelectedDeployType } from '../deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -53,13 +54,8 @@ export class DeployApplicationStep2Component
 
   branchesSubscription: Subscription;
   commitInfo: GitCommit;
-  sourceTypes: SourceType[] = [
-    { name: 'Public GitHub', id: 'github', group: 'gitscm' },
-    { name: 'Public GitLab', id: 'gitlab', group: 'gitscm' },
-    { name: 'Public Git URL', id: 'giturl' },
-    { name: 'Application Archive File', id: 'file' },
-    { name: 'Application Folder', id: 'folder' },
-  ];
+  sourceTypes: SourceType[] = getApplicationDeploySourceTypes();
+  public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // GitHub by default
   repositoryBranches$: Observable<any>;
@@ -95,6 +91,7 @@ export class DeployApplicationStep2Component
   subscriptions: Array<Subscription> = [];
 
   @ViewChild('fsChooser') fsChooser;
+  public selectedSourceType: SourceType = null;
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -109,10 +106,15 @@ export class DeployApplicationStep2Component
   constructor(
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
-    private route: ActivatedRoute,
+    route: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private scmService: GitSCMService
-  ) { }
+  ) {
+    this.selectedSourceType = getAutoSelectedDeployType(route);
+    if (this.selectedSourceType) {
+      this.stepperText = this.selectedSourceType.helpText;
+    }
+  }
 
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
@@ -123,7 +125,7 @@ export class DeployApplicationStep2Component
         branch: this.repositoryBranch,
         url: this.scm.getCloneURL(this.repository)
       };
-    } else if (this.sourceType.id === 'giturl') {
+    } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       details = {
         projectName: this.gitUrl,
         branch: {
@@ -150,7 +152,7 @@ export class DeployApplicationStep2Component
 
     this.sourceTypeNeedsUpload$ = this.sourceType$.pipe(
       filter(type => type && !!type.id),
-      map(type => type.id === 'folder' || type.id === 'file')
+      map(type => type.id === DEPLOY_TYPES_IDS.FOLDER || type.id === DEPLOY_TYPES_IDS.FILE)
     );
 
     const fetchBranches = this.store
@@ -247,9 +249,12 @@ export class DeployApplicationStep2Component
 
     const setInitialSourceType$ = this.store.select(selectSourceType).pipe(
       filter(p => !p),
-      take(1),
+      first(),
       tap(p => {
-        this.setSourceType(this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
+        this.setSourceType(this.selectedSourceType || this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
+        if (this.selectedSourceType) {
+          this.sourceType = this.selectedSourceType;
+        }
       })
     );
 
@@ -314,7 +319,7 @@ export class DeployApplicationStep2Component
     );
   }
 
-  setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));
+  setSourceType = (sourceType: SourceType) => this.store.dispatch(new SetAppSourceDetails(sourceType));
 
   updateBranchName(branch: GitBranch) {
     this.store.dispatch(new SetDeployBranch(branch.name));

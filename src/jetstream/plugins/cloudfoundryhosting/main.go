@@ -20,14 +20,14 @@ import (
 
 // Constants
 const (
-	VCapApplication        = "VCAP_APPLICATION"
-	CFApiURLOverride       = "CF_API_URL"
-	CFApiForceSecure       = "CF_API_FORCE_SECURE"
-	cfSessionCookieName    = "JSESSIONID"
-	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
-	SkipAutoRegister       = "SKIP_AUTO_REGISTER"
-	SQLiteProviderName     = "sqlite"
-	defaultSessionSecret   = "wheeee!"
+	VCapApplication                = "VCAP_APPLICATION"
+	CFApiURLOverride               = "CF_API_URL"
+	CFApiForceSecure               = "CF_API_FORCE_SECURE"
+	cfSessionCookieName            = "JSESSIONID"
+	ForceEnablePersistenceFeatures = "FORCE_ENABLE_PERSISTENCE_FEATURES"
+	SkipAutoRegister               = "SKIP_AUTO_REGISTER"
+	SQLiteProviderName             = "sqlite"
+	defaultSessionSecret           = "wheeee!"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
@@ -100,6 +100,7 @@ func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 
 // Init performs plugin initialization
 func (ch *CFHosting) Init() error {
+
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if ch.portalProxy.Env().IsSet(VCapApplication) {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
@@ -137,7 +138,7 @@ func (ch *CFHosting) Init() error {
 		data := []byte(vCapApp)
 		err := json.Unmarshal(data, &appData)
 		if err != nil {
-			log.Fatal("Could not get the Cloud Foundry API URL", err)
+			log.Fatalf("Could not get the Cloud Foundry API URL: %v+", err)
 			return nil
 		}
 
@@ -158,24 +159,27 @@ func (ch *CFHosting) Init() error {
 			log.Info("No forced override to HTTPS")
 		}
 
-		disableEndpointDashboard := true
-		if ch.portalProxy.Env().IsSet(ForceEndpointDashboard) {
+		// Ephemeral Database indicates if we are running with a DB like SQLite, which is Ephemeral
+		// Only need to do this if the Database we are using is SQLite
+		isSQLite := ch.portalProxy.GetConfig().DatabaseProviderName == SQLiteProviderName
+		disablePersistenceFeatures := isSQLite
+		if ch.portalProxy.Env().IsSet(ForceEnablePersistenceFeatures) {
 			// Force the Endpoint Dashboard to be visible?
-			disableEndpointDashboard = !ch.portalProxy.Env().MustBool(ForceEndpointDashboard)
+			disablePersistenceFeatures = !ch.portalProxy.Env().MustBool(ForceEnablePersistenceFeatures)
+			if disablePersistenceFeatures {
+				log.Info("Features requiring persistence have been DISABLED")
+			} else {
+				log.Info("Features requiring persistence have been ENABLED")
+			}
 		}
-
-		if disableEndpointDashboard {
-			log.Info("Endpoint Dashboard has been DISABLED")
-		} else {
-			log.Info("Endpoint Dashboard has been ENABLED")
-		}
-		ch.portalProxy.GetConfig().PluginConfig["endpointsDashboardDisabled"] = strconv.FormatBool(disableEndpointDashboard)
+		ch.portalProxy.GetConfig().PluginConfig["disablePersistenceFeatures"] = strconv.FormatBool(disablePersistenceFeatures)
+		log.Infof("Features requiring persistence: enabled: %s", strconv.FormatBool(!disablePersistenceFeatures))
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
 		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
 		if err != nil {
-			log.Fatal("Could not get the info for Cloud Foundry", err)
+			log.Fatalf("Could not get the info for Cloud Foundry: %v+", err)
 			return nil
 		}
 
@@ -207,8 +211,8 @@ func (ch *CFHosting) Init() error {
 		}
 
 		// Store the space and id of the Console application - we can use these to prevent stop/delete in the front-end
-		if (ch.portalProxy.GetConfig().CloudFoundryInfo == nil) {
-		    ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{}
+		if ch.portalProxy.GetConfig().CloudFoundryInfo == nil {
+			ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{}
 		}
 		ch.portalProxy.GetConfig().CloudFoundryInfo.SpaceGUID = appData.SpaceID
 		ch.portalProxy.GetConfig().CloudFoundryInfo.AppGUID = appData.ApplicationID

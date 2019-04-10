@@ -1,5 +1,5 @@
 <div *ngIf="!placeholder" class="favorite-entity-list">
-  <form class="favorite-entity-list__search-form">
+  <form class="favorite-entity-list__search-form" [ngClass]="{'favorite-entity-list__hide-filters': !showFilters}">
     <mat-form-field class="favorite-entity-list__name-search">
       <input matInput ngModel #nameChange="ngModel" name="favoriteName" placeholder="Name">
     </mat-form-field>
@@ -25,7 +25,6 @@
       <mat-icon *ngIf="(limitToggle$ | async) !== null">expand_more</mat-icon>
     </button>
   </ng-container>
-
 </div>
 
 <div *ngIf="placeholder" class="favorite-entity-list">

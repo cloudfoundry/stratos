@@ -2,7 +2,7 @@ import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
 import { AppState } from '../../store/src/app-state';
-import { addEntityToCache, EntitySchema } from '../../store/src/helpers/entity-factory';
+import { addEntityToCache, EntitySchema, userProvidedServiceInstanceSchemaKey } from '../../store/src/helpers/entity-factory';
 import { appReducers } from '../../store/src/reducers.module';
 import { registerAPIRequestEntity } from '../../store/src/reducers/api-request-reducers.generator';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
@@ -611,12 +611,15 @@ function getDefaultInitialTestStoreState(): AppState {
       gitCommits: {},
       domain: {},
       metrics: {},
-      servicePlan: {}
+      servicePlan: {},
+      [userProvidedServiceInstanceSchemaKey]: {}
     },
     dashboard: {
       sidenavOpen: true,
       sideNavMode: 'side',
-      headerEventMinimized: false
+      headerEventMinimized: false,
+      sideHelpOpen: false,
+      sideHelpDocument: ''
     },
     createApplication: {
       cloudFoundryDetails: null,
@@ -3906,6 +3909,7 @@ function getDefaultInitialTestStoreState(): AppState {
       system: {},
       private_domains: {},
       space_quota_definition: {},
+      [userProvidedServiceInstanceSchemaKey]: {}
     },
     requestData: {
       userFavorites: {},
@@ -21794,7 +21798,8 @@ function getDefaultInitialTestStoreState(): AppState {
           }
         ],
         passwordLastModified: ''
-      }
+      },
+      [userProvidedServiceInstanceSchemaKey]: {}
     },
     actionHistory: [],
     lists: {},

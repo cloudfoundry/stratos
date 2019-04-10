@@ -20,6 +20,7 @@ export interface SessionUser {
 }
 export interface PluginConfig {
   userInvitationsEnabled: 'true' | 'false';
+  disablePersistenceFeatures: 'true' | 'false';
 }
 export interface SessionEndpoints {
   [type: string]: SessionEndpoint;

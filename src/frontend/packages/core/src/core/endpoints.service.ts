@@ -18,12 +18,14 @@ import { getEndpointType } from '../features/endpoints/endpoint-helpers';
 import { UserService } from './user.service';
 
 
+
 @Injectable()
 export class EndpointsService implements CanActivate {
 
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
+  disablePersistenceFeatures$: Observable<boolean>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint) {
@@ -44,6 +46,10 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking')));
+
+    this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
+      map((auth) => auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true')
+    );
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {

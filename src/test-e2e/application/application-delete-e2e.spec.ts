@@ -1,12 +1,13 @@
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
 
 
-describe('Application Delete', function () {
+describe('Application Delete', () => {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
@@ -68,57 +69,64 @@ describe('Application Delete', function () {
       appSummaryPage.waitForPage();
     });
 
-    it('Should delete app', () => {
-      // We should be on the app wall
-      expect(appWall.isActivePage()).toBeTruthy();
+    describe('Long running tests', () => {
+      const timeout = 100000;
+      extendE2ETestTime(timeout);
 
-      // We created the app after the wall loaded, so refresh to make sure app wall shows the new app
-      appWall.appList.header.refresh();
+      it('Should delete app', () => {
+        // We should be on the app wall
+        expect(appWall.isActivePage()).toBeTruthy();
 
-      appWall.appList.header.setSearchText(testAppName);
-      expect(appWall.appList.getTotalResults()).toBe(1);
+        // We created the app after the wall loaded, so refresh to make sure app wall shows the new app
+        appWall.appList.header.refresh();
 
-      // Open delete app dialog
-      const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
-      appSummaryPage.navigateTo();
-      appSummaryPage.waitForPage();
-      const deleteApp = appSummaryPage.delete(testAppName);
+        appWall.appList.header.setSearchText(testAppName);
+        expect(appWall.appList.getTotalResults()).toBe(1);
 
-      // App did not have a route, so there should be no routes step
-      expect(deleteApp.hasRouteStep()).toBeFalsy();
+        // Open delete app dialog
+        const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
+        appSummaryPage.navigateTo();
+        appSummaryPage.waitForPage();
+        const deleteApp = appSummaryPage.delete(testAppName);
 
-      // 1 step - np header shown
-      expect(deleteApp.stepper.canCancel()).toBeTruthy();
-      expect(deleteApp.stepper.canNext()).toBeTruthy();
-      expect(deleteApp.stepper.hasPrevious()).toBeFalsy();
+        // App did not have a route, so there should be no routes step
+        expect(deleteApp.hasRouteStep()).toBeFalsy();
 
-      deleteApp.table.getTableData().then(table => {
-        expect(table.length).toBe(1);
-        expect(table[0].name).toBe(testAppName);
-        expect(table[0].instances).toBe('0 / 1');
-      });
+        // 1 step - np header shown
+        expect(deleteApp.stepper.canCancel()).toBeTruthy();
+        expect(deleteApp.stepper.canNext()).toBeTruthy();
+        expect(deleteApp.stepper.hasPrevious()).toBeFalsy();
 
-      expect(deleteApp.stepper.getNextLabel()).toBe('Delete');
+        deleteApp.table.getTableData().then(table => {
+          expect(table.length).toBe(1);
+          expect(table[0].name).toBe(testAppName);
+          expect(table[0].instances).toBe('0 / 1');
+        });
 
-      // Delete the app
-      deleteApp.stepper.next();
+        expect(deleteApp.stepper.getNextLabel()).toBe('Delete');
 
-      deleteApp.stepper.waitUntilCanNext();
-      expect(deleteApp.stepper.getNextLabel()).toBe('Close');
-      // Close
-      deleteApp.stepper.next();
+        // Delete the app
+        deleteApp.stepper.next();
 
-      // Should go back to app wall
-      appWall.waitForPage();
+        deleteApp.stepper.waitUntilCanNext();
+        expect(deleteApp.stepper.getNextLabel()).toBe('Close');
+        // Close
+        deleteApp.stepper.next();
 
-      appWall.appList.header.waitUntilShown();
+        // Should go back to app wall
+        appWall.waitForPage();
 
-      // We deleted the app, so don't try and do this on cleanup
-      app = null;
+        appWall.appList.header.waitUntilShown();
 
-      appWall.appList.header.setSearchText(testAppName);
-      expect(appWall.appList.getTotalResults()).toBe(0);
+        // We deleted the app, so don't try and do this on cleanup
+        app = null;
+
+        appWall.appList.header.setSearchText(testAppName);
+        expect(appWall.appList.getTotalResults()).toBe(0);
+      }, timeout);
     });
+
+
   });
 
 });
