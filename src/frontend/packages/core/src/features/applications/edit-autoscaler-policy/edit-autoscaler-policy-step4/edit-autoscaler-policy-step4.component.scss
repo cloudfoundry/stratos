@@ -7,7 +7,7 @@ app-tile-grid {
   position: relative;
   width: 100%;
   &__actions {
-    bottom: 24px;
+    bottom: 10px;
     padding-top: 0;
     position: absolute;
     right: 24px;
@@ -30,7 +30,7 @@ app-tile-grid {
 .autoscaler-policy-edit-specific {
   max-width: 100%;
   .form-field-left {
-    margin-right: .5em
+    margin-right: .5em;
   }
   .form-field-30 {
     width: 30%;

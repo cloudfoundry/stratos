@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   &__actions {
-    bottom: 24px;
+    bottom: 10px;
     padding-top: 0;
     position: absolute;
     right: 24px;
@@ -20,13 +20,6 @@
       margin-top: 0;
     }
   }
-  &__actions {
-    bottom: 24px;
-    padding-top: 0;
-    position: absolute;
-    right: 24px;
-    text-align: right;
-  }
   app-metadata-item {
     margin-bottom: 0;
   }
@@ -38,6 +31,9 @@ app-tile-grid {
 
 table {
   width: 100%;
+  td {
+    padding-left: .5em;
+  }
 }
 
 .autoscaler-tab-policy {

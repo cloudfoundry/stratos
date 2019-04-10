@@ -104,9 +104,6 @@ import {
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import {
-  TableCellAutoscalerEventActionLabelPipe,
-} from './components/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-action/table-cell-autoscaler-event-action-label.pipe';
-import {
   TableCellAutoscalerEventStatusIconPipe,
 } from './components/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status-icon.pipe';
 import {
@@ -202,7 +199,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     UniqueDirective,
     CodeBlockComponent,
     EventTabActorIconPipe,
-    TableCellAutoscalerEventActionLabelPipe,
     TableCellAutoscalerEventStatusIconPipe,
     TableCellAutoscalerEventChangeIconPipe,
     LogViewerComponent,

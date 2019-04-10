@@ -16,7 +16,7 @@ import {
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../../../../store/src/actions/app-autoscaler.actions';
 import { AppAutoscalerPolicy } from '../../../../../../store/src/types/app-autoscaler.types';
 import {
-  MomentFormateDateTimeT, PolicyAlert
+  MomentFormateDateTimeT, PolicyAlert, PolicyDefaultSpecificDate
 } from '../../../../../../store/src/helpers/autoscaler/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
@@ -55,8 +55,8 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
     private entityServiceFactory: EntityServiceFactory,
   ) {
     this.editSpecificDateForm = this.fb.group({
-      instance_min_count: [0],
-      instance_max_count: [0],
+      instance_min_count: [0, [Validators.required, this.validateRecurringSpecificMin()]],
+      instance_max_count: [0, [Validators.required, this.validateRecurringSpecificMax()]],
       initial_min_instance_count: [0, [this.validateSpecificDateInitialMin()]],
       start_date_time: [0, [Validators.required, this.validateSpecificDateStartDateTime()]],
       end_date_time: [0, [Validators.required, this.validateSpecificDateEndDateTime()]]
@@ -114,23 +114,11 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
       this.submitStatus = false;
       this.submitMessage = errorMessage;
     });
-    return observableOf({ success: this.submitStatus, message: this.submitMessage });
+    return observableOf({ success: this.submitStatus, message: this.submitMessage});
   }
 
   addSpecificDate = () => {
-    const nextStartDateTime = moment().add(1, 'days');
-    const nextEndDateTime = moment().add(1, 'days');
-    nextStartDateTime.set('hour', 10);
-    nextStartDateTime.set('minute', 0);
-    nextEndDateTime.set('hour', 18);
-    nextEndDateTime.set('minute', 0);
-    this.currentPolicy.schedules.specific_date.push({
-      start_date_time: nextStartDateTime.format(MomentFormateDateTimeT),
-      end_date_time: nextEndDateTime.format(MomentFormateDateTimeT),
-      instance_min_count: 1,
-      instance_max_count: 10,
-      initial_min_instance_count: 5
-    });
+    this.currentPolicy.schedules.specific_date.push(PolicyDefaultSpecificDate);
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
 
@@ -150,10 +138,6 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
       start_date_time: this.currentPolicy.schedules.specific_date[index].start_date_time,
       end_date_time: this.currentPolicy.schedules.specific_date[index].end_date_time,
     });
-    this.editSpecificDateForm.controls.instance_min_count.
-      setValidators([Validators.required, this.validateRecurringSpecificMin(this.editSpecificDateForm)]);
-    this.editSpecificDateForm.controls.instance_max_count.
-      setValidators([Validators.required, this.validateRecurringSpecificMax(this.editSpecificDateForm)]);
   }
 
   finishSpecificDate() {
@@ -240,33 +224,34 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
     };
   }
 
-  validateRecurringSpecificMin(formGroup: FormGroup): ValidatorFn {
+  validateRecurringSpecificMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = formGroup && numberWithFractionOrExceedRange(control.value, 1, formGroup.get('instance_max_count').value - 1, true);
+      const invalid = this.editSpecificDateForm &&
+      numberWithFractionOrExceedRange(control.value, 1, this.editSpecificDateForm.get('instance_max_count').value - 1, true);
       const lastValid = this.editLimitValid;
-      this.editLimitValid = formGroup && control.value < formGroup.get('instance_max_count').value;
-      if (formGroup && lastValid !== this.editLimitValid) {
-        formGroup.controls.instance_max_count.updateValueAndValidity();
+      this.editLimitValid = this.editSpecificDateForm && control.value < this.editSpecificDateForm.get('instance_max_count').value;
+      if (this.editSpecificDateForm && lastValid !== this.editLimitValid) {
+        this.editSpecificDateForm.controls.instance_max_count.updateValueAndValidity();
       }
-      if (formGroup) {
-        formGroup.controls.initial_min_instance_count.updateValueAndValidity();
+      if (this.editSpecificDateForm) {
+        this.editSpecificDateForm.controls.initial_min_instance_count.updateValueAndValidity();
       }
       return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
     };
   }
 
-  validateRecurringSpecificMax(formGroup: FormGroup): ValidatorFn {
+  validateRecurringSpecificMax(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = formGroup && numberWithFractionOrExceedRange(control.value,
-        formGroup.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
+      const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
+        this.editSpecificDateForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
       const lastValid = this.editLimitValid;
       this.editLimitValid =
-        formGroup && formGroup.get('instance_min_count').value < control.value;
-      if (formGroup && lastValid !== this.editLimitValid) {
-        formGroup.controls.instance_min_count.updateValueAndValidity();
+        this.editSpecificDateForm && this.editSpecificDateForm.get('instance_min_count').value < control.value;
+      if (this.editSpecificDateForm && lastValid !== this.editLimitValid) {
+        this.editSpecificDateForm.controls.instance_min_count.updateValueAndValidity();
       }
-      if (formGroup) {
-        formGroup.controls.initial_min_instance_count.updateValueAndValidity();
+      if (this.editSpecificDateForm) {
+        this.editSpecificDateForm.controls.initial_min_instance_count.updateValueAndValidity();
       }
       return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
     };

@@ -14,7 +14,8 @@ import {
   MetricTypes,
   getScaleType,
   getAdjustmentType,
-  PolicyAlert
+  PolicyAlert,
+  PolicyDefaultTrigger
 } from '../../../../../../store/src/helpers/autoscaler/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
@@ -78,14 +79,7 @@ export class EditAutoscalerPolicyStep2Component implements OnInit {
   }
 
   addTrigger = () => {
-    this.currentPolicy.scaling_rules_form.push({
-      metric_type: 'memoryused',
-      breach_duration_secs: PolicyDefaultSetting.breach_duration_secs_default,
-      threshold: 10,
-      operator: '<=',
-      cool_down_secs: PolicyDefaultSetting.cool_down_secs_default,
-      adjustment: '-1'
-    });
+    this.currentPolicy.scaling_rules_form.push(PolicyDefaultTrigger);
     this.editTrigger(this.currentPolicy.scaling_rules_form.length - 1);
   }
 

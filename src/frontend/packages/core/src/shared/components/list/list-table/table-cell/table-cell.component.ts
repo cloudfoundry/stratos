@@ -25,20 +25,8 @@ import {
   TableCellEventTypeComponent,
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import {
-  TableCellAutoscalerEventActionComponent,
-} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
-import {
-  TableCellAutoscalerEventTimestampComponent,
-} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-timestamp/table-cell-autoscaler-event-timestamp.component';
-import {
-  TableCellAutoscalerEventTypeComponent,
-} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-type/table-cell-autoscaler-event-type.component';
-import {
   TableCellAutoscalerEventChangeComponent,
 } from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
-import {
-  TableCellAutoscalerEventErrorComponent,
-} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
 import {
   TableCellAutoscalerEventStatusComponent,
 } from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
@@ -147,12 +135,8 @@ export const listTableCells = [
   TableCellEventTypeComponent,
   TableCellEventActionComponent,
   TableCellEventDetailComponent,
-  TableCellAutoscalerEventTimestampComponent,
-  TableCellAutoscalerEventTypeComponent,
-  TableCellAutoscalerEventActionComponent,
   TableCellAutoscalerEventStatusComponent,
   TableCellAutoscalerEventChangeComponent,
-  TableCellAutoscalerEventErrorComponent,
   TableCellActionsComponent,
   TableCellAppNameComponent,
   TableCellEndpointStatusComponent,

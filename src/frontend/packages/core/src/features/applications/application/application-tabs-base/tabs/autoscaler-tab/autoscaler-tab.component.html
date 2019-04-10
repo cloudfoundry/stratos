@@ -30,11 +30,11 @@
             <div class="app-metadata">
               <div class="app-metadata__two-cols">
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 0" checked="true"
-                  (click)="diableAutoscaler()">Policy defined</mat-slide-toggle>
+                  (click)="diableAutoscaler()">Enabled</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 1" checked="true"
-                  (click)="diableAutoscaler()">Policy defined</mat-slide-toggle>
+                  (click)="diableAutoscaler()">Enabled</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 2" checked="false"
-                  (click)="updatePolicyPage()">Policy undefined</mat-slide-toggle>
+                  (click)="updatePolicyPage()">Disabled</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="!(policy.enabled)" checked="false" (click)="updatePolicyPage()">Policy
                   undefined</mat-slide-toggle>
               </div>

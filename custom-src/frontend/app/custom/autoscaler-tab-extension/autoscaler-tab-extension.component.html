@@ -51,11 +51,11 @@
             <div class="app-metadata">
               <div class="app-metadata__two-cols">
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 0" checked="true"
-                  (click)="diableAutoscaler()">Policy defined</mat-slide-toggle>
+                  (click)="diableAutoscaler()">Enabled</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 1" checked="true"
-                  (click)="diableAutoscaler()">Policy defined</mat-slide-toggle>
+                  (click)="diableAutoscaler()">Enabled</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 2" checked="false"
-                  (click)="updatePolicyPage()">Policy undefined</mat-slide-toggle>
+                  (click)="updatePolicyPage()">Disabled</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="!(policy.enabled)" checked="false" (click)="updatePolicyPage()">Policy
                   undefined</mat-slide-toggle>
               </div>
@@ -221,45 +221,47 @@
         </app-tile>
       </app-tile-group>
     </div>
-    <app-tile-group>
-      <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Latest Events</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="app-metadata" *ngIf="appAutoscalerScalingHistory$ | async as scalingHistory">
-              <table mat-table [dataSource]="scalingHistory.resources">
-                <ng-container matColumnDef="event">
-                  <th mat-header-cell *matHeaderCellDef> Event </th>
-                  <td mat-cell *matCellDef="let element"> Instances scaled
-                    {{element.old_instances > element.new_instances? 'down' : 'up'}} from {{element.old_instances}} to
-                    {{element.new_instances}} </td>
-                </ng-container>
-                <ng-container matColumnDef="trigger">
-                  <th mat-header-cell *matHeaderCellDef> Trigger </th>
-                  <td mat-cell *matCellDef="let element"> {{element.reason}} </td>
-                </ng-container>
-                <ng-container matColumnDef="date">
-                  <th mat-header-cell *matHeaderCellDef> Date </th>
-                  <td mat-cell *matCellDef="let element"> {{element.timestamp / 1000000 | date:'medium'}} </td>
-                </ng-container>
-                <ng-container matColumnDef="error">
-                  <th mat-header-cell *matHeaderCellDef> Error </th>
-                  <td mat-cell *matCellDef="let element"> {{element.message}} {{element.error}} </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="scalingHistoryColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: scalingHistoryColumns;"></tr>
-              </table>
-            </div>
-          </mat-card-content>
-          <mat-card-actions class="autoscaler-tab__actions">
-            <button (click)="scaleHistoryPage()" mat-icon-button>
-              <mat-icon>launch</mat-icon>
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </app-tile>
-    </app-tile-group>
+    <div *ngIf="appAutoscalerScalingHistory$ | async as scalingHistory">
+      <app-tile-group *ngIf="scalingHistory.resources.length > 0">
+        <app-tile>
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Latest Events</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="app-metadata">
+                <table mat-table [dataSource]="scalingHistory.resources">
+                  <ng-container matColumnDef="event">
+                    <th mat-header-cell *matHeaderCellDef> Event </th>
+                    <td mat-cell *matCellDef="let element"> Instances scaled
+                      {{element.old_instances > element.new_instances? 'down' : 'up'}} from {{element.old_instances}} to
+                      {{element.new_instances}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="trigger">
+                    <th mat-header-cell *matHeaderCellDef> Trigger </th>
+                    <td mat-cell *matCellDef="let element"> {{element.reason}} {{element.message}}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef> Date </th>
+                    <td mat-cell *matCellDef="let element"> {{element.timestamp / 1000000 | date:'medium'}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="error">
+                    <th mat-header-cell *matHeaderCellDef> Error </th>
+                    <td mat-cell *matCellDef="let element"> {{element.error}} </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="scalingHistoryColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: scalingHistoryColumns;"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+            <mat-card-actions class="autoscaler-tab__actions">
+              <button (click)="scaleHistoryPage()" mat-icon-button>
+                <mat-icon>launch</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </app-tile>
+      </app-tile-group>
+    </div>
   </app-tile-grid>
 </div>

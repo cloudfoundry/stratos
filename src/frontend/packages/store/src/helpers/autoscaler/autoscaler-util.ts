@@ -1,24 +1,6 @@
 
 import * as moment from 'moment-timezone';
 
-export const PolicyDefault = {
-  instance_min_count: 1,
-  instance_max_count: 10,
-  scaling_rules: [],
-  schedules: {
-    timezone: moment.tz.guess(),
-    recurring_schedule: [],
-    specific_date: []
-  }
-};
-export const PolicyDefaultSetting = {
-  breach_duration_secs_default: 120,
-  breach_duration_secs_min: 60,
-  breach_duration_secs_max: 3600,
-  cool_down_secs_default: 300,
-  cool_down_secs_min: 60,
-  cool_down_secs_max: 3600,
-};
 export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput'];
 export const ScaleTypes = ['upper', 'lower'];
 export const UpperOperators = ['>', '>='];
@@ -29,6 +11,50 @@ export const MomentFormateDate = 'YYYY-MM-DD';
 export const MomentFormateDateTimeT = 'YYYY-MM-DDTHH:mm';
 export const MomentFormateTime = 'HH:mm';
 export const MomentFormateTimeS = 'HH:mm:ss';
+
+export const PolicyDefaultSetting = {
+  breach_duration_secs_default: 120,
+  breach_duration_secs_min: 60,
+  breach_duration_secs_max: 3600,
+  cool_down_secs_default: 300,
+  cool_down_secs_min: 60,
+  cool_down_secs_max: 3600,
+};
+export const PolicyDefault = {
+  instance_min_count: 1,
+  instance_max_count: 10,
+  scaling_rules: [],
+  schedules: {
+    timezone: moment.tz.guess(),
+    recurring_schedule: [],
+    specific_date: []
+  }
+};
+export const PolicyDefaultTrigger = {
+  metric_type: 'memoryused',
+  breach_duration_secs: PolicyDefaultSetting.breach_duration_secs_default,
+  threshold: 10,
+  operator: '<=',
+  cool_down_secs: PolicyDefaultSetting.cool_down_secs_default,
+  adjustment: '-1'
+};
+export const PolicyDefaultRecurringSchedule = {
+  start_time: '10:00',
+  end_time: '18:00',
+  days_of_week: [
+    1, 2, 3
+  ],
+  instance_min_count: 1,
+  instance_max_count: 10,
+  initial_min_instance_count: 5
+};
+export const PolicyDefaultSpecificDate = {
+  start_date_time: moment().add(1, 'days').set('hour', 10).set('minute', 0).format(MomentFormateDateTimeT),
+  end_date_time: moment().add(1, 'days').set('hour', 18).set('minute', 0).format(MomentFormateDateTimeT),
+  instance_min_count: 1,
+  instance_max_count: 10,
+  initial_min_instance_count: 5
+};
 
 export const metricMap = {
   memoryused: {
@@ -204,4 +230,12 @@ function getLeftOperator(operator) {
     default:
       return '<';
   }
+}
+
+export function shiftArray(array, step) {
+  const days = [];
+  for (let i = 0; i < array.length; i++) {
+    days[i] = array[i] + step;
+  }
+  return days;
 }

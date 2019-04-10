@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-
+import { DatePipe } from '@angular/common';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -9,46 +9,65 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import {
-  TableCellAutoscalerEventActionComponent,
-} from './table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
-import {
   TableCellAutoscalerEventChangeComponent,
 } from './table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
 import {
-  TableCellAutoscalerEventErrorComponent,
-} from './table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
-import {
   TableCellAutoscalerEventStatusComponent,
 } from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
-import {
-  TableCellAutoscalerEventTimestampComponent,
-} from './table-cell-autoscaler-event-timestamp/table-cell-autoscaler-event-timestamp.component';
-import {
-  TableCellAutoscalerEventTypeComponent,
-} from './table-cell-autoscaler-event-type/table-cell-autoscaler-event-type.component';
 
 @Injectable()
 export class CfAppAutoscalerEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
   autoscalerEventSource: CfAppAutoscalerEventsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
     {
-      columnId: 'timestamp', headerCell: () =>
-        'Timestamp', cellComponent: TableCellAutoscalerEventTimestampComponent, sort: true, cellFlex: '3'
+      columnId: 'timestamp',
+      headerCell: () => 'Timestamp',
+      cellDefinition: {
+        getValue: row => this.datePipe.transform(row.entity.timestamp / 1000000, 'medium')
+      },
+      sort: true,
+      cellFlex: '3'
     },
     {
       columnId: 'status', headerCell: () => 'Status', cellComponent: TableCellAutoscalerEventStatusComponent, cellFlex: '2'
     },
     {
-      columnId: 'type', headerCell: () => 'Type', cellComponent: TableCellAutoscalerEventTypeComponent, cellFlex: '2'
+      columnId: 'type',
+      headerCell: () => 'Type',
+      cellDefinition: {
+        getValue: row => row.entity.scaling_type === 0 ? 'dynamic' : 'schedule'
+      },
+      cellFlex: '2'
     },
     {
       columnId: 'change', headerCell: () => 'Instance Change', cellComponent: TableCellAutoscalerEventChangeComponent, cellFlex: '2'
     },
     {
-      columnId: 'action', headerCell: () => 'Action', cellComponent: TableCellAutoscalerEventActionComponent, cellFlex: '4'
+      columnId: 'action',
+      headerCell: () => 'Action',
+      cellDefinition: {
+        getValue: row => {
+          if (row.entity.message) {
+            const change = row.entity.new_instances - row.entity.old_instances;
+            if (change >= 0) {
+              return '+' + change + ' instance(s) because ' + row.entity.message;
+            } else {
+              return change + ' instance(s) because ' + row.entity.message;
+            }
+          } else {
+            return row.entity.reason;
+          }
+        }
+      },
+      cellFlex: '4'
     },
     {
-      columnId: 'error', headerCell: () => 'Error', cellComponent: TableCellAutoscalerEventErrorComponent, cellFlex: '4'
+      columnId: 'error',
+      headerCell: () => 'Error',
+      cellDefinition: {
+        getValue: row => row.entity.error
+      },
+      cellFlex: '4'
     },
   ];
   viewType = ListViewTypes.TABLE_ONLY;
@@ -82,7 +101,7 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<APIResource> 
     }
   ];
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService) {
+  constructor(private store: Store<AppState>, private appService: ApplicationService, private datePipe: DatePipe) {
     super();
     this.autoscalerEventSource = new CfAppAutoscalerEventsDataSource(
       this.store,
