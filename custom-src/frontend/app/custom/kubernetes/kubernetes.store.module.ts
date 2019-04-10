@@ -12,7 +12,6 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
-
 import { kubernetesEntities, kubernetesEntityKeys } from './store/kubernetes.entities';
 
 const enum KubeEndpointAuthTypes {

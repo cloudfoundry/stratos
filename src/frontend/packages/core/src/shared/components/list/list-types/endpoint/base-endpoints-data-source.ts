@@ -28,7 +28,7 @@ export function syncPaginationSection(
   ));
 }
 
-export abstract class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
+export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<AppState>;
   endpointType: string;
 
