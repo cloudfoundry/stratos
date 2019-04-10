@@ -1,3 +1,11 @@
+// *****
+// NOTE
+// *****
+// Having this "theme" file bad practice. We need to work out if we can do without this.
+// Having this file completely sidesteps our theming and angular's component styles, potentially resulting
+// in inconsistent and unexpected styling.
+// This should only be used as a last resort - NJ.
+
 // Style overrides
 // SUSE Brand primary colour
 $suse-primary-color: #00c081;
@@ -52,7 +60,7 @@ $suse-side-nav-active: #003358;
 // Use SUSE Blue Side Navigation
 .stratos {
 
-  .side-nav,
+  .side-nav__inner,
   .side-nav__top,
   .side-nav__item--active:hover {
     background-color: $suse-side-nav;

@@ -5,10 +5,13 @@ $side-nav-mat-icon-padding-right: 10px;
 $nav-width: 175px;
 $icon-nav-width: 50px;
 .side-nav {
-  display: flex;
-  flex-direction: column;
   height: 100%;
-  width: $nav-width;
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: $nav-width;
+  }
   &__top {
     display: flex;
     flex: 0 0 56px;
@@ -103,7 +106,7 @@ $icon-nav-width: 50px;
 $transition-time: .2s;
 $transition-delay: .5s;
 .side-nav__icon-mode {
-  transition: $transition-time width;
+  overflow: hidden;
   width: $icon-nav-width;
   &__top,
   &__item-icon,
@@ -115,6 +118,10 @@ $transition-delay: .5s;
     transition: 0s opacity, 0s width;
   }
   .side-nav {
+    &__inner {
+      transition: $transition-time width;
+      width: $icon-nav-width;
+    }
     &__items,
     &__top,
     &__bottom,
@@ -123,10 +130,13 @@ $transition-delay: .5s;
     }
   }
   &:hover {
-    overflow: hidden;
-    transition-delay: $transition-delay;
-    width: $nav-width;
+    overflow: visible;
     .side-nav {
+      &__inner {
+        position: fixed;
+        transition-delay: $transition-delay;
+        width: $nav-width;
+      }
       &,
       &__top,
       &__item-icon,
