@@ -6,6 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { initEndpointTypes } from '../endpoint-helpers';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointComponent } from './create-endpoint.component';
 
@@ -31,12 +32,16 @@ describe('CreateEndpointComponent', () => {
         useValue: {
           snapshot: {
             queryParams: {},
-            params: { type: 'metrics' }
+            params: {
+              type: 'metrics',
+              subtype: null
+            }
           }
         }
       }]
     })
       .compileComponents();
+    initEndpointTypes([]);
   }));
 
   beforeEach(() => {

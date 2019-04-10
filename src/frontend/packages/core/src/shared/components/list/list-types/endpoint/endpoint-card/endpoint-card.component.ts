@@ -46,6 +46,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public endpointConfig: EndpointTypeConfig;
   public hasDetails = true;
   public endpointLink: string = null;
+  public endpointParentType: string;
   private endpointIds = new ReplaySubject<string[]>();
   public endpointIds$: Observable<string[]>;
   public cardStatus$: Observable<CardStatus>;
@@ -67,8 +68,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       return;
     }
     this.pRow = row;
+    this.endpointConfig = getEndpointType(row.cnsi_type, row.sub_type);
+    this.endpointParentType = row.sub_type ? getEndpointType(row.cnsi_type, null).label : null;
     this.endpointIds.next([row.guid]);
-    this.endpointConfig = getEndpointType(row.cnsi_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
     this.endpointLink = row.connectionStatus === 'connected' ? EndpointsService.getLinkForEndpoint(row) : null;
@@ -109,7 +111,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   ngOnInit() {
     this.favorite = this.pRow.cnsi_type === 'cf' ? getFavoriteFromEndpointEntity(this.row) : null;
-    const e = getEndpointType(this.pRow.cnsi_type);
+    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     this.hasDetails = !!e.listDetailsComponent;
   }
 
@@ -126,7 +128,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = getEndpointType(this.pRow.cnsi_type);
+    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     if (!e.listDetailsComponent) {
       return;
     }

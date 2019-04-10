@@ -86,6 +86,7 @@ export class EndpointListHelper {
               name: item.name,
               guid: item.guid,
               type: item.cnsi_type,
+              subType: item.sub_type,
               ssoAllowed: item.sso_allowed
             },
             disableClose: true

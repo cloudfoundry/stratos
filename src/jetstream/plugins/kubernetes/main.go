@@ -23,6 +23,7 @@ const (
 	AuthConnectTypeKubeConfigAz = "kubeconfig-az"
 	AuthConnectTypeAWSIAM       = "aws-iam"
 	AuthConnectTypeCertAuth     = "kube-cert-auth"
+	AuthConnectTypeGKE          = "gke-auth"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -80,6 +81,7 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 		}
 		return tokenRecord, false, nil
 	}
+
 	// AKS ?
 	if strings.EqualFold(connectType, AuthConnectTypeKubeConfigAz) {
 		tokenRecord, _, err := c.FetchKubeConfigTokenAKS(cnsiRecord, ec)
@@ -97,6 +99,7 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 		}
 		return tokenRecord, false, nil
 	}
+
 	// Cert Auth?
 	if strings.EqualFold(connectType, AuthConnectTypeCertAuth) {
 		tokenRecord, _, err := c.FetchCertAuth(cnsiRecord, ec)
@@ -106,9 +109,19 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 		return tokenRecord, false, nil
 	}
 
-	return nil, false, errors.New("Unsporrted Auth connectio type for Kubernetes endpoint")
+	// GKE ?
+	if strings.EqualFold(connectType, AuthConnectTypeGKE) {
+		tokenRecord, _, err := c.FetchGKEToken(cnsiRecord, ec)
+		if err != nil {
+			return nil, false, err
+		}
+		return tokenRecord, false, nil
+	}
+
+	return nil, false, errors.New("Unsupported Auth connection type for Kubernetes endpoint")
 }
 
+// Init the Kubernetes Jetstream plugin
 func (c *KubernetesSpecification) Init() error {
 	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, interfaces.AuthProvider{
 		Handler:  c.doAWSIAMFlowRequest,
@@ -121,6 +134,10 @@ func (c *KubernetesSpecification) Init() error {
 	c.portalProxy.AddAuthProvider(AuthConnectTypeKubeConfigAz, interfaces.AuthProvider{
 		Handler:  c.doCertAuthFlowRequest,
 		UserInfo: c.GetCNSIUserFromCertAuth,
+	})
+	c.portalProxy.AddAuthProvider(AuthConnectTypeGKE, interfaces.AuthProvider{
+		Handler:  c.doGKEFlowRequest,
+		UserInfo: c.GetGKEUserFromToken,
 	})
 
 	return nil

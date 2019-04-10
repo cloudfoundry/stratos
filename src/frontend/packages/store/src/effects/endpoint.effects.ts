@@ -175,15 +175,21 @@ export class EndpointsEffect {
     mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
+      const paramsObj = {
+        cnsi_name: action.name,
+        api_endpoint: action.endpoint,
+        skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
+        cnsi_client_id: action.clientID,
+        cnsi_client_secret: action.clientSecret,
+        sso_allowed: action.ssoAllowed ? 'true' : 'false'
+      };
+      // Do not include sub_type in HttpParams if it doesn't exist (falsies get stringified and sent)
+      if (action.endpointSubType) {
+        /* tslint:disable-next-line:no-string-literal  */
+        paramsObj['sub_type'] = action.endpointSubType;
+      }
       const params: HttpParams = new HttpParams({
-        fromObject: {
-          cnsi_name: action.name,
-          api_endpoint: action.endpoint,
-          skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
-          cnsi_client_id: action.clientID,
-          cnsi_client_secret: action.clientSecret,
-          sso_allowed: action.ssoAllowed ? 'true' : 'false',
-        }
+        fromObject: paramsObj
       });
 
       return this.doEndpointAction(
@@ -200,7 +206,8 @@ export class EndpointsEffect {
 
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
-      `Please ensure the endpoint address is correct and try again (${e.error.error})`;
+      `Please ensure the endpoint address is correct and try again` +
+      `${e.error.error ? '(' + e.error.error + ').' : '.'}`;
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
     }
