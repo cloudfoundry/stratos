@@ -22,24 +22,22 @@
               <span *ngIf="!rule.start_date">.</span>
             </div>
             <div *ngIf="editIndex==index">
-              <form [formGroup]="editRecurringScheduleForm" validate class="edit-recurring-schedule">
+              <form [formGroup]="editRecurringScheduleForm" validate class="autoscaler-policy-edit-recurring">
                 <div class="app-metadata">
                   <div class="app-metadata__two-cols">
                     <app-metadata-item label="Effective Duration">
                       <mat-radio-group formControlName="effective_type">
                         <mat-radio-button value="always" (click)="resetEffectiveType('always')"
-                          style="margin-right: 0.5em">Always
+                          class="form-field-left">Always
                         </mat-radio-button>
                         <mat-radio-button value="custom" (click)="resetEffectiveType('custom')">
                           <span *ngIf="editEffectiveType=='always'">
                             Custom
                           </span>
-                          <mat-form-field *ngIf="editEffectiveType=='custom'" class="autoscaler-date-input"
-                            style="width:50%">
+                          <mat-form-field *ngIf="editEffectiveType=='custom'" class="form-field-50">
                             <input matInput placeholder="From" type="date" formControlName="start_date" required>
                           </mat-form-field>
-                          <mat-form-field *ngIf="editEffectiveType=='custom'" class="autoscaler-date-input"
-                            style="width:50%">
+                          <mat-form-field *ngIf="editEffectiveType=='custom'" class="form-field-50">
                             <input matInput placeholder="To" type="date" formControlName="end_date" required>
                           </mat-form-field>
                         </mat-radio-button>
@@ -47,7 +45,7 @@
                     </app-metadata-item>
                     <app-metadata-item label="Repeat By">
                       <mat-radio-group formControlName="repeat_type">
-                        <mat-radio-button value="week" (click)="resetRepeatType('week')" style="margin-right: 0.5em">
+                        <mat-radio-button value="week" (click)="resetRepeatType('week')" class="form-field-left">
                           Week
                         </mat-radio-button>
                         <mat-radio-button value="month" (click)="resetRepeatType('month')">
@@ -72,23 +70,23 @@
                   </div>
                   <div class="app-metadata__two-cols">
                     <app-metadata-item label="Repeat Time">
-                      <mat-form-field>
+                      <mat-form-field class="form-field-left">
                         <input matInput placeholder="Start" type="time" formControlName="start_time" required>
                       </mat-form-field>
-                      <mat-form-field style="margin-left: 0.5em">
+                      <mat-form-field>
                         <input matInput placeholder="End" type="time" formControlName="end_time" required>
                       </mat-form-field>
                     </app-metadata-item>
                     <app-metadata-item label="Instance Count">
-                      <mat-form-field style="width:30%; ">
+                      <mat-form-field class="form-field-left form-field-30">
                         <input matInput placeholder="Minimum" type="number" formControlName="instance_min_count"
                           required>
                       </mat-form-field>
-                      <mat-form-field style="width:30%; margin-left: 0.5em">
+                      <mat-form-field class="form-field-left form-field-30">
                         <input matInput placeholder="Initial Minimum" type="number"
                           formControlName="initial_min_instance_count">
                       </mat-form-field>
-                      <mat-form-field style="width:30%; margin-left: 0.5em">
+                      <mat-form-field class="form-field-30">
                         <input matInput placeholder="Maximum" type="number" formControlName="instance_max_count"
                           required>
                       </mat-form-field>
@@ -150,7 +148,7 @@
               </mat-error>
             </div>
           </mat-card-content>
-          <mat-card-actions class="app-auto-scaler__actions">
+          <mat-card-actions class="autoscaler-policy-edit__actions">
             <button *ngIf="editIndex!=index" (click)="editRecurringSchedule(index)" [disabled]="editIndex!=-1"
               mat-icon-button>
               <mat-icon>edit</mat-icon>

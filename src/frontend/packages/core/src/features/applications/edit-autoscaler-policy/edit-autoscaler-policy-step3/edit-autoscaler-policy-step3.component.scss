@@ -8,7 +8,7 @@ app-tile-grid {
   width: 100%;
 }
 
-.app-auto-scaler {
+.autoscaler-policy-edit {
   display: flex;
   position: relative;
   width: 100%;
@@ -33,6 +33,15 @@ app-tile-grid {
   }
 }
 
-.edit-recurring-schedule {
+.autoscaler-policy-edit-recurring {
   max-width: 100%;
+  .form-field-left {
+    margin-right: .5em
+  }
+  .form-field-30 {
+    width: 30%;
+  }
+  .form-field-50 {
+    width: 50%;
+  }
 }

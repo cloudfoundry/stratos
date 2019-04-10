@@ -8,8 +8,8 @@
               Rule {{index+1}}:
             </mat-card-title>
           </mat-card-header>
-          <mat-card-content class="app-autoscaler-edit-policy-item">
-            <div *ngIf="editIndex!=index" class="app-autoscaler-edit-policy-desc">
+          <mat-card-content class="autoscaler-policy-edit-trigger-item">
+            <div *ngIf="editIndex!=index" class="autoscaler-policy-edit-trigger-item-desc">
               If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}} for {{rule.breach_duration_secs}}
               seconds, then {{rule.adjustment}} instances. Cooldown: {{rule.cool_down_secs}} seconds.
             </div>
@@ -89,7 +89,7 @@
               </mat-error>
             </div>
           </mat-card-content>
-          <mat-card-actions class="app-auto-scaler__actions">
+          <mat-card-actions class="autoscaler-policy-edit__actions">
             <button *ngIf="editIndex!=index" (click)="editTrigger(index)" [disabled]="editIndex!=-1" mat-icon-button>
               <mat-icon>edit</mat-icon>
             </button>

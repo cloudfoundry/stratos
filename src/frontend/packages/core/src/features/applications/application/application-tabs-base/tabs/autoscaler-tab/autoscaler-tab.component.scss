@@ -1,4 +1,4 @@
-.app-auto-scaler {
+.autoscaler-tab {
   display: flex;
   position: relative;
   width: 100%;
@@ -40,11 +40,15 @@ table {
   width: 100%;
 }
 
-.app-auto-scaler-policy-left {
+.autoscaler-tab-policy {
+  margin-bottom: 24px;
+}
+
+.autoscaler-tab-policy-left {
   flex: 0 0 40%;
 }
 
-.app-auto-scaler-tile {
+.autoscaler-tab-tile {
   &-1of2 {
     flex: 0 0 50%;
   }
@@ -53,12 +57,5 @@ table {
   }
   &-1of6 {
     flex: 0 0 16.78%;
-  }
-}
-
-.app-auto-scaler-limit {
-  display: inherit;
-  mat-card {
-    width: 50%;
   }
 }

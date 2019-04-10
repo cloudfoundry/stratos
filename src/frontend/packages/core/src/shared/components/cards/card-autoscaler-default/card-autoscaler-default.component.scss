@@ -1,11 +1,13 @@
 .card-autoscaler-default {
-  &__large {
-    font-size: 16px;
+  &__left {
+    display: inline-block;
+    border-right: 1px solid gray;
+    padding-right: 1em;
   }
 
-  &__compact {
-    margin-bottom: 0;
-    position: absolute;
+  &__right {
+    display: inline-block;
+    padding-left: 1em;
   }
 
   &__actions {
@@ -42,7 +44,6 @@
     display: inline;
     margin-right: 10px;
   }
-
 }
 
 .app-metadata {

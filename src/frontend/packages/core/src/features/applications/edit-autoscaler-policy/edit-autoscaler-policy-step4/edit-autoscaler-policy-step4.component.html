@@ -18,15 +18,15 @@
                 {{rule.start_date_time}} to {{rule.end_date_time}}.</span>
             </div>
             <div *ngIf="editIndex==index">
-              <form [formGroup]="editSpecificDateForm" validate class="edit-specific-date">
+              <form [formGroup]="editSpecificDateForm" validate class="autoscaler-policy-edit-specific">
                 <div class="app-metadata">
-                  <div class="app-metadata__two-cols">
-                    <app-metadata-item label="Effective Date Time" class="app-autoscaler-edit-specific-date">
-                      <mat-form-field>
+                  <div class="app-metadata__two-cols autoscaler-policy-edit-specific-left">
+                    <app-metadata-item label="Effective Date Time">
+                      <mat-form-field class="form-field-left">
                         <input matInput placeholder="Start" type="datetime-local" formControlName="start_date_time"
                           required>
                       </mat-form-field>
-                      <mat-form-field style="margin-left: 0.5em">
+                      <mat-form-field>
                         <input matInput placeholder="End" type="datetime-local" formControlName="end_date_time"
                           required>
                       </mat-form-field>
@@ -34,15 +34,15 @@
                   </div>
                   <div class="app-metadata__two-cols">
                     <app-metadata-item label="Instance Count">
-                      <mat-form-field style="width:30%; ">
+                      <mat-form-field class="form-field-left form-field-30">
                         <input matInput placeholder="Minimum" type="number" formControlName="instance_min_count"
                           required>
                       </mat-form-field>
-                      <mat-form-field style="width:30%; margin-left: 0.5em">
+                      <mat-form-field class="form-field-left form-field-30">
                         <input matInput placeholder="Initial Minimum" type="number"
                           formControlName="initial_min_instance_count">
                       </mat-form-field>
-                      <mat-form-field style="width:30%; margin-left: 0.5em">
+                      <mat-form-field class="form-field-30">
                         <input matInput placeholder="Maximum" type="number" formControlName="instance_max_count"
                           required>
                       </mat-form-field>
@@ -88,7 +88,7 @@
               </mat-error> -->
             </div>
           </mat-card-content>
-          <mat-card-actions class="app-auto-scaler__actions">
+          <mat-card-actions class="autoscaler-policy-edit__actions">
             <button *ngIf="editIndex!=index" (click)="editSpecificDate(index)" [disabled]="editIndex!=-1"
               mat-icon-button>
               <mat-icon>edit</mat-icon>
@@ -105,10 +105,10 @@
       </app-tile>
     </app-tile-group>
   </app-tile-grid>
-  <mat-error *ngIf="!submitStatus" style="width: 100%">
+  <mat-error *ngIf="!submitStatus" class="autoscaler-policy-edit-specific">
     {{submitMessage}}
   </mat-error>
-  <div *ngIf="submitStatus" style="width: 100%">
+  <div *ngIf="submitStatus" class="autoscaler-policy-edit-specific">
     {{submitMessage}}
   </div>
 </div>

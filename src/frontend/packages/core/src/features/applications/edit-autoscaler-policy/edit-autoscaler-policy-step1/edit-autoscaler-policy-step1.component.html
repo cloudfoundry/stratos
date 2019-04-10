@@ -1,12 +1,12 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
-  <form [formGroup]="editLimitForm" validate class="stepper-form edit-app">
+  <form [formGroup]="editLimitForm" validate class="stepper-form">
     <mat-form-field>
       <input matInput placeholder="Minimum Instance Count" formControlName="instance_min_count" type="number" required>
       <mat-error *ngIf="editLimitForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')">
         {{policyAlert.alertInvalidPolicyMinimumRange}}
       </mat-error>
     </mat-form-field>
-    <mat-form-field style="margin-top: 0.5em">
+    <mat-form-field class="autoscaler-policy-edit-limit-max">
       <input matInput placeholder="Maximum Instance Count" formControlName="instance_max_count" type="number" required>
       <mat-error *ngIf="editLimitForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')">
         {{policyAlert.alertInvalidPolicyMaximumRange}}

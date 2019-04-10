@@ -2,7 +2,7 @@ app-tile-grid {
   width: 100%;
 }
 
-.app-auto-scaler {
+.autoscaler-policy-edit {
   display: flex;
   position: relative;
   width: 100%;
@@ -15,8 +15,8 @@ app-tile-grid {
   }
 }
 
-.app-autoscaler-edit-policy-item {
-  .app-autoscaler-edit-policy-desc {
+.autoscaler-policy-edit-trigger-item {
+  .autoscaler-policy-edit-trigger-item-desc {
     margin-bottom: .5em;
   }
   mat-error {

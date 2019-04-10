@@ -18,8 +18,8 @@
     </app-tile-group>
   </app-tile-grid>
 </div>
-<div class="app-auto-scaler" *ngIf="(appAutoscalerEnablement$ | async)"> -->
-<div class="app-auto-scaler">
+<div class="autoscaler-tab" *ngIf="(appAutoscalerEnablement$ | async)"> -->
+<div class="autoscaler-tab">
   <app-tile-grid>
     <app-tile-group *ngIf="!(appAutoscalerPolicy$ | async)">
       <app-tile>
@@ -66,10 +66,10 @@
       <app-tile *ngIf="!(policy.enabled)">
         <app-card-app-instances></app-card-app-instances>
       </app-tile>
-      <app-tile *ngIf="policy.enabled" class="app-auto-scaler-tile-1of3">
+      <app-tile *ngIf="policy.enabled" class="autoscaler-tab-tile-1of3">
         <app-card-autoscaler-default [onUpdate]="updatePolicyPage"></app-card-autoscaler-default>
       </app-tile>
-      <app-tile *ngIf="policy.enabled" class="app-auto-scaler-tile-1of2">
+      <app-tile *ngIf="policy.enabled" class="autoscaler-tab-tile-1of2">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Latest Metrics</mat-card-title>
@@ -91,7 +91,7 @@
               </div>
             </div>
           </mat-card-content>
-          <mat-card-actions class="app-auto-scaler__actions">
+          <mat-card-actions class="autoscaler-tab__actions">
             <button (click)="metricChartPage()" mat-icon-button>
               <mat-icon>launch</mat-icon>
             </button>
@@ -99,9 +99,9 @@
         </mat-card>
       </app-tile>
     </app-tile-group>
-    <div *ngIf="appAutoscalerPolicy$ | async as policy" style="margin-bottom: 24px">
+    <div *ngIf="appAutoscalerPolicy$ | async as policy" class="autoscaler-tab-policy">
       <app-tile-group *ngIf="policy.enabled">
-        <app-tile class="app-auto-scaler-policy-left">
+        <app-tile class="autoscaler-tab-policy-left">
           <mat-card>
             <mat-card-header>
               <mat-card-title>Scaling Rules </mat-card-title>
@@ -127,7 +127,7 @@
                 </table>
               </div>
             </mat-card-content>
-            <mat-card-actions class="app-auto-scaler__actions">
+            <mat-card-actions class="autoscaler-tab__actions">
               <button (click)="updatePolicyPage()" mat-icon-button>
                 <mat-icon>edit</mat-icon>
               </button>
@@ -212,7 +212,7 @@
                 </table>
               </div>
             </mat-card-content>
-            <mat-card-actions class="app-auto-scaler__actions">
+            <mat-card-actions class="autoscaler-tab__actions">
               <button (click)="updatePolicyPage()" mat-icon-button>
                 <mat-icon>edit</mat-icon>
               </button>
@@ -253,7 +253,7 @@
               </table>
             </div>
           </mat-card-content>
-          <mat-card-actions class="app-auto-scaler__actions">
+          <mat-card-actions class="autoscaler-tab__actions">
             <button (click)="scaleHistoryPage()" mat-icon-button>
               <mat-icon>launch</mat-icon>
             </button>

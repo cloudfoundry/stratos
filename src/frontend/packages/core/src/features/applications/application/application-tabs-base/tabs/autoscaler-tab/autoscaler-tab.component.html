@@ -78,7 +78,7 @@
         </mat-card>
       </app-tile>
     </app-tile-group>
-    <div *ngIf="appAutoscalerPolicy$ | async as policy" style="margin-bottom: 24px">
+    <div *ngIf="appAutoscalerPolicy$ | async as policy" class="autoscaler-tab-policy">
       <app-tile-group *ngIf="policy.enabled">
         <app-tile class="app-auto-scaler-policy-left">
           <mat-card>
