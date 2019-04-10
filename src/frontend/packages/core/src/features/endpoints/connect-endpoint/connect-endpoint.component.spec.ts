@@ -1,5 +1,9 @@
+import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
 import { ConnectEndpointComponent } from './connect-endpoint.component';
 
 describe('ConnectEndpointComponent', () => {
@@ -8,9 +12,15 @@ describe('ConnectEndpointComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ConnectEndpointComponent ]
+      declarations: [ConnectEndpointComponent],
+      imports: [
+        CommonModule,
+        CoreModule,
+        SharedModule,
+        createBasicStoreModule()
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

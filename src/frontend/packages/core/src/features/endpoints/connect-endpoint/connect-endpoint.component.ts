@@ -86,7 +86,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     this.canShareEndpointToken = getCanShareTokenForEndpointType(config.type);
 
     // Create the endpoint form
-    this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : null;
+    this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : { form: null } as EndpointAuthTypeConfig;
 
     // Auto-select SSO if it is available
     const ssoIndex = this.authTypesForEndpoint.findIndex(authType => authType.value === 'sso' && config.ssoAllowed);
