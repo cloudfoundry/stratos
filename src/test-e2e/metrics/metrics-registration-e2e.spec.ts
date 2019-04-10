@@ -1,6 +1,6 @@
 import { e2e } from '../e2e';
 import { EndpointMetadata, EndpointsPage } from '../endpoints/endpoints.po';
-import { RegisterDialog } from '../endpoints/register-dialog.po';
+import { RegisterStepper } from '../endpoints/register-dialog.po';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
 import { TileSelector } from '../po/tile-selector.po';
@@ -8,7 +8,7 @@ import { TileSelector } from '../po/tile-selector.po';
 describe('Metrics', () => {
 
   const endpointsPage = new EndpointsPage();
-  const register = new RegisterDialog();
+  const register = new RegisterStepper();
   const tileSelector = new TileSelector();
 
   beforeAll(() => {
@@ -43,6 +43,7 @@ describe('Metrics', () => {
 
     expect(register.stepper.canNext()).toBeTruthy();
     register.stepper.next();
+    register.stepper.cancel();
     expect(register.isRegisterDialog()).toBeFalsy();
 
     // Check that we have one row

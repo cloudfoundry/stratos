@@ -6,7 +6,7 @@ import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { ListCardComponent, ListComponent, ListHeaderComponent, ListTableComponent } from '../po/list.po';
 import { MetaCard, MetaCardItem } from '../po/meta-card.po';
 import { Page } from '../po/page.po';
-import { SnackBarComponent } from '../po/snackbar.po';
+import { SnackBarPo } from '../po/snackbar.po';
 
 export class EndpointCards extends ListCardComponent {
   constructor(locator: ElementFinder, header: ListHeaderComponent) {
@@ -136,7 +136,7 @@ export class EndpointsPage extends Page {
     return this.checkWelcomeMessageText('There are no registered endpoints');
   }
 
-  isNoneConnectedSnackBar(snackBar: SnackBarComponent) {
+  isNoneConnectedSnackBar(snackBar: SnackBarPo) {
     return snackBar.hasMessage(NONE_CONNECTED_MSG);
   }
 
