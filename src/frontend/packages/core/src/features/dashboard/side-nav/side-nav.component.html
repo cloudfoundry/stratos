@@ -2,9 +2,10 @@
   <div class="side-nav__top">
     <div class="side-nav__top-inner">
       <div class="side-nav__logo" (click)="logoClicked.next(true)">
-        <img class="side-nav__logo-img" src="/core/assets/nav-logo.png" />
-        <img class="side-nav__logo-icon-img" src="/core/assets/nav-logo-icon.png" />
-        <div class="side-nav__logo-text">{{ customizations.logoText || 'Stratos' }}</div>
+        <div class="side-nav__logo-img"></div>
+        <div class="side-nav__logo-icon-img"></div>
+        <div class="side-nav__logo-text">{{ customizations.logoText || '' }}
+        </div>
       </div>
     </div>
   </div>

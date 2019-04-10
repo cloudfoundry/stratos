@@ -1,7 +1,7 @@
 <mat-drawer-container class="dashboard">
   <mat-drawer #sidenav *ngIf="mainNavState$ | async as navState" class="dashboard__side-nav" [mode]="navState.mode"
     [opened]="navState.opened">
-    <app-side-nav [iconMode]="navState.iconMode" [tabs]="sideNavTabs">
+    <app-side-nav (changedMode)="redrawSideNav()" [iconMode]="navState.iconMode" [tabs]="sideNavTabs">
     </app-side-nav>
   </mat-drawer>
   <mat-drawer-content>

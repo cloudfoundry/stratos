@@ -1,12 +1,12 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
 import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild, NgZone } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, startWith, withLatestFrom, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, withLatestFrom, tap, debounceTime } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import {
@@ -14,6 +14,7 @@ import {
   CloseSideNav,
   DisableMobileNav,
   EnableMobileNav,
+  ToggleSideNav,
 } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
@@ -41,6 +42,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
   public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean }>;
   public rightNavState$: Observable<{ opened: boolean; documentUrl: string; }>;
   private dashboardState$: Observable<DashboardState>;
+  private drawer: MatDrawer;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -50,7 +52,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
-    @Inject(DOCUMENT) private document: Document,
+    private ngZone: NgZone,
   ) {
     this.isMobile$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
       map(breakpoint => breakpoint.matches),
@@ -95,6 +97,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
   private mobileSub: Subscription;
 
   @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
+    this.drawer = drawer;
     if (!this.closeSub) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
       this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]) => {
@@ -113,6 +116,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
 
   public iconModeOpen = false;
   public sideNavWidth = 54;
+
+  public redrawSideNav() {
+    // We need to do this to ensure there isn't a space left behind 
+    // when going from mobile to desktop
+    this.ngZone.runOutsideAngular(() => {
+      setTimeout(() => this.drawer._modeChanged.next(), 250);
+    });
+  }
 
   dispatchRelations() {
     this.store.dispatch(new GetCurrentUsersRelations());

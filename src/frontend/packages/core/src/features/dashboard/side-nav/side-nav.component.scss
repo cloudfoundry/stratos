@@ -25,6 +25,7 @@ $icon-nav-width: 50px;
     flex: 1;
     list-style-type: none;
     margin: 0;
+    overflow: auto;
     padding: 0;
   }
   &__item {
@@ -51,6 +52,7 @@ $icon-nav-width: 50px;
   &__logo {
     align-items: center;
     display: flex;
+    position: relative;
     width: 100%;
     &-text {
       flex: 1;
@@ -58,9 +60,24 @@ $icon-nav-width: 50px;
       text-align: center;
       text-transform: uppercase;
     }
-    &-img {
+    &-img,
+    &-icon-img {
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      height: 100%;
+      position: absolute;
       width: 100%;
     }
+    &-img {
+      background-image: url('/core/assets/nav-logo.png');
+    }
+    &-icon-img {
+      background-image: url('/core/assets/nav-logo-icon.png');
+    }
+  }
+  &__top-inner {
+    overflow: hidden;
   }
   &__bottom {
     display: flex;
@@ -82,15 +99,19 @@ $icon-nav-width: 50px;
     opacity: 1;
     white-space: nowrap;
   }
-  &__logo-icon-img {
-    padding-right: 10px;
-  }
 }
 $transition-time: .2s;
+$transition-delay: .5s;
 .side-nav__icon-mode {
   transition: $transition-time width;
   width: $icon-nav-width;
-  & * {
+  &__top,
+  &__item-icon,
+  &__item-label,
+  &__copyright,
+  &__logo-img,
+  &__copyright-icon,
+  &__logo-icon-img {
     transition: 0s opacity, 0s width;
   }
   .side-nav {
@@ -103,13 +124,22 @@ $transition-time: .2s;
   }
   &:hover {
     overflow: hidden;
+    transition-delay: $transition-delay;
     width: $nav-width;
-    &,
-    & * {
-      transition-delay: .5s;
-    }
-    .side-nav__copyright-icon {
-      width: 0;
+    .side-nav {
+      &,
+      &__top,
+      &__item-icon,
+      &__item-label,
+      &__copyright,
+      &__logo-img,
+      &__copyright-icon,
+      &__logo-icon-img {
+        transition-delay: $transition-delay;
+      }
+      &__copyright-icon {
+        width: 0;
+      }
     }
   }
   &:not(:hover) {
