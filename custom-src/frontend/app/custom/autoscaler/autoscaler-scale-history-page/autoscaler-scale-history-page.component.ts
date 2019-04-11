@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ApplicationService } from '../application.service';
+import { ApplicationService } from '../../../features/applications/application.service';
 import {
   CfAppAutoscalerEventsConfigService,
 } from '../../../shared/components/list/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';

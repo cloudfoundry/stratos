@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { ApplicationService } from '../application.service';
+import { ApplicationService } from '../../../features/applications/application.service';
 
 @Component({
   selector: 'app-edit-autoscaler-policy',

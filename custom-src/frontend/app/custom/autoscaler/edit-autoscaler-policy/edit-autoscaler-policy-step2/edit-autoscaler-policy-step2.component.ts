@@ -6,7 +6,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService } from '../../../../features/applications/application.service';
 import {
   UpperOperators,
   LowerOperators,

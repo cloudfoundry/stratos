@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { ApplicationService } from '../application.service';
+import { ApplicationService } from '../../../features/applications/application.service';
 import {
   AppAutoscalerMetricChartListConfigService,
 } from '../../../shared/components/list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-list-config.service';
@@ -23,7 +22,6 @@ export class AutoscalerMetricPageComponent {
 
   constructor(
     public applicationService: ApplicationService,
-    public cloudFoundryService: CloudFoundryService,
   ) {
   }
 

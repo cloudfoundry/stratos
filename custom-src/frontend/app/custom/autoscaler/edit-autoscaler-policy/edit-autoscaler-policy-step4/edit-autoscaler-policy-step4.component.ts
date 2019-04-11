@@ -6,7 +6,7 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, distinctUntilChanged, publishReplay, refCount, first } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService } from '../../../../features/applications/application.service';
 import { EntityService } from '../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import {

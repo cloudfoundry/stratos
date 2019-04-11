@@ -18,28 +18,12 @@ import { EventsTabComponent } from './application/application-tabs-base/tabs/eve
 import { GitSCMTabComponent } from './application/application-tabs-base/tabs/gitscm-tab/gitscm-tab.component';
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
-import { AutoscalerTabComponent } from './application/application-tabs-base/tabs/autoscaler-tab/autoscaler-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
 import { RoutesTabComponent } from './application/application-tabs-base/tabs/routes-tab/routes-tab/routes-tab.component';
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
-import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy/edit-autoscaler-policy.component';
-import {
-  EditAutoscalerPolicyStep1Component
-} from './edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
-import {
-  EditAutoscalerPolicyStep2Component
-} from './edit-autoscaler-policy/edit-autoscaler-policy-step2/edit-autoscaler-policy-step2.component';
-import {
-  EditAutoscalerPolicyStep3Component
-} from './edit-autoscaler-policy/edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';
-import {
-  EditAutoscalerPolicyStep4Component
-} from './edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
-import { AutoscalerMetricPageComponent } from './autoscaler-metric-page/autoscaler-metric-page.component';
-import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page/autoscaler-scale-history-page.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
@@ -64,7 +48,6 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     ApplicationBaseComponent,
     EventsTabComponent,
     LogStreamTabComponent,
-    AutoscalerTabComponent,
     ServicesTabComponent,
     BuildTabComponent,
     VariablesTabComponent,
@@ -72,13 +55,6 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     ApplicationTabsBaseComponent,
     SshApplicationComponent,
     EditApplicationComponent,
-    EditAutoscalerPolicyComponent,
-    EditAutoscalerPolicyStep1Component,
-    EditAutoscalerPolicyStep2Component,
-    EditAutoscalerPolicyStep3Component,
-    EditAutoscalerPolicyStep4Component,
-    AutoscalerMetricPageComponent,
-    AutoscalerScaleHistoryPageComponent,
     InstancesTabComponent,
     AddRoutesComponent,
     GitSCMTabComponent,

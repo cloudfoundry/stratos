@@ -41,7 +41,6 @@ import { CardAppInstancesComponent } from './components/cards/card-app-instances
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
-import { CardAutoscalerDefaultComponent } from './components/cards/card-autoscaler-default/card-autoscaler-default.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import {
   CardCfOrgUserDetailsComponent,
@@ -217,7 +216,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardAppStatusComponent,
     CardAppInstancesComponent,
     CardAppUsageComponent,
-    CardAutoscalerDefaultComponent,
     RunningInstancesComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
@@ -329,7 +327,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardAppInstancesComponent,
     UsageGaugeComponent,
     CardAppUsageComponent,
-    CardAutoscalerDefaultComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
     ListComponent,
@@ -397,7 +394,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
-    AppNameUniqueDirective
+    AppNameUniqueDirective,
+    RunningInstancesComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

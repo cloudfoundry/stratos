@@ -2,20 +2,20 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild, Input } from '@ang
 import { Observable } from 'rxjs';
 import { map, first, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/src/app-state';
-import { ApplicationService } from '../../../../features/applications/application.service';
+import { AppState } from '../../../../../store/src/app-state';
+import { ApplicationService } from '../../../features/applications/application.service';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
-import { EntityService } from '../../../../core/entity-service';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { EntityService } from '../../../core/entity-service';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import {
   entityFactory,
   appAutoscalerPolicySchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../../../../store/src/actions/app-autoscaler.actions';
-import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { CardStatus } from '../../../shared.types';
-import { autoscalerTransformArrayToMap } from '../../../../../../store/src/helpers/autoscaler/autoscaler-transform-policy';
+} from '../../../../../store/src/helpers/entity-factory';
+import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../../../store/src/actions/app-autoscaler.actions';
+import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { CardStatus } from '../../../../../core/src/shared/shared.types';
+import { autoscalerTransformArrayToMap } from '../../../../../store/src/helpers/autoscaler/autoscaler-transform-policy';
 
 @Component({
   selector: 'app-card-autoscaler-default',

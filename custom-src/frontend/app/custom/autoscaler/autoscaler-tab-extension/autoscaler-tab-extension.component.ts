@@ -1,5 +1,5 @@
-import { StratosTab, StratosTabType } from '../../core/extension/extension-service';
-import { ApplicationService } from '../../features/applications/application.service';
+import { StratosTab, StratosTabType } from '../../../core/extension/extension-service';
+import { ApplicationService } from '../../../features/applications/application.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -12,32 +12,32 @@ import {
   GetAppAutoscalerHealthAction,
   GetAppAutoscalerScalingHistoryAction,
   UpdateAppAutoscalerPolicyAction,
-} from '../../../../store/src/actions/app-autoscaler.actions';
-import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { MetricTypes } from '../../../../store/src/helpers/autoscaler/autoscaler-util';
+} from '../../../../../store/src/actions/app-autoscaler.actions';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { MetricTypes } from '../../../../../store/src/helpers/autoscaler/autoscaler-util';
 import {
   appAutoscalerHealthSchemaKey,
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
   entityFactory,
-} from '../../../../store/src/helpers/entity-factory';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+} from '../../../../../store/src/helpers/entity-factory';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import {
   getPaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
 import {
   AppAutoscalerAppMetric,
   AppAutoscalerPolicy,
   AppAutoscalerScalingHistory,
-} from '../../../../store/src/types/app-autoscaler.types';
-import { EntityService } from '../../core/entity-service';
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+} from '../../../../../store/src/types/app-autoscaler.types';
+import { EntityService } from '../../../core/entity-service';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 @StratosTab({
   type: StratosTabType.Application,
@@ -251,7 +251,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   updatePolicyPage = () => {
     this.store.dispatch(new RouterNav({
       path: [
-        'applications',
+        'autoscaler',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
         'edit-autoscaler-policy'
@@ -262,7 +262,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   metricChartPage() {
     this.store.dispatch(new RouterNav({
       path: [
-        'applications',
+        'autoscaler',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
         'app-autoscaler-metric-page'
@@ -273,7 +273,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   scaleHistoryPage() {
     this.store.dispatch(new RouterNav({
       path: [
-        'applications',
+        'autoscaler',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
         'app-autoscaler-scale-history-page'
