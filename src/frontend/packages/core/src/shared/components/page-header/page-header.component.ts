@@ -14,7 +14,7 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { GlobalWarningsService, IGlobalWarning } from '../../global-warnings.service';
+import { GlobalEventService, IGlobalEvent } from '../../global-warnings.service';
 
 @Component({
   selector: 'app-page-header',
@@ -41,7 +41,7 @@ export class PageHeaderComponent {
 
   @Input() showHistory = true;
 
-  public warnings$: Observable<IGlobalWarning[]>;
+  public warnings$: Observable<IGlobalEvent[]>;
   public warningsCount$: Observable<number>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
@@ -109,10 +109,10 @@ export class PageHeaderComponent {
   constructor(
     private store: Store<AppState>,
     private route: ActivatedRoute,
-    globalWarningsService: GlobalWarningsService
+    globalWarningsService: GlobalEventService
   ) {
-    this.warnings$ = globalWarningsService.warnings$;
-    this.warningsCount$ = globalWarningsService.warnings$.pipe(
+    this.warnings$ = globalWarningsService.filterEvents('warning');
+    this.warningsCount$ = globalWarningsService.events$.pipe(
       map(warnings => warnings.length)
     );
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
