@@ -58,6 +58,7 @@ import { ApplicationStateService } from './shared/components/application-state/a
 import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
+import { GlobalWarningsService } from './shared/global-warnings.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -133,8 +134,16 @@ export class AppModule {
     private permissionService: CurrentUserPermissionsService,
     private appStateService: ApplicationStateService,
     private store: Store<AppState>,
-    private logger: LoggerService
+    logger: LoggerService,
+    globalWarningsService: GlobalWarningsService
   ) {
+    globalWarningsService.addWarning(
+      {
+        isWarning: (state: AppState) => !state.dashboard.timeoutSession,
+        message: 'Timeout session is disabled - this is considered a security risk',
+        link: '/profile'
+      }
+    )
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     initEndpointExtensions(ext);

@@ -14,6 +14,7 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { GlobalWarningsService, IGlobalWarning } from '../../global-warnings.service';
 
 @Component({
   selector: 'app-page-header',
@@ -39,6 +40,9 @@ export class PageHeaderComponent {
   @Input() showUnderFlow = false;
 
   @Input() showHistory = true;
+
+  public warnings$: Observable<IGlobalWarning[]>;
+  public warningsCount$: Observable<number>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
@@ -102,7 +106,15 @@ export class PageHeaderComponent {
     this.store.dispatch(new Logout());
   }
 
-  constructor(private store: Store<AppState>, private route: ActivatedRoute) {
+  constructor(
+    private store: Store<AppState>,
+    private route: ActivatedRoute,
+    globalWarningsService: GlobalWarningsService
+  ) {
+    this.warnings$ = globalWarningsService.warnings$;
+    this.warningsCount$ = globalWarningsService.warnings$.pipe(
+      map(warnings => warnings.length)
+    );
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
