@@ -6,7 +6,6 @@ import { SharedModule } from '../../shared/shared.module';
 import { MonocularChartViewComponent } from './chart-view/monocular.component';
 import { CreateReleaseModule } from './create-release/create-release.module';
 import { HelmRoutingModule } from './helm.routing';
-import { HelmReleaseLinkComponent } from './list-types/helm-release-link/helm-release-link.component';
 import { HelmReleaseServiceCardComponent } from './list-types/helm-release-service-card/helm-release-service-card.component';
 import { HelmRepositoryCountComponent } from './list-types/helm-repository-count/helm-repository-count.component';
 import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
@@ -77,7 +76,6 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmRepositoryCountComponent,
     HelmReleaseTabBaseComponent,
     HelmReleaseSummaryTabComponent,
-    HelmReleaseLinkComponent,
     HelmReleaseNotesTabComponent,
     HelmReleaseValuesTabComponent,
     HelmReleasePodsTabComponent,
@@ -95,7 +93,6 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     MonocularChartCardComponent,
     HelmReleaseServiceCardComponent,
     HelmRepositoryCountComponent,
-    HelmReleaseLinkComponent,
     KubernetesServicePortsComponent
   ]
 })

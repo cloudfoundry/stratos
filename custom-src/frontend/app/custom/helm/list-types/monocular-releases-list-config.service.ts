@@ -10,7 +10,6 @@ import {
 } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
 import { HelmRelease } from '../store/helm.types';
-import { HelmReleaseLinkComponent } from './helm-release-link/helm-release-link.component';
 import { HelmReleasesDataSource } from './monocular-releases-list-source';
 
 @Injectable()
@@ -30,7 +29,13 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
     {
       columnId: 'name',
       headerCell: () => 'Name',
-      cellComponent: HelmReleaseLinkComponent,
+      cellDefinition: {
+        valuePath: 'name',
+        getLink: (row: HelmRelease) => row.guid,
+        newTab: false,
+        externalLink: false,
+        showShortLink: false
+      },
       sort: {
         type: 'sort',
         orderKey: 'name',

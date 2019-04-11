@@ -1,16 +1,16 @@
-import { NgModule } from '@angular/core';
-
-import { CoreModule } from '../../core/core.module';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '../../shared/shared.module';
+import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
+
+import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { CoreModule } from '../../core/core.module';
+import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
+import { FavoriteConfig, favoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
+import { SharedModule } from '../../shared/shared.module';
+import { IK8FavMetadata } from '../kubernetes/kubernetes.setup.module';
 import { HelmStoreModule } from './helm.store.module';
 import { HelmEffects } from './store/helm.effects';
-import { favoritesConfigMapper, FavoriteConfig } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { IK8FavMetadata } from '../kubernetes/kubernetes.setup.module';
-import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
-import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 
 @NgModule({
   imports: [
@@ -21,10 +21,6 @@ import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers
     EffectsModule.forFeature([
       HelmEffects
     ])
-  ],
-  declarations: [
-  ],
-  entryComponents: [
   ]
 })
 export class HelmSetupModule {
@@ -38,7 +34,6 @@ export class HelmSetupModule {
         'Helm',
         (endpoint: IK8FavMetadata) => ({
           type: endpointType,
-          // routerLink: `/monodular/${endpoint.guid}`,
           routerLink: `/monodular/charts`,
           lines: [
             ['Address', endpoint.address]
