@@ -5,9 +5,7 @@ import {
   LoginFailed,
   RESET_AUTH,
   SESSION_INVALID,
-  SESSION_KEEP_ALIVE,
   SESSION_VERIFIED,
-  SessionKeepAlive,
   VERIFY_SESSION,
 } from '../actions/auth.actions';
 import { RouterActions, RouterNav } from '../actions/router.actions';
@@ -94,12 +92,6 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
             ...action.payload.endpoints
           }
         },
-      };
-    case SESSION_KEEP_ALIVE:
-      const keepAliveAction: SessionKeepAlive = action as SessionKeepAlive;
-      return state.keepAlive === keepAliveAction.keepAlive ? state : {
-        ...state,
-        keepAlive: keepAliveAction.keepAlive
       };
     default:
       return state;

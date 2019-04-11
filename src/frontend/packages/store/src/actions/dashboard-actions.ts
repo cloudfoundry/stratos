@@ -9,6 +9,8 @@ export const CHANGE_SIDE_NAV_MODE = '[Dashboard] Change side nav mode';
 export const TOGGLE_HEADER_EVENT = '[Dashboard] Toggle header event';
 export const SET_HEADER_EVENT = '[Dashboard] Set header event';
 
+export const TIMEOUT_SESSION = '[Dashboard] Timeout Session';
+
 export class OpenSideNav implements Action {
   constructor() { }
   type = OPEN_SIDE_NAV;
@@ -36,4 +38,9 @@ export class ToggleHeaderEvent implements Action {
 export class SetHeaderEvent implements Action {
   constructor(public minimised = false) { }
   type = SET_HEADER_EVENT;
+}
+
+export class SetSessionTimeoutAction implements Action {
+  constructor(public timeoutSession = true) { }
+  type = TIMEOUT_SESSION;
 }

@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule } from '@ngrx/store';
+import { ActionReducerMap, StoreModule, ActionReducer } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
+import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { environment } from '../../core/src/environments/environment';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
@@ -53,7 +54,10 @@ export const appReducers = {
   recentlyVisited: recentlyVisitedReducer
 } as ActionReducerMap<{}>;
 
-const metaReducers = [];
+export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
+  return localStorageSync({ keys: ['dashboard'], rehydrate: true })(reducer);
+}
+const metaReducers = [localStorageSyncReducer];
 if (!environment.production) {
   metaReducers.push(storeFreeze);
   // if (environment.logEnableConsoleActions) {

@@ -1,3 +1,4 @@
+import { SetSessionTimeoutAction, TIMEOUT_SESSION } from './../actions/dashboard-actions';
 import {
   CHANGE_SIDE_NAV_MODE,
   CLOSE_SIDE_NAV,
@@ -10,12 +11,14 @@ import {
 import { SideNavModes } from '../types/dashboard.types';
 
 export interface DashboardState {
+  timeoutSession: boolean;
   sidenavOpen: boolean;
   sideNavMode: SideNavModes;
   headerEventMinimized: boolean;
 }
 
 export const defaultDashboardState: DashboardState = {
+  timeoutSession: true,
   sidenavOpen: true,
   sideNavMode: 'side',
   headerEventMinimized: false
@@ -47,6 +50,12 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       const setHeaderEvent = action as SetHeaderEvent;
       return {
         ...state, headerEventMinimized: setHeaderEvent.minimised
+      };
+    case TIMEOUT_SESSION:
+      const timeoutSessionAction = action as SetSessionTimeoutAction;
+      return {
+        ...state,
+        timeoutSession: timeoutSessionAction.timeoutSession
       };
     default:
       return state;

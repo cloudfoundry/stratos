@@ -4,7 +4,11 @@ import { Observable } from 'rxjs';
 
 import { UserProfileService } from '../user-profile.service';
 import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
-import { map } from 'rxjs/operators';
+import { map, first } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../../store/src/app-state';
+import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
+import { SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
 
 @Component({
   selector: 'app-profile-info',
@@ -13,11 +17,23 @@ import { map } from 'rxjs/operators';
 })
 export class ProfileInfoComponent implements OnInit {
 
+  public timeoutSession$ = this.store.select(selectDashboardState).pipe(
+    first(),
+    map(dashboardState => dashboardState.timeoutSession)
+  );
+
   userProfile$: Observable<UserProfileInfo>;
 
   primaryEmailAddress$: Observable<string>;
 
-  constructor(private userProfileService: UserProfileService) {
+  public updateSessionKeepAlive(timeoutSession: boolean) {
+    this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
+  }
+
+  constructor(
+    private userProfileService: UserProfileService,
+    private store: Store<AppState>
+  ) {
     this.userProfile$ = userProfileService.userProfile$;
 
     this.primaryEmailAddress$ = this.userProfile$.pipe(
