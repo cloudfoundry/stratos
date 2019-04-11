@@ -5,6 +5,7 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
+import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import {
@@ -28,15 +29,26 @@ import {
   GetHelmReleaseStatus,
   GetHelmVersions,
   GetMonocularCharts,
+  HELM_INSTALL,
+  HelmInstall,
 } from './helm.actions';
-import { helmReleasesSchemaKey, monocularChartsSchemaKey } from './helm.entities';
-import { HelmRelease, HelmReleasePod, HelmReleaseService, HelmReleaseStatus, HelmStatus, HelmVersion } from './helm.types';
+import { helmReleaseSchemaKey, monocularChartsSchemaKey } from './helm.entities';
+import {
+  HELM_INSTALLING_KEY,
+  HelmRelease,
+  HelmReleasePod,
+  HelmReleaseService,
+  HelmReleaseStatus,
+  HelmStatus,
+  HelmVersion,
+} from './helm.types';
 
 @Injectable()
 export class HelmEffects {
 
   constructor(
-    private http: HttpClient,
+    private http: HttpClient, // TODO: RC remove
+    private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>
   ) { }
@@ -97,7 +109,7 @@ export class HelmEffects {
             helmRelease.lastDeployed = mapHelmModifiedDate(data.info.last_deployed);
             helmRelease.firstDeployed = mapHelmModifiedDate(data.info.first_deployed);
             // data.info =
-            processedData.entities[helmReleasesSchemaKey][id] = helmRelease;
+            processedData.entities[helmReleaseSchemaKey][id] = helmRelease;
             processedData.result.push(id);
           });
         });
@@ -176,6 +188,48 @@ export class HelmEffects {
     ofType<GetHelmReleaseServices>(GET_HELM_RELEASE_SERVICES),
     mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
   );
+
+
+  @Effect()
+  helmInstall$ = this.actions$.pipe(
+    ofType<HelmInstall>(HELM_INSTALL),
+    flatMap(action => {
+      const apiAction = this.getHelmUpdateAction(action.guid(), action.type, HELM_INSTALLING_KEY);
+      const url = '/pp/v1/helm/install';
+      this.store.dispatch(new StartRequestAction(apiAction));
+      return this.httpClient.post(url, action.values).pipe(
+        mergeMap((response: any) => {
+          console.log(response);
+          return [
+            new ClearPaginationOfType(helmReleaseSchemaKey),
+            new WrapperRequestActionSuccess(null, apiAction)
+          ];
+        }),
+        catchError(error => {
+          const errorMessage = `Failed to install helm chart: ${error.message}`;
+          return [
+            new WrapperRequestActionFailed(errorMessage, apiAction, 'create', {
+              endpointIds: [action.values.endpoint],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: errorMessage,
+              error
+            })
+          ];
+        })
+      );
+
+    })
+  );
+
+  private getHelmUpdateAction(guid: string, type: string, updatingKey: string) {
+    return {
+      entityKey: helmReleaseSchemaKey,
+      guid,
+      type,
+      updatingKey,
+    } as IRequestAction;
+  }
 
   private makeRequest(
     action: IRequestAction,

@@ -13,7 +13,7 @@ import { KubeService } from '../../kubernetes/store/kube.types';
 import { GetKubernetesServicesInNamespace } from '../../kubernetes/store/kubernetes.actions';
 import { kubernetesServicesSchemaKey } from '../../kubernetes/store/kubernetes.entities';
 import { GetHelmReleases, GetHelmReleaseServices } from '../store/helm.actions';
-import { helmReleasesSchemaKey } from '../store/helm.entities';
+import { helmReleaseSchemaKey } from '../store/helm.entities';
 import { HelmRelease, HelmReleaseService } from '../store/helm.types';
 
 export const fetchHelmReleaseServiceFromKubernetes = (store: Store<AppState>, helmService: HelmReleaseService): Observable<KubeService> => {
@@ -32,7 +32,7 @@ export const fetchHelmReleaseServiceFromKubernetes = (store: Store<AppState>, he
 
 function fetchRelease(store: Store<AppState>, endpointGuid: string, releaseTitle: string) {
   const action = new GetHelmReleases();
-  const paginationMonitor = new PaginationMonitor(store, action.paginationKey, entityFactory(helmReleasesSchemaKey));
+  const paginationMonitor = new PaginationMonitor(store, action.paginationKey, entityFactory(helmReleaseSchemaKey));
   const svc = getPaginationObservables({ store, action, paginationMonitor });
   return svc.entities$.pipe(
     map((items: HelmRelease[]) => items.find(item => item.guid === `${endpointGuid}:${releaseTitle}`))

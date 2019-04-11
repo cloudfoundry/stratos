@@ -120,3 +120,13 @@ export class HelmReleaseGuid {
   guid: string;
 }
 
+export interface HelmInstallValues {
+  endpoint: string;
+  releaseName: string;
+  releaseNamespace: string;
+  values: string;
+  chart: string;
+}
+
+export const HELM_INSTALLING_KEY = 'installing';
+

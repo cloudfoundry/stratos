@@ -7,7 +7,7 @@ import { entityFactory } from '../../../../../../store/src/helpers/entity-factor
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitor } from '../../../../shared/monitors/pagination-monitor';
 import { GetHelmReleases, GetHelmReleaseStatus } from '../../store/helm.actions';
-import { helmReleasesSchemaKey } from '../../store/helm.entities';
+import { helmReleaseSchemaKey } from '../../store/helm.entities';
 import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus } from '../../store/helm.types';
 import { AppState } from './../../../../../../store/src/app-state';
 import {
@@ -35,7 +35,7 @@ export class HelmReleaseHelperService {
     this.endpointGuid = this.guid.split(':')[0];
 
     const action = new GetHelmReleases();
-    const paginationMonitor = new PaginationMonitor(store, action.paginationKey, entityFactory(helmReleasesSchemaKey));
+    const paginationMonitor = new PaginationMonitor(store, action.paginationKey, entityFactory(helmReleaseSchemaKey));
     const svc = getPaginationObservables({ store, action, paginationMonitor });
     this.isFetching$ = svc.fetchingEntities$;
 

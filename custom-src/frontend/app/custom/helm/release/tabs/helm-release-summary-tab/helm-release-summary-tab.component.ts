@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
@@ -9,10 +9,9 @@ import { RouterNav } from '../../../../../../../store/src/actions/router.actions
 import { HideSnackBar, ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { LoggerService } from '../../../../../core/logger.service';
-import { safeUnsubscribe } from '../../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
-import { helmReleasesSchemaKey } from '../../../store/helm.entities';
+import { helmReleaseSchemaKey } from '../../../store/helm.entities';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
@@ -126,7 +125,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           this.logService.error('Failed to delete release: ', err);
         },
         complete: () => {
-          this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
+          this.store.dispatch(new ClearPaginationOfType(helmReleaseSchemaKey));
           this.completeDelete();
           this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
         }

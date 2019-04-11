@@ -4,7 +4,7 @@ import { HelmReleasePod, HelmReleaseService, HelmReleaseStatus, HelmVersion } fr
 
 export const monocularChartsSchemaKey = 'monocularCharts';
 
-export const helmReleasesSchemaKey = 'helmReleases';
+export const helmReleaseSchemaKey = 'helmReleases';
 export const helmVersionsSchemaKey = 'helmVersions';
 export const helmReleaseStatusSchemaKey = 'helmReleaseStatus';
 export const helmReleasePod = 'helmReleasePod';
@@ -18,7 +18,7 @@ export const monocularEntities: ExtensionEntitySchema[] = [
     options: { idAttribute: getAPIResourceGuid }
   },
   {
-    entityKey: helmReleasesSchemaKey,
+    entityKey: helmReleaseSchemaKey,
     definition: {},
     // TODO: RC Is this correct?
     options: { idAttribute: getAPIResourceGuid }

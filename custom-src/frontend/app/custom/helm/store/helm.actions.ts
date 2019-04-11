@@ -1,14 +1,17 @@
+import { Action } from '@ngrx/store';
+
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { PaginatedAction } from './../../../../../store/src/types/pagination.types';
 import { IRequestAction } from './../../../../../store/src/types/request.types';
 import {
   helmReleasePod,
+  helmReleaseSchemaKey as helmReleaseSchemaKey,
   helmReleaseService,
-  helmReleasesSchemaKey,
   helmReleaseStatusSchemaKey,
   helmVersionsSchemaKey,
   monocularChartsSchemaKey,
 } from './helm.entities';
+import { HelmInstallValues } from './helm.types';
 
 export const GET_MONOCULAR_CHARTS = '[Monocular] Get Charts';
 export const GET_MONOCULAR_CHARTS_SUCCESS = '[Monocular] Get Charts Success';
@@ -31,8 +34,12 @@ export const GET_HELM_RELEASE_PODS_SUCCESS = '[Helm] Get Release Pods Success';
 export const GET_HELM_RELEASE_PODS_FAILURE = '[Helm] Get Release Pods Failure';
 
 export const GET_HELM_RELEASE_SERVICES = '[Helm] Get Release Services';
-export const GET_HELM_RELEASE_SERVICES_SUCCESS = '[Helm] Get Release Pods Services';
-export const GET_HELM_RELEASE_SERVICES_FAILURE = '[Helm] Get Release Pods Services';
+export const GET_HELM_RELEASE_SERVICES_SUCCESS = '[Helm] Get Release Services Success';
+export const GET_HELM_RELEASE_SERVICES_FAILURE = '[Helm] Get Release Services Failure';
+
+export const HELM_INSTALL = '[Helm] Install';
+export const HELM_INSTALL_SUCCESS = '[Helm] Install Success';
+export const HELM_INSTALL_FAILURE = '[Helm] Install Failure';
 
 export interface MonocularPaginationAction extends PaginatedAction, IRequestAction { }
 
@@ -61,8 +68,8 @@ export class GetHelmReleases implements MonocularPaginationAction {
     this.paginationKey = 'helm-releases';
   }
   type = GET_HELM_RELEASES;
-  entityKey = helmReleasesSchemaKey;
-  entity = [entityFactory(helmReleasesSchemaKey)];
+  entityKey = helmReleaseSchemaKey;
+  entity = [entityFactory(helmReleaseSchemaKey)];
   actions = [
     GET_HELM_RELEASES,
     GET_HELM_RELEASES_SUCCESS,
@@ -160,4 +167,10 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
   static createKey = (endpointGuid: string, releaseTitle: string, name: string): string => {
     return `${endpointGuid}/${releaseTitle}/${name}`;
   }
+}
+
+export class HelmInstall implements Action {
+  constructor(public values: HelmInstallValues) { }
+  type = HELM_INSTALL;
+  public guid = () => '<New Release>' + this.values.releaseName;
 }

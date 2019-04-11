@@ -1,13 +1,12 @@
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { IListConfig } from '../../../shared/components/list/list.component.types';
-import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { HelmRelease } from '../store/helm.types';
+import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
+import { IListConfig } from '../../../shared/components/list/list.component.types';
 import { GetHelmReleases } from '../store/helm.actions';
-import { helmReleasesSchemaKey } from '../store/helm.entities';
-import { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
+import { helmReleaseSchemaKey } from '../store/helm.entities';
+import { HelmRelease } from '../store/helm.types';
 
 export class HelmReleasesDataSource extends ListDataSource<HelmRelease> {
 
@@ -19,7 +18,7 @@ export class HelmReleasesDataSource extends ListDataSource<HelmRelease> {
     super({
       store,
       action,
-      schema: entityFactory(helmReleasesSchemaKey),
+      schema: entityFactory(helmReleaseSchemaKey),
       getRowUniqueId: object => object.guid,
       paginationKey: action.paginationKey,
       isLocal: true,

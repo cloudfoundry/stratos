@@ -4,15 +4,16 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Observable, of, Subscription } from 'rxjs';
+import { delay, filter, map, pairwise, switchMap } from 'rxjs/operators';
 
-import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { helmReleasesSchemaKey } from '../store/helm.entities';
+import { HelmInstall } from '../store/helm.actions';
+import { helmReleaseSchemaKey } from '../store/helm.entities';
+import { HELM_INSTALLING_KEY, HelmInstallValues } from '../store/helm.types';
 
 @Component({
   selector: 'app-create-release',
@@ -21,7 +22,7 @@ import { helmReleasesSchemaKey } from '../store/helm.entities';
 })
 export class CreateReleaseComponent {
 
-  isLoading$ = observableOf(false);
+  // isLoading$ = observableOf(false);
   paginationStateSub: Subscription;
 
   public cancelUrl: string;
@@ -68,38 +69,34 @@ export class CreateReleaseComponent {
   }
 
   submit: StepOnNextFunction = () => {
-
-    console.log('INSTALLING!');
-
     // Build the request body
-
-    console.log(this.details);
-    const values = {
+    const values: HelmInstallValues = {
       ...this.details.value,
-      ...this.overrides.value
+      ...this.overrides.value,
+      chart: this.route.snapshot.params
     };
-    values.chart = this.route.snapshot.params;
 
-    console.log(values);
+    // Make the request
+    const action = new HelmInstall(values);
+    this.store.dispatch(action);
 
-    // This needs to be done via an action
-    // Using http client diretcly for testing
+    // Wait for result of request
+    return of(true).pipe(
+      delay(1),
+      switchMap(() => this.store.select(selectUpdateInfo(helmReleaseSchemaKey, action.guid(), HELM_INSTALLING_KEY))),
+      filter(update => !!update),
+      pairwise(),
+      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+      map(([oldVal, newVal]) => newVal),
+      map(result => ({
+        success: !result.error,
+        redirect: !result.error,
+        redirectPayload: {
+          path: 'monocular/releases'
+        },
+        message: !result.error ? '' : result.message
+      })));
 
-    const obs$ = this.httpClient.post('/pp/v1/helm/install', values);
-    // this.store.dispatch(new SetCFDetails({
-    //   cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
-    //   org: this.cfOrgSpaceService.org.select.getValue(),
-    //   space: this.cfOrgSpaceService.space.select.getValue()
-    // }));
-    return obs$.pipe(
-      tap(() => {
-        // Redirect
-        this.store.dispatch(new ClearPaginationOfType(helmReleasesSchemaKey));
-        this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
-      }),
-      map(d => ({ success: true })),
-      catchError(err => observableOf({ success: false }))
-    );
   }
 
 }
