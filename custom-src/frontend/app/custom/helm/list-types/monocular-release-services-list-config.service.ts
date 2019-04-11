@@ -18,11 +18,10 @@ export class HelmReleaseServicesListConfig implements IListConfig<HelmReleaseSer
   isLocal = true;
   dataSource: HelmReleaseServicesDataSource;
   viewType = ListViewTypes.BOTH;
-  // viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
   cardComponent = HelmReleaseServiceCardComponent;
   tableFixedRowHeight = true;
-  columns = [
+  columns: ITableColumn<HelmReleaseService>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Name',
@@ -64,7 +63,7 @@ export class HelmReleaseServicesListConfig implements IListConfig<HelmReleaseSer
       cellComponent: KubernetesServicePortsComponent,
       cellFlex: '4'
     },
-  ] as ITableColumn<HelmReleaseService>[];
+  ];
   initialised$: Observable<boolean>;
 
 

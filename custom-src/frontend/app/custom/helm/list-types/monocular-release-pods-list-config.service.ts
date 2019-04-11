@@ -16,7 +16,7 @@ export class HelmReleasePodsListConfig implements IListConfig<HelmReleasePod> {
   dataSource: HelmReleasePodsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
   tableFixedRowHeight = true;
-  columns = [
+  columns: ITableColumn<HelmReleasePod>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Name',
@@ -82,7 +82,7 @@ export class HelmReleasePodsListConfig implements IListConfig<HelmReleasePod> {
       },
       cellFlex: '1'
     },
-  ] as ITableColumn<HelmReleasePod>[];
+  ];
   initialised$: Observable<boolean>;
 
   constructor(

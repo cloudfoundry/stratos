@@ -22,15 +22,7 @@ export class HelmReleasesDataSource extends ListDataSource<HelmRelease> {
       getRowUniqueId: object => object.guid,
       paginationKey: action.paginationKey,
       isLocal: true,
-      listConfig,
-      // transformEntities: [{ type: 'filter', field: 'name' },
-      // (entities: HelmRelease[], paginationState: PaginationEntityState) => {
-      //   // const repository = paginationState.clientPagination.filter.items['repository'];
-      //   return entities.filter(e => {
-      //     return true;
-      //   });
-      // }
-      // ]
+      listConfig
     });
   }
 }

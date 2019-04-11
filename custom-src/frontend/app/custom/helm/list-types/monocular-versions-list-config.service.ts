@@ -17,7 +17,7 @@ export class HelmVersionsListConfig implements IListConfig<HelmVersion> {
   dataSource: HelmVersionsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
   tableFixedRowHeight = true;
-  columns = [
+  columns: ITableColumn<HelmVersion>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Cluster',
@@ -37,7 +37,7 @@ export class HelmVersionsListConfig implements IListConfig<HelmVersion> {
       },
       cellFlex: '1'
     },
-  ] as ITableColumn<HelmVersion>[];
+  ];
 
 
   constructor(

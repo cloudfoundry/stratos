@@ -26,7 +26,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
   pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
   tableFixedRowHeight = true;
-  columns = [
+  columns: ITableColumn<HelmRelease>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Name',
@@ -54,7 +54,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'namespace',
       headerCell: () => 'Namespace',
       cellDefinition: {
-        getValue: (row) => `${row.namespace}`
+        valuePath: 'namespace'
       },
       sort: {
         type: 'sort',
@@ -67,7 +67,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'status',
       headerCell: () => 'Status',
       cellDefinition: {
-        getValue: (row) => `${row.status}`
+        valuePath: 'status'
       },
       sort: {
         type: 'sort',
@@ -80,7 +80,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'version',
       headerCell: () => 'Version',
       cellDefinition: {
-        getValue: (row) => `${row.version}`
+        valuePath: 'version'
       },
       sort: {
         type: 'sort',
@@ -102,7 +102,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       },
       cellFlex: '3'
     },
-  ] as ITableColumn<HelmRelease>[];
+  ];
 
   constructor(
     private store: Store<AppState>,

@@ -45,7 +45,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     {
       columnId: 'name', headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => `${row.name}`
+        valuePath: 'name'
       },
       sort: {
         type: 'sort',

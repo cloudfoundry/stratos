@@ -33,12 +33,12 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
   pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
   tableFixedRowHeight = true;
-  columns = [
+  columns: ITableColumn<EndpointModel>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => `${row.name}`
+        valuePath: 'name'
       },
       sort: {
         type: 'sort',
@@ -69,22 +69,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
       },
       cellFlex: '2'
     },
-  ] as ITableColumn<EndpointModel>[];
-
-  // private handleAction(item, effectKey, handleChange) {
-  //   const disSub = this.store.select(selectUpdateInfo(
-  //     endpointStoreNames.type,
-  //     item.guid,
-  //     effectKey,
-  //   )).pipe(
-  //     pairwise())
-  //     .subscribe(([oldVal, newVal]) => {
-  //       if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-  //         handleChange([oldVal, newVal]);
-  //         disSub.unsubscribe();
-  //       }
-  //     });
-  // }
+  ];
 
   constructor(
     private store: Store<AppState>,
