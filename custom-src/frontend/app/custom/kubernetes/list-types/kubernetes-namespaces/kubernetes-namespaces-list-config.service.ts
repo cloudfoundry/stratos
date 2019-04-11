@@ -11,6 +11,7 @@ import { KubernetesNamespace } from '../../../kubernetes/store/kube.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { GetKubernetesDashboard } from '../../store/kubernetes.actions';
 import { kubernetesDashboardSchemaKey } from '../../store/kubernetes.entities';
+import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count/kube-namespace-pod-count.component';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
 import { KubernetesNamespacesDataSource } from './kubernetes-namespaces-data-source';
@@ -60,7 +61,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
     },
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
   text = {

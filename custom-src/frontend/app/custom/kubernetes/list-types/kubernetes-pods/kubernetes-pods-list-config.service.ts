@@ -6,6 +6,7 @@ import { ITableColumn } from '../../../../shared/components/list/list-table/tabl
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesPod } from '../../store/kube.types';
+import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { getContainerLengthSort } from '../kube-sort.helper';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
@@ -91,7 +92,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     },
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
   text = {

@@ -16,6 +16,7 @@ import { IListConfig, ListViewTypes } from '../../../shared/components/list/list
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { MonocularRepositoryDataSource } from './monocular-repository-list-source';
 
 @Injectable()
@@ -29,7 +30,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
     filter: 'Filter Repositories',
     noEntries: 'There are no repositories'
   };
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
   tableFixedRowHeight = true;
   columns = [

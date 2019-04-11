@@ -5,9 +5,14 @@ import {
   KubernetesServicePortsComponent,
 } from '../../helm/list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubeService } from '../store/kube.types';
+import { defaultHelmKubeListPageSize } from './kube-helm-list-types';
 
 
 export abstract class BaseKubernetesServicesListConfig implements IListConfig<KubeService> {
+
+  constructor(
+  ) {
+  }
   columns: Array<ITableColumn<KubeService>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
@@ -45,23 +50,19 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
     },
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
   text = {
     filter: 'Filter by Name',
     noEntries: 'There are no services'
   };
+  getDataSource: () => ListDataSource<KubeService>;
 
   getGlobalActions = () => null;
   getMultiActions = () => [];
   getSingleActions = () => [];
   getColumns = () => this.columns;
-  getDataSource: () => ListDataSource<KubeService>;
   getMultiFiltersConfigs = () => [];
-
-  constructor(
-  ) {
-  }
 
 }

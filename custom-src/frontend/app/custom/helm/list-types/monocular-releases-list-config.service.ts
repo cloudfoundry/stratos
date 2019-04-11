@@ -9,6 +9,7 @@ import {
   TableCellEndpointNameComponent,
 } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
+import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { HelmRelease } from '../store/helm.types';
 import { HelmReleasesDataSource } from './monocular-releases-list-source';
 
@@ -22,7 +23,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
     filter: 'Filter Releases',
     noEntries: 'There are no releases'
   };
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
   tableFixedRowHeight = true;
   columns = [

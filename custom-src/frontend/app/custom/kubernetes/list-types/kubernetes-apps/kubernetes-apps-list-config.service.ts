@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { AppState } from '../../../../../../store/src/app-state';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../../store/src/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesApp } from '../../store/kube.types';
+import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { AppLinkComponent } from './app-link/app-link.component';
 import { KubeAppcreatedDateComponent } from './kube-appcreated-date/kube-appcreated-date.component';
 import { KubernetesAppsDataSource } from './kubernetes-apps-data-source';
@@ -73,7 +74,7 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
     },
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
 
   enableTextFilter = true;
