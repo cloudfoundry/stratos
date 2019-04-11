@@ -13,18 +13,18 @@ import {
   entityFactory,
   appAutoscalerUpdatedPolicySchemaKey
 } from '../../../../../../store/src/helpers/entity-factory';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../../../../store/src/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../../../../store/src/types/app-autoscaler.types';
+import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
+import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import {
   MomentFormateDateTimeT, PolicyAlert, PolicyDefaultSpecificDate
-} from '../../../../../../store/src/helpers/autoscaler/autoscaler-util';
+} from '../../autoscaler-helpers/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
   dateTimeIsSameOrAfter,
   specificDateRangeOverlapping
-} from '../../../../../../store/src/helpers/autoscaler/autoscaler-validation';
+} from '../../autoscaler-helpers/autoscaler-validation';
 import * as moment from 'moment-timezone';
-import { selectUpdateAutoscalerPolicyState } from '../../../../../../store/src/effects/autoscaler.effects';
+import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',

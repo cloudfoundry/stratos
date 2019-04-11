@@ -16,14 +16,14 @@ import {
   getAdjustmentType,
   PolicyAlert,
   PolicyDefaultTrigger
-} from '../../../../../../store/src/helpers/autoscaler/autoscaler-util';
+} from '../../autoscaler-helpers/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
   getThresholdMin,
   getThresholdMax
-} from '../../../../../../store/src/helpers/autoscaler/autoscaler-validation';
-import { selectUpdateAutoscalerPolicyState } from '../../../../../../store/src/effects/autoscaler.effects';
-import { UpdateAppAutoscalerPolicyStepAction } from '../../../../../../store/src/actions/app-autoscaler.actions';
+} from '../../autoscaler-helpers/autoscaler-validation';
+import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
+import { UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.actions';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step2',

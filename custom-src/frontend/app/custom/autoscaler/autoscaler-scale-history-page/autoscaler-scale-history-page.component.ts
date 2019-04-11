@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ApplicationService } from '../../../features/applications/application.service';
 import {
   CfAppAutoscalerEventsConfigService,
-} from '../../../shared/components/list/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';
+} from '../list/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 
 @Component({

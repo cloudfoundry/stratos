@@ -23,16 +23,9 @@ import {
 } from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
-import {
-  AppAutoscalerMetricChartCardComponent
-} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
-import {
-  AppAutoscalerComboChartComponent
-} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-chart.component';
-import {
-  AppAutoscalerComboSeriesVerticalComponent
-} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
-
+import { AppAutoscalerMetricChartCardComponent } from '../../../../../custom/autoscaler/list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
+import { AppAutoscalerComboChartComponent } from '../../../../../custom/autoscaler/list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-chart.component';
+import { AppAutoscalerComboSeriesVerticalComponent } from '../../../../../custom/autoscaler/list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 
 export const listCards = [
   CardAppComponent,

@@ -6,9 +6,9 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
-import { ITableColumn } from '../../list-table/table.types';
-import { ListViewTypes } from '../../list.component.types';
-import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
+import { ListViewTypes } from '../../../../../shared/components/list/list.component.types';
+import { BaseCfListConfig } from '../../../../../shared/components/list/list-types/base-cf/base-cf-list-config';
 import {
   AppAutoscalerMetricChartCardComponent,
 } from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';

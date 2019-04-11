@@ -8,9 +8,9 @@ import {
   appAutoscalerScalingHistorySchemaKey,
   appAutoscalerUpdatedPolicySchemaKey,
   entityFactory,
-} from '../helpers/entity-factory';
-import { PaginatedAction } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
+} from '../../../../store/src/helpers/entity-factory';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { IRequestAction } from '../../../../store/src/types/request.types';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',

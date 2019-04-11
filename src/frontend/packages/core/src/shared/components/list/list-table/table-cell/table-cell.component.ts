@@ -26,10 +26,10 @@ import {
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import {
   TableCellAutoscalerEventChangeComponent,
-} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
+} from '../../../../../custom/autoscaler/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
 import {
   TableCellAutoscalerEventStatusComponent,
-} from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
+} from '../../../../../custom/autoscaler/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
 import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import {
@@ -122,7 +122,6 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
-import { TableCellAutoscalerEventStatusIconPipe } from '../../list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status-icon.pipe';
 
 /* tslint:enable:max-line-length */
 export const listTableCells = [

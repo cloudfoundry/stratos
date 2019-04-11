@@ -1,11 +1,11 @@
 import { Store } from '@ngrx/store';
 
-import { getRowMetadata } from '../../../../../../../core/src/features/cloud-foundry/cf.helpers';
-import { GetAppAutoscalerPolicyTriggerAction } from '../../../../../../../store/src/actions/app-autoscaler.actions';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { GetAppAutoscalerPolicyTriggerAction } from '../../../app-autoscaler.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { appAutoscalerPolicySchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 
 export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResource> {
   action: any;

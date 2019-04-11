@@ -3,7 +3,7 @@ import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angula
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
-import { environment } from '../../../core/src/environments/environment.prod';
+import { environment } from '../../environments/environment.prod';
 import {
   APP_AUTOSCALER_HEALTH,
   APP_AUTOSCALER_POLICY,
@@ -18,25 +18,25 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
-} from '../actions/app-autoscaler.actions';
-import { AppState } from '../app-state';
-import { buildMetricData } from '../helpers/autoscaler/autoscaler-transform-metric';
+} from './app-autoscaler.actions';
+import { AppState } from '../../../../store/src/app-state';
+import { buildMetricData } from './autoscaler-helpers/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,
   autoscalerTransformMapToArray,
-} from '../helpers/autoscaler/autoscaler-transform-policy';
-import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { NormalizedResponse } from '../types/api.types';
-import { PaginationEntityState, PaginationParam } from '../types/pagination.types';
+} from './autoscaler-helpers/autoscaler-transform-policy';
+import { resultPerPageParam, resultPerPageParamDefault } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { PaginationEntityState, PaginationParam } from '../../../../store/src/types/pagination.types';
 import {
   ICFAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-} from '../types/request.types';
-import { PaginatedAction } from './../types/pagination.types';
-import { UpdateAutoscalerPolicyState } from '../types/app-autoscaler.types';
+} from '../../../../store/src/types/request.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { UpdateAutoscalerPolicyState } from './app-autoscaler.types';
 
 const { proxyAPIVersion, autoscalerAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;

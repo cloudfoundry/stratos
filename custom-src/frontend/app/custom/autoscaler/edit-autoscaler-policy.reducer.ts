@@ -1,5 +1,5 @@
-import { UPDATE_APP_AUTOSCALER_POLICY_STEP } from '../actions/app-autoscaler.actions';
-import { UpdateAutoscalerPolicyState } from '../types/app-autoscaler.types';
+import { UPDATE_APP_AUTOSCALER_POLICY_STEP } from './app-autoscaler.actions';
+import { UpdateAutoscalerPolicyState } from './app-autoscaler.types';
 
 const defaultState: UpdateAutoscalerPolicyState = {
   policy: {

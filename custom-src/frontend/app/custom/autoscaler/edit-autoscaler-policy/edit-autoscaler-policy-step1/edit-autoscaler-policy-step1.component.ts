@@ -16,11 +16,11 @@ import {
 import {
   GetAppAutoscalerPolicyAction,
   UpdateAppAutoscalerPolicyStepAction
-} from '../../../../../../store/src/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../../../../store/src/types/app-autoscaler.types';
-import { PolicyDefault, PolicyAlert } from '../../../../../../store/src/helpers/autoscaler/autoscaler-util';
-import { autoscalerTransformArrayToMap } from '../../../../../../store/src/helpers/autoscaler/autoscaler-transform-policy';
-import { numberWithFractionOrExceedRange } from '../../../../../../store/src/helpers/autoscaler/autoscaler-validation';
+} from '../../app-autoscaler.actions';
+import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
+import { PolicyDefault, PolicyAlert } from '../../autoscaler-helpers/autoscaler-util';
+import { autoscalerTransformArrayToMap } from '../../autoscaler-helpers/autoscaler-transform-policy';
+import { numberWithFractionOrExceedRange } from '../../autoscaler-helpers/autoscaler-validation';
 import * as moment from 'moment-timezone';
 
 @Component({

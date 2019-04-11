@@ -15,8 +15,6 @@ import {
 } from '../../../../store/src/actions/application.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { GetAppAutoscalerHealthAction } from '../../../../store/src/actions/app-autoscaler.actions';
-import { AppAutoscalerHealth } from '../../../../store/src/types/app-autoscaler.types';
 
 import {
   appEnvVarsSchemaKey,
@@ -30,8 +28,7 @@ import {
   serviceBindingSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  stackSchemaKey,
-  appAutoscalerHealthSchemaKey,
+  stackSchemaKey
 } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -117,14 +114,6 @@ export class ApplicationService {
       false
     );
 
-    this.appAutoscalerHealthService = this.entityServiceFactory.create<APIResource<AppAutoscalerHealth>>(
-      appAutoscalerHealthSchemaKey,
-      entityFactory(appAutoscalerHealthSchemaKey),
-      appGuid,
-      new GetAppAutoscalerHealthAction(appGuid, cfGuid),
-      false
-    );
-
     this.constructCoreObservables();
     this.constructAmalgamatedObservables();
     this.constructStatusObservables();
@@ -157,8 +146,6 @@ export class ApplicationService {
   applicationState$: Observable<ApplicationStateData>;
   applicationUrl$: Observable<string>;
   applicationRunning$: Observable<boolean>;
-
-  waitForAppAutoscalerHealth$: Observable<EntityInfo<AppAutoscalerHealth>>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -228,8 +215,6 @@ export class ApplicationService {
     );
 
     this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
-
-    this.waitForAppAutoscalerHealth$ = this.appAutoscalerHealthService.waitForEntity$.pipe(publishReplay(1), refCount());
   }
 
   public getApplicationEnvVarsMonitor() {

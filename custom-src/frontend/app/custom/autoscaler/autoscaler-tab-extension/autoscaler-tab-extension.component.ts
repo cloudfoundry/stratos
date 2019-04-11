@@ -12,10 +12,10 @@ import {
   GetAppAutoscalerHealthAction,
   GetAppAutoscalerScalingHistoryAction,
   UpdateAppAutoscalerPolicyAction,
-} from '../../../../../store/src/actions/app-autoscaler.actions';
+} from '../app-autoscaler.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { MetricTypes } from '../../../../../store/src/helpers/autoscaler/autoscaler-util';
+import { MetricTypes } from '../autoscaler-helpers/autoscaler-util';
 import {
   appAutoscalerHealthSchemaKey,
   appAutoscalerAppMetricSchemaKey,
@@ -32,7 +32,7 @@ import {
   AppAutoscalerAppMetric,
   AppAutoscalerPolicy,
   AppAutoscalerScalingHistory,
-} from '../../../../../store/src/types/app-autoscaler.types';
+} from '../app-autoscaler.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';

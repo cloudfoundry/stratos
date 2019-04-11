@@ -3,7 +3,7 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 import { ApplicationService } from '../../../features/applications/application.service';
 import {
   AppAutoscalerMetricChartListConfigService,
-} from '../../../shared/components/list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-list-config.service';
+} from '../list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-list-config.service';
 
 @Component({
   selector: 'app-autoscaler-metric-page',

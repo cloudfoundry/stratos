@@ -7,11 +7,11 @@ import {
 import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { ApplicationStateService } from '../../../../application-state/application-state.service';
-import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { ServiceActionHelperService } from '../../../../../../shared/data-services/service-action-helper.service';
+import { EntityMonitorFactory } from '../../../../../../shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
+import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
 
 describe('AppServiceBindingCardComponent', () => {

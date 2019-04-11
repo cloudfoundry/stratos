@@ -5,8 +5,8 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
-import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
+import { IListConfig, ListConfig, ListViewTypes } from '../../../../../shared/components/list/list.component.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import {
   TableCellAutoscalerEventChangeComponent,

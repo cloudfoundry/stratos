@@ -7,17 +7,17 @@ import { filter, map } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { selectUpdateAutoscalerPolicyState } from '../../../../../../store/src/effects/autoscaler.effects';
-import { UpdateAppAutoscalerPolicyStepAction } from '../../../../../../store/src/actions/app-autoscaler.actions';
+import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
+import { UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.actions';
 import {
   MomentFormateDate, PolicyAlert, shiftArray, PolicyDefaultRecurringSchedule
-} from '../../../../../../store/src/helpers/autoscaler/autoscaler-util';
+} from '../../autoscaler-helpers/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
   dateIsAfter,
   timeIsSameOrAfter,
   recurringSchedulesOverlapping,
-} from '../../../../../../store/src/helpers/autoscaler/autoscaler-validation';
+} from '../../autoscaler-helpers/autoscaler-validation';
 import * as moment from 'moment-timezone';
 
 @Component({

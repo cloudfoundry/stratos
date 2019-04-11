@@ -11,11 +11,11 @@ import {
   entityFactory,
   appAutoscalerPolicySchemaKey,
 } from '../../../../../store/src/helpers/entity-factory';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../../../store/src/actions/app-autoscaler.actions';
+import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../app-autoscaler.actions';
 import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { CardStatus } from '../../../../../core/src/shared/shared.types';
-import { autoscalerTransformArrayToMap } from '../../../../../store/src/helpers/autoscaler/autoscaler-transform-policy';
+import { autoscalerTransformArrayToMap } from '../autoscaler-helpers/autoscaler-transform-policy';
 
 @Component({
   selector: 'app-card-autoscaler-default',
