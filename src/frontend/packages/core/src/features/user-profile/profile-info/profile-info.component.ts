@@ -9,6 +9,8 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 
 @Component({
   selector: 'app-profile-info',
@@ -18,21 +20,36 @@ import { SetSessionTimeoutAction } from '../../../../../store/src/actions/dashbo
 export class ProfileInfoComponent implements OnInit {
 
   public timeoutSession$ = this.store.select(selectDashboardState).pipe(
-    first(),
-    map(dashboardState => dashboardState.timeoutSession)
+    map(dashboardState => dashboardState.timeoutSession ? 'true' : 'false')
   );
 
   userProfile$: Observable<UserProfileInfo>;
 
   primaryEmailAddress$: Observable<string>;
 
+  private sessionDialogConfig = new ConfirmationDialogConfig(
+    'Disable session timeout',
+    'We recommend keeping automatic session timeout enabled to improve the security of your data.',
+    'Disable',
+    true
+  );
+
   public updateSessionKeepAlive(timeoutSession: boolean) {
+    if (!timeoutSession) {
+      this.confirmDialog.open(this.sessionDialogConfig, () => this.setSessionTimeout(timeoutSession));
+    } else {
+      this.setSessionTimeout(timeoutSession);
+    }
+  }
+
+  private setSessionTimeout(timeoutSession: boolean) {
     this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
   }
 
   constructor(
     private userProfileService: UserProfileService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private confirmDialog: ConfirmationDialogService,
   ) {
     this.userProfile$ = userProfileService.userProfile$;
 
