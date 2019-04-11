@@ -101,8 +101,6 @@ export class EndpointsEffect {
   @Effect() connectEndpoint$ = this.actions$.pipe(
     ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
     mergeMap(action => {
-      const actionType = 'update';
-
       // Special-case SSO login - redirect to the back-end
       if (action.authType === 'sso') {
         const loc = window.location.protocol + '//' + window.location.hostname +

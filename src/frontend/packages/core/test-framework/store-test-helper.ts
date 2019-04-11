@@ -615,10 +615,12 @@ function getDefaultInitialTestStoreState(): AppState {
     },
     dashboard: {
       sidenavOpen: true,
-      sideNavMode: 'side',
       headerEventMinimized: false,
       sideHelpOpen: false,
-      sideHelpDocument: ''
+      sideHelpDocument: '',
+      isMobile: false,
+      isMobileNavOpen: false,
+      sideNavPinned: false,
     },
     createApplication: {
       cloudFoundryDetails: null,
