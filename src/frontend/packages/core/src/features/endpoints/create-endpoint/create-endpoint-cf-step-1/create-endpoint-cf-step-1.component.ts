@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
+import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
 import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
@@ -105,6 +106,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
           type: this.endpoint.value,
           ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
         };
+        if (!result.error) {
+          this.store.dispatch(new ShowSnackBar(`Successfully registered '${this.nameField.value}'`));
+        }
         return {
           success: !result.error,
           redirect: false,

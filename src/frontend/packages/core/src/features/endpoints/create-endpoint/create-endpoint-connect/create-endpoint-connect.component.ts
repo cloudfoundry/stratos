@@ -22,6 +22,8 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   public helpDocumentUrl: string;
   public connectService: ConnectEndpointService;
 
+  public doConnect = false;
+
   constructor(
     private store: Store<AppState>,
     private endpointsService: EndpointsService

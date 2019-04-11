@@ -2,8 +2,27 @@
   flex: 1;
 }
 
-.title {
-  align-items: center;
-  display: flex;
-  height: 40px;
+
+.connect {
+  &__question {
+    padding-bottom: 24px;
+  }
+
+  &__option {
+    padding-bottom: 24px;
+    mat-radio-button {
+      &:first-of-type {
+        padding-right: 12px;
+      }
+    }
+  }
+
+  &__title {
+    &_title {
+      align-items: center;
+      display: flex;
+      height: 40px;
+    }
+  }
 }
+
