@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 
 import { CardCell } from '../../../../shared/components/list/list.types';
 import { KubeService } from '../../../kubernetes/store/kube.types';
-import { HelmReleaseService } from '../../store/helm.types';
+import { HelmReleaseService, isHelmReleaseService } from '../../store/helm.types';
 
 @Component({
   selector: 'app-kubernetes-service-ports',
@@ -20,11 +20,9 @@ export class KubernetesServicePortsComponent extends CardCell<HelmReleaseService
       return;
     }
     this.pRow = row;
-    // TODO: RC update with proper typing & somehow pipe in endpointId for `KubeService` world
-    /* tslint:disable-next-line:no-string-literal */
-    if (row['kubeService$']) {
+    const helmReleaseService = isHelmReleaseService(row);
+    if (helmReleaseService) {
       this.kubeService$ = (row as HelmReleaseService).kubeService$;
-      const helmReleaseService: HelmReleaseService = row as HelmReleaseService;
       this.endpointId = helmReleaseService.endpointId;
     } else {
       this.kubeService$ = of(row as KubeService);

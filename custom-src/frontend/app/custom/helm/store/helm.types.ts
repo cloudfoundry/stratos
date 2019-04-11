@@ -94,6 +94,12 @@ export interface HelmReleaseService {
   kubeService$?: Observable<KubeService>;
 }
 
+export function isHelmReleaseService(obj: any): HelmReleaseService {
+  if (obj && obj.kubeService$) {
+    return obj as HelmReleaseService;
+  }
+}
+
 export interface HelmVersion {
   endpointId: string;
   Version?: {
