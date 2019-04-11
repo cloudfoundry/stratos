@@ -15,7 +15,6 @@ import {
 } from '../../../../store/src/actions/application.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
 import { AppState } from '../../../../store/src/app-state';
-
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
@@ -28,7 +27,7 @@ import {
   serviceBindingSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  stackSchemaKey
+  stackSchemaKey,
 } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -87,7 +86,6 @@ export class ApplicationService {
 
   private appEntityService: EntityService<APIResource<IApp>>;
   private appSummaryEntityService: EntityService<APIResource<IAppSummary>>;
-  private appAutoscalerHealthService: EntityService;
 
   constructor(
     @Inject(CF_GUID) public cfGuid: string,

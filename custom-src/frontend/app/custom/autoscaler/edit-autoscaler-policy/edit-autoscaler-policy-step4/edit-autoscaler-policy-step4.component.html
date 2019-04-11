@@ -105,6 +105,7 @@
       </app-tile>
     </app-tile-group>
   </app-tile-grid>
+  <button color="accent" mat-button mat-raised-button (click)="addSpecificDate()" [disabled]="editIndex!=-1">Add</button>
   <mat-error *ngIf="!submitStatus" class="autoscaler-policy-edit-specific">
     {{submitMessage}}
   </mat-error>

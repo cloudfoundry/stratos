@@ -1,5 +1,5 @@
 
 
 export const resultPerPageParam = 'results-per-page';
-export const resultPerPageParamDefault = 9;
+export const resultPerPageParamDefault = 5;
 

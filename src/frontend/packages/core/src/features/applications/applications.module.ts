@@ -1,6 +1,5 @@
 import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
@@ -40,8 +39,7 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     CoreModule,
     SharedModule,
     ApplicationsRoutingModule,
-    CustomImportModule,
-    NgxChartsModule
+    CustomImportModule
   ],
   declarations: [
     ApplicationWallComponent,

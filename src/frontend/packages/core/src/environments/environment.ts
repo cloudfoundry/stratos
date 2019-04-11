@@ -9,7 +9,6 @@ export const environment = {
   production: false,
   proxyAPIVersion: 'v1',
   cfAPIVersion: 'v2',
-  autoscalerAPIVersion: 'v1',
   logLevel: LogLevel.DEBUG,
   logToConsole: true,
   logEnableConsoleActions: false,

@@ -38,7 +38,7 @@ import {
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { UpdateAutoscalerPolicyState } from './app-autoscaler.types';
 
-const { proxyAPIVersion, autoscalerAPIVersion } = environment;
+const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 // const commonPrefix = `/pp/${proxyAPIVersion}/proxy/${autoscalerAPIVersion}`;
 // const healthPrefix = `/pp/${proxyAPIVersion}/proxy`;

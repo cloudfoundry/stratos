@@ -101,22 +101,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService
   ) {
-    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
-      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
-        this.applicationService.cfGuid, space.metadata.guid)
-      ),
-      map(can => !can)
-    );
-    this.tabLinks = [
-      { link: 'summary', label: 'Summary' },
-      { link: 'instances', label: 'Instances' },
-      { link: 'routes', label: 'Routes' },
-      { link: 'log-stream', label: 'Log Stream' },
-      { link: 'services', label: 'Services' },
-      { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
-      { link: 'events', label: 'Events' }
-    ];
-
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(
@@ -134,13 +118,23 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
-    // this.applicationService.waitForAppAutoscalerHealth$
-    //   .pipe(first())
-    //   .subscribe(entity => {
-    //     if (entity && entity.entity && entity.entity.entity && entity.entity.entity.uptime > 0) {
-    //       this.tabLinks.push({ link: 'auto-scaler', label: 'Autoscale' });
-    //     }
-    //   });
+
+    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
+      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid, space.metadata.guid)
+      ),
+      map(can => !can)
+    );
+
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary' },
+      { link: 'instances', label: 'Instances' },
+      { link: 'routes', label: 'Routes' },
+      { link: 'log-stream', label: 'Log Stream' },
+      { link: 'services', label: 'Services' },
+      { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
+      { link: 'events', label: 'Events' }
+    ];
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
