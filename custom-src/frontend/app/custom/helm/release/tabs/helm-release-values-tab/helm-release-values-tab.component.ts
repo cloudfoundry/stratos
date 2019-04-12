@@ -27,6 +27,7 @@ export class HelmReleaseValuesTabComponent {
   }
 
   private hidePasswords(values: string): string {
+    // TODO: It's a PITA but this should be done in the back end
     let mask = values.replace(new RegExp('(PASSWORD: [a-zA-Z0-9_\-]*)', 'gm'), 'PASSWORD: **********');
     mask = mask.replace(new RegExp('(password: [a-zA-Z0-9_\-]*)', 'gm'), 'password: **********');
     mask = mask.replace(new RegExp('(SECRET: [a-zA-Z0-9_\-]*)', 'gm'), 'SECRET: **********');

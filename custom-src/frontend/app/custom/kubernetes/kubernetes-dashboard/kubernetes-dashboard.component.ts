@@ -1,12 +1,13 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Component, OnInit, ViewChild, ElementRef, Renderer2 } from '@angular/core';
-import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { BaseKubeGuid } from '../kubernetes-page.types';
 import { ActivatedRoute } from '@angular/router';
-import { KubernetesService } from '../services/kubernetes.service';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { BaseKubeGuid } from '../kubernetes-page.types';
+import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
   selector: 'app-kubernetes-dashboard',
@@ -30,7 +31,7 @@ import { map } from 'rxjs/operators';
 })
 export class KubernetesDashboardTabComponent implements OnInit {
 
-  @ViewChild('kubeDash', {read: ElementRef}) kubeDash: ElementRef;
+  @ViewChild('kubeDash', { read: ElementRef }) kubeDash: ElementRef;
 
   source: SafeResourceUrl;
   isLoading$ = new BehaviorSubject<boolean>(true);
@@ -50,10 +51,10 @@ export class KubernetesDashboardTabComponent implements OnInit {
     let href = window.location.href;
     const index = href.indexOf('dashboard');
     href = href.substr(index + 9);
-    console.log(href);
+    // console.log(href);
     this.href = href;
     this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/ui/${guid}/`);
-    console.log(window.location);
+    // console.log(window.location);
 
     this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
@@ -73,18 +74,18 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     const iframeWindow = this.kubeDash.nativeElement.contentWindow;
-    console.log('iframe loaded');
+    // console.log('iframe loaded');
 
     iframeWindow.addEventListener('hashchange', () => {
-      //Object.defineProperty( event, "oldURL", { enumerable: true, configurable: true, value: lastURL } );
-      //Object.defineProperty( event, "newURL", { enumerable: true, configurable: true, value: document.URL } );
-      //lastURL = document.URL;
-      console.log('iframe hashchange');
-      //console.log(event);
+      // Object.defineProperty( event, "oldURL", { enumerable: true, configurable: true, value: lastURL } );
+      // Object.defineProperty( event, "newURL", { enumerable: true, configurable: true, value: document.URL } );
+      // lastURL = document.URL;
+      // console.log('iframe hashchange');
+      // console.log(event);
 
-      console.log(iframeWindow.location);
+      // console.log(iframeWindow.location);
 
-      console.log(this.href);
+      // console.log(this.href);
 
       if (this.href) {
         let h2 = decodeURI(this.href);
@@ -92,9 +93,9 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
         h2 = h2.replace('%3F', '?');
         h2 = h2.replace('%3D', '=');
-        console.log(h2);
+        // console.log(h2);
         h2 = '#!' + h2;
-        console.log('Changing location hash');
+        // console.log('Changing location hash');
         iframeWindow.location.hash = h2;
         this.href = '';
       }
@@ -120,7 +121,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   private getKubeDashToolbar() {
     if (this.kubeDash.nativeElement &&
       this.kubeDash.nativeElement.contentDocument &&
-      this.kubeDash.nativeElement.contentDocument.getElementsByTagName ) {
+      this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
       const kdChrome = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('kd-chrome')[0];
       if (kdChrome) {
         const kdToolbar = kdChrome.getElementsByTagName('md-toolbar')[0];

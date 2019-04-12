@@ -1,6 +1,7 @@
-import { MonocularChartsListConfig } from './../../list-types/monocular-charts-list-config.service';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
+import { MonocularChartsListConfig } from './../../list-types/monocular-charts-list-config.service';
 
 @Component({
   selector: 'app-catalog-tab',
@@ -12,11 +13,5 @@ import { ListConfig } from '../../../../shared/components/list/list.component.ty
   }]
 
 })
-export class CatalogTabComponent implements OnInit {
+export class CatalogTabComponent { }
 
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
