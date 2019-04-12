@@ -1,50 +1,60 @@
-import { getAPIResourceGuid } from '../../../../../store/src/selectors/api.selectors';
 import { ExtensionEntitySchema } from '../../../core/extension/extension-types';
-import { HelmReleasePod, HelmReleaseService, HelmReleaseStatus, HelmVersion } from './helm.types';
+import {
+  HelmRelease,
+  HelmReleasePod,
+  HelmReleaseService,
+  HelmReleaseStatus,
+  HelmVersion,
+  MonocularChart,
+} from './helm.types';
 
 export const monocularChartsSchemaKey = 'monocularCharts';
 
 export const helmReleaseSchemaKey = 'helmReleases';
 export const helmVersionsSchemaKey = 'helmVersions';
 export const helmReleaseStatusSchemaKey = 'helmReleaseStatus';
-export const helmReleasePod = 'helmReleasePod';
-export const helmReleaseService = 'helmReleaseService';
+export const helmReleasePodKey = 'helmReleasePod';
+export const helmReleaseServiceKey = 'helmReleaseService';
+
+export const getMonocularChartId = (entity: MonocularChart) => entity.id;
+export const getHelmReleaseId = (entity: HelmRelease) => entity.endpointId;
+export const getHelmVersionId = (entity: HelmVersion) => entity.endpointId;
+export const getHelmReleaseStatusId = (entity: HelmReleaseStatus) => entity.endpointId;
+export const getHelmReleasePodId = (entity: HelmReleasePod) => entity.name;
+export const getHelmReleaseServiceId = (entity: HelmReleaseService) => entity.name;
 
 export const monocularEntities: ExtensionEntitySchema[] = [
   {
     entityKey: monocularChartsSchemaKey,
     definition: {},
-    // TODO: RC Is this correct?
-    options: { idAttribute: getAPIResourceGuid }
+    options: { idAttribute: getMonocularChartId }
   },
   {
     entityKey: helmReleaseSchemaKey,
     definition: {},
-    // TODO: RC Is this correct?
-    options: { idAttribute: getAPIResourceGuid }
+    options: { idAttribute: getHelmReleaseId }
   },
   {
     entityKey: helmVersionsSchemaKey,
     definition: {},
-    options: { idAttribute: (entity: HelmVersion) => entity.endpointId }
+    options: { idAttribute: getHelmVersionId }
   },
   {
     entityKey: helmReleaseStatusSchemaKey,
     definition: {},
-    options: { idAttribute: (entity: HelmReleaseStatus) => entity.endpointId }
+    options: { idAttribute: getHelmReleaseStatusId }
   },
   {
-    entityKey: helmReleasePod,
+    entityKey: helmReleasePodKey,
     definition: {},
-    // TODO: RC Fix
-    options: { idAttribute: (entity: HelmReleasePod) => entity.name }
+    options: { idAttribute: getHelmReleasePodId }
   },
   {
-    entityKey: helmReleaseService,
+    entityKey: helmReleaseServiceKey,
     definition: {},
-    // TODO: RC Fix
-    options: { idAttribute: (entity: HelmReleaseService) => entity.name }
+    options: { idAttribute: getHelmReleaseServiceId }
   }
 ];
 
+// TODO: RC Q Shouldn't this be populated with the keys above? Everything seems like it works without....
 export const monocularEntityKeys: string[] = [];

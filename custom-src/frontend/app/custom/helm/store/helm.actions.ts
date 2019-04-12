@@ -4,9 +4,9 @@ import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { PaginatedAction } from './../../../../../store/src/types/pagination.types';
 import { IRequestAction } from './../../../../../store/src/types/request.types';
 import {
-  helmReleasePod,
-  helmReleaseSchemaKey as helmReleaseSchemaKey,
-  helmReleaseService,
+  helmReleasePodKey,
+  helmReleaseSchemaKey,
+  helmReleaseServiceKey,
   helmReleaseStatusSchemaKey,
   helmVersionsSchemaKey,
   monocularChartsSchemaKey,
@@ -127,8 +127,8 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
     this.paginationKey = `${endpointGuid}/${releaseTitle}/pods`;
   }
   type = GET_HELM_RELEASE_PODS;
-  entityKey = helmReleasePod;
-  entity = [entityFactory(helmReleasePod)];
+  entityKey = helmReleasePodKey;
+  entity = [entityFactory(helmReleasePodKey)];
   actions = [
     GET_HELM_RELEASE_PODS,
     GET_HELM_RELEASE_PODS_SUCCESS,
@@ -152,8 +152,8 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
     this.paginationKey = `${endpointGuid}/${releaseTitle}/services`;
   }
   type = GET_HELM_RELEASE_SERVICES;
-  entityKey = helmReleaseService;
-  entity = [entityFactory(helmReleaseService)];
+  entityKey = helmReleaseServiceKey;
+  entity = [entityFactory(helmReleaseServiceKey)];
   actions = [
     GET_HELM_RELEASE_SERVICES,
     GET_HELM_RELEASE_SERVICES_SUCCESS,

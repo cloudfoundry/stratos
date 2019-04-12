@@ -6,7 +6,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../shared/components/list/list.component.types';
 import { GetMonocularCharts } from '../store/helm.actions';
-import { monocularChartsSchemaKey } from '../store/helm.entities';
+import { getMonocularChartId, monocularChartsSchemaKey } from '../store/helm.entities';
 import { MonocularChart } from '../store/helm.types';
 
 export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
@@ -20,7 +20,7 @@ export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
       store,
       action,
       schema: entityFactory(monocularChartsSchemaKey),
-      getRowUniqueId: object => object.id,
+      getRowUniqueId: getMonocularChartId,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

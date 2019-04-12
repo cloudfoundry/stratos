@@ -13,7 +13,7 @@ import { KubeService } from '../../kubernetes/store/kube.types';
 import { GetKubernetesServicesInNamespace } from '../../kubernetes/store/kubernetes.actions';
 import { kubernetesServicesSchemaKey } from '../../kubernetes/store/kubernetes.entities';
 import { GetHelmReleases, GetHelmReleaseServices } from '../store/helm.actions';
-import { helmReleaseSchemaKey } from '../store/helm.entities';
+import { getHelmReleaseServiceId, helmReleaseSchemaKey } from '../store/helm.entities';
 import { HelmRelease, HelmReleaseService } from '../store/helm.types';
 
 export const fetchHelmReleaseServiceFromKubernetes = (store: Store<AppState>, helmService: HelmReleaseService): Observable<KubeService> => {
@@ -52,7 +52,7 @@ export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseSer
       store,
       action,
       schema: entityFactory(action.entityKey),
-      getRowUniqueId: (object: HelmReleaseService) => object.name,
+      getRowUniqueId: getHelmReleaseServiceId,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,
