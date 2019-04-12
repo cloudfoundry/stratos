@@ -43,7 +43,13 @@ export class EndpointsService implements CanActivate {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
-      !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking')));
+      !!Object.values(endpoints).find(endpoint => {
+        const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
+        return epType.doesNotSupportConnect ||
+          endpoint.connectionStatus === 'connected' ||
+          endpoint.connectionStatus === 'checking';
+      }))
+    );
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {

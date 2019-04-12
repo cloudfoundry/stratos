@@ -1,6 +1,6 @@
 <div class="versions">
   <h1>Chart Versions</h1>
-  <div class="version" *ngFor="let version of shownVersions(versions)">
+  <div class="version" *ngFor="let version of shownVersions()">
     <span class='number' [class.selected]="isSelected(version)">
       <a [href]="goToVersionUrl(version)" [routerLink]="goToVersionUrl(version)">
         {{ version.attributes.version }}</a>

@@ -1,27 +1,25 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ChartVersion } from '../../shared/models/chart-version';
+import { Component, Input } from '@angular/core';
+
 import { ChartAttributes } from '../../shared/models/chart';
+import { ChartVersion } from '../../shared/models/chart-version';
 
 @Component({
   selector: 'app-chart-details-versions',
   templateUrl: './chart-details-versions.component.html',
   styleUrls: ['./chart-details-versions.component.scss']
 })
-export class ChartDetailsVersionsComponent implements OnInit {
-  @Input() versions: ChartVersion[]
-  @Input() currentVersion: ChartVersion
-  showAllVersions: boolean
-  constructor() { }
-
-  ngOnInit() { }
+export class ChartDetailsVersionsComponent {
+  @Input() versions: ChartVersion[];
+  @Input() currentVersion: ChartVersion;
+  showAllVersions: boolean;
 
   goToVersionUrl(version: ChartVersion): string {
-    let chart: ChartAttributes = version.relationships.chart.data
+    const chart: ChartAttributes = version.relationships.chart.data;
     return `/monocular/charts/${chart.repo.name}/${chart.name}/${version.attributes.version}`;
   }
 
   isSelected(version: ChartVersion): boolean {
-    return this.currentVersion && version.attributes.version == this.currentVersion.attributes.version;
+    return this.currentVersion && version.attributes.version === this.currentVersion.attributes.version;
   }
 
   showMoreLink(): boolean {
@@ -32,7 +30,7 @@ export class ChartDetailsVersionsComponent implements OnInit {
     this.showAllVersions = true;
   }
 
-  shownVersions(versions: ChartVersion[]): ChartVersion[] {
+  shownVersions(): ChartVersion[] {
     if (this.versions) {
       return this.showAllVersions ? this.versions : this.versions.slice(0, 5);
     }

@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import * as markdown from 'marked';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+
 import { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
 
@@ -27,11 +28,12 @@ export class ChartDetailsReadmeComponent {
     this.renderer.code = (text: string) => `<code>${text}</code>`;
   }
 
-  // TODO. This should not require loading the specific version and then the readme
+  // TODO: NWM This should not require loading the specific version and then the readme
   private getReadme(currentVersion: ChartVersion): Observable<string> {
     return this.chartsService.getChartReadme(currentVersion).pipe(
       map(resp => {
         this.loading = false;
+        // TODO: RC Should also sanitise in case of man-in-middle
         return markdown(resp.text(), {
           renderer: this.renderer
         });
@@ -41,7 +43,7 @@ export class ChartDetailsReadmeComponent {
         if (error.status === 404) {
           return '<h1>No Readme available for this chart</h1>';
         } else {
-          return '<h1>An error occrred retrieving Readme</h1>';
+          return '<h1>An error occurred retrieving Readme</h1>';
         }
       }));
   }
