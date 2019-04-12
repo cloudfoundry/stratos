@@ -1,6 +1,6 @@
 import { compose } from '@ngrx/store';
 
-import { KubeAPIResource, Metadata } from './kube.types';
+import { BasicKubeAPIResource, Metadata } from './kube.types';
 
 
 const getValueOrNull = (object, key) =>
@@ -9,7 +9,7 @@ export const getMetadataGuid = (metadata: Metadata): string =>
   getValueOrNull(metadata, 'uid');
 
 export const getKubeAPIMetadata = (
-  resource: KubeAPIResource
+  resource: BasicKubeAPIResource
 ): Metadata => getValueOrNull(resource, 'metadata');
 
 export const getKubeAPIResourceGuid = compose(
