@@ -25,7 +25,7 @@ import {
   getEndpointType,
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
-import { CardStatus } from '../../../../../shared.types';
+import { StratosStatus } from '../../../../../shared.types';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
@@ -48,7 +48,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public endpointLink: string = null;
   private endpointIds = new ReplaySubject<string[]>();
   public endpointIds$: Observable<string[]>;
-  public cardStatus$: Observable<CardStatus>;
+  public cardStatus$: Observable<StratosStatus>;
   private subs: Subscription[] = [];
 
   private componentRef: ComponentRef<EndpointListDetailsComponent>;
@@ -150,7 +150,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   updateCardStatus() {
     if (this.row && this.dataSource && this.dataSource.getRowState && !this.cardStatus$) {
       this.cardStatus$ = this.dataSource.getRowState(this.row).pipe(
-        map(rowState => rowState.error ? CardStatus.ERROR : null),
+        map(rowState => rowState.error ? StratosStatus.ERROR : null),
         startWith(null)
       );
 

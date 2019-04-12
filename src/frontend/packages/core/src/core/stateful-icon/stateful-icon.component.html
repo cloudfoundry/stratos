@@ -1,0 +1,12 @@
+<div class="stateful-icon" *ngIf="selectedState">
+  <mat-icon *ngIf="!selectedState.template; else spinnerOutlet" [color]="selectedState.color">
+    {{ selectedState.icon }}</mat-icon>
+</div>
+<ng-template #spinnerOutlet>
+  <span>
+    <ng-container *ngTemplateOutlet="selectedState.template"></ng-container>
+  </span>
+</ng-template>
+<ng-template #spinner>
+  <mat-spinner diameter="20"></mat-spinner>
+</ng-template>

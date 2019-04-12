@@ -1,10 +1,16 @@
 import { AppState } from './../../../store/src/app-state';
 import { Injectable } from '@angular/core';
 import { Observable, combineLatest, ReplaySubject } from 'rxjs';
-import { Store } from '@ngrx/store';
-import { map, publishReplay, refCount, tap, startWith, debounceTime } from 'rxjs/operators';
+import { Store, State } from '@ngrx/store';
+import { map, publishReplay, refCount, tap, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-export type IGlobalEventTypes = 'warning' | 'error' | 'process';
+export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
+
+
+interface IGlobalEventType {
+  type?: GlobalEventTypes;
+}
+
 
 /**
  * An global application wide event that is derived from data stored in the store.
@@ -13,104 +19,176 @@ export type IGlobalEventTypes = 'warning' | 'error' | 'process';
  * @template EventState The root data that the event can be generated from. Will act as the EventData if no EventData is provided.
  * @template EventData This data can be used to generate the link or message for an event.
  */
-export interface IGlobalEventConfig<EventState, EventData = EventState> {
-
-  /**
-   * Used to get the part of the store the event may be build from.
-   */
-  selector: (state: AppState) => EventState;
-  message: ((data?: EventData) => string) | string;
+export interface IGlobalEventConfig<EventState> extends IGlobalEventType {
 
   /**
    * Can be used to generate the data for an event.
    * If an array is passed then multiple events will be created of the type provided in the config.
    */
-  getEventData?: (state: EventState) => EventData | EventData[];
-  link?: ((data?: EventData) => string) | string;
-  type?: IGlobalEventTypes;
+  eventTriggered: (state: EventState | AppState) => boolean | boolean[];
+  message: ((data?: EventState, appState?: AppState) => string) | string;
+  key?: ((data?: EventState, appState?: AppState) => string) | string
+
+  /**
+   * Used to get the part of the store the event may be built from.
+   */
+  selector?: (state: AppState) => EventState;
+  link?: ((data?: EventState, appState?: AppState) => string) | string;
 }
 
 export interface IGlobalEvent {
   message: string;
   link: string;
-  type?: IGlobalEventTypes;
+  key: string;
+  type?: GlobalEventTypes;
 }
 @Injectable({
   providedIn: 'root'
 })
 export class GlobalEventService {
-  private eventConfigs: IGlobalEventConfig<any, any>[] = [];
-  private eventConfigsSubject = new ReplaySubject<IGlobalEventConfig<any, any>[]>();
+  private eventConfigs: IGlobalEventConfig<any>[] = [];
+  private eventConfigsSubject = new ReplaySubject<IGlobalEventConfig<any>[]>();
+
+  private readonly eventTypePriority: GlobalEventTypes[] = [
+    'process', 'error', 'warning', 'complete'
+  ];
+
+  private dataCache = new Map<any, Map<any, IGlobalEvent[]>>();
 
   public events$: Observable<IGlobalEvent[]>;
-
-  private dataCache = new Map<any, Map<any, any[]>>();
-
-  public addEventConfig<EventState, EventData = EventState>(event: IGlobalEventConfig<EventState, EventData>) {
+  public priorityType$: Observable<GlobalEventTypes>;
+  public addEventConfig<EventState>(event: IGlobalEventConfig<EventState>) {
     this.eventConfigs.push(event);
     this.eventConfigsSubject.next(this.eventConfigs);
   }
 
-  public filterEvents(eventType: IGlobalEventTypes) {
+  public filterEvents(eventType: GlobalEventTypes) {
     return this.events$.pipe(
       map(events => events.filter(event => event.type === eventType))
     );
   }
-
-  private getEvent(eventData: any, config: IGlobalEventConfig<any, any>) {
-    const message = typeof config.message === 'function' ? config.message(eventData) : config.message;
-    const link = typeof config.link === 'function' ? config.link(eventData) : config.link;
+  // Get the event from the event config and event data.
+  private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: AppState): IGlobalEvent {
+    const message = typeof config.message === 'function' ? config.message(eventData, appState) : config.message;
+    const link = typeof config.link === 'function' ? config.link(eventData, appState) : config.link;
+    const key = typeof config.key === 'function' ? config.key(eventData, appState) : config.link || config.message;
     return {
       message,
       link,
+      key,
       type: config.type || 'warning'
-    };
+    } as IGlobalEvent;
   }
 
-  private getEvents(eventsData: any, config: IGlobalEventConfig<any, any>) {
+  // Get the events from the event config and event data.
+  private getEvents(eventsData: any, config: IGlobalEventConfig<any>, appState: AppState) {
     if (Array.isArray(eventsData)) {
       if (eventsData.length) {
-        return eventsData.map((eventData) => this.getEvent(eventData, config));
+        return eventsData.map((eventData) => this.getEvent(eventData, config, appState));
       }
     } else {
-      return [this.getEvent(eventsData, config)];
+      return [this.getEvent(eventsData, config, appState)];
     }
   }
 
-  constructor(store: Store<AppState>) {
-    this.events$ = combineLatest(
+  // Will get the highest priority event type as dictated by eventTypePriority (0 index is highest priority)
+  private getHighestPriorityEventType(eventTypes: IGlobalEventType[]): GlobalEventTypes {
+    return eventTypes.reduce((currentPriority, nextType) => {
+      if (
+        currentPriority.priority !== 0 &&
+        nextType.type &&
+        nextType.type !== currentPriority.eventType
+      ) {
+        const priority = this.eventTypePriority.findIndex(priorities => nextType.type === priorities);
+        if (currentPriority.priority === null || priority < currentPriority.priority) {
+          return {
+            eventType: nextType.type,
+            priority
+          };
+        }
+      }
+      return currentPriority;
+    }, { eventType: null, priority: null } as { eventType: GlobalEventTypes, priority: number }).eventType;
+  }
+
+  // We cache the event results by keying them by the selectedState object.
+  private getNewEventsOrCached(config: IGlobalEventConfig<any>, appState: AppState): IGlobalEvent[] {
+    const selectedState = config.selector ? config.selector(appState) : appState;
+    const isEventTriggered = config.eventTriggered(selectedState);
+    if (!isEventTriggered) {
+      const dataToEventCache = new Map<any, any>();
+      dataToEventCache.set(selectedState, []);
+      this.dataCache.set(config, dataToEventCache);
+      return [];
+    }
+    if (Array.isArray(isEventTriggered)) {
+      return isEventTriggered.reduce((events) => {
+        return [
+          ...events,
+          ...this.getNewEventOrCached(config, selectedState, appState)
+        ];
+      }, []);
+    }
+    return this.getNewEventOrCached(config, selectedState, appState);
+  }
+
+  private getNewEventOrCached(
+    config: IGlobalEventConfig<any>,
+    selectedState: any,
+    appState: AppState
+  ) {
+    // We will get cached events if the data object matches exactly.
+    const cache = this.dataCache.get(config);
+    const cachedEvents = cache ? cache.get(selectedState) : null;
+    if (cachedEvents) {
+      return cachedEvents;
+    } else {
+      const events = this.getEvents(selectedState, config, appState);
+      const dataToEventCache = new Map<any, any>();
+      dataToEventCache.set(selectedState, events);
+      this.dataCache.set(config, dataToEventCache);
+      return events;
+    }
+  }
+
+  private getEventsAndPriorityType() {
+    return combineLatest(
       this.eventConfigsSubject.asObservable().pipe(
         startWith(this.eventConfigs)
       ),
-      store
+      this.store
     ).pipe(
       debounceTime(100),
       map(([configs, appState]) => {
-        return configs.reduce((allEvents, config) => {
-          const selectedState = config.selector(appState);
-          const eventsData = config.getEventData ? config.getEventData(selectedState) : selectedState;
-          if (eventsData) {
-            // We will get cached events if the data object matches exactly.
-            const cache = this.dataCache.get(config);
-            const cachedEvents = cache ? cache.get(eventsData) : null;
-            if (cachedEvents) {
-              return [...allEvents, ...cachedEvents];
-            } else {
-              const events = this.getEvents(eventsData, config);
-              const dataToEventCache = new Map<any, any>();
-              dataToEventCache.set(eventsData, events);
-              this.dataCache.set(config, dataToEventCache);
-              return [...allEvents, ...events];
-            }
+
+        return configs.reduce((eventsAndPriority, config) => {
+          const newEvents = this.getNewEventsOrCached(config, appState);
+          if (newEvents && newEvents.length) {
+            console.log('newEvents', newEvents);
+            const newHighestPriority = this.getHighestPriorityEventType([
+              { type: eventsAndPriority[1] },
+              ...newEvents,
+            ]);
+            eventsAndPriority[0] = [...eventsAndPriority[0], ...newEvents];
+            eventsAndPriority[1] = newHighestPriority;
+            console.log('eventsAndPriority', eventsAndPriority);
           }
-          const dataToEventCache = new Map<any, any>();
-          dataToEventCache.set(eventsData, []);
-          this.dataCache.set(config, dataToEventCache);
-          return allEvents;
-        }, [] as IGlobalEvent[]);
+          return eventsAndPriority;
+        }, [[], null] as [IGlobalEvent[], GlobalEventTypes]);
       }),
       publishReplay(1),
       refCount(),
+    );
+  }
+
+  constructor(private store: Store<AppState>) {
+    const eventsAndPriority$ = this.getEventsAndPriorityType();
+    this.events$ = eventsAndPriority$.pipe(
+      map(eventsAndPriority => eventsAndPriority[0])
+    );
+    this.priorityType$ = eventsAndPriority$.pipe(
+      map(eventsAndPriority => eventsAndPriority[1]),
+      distinctUntilChanged()
     );
   }
 }

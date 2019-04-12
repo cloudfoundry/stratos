@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { UtilsService } from '../../../../core/utils.service';
-import { CardStatus } from '../../../shared.types';
+import { StratosStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';
 
 @Component({
@@ -29,7 +29,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   formattedLimit: string;
   usage: string;
 
-  status$ = new BehaviorSubject<CardStatus>(CardStatus.NONE);
+  status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
 
   constructor(private utils: UtilsService, private store: Store<AppState>) { }
 

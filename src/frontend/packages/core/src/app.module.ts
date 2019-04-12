@@ -132,15 +132,22 @@ export class AppModule {
   constructor(
     ext: ExtensionService,
     private permissionService: CurrentUserPermissionsService,
-    private appStateService: ApplicationStateService,
     private store: Store<AppState>,
     logger: LoggerService,
-    globalWarningsService: GlobalEventService
+    eventService: GlobalEventService
   ) {
-    globalWarningsService.addEventConfig<boolean>(
+    eventService.addEventConfig<boolean>(
       {
-        selector: (state: AppState) => !state.dashboard.timeoutSession,
+        eventTriggered: (state: AppState) => !state.dashboard.timeoutSession,
         message: 'Timeout session is disabled - this is considered a security risk',
+        link: '/profile'
+      }
+    );
+    eventService.addEventConfig<boolean>(
+      {
+        eventTriggered: () => [true, true, true],
+        message: 'Timeout session is disabled - this is considered a security risk',
+        type: 'process',
         link: '/profile'
       }
     );

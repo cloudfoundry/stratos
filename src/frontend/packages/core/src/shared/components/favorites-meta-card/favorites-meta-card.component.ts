@@ -11,7 +11,7 @@ import { entityFactory, userFavoritesSchemaKey } from '../../../../../store/src/
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { CardStatus, ComponentEntityMonitorConfig } from '../../shared.types';
+import { StratosStatus, ComponentEntityMonitorConfig } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
@@ -41,7 +41,7 @@ export class FavoritesMetaCardComponent {
 
   public config: IFavoritesMetaCardConfig;
 
-  public status$: Observable<CardStatus>;
+  public status$: Observable<StratosStatus>;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
 

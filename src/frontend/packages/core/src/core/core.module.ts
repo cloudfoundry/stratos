@@ -27,6 +27,7 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
 
 
 @NgModule({
@@ -53,7 +54,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     PageNotFoundComponentComponent,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
-    DisableRouterLinkDirective
+    DisableRouterLinkDirective,
+    StatefulIconComponent
   ],
   providers: [
     AuthGuardService,
@@ -69,6 +71,7 @@ import { WindowRef } from './window-ref/window-ref.service';
     CurrentUserPermissionsService
   ],
   declarations: [
+    StatefulIconComponent,
     LogOutDialogComponent,
     TruncatePipe,
     InfinityPipe,

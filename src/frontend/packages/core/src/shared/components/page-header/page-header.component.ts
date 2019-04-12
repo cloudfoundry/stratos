@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
@@ -14,7 +14,8 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import { GlobalEventService, IGlobalEvent, GlobalEventTypes } from '../../global-events.service';
+import { StratosStatus } from '../../shared.types';
 
 @Component({
   selector: 'app-page-header',
@@ -41,8 +42,9 @@ export class PageHeaderComponent {
 
   @Input() showHistory = true;
 
-  public warnings$: Observable<IGlobalEvent[]>;
-  public warningsCount$: Observable<number>;
+  public events$: Observable<IGlobalEvent[]>;
+  public eventCount$: Observable<number>;
+  public eventPriorityStatus$: Observable<StratosStatus>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
@@ -109,12 +111,28 @@ export class PageHeaderComponent {
   constructor(
     private store: Store<AppState>,
     private route: ActivatedRoute,
-    globalWarningsService: GlobalEventService
+    eventService: GlobalEventService
   ) {
-    this.warnings$ = globalWarningsService.filterEvents('warning');
-    this.warningsCount$ = globalWarningsService.events$.pipe(
-      map(warnings => warnings.length)
+    this.events$ = eventService.events$;
+    this.eventCount$ = eventService.events$.pipe(
+      map(events => events.length)
     );
+    this.eventPriorityStatus$ = eventService.priorityType$.pipe(
+      map(priorityEventType => {
+        console.log(priorityEventType);
+        switch (priorityEventType) {
+          case ('warning'):
+            return StratosStatus.WARNING;
+          case ('process'):
+            return StratosStatus.BUSY;
+          case ('error'):
+            return StratosStatus.ERROR;
+          default:
+            return null;
+        }
+      })
+    );
+
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(

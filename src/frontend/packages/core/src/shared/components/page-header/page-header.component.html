@@ -43,8 +43,7 @@
         <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button
           [matMenuTriggerFor]="menu">
           <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
-          <mat-icon class="page-header__warning-icon page-header__menu-button-warning-icon"
-            *ngIf="warningsCount$ | async as warningCount">warning</mat-icon>
+          <app-stateful-icon class="page-header__menu-icon" [state]="eventPriorityStatus$ | async"></app-stateful-icon>
         </button>
         <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
           <div class="page-header__menu-inner">
@@ -64,13 +63,13 @@
               </button>
               <div class="page-header__menu-separator"></div>
             </div>
-            <div *ngIf="warningsCount$ | async as warningCount">
+            <div *ngIf="eventCount$ | async as eventCount">
               <button mat-menu-item class="page-header__warning-button">
-                <div> Warnings <mat-icon class="page-header__warning-icon" [inline]="true">
+                <div> Events <mat-icon class="page-header__warning-icon" [inline]="true">
                     warning</mat-icon>
                 </div>
                 <div class="page-header__warning-count">
-                  {{warningCount}}
+                  {{eventCount}}
                 </div>
               </button>
               <div class="page-header__menu-separator"></div>

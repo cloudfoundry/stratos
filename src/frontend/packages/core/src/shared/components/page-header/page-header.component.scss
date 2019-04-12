@@ -14,10 +14,10 @@ $bottom-index: $top-index - 1;
     text-align: center;
     width: 25px;
   }
-  &__menu-button-warning-icon {
-    font-size: 20px;
+  &__menu-icon {
     position: absolute;
-    top: -3px;
+    right: -5px;
+    top: -5px;
   }
   &__warning-button {
     align-items: center;

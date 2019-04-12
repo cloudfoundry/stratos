@@ -8,7 +8,7 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import {
   CfCellHealthListConfigService
 } from '../../../../../../shared/components/list/list-types/cf-cell-health/cf-cell-health-list-config.service';
-import { CardStatus } from '../../../../../../shared/shared.types';
+import { StratosStatus } from '../../../../../../shared/shared.types';
 
 @Component({
   selector: 'app-cloud-foundry-cell-summary',
@@ -23,7 +23,7 @@ import { CardStatus } from '../../../../../../shared/shared.types';
 })
 export class CloudFoundryCellSummaryComponent {
 
-  public status$: Observable<CardStatus>;
+  public status$: Observable<StratosStatus>;
 
   constructor(
     public cfCellService: CloudFoundryCellService
@@ -31,9 +31,9 @@ export class CloudFoundryCellSummaryComponent {
     this.status$ = cfCellService.healthy$.pipe(
       map(health => {
         if (health === undefined) {
-          return CardStatus.NONE;
+          return StratosStatus.NONE;
         }
-        return health === '0' ? CardStatus.OK : CardStatus.ERROR;
+        return health === '0' ? StratosStatus.OK : StratosStatus.ERROR;
       })
     );
   }
