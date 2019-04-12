@@ -1,13 +1,14 @@
 import { EndpointModel } from '../store/src/types/endpoint.types';
+import { getEndpointType } from './src/features/endpoints/endpoint-helpers';
 
 
 export class EndpointHealthCheck {
+  /**
+   * @param check To show an error, the check should either call a WrapperRequestActionFailed
+   * or kick off a chain that eventually calls a WrapperRequestActionFailed
+   */
   constructor(
     public endpointType: string,
-    /*
-   To show an error, the check should either call a WrapperRequestActionFailed
-   or kick off a chain that eventually calls a WrapperRequestActionFailed
-  */
     public check: (endpoint: EndpointModel) => void
   ) { }
 }
@@ -22,7 +23,8 @@ class EndpointHealthChecks {
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
-    if (endpoint.connectionStatus === 'connected') {
+    const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
+    if (endpoint.connectionStatus === 'connected' || epType.doesNotSupportConnect) {
       const healthCheck = this.healthChecks.find(check => {
         return check.endpointType === endpoint.cnsi_type;
       });
