@@ -6,6 +6,16 @@ $bottom-index: $top-index - 1;
   $breadcrumb-padding: 3px;
   position: relative;
   z-index: $top-index;
+  &__menu-icon {
+    border-radius: 50%;
+    box-shadow: 0 6px 8px 3px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, 0);
+    height: 26px;
+    padding: 1px;
+    position: absolute;
+    right: -5px;
+    top: -5px;
+    width: 26px;
+  }
   &__warning-count {
     border-radius: 50%;
     font-size: 10px;
@@ -13,11 +23,6 @@ $bottom-index: $top-index - 1;
     line-height: 25px;
     text-align: center;
     width: 25px;
-  }
-  &__menu-icon {
-    position: absolute;
-    right: -5px;
-    top: -5px;
   }
   &__warning-button {
     align-items: center;

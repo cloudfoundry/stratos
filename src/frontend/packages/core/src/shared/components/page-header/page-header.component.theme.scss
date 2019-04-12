@@ -32,6 +32,9 @@
       background-color: mat-color($primary);
       color: mat-contrast($primary, 500);
     }
+    &__menu-icon {
+      background-color: mat-contrast($primary, 500);
+    }
     &__warning-icon {
       color: $warning;
     }

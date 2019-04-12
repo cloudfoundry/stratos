@@ -18,25 +18,21 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
   styleUrls: ['./stateful-icon.component.scss']
 })
 
-export class StatefulIconComponent implements OnInit {
+export class StatefulIconComponent {
 
   @Input()
   set state(state: StratosStatus) {
-    console.log(state);
+    this.stateKey = state;
     this.selectedState = this.stateDefinitions[state] || null;
   }
-
-  @ViewChild('spinner')
-  public spinnerTemplate: TemplateRef<any>;
+  public allStateKeys = StratosStatus;
+  public stateKey: StratosStatus;
+  @Input()
+  public inline = false;
 
   private stateDefinitions: {
     [key: string]: StatefulIconDefinition;
-  } = {};
-
-  public selectedState: StatefulIconDefinition;
-
-  ngOnInit() {
-    this.stateDefinitions = {
+  } = {
       [StratosStatus.OK]: {
         icon: 'done',
         color: 'primary'
@@ -48,10 +44,8 @@ export class StatefulIconComponent implements OnInit {
       [StratosStatus.WARNING]: {
         icon: 'warning',
         color: 'warn'
-      },
-      [StratosStatus.BUSY]: {
-        template: this.spinnerTemplate
       }
     };
-  }
+
+  public selectedState: StatefulIconDefinition;
 }

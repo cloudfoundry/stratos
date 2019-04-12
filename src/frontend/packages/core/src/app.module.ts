@@ -140,17 +140,18 @@ export class AppModule {
       {
         eventTriggered: (state: AppState) => !state.dashboard.timeoutSession,
         message: 'Timeout session is disabled - this is considered a security risk',
+        key: 'timeoutSessionWarning',
         link: '/profile'
       }
     );
-    eventService.addEventConfig<boolean>(
-      {
-        eventTriggered: () => [true, true, true],
-        message: 'Timeout session is disabled - this is considered a security risk',
-        type: 'process',
-        link: '/profile'
-      }
-    );
+    // eventService.addEventConfig<boolean>(
+    //   {
+    //     eventTriggered: () => [true, true, true],
+    //     message: 'Timeout session is disabled - this is considered a security risk',
+    //     type: 'process',
+    //     link: '/profile'
+    //   }
+    // );
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     initEndpointExtensions(ext);
