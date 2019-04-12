@@ -116,9 +116,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
       this.startDelete();
       this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
-        next: () => {
-
-        },
         error: (err: any) => {
           this.endDelete();
           this.store.dispatch(new ShowSnackBar('Failed to delete release', 'Close'));

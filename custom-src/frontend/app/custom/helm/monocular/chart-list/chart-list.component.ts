@@ -1,4 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
+
 import { Chart } from '../shared/models/chart';
 
 @Component({
@@ -6,10 +7,6 @@ import { Chart } from '../shared/models/chart';
   templateUrl: './chart-list.component.html',
   styleUrls: ['./chart-list.component.scss']
 })
-export class ChartListComponent implements OnInit {
+export class ChartListComponent {
   @Input() charts: Chart[];
-
-  constructor() {}
-
-  ngOnInit() {}
 }

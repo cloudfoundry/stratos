@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ChartsService } from '../shared/services/charts.service';
+import { first } from 'rxjs/operators';
+
 import { Chart } from '../shared/models/chart';
+import { ChartsService } from '../shared/services/charts.service';
 
 @Component({
   selector: 'app-chart-index',
@@ -8,20 +10,20 @@ import { Chart } from '../shared/models/chart';
   styleUrls: ['./chart-index.component.scss']
 })
 export class ChartIndexComponent implements OnInit {
-	charts: Chart[]
-  loading: boolean = true;
-  totalChartsNumber: number
+  charts: Chart[];
+  loading = true;
+  totalChartsNumber: number;
 
   constructor(
     private chartsService: ChartsService,
-  ) {}
+  ) { }
 
   ngOnInit() {
-		this.loadCharts();
+    this.loadCharts();
   }
 
   loadCharts(): void {
-		this.chartsService.getCharts().subscribe(charts => {
+    this.chartsService.getCharts().pipe(first()).subscribe(charts => {
       this.loading = false;
       this.charts = charts;
       this.totalChartsNumber = charts.length;
