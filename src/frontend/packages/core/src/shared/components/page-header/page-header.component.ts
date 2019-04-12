@@ -14,7 +14,7 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { GlobalEventService, IGlobalEvent } from '../../global-warnings.service';
+import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 
 @Component({
   selector: 'app-page-header',

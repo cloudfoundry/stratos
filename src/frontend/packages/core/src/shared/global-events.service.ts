@@ -44,6 +44,8 @@ export class GlobalEventService {
 
   public events$: Observable<IGlobalEvent[]>;
 
+  private dataCache = new Map<any, Map<any, any[]>>();
+
   public addEventConfig<EventState, EventData = EventState>(event: IGlobalEventConfig<EventState, EventData>) {
     this.eventConfigs.push(event);
     this.eventConfigsSubject.next(this.eventConfigs);
@@ -75,8 +77,6 @@ export class GlobalEventService {
     }
   }
 
-  private dataCache = new Map<any, Map<any, any[]>>();
-
   constructor(store: Store<AppState>) {
     this.events$ = combineLatest(
       this.eventConfigsSubject.asObservable().pipe(
@@ -103,6 +103,9 @@ export class GlobalEventService {
               return [...allEvents, ...events];
             }
           }
+          const dataToEventCache = new Map<any, any>();
+          dataToEventCache.set(eventsData, []);
+          this.dataCache.set(config, dataToEventCache);
           return allEvents;
         }, [] as IGlobalEvent[]);
       }),

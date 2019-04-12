@@ -58,7 +58,7 @@ import { ApplicationStateService } from './shared/components/application-state/a
 import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { GlobalEventService } from './shared/global-warnings.service';
+import { GlobalEventService } from './shared/global-events.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
