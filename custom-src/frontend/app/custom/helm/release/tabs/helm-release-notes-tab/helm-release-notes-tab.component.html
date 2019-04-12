@@ -2,5 +2,5 @@
   <div [innerHtml]="notes"></div>
 </div>
 <ng-template #noNotes>
-  No release notes
+  <app-no-content-message [icon]="'subject'" [firstLine]="'There are no release notes'"></app-no-content-message>
 </ng-template>
