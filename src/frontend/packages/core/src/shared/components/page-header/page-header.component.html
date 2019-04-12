@@ -67,7 +67,7 @@
               <div class="page-header__menu-separator"></div>
             </div>
             <div *ngIf="eventCount$ | async as eventCount">
-              <button mat-menu-item class="page-header__warning-button">
+              <button routerLink="/events" mat-menu-item class="page-header__warning-button">
                 Events
                 <div class="page-header__warning-count">
                   {{eventCount}}

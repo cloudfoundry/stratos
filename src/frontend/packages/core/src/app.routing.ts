@@ -100,6 +100,7 @@ const appRoutes: Routes = [
       },
       { path: 'about', loadChildren: './features/about/about.module#AboutModule' },
       { path: 'user-profile', loadChildren: './features/user-profile/user-profile.module#UserProfileModule' },
+      { path: 'events', loadChildren: './features/event-page/event-page.module#EventPageModule' },
     ]
   },
   {

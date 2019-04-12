@@ -1,16 +1,15 @@
 import { AppState } from './../../../store/src/app-state';
 import { Injectable } from '@angular/core';
 import { Observable, combineLatest, ReplaySubject } from 'rxjs';
-import { Store, State } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { map, publishReplay, refCount, tap, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { StratosStatus } from './shared.types';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
-
 
 interface IGlobalEventType {
   type?: GlobalEventTypes;
 }
-
 
 /**
  * An global application wide event that is derived from data stored in the store.
@@ -41,6 +40,7 @@ export interface IGlobalEvent {
   link: string;
   key: string;
   type?: GlobalEventTypes;
+  stratosStatus?: StratosStatus;
 }
 @Injectable({
   providedIn: 'root'
@@ -57,6 +57,7 @@ export class GlobalEventService {
 
   public events$: Observable<IGlobalEvent[]>;
   public priorityType$: Observable<GlobalEventTypes>;
+  public priorityStratosStatus$: Observable<StratosStatus>;
   public addEventConfig<EventState>(event: IGlobalEventConfig<EventState>) {
     this.eventConfigs.push(event);
     this.eventConfigsSubject.next(this.eventConfigs);
@@ -67,16 +68,32 @@ export class GlobalEventService {
       map(events => events.filter(event => event.type === eventType))
     );
   }
+
+  public eventTypeToStratosStatus(eventType: GlobalEventTypes) {
+    switch (eventType) {
+      case ('warning'):
+        return StratosStatus.WARNING;
+      case ('process'):
+        return StratosStatus.BUSY;
+      case ('error'):
+        return StratosStatus.ERROR;
+      default:
+        return null;
+    }
+  }
+
   // Get the event from the event config and event data.
   private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: AppState): IGlobalEvent {
     const message = typeof config.message === 'function' ? config.message(eventData, appState) : config.message;
     const link = typeof config.link === 'function' ? config.link(eventData, appState) : config.link;
     const key = typeof config.key === 'function' ? config.key(eventData, appState) : config.link || config.message;
+    const type = config.type || 'warning';
     return {
       message,
       link,
       key,
-      type: config.type || 'warning'
+      type,
+      stratosStatus: this.eventTypeToStratosStatus(type)
     } as IGlobalEvent;
   }
 
@@ -160,18 +177,15 @@ export class GlobalEventService {
     ).pipe(
       debounceTime(100),
       map(([configs, appState]) => {
-
         return configs.reduce((eventsAndPriority, config) => {
           const newEvents = this.getNewEventsOrCached(config, appState);
           if (newEvents && newEvents.length) {
-            console.log('newEvents', newEvents);
             const newHighestPriority = this.getHighestPriorityEventType([
               { type: eventsAndPriority[1] },
               ...newEvents,
             ]);
             eventsAndPriority[0] = [...eventsAndPriority[0], ...newEvents];
             eventsAndPriority[1] = newHighestPriority;
-            console.log('eventsAndPriority', eventsAndPriority);
           }
           return eventsAndPriority;
         }, [[], null] as [IGlobalEvent[], GlobalEventTypes]);
@@ -189,6 +203,9 @@ export class GlobalEventService {
     this.priorityType$ = eventsAndPriority$.pipe(
       map(eventsAndPriority => eventsAndPriority[1]),
       distinctUntilChanged()
+    );
+    this.priorityStratosStatus$ = this.priorityType$.pipe(
+      map(priorityEventType => this.eventTypeToStratosStatus(priorityEventType))
     );
   }
 }

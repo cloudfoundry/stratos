@@ -117,23 +117,7 @@ export class PageHeaderComponent {
     this.eventCount$ = eventService.events$.pipe(
       map(events => events.length)
     );
-    this.eventPriorityStatus$ = eventService.priorityType$.pipe(
-      map(priorityEventType => {
-        console.log(priorityEventType);
-        switch (priorityEventType) {
-          case ('warning'):
-            return StratosStatus.WARNING;
-          case ('process'):
-            return StratosStatus.BUSY;
-          case ('error'):
-            return StratosStatus.ERROR;
-          default:
-            return null;
-        }
-      }),
-      publishReplay(1),
-      refCount()
-    );
+    this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
 
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
