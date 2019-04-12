@@ -35,7 +35,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     {
       columnId: 'containers', headerCell: () => 'No. of Containers',
       cellDefinition: {
-        getValue: (row) => `${row.spec.containers.length}`
+        valuePath: 'spec.containers.length'
       },
       sort: getContainerLengthSort,
       cellFlex: '2',
@@ -43,7 +43,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     {
       columnId: 'namespace', headerCell: () => 'Namespace',
       cellDefinition: {
-        getValue: (row) => `${row.metadata.namespace}`
+        valuePath: 'metadata.namespace'
       },
       sort: {
         type: 'sort',
@@ -55,7 +55,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     {
       columnId: 'node', headerCell: () => 'Node',
       cellDefinition: {
-        getValue: (row) => `${row.spec.nodeName}`
+        valuePath: 'spec.nodeName'
       },
       sort: {
         type: 'sort',
@@ -67,10 +67,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     {
       columnId: 'status', headerCell: () => 'Status',
       cellDefinition: {
-        getValue: (row) => {
-
-          return `${row.status.phase}`;
-        }
+        valuePath: 'status.phase'
       },
       sort: {
         type: 'sort',

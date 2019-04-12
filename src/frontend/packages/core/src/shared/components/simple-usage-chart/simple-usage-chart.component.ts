@@ -1,5 +1,6 @@
-import { Component, Input, ViewChild, ElementRef } from '@angular/core';
-import { IChartData, ISimpleUsageChartData, IChartThresholds } from './simple-usage-chart.types';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+
+import { IChartData, IChartThresholds, ISimpleUsageChartData } from './simple-usage-chart.types';
 
 
 @Component({
@@ -38,11 +39,11 @@ export class SimpleUsageChartComponent {
   };
 
   @Input() set data(usageData: ISimpleUsageChartData) {
-    console.log(usageData)
+    // console.log(usageData)
     if (usageData) {
       const { total, used } = usageData;
       const remaining = total - used;
-      console.log(this.getColors(total, used))
+      // console.log(this.getColors(total, used))
       this.chartData = {
         colors: this.getColors(total, used),
         total,

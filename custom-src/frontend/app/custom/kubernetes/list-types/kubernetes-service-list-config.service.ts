@@ -9,10 +9,6 @@ import { defaultHelmKubeListPageSize } from './kube-helm-list-types';
 
 
 export abstract class BaseKubernetesServicesListConfig implements IListConfig<KubeService> {
-
-  constructor(
-  ) {
-  }
   columns: Array<ITableColumn<KubeService>> = [
     {
       columnId: 'name', headerCell: () => 'Name',

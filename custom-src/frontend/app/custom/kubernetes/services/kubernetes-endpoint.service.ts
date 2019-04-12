@@ -3,32 +3,29 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, shareReplay } from 'rxjs/operators';
 
-import { EntityService } from '../../../core/entity-service';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import {
-  endpointSchemaKey,
-  entityFactory,
-} from '../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
+import { EntityService } from '../../../core/entity-service';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
-import { KubernetesDeployment, KubernetesStatefulSet, KubeService, KubernetesPod } from '../store/kube.types';
+import { KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
 import {
   GeKubernetesDeployments,
+  GetKubernetesPods,
   GetKubernetesServices,
   GetKubernetesStatefulSets,
   KubePaginationAction,
-  GetKubernetesPods,
 } from '../store/kubernetes.actions';
 import {
   kubernetesDeploymentsSchemaKey,
   kubernetesPodsSchemaKey,
+  kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
-  kubernetesServicesSchemaKey
 } from '../store/kubernetes.entities';
 
 @Injectable()
@@ -87,7 +84,6 @@ export class KubernetesEndpointService {
       kubernetesStatefulSetsSchemaKey
     );
 
-
     this.services$ = this.getObservable<KubeService>(
       new GetKubernetesServices(this.kubeGuid),
       kubernetesServicesSchemaKey
@@ -95,11 +91,11 @@ export class KubernetesEndpointService {
 
   }
 
-  private getObservable<T>(pagintionAction: KubePaginationAction, schemaKey: string): Observable<T[]> {
+  private getObservable<T>(paginationAction: KubePaginationAction, schemaKey: string): Observable<T[]> {
     return getPaginationObservables<T>({
       store: this.store,
-      action: pagintionAction,
-      paginationMonitor: this.paginationMonitorFactory.create(pagintionAction.paginationKey, entityFactory(schemaKey))
+      action: paginationAction,
+      paginationMonitor: this.paginationMonitorFactory.create(paginationAction.paginationKey, entityFactory(schemaKey))
     }, true).entities$.pipe(filter(p => !!p), first());
   }
 }

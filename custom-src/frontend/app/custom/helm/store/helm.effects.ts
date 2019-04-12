@@ -198,8 +198,7 @@ export class HelmEffects {
       const url = '/pp/v1/helm/install';
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.post(url, action.values).pipe(
-        mergeMap((response: any) => {
-          console.log(response);
+        mergeMap(() => {
           return [
             new ClearPaginationOfType(helmReleaseSchemaKey),
             new WrapperRequestActionSuccess(null, apiAction)

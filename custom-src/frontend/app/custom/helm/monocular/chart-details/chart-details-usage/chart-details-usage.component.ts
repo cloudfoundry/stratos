@@ -28,6 +28,7 @@ export class ChartDetailsUsageComponent implements OnInit {
     this.mdIconRegistry.addSvgIcon(
       'content-copy',
       this.sanitizer.bypassSecurityTrustResourceUrl(
+        // TODO: NWM content-copy.svg doesn't exist
         '/assets/icons/content-copy.svg'
       )
     );
@@ -41,7 +42,7 @@ export class ChartDetailsUsageComponent implements OnInit {
   }
 
   get showRepoInstructions(): boolean {
-    return this.chart.attributes.repo.name != 'stable';
+    return this.chart.attributes.repo.name !== 'stable';
   }
 
   get repoAddInstructions(): string {

@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, Renderer2, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import * as markdown from 'marked';
 
 @Component({
@@ -29,7 +29,7 @@ export class MarkdownPreviewComponent implements OnInit {
   ngOnInit() { }
 
   private loadDocument() {
-    this.httpClient.get(this.documentUrl, {responseType: 'text'}).subscribe((markText) => {
+    this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe((markText) => {
       if (markText && markText.length > 0) {
         // Ensure links in the readme open in a new tab
         const renderer = new markdown.Renderer();
@@ -52,7 +52,7 @@ export class MarkdownPreviewComponent implements OnInit {
           const titleElement = h1[0];
           const titleText = titleElement.innerText;
           this.title = titleText;
-          console.log('Got title: ' + titleText);
+          // console.log('Got title: ' + titleText);
         }, 100);
       } else {
         this.title = 'Help';
