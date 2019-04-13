@@ -55,7 +55,30 @@ export const appReducers = {
 } as ActionReducerMap<{}>;
 
 export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  return localStorageSync({ keys: ['dashboard'], rehydrate: true })(reducer);
+  // This is done to ensure we don't accidentally apply state from session storage from another user.
+  let globalUserId = null;
+  return localStorageSync({
+    storageKeySerializer: (id) => {
+      return globalUserId || id;
+    },
+    syncCondition: () => {
+      if (globalUserId) {
+        return true;
+      }
+      const idElement = document.getElementById('__stratos-userid__');
+      if (idElement) {
+        const userId = idElement.innerText;
+        if (userId) {
+          globalUserId = 'stratos-' + userId;
+          return true;
+        }
+      }
+      return false;
+    },
+    keys: ['dashboard'],
+    rehydrate: true,
+
+  })(reducer);
 }
 const metaReducers = [localStorageSyncReducer];
 if (!environment.production) {

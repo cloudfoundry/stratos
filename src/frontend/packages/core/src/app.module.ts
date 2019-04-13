@@ -59,7 +59,7 @@ import { ApplicationStateService } from './shared/components/application-state/a
 import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { GlobalEventService } from './shared/global-events.service';
+import { GlobalEventService, GlobalEventData } from './shared/global-events.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -139,25 +139,25 @@ export class AppModule {
   ) {
     eventService.addEventConfig<boolean>(
       {
-        eventTriggered: (state: AppState) => !state.dashboard.timeoutSession,
+        eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),
         message: 'Timeout session is disabled - this is considered a security risk.',
         key: 'timeoutSessionWarning',
         link: '/user-profile'
       }
     );
-    eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>>(
+    eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
       {
         selector: (state: AppState) => state.requestData.endpoint,
         eventTriggered: (state: IRequestEntityTypeState<EndpointModel>) => {
-          return Object.values(state).reduce((events, appState) => {
-            if (appState.connectionStatus === 'checking') {
-              console.log('pushing');
-              events.push(true);
+          return Object.values(state).reduce((events, endpoint) => {
+            if (endpoint.connectionStatus === 'checking') {
+              events.push(new GlobalEventData(true, endpoint));
             }
             return events;
           }, []);
         },
-        message: 'Connecting Endpoint',
+        message: (endpoint: EndpointModel) => `Connecting endpoint ${endpoint.name}`,
+        link: '/endpoints',
         key: 'endpoint-connect',
         type: 'process'
       }
