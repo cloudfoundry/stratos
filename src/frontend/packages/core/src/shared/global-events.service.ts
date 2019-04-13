@@ -7,6 +7,15 @@ import { StratosStatus } from './shared.types';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
 
+
+/**
+ * Used to build the message or link for an event
+ * @export
+ */
+export class GlobalEventData<T = any> {
+  constructor(public triggered = true, public data?: T) { }
+}
+
 interface IGlobalEventType {
   type?: GlobalEventTypes;
 }
@@ -15,23 +24,23 @@ interface IGlobalEventType {
  * An global application wide event that is derived from data stored in the store.
  *
  * @export
- * @template EventState The root data that the event can be generated from. Will act as the EventData if no EventData is provided.
- * @template EventData This data can be used to generate the link or message for an event.
+ * @template SelectedState The root data that the event can be generated from. Will act as the EventData if no EventData is provided.
+ * @template EventState This data can be used to generate the link or message for an event.
  */
-export interface IGlobalEventConfig<EventState> extends IGlobalEventType {
+export interface IGlobalEventConfig<SelectedState, EventState = SelectedState> extends IGlobalEventType {
 
   /**
    * Can be used to generate the data for an event.
    * If an array is passed then multiple events will be created of the type provided in the config.
    */
-  eventTriggered: (state: EventState | AppState) => boolean | boolean[];
+  eventTriggered: (state: SelectedState | AppState) => GlobalEventData | GlobalEventData[];
   message: ((data?: EventState, appState?: AppState) => string) | string;
-  key?: ((data?: EventState, appState?: AppState) => string) | string
+  key?: ((data?: EventState, appState?: AppState) => string) | string;
 
   /**
    * Used to get the part of the store the event may be built from.
    */
-  selector?: (state: AppState) => EventState;
+  selector?: (state: AppState) => SelectedState;
   link?: ((data?: EventState, appState?: AppState) => string) | string;
 }
 
@@ -58,7 +67,7 @@ export class GlobalEventService {
   public events$: Observable<IGlobalEvent[]>;
   public priorityType$: Observable<GlobalEventTypes>;
   public priorityStratosStatus$: Observable<StratosStatus>;
-  public addEventConfig<EventState>(event: IGlobalEventConfig<EventState>) {
+  public addEventConfig<SelectedState, EventState = SelectedState>(event: IGlobalEventConfig<SelectedState, EventState>) {
     this.eventConfigs.push(event);
     this.eventConfigsSubject.next(this.eventConfigs);
   }
@@ -98,13 +107,18 @@ export class GlobalEventService {
   }
 
   // Get the events from the event config and event data.
-  private getEvents(eventsData: any, config: IGlobalEventConfig<any>, appState: AppState) {
-    if (Array.isArray(eventsData)) {
-      if (eventsData.length) {
-        return eventsData.map((eventData) => this.getEvent(eventData, config, appState));
+  private getEvents(
+    eventData: GlobalEventData | GlobalEventData[],
+    selectedState: any,
+    config: IGlobalEventConfig<any>,
+    appState: AppState
+  ) {
+    if (Array.isArray(eventData)) {
+      if (eventData.length) {
+        return eventData.map((data) => this.getEvent(data.data || selectedState, config, appState));
       }
     } else {
-      return [this.getEvent(eventsData, config, appState)];
+      return [this.getEvent(eventData.data || selectedState, config, appState)];
     }
   }
 
@@ -139,17 +153,21 @@ export class GlobalEventService {
       return [];
     }
     if (Array.isArray(isEventTriggered)) {
-      return isEventTriggered.reduce((events) => {
+      return isEventTriggered.reduce((events, eventData) => {
+        if (!eventData.triggered) {
+          return events;
+        }
         return [
           ...events,
-          ...this.getNewEventOrCached(config, selectedState, appState)
+          ...this.getNewEventOrCached(eventData, config, selectedState, appState)
         ];
       }, []);
     }
-    return this.getNewEventOrCached(config, selectedState, appState);
+    return isEventTriggered.triggered ? this.getNewEventOrCached(isEventTriggered, config, selectedState, appState) : [];
   }
 
   private getNewEventOrCached(
+    eventData: GlobalEventData,
     config: IGlobalEventConfig<any>,
     selectedState: any,
     appState: AppState
@@ -160,7 +178,7 @@ export class GlobalEventService {
     if (cachedEvents) {
       return cachedEvents;
     } else {
-      const events = this.getEvents(selectedState, config, appState);
+      const events = this.getEvents(eventData, selectedState, config, appState);
       const dataToEventCache = new Map<any, any>();
       dataToEventCache.set(selectedState, events);
       this.dataCache.set(config, dataToEventCache);
