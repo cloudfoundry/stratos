@@ -2,6 +2,14 @@
 
 Weekly status updates are published here.
 
+## 12 April 2019
+This week the Stratos team has been...
+- Presenting Stratos v2.4 features to the community in the latest project update
+- Working towards phase two of the extension project.
+- Finishing off the remove roles from cf user feature.
+- Finishing off adding an optional 'connect' step to the register endpoint stepper.
+- Reviewing and shepherding PRs into master, minor bug fixes.
+
 ## 5 April 2019
 This week the Stratos team have mostly been ...
 - Improving e2e reliability and merging existing PRs.
