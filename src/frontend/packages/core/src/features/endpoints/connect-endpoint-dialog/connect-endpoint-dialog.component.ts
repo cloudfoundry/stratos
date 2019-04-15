@@ -15,6 +15,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
+import { ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 import { ConnectEndpoint } from '../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
@@ -32,7 +33,6 @@ import {
   IEndpointAuthComponent,
 } from '../../../core/extension/extension-types';
 import { getCanShareTokenForEndpointType, getEndpointAuthTypes, getEndpointType } from '../endpoint-helpers';
-import { ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 
 
 @Component({
@@ -252,7 +252,9 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
       this.connecting$.pipe(startWith(false)),
       this.fetchingInfo$.pipe(startWith(false))
     ).pipe(
-      map(([connecting, fetchingInfo]) => connecting || fetchingInfo));
+      map(([connecting, fetchingInfo]) => connecting || fetchingInfo),
+      startWith(false)
+    );
 
     this.canSubmit$ = observableCombineLatest(
       this.connecting$.pipe(startWith(false)),
