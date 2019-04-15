@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { of as observableOf, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 
 @Injectable()
 export class MenuService {
   // Emitter
   private menuOpenSource = new Subject<boolean>();
-  private open: boolean = false;
+  private open = false;
   // Observable boolean streams
   public menuOpen$ = this.menuOpenSource.asObservable();
 

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+
 import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
 
@@ -6,6 +7,7 @@ import { ChartsService } from '../shared/services/charts.service';
   selector: 'app-chart-item',
   templateUrl: './chart-item.component.html',
   styleUrls: ['./chart-item.component.scss'],
+  /* tslint:disable-next-line:use-input-property-decorator */
   inputs: ['chart', 'showVersion', 'showDescription']
 })
 export class ChartItemComponent implements OnInit {
@@ -13,11 +15,11 @@ export class ChartItemComponent implements OnInit {
   // Chart to represent
   public chart: Chart;
   // Show version form by default
-  public showVersion: boolean = true;
+  public showVersion = true;
   // Truncate the description
-  public showDescription: boolean = true;
+  public showDescription = true;
 
-  constructor(private chartsService: ChartsService) {}
+  constructor(private chartsService: ChartsService) { }
 
   ngOnInit() {
     this.iconUrl = this.chartsService.getChartIconURL(this.chart);

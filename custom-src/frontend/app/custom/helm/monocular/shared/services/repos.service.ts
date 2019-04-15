@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../../core/logger.service';
@@ -26,7 +26,7 @@ export class ReposService {
   /**
    * Get all repos from the API
    *
-   * @return {Observable} An observable that will an array with all repos
+   * @return An observable that will an array with all repos
    */
   getRepos(): Observable<RepoAttributes[]> {
     return this.http.get(`${this.hostname}`).pipe(
@@ -44,6 +44,6 @@ export class ReposService {
     const errMsg = (error.json().message) ? error.json().message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     this.loggerService.error(errMsg); // log to console instead
-    return Observable.throw(errMsg);
+    return throwError(errMsg);
   }
 }

@@ -1,4 +1,5 @@
-import { ChartAttributes } from "./chart"
+import { ChartAttributes } from './chart';
+
 export class ChartVersion {
   id: string;
   type: string;
@@ -12,6 +13,7 @@ export class ChartVersionAttributes {
   icons: ChartVersionIcon[];
   readme: string;
   version: string;
+  /* tslint:disable-next-line:variable-name */
   app_version: string;
   urls: string[];
 }
@@ -26,8 +28,8 @@ class ChartVersionRelationships {
 }
 
 class ChartVersionChart {
-  data: ChartAttributes
+  data: ChartAttributes;
   links: {
     self: string
-  }
+  };
 }

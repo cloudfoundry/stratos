@@ -1,35 +1,31 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { HttpModule } from '@angular/http';
-import { Angulartics2Module, Angulartics2GoogleAnalytics } from 'angulartics2';
-import { ClipboardModule } from 'ngx-clipboard';
-import { Observable } from 'rxjs/Rx';
+import 'hammerjs';
 
-// Shared
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterTestingModule } from '@angular/router/testing';
+import { Angulartics2Module } from 'angulartics2';
+import { ClipboardModule } from 'ngx-clipboard';
+
+import { ChartItemComponent } from '../chart-item/chart-item.component';
+import { HeaderBarComponent } from '../header-bar/header-bar.component';
+import { ListItemComponent } from '../list-item/list-item.component';
+import { LoaderComponent } from '../loader/loader.component';
+import { PanelComponent } from '../panel/panel.component';
 import { TruncatePipe } from '../shared/pipes/truncate.pipe';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
-import { SeoService } from '../shared/services/seo.service';
 import { MenuService } from '../shared/services/menu.service';
-
-// Components
-import { ChartDetailsComponent } from './chart-details.component';
-import { ChartItemComponent } from '../chart-item/chart-item.component';
-import { PanelComponent } from '../panel/panel.component';
-import { HeaderBarComponent } from '../header-bar/header-bar.component';
-import { LoaderComponent } from '../loader/loader.component';
-import { ListItemComponent } from '../list-item/list-item.component';
-import { ChartDetailsVersionsComponent } from './chart-details-versions/chart-details-versions.component';
+import { SeoService } from '../shared/services/seo.service';
 import { ChartDetailsInfoComponent } from './chart-details-info/chart-details-info.component';
 import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-details-readme.component';
 import { ChartDetailsUsageComponent } from './chart-details-usage/chart-details-usage.component';
+import { ChartDetailsVersionsComponent } from './chart-details-versions/chart-details-versions.component';
+import { ChartDetailsComponent } from './chart-details.component';
 
-import 'hammerjs';
-
+// Shared
+// Components
 // Stub
 const mockData = {
   data: {

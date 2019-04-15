@@ -1,6 +1,7 @@
-import { ChartVersionAttributes } from "./chart-version"
-import { RepoAttributes } from "./repo"
-import { Maintainer } from "./maintainer"
+import { ChartVersionAttributes } from './chart-version';
+import { Maintainer } from './maintainer';
+import { RepoAttributes } from './repo';
+
 export class Chart {
   id: string;
   type: string;
@@ -26,8 +27,8 @@ class ChartRelationships {
 }
 
 class ChartVersionRelationship {
-  data: ChartVersionAttributes
+  data: ChartVersionAttributes;
   links: {
     self: string
-  }
+  };
 }

@@ -4,11 +4,10 @@ import { Component } from '@angular/core';
   selector: 'app-loader',
   templateUrl: './loader.component.html',
   styleUrls: ['./loader.component.scss'],
+  /* tslint:disable-next-line:use-input-property-decorator */
   inputs: ['loading']
 })
 export class LoaderComponent {
   // Show the loader or the content
-  public loading: boolean = false;
-
-  constructor() {}
+  public loading = false;
 }

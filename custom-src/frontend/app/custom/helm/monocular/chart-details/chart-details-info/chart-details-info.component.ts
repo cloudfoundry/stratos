@@ -1,8 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ChartsService } from '../../shared/services/charts.service';
+import { Component, Input, OnInit } from '@angular/core';
+
 import { Chart } from '../../shared/models/chart';
-import { Maintainer } from '../../shared/models/maintainer';
 import { ChartVersion } from '../../shared/models/chart-version';
+import { Maintainer } from '../../shared/models/maintainer';
+import { ChartsService } from '../../shared/services/charts.service';
 
 @Component({
   selector: 'app-chart-details-info',
@@ -13,7 +14,7 @@ export class ChartDetailsInfoComponent implements OnInit {
   @Input() chart: Chart;
   @Input() currentVersion: ChartVersion;
   versions: ChartVersion[];
-  constructor(private chartsService: ChartsService) {}
+  constructor(private chartsService: ChartsService) { }
 
   ngOnInit() {
     this.loadVersions(this.chart);
@@ -47,8 +48,8 @@ export class ChartDetailsInfoComponent implements OnInit {
 
   private isUpstreamHelmRepo(repoURL: string): boolean {
     return (
-      repoURL === "https://kubernetes-charts.storage.googleapis.com" ||
-      repoURL === "https://kubernetes-charts-incubator.storage.googleapis.com"
+      repoURL === 'https://kubernetes-charts.storage.googleapis.com' ||
+      repoURL === 'https://kubernetes-charts-incubator.storage.googleapis.com'
     );
   }
 }

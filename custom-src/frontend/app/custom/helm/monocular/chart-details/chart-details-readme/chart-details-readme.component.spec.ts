@@ -1,9 +1,9 @@
-/* tslint:disable:no-unused-variable */
-
-import { TestBed, async } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ChartDetailsReadmeComponent } from './chart-details-readme.component';
+import { TestBed } from '@angular/core/testing';
+
 import { ChartsService } from '../../shared/services/charts.service';
+import { ChartDetailsReadmeComponent } from './chart-details-readme.component';
+
 
 describe('Component: ChartDetailsReadme', () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('Component: ChartDetailsReadme', () => {
   });
 
   it('should create an instance', () => {
-    let component = TestBed.createComponent(ChartDetailsReadmeComponent);
+    const component = TestBed.createComponent(ChartDetailsReadmeComponent);
     expect(component).toBeTruthy();
   });
 });

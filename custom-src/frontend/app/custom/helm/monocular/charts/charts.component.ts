@@ -175,7 +175,7 @@ export class ChartsComponent implements OnInit {
   // TODO: RC Q is this to be implemented?
   updateMetaTags(): void { }
 
-  capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  capitalize(input: string) {
+    return input.charAt(0).toUpperCase() + input.slice(1);
   }
 }

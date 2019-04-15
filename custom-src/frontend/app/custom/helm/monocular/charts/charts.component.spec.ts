@@ -1,18 +1,17 @@
-/* tslint:disable:no-unused-variable */
-
-import { TestBed, async } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ChartsComponent } from './charts.component';
-import { ChartListComponent } from '../chart-list/chart-list.component';
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
+
 import { ChartItemComponent } from '../chart-item/chart-item.component';
+import { ChartListComponent } from '../chart-list/chart-list.component';
+import { HeaderBarComponent } from '../header-bar/header-bar.component';
 import { LoaderComponent } from '../loader/loader.component';
 import { PanelComponent } from '../panel/panel.component';
-import { HeaderBarComponent } from '../header-bar/header-bar.component';
 import { ChartsService } from '../shared/services/charts.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { SeoService } from '../shared/services/seo.service';
-import { MenuService } from '../shared/services/menu.service';
 import { ConfigService } from '../shared/services/config.service';
+import { MenuService } from '../shared/services/menu.service';
+import { SeoService } from '../shared/services/seo.service';
+import { ChartsComponent } from './charts.component';
 
 describe('Component: Charts', () => {
   beforeEach(() => {
@@ -39,7 +38,7 @@ describe('Component: Charts', () => {
   });
 
   it('should create an instance', () => {
-    let component = TestBed.createComponent(ChartsComponent);
+    const component = TestBed.createComponent(ChartsComponent);
     expect(component).toBeTruthy();
   });
 });

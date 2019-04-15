@@ -13,9 +13,9 @@ export interface ISimpleUsageChartData {
  * The threshold will be met if the used value is greater than the threshold,
  * this is to allow > 0% but not 0% thresholds.
  * The 'ok' color will always be used if no threshold is met or no thresholds are found.
- * 
+ *
  * If inverted, danger comparison becomes less than.
- * 
+ *
  * The colors are take from the $status-colors scss theme variable.
  * @export
  */
@@ -52,5 +52,5 @@ export interface IChartData {
       name: 'Remaining',
       value: number
     }
-  ]
+  ];
 }
