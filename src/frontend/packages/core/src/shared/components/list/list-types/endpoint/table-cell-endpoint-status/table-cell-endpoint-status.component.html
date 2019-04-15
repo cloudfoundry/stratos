@@ -9,7 +9,7 @@
       <mat-icon>cloud_off</mat-icon>
     </ng-container>
     <ng-container *ngIf="row.connectionStatus === 'checking'">
-      <span *ngIf="config?.showLabel">Connected </span>
+      <span *ngIf="config?.showLabel">Updating </span>
       <mat-spinner diameter="20"></mat-spinner>
     </ng-container>
     <ng-container *ngIf="!row.connectionStatus || row.connectionStatus === 'unknown'">
