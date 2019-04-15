@@ -4,15 +4,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
-import { HeaderBarComponent } from '../header-bar/header-bar.component';
 import { LoaderComponent } from '../loader/loader.component';
 import { PanelComponent } from '../panel/panel.component';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
-import { SeoService } from '../shared/services/seo.service';
 import { ChartsComponent } from './charts.component';
 
+// import { HeaderBarComponent } from '../header-bar/header-bar.component';
+// import { SeoService } from '../shared/services/seo.service';
 describe('Component: Charts', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,13 +23,13 @@ describe('Component: Charts', () => {
         ChartItemComponent,
         LoaderComponent,
         PanelComponent,
-        HeaderBarComponent
+        // HeaderBarComponent
       ],
       providers: [
         ConfigService,
         MenuService,
         { provide: ChartsService },
-        { provide: SeoService },
+        // { provide: SeoService },
         { provide: ActivatedRoute },
         { provide: Router }
       ],

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ReleasesTabComponent } from './releases-tab.component';
+import { HelmReleasesTabComponent } from './releases-tab.component';
 
 describe('ReleasesTabComponent', () => {
-  let component: ReleasesTabComponent;
-  let fixture: ComponentFixture<ReleasesTabComponent>;
+  let component: HelmReleasesTabComponent;
+  let fixture: ComponentFixture<HelmReleasesTabComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ReleasesTabComponent ]
+      declarations: [HelmReleasesTabComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ReleasesTabComponent);
+    fixture = TestBed.createComponent(HelmReleasesTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
