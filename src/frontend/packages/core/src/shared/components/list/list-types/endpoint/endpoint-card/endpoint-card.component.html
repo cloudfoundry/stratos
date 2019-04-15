@@ -25,6 +25,13 @@
       <app-table-cell-endpoint-status [row]="row"></app-table-cell-endpoint-status>
     </app-meta-card-value>
   </app-meta-card-item>
+  <app-meta-card-item *ngIf="row.system_shared_token">
+    <app-meta-card-key>Shared Connection</app-meta-card-key>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="true" type="yes-no" [showText]="false"
+        matTooltip="This endpoint's connection is shared by the administrator"></app-boolean-indicator>
+    </app-meta-card-value>
+  </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Address</app-meta-card-key>
     <app-meta-card-value>{{ address }}</app-meta-card-value>
