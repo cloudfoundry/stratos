@@ -26,7 +26,7 @@ export interface MonocularChart {
     };
   };
   relationships: {
-    latestChartVerson: {
+    latestChartVersion: {
       data: {
         version: string
       }

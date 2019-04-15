@@ -1,7 +1,10 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { HttpModule } from '@angular/http';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { LoggerService } from '../../../../core/logger.service';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
 import { LoaderComponent } from '../loader/loader.component';
@@ -9,6 +12,7 @@ import { PanelComponent } from '../panel/panel.component';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
+import { ReposService } from '../shared/services/repos.service';
 import { ChartsComponent } from './charts.component';
 
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
@@ -16,7 +20,10 @@ import { ChartsComponent } from './charts.component';
 describe('Component: Charts', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
+      imports: [
+        HttpModule,
+        createBasicStoreModule()
+      ],
       declarations: [
         ChartsComponent,
         ChartListComponent,
@@ -31,7 +38,9 @@ describe('Component: Charts', () => {
         { provide: ChartsService },
         // { provide: SeoService },
         { provide: ActivatedRoute },
-        { provide: Router }
+        { provide: Router },
+        ReposService,
+        LoggerService
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

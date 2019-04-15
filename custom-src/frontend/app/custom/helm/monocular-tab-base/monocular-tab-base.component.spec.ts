@@ -1,5 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { HelmModule } from '../helm.module';
 import { MonocularTabBaseComponent } from './monocular-tab-base.component';
 
 describe('MonocularTabBaseComponent', () => {
@@ -8,9 +11,16 @@ describe('MonocularTabBaseComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MonocularTabBaseComponent ]
+      declarations: [],
+      imports: [
+        ...BaseTestModulesNoShared,
+        HelmModule
+      ],
+      providers: [
+        TabNavService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

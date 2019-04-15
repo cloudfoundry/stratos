@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { StratosAction, StratosActionType } from '../../../core/extension/extension-service';
 import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
+
+import { StratosAction, StratosActionType } from '../../../core/extension/extension-service';
+
 
 @StratosAction({
   type: StratosActionType.Endpoints,
@@ -17,7 +19,7 @@ export class DemoHelperComponent {
 
   constructor(
     private httpClient: HttpClient,
-    ) { }
+  ) { }
 
   public demo(action: string) {
     const url = `/pp/v1/demo/endpoints/${action}`;

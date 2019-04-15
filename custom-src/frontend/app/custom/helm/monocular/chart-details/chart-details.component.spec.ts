@@ -1,4 +1,3 @@
-/* tslint:disable:no-unused-variable */
 import 'hammerjs';
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
@@ -6,6 +5,10 @@ import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  EntitySummaryTitleComponent,
+} from '../../../../shared/components/entity-summary-title/entity-summary-title.component';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ListItemComponent } from '../list-item/list-item.component';
 import { LoaderComponent } from '../loader/loader.component';
@@ -19,6 +22,7 @@ import { ChartDetailsUsageComponent } from './chart-details-usage/chart-details-
 import { ChartDetailsVersionsComponent } from './chart-details-versions/chart-details-versions.component';
 import { ChartDetailsComponent } from './chart-details.component';
 
+/* tslint:disable:no-unused-variable */
 // import { Angulartics2Module } from 'angulartics2';
 // import { ClipboardModule } from 'ngx-clipboard';
 
@@ -84,7 +88,8 @@ describe('ChartDetailsComponent', () => {
           BrowserModule,
           // Angulartics2Module,
           RouterTestingModule,
-          HttpModule
+          HttpModule,
+          ...BaseTestModulesNoShared
         ],
         declarations: [
           ChartDetailsComponent,
@@ -97,13 +102,15 @@ describe('ChartDetailsComponent', () => {
           // HeaderBarComponent,
           ChartItemComponent,
           // TruncatePipe,
-          ListItemComponent
+          ListItemComponent,
+          EntitySummaryTitleComponent
         ],
         providers: [
           { provide: ChartsService },
           { provide: ConfigService, useValue: { appName: 'appName' } },
           // { provide: SeoService },
-          { provide: MenuService }
+          { provide: MenuService },
+          ChartsService
         ]
       }).compileComponents();
     })

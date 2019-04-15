@@ -1,5 +1,8 @@
+import { HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DemoHelperComponent } from './demo-helper.component';
 
 describe('DemoHelperComponent', () => {
@@ -8,9 +11,16 @@ describe('DemoHelperComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DemoHelperComponent ]
+      declarations: [DemoHelperComponent],
+      imports: [
+        ...BaseTestModules,
+        HttpClientModule
+      ],
+      providers: [
+        TabNavService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

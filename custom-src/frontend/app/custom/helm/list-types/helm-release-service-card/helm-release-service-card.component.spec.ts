@@ -1,5 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { KubernetesServicePortsComponent } from '../kubernetes-service-ports/kubernetes-service-ports.component';
 import { HelmReleaseServiceCardComponent } from './helm-release-service-card.component';
 
 
@@ -9,7 +11,11 @@ describe('HelmReleaseServiceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [HelmReleaseServiceCardComponent]
+      declarations: [
+        HelmReleaseServiceCardComponent,
+        KubernetesServicePortsComponent
+      ],
+      imports: [...BaseTestModules],
     })
       .compileComponents();
   }));
