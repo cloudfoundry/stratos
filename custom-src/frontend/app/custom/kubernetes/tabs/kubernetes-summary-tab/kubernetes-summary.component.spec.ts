@@ -1,16 +1,29 @@
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../tab-nav.service';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesSummaryTabComponent } from './kubernetes-summary.component';
 
-describe('KubernetesDashboardComponent', () => {
+describe('KubernetesSummaryTabComponent', () => {
   let component: KubernetesSummaryTabComponent;
   let fixture: ComponentFixture<KubernetesSummaryTabComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesSummaryTabComponent ]
+      declarations: [KubernetesSummaryTabComponent],
+      imports: [...KubernetesBaseTestModules],
+      providers: [
+        KubernetesEndpointService,
+        BaseKubeGuid,
+        HttpClient,
+        HttpHandler,
+        TabNavService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

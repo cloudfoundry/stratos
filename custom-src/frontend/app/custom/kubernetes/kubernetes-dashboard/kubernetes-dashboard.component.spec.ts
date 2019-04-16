@@ -4,7 +4,7 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard.component';
 
-describe('KubernetesDashboardComponent', () => {
+describe('KubernetesDashboardTabComponent', () => {
   let component: KubernetesDashboardTabComponent;
   let fixture: ComponentFixture<KubernetesDashboardTabComponent>;
 
