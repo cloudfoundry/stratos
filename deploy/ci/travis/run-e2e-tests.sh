@@ -50,7 +50,7 @@ docker run -d -p 8080:8080 splatform/stratos-uaa
 # Get go 1.0 and dep
 curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
 chmod +x ~/bin/gimme
-eval "$(gimme 1.9)"
+eval "$(gimme 1.12)"
 curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 go version
 dep version
