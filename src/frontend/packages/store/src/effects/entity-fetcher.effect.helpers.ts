@@ -9,8 +9,7 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   return entityRequestInfo.fetching ||
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
-    entityRequestInfo.deleting.deleted ||
-    entityRequestInfo.updating._root_.busy;
+    entityRequestInfo.deleting.deleted
 }
 
 export function isPageReady(pagination: PaginationEntityState, isLocal = false) {
