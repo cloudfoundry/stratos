@@ -48,6 +48,7 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
   connectingError$: Observable<boolean>;
   fetchingInfo$: Observable<boolean>;
   endpointConnected$: Observable<[boolean, EndpointModel]>;
+  showClose$: Observable<boolean>;
   valid$: Observable<boolean>;
   canSubmit$: Observable<boolean>;
 
@@ -224,6 +225,7 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
         return [isConnected, endpoint] as [boolean, EndpointModel];
       })
     );
+
     const busy$ = this.update$.pipe(map(update => update.busy), startWith(false));
     this.connecting$ = busy$.pipe(
       pairwise(),
@@ -262,6 +264,14 @@ export class ConnectEndpointDialogComponent implements OnInit, OnDestroy {
       this.valid$.pipe(startWith(this.endpointForm.valid))
     ).pipe(
       map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid)
+    );
+
+    this.showClose$ = observableCombineLatest(
+      this.isBusy$.pipe(),
+      this.endpointConnected$.pipe()
+    ).pipe(
+      map(([isBusy, [connected]]) => isBusy || connected),
+      startWith(false)
     );
   }
 

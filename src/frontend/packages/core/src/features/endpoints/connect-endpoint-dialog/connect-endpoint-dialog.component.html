@@ -30,8 +30,8 @@
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async">
     </app-dialog-error>
     <mat-dialog-actions class="connection-dialog__actions">
-      <button [mat-dialog-close]="true" mat-button color="warn" *ngIf="isBusy$ | async">Close</button>
-      <button [mat-dialog-close]="true" mat-button color="warn" *ngIf="!(isBusy$ | async)">Cancel</button>
+      <button [mat-dialog-close]="true" mat-button color="warn" *ngIf="(showClose$ | async)">Close</button>
+      <button [mat-dialog-close]="true" mat-button color="warn" *ngIf="!(showClose$ | async)">Cancel</button>
       <button type="submit" [disabled]="!(canSubmit$ | async)" mat-button color="primary">Connect</button>
     </mat-dialog-actions>
   </form>
