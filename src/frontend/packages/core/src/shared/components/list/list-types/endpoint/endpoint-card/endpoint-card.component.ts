@@ -112,7 +112,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   ngOnInit() {
     const favorite = getFavoriteFromEndpointEntity(this.row);
-    this.favorite = favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
+    if (favorite) {
+      this.favorite = favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
+    }
     const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     this.hasDetails = !e ? false : !!e.listDetailsComponent;
   }

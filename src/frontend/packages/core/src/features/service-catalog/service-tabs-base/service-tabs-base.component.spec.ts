@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
@@ -15,7 +16,9 @@ describe('ServiceTabsBaseComponent', () => {
       imports: [...BaseTestModules],
       providers: [{
         provide: ServicesService, useClass: ServicesServiceMock
-      }]
+      },
+        TabNavService
+      ]
     })
       .compileComponents();
   }));

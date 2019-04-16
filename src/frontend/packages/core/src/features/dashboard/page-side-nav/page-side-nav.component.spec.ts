@@ -1,5 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { PageSideNavComponent } from './page-side-nav.component';
 
 describe('PageSideNavComponent', () => {
@@ -8,9 +10,11 @@ describe('PageSideNavComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PageSideNavComponent ]
+      imports: [BaseTestModulesNoShared],
+      declarations: [PageSideNavComponent],
+      providers: [TabNavService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

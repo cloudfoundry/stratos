@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
+import { CoreModule } from '../../../core/core.module';
 import { BreadcrumbsComponent } from './breadcrumbs.component';
+import { BREADCRUMB_URL_PARAM } from './breadcrumbs.types';
 
 describe('BreadcrumbsComponent', () => {
   let component: BreadcrumbsComponent;
@@ -8,9 +11,20 @@ describe('BreadcrumbsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BreadcrumbsComponent ]
+      imports: [CoreModule],
+      declarations: [BreadcrumbsComponent],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            queryParams: {
+              [BREADCRUMB_URL_PARAM]: '123'
+            },
+          }
+        }
+      }]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { CoreModule } from '../../../core/core.module';
 import { EntitySummaryTitleComponent } from './entity-summary-title.component';
 
 describe('EntitySummaryTitleComponent', () => {
@@ -8,9 +9,10 @@ describe('EntitySummaryTitleComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EntitySummaryTitleComponent ]
+      imports: [CoreModule],
+      declarations: [EntitySummaryTitleComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

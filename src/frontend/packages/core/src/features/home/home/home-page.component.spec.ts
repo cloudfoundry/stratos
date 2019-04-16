@@ -4,9 +4,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { appReducers } from '../../../../../store/src/reducers.module';
+import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { appReducers } from '../../../../../store/src/reducers.module';
 import { HomePageComponent } from './home-page.component';
 
 describe('HomePageComponent', () => {
@@ -25,7 +26,8 @@ describe('HomePageComponent', () => {
         StoreModule.forRoot(
           appReducers
         )
-      ]
+      ],
+      providers: [TabNavService]
     })
       .compileComponents();
   }));
