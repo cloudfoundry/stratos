@@ -1,3 +1,4 @@
+import { DashboardState } from './../reducers/dashboard-reducer';
 import { Action } from '@ngrx/store';
 
 import { SideNavModes } from '../types/dashboard.types';
@@ -10,6 +11,7 @@ export const TOGGLE_HEADER_EVENT = '[Dashboard] Toggle header event';
 export const SET_HEADER_EVENT = '[Dashboard] Set header event';
 
 export const TIMEOUT_SESSION = '[Dashboard] Timeout Session';
+export const HYDRATE_DASHBOARD_STATE = '[Dashboard] Hydrate dashboard state';
 
 export class OpenSideNav implements Action {
   constructor() { }
@@ -44,3 +46,9 @@ export class SetSessionTimeoutAction implements Action {
   constructor(public timeoutSession = true) { }
   type = TIMEOUT_SESSION;
 }
+
+export class HydrateDashboardStateAction implements Action {
+  constructor(public dashboardState: DashboardState) { }
+  type = HYDRATE_DASHBOARD_STATE;
+}
+

@@ -1,4 +1,4 @@
-import { SetSessionTimeoutAction, TIMEOUT_SESSION } from './../actions/dashboard-actions';
+import { SetSessionTimeoutAction, TIMEOUT_SESSION, HYDRATE_DASHBOARD_STATE, HydrateDashboardStateAction } from './../actions/dashboard-actions';
 import {
   CHANGE_SIDE_NAV_MODE,
   CLOSE_SIDE_NAV,
@@ -56,6 +56,12 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return {
         ...state,
         timeoutSession: timeoutSessionAction.timeoutSession
+      };
+    case HYDRATE_DASHBOARD_STATE:
+      const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
+      return {
+        ...state,
+        ...hydrateDashboardStateAction.dashboardState
       };
     default:
       return state;

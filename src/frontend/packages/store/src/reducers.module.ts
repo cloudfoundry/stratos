@@ -22,6 +22,7 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
+import { getDashboardStateSessionId } from './helpers/store-helpers';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -65,18 +66,15 @@ export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionRedu
       if (globalUserId) {
         return true;
       }
-      const idElement = document.getElementById('__stratos-userid__');
-      if (idElement) {
-        const userId = idElement.innerText;
-        if (userId) {
-          globalUserId = 'stratos-' + userId;
-          return true;
-        }
+      const userId = getDashboardStateSessionId();
+      if (userId) {
+        globalUserId = userId;
+        return true;
       }
       return false;
     },
     keys: ['dashboard'],
-    rehydrate: true,
+    rehydrate: false,
 
   })(reducer);
 }
