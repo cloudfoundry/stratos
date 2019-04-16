@@ -31,6 +31,7 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
 import { AppStoreExtensionsModule } from './store.extensions.module';
+import { TryFetchEffect } from './effects/entity-fetcher.effect';
 
 @NgModule({
   imports: [
@@ -65,7 +66,8 @@ import { AppStoreExtensionsModule } from './store.extensions.module';
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
-      UserFavoritesEffect
+      UserFavoritesEffect,
+      TryFetchEffect
     ])
   ]
 })

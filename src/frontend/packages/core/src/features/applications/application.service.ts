@@ -32,7 +32,6 @@ import {
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
-  getCurrentPageRequestInfo,
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -57,6 +56,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { getCurrentPageRequestInfo } from '../../../../store/src/effects/entity-fetcher.effect';
 
 
 

@@ -19,7 +19,6 @@ import { AppState } from '../../../../store/src/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
-  getCurrentPageRequestInfo,
   getPaginationObservables,
   spreadPaginationParams,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -32,6 +31,7 @@ import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
 import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { getCurrentPageRequestInfo } from '../../../../store/src/effects/entity-fetcher.effect';
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
   return {
@@ -67,9 +67,9 @@ export const enum CfOrgSpaceSelectMode {
 
 
 export const initCfOrgSpaceService = (store: Store<AppState>,
-                                      cfOrgSpaceService: CfOrgSpaceDataService,
-                                      schemaKey: string,
-                                      paginationKey: string): Observable<any> => {
+  cfOrgSpaceService: CfOrgSpaceDataService,
+  schemaKey: string,
+  paginationKey: string): Observable<any> => {
   return store.select(selectPaginationState(schemaKey, paginationKey)).pipe(
     filter((pag) => !!pag),
     first(),

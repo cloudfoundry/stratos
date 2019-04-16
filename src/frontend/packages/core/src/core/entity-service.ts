@@ -1,30 +1,22 @@
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-
-import { ValidateEntitiesStart } from '../../../store/src/actions/request.actions';
+import { filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
 import { AppState } from '../../../store/src/app-state';
+import { TryEntityFetchAction, TryEntityValidationAction } from '../../../store/src/effects/entity-fetcher.effect';
 import {
   RequestInfoState,
   RequestSectionKeys,
   TRequestTypeKeys,
-  UpdatingSection,
+  UpdatingSection
 } from '../../../store/src/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
 import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
+import { doOnFirstSubscribe } from './custom-operators';
+import { isEntityBlocked } from '../../../store/src/effects/entity-fetcher.effect.helpers';
 
-export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
-  if (!entityRequestInfo) {
-    return false;
-  }
-  return entityRequestInfo.fetching ||
-    entityRequestInfo.error ||
-    entityRequestInfo.deleting.busy ||
-    entityRequestInfo.deleting.deleted ||
-    entityRequestInfo.updating._root_.busy;
-}
+
 
 /**
  * Designed to be used in a service factory provider
@@ -49,30 +41,26 @@ export class EntityService<T = any> {
       this.actionDispatch(this.refreshKey);
     };
 
-    let validated = false;
-
     this.updatingSection$ = entityMonitor.updatingSection$;
     this.isDeletingEntity$ = entityMonitor.isDeletingEntity$;
     this.isFetchingEntity$ = entityMonitor.isFetchingEntity$;
     this.entityObs$ = this.getEntityObservable(
       entityMonitor,
-      this.actionDispatch,
     ).pipe(
+      doOnFirstSubscribe(() => {
+        this.store.dispatch(new TryEntityFetchAction(
+          this.actionDispatch,
+          this.entityMonitor.entityKey,
+          this.entityMonitor.id
+        ));
+        this.store.dispatch(new TryEntityValidationAction(
+          this.entityMonitor.entityKey,
+          this.entityMonitor.id,
+          action as ICFAction
+        ));
+      }),
       publishReplay(1),
       refCount(),
-      tap((entityInfo: EntityInfo) => {
-        if (!entityInfo || entityInfo.entity) {
-          if ((!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo))) {
-            return;
-          }
-          validated = true;
-          store.dispatch(new ValidateEntitiesStart(
-            action as ICFAction,
-            [entityInfo.entity.metadata.guid],
-            false
-          ));
-        }
-      })
     );
 
     this.waitForEntity$ = this.entityObs$.pipe(
@@ -102,19 +90,8 @@ export class EntityService<T = any> {
   updatingSection$: Observable<UpdatingSection>;
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
-    actionDispatch: (key?: string) => void
   ): Observable<EntityInfo> => {
-    const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
-    return entityMonitor.entityRequest$.pipe(
-      withLatestFrom(entityMonitor.entity$),
-      tap(([entityRequestInfo, entity]) => {
-        if (actionDispatch && this.shouldCallAction(entityRequestInfo, entity)) {
-          actionDispatch();
-        }
-      }),
-      first(),
-      switchMap(() => cleanEntityInfo$)
-    );
+    return this.getCleanEntityInfoObs(entityMonitor);
   }
 
   private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
@@ -128,16 +105,14 @@ export class EntityService<T = any> {
       map(([entityRequestInfo, entity]) => ({
         entityRequestInfo,
         entity
-      }))
+      })),
+      publishReplay(1),
+      refCount()
     );
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
     return entity && !isEntityBlocked(entityRequestInfo);
-  }
-
-  private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
-    return !entityRequestInfo || (!entity && !isEntityBlocked(entityRequestInfo));
   }
 
   /**
