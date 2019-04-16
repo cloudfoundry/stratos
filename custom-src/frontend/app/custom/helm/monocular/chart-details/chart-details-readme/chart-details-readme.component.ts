@@ -33,7 +33,6 @@ export class ChartDetailsReadmeComponent {
     return this.chartsService.getChartReadme(currentVersion).pipe(
       map(resp => {
         this.loading = false;
-        // TODO: RC Should also sanitise in case of man-in-middle
         return markdown(resp.text(), {
           renderer: this.renderer
         });
