@@ -1,15 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { HelmBaseTestModules, HelmBaseTestProviders } from '../../../helm-testing.module';
 import { HelmReleaseServicesTabComponent } from './helm-release-services-tab.component';
 
 
-describe('HelmReleaseValuesTabComponent', () => {
+describe('HelmReleaseServicesTabComponent', () => {
   let component: HelmReleaseServicesTabComponent;
   let fixture: ComponentFixture<HelmReleaseServicesTabComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [HelmReleaseServicesTabComponent]
+      imports: [
+        ...HelmBaseTestModules
+      ],
+      declarations: [HelmReleaseServicesTabComponent],
+      providers: [
+        ...HelmBaseTestProviders
+      ]
     })
       .compileComponents();
   }));

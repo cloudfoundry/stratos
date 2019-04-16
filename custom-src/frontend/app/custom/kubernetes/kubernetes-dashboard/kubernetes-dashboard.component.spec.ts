@@ -1,5 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
+import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard.component';
 
 describe('KubernetesDashboardComponent', () => {
@@ -8,7 +10,9 @@ describe('KubernetesDashboardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesDashboardTabComponent]
+      declarations: [KubernetesDashboardTabComponent],
+      imports: [...KubernetesBaseTestModules],
+      providers: [TabNavService]
     })
       .compileComponents();
   }));

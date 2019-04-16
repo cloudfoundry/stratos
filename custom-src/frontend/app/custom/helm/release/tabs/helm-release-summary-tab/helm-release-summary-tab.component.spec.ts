@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { HelmBaseTestModules, HelmBaseTestProviders } from '../../../helm-testing.module';
 import { HelmReleaseSummaryTabComponent } from './helm-release-summary-tab.component';
 
 describe('HelmReleaseSummaryTabComponent', () => {
@@ -8,9 +9,15 @@ describe('HelmReleaseSummaryTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseSummaryTabComponent ]
+      imports: [
+        ...HelmBaseTestModules
+      ],
+      declarations: [HelmReleaseSummaryTabComponent],
+      providers: [
+        ...HelmBaseTestProviders
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

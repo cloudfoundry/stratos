@@ -1,5 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../tab-nav.service';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesNamespaceServicesComponent } from './kubernetes-namespace-services.component';
 
 describe('KubernetesNamespaceServicesComponent', () => {
@@ -8,9 +13,16 @@ describe('KubernetesNamespaceServicesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNamespaceServicesComponent ]
+      declarations: [KubernetesNamespaceServicesComponent],
+      imports: [...KubernetesBaseTestModules],
+      providers: [
+        TabNavService,
+        BaseKubeGuid,
+        KubernetesNamespaceService,
+        KubernetesEndpointService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

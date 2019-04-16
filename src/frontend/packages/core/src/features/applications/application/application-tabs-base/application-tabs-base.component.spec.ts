@@ -7,6 +7,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { GetApplication } from '../../../../../../store/src/actions/application.actions';
 import { applicationSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { TabNavService } from '../../../../../tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
@@ -50,7 +51,8 @@ describe('ApplicationTabsBaseComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
+        TabNavService
       ]
     })
       .compileComponents();

@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesComponent } from './kubernetes.component';
+import { TabNavService } from '../../../../tab-nav.service';
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
+import { KubernetesComponent } from './kubernetes.component';
 
 describe('KubernetesComponent', () => {
   let component: KubernetesComponent;
@@ -10,7 +11,8 @@ describe('KubernetesComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesComponent],
-      imports: KubernetesBaseTestModules
+      imports: KubernetesBaseTestModules,
+      providers: [TabNavService]
     })
       .compileComponents();
   }));

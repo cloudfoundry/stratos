@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { HelmBaseTestModules } from '../../helm-testing.module';
 import { HelmConfigurationComponent } from './helm-configuration.component';
 
 describe('HelmConfigurationComponent', () => {
@@ -8,9 +9,12 @@ describe('HelmConfigurationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmConfigurationComponent ]
+      imports: [
+        ...HelmBaseTestModules
+      ],
+      declarations: [HelmConfigurationComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

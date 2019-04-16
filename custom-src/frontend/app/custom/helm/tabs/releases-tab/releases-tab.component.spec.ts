@@ -1,5 +1,7 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { HelmBaseTestModules } from '../../helm-testing.module';
 import { HelmReleasesTabComponent } from './releases-tab.component';
 
 describe('ReleasesTabComponent', () => {
@@ -8,7 +10,12 @@ describe('ReleasesTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [HelmReleasesTabComponent]
+      imports: [
+        ...HelmBaseTestModules
+      ],
+      declarations: [HelmReleasesTabComponent],
+      providers: [DatePipe]
+
     })
       .compileComponents();
   }));

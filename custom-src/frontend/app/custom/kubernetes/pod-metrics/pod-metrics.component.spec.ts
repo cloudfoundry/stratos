@@ -1,7 +1,9 @@
-
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { PodMetricsComponent } from './pod-metrics.component';
+
+import { TabNavService } from '../../../../tab-nav.service';
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
+import { PodMetricsComponent } from './pod-metrics.component';
+
 
 describe('PodMetricsComponent', () => {
   let component: PodMetricsComponent;
@@ -10,7 +12,8 @@ describe('PodMetricsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [PodMetricsComponent],
-      imports: KubernetesBaseTestModules
+      imports: KubernetesBaseTestModules,
+      providers: [TabNavService]
     })
       .compileComponents();
   }));
