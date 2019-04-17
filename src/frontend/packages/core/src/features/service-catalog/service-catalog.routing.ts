@@ -8,8 +8,8 @@ import { ServiceBaseComponent } from './service-base/service-base.component';
 import { ServiceCatalogPageComponent } from './service-catalog-page/service-catalog-page.component';
 import { ServiceInstancesComponent } from './service-instances/service-instances.component';
 import { ServicePlansComponent } from './service-plans/service-plans.component';
-import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
 import { ServiceSummaryComponent } from './service-summary/service-summary.component';
+import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
 
 const serviceCatalog: Routes = [
   {
@@ -27,9 +27,6 @@ const serviceCatalog: Routes = [
       {
         path: '',
         component: ServiceTabsBaseComponent,
-        data: {
-          uiFullView: true
-        },
         children: [
           {
             path: '',

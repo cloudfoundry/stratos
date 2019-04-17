@@ -19,9 +19,6 @@ const monocular: Routes = [
   {
     path: '',
     component: MonocularTabBaseComponent,
-    data: {
-      uiFullView: true,
-    },
     children: [
       { path: '', redirectTo: 'charts', pathMatch: 'full' },
       { path: 'charts', component: CatalogTabComponent },
@@ -36,9 +33,6 @@ const monocular: Routes = [
     // Helm Release Views
     path: 'releases/:guid',
     component: HelmReleaseTabBaseComponent,
-    data: {
-      uiFullView: true,
-    },
     children: [
       { path: '', redirectTo: 'summary', pathMatch: 'full' },
       { path: 'summary', component: HelmReleaseSummaryTabComponent },

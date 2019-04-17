@@ -50,9 +50,6 @@ const kubernetes: Routes = [{
 {
   path: ':endpointId/nodes/:nodeName',
   component: KubernetesNodeComponent,
-  data: {
-    uiFullView: true
-  },
   children: [
     {
       path: '',
@@ -76,9 +73,6 @@ const kubernetes: Routes = [{
 {
   path: ':endpointId/namespaces/:namespaceName',
   component: KubernetesNamespaceComponent,
-  data: {
-    uiFullView: true
-  },
   children: [
     {
       path: '',
@@ -99,9 +93,6 @@ const kubernetes: Routes = [{
 {
   path: ':endpointId/apps/:releaseName',
   component: HelmReleaseComponent,
-  data: {
-    uiFullView: true
-  },
   children: [
     {
       path: '',
@@ -121,9 +112,6 @@ const kubernetes: Routes = [{
 {
   path: ':endpointId',
   component: KubernetesTabBaseComponent,
-  data: {
-    uiFullView: true
-  },
   children: [
     {
       path: '',

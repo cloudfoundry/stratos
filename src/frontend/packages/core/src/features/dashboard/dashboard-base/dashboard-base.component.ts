@@ -94,7 +94,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
 
   private closeSub: Subscription;
 
-  public fullView: boolean;
   public noMargin$: Observable<boolean>;
 
   private mobileSub: Subscription;
@@ -144,24 +143,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     );
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());
-    // TODO: Update: can be nuked
-    this.fullView = this.isFullView(this.activatedRoute.snapshot);
   }
 
   ngOnDestroy() {
     this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
-  }
-
-  isFullView(route: ActivatedRouteSnapshot): boolean {
-    while (route.firstChild) {
-      route = route.firstChild;
-      // TODO: Update: uiFullView is still referenced in routes and can be nuked
-      if (route.data.uiFullView) {
-        return true;
-      }
-    }
-    return false;
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {
