@@ -1,6 +1,6 @@
 <div>
   <app-page-sub-nav>
-    <button *ngIf="dashboardAvailable$ | async" [routerLink]="dashboardLink" mat-button>
+    <button *ngIf="kubeEndpointService.kubeDashboardEnabled$ | async" [routerLink]="dashboardLink" mat-button>
       <mat-icon>dashboard</mat-icon>
       <span class="kube-details__button">View Dashboard</span>
     </button>

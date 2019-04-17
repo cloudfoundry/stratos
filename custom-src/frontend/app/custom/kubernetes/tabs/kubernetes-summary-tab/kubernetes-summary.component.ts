@@ -3,12 +3,11 @@ import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, Subscription } from 'rxjs';
-import { filter, map, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectEntity } from '../../../../../../store/src/selectors/api.selectors';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
@@ -19,10 +18,9 @@ import {
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
-import { kubernetesDashboardSchemaKey } from '../../store/kubernetes.entities';
 import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 import { KubernetesPod } from './../../store/kube.types';
-import { GetKubernetesApps, GetKubernetesDashboard } from './../../store/kubernetes.actions';
+import { GetKubernetesApps } from './../../store/kubernetes.actions';
 
 interface IEndpointDetails {
   imagePath: string;
@@ -85,8 +83,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   };
 
   private polls: Subscription[] = [];
-
-  public dashboardAvailable$: Observable<boolean>;
 
   public isLoading$: Observable<boolean>;
 
@@ -203,14 +199,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     this.nodesReady$ = this.getNodeStatusCount(nodes$, 'Ready');
 
     this.dashboardLink = `/kubernetes/${guid}/dashboard`;
-
-    this.store.dispatch(new GetKubernetesDashboard(guid));
-
-    this.dashboardAvailable$ = this.store.select(selectEntity(kubernetesDashboardSchemaKey, guid)).pipe(
-      startWith(false),
-      filter(p => !!p),
-      map((p: any) => p.installed)
-    );
 
     this.kubeNodeVersions$ = this.getNodeKubeVersions(nodes$).pipe(startWith('-'));
 

@@ -5,6 +5,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
+import {
+  KubernetesServicePortsComponent,
+} from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubernetesReleasePodsTabComponent } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
 import { HelmReleaseServicesComponent } from './helm-release/helm-release-services/helm-release-services.component';
 import {
@@ -140,6 +143,10 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
+    KubernetesServicePortsComponent
+  ],
+  exports: [
+    KubernetesServicePortsComponent
   ],
   providers: [
     KubernetesService,
@@ -160,6 +167,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
+    KubernetesServicePortsComponent
   ]
 })
 export class KubernetesModule { }

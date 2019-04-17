@@ -68,8 +68,9 @@ import {
   kubernetesStatefulSetsSchemaKey,
 } from './kubernetes.entities';
 
-interface DashboardStatus {
+export interface KubeDashboardStatus {
   guid: string;
+  installed: boolean;
 }
 
 export type GetID<T> = (p: T) => string;
@@ -101,7 +102,7 @@ export class KubernetesEffects {
             entities: { [kubernetesDashboardSchemaKey]: {} },
             result: []
           } as NormalizedResponse;
-          const status = response as DashboardStatus;
+          const status = response as KubeDashboardStatus;
           const id = status.guid;
           result.entities[kubernetesDashboardSchemaKey][id] = status;
           result.result.push(id);

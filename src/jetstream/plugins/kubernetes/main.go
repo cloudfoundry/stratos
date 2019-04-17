@@ -16,6 +16,9 @@ type KubernetesSpecification struct {
 	endpointType string
 }
 
+// KubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
+const KubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
+
 const (
 	EndpointType                = "k8s"
 	CLIENT_ID_KEY               = "K8S_CLIENT"
@@ -139,6 +142,8 @@ func (c *KubernetesSpecification) Init() error {
 		Handler:  c.doGKEFlowRequest,
 		UserInfo: c.GetGKEUserFromToken,
 	})
+
+	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = "false"
 
 	return nil
 }

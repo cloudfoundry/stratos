@@ -73,7 +73,9 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
         sessionData: {
           valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
           domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null,
-          plugins: {}
+          plugins: {
+            demo: false
+          }
         },
         verifying: false
       };

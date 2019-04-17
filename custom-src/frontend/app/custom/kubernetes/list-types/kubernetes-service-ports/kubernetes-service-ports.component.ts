@@ -3,32 +3,26 @@ import { Observable, of } from 'rxjs';
 
 import { CardCell } from '../../../../shared/components/list/list.types';
 import { KubeService } from '../../../kubernetes/store/kube.types';
-import { HelmReleaseService, isHelmReleaseService } from '../../store/helm.types';
 
 @Component({
   selector: 'app-kubernetes-service-ports',
   templateUrl: './kubernetes-service-ports.component.html',
   styleUrls: ['./kubernetes-service-ports.component.scss']
 })
-export class KubernetesServicePortsComponent extends CardCell<HelmReleaseService | KubeService> {
-  private pRow: HelmReleaseService | KubeService;
+export class KubernetesServicePortsComponent extends CardCell<KubeService> {
+  private pRow: KubeService;
   public kubeService$: Observable<KubeService>;
+  // Used when extending this class
   public endpointId: string;
 
-  @Input() set row(row: HelmReleaseService | KubeService) {
+  @Input() set row(row: KubeService) {
     if (!row) {
       return;
     }
     this.pRow = row;
-    const helmReleaseService = isHelmReleaseService(row);
-    if (helmReleaseService) {
-      this.kubeService$ = (row as HelmReleaseService).kubeService$;
-      this.endpointId = helmReleaseService.endpointId;
-    } else {
-      this.kubeService$ = of(row as KubeService);
-    }
+    this.kubeService$ = of(row as KubeService);
   }
-  get row(): HelmReleaseService | KubeService {
+  get row(): KubeService {
     return this.pRow;
   }
 

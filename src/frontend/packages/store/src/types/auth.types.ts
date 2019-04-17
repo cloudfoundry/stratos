@@ -20,6 +20,7 @@ export interface SessionUser {
 }
 export interface PluginConfig {
   userInvitationsEnabled: 'true' | 'false';
+  [key: string]: 'true' | 'false';
 }
 export interface SessionEndpoints {
   [type: string]: SessionEndpoint;

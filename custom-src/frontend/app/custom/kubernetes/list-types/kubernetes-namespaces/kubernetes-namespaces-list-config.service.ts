@@ -1,16 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, first, map, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
-import { selectEntity } from '../../../../../../store/src/selectors/api.selectors';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { KubernetesNamespace } from '../../../kubernetes/store/kube.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { GetKubernetesDashboard } from '../../store/kubernetes.actions';
-import { kubernetesDashboardSchemaKey } from '../../store/kubernetes.entities';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count/kube-namespace-pod-count.component';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
@@ -80,16 +78,15 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
 
   constructor(
     store: Store<AppState>,
-    private kubeId: BaseKubeGuid
+    private kubeId: BaseKubeGuid,
+    kubeService: KubernetesEndpointService
   ) {
     this.podsDataSource = new KubernetesNamespacesDataSource(store, this.kubeId, this);
 
-    // TODO: R - do  RC Check whether we already have the value before dispatching a new action
-    store.dispatch(new GetKubernetesDashboard(this.kubeId.guid));
-    const hasDashboard = store.select(selectEntity(kubernetesDashboardSchemaKey, this.kubeId.guid)).pipe(
-      filter(p => !!p),
-      tap((p: any) => {
-        if (!p.installed) {
+    const hasDashboard = kubeService.kubeDashboardEnabled$.pipe(
+      first(),
+      tap((enabled) => {
+        if (!enabled) {
           this.columns = this.columns.filter(column => column.columnId !== 'view');
         }
       })

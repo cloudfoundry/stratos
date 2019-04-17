@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, shareReplay } from 'rxjs/operators';
+import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -16,12 +16,15 @@ import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
 import {
   GeKubernetesDeployments,
+  GetKubernetesDashboard,
   GetKubernetesPods,
   GetKubernetesServices,
   GetKubernetesStatefulSets,
   KubePaginationAction,
 } from '../store/kubernetes.actions';
+import { KubeDashboardStatus } from '../store/kubernetes.effects';
 import {
+  kubernetesDashboardSchemaKey,
   kubernetesDeploymentsSchemaKey,
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
@@ -41,6 +44,7 @@ export class KubernetesEndpointService {
   statefulSets$: Observable<KubernetesStatefulSet[]>;
   services$: Observable<KubeService[]>;
   pods$: Observable<KubernetesPod[]>;
+  kubeDashboardEnabled$: Observable<boolean>;
 
   constructor(
     public baseKube: BaseKubeGuid,
@@ -89,6 +93,24 @@ export class KubernetesEndpointService {
       kubernetesServicesSchemaKey
     );
 
+    const kubeDashboardEnabled$ = this.store.select('auth').pipe(
+      filter(auth => !!auth.sessionData['plugin-config']),
+      map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true'),
+      first(),
+    );
+
+    this.kubeDashboardEnabled$ = kubeDashboardEnabled$.pipe(
+      filter(enabled => enabled),
+      switchMap(() => this.entityServiceFactory.create<KubeDashboardStatus>(
+        kubernetesDashboardSchemaKey,
+        entityFactory(kubernetesDashboardSchemaKey),
+        this.kubeGuid,
+        new GetKubernetesDashboard(this.kubeGuid),
+        false
+      ).waitForEntity$.pipe(map(status => status.entity.installed))
+      ),
+      startWith(false),
+    );
   }
 
   private getObservable<T>(paginationAction: KubePaginationAction, schemaKey: string): Observable<T[]> {

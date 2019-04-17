@@ -3,7 +3,7 @@ import { ITableColumn } from '../../../shared/components/list/list-table/table.t
 import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
 import {
   KubernetesServicePortsComponent,
-} from '../../helm/list-types/kubernetes-service-ports/kubernetes-service-ports.component';
+} from './kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubeService } from '../store/kube.types';
 import { defaultHelmKubeListPageSize } from './kube-helm-list-types';
 
