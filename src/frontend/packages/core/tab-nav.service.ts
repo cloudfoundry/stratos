@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, asapScheduler, Observable, Subject, combineLatest } from 'rxjs';
-import { observeOn, map, startWith, withLatestFrom, publishReplay, refCount, tap } from 'rxjs/operators';
+import { observeOn, map, startWith, withLatestFrom, publishReplay, refCount, tap, filter } from 'rxjs/operators';
 import { Portal } from '@angular/cdk/portal';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { ISubHeaderTabs } from './src/shared/components/page-subheader/page-subheader.types';
 
 @Injectable()
@@ -49,6 +49,7 @@ export class TabNavService {
   public getCurrentTabHeaderObservable() {
     return combineLatest(
       this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd),
         startWith(null)
       ),
       this.tabNavs$
