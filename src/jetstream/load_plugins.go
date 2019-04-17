@@ -1,7 +1,6 @@
 package main
 
 import (
-	//	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/caasp"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfappssh"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
@@ -39,7 +38,6 @@ func (pp *portalProxy) loadPlugins() {
 		{"monocular", monocular.Init},
 		{"userfavorites", userfavorites.Init},
 		{"demo", demo.Init},
-		//		{"caasp", caasp.Init},
 	} {
 		plugin, err := p.Init(pp)
 		pp.Plugins[p.Name] = plugin

@@ -52,32 +52,6 @@ func (m *Monocular) Init() error {
 
 	m.InitSync()
 
-	// u1, _ := url.Parse("https://cloudfoundry-incubator.github.io/stratos")
-	// suseEndpoint := &interfaces.CNSIRecord{
-	// 	GUID:        "Test",
-	// 	Name:        "suse",
-	// 	CNSIType:    "helm",
-	// 	APIEndpoint: u1,
-	// }
-	// // m.Sync(interfaces.EndpointRegisterAction, suseEndpoint)
-
-	// u2, _ := url.Parse("https://kubernetes-charts.storage.googleapis.com")
-	// stableEndpoint := &interfaces.CNSIRecord{
-	// 	GUID:        "Test",
-	// 	Name:        "stable",
-	// 	CNSIType:    "helm",
-	// 	APIEndpoint: u2,
-	// }
-
-	// log.Info(suseEndpoint)
-	// log.Info(stableEndpoint)
-
-	//m.Sync(interfaces.EndpointRegisterAction, stableEndpoint)
-	//m.Sync(interfaces.EndpointUnregisterAction, stableEndpoint)
-
-	//	test()
-
-	// On startup - sync the helm repository endpoints to the chart store
 	m.syncOnStartup()
 
 	return nil
@@ -136,36 +110,36 @@ func arrayContainsString(a []string, x string) bool {
 	return false
 }
 
-func (m *Monocular) ConfigureMonocular() error {
-	log.Info("Connecting to MongoDB...")
+// func (m *Monocular) ConfigureMonocular() error {
+// 	log.Info("Connecting to MongoDB...")
 
-	var host = "127.0.0.1"
-	var db = "monocular"
-	var user = "mongoadmin"
-	var password = "secret"
+// 	var host = "127.0.0.1"
+// 	var db = "monocular"
+// 	var user = "mongoadmin"
+// 	var password = "secret"
 
-	session, err := chartsvc.SetMongoConfig(&host, &db, &user, password)
-	if err != nil {
-		log.Warn("Could not connect to MongoDB")
-		return err
-	}
+// 	session, err := chartsvc.SetMongoConfig(&host, &db, &user, password)
+// 	if err != nil {
+// 		log.Warn("Could not connect to MongoDB")
+// 		return err
+// 	}
 
-	store, err := chartsvc.NewMongoDBChartSvcDatastore(session)
-	if err != nil {
-		return err
-	}
-	chartsvc.SetStore(store)
-	m.QueryStore = store
+// 	store, err := chartsvc.NewMongoDBChartSvcDatastore(session)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	chartsvc.SetStore(store)
+// 	m.QueryStore = store
 
-	syncStore, err := chartrepo.NewMongoDBChartRepoDatastore(session)
-	if err != nil {
-		return err
-	}
-	m.Store = syncStore
-	log.Info("Connected to MongoDB")
+// 	syncStore, err := chartrepo.NewMongoDBChartRepoDatastore(session)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	m.Store = syncStore
+// 	log.Info("Connected to MongoDB")
 
-	return nil
-}
+// 	return nil
+// }
 
 func (m *Monocular) ConfigureSQL() error {
 

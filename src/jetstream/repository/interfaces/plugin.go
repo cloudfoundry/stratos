@@ -23,9 +23,6 @@ func RegisterJetstreamConfigPlugin(plugin JetstreamConfigInit) {
 	JetstreamConfigPlugins = append(JetstreamConfigPlugins, plugin)
 }
 
-// JetstreamEndpointNotification is the function signature for a function to call when an endpoint notifcatikon occurs
-type JetstreamEndpointNotification func(EndpointAction, *CNSIRecord)
-
 // i is the interface for a Jetstream plugin
 type EndpointNotificationPlugin interface {
 	OnEndpointNotification(EndpointAction, *CNSIRecord)
