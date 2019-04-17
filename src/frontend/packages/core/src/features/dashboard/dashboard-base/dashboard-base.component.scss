@@ -12,6 +12,7 @@ $app-sub-header-height: 48px;
     height: 100%;
     max-width: 100vw;
     overflow: hidden;
+    position: relative;
   }
   &__side-help-outer {
     z-index: 9999;
@@ -50,7 +51,7 @@ $app-sub-header-height: 48px;
     padding: 0;
   }
   &__side-help {
-    width: 600px;
+    max-width: 600px;
   }
 }
 
