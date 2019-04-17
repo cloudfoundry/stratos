@@ -123,6 +123,9 @@ function getDefaultInitialTestStoreState(): AppState {
         uaaError: false,
         upgradeInProgress: false,
         sessionExpiresOn: 1000,
+        plugins: {
+          demo: false
+        }
       },
       verifying: false
     },

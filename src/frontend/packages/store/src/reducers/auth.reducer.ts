@@ -1,9 +1,5 @@
-import { InvalidSession, LOGIN } from '../actions/auth.actions';
-import { RouterActions, RouterNav } from '../actions/router.actions';
-import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
-import { AppState } from '../app-state';
-import { SessionData } from '../types/auth.types';
 import {
+  LOGIN,
   LOGIN_FAILED,
   LOGIN_SUCCESS,
   LoginFailed,
@@ -13,6 +9,10 @@ import {
   SESSION_VERIFIED,
   VERIFY_SESSION,
 } from '../actions/auth.actions';
+import { RouterActions, RouterNav } from '../actions/router.actions';
+import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
+import { AppState } from '../app-state';
+import { SessionData } from '../types/auth.types';
 import { RouterRedirect } from './routing.reducer';
 
 export interface AuthUser {
@@ -68,12 +68,12 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
         verifying: false
       };
     case SESSION_INVALID:
-      const sessionInvalid: InvalidSession = action;
       return {
         ...state,
         sessionData: {
           valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
-          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null
+          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null,
+          plugins: {}
         },
         verifying: false
       };

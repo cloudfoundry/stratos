@@ -73,7 +73,7 @@ func (m *DemoSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIR
 
 // Init performs plugin initialization
 func (m *DemoSpecification) Init() error {
-	return nil
+	return errors.New("Manually disabled")
 }
 
 func (m *DemoSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

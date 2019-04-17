@@ -1,6 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
 
+import { AppState } from '../../../../../store/src/app-state';
 import { StratosAction, StratosActionType } from '../../../core/extension/extension-service';
 
 
@@ -8,7 +11,10 @@ import { StratosAction, StratosActionType } from '../../../core/extension/extens
   type: StratosActionType.Endpoints,
   label: 'Demo Helper',
   link: 'demoHelper',
-  icon: 'tv'
+  icon: 'tv',
+  visible: (store: Store<AppState>) => store.select('auth').pipe(
+    map(auth => auth.sessionData.plugins && auth.sessionData.plugins.demo)
+  ),
 })
 @Component({
   selector: 'app-demo-helper',
