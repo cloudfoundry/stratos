@@ -9,7 +9,7 @@
   }
 
   &__option {
-    padding-bottom: 24px;
+    padding-bottom: 40px;
     mat-radio-button {
       &:first-of-type {
         padding-right: 12px;
@@ -24,5 +24,16 @@
       height: 40px;
     }
   }
+  &__successful-reg-text {
+    margin-bottom: 30px;
+  }
+  &__subtext {
+    font-size: 13px;
+    margin-top: -5px;
+    opacity: .5;
+    position: absolute;
+  }
+  &__checkbox {
+    position: relative;
+  }
 }
-

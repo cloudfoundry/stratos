@@ -1,20 +1,24 @@
-<div class="connect__question">
-  Would you like to connect to '{{ connectService?.config.name }}'
-</div>
-<div class="connect__option">
-  <mat-radio-group [(ngModel)]="doConnect">
-    <mat-radio-button [value]="false" class="schema-form__radios-btn">Skip</mat-radio-button>
-    <mat-radio-button [value]="true" class="schema-form__radios-btn">Connect</mat-radio-button>
-  </mat-radio-group>
-</div>
-<div *ngIf="doConnect">
-  <div class="connect__title">
-    <span class="connect__title__text">Credentials</span>
-    <button *ngIf="helpDocumentUrl" [appBlur]="true" class="title__help" mat-icon-button (click)="showHelp()">
-      <mat-icon>help</mat-icon>
-    </button>
+<div class="connect">
+  <div class="connect__option">
+    <p class="connect__successful-reg-text">
+      <b>{{ connectService?.config.name }}</b> has been registered successfully.
+    </p>
+    <mat-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
+      <b>{{ connectService?.config.name }}</b> now
+      (optional).
+      <div class="connect__subtext">You may connect this endpoint at a later date from the
+        endpoints page.</div>
+    </mat-checkbox>
   </div>
-  <app-connect-endpoint class="stepper-form" (valid)="valid = $event" (authType)="helpDocumentUrl = $event.help"
-    [connectService]="connectService">
-  </app-connect-endpoint>
+  <div>
+    <div class="connect__title">
+      <span class="connect__title-inner">Connection Credentials</span>
+      <button *ngIf="helpDocumentUrl" [appBlur]="true" class="connect__title-help" mat-icon-button (click)="showHelp()">
+        <mat-icon>help</mat-icon>
+      </button>
+    </div>
+    <app-connect-endpoint [disabled]="!doConnect" class="stepper-form" (valid)="valid = $event"
+      (authType)="helpDocumentUrl = $event.help" [connectService]="connectService">
+    </app-connect-endpoint>
+  </div>
 </div>

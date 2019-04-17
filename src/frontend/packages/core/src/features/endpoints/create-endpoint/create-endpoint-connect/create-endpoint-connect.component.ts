@@ -28,7 +28,6 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     private store: Store<AppState>,
     private endpointsService: EndpointsService
   ) {
-
   }
 
   showHelp() {
@@ -49,7 +48,7 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     );
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     if (this.connectService) {
       this.connectService.destroy();
     }

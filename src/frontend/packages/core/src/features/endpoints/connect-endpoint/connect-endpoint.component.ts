@@ -26,7 +26,7 @@ import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoi
   styleUrls: ['./connect-endpoint.component.scss']
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
-
+  private pDisabled = false;
   private pConnectService: ConnectEndpointService;
   @Input() set connectService(service: ConnectEndpointService) {
     if (!service || this.pConnectService) {
@@ -39,6 +39,13 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     return this.pConnectService;
   }
 
+  @Input() set disabled(disabled: boolean) {
+    if (this.endpointForm) {
+      disabled ? this.endpointForm.disable() : this.endpointForm.enable();
+    }
+    this.pDisabled = disabled;
+  }
+
   /**
    * Make the form submit as if it had a button - aka on pressing return
    */
@@ -48,7 +55,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   @Output() authType = new EventEmitter<EndpointAuthTypeConfig>();
 
   // Component reference for the dynamically created auth form
-  @ViewChild('authForm', { read: ViewContainerRef }) container: ViewContainerRef;
+  @ViewChild('authForm', { read: ViewContainerRef })
+  public container: ViewContainerRef;
 
   public endpointForm: FormGroup;
 
@@ -152,6 +160,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     const factory = this.resolver.resolveComponentFactory<IAuthForm>(component);
     this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;
+    this.pDisabled ? this.authFormComponentRef.instance.formGroup.disable() : this.authFormComponentRef.instance.formGroup.enable();
   }
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
