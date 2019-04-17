@@ -26,7 +26,7 @@
               </div>
             </div>
           </div>
-          <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin}">
+          <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}">
             <router-outlet></router-outlet>
           </div>
         </div>

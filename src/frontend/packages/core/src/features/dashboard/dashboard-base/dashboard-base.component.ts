@@ -2,10 +2,10 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router, NavigationEnd } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, startWith, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, withLatestFrom, filter, tap } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import {
@@ -52,6 +52,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     public tabNavService: TabNavService,
     private ngZone: NgZone,
   ) {
+    this.noMargin$ = this.router.events.pipe(
+      tap(console.log),
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.isNoMarginView(this.activatedRoute.snapshot)),
+      startWith(this.isNoMarginView(this.activatedRoute.snapshot))
+    );
     this.isMobile$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
       map(breakpoint => breakpoint.matches),
       startWith(false),
@@ -90,7 +96,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
   private closeSub: Subscription;
 
   public fullView: boolean;
-  public noMargin: boolean;
+  public noMargin$: Observable<boolean>;
 
   private mobileSub: Subscription;
 
@@ -140,14 +146,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
-
-    // TODO: NWM Noticed a weird bug revolving when init is called, and thus noMargin is updated
-    // Fresh load on home, dashboard-base init is only ever called once (uiNoMargin is never re-evaluated)
-    // - Home --> Kube Dashboard page - kube dashboard page show margin
-    // - Kube Dashboard page --> Home - home doesn't show a margin
-    // Visit a helm chart page, dashboard-base init is called on every route change
-    // console.log('DASHBOARD - INIT');
-    this.noMargin = this.isNoMarginView(this.activatedRoute.snapshot);
   }
 
   ngOnDestroy() {
