@@ -251,13 +251,16 @@ func main() {
 	portalProxy.loadPlugins()
 
 	initedPlugins := make(map[string]interfaces.StratosPlugin)
+	portalProxy.PluginsStatus = make(map[string]bool)
 
 	// Initialise general plugins
 	for name, plugin := range portalProxy.Plugins {
 		if err = plugin.Init(); err == nil {
 			initedPlugins[name] = plugin
+			portalProxy.PluginsStatus[name] = true
 		} else {
 			log.Infof("Plugin %s is disabled: %s", name, err.Error())
+			portalProxy.PluginsStatus[name] = false
 		}
 	}
 

@@ -195,6 +195,7 @@ type Info struct {
 	User         *ConnectedUser                        `json:"user"`
 	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
 	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
+	Plugins      map[string]bool                       `json:"plugins"`
 	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
 }

@@ -103,6 +103,8 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		}
 	}
 
+	s.Plugins = p.PluginsStatus
+
 	return s, nil
 }
 
