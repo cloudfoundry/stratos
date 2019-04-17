@@ -1,6 +1,7 @@
 package userinvite
 
 import (
+	"errors"
 	"fmt"
 	html "html/template"
 	"path"
@@ -103,7 +104,20 @@ func (userinvite *UserInvite) ValidateConfig(c *Config) error {
 	}
 
 	err := userinvite.loadTemplates(c)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Check SMTP Configuration
+	if len(c.SMTP.Host) == 0 {
+		return errors.New("SMTP Server Host is not configured")
+	}
+
+	if len(c.SMTP.FromAddress) == 0 {
+		return errors.New("SMTP From Address is not configured")
+	}
+
+	return nil
 }
 
 func (userinvite *UserInvite) loadTemplates(c *Config) error {
@@ -116,6 +130,7 @@ func (userinvite *UserInvite) loadTemplates(c *Config) error {
 	}
 
 	textFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.PlainTextTemplate)
+	log.Debugf("Loading plain text email template from: %s", textFile)
 	textTmpl, err := text.ParseFiles(textFile)
 	if err != nil {
 		log.Warn("User Invite failed to load Plain Text template")
@@ -124,6 +139,7 @@ func (userinvite *UserInvite) loadTemplates(c *Config) error {
 	c.PlainTextTemplate = textTmpl
 
 	htmlFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.HTMLTemplate)
+	log.Debugf("Loading HTML email template from: %s", htmlFile)
 	htmlTmpl, err := html.ParseFiles(htmlFile)
 	if err == nil {
 		c.HTMLTemplate = htmlTmpl
