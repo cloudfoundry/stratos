@@ -56,5 +56,11 @@ export const monocularEntities: ExtensionEntitySchema[] = [
   }
 ];
 
-// TODO: RC Q Shouldn't this be populated with the keys above? Everything seems like it works without....
-export const monocularEntityKeys: string[] = [];
+export const monocularEntityKeys: string[] = [
+  monocularChartsSchemaKey,
+  helmReleaseSchemaKey,
+  helmVersionsSchemaKey,
+  helmReleaseStatusSchemaKey,
+  helmReleasePodKey,
+  helmReleaseServiceKey
+];

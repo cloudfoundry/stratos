@@ -172,7 +172,7 @@ export class ChartsComponent implements OnInit {
     return 0;
   }
 
-  // TODO: RC Q is this to be implemented?
+  // TODO: See #150 - is this to be implemented?
   updateMetaTags(): void { }
 
   capitalize(input: string) {

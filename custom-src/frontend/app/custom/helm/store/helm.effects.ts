@@ -47,7 +47,6 @@ import {
 export class HelmEffects {
 
   constructor(
-    private http: HttpClient, // TODO: RC remove
     private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>
@@ -241,7 +240,7 @@ export class HelmEffects {
       headers: null,
       params: null
     };
-    return this.http.get(url, requestArgs).pipe(
+    return this.httpClient.get(url, requestArgs).pipe(
       mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
       catchError(error => [
         new WrapperRequestActionFailed(error.message, action, 'fetch', {

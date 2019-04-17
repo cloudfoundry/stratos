@@ -84,7 +84,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
   ) {
     this.podsDataSource = new KubernetesNamespacesDataSource(store, this.kubeId, this);
 
-    // TODO: RC Check whether we already have the value before dispatching a new action
+    // TODO: R - do  RC Check whether we already have the value before dispatching a new action
     store.dispatch(new GetKubernetesDashboard(this.kubeId.guid));
     const hasDashboard = store.select(selectEntity(kubernetesDashboardSchemaKey, this.kubeId.guid)).pipe(
       filter(p => !!p),

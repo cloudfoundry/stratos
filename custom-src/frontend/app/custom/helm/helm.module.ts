@@ -25,7 +25,6 @@ import { ListFiltersComponent } from './monocular/list-filters/list-filters.comp
 import { ListItemComponent } from './monocular/list-item/list-item.component';
 import { LoaderComponent } from './monocular/loader/loader.component';
 import { PanelComponent } from './monocular/panel/panel.component';
-import { AuthService } from './monocular/shared/services/auth.service';
 import { ChartsService } from './monocular/shared/services/charts.service';
 import { ConfigService } from './monocular/shared/services/config.service';
 import { MenuService } from './monocular/shared/services/menu.service';
@@ -84,7 +83,6 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     ChartsService,
     ConfigService,
     MenuService,
-    AuthService,
     ReposService
   ],
   entryComponents: [

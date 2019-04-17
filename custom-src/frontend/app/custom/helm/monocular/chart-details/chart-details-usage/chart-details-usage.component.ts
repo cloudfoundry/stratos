@@ -28,7 +28,7 @@ export class ChartDetailsUsageComponent implements OnInit {
     this.mdIconRegistry.addSvgIcon(
       'content-copy',
       this.sanitizer.bypassSecurityTrustResourceUrl(
-        // TODO: NWM content-copy.svg doesn't exist
+        // TODO: See #150 - content-copy.svg doesn't exist
         '/assets/icons/content-copy.svg'
       )
     );

@@ -26,7 +26,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       },
       cellFlex: '5',
     },
-    // TODO: RC bring back after demo
+    // TODO: See #150 - keep out RC bring back after demo
     // {
     //   columnId: 'tags', headerCell: () => 'Tags',
     //   cellComponent: KubernetesPodTagsComponent,

@@ -2,10 +2,10 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router, NavigationEnd } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, startWith, withLatestFrom, filter } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import {
@@ -144,6 +144,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     );
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());
+    // TODO: Update: can be nuked
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
   }
 
@@ -155,6 +156,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
   isFullView(route: ActivatedRouteSnapshot): boolean {
     while (route.firstChild) {
       route = route.firstChild;
+      // TODO: Update: uiFullView is still referenced in routes and can be nuked
       if (route.data.uiFullView) {
         return true;
       }

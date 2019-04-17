@@ -14,7 +14,6 @@ export class ReposService {
 
   hostname: string;
 
-  // TODO: RC Q Should this whole service be converted to redux world? How do we handle refresh and repo syncing?
   constructor(
     private http: Http,
     private config: ConfigService,

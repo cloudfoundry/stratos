@@ -28,7 +28,7 @@ export class ChartDetailsReadmeComponent {
     this.renderer.code = (text: string) => `<code>${text}</code>`;
   }
 
-  // TODO: NWM This should not require loading the specific version and then the readme
+  // TODO: See #150 - This should not require loading the specific version and then the readme
   private getReadme(currentVersion: ChartVersion): Observable<string> {
     return this.chartsService.getChartReadme(currentVersion).pipe(
       map(resp => {

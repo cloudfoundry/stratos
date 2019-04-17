@@ -45,7 +45,7 @@ export class ChartDetailsComponent implements OnInit {
     });
   }
 
-  // TODO: RC Q is this to be implemented?
+  // TODO: See #150 - Is this to be implemented?
   /**
    * Update the metatags with the name and the description of the application.
    */
