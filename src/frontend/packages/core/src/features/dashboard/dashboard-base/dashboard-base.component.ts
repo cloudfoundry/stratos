@@ -5,7 +5,7 @@ import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router, NavigationEnd } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, startWith, withLatestFrom, filter, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, withLatestFrom, filter } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import {
@@ -53,7 +53,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
   ) {
     this.noMargin$ = this.router.events.pipe(
-      tap(console.log),
       filter(event => event instanceof NavigationEnd),
       map(() => this.isNoMarginView(this.activatedRoute.snapshot)),
       startWith(this.isNoMarginView(this.activatedRoute.snapshot))
