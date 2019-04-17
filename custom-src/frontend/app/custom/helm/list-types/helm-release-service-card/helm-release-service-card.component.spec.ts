@@ -1,7 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { KubernetesServicePortsComponent } from '../../../kubernetes/list-types/kubernetes-service-ports/kubernetes-service-ports.component';
+import {
+  KubernetesServicePortsComponent,
+} from '../../../kubernetes/list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import { HelmReleaseServiceCardComponent } from './helm-release-service-card.component';
 
 
