@@ -8,6 +8,19 @@ $app-sub-header-height: 48px;
   flex-direction: column;
   height: 100%;
   z-index: 1;
+  &__outer {
+    height: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+  }
+  &__side-help-outer {
+    z-index: 9999;
+  }
+  &__side-help-button {
+    position: absolute;
+    right: 5px;
+    top: 7px;
+  }
   &__page-tabs {
     background-color: rgba(146, 146, 146, .1);
   }
