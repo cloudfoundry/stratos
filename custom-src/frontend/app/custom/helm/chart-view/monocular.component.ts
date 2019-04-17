@@ -12,9 +12,7 @@ export class MonocularChartViewComponent implements OnInit {
 
   public title = '';
 
-  constructor(router: Router, private route: ActivatedRoute) {
-    router.routeReuseStrategy.shouldReuseRoute = () => false;
-  }
+  constructor(private route: ActivatedRoute) { }
 
   public ngOnInit() {
 
