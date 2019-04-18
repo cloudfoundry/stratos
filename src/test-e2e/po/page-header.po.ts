@@ -10,7 +10,7 @@ import { MenuComponent } from './menu.po';
 export class PageHeader extends Component {
 
   constructor() {
-    super(protractorElement(by.css('.page-header')));
+    super(protractorElement(by.css('.page-content > .page-header')));
   }
   private readonly until = protractor.ExpectedConditions;
   private readonly pageTitleSelector = 'h1';
