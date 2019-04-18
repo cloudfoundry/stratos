@@ -28,6 +28,7 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
+import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 
 
 @NgModule({
@@ -55,7 +56,9 @@ import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
     DisableRouterLinkDirective,
-    StatefulIconComponent
+    StatefulIconComponent,
+    NoContentMessageComponent,
+    DisableRouterLinkDirective
   ],
   providers: [
     AuthGuardService,
@@ -84,7 +87,8 @@ import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
     PageNotFoundComponentComponent,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
-    DisableRouterLinkDirective
+    DisableRouterLinkDirective,
+    NoContentMessageComponent
   ],
   entryComponents: [
     LogOutDialogComponent

@@ -618,7 +618,9 @@ function getDefaultInitialTestStoreState(): AppState {
       sidenavOpen: true,
       sideNavMode: 'side',
       headerEventMinimized: false,
-      timeoutSession: true
+      timeoutSession: true,
+      sideHelpOpen: false,
+      sideHelpDocument: ''
     },
     createApplication: {
       cloudFoundryDetails: null,

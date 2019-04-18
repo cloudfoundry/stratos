@@ -2,6 +2,8 @@
   [actionMenu]="actions$ | async" [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$"
   [entityConfig]="entityConfig">
   <app-meta-card-title class="fav-meta-card__header">
+    <!--<div>ICON</div>-->
+    <div>
     <h2 class="fav-meta-card__header-text" *ngIf="!compact">
       <app-multiline-title>{{ name$ | async }}</app-multiline-title>
     </h2>
@@ -9,6 +11,7 @@
       <app-multiline-title>{{ name$ | async }}</app-multiline-title>
     </h3>
     <div class="fav-meta-card__type">{{ prettyName }}</div>
+  </div>
   </app-meta-card-title>
   <ng-container *ngFor="let line of config.lines">
     <app-meta-card-item *ngIf="line[1] | async as value">

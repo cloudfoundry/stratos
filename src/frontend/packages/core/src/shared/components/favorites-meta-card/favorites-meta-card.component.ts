@@ -77,10 +77,10 @@ export class FavoritesMetaCardComponent {
       const { cardMapper, favorite, prettyName } = favoriteEntity;
       this.favorite = favorite;
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
-      this.prettyName = prettyName;
+      this.prettyName = prettyName || 'Unknown';
       this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
 
-      this.setConfirmation(prettyName, favorite);
+      this.setConfirmation(this.prettyName, favorite);
 
       const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
       if (config) {

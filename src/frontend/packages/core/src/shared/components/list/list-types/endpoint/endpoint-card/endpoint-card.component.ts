@@ -127,7 +127,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       return;
     }
     const e = getEndpointType(this.pRow.cnsi_type);
-    if (!!e || !e.listDetailsComponent) {
+    if (!e || !e.listDetailsComponent) {
       return;
     }
 

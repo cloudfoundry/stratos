@@ -54,7 +54,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   protected serviceInstanceColumns: ITableColumn<APIResource<IServiceInstance>>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Service Instances',
+      headerCell: () => 'Service Instance',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
       },

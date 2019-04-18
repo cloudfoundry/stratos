@@ -34,7 +34,8 @@ const appRoutes: Routes = [
             matIcon: 'home',
             position: 10,
             requiresPersistence: true
-          }
+          },
+          uiNoMargin: true
         }
       },
       {
