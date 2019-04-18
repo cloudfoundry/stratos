@@ -18,7 +18,7 @@ import { map } from 'rxjs/operators';
 import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
-import { getCanShareTokenForEndpointType, getEndpointAuthTypes } from '../endpoint-helpers';
+import { getCanShareTokenForEndpointType, getEndpointAuthTypes, getEndpointType } from '../endpoint-helpers';
 
 @Component({
   selector: 'app-connect-endpoint',
@@ -80,9 +80,13 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   }
 
   private init(config: ConnectEndpointConfig) {
+    const endpointType = getEndpointType(config.type, config.subType);
+
     // Populate the valid auth types for the endpoint that we want to connect to
     getEndpointAuthTypes().forEach(authType => {
-      if (authType.types.find(t => t === config.type)) {
+      const authTypeHasEndpoint = authType.types.find(t => t === config.type);
+      const endpointHasAuthType = endpointType.authTypes && endpointType.authTypes.find(t => t === authType.value);
+      if (authTypeHasEndpoint || endpointHasAuthType) {
         this.authTypesForEndpoint.push(authType);
       }
     });
@@ -91,7 +95,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || config.ssoAllowed);
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
-    this.canShareEndpointToken = getCanShareTokenForEndpointType(config.type);
+    this.canShareEndpointToken = getCanShareTokenForEndpointType(endpointType.type, endpointType.subType);
 
     // Create the endpoint form
     this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : { form: null } as EndpointAuthTypeConfig;
