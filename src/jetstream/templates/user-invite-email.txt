@@ -1,5 +1,5 @@
-You have been invited to Cloud Foundry!
+You have been invited to join our Cloud Foundry
 
-Use the link below:
+Click on the link below to create your account and start accessing Cloud Foundry:
 
 {{ .InviteLink }}
