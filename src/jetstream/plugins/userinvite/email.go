@@ -87,13 +87,13 @@ func (invite *UserInvite) setFromAddress(mail *mailyak.MailYak) error {
 	from := invite.Config.SMTP.FromAddress
 	parts := strings.Split(from, "<")
 	if len(parts) != 2 {
-		mail.From(parts[0])
+		mail.From(strings.TrimSpace(parts[0]))
 	} else {
 		if strings.HasSuffix(parts[1], ">") {
 			fromEmail := parts[1]
 			fromEmail = fromEmail[:len(fromEmail)-1]
-			mail.From(fromEmail)
-			mail.FromName("\"" + parts[0] + "\"")
+			mail.From(strings.TrimSpace(fromEmail))
+			mail.FromName("\"" + strings.TrimSpace(parts[0]) + "\"")
 		} else {
 			return errors.New("Can not parse From address: " + from)
 		}
