@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ShowSideHelp } from '../../../../../../store/src/actions/dashboard-actions';
@@ -38,15 +38,16 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     this.connectService = new ConnectEndpointService(this.store, this.endpointsService, data);
   }
 
-  onNext = (): Observable<StepOnNextResult> => {
-    return this.connectService.submit().pipe(
-      map(res => ({
-        success: res.success,
-        message: res.errorMessage,
-        redirect: res.success
-      }))
-    );
-  }
+  onNext = (): Observable<StepOnNextResult> => this.doConnect ? this.connectService.submit().pipe(
+    map(res => ({
+      success: res.success,
+      message: res.errorMessage,
+      redirect: res.success
+    }))
+  ) : of({
+    success: true,
+    redirect: true
+  })
 
   ngOnDestroy() {
     if (this.connectService) {

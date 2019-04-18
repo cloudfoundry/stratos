@@ -1,3 +1,5 @@
+import { by, element } from 'protractor';
+
 import { e2e, E2ESetup } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ResetsHelpers } from '../helpers/reset-helpers';
@@ -179,7 +181,7 @@ describe('Endpoints', () => {
         register.stepper.next();
 
         register.stepper.waitForStep('Connect (Optional)');
-        register.stepper.cancel();
+        register.stepper.next();
 
         expect(endpointsPage.isActivePage()).toBeTruthy();
         expect(endpointsPage.cards.isPresent()).toBeTruthy();
@@ -211,8 +213,9 @@ describe('Endpoints', () => {
 
         register.stepper.waitForStep('Connect (Optional)');
         expect(register.stepper.canPrevious()).toBeFalsy();
-        expect(register.stepper.canCancel()).toBeTruthy();
-        expect(register.stepper.canNext()).toBeFalsy();
+        expect(register.stepper.canNext()).toBeTruthy();
+
+        element(by.css('.connect__checkbox')).click();
 
         const toConnect = e2e.secrets.getDefaultCFEndpoint();
         register.stepper.getStepperForm().fill({
