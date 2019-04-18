@@ -1,7 +1,9 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -29,7 +31,23 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState>, private ngZone: NgZone) { }
+  constructor(public endpointsService: EndpointsService, public store: Store<AppState>, private ngZone: NgZone) {
+    // Redirect to /applications if not enabled.
+    endpointsService.disablePersistenceFeatures$.pipe(
+      map(off => {
+        if (off) {
+          // User should only get here if url is manually entered
+          this.store.dispatch(new RouterNav({
+            path: ['applications'],
+            extras: {
+              replaceUrl: true
+            }
+          }));
+        }
+      }),
+      first()
+    ).subscribe();
+  }
 
   sub: Subscription;
 
