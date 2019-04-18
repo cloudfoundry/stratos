@@ -14,8 +14,11 @@ This release contains a number of fixes and improvements:
 - Fix 'unknown locale' error message when viewing service plans [\#3447](https://github.com/cloudfoundry-incubator/stratos/pull/3447)
 - Fix Gitlab deploy step [\#3469](https://github.com/cloudfoundry-incubator/stratos/pull/3469)
 - Ensure Service Instance counts are correct [\#3448](https://github.com/cloudfoundry-incubator/stratos/pull/3448)
+- Fix multiple app stats requests on org & space summary pages [\#3451](https://github.com/cloudfoundry-incubator/stratos/pull/3451)
 
 **Improvements:**
+- Change Side Navigation [\#3449](https://github.com/cloudfoundry-incubator/stratos/pull/3449)
+- Use side nav instead of top tabs throughout [\#3289] (https://github.com/cloudfoundry-incubator/stratos/pull/3289)
 - Add support for inviting users to an org or space [\#3377](https://github.com/cloudfoundry-incubator/stratos/pull/3377) 
 - Add support for User Favourites [\#3255](https://github.com/cloudfoundry-incubator/stratos/pull/3255)
 - Add support for User Provided Service Instances [\#3415](https://github.com/cloudfoundry-incubator/stratos/pull/3415)
@@ -25,6 +28,7 @@ This release contains a number of fixes and improvements:
 - Update front-end to Angular 7 [\#3418](https://github.com/cloudfoundry-incubator/stratos/pull/3418)
 - Also show forked repositories when suggesting GitHub repositories in deploy app [\#3403](https://github.com/cloudfoundry-incubator/stratos/pull/3403)
 - Hide User Favorites when using SQLite [\#3419](https://github.com/cloudfoundry-incubator/stratos/pull/3419)
+- Hide Endpoints Page when using SQLite [\#3463](https://github.com/cloudfoundry-incubator/stratos/pull/3463)
 - Add card view to endpoint list [\#3422](https://github.com/cloudfoundry-incubator/stratos/pull/3422)
 - Add support for endpoint sub type \(and metadata\) [\#3423](https://github.com/cloudfoundry-incubator/stratos/pull/3423)
 - Add tile selector to register endpoint stepper [\#3432](https://github.com/cloudfoundry-incubator/stratos/pull/3432)
