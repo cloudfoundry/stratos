@@ -164,7 +164,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     const factory = this.resolver.resolveComponentFactory<IAuthForm>(component);
     this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;
-    this.pDisabled ? this.authFormComponentRef.instance.formGroup.disable() : this.authFormComponentRef.instance.formGroup.enable();
+    this.pDisabled ? this.endpointForm.disable() : this.endpointForm.enable();
   }
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
