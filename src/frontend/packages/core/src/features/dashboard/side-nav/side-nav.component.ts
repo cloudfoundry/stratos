@@ -13,6 +13,10 @@ export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright 
 
 export interface SideNavItem extends ISubHeaderTabs {
   label: string;
+  /**
+   * deprecated
+   */
+  text?: string;
   matIcon?: string;
   matIconFont?: string;
   link: string;

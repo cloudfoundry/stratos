@@ -18,7 +18,7 @@ export class MarkdownPreviewComponent {
 
   @Input('documentUrl')
   set setDocumentUrl(value: string) {
-    if (this.documentUrl !== value) {
+    if (value && this.documentUrl !== value) {
       this.documentUrl = value;
       this.title = null;
       this.loadDocument();
