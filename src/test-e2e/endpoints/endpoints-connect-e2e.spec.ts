@@ -5,7 +5,7 @@ import { LoginPage } from '../login/login.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
 import { MenuComponent } from '../po/menu.po';
-import { SnackBarComponent } from '../po/snackbar.po';
+import { SnackBarPo } from '../po/snackbar.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
@@ -20,7 +20,7 @@ describe('Endpoints', () => {
         .registerDefaultCloudFoundry();
     });
 
-    describe('endpoint `Connect` -', () => {
+    describe('endpoint `Connect` dialog -', () => {
       const toConnect = e2e.secrets.getDefaultCFEndpoint();
       const connectDialog = new ConnectDialogComponent();
 
@@ -132,7 +132,7 @@ describe('Endpoints', () => {
             ConfirmDialogComponent.expectDialogAndConfirm('Disconnect', 'Disconnect Endpoint');
 
             // Wait for snackbar
-            const snackBar = new SnackBarComponent();
+            const snackBar = new SnackBarPo();
             snackBar.waitUntilShown();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
             endpointsPage.cards.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {

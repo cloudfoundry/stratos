@@ -1,5 +1,44 @@
 # Change Log
 
+## 2.4.0
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.3.0...2.4.0)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Fix issue where org level user lists shows space roles from other orgs [\#3399](https://github.com/cloudfoundry-incubator/stratos/pull/3399)
+- Fix service broker action [\#3427](https://github.com/cloudfoundry-incubator/stratos/pull/3427)
+- Service plan cost truncated in first service display [\#3431](https://github.com/cloudfoundry-incubator/stratos/issues/3431)
+- Fix 'unknown locale' error message when viewing service plans [\#3447](https://github.com/cloudfoundry-incubator/stratos/pull/3447)
+- Fix Gitlab deploy step [\#3469](https://github.com/cloudfoundry-incubator/stratos/pull/3469)
+- Ensure Service Instance counts are correct [\#3448](https://github.com/cloudfoundry-incubator/stratos/pull/3448)
+- Fix multiple app stats requests on org & space summary pages [\#3451](https://github.com/cloudfoundry-incubator/stratos/pull/3451)
+
+**Improvements:**
+- Change Side Navigation [\#3449](https://github.com/cloudfoundry-incubator/stratos/pull/3449)
+- Use side nav instead of top tabs throughout [\#3289](https://github.com/cloudfoundry-incubator/stratos/pull/3289)
+- Add support for inviting users to an org or space [\#3377](https://github.com/cloudfoundry-incubator/stratos/pull/3377) 
+- Add support for User Favourites [\#3255](https://github.com/cloudfoundry-incubator/stratos/pull/3255)
+- Add support for User Provided Service Instances [\#3415](https://github.com/cloudfoundry-incubator/stratos/pull/3415)
+- Autocomplete git repository name [\#3372](https://github.com/cloudfoundry-incubator/stratos/pull/3372)
+- Scale Users in CF Summary section [\#3371](https://github.com/cloudfoundry-incubator/stratos/pull/3371)
+- Allow Stratos to be configured with via a User Provided Service [\#3405](https://github.com/cloudfoundry-incubator/stratos/pull/3405)
+- Update front-end to Angular 7 [\#3418](https://github.com/cloudfoundry-incubator/stratos/pull/3418)
+- Also show forked repositories when suggesting GitHub repositories in deploy app [\#3403](https://github.com/cloudfoundry-incubator/stratos/pull/3403)
+- Hide User Favorites when using SQLite [\#3419](https://github.com/cloudfoundry-incubator/stratos/pull/3419)
+- Hide Endpoints Page when using SQLite [\#3463](https://github.com/cloudfoundry-incubator/stratos/pull/3463)
+- Add card view to endpoint list [\#3422](https://github.com/cloudfoundry-incubator/stratos/pull/3422)
+- Add support for endpoint sub type \(and metadata\) [\#3423](https://github.com/cloudfoundry-incubator/stratos/pull/3423)
+- Add tile selector to register endpoint stepper [\#3432](https://github.com/cloudfoundry-incubator/stratos/pull/3432)
+- Add cf/org/space links to service instance table using common components [\#3436](https://github.com/cloudfoundry-incubator/stratos/pull/3436)
+- Add a user provided service instance tab & list to the space page [\#3443](https://github.com/cloudfoundry-incubator/stratos/pull/3443)
+- Ensure unknown endpoint types are handled correctly [\#3445](https://github.com/cloudfoundry-incubator/stratos/pull/3445)
+- Add created and updated dates to organization/space summary [\#3460](https://github.com/cloudfoundry-incubator/stratos/pull/3460)
+- Add support for slide-in side help and write in to endpoint connect dialog [\#3433](https://github.com/cloudfoundry-incubator/stratos/pull/3433)
+- Improve no users message [\#3327](https://github.com/cloudfoundry-incubator/stratos/issues/3327)
+
 ## 2.3.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.2.0...2.3.0)
