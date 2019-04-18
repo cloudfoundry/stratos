@@ -81,6 +81,7 @@ cp manifest.yml $MANIFEST
 
 echo "    env:" >> $MANIFEST
 echo "      SKIP_AUTO_REGISTER: true" >> $MANIFEST
+echo "      FORCE_ENABLE_PERSISTENCE_FEATURES: true" >> $MANIFEST
 
 # SSO
 SUITE=""
