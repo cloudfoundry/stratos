@@ -48,7 +48,7 @@ export class CfSpaceLevelPage extends CFPage {
   }
 
   private goToTab(label: string, urlSuffix: string) {
-    return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
+    return this.tabs.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
 }

@@ -35,7 +35,7 @@ export class CfTopLevelPage extends CFPage {
 
   // Goto the Organizations view (tab)
   goToOrgView(): ListComponent {
-    this.subHeader.clickItem('Organizations');
+    this.tabs.clickItem('Organizations');
     const cardView = new ListComponent();
     cardView.cards.waitUntilShown();
     return cardView;
@@ -117,9 +117,9 @@ export class CfTopLevelPage extends CFPage {
 
   private goToTab(label: string, urlSuffix: string): promise.Promise<any> {
     // Some tabs don't appear until the page has fully loaded - so wait until the tab is present
-    const tabElement = this.subHeader.getItem(label);
+    const tabElement = this.tabs.getItem(label);
     browser.wait(this.until.presenceOf(tabElement), 10000, 'Tab: ' + label);
-    return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
+    return this.tabs.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
 }

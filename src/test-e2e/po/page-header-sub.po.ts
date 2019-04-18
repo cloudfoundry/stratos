@@ -2,21 +2,33 @@ import { browser, by, element as protractorElement, ElementFinder, promise, prot
 import { ElementArrayFinder } from 'protractor/built';
 
 import { Component } from './component.po';
-import { MenuComponent } from './menu.po';
+
 
 /**
- * Page Object for page header
+ * Contains page title & actions
  */
-export class PageHeader extends Component {
+export class PageHeaderSubPo extends Component {
 
   constructor() {
-    super(protractorElement(by.css('.page-header')));
+    super(protractorElement(by.css('.page-header-sub-nav')));
   }
+
   private readonly until = protractor.ExpectedConditions;
-  private readonly pageTitleSelector = '.page-header h1';
+
+  getItem(iconName: string): promise.Promise<ElementFinder> {
+    return this.getIconButton(iconName);
+  }
+
+  goToItemAndWait(iconName: string, baseUrl: string, suffix: string): promise.Promise<any> {
+    this.clickIconButton(iconName);
+    if (!suffix.startsWith('/')) {
+      suffix = '/' + suffix;
+    }
+    return browser.wait(this.until.urlContains(browser.baseUrl + baseUrl + suffix), 20000, `Waiting for item '${name}'`);
+  }
 
   getIconButtons(): ElementArrayFinder {
-    return this.locator.all(by.css('.page-header button.mat-icon-button'));
+    return this.locator.all(by.css('.page-header-sub-nav__container button mat-icon'));
   }
 
   getIconButton(iconName: string): promise.Promise<ElementFinder> {
@@ -37,7 +49,7 @@ export class PageHeader extends Component {
   }
 
   getTitle(): ElementFinder {
-    const element = this.locator.element(by.css(this.pageTitleSelector));
+    const element = this.locator.element(by.css('.page-header-sub-nav__title'));
     browser.wait(this.until.presenceOf(element), 20000);
     return element;
   }
@@ -50,17 +62,5 @@ export class PageHeader extends Component {
     browser.wait(this.until.textToBePresentInElement(this.getTitle(), text), 10000, `Failed to wait for page header with text ${text}`);
   }
 
-  logout(): promise.Promise<any> {
-    return this.locator.element(by.id('userMenu'))
-      .click()
-      .then(() => {
-        // browser.driver.sleep(2000);
-        const menu = new MenuComponent();
-        menu.waitUntilShown();
-        menu.clickItem('Logout');
-        // browser.driver.sleep(2000);
-        return browser.waitForAngular();
-      });
-  }
 
 }
