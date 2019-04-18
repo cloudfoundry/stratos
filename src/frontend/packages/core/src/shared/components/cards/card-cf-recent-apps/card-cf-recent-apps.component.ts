@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first } from 'rxjs/operators';
+import { filter, first, map, tap } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -21,6 +21,7 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
+  public recentApps$: Observable<APIResource<IApp>[]>;
   @Input() allApps$: Observable<APIResource<IApp>[]>;
   @Input() loading$: Observable<boolean>;
   @Output() refresh = new EventEmitter<any>();
@@ -31,24 +32,27 @@ export class CardCfRecentAppsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.allApps$.pipe(
+    this.recentApps$ = this.allApps$.pipe(
       filter(apps => !!apps),
-      first()
-    ).subscribe(apps => this.processApps(apps));
+      first(),
+      map(apps => this.restrictApps(apps)),
+      tap(apps => this.fetchAppStats(apps))
+    );
   }
 
-  private processApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
-    if (!apps) {
-      return apps;
-    }
-
-    const recentApps = [].concat(apps).sort(appDataSort).slice(0, RECENT_ITEMS_COUNT);
+  private fetchAppStats(recentApps: APIResource<IApp>[]) {
     recentApps.forEach(app => {
       if (app.entity.state === 'STARTED') {
         this.store.dispatch(new GetAppStatsAction(app.metadata.guid, this.cfEndpointService.cfGuid));
       }
     });
-    return recentApps;
+  }
+
+  private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
+    if (!apps) {
+      return [];
+    }
+    return apps.sort(appDataSort).slice(0, RECENT_ITEMS_COUNT);
   }
 
 }
