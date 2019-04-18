@@ -3,7 +3,6 @@ import {
   LOGIN_FAILED,
   LOGIN_SUCCESS,
   LoginFailed,
-  LoginSuccess,
   RESET_AUTH,
   SESSION_INVALID,
   SESSION_VERIFIED,
@@ -47,7 +46,6 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
     case LOGIN:
       return { ...state, loggingIn: true, loggedIn: false, error: false };
     case LOGIN_SUCCESS:
-      const loginSuccess = action as LoginSuccess;
       return { ...state, loggingIn: false, loggedIn: true, error: false, errorResponse: undefined };
     case LOGIN_FAILED:
       const loginFailed = action as LoginFailed;

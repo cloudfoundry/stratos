@@ -72,6 +72,9 @@ import {
   CloudFoundrySpaceSummaryComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-summary/cloud-foundry-space-summary.component';
 import {
+  CloudFoundrySpaceUserServiceInstancesComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-user-service-instances/cloud-foundry-space-user-service-instances.component';
+import {
   CloudFoundrySpaceUsersComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-users/cloud-foundry-space-users.component';
 import {
@@ -143,6 +146,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundrySpaceBaseComponent,
     CloudFoundrySpaceAppsComponent,
     CloudFoundrySpaceServiceInstancesComponent,
+    CloudFoundrySpaceUserServiceInstancesComponent,
     CloudFoundrySpaceRoutesComponent,
     CloudFoundrySpaceUsersComponent,
     EditSpaceStepComponent,

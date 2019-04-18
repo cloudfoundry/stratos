@@ -5,7 +5,8 @@
   <div class="favorites-list">
     <div class="home-page__list-header">
       <h3 class="home-page__header">Favorites</h3>
-      <button mat-icon-button [ngSwitch]="showFilters" (click)="toggleShowFilters($event)">
+      <button mat-icon-button *ngIf="showFilterToggle$ | async" [ngSwitch]="showFilters"
+        (click)="toggleShowFilters($event)">
         <mat-icon *ngSwitchCase="true" matTooltip="Hide filters" aria-label="Show filters">filter_list</mat-icon>
         <mat-icon *ngSwitchCase="false" matTooltip="Show filters" aria-label="Hide filters">filter_list</mat-icon>
       </button>

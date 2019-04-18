@@ -5,9 +5,10 @@
     </app-multiline-title>
   </app-meta-card-title>
   <app-meta-card-item>
-    <app-meta-card-key>Space</app-meta-card-key>
+    <app-meta-card-key>{{cfOrgSpace.getLabel() | async}}</app-meta-card-key>
     <app-meta-card-value>
-      <a [routerLink]="getSpaceURL()" [queryParams]="getSpaceBreadcrumbs()">{{ getSpaceName() }}</a>
+      <app-cf-org-space-links [service]="cfOrgSpace" [spaceBreadCrumbs]="getSpaceBreadcrumbs()">
+      </app-cf-org-space-links>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>

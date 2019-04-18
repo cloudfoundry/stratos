@@ -41,16 +41,11 @@ export class ToggleHeaderEvent implements Action {
 }
 
 export class ShowSideHelp implements Action {
-
   constructor(public document: string) { }
-
   type = SHOW_SIDE_HELP;
 }
 
 export class CloseSideHelp implements Action {
-
-  constructor() { }
-
   type = CLOSE_SIDE_HELP;
 }
 

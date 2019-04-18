@@ -18,12 +18,14 @@ import { getEndpointType } from '../features/endpoints/endpoint-helpers';
 import { UserService } from './user.service';
 
 
+
 @Injectable()
 export class EndpointsService implements CanActivate {
 
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
+  disablePersistenceFeatures$: Observable<boolean>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint) {
@@ -49,6 +51,10 @@ export class EndpointsService implements CanActivate {
           endpoint.connectionStatus === 'connected' ||
           endpoint.connectionStatus === 'checking';
       }))
+    );
+
+    this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
+      map((auth) => auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true')
     );
   }
 
@@ -77,16 +83,20 @@ export class EndpointsService implements CanActivate {
         this.haveRegistered$,
         this.haveConnected$,
         this.userService.isAdmin$,
+        this.disablePersistenceFeatures$
       ),
-      map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
+      map(([state, haveRegistered, haveConnected, isAdmin, disablePersistenceFeatures]
+        : [[AuthState, EndpointState], boolean, boolean, boolean, boolean]) => {
         const [authState] = state;
         if (authState.sessionData.valid) {
           // Redirect to endpoints if there's no connected endpoints
           let redirect: string;
-          if (!haveRegistered) {
-            redirect = isAdmin ? '/endpoints' : '/noendpoints';
-          } else if (!haveConnected) {
-            redirect = '/endpoints';
+          if (!disablePersistenceFeatures) {
+            if (!haveRegistered) {
+              redirect = isAdmin ? '/endpoints' : '/noendpoints';
+            } else if (!haveConnected) {
+              redirect = '/endpoints';
+            }
           }
 
           // Abort redirect if there's no redirect needed (endpoints are ok or we're already heading to redirect)

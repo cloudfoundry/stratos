@@ -186,12 +186,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     }
     return routes.reduce((nav, route) => {
       if (route.data && route.data.stratosNavigation) {
-        const item = {
+        const item: SideNavItem = {
           ...route.data.stratosNavigation,
           link: path + '/' + route.path
         };
         if (item.requiresEndpointType) {
           item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+        } else if (item.requiresPersistence) {
+          item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));
         }
         // Backwards compatibility (text became label)
         if (!item.label && !!item.text) {

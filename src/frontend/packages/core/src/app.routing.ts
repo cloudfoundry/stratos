@@ -32,7 +32,8 @@ const appRoutes: Routes = [
           stratosNavigation: {
             label: 'Home',
             matIcon: 'home',
-            position: 10
+            position: 10,
+            requiresPersistence: true
           }
         }
       },
@@ -53,7 +54,8 @@ const appRoutes: Routes = [
           stratosNavigation: {
             label: 'Endpoints',
             matIcon: 'settings_ethernet',
-            position: 100
+            position: 100,
+            requiresPersistence: true
           }
         },
         children: [{

@@ -2,14 +2,14 @@ import {
   CHANGE_SIDE_NAV_MODE,
   CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
+  DISABLE_SIDE_NAV_MOBILE_MODE,
+  ENABLE_SIDE_NAV_MOBILE_MODE,
   OPEN_SIDE_NAV,
   SET_HEADER_EVENT,
   SetHeaderEvent,
   SHOW_SIDE_HELP,
   TOGGLE_HEADER_EVENT,
   TOGGLE_SIDE_NAV,
-  ENABLE_SIDE_NAV_MOBILE_MODE,
-  DISABLE_SIDE_NAV_MOBILE_MODE,
 } from '../actions/dashboard-actions';
 
 export interface DashboardState {
@@ -29,7 +29,7 @@ export const defaultDashboardState: DashboardState = {
   sideNavPinned: true,
   headerEventMinimized: false,
   sideHelpOpen: false,
-  sideHelpDocument: ''
+  sideHelpDocument: null
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action) {

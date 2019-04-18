@@ -133,6 +133,7 @@ $side-nav-light-active: #484848;
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
   @include app-multiline-title-theme($theme, $app-theme);
+  @include app-markdown-preview-theme($theme, $app-theme);
   @include tile-selector-theme($theme, $app-theme);
   @include app-markdown-preview-theme($theme, $app-theme);
   @include app-simple-usage-chart($theme, $app-theme);

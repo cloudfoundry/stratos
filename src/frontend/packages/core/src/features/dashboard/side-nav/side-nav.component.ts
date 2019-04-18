@@ -1,4 +1,4 @@
-import { Component, Inject, InjectionToken, Input, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, InjectionToken, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { buffer, debounceTime, filter, map } from 'rxjs/operators';
@@ -18,6 +18,8 @@ export interface SideNavItem extends ISubHeaderTabs {
   link: string;
   position?: number;
   hidden?: Observable<boolean>;
+  requiresEndpointType?: string;
+  requiresPersistence?: boolean;
 }
 
 @Component({

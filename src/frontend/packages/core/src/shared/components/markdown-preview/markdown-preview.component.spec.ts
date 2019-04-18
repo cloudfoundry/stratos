@@ -1,6 +1,9 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { LoggerService } from '../../../core/logger.service';
 import { MarkdownPreviewComponent } from './markdown-preview.component';
 
 describe('MarkdownPreviewComponent', () => {
@@ -10,7 +13,12 @@ describe('MarkdownPreviewComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [MarkdownPreviewComponent],
-      providers: [HttpClient, HttpHandler]
+      providers: [LoggerService, HttpClient, HttpHandler],
+      imports: [
+        HttpClientModule,
+        HttpClientTestingModule,
+        createBasicStoreModule()
+      ]
     })
       .compileComponents();
   }));

@@ -1,0 +1,39 @@
+:host {
+  flex: 1;
+}
+
+
+.connect {
+  &__question {
+    padding-bottom: 24px;
+  }
+
+  &__option {
+    padding-bottom: 40px;
+    mat-radio-button {
+      &:first-of-type {
+        padding-right: 12px;
+      }
+    }
+  }
+
+  &__title {
+    &_title {
+      align-items: center;
+      display: flex;
+      height: 40px;
+    }
+  }
+  &__successful-reg-text {
+    margin-bottom: 30px;
+  }
+  &__subtext {
+    font-size: 13px;
+    margin-top: -5px;
+    opacity: .5;
+    position: absolute;
+  }
+  &__checkbox {
+    position: relative;
+  }
+}

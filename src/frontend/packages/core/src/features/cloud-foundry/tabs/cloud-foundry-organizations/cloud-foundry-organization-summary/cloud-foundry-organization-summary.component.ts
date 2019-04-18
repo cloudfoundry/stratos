@@ -33,6 +33,7 @@ export class CloudFoundryOrganizationSummaryComponent {
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
+      cfOrgService.userProvidedServiceInstancesCount$
     ]).pipe(
       map(() => false),
       startWith(true)
