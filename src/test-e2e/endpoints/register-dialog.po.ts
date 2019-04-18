@@ -5,7 +5,7 @@ import { FormComponent } from '../po/form.po';
 import { Page } from '../po/page.po';
 import { StepperComponent } from '../po/stepper.po';
 
-export class RegisterDialog extends Page {
+export class RegisterStepper extends Page {
 
   helpers = new E2EHelpers();
 

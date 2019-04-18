@@ -31,7 +31,8 @@
         </div>
         <div class="steppers__navigation-right">
           <button id="stepper_cancel" color="primary" mat-button [routerLink]="cancel$ | async"
-            [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)" *ngIf="cancel"
+            [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)"
+            *ngIf="!steps[currentIndex].hideCloseButton && cancel"
             (click)="steps[currentIndex].onLeave(false)">{{ this.getCancelButtonText(currentIndex) }}</button>
           <button id="stepper_next" *ngIf="!steps[currentIndex].hideNextButton" class="steppers__navigation-right__next"
             [color]="steps[currentIndex].destructiveStep ? 'warn' : 'primary'" type="submit" mat-button
