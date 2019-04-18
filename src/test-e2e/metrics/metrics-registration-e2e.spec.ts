@@ -22,7 +22,6 @@ describe('Metrics', () => {
     endpointsPage.register();
     tileSelector.select('Metrics');
     expect(register.isRegisterDialog()).toBeTruthy();
-    expect(register.stepper.canCancel()).toBeTruthy();
     expect(register.stepper.canNext()).toBeFalsy();
 
     register.form.getControlsMap().then(fields => {
@@ -43,7 +42,7 @@ describe('Metrics', () => {
 
     expect(register.stepper.canNext()).toBeTruthy();
     register.stepper.next();
-    register.stepper.cancel();
+    register.stepper.next();
     expect(register.isRegisterDialog()).toBeFalsy();
 
     // Check that we have one row
