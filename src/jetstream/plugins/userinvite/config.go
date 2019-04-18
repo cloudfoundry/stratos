@@ -93,7 +93,6 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 
 // ValidateConfig will validate that enough configuration is available
 func (userinvite *UserInvite) ValidateConfig(c *Config) error {
-	//return fmt.Errorf("Not configured")
 
 	if len(c.TemplateConfig.HTMLTemplate) == 0 {
 		c.TemplateConfig.HTMLTemplate = defaultHTMLTemplate
