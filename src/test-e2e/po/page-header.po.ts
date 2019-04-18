@@ -13,10 +13,10 @@ export class PageHeader extends Component {
     super(protractorElement(by.css('.page-header')));
   }
   private readonly until = protractor.ExpectedConditions;
-  private readonly pageTitleSelector = '.page-header h1';
+  private readonly pageTitleSelector = 'h1';
 
   getIconButtons(): ElementArrayFinder {
-    return this.locator.all(by.css('.page-header button.mat-icon-button'));
+    return this.locator.all(by.css('button.mat-icon-button'));
   }
 
   getIconButton(iconName: string): promise.Promise<ElementFinder> {
