@@ -18,7 +18,7 @@ This release contains a number of fixes and improvements:
 
 **Improvements:**
 - Change Side Navigation [\#3449](https://github.com/cloudfoundry-incubator/stratos/pull/3449)
-- Use side nav instead of top tabs throughout [\#3289] (https://github.com/cloudfoundry-incubator/stratos/pull/3289)
+- Use side nav instead of top tabs throughout [\#3289](https://github.com/cloudfoundry-incubator/stratos/pull/3289)
 - Add support for inviting users to an org or space [\#3377](https://github.com/cloudfoundry-incubator/stratos/pull/3377) 
 - Add support for User Favourites [\#3255](https://github.com/cloudfoundry-incubator/stratos/pull/3255)
 - Add support for User Provided Service Instances [\#3415](https://github.com/cloudfoundry-incubator/stratos/pull/3415)
