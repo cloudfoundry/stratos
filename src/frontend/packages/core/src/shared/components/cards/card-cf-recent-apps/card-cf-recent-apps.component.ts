@@ -1,16 +1,16 @@
-import { Component, Input, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { filter, first } from 'rxjs/operators';
 
+import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../core/cf-api.types';
 import {
   appDataSort,
   CloudFoundryEndpointService,
 } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { AppState } from '../../../../../../store/src/app-state';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 
 const RECENT_ITEMS_COUNT = 10;
 
@@ -30,12 +30,11 @@ export class CardCfRecentAppsComponent implements OnInit {
     public cfEndpointService: CloudFoundryEndpointService,
   ) { }
 
-  apps$: Observable<APIResource<IApp>[]>;
-
   ngOnInit() {
-    this.apps$ = this.allApps$.pipe(
-      map(allApps => this.processApps(allApps))
-    );
+    this.allApps$.pipe(
+      filter(apps => !!apps),
+      first()
+    ).subscribe(apps => this.processApps(apps));
   }
 
   private processApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
