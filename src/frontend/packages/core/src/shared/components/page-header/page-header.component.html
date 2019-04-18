@@ -40,13 +40,13 @@
             <app-recent-entities class="page-header__history-list" history="true"></app-recent-entities>
           </div>
         </mat-menu>
+        <button *ngIf="eventCount$ | async as eventCount" routerLink="/events" mat-icon-button>
+          <mat-icon matBadgeColor="warn" [matBadge]="eventCount" class="page-header__notifications-button">notifications
+          </mat-icon>
+        </button>
         <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button
           [matMenuTriggerFor]="menu">
           <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
-          <div class="page-header__menu-icon" *ngIf="eventPriorityStatus$ | async as state">
-            <app-stateful-icon [inline]="true" [state]="state">
-            </app-stateful-icon>
-          </div>
         </button>
         <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
           <div class="page-header__menu-inner">
@@ -63,15 +63,6 @@
               </button>
               <button mat-menu-item routerLink="/user-profile">
                 <span>Profile</span>
-              </button>
-              <div class="page-header__menu-separator"></div>
-            </div>
-            <div *ngIf="eventCount$ | async as eventCount">
-              <button routerLink="/events" mat-menu-item class="page-header__warning-button">
-                Events
-                <div class="page-header__warning-count">
-                  {{eventCount}}
-                </div>
               </button>
               <div class="page-header__menu-separator"></div>
             </div>

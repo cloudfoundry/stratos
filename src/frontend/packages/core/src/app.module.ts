@@ -145,23 +145,24 @@ export class AppModule {
         link: '/user-profile'
       }
     );
-    eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
-      {
-        selector: (state: AppState) => state.requestData.endpoint,
-        eventTriggered: (state: IRequestEntityTypeState<EndpointModel>) => {
-          return Object.values(state).reduce((events, endpoint) => {
-            if (endpoint.connectionStatus === 'checking') {
-              events.push(new GlobalEventData(true, endpoint));
-            }
-            return events;
-          }, []);
-        },
-        message: (endpoint: EndpointModel) => `Connecting endpoint ${endpoint.name}`,
-        link: '/endpoints',
-        key: 'endpoint-connect',
-        type: 'process'
-      }
-    );
+    // This should be brought back in in the future
+    // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
+    //   {
+    //     selector: (state: AppState) => state.requestData.endpoint,
+    //     eventTriggered: (state: IRequestEntityTypeState<EndpointModel>) => {
+    //       return Object.values(state).reduce((events, endpoint) => {
+    //         if (endpoint.connectionStatus === 'checking') {
+    //           events.push(new GlobalEventData(true, endpoint));
+    //         }
+    //         return events;
+    //       }, []);
+    //     },
+    //     message: (endpoint: EndpointModel) => `Connecting endpoint ${endpoint.name}`,
+    //     link: '/endpoints',
+    //     key: 'endpoint-connect',
+    //     type: 'process'
+    //   }
+    // );
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     initEndpointExtensions(ext);

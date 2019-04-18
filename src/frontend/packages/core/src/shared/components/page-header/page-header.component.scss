@@ -6,6 +6,9 @@ $bottom-index: $top-index - 1;
   $breadcrumb-padding: 3px;
   position: relative;
   z-index: $top-index;
+  &__notifications-button {
+    display: inline-block;
+  }
   &__menu-icon {
     border-radius: 50%;
     box-shadow: 0 6px 8px 3px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, 0);
