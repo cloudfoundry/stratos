@@ -4,7 +4,7 @@ import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { MenuComponent } from '../po/menu.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
-import { SnackBarComponent } from '../po/snackbar.po';
+import { SnackBarPo } from '../po/snackbar.po';
 import { ServicesPage } from '../services/services.po';
 import { EndpointsPage } from './endpoints.po';
 
@@ -63,7 +63,7 @@ describe('Endpoints', () => {
 
         it('Welcome snackbar message should be displayed', () => {
           endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
-          const snackBar = new SnackBarComponent();
+          const snackBar = new SnackBarPo();
           expect(snackBar.isDisplayed()).toBeTruthy();
           expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
           snackBar.close();
@@ -131,7 +131,7 @@ describe('Endpoints', () => {
 
           it('Welcome snackbar message should be displayed', () => {
             endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
-            const snackBar = new SnackBarComponent();
+            const snackBar = new SnackBarPo();
             expect(snackBar.isDisplayed()).toBeTruthy();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
             snackBar.close();

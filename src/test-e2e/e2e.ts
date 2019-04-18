@@ -215,7 +215,6 @@ export class E2ESetup {
   }
 
   private addSetupOp(fn: Function, desc?: string) {
-    const that = this;
     this.setupOps.push(() => protractor.promise.controlFlow().execute(() => {
       E2E.debugLog(desc || 'Performing setup op');
       return fn();

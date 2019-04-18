@@ -143,11 +143,13 @@ export class WrapperRequestActionSuccess<T = any> extends RequestSuccessAction i
     public apiAction: IRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
     public totalResults?: number,
-    public totalPages?: number
+    public totalPages?: number,
+    public updatingMessage?: string
   ) {
     super();
   }
 }
+
 export interface InternalEndpointError {
   endpointIds: string[];
   eventCode?: string;

@@ -1,13 +1,13 @@
+import { IRequestTypeState } from '../../app-state';
+import { mergeState } from '../../helpers/reducer.helper';
 import { IRequestAction, ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
 import {
   createRequestStateFromResponse,
   getEntityRequestState,
+  mergeObject,
   mergeUpdatingState,
   setEntityRequestState,
-  mergeObject,
 } from './request-helpers';
-import { mergeState } from '../../helpers/reducer.helper';
-import { IRequestTypeState } from '../../app-state';
 
 export function succeedRequest(state: IRequestTypeState, action: ISuccessRequestAction) {
   if (action.apiAction.guid) {
@@ -21,7 +21,7 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
         {
           busy: false,
           error: false,
-          message: '',
+          message: successAction.updatingMessage || '',
         }
       );
     } else if (action.requestType === 'delete' && !action.apiAction.updatingKey) {

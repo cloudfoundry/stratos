@@ -125,6 +125,7 @@ export class EndpointsEffect {
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
         action.body,
+        response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
       );
     }));
 
@@ -242,6 +243,7 @@ export class EndpointsEffect {
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {
         const actions = [];
+        let response: NormalizedResponse<EndpointModel>;
         if (actionStrings[0]) {
           actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
         }
@@ -253,13 +255,21 @@ export class EndpointsEffect {
 
         if (apiActionType === 'create') {
           actions.push(new GetSystemInfo());
+          response = {
+            entities: {
+              [endpointSchemaKey]: {
+                [endpoint.guid]: endpoint
+              }
+            },
+            result: [endpoint.guid]
+          };
         }
 
         if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
           actions.push(this.clearEndpointInternalEvents(apiAction.guid));
         }
 
-        actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
+        actions.push(new WrapperRequestActionSuccess(response, apiAction, apiActionType, null, null, endpoint ? endpoint.guid : null));
         return actions;
       }
       ),
