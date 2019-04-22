@@ -33,7 +33,7 @@ spec:
 {{- if .Values.console.service.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
   {{- range $cidr := .Values.console.service.loadBalancerSourceRanges }}
-    - {{ $cidr }}
+    - {{ $cidr | quote }}
   {{- end }}
 {{- end }}
 {{- end }}
