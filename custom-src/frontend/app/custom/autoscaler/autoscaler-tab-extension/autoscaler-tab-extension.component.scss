@@ -25,6 +25,10 @@
   }
 }
 
+.app-metadata-table {
+  display: block;
+}
+
 app-tile-grid {
   width: 100%;
 }
@@ -53,5 +57,14 @@ table {
   }
   &-1of6 {
     flex: 0 0 16.78%;
+  }
+}
+
+.autoscaler-tab {
+  th.mat-header-cell:first-of-type {
+    padding-left: unset;
+  }
+  .autoscaler-tab-table-no-record {
+    margin-top: 0.5em;
   }
 }

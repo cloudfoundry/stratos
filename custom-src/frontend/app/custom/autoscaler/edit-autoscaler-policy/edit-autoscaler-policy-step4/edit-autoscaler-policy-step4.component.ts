@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, distinctUntilChanged, publishReplay, refCount, first } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { filter, map, distinctUntilChanged, take } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
 import { ApplicationService } from '../../../../features/applications/application.service';
@@ -16,7 +16,7 @@ import {
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
 import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import {
-  MomentFormateDateTimeT, PolicyAlert, PolicyDefaultSpecificDate
+  MomentFormateDateTimeT, PolicyAlert, PolicyDefaultSpecificDate, cloneObject
 } from '../../autoscaler-helpers/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
@@ -38,10 +38,9 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup;
-  submitMessage = '';
-  submitStatus = true;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
+  private updateAppAutoscalerPolicyService: EntityService;
   private editLimitValid = true;
   private editSpecificDateTimeValid = true;
   private appAutoscalerPolicyErrorSub: Subscription;
@@ -71,6 +70,13 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
         return this.currentPolicy;
       })
     );
+    this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
+      appAutoscalerUpdatedPolicySchemaKey,
+      entityFactory(appAutoscalerUpdatedPolicySchemaKey),
+      this.applicationService.appGuid,
+      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
+      false
+    );
   }
 
   ngOnDestroy(): void {
@@ -80,45 +86,45 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
   }
 
   updatePolicy: StepOnNextFunction = () => {
-    this.submitStatus = true;
-    this.submitMessage = '';
-    let updateAppAutoscalerPolicyService: EntityService;
-    updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerUpdatedPolicySchemaKey,
-      entityFactory(appAutoscalerUpdatedPolicySchemaKey),
-      this.applicationService.appGuid,
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
-      false
-    );
     this.store.dispatch(
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
-
     let waitForAppAutoscalerUpdateStatus$: Observable<any>;
-    waitForAppAutoscalerUpdateStatus$ = updateAppAutoscalerPolicyService.waitForEntity$.pipe(publishReplay(1), refCount());
-    waitForAppAutoscalerUpdateStatus$
-      .pipe(first())
-      .subscribe(entity => {
-        this.submitStatus = true;
-        this.submitMessage = 'Policy is saved.';
-        this.currentPolicy = entity.entity;
-        this.store.dispatch(
-          new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-        );
-      });
-    this.appAutoscalerPolicyErrorSub = updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error),
-      map(request => request.message),
+    waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
+      filter(request => !!request.error || !!request.response),
+      map(request => {
+        const msg = request.message;
+        request.error = false;
+        request.response = null;
+        request.message = '';
+        return msg;
+      }),
       distinctUntilChanged(),
-    ).subscribe(errorMessage => {
-      this.submitStatus = false;
-      this.submitMessage = errorMessage;
-    });
-    return observableOf({ success: this.submitStatus, message: this.submitMessage});
+    ).pipe(map(errorMessage => {
+      if (errorMessage) {
+        return {
+          success: false,
+          message: `Could not update policy: ${errorMessage}`,
+        };
+      } else {
+        return {
+          success: true,
+          redirect: true
+        };
+      }
+    }));
+    return waitForAppAutoscalerUpdateStatus$.pipe(take(1), map(res => {
+      this.store.dispatch(
+        new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
+      );
+      return {
+        ...res,
+      };
+    }));
   }
 
   addSpecificDate = () => {
-    this.currentPolicy.schedules.specific_date.push(PolicyDefaultSpecificDate);
+    this.currentPolicy.schedules.specific_date.push(cloneObject(PolicyDefaultSpecificDate));
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
 
@@ -227,7 +233,7 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
   validateRecurringSpecificMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editSpecificDateForm &&
-      numberWithFractionOrExceedRange(control.value, 1, this.editSpecificDateForm.get('instance_max_count').value - 1, true);
+        numberWithFractionOrExceedRange(control.value, 1, this.editSpecificDateForm.get('instance_max_count').value - 1, true);
       const lastValid = this.editLimitValid;
       this.editLimitValid = this.editSpecificDateForm && control.value < this.editSpecificDateForm.get('instance_max_count').value;
       if (this.editSpecificDateForm && lastValid !== this.editLimitValid) {

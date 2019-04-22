@@ -4,7 +4,8 @@ import {
   metricMap,
   S2NS,
   MomentFormateTimeS,
-  normalColor
+  normalColor,
+  MetricPercentageTypes
 } from './autoscaler-util';
 
 function initMeticData(metricName) {
@@ -205,7 +206,7 @@ function getMetricBasicInfo(metricName, source, trigger) {
   let maxCount = 1;
   let preTimestamp = 0;
   let maxValue = -1;
-  let unit = metricMap[metricName].unit_internal;
+  const unit = metricMap[metricName].unit_internal;
   map[interval] = 1;
   for (const item of source) {
     maxValue = Math.max(Number(item.value), maxValue);
@@ -217,7 +218,7 @@ function getMetricBasicInfo(metricName, source, trigger) {
       maxCount = map[currentInterval];
     }
     preTimestamp = thisTimestamp;
-    unit = item.unit === '' ? unit : item.unit;
+    // unit = item.unit === '' ? unit : item.unit;
   }
   return {
     interval,
@@ -230,13 +231,19 @@ function getChartMax(trigger, maxValue) {
   let thresholdCount = 0;
   let maxThreshold = 0;
   let thresholdmax = 0;
+  let metricType = '';
   if (trigger.upper && trigger.upper.length > 0) {
     thresholdCount += trigger.upper.length;
     maxThreshold = trigger.upper[0].threshold;
+    metricType = trigger.upper[0].metric_type;
   }
   if (trigger.lower && trigger.lower.length > 0) {
     thresholdCount += trigger.lower.length;
     maxThreshold = Math.max(trigger.lower[0].threshold, maxThreshold);
+    metricType = trigger.lower[0].metric_type;
+  }
+  if (MetricPercentageTypes.indexOf(metricType) >= 0) {
+    return 100;
   }
   if (maxThreshold > 0) {
     thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));

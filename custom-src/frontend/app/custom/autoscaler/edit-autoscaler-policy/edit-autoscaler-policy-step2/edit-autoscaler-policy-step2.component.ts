@@ -15,7 +15,9 @@ import {
   getScaleType,
   getAdjustmentType,
   PolicyAlert,
-  PolicyDefaultTrigger
+  PolicyDefaultTrigger,
+  MetricPercentageTypes,
+  cloneObject
 } from '../../autoscaler-helpers/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
@@ -79,7 +81,7 @@ export class EditAutoscalerPolicyStep2Component implements OnInit {
   }
 
   addTrigger = () => {
-    this.currentPolicy.scaling_rules_form.push(PolicyDefaultTrigger);
+    this.currentPolicy.scaling_rules_form.push(cloneObject(PolicyDefaultTrigger));
     this.editTrigger(this.currentPolicy.scaling_rules_form.length - 1);
   }
 
@@ -105,28 +107,29 @@ export class EditAutoscalerPolicyStep2Component implements OnInit {
     });
   }
 
-  finishTrigger: StepOnNextFunction = () => {
-    if (this.editIndex !== -1) {
-      const adjustmentp = this.editTriggerForm.get('adjustment_type').value === 'value' ? '' : '%';
-      const adjustmenti = this.editTriggerForm.get('adjustment').value;
-      const adjustmentm = this.editScaleType === 'upper' ? `+${adjustmenti}${adjustmentp}` : `-${adjustmenti}${adjustmentp}`;
-      this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type').value;
-      this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator').value;
-      this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold').value;
-      this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentm;
-      if (this.editTriggerForm.get('breach_duration_secs').value) {
-        this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
-          this.editTriggerForm.get('breach_duration_secs').value;
-      } else {
-        this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs = PolicyDefaultSetting.breach_duration_secs_default;
-      }
-      if (this.editTriggerForm.get('cool_down_secs').value) {
-        this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = this.editTriggerForm.get('cool_down_secs').value;
-      } else {
-        this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = PolicyDefaultSetting.cool_down_secs_default;
-      }
-      this.editIndex = -1;
+  finishTrigger() {
+    const adjustmentp = this.editTriggerForm.get('adjustment_type').value === 'value' ? '' : '%';
+    const adjustmenti = this.editTriggerForm.get('adjustment').value;
+    const adjustmentm = this.editScaleType === 'upper' ? `+${adjustmenti}${adjustmentp}` : `-${adjustmenti}${adjustmentp}`;
+    this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type').value;
+    this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator').value;
+    this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold').value;
+    this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentm;
+    if (this.editTriggerForm.get('breach_duration_secs').value) {
+      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
+        this.editTriggerForm.get('breach_duration_secs').value;
+    } else {
+      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs = PolicyDefaultSetting.breach_duration_secs_default;
     }
+    if (this.editTriggerForm.get('cool_down_secs').value) {
+      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = this.editTriggerForm.get('cool_down_secs').value;
+    } else {
+      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = PolicyDefaultSetting.cool_down_secs_default;
+    }
+    this.editIndex = -1;
+  }
+
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(new UpdateAppAutoscalerPolicyStepAction(this.currentPolicy));
     return observableOf({ success: true });
   }
@@ -158,7 +161,7 @@ export class EditAutoscalerPolicyStep2Component implements OnInit {
       const metricType = this.editTriggerForm.get('metric_type').value;
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
       const errors: any = {};
-      if (metricType === 'memoryutil') {
+      if (MetricPercentageTypes.indexOf(metricType) >= 0) {
         if (numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
           errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
         }

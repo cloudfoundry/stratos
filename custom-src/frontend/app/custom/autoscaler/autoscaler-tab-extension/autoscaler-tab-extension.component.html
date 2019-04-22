@@ -107,8 +107,8 @@
               <mat-card-title>Scaling Rules </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <div class="app-metadata">
-                <table mat-table [dataSource]="policy && policy.scaling_rules">
+              <div class="app-metadata app-metadata-table">
+                <table mat-table [dataSource]="policy && policy.scaling_rules_form">
                   <ng-container matColumnDef="metric">
                     <th mat-header-cell *matHeaderCellDef> Metric </th>
                     <td mat-cell *matCellDef="let element"> {{element.metric_type}} </td>
@@ -125,6 +125,7 @@
                   <tr mat-header-row *matHeaderRowDef="scalingRuleColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: scalingRuleColumns;"></tr>
                 </table>
+                <div class="autoscaler-tab-table-no-record" *ngIf="policy && policy.scaling_rules_form && policy.scaling_rules_form.length == 0">No scaling rules.</div>
               </div>
             </mat-card-content>
             <mat-card-actions class="autoscaler-tab__actions">
@@ -145,7 +146,7 @@
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <div class="app-metadata">
+              <div class="app-metadata app-metadata-table">
                 <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.specific_date">
                   <ng-container matColumnDef="from">
                     <th mat-header-cell *matHeaderCellDef> From </th>
@@ -171,9 +172,10 @@
                   <tr mat-header-row *matHeaderRowDef="specificDateColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: specificDateColumns;"></tr>
                 </table>
+                <div class="autoscaler-tab-table-no-record" *ngIf="policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length == 0">No specific date schedule.</div>
               </div>
               <br />
-              <div class="app-metadata">
+              <div class="app-metadata app-metadata-table">
                 <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.recurring_schedule">
                   <ng-container matColumnDef="effect">
                     <th mat-header-cell *matHeaderCellDef> Effective Duration </th>
@@ -210,6 +212,7 @@
                   <tr mat-header-row *matHeaderRowDef="recurringScheduleColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: recurringScheduleColumns;"></tr>
                 </table>
+                <div class="autoscaler-tab-table-no-record" *ngIf="policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length == 0">No recurring schedule.</div>
               </div>
             </mat-card-content>
             <mat-card-actions class="autoscaler-tab__actions">

@@ -1,7 +1,8 @@
 
 import * as moment from 'moment-timezone';
 
-export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput'];
+export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'];
+export const MetricPercentageTypes = ['memoryutil'];
 export const ScaleTypes = ['upper', 'lower'];
 export const UpperOperators = ['>', '>='];
 export const LowerOperators = ['<', '<='];
@@ -62,7 +63,7 @@ export const metricMap = {
     interval: 40,
   },
   memoryutil: {
-    unit_internal: '%',
+    unit_internal: ' % ',
     interval: 40,
   },
   responsetime: {
@@ -71,6 +72,10 @@ export const metricMap = {
   },
   throughput: {
     unit_internal: 'rps',
+    interval: 40,
+  },
+  cpu: {
+    unit_internal: ' % ',
     interval: 40,
   }
 };
@@ -238,4 +243,8 @@ export function shiftArray(array, step) {
     days[i] = array[i] + step;
   }
   return days;
+}
+
+export function cloneObject(obj) {
+  return JSON.parse(JSON.stringify(obj));
 }

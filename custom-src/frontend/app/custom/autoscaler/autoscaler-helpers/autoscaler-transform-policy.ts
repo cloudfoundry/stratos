@@ -84,17 +84,19 @@ function setLowerColor(array) {
 }
 
 export function autoscalerTransformMapToArray(newPolicy) {
+  const scalingRules = [];
   if (newPolicy.scaling_rules_form) {
-    const scalingRules = [];
     newPolicy.scaling_rules_form.map((trigger) => {
       deleteIf(trigger, 'breach_duration_secs', trigger.breach_duration_secs === PolicyDefaultSetting.breach_duration_secs_default);
       deleteIf(trigger, 'cool_down_secs', trigger.cool_down_secs === PolicyDefaultSetting.cool_down_secs_default);
       delete trigger.color;
       scalingRules.push(trigger);
     });
-    if (scalingRules.length > 0) {
-      newPolicy.scaling_rules = scalingRules;
-    }
+  }
+  if (scalingRules.length > 0) {
+    newPolicy.scaling_rules = scalingRules;
+  } else {
+    delete newPolicy.scaling_rules;
   }
   delete newPolicy.scaling_rules_form;
   delete newPolicy.scaling_rules_map;

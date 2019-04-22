@@ -10,7 +10,7 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
 import { UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.actions';
 import {
-  MomentFormateDate, PolicyAlert, shiftArray, PolicyDefaultRecurringSchedule
+  MomentFormateDate, PolicyAlert, shiftArray, PolicyDefaultRecurringSchedule, cloneObject
 } from '../../autoscaler-helpers/autoscaler-util';
 import {
   numberWithFractionOrExceedRange,
@@ -81,7 +81,7 @@ export class EditAutoscalerPolicyStep3Component implements OnInit {
   }
 
   addRecurringSchedule = () => {
-    this.currentPolicy.schedules.recurring_schedule.push(PolicyDefaultRecurringSchedule);
+    this.currentPolicy.schedules.recurring_schedule.push(cloneObject(PolicyDefaultRecurringSchedule));
     this.editRecurringSchedule(this.currentPolicy.schedules.recurring_schedule.length - 1);
   }
 
@@ -126,7 +126,7 @@ export class EditAutoscalerPolicyStep3Component implements OnInit {
     }
   }
 
-  finishRecurringSchedule: StepOnNextFunction = () => {
+  finishRecurringSchedule() {
     const currentSchedule = this.currentPolicy.schedules.recurring_schedule[this.editIndex];
     const repeatOn = 'days_of_' + this.editRepeatType;
     if (this.editRecurringScheduleForm.get('effective_type').value === 'custom') {
@@ -148,8 +148,11 @@ export class EditAutoscalerPolicyStep3Component implements OnInit {
     currentSchedule.instance_max_count = this.editRecurringScheduleForm.get('instance_max_count').value;
     currentSchedule.start_time = this.editRecurringScheduleForm.get('start_time').value;
     currentSchedule.end_time = this.editRecurringScheduleForm.get('end_time').value;
-    this.store.dispatch(new UpdateAppAutoscalerPolicyStepAction(this.currentPolicy));
     this.editIndex = -1;
+  }
+
+  onNext: StepOnNextFunction = () => {
+    this.store.dispatch(new UpdateAppAutoscalerPolicyStepAction(this.currentPolicy));
     return observableOf({ success: true });
   }
 
