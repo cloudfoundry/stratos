@@ -4,6 +4,7 @@ import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-end
 import {
   KubernetesServicePortsComponent,
 } from '../../../kubernetes/list-types/kubernetes-service-ports/kubernetes-service-ports.component';
+import { HelmServicePortsComponent } from '../helm-service-ports/helm-service-ports.component';
 import { HelmReleaseServiceCardComponent } from './helm-release-service-card.component';
 
 
@@ -15,7 +16,8 @@ describe('HelmReleaseServiceCardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         HelmReleaseServiceCardComponent,
-        KubernetesServicePortsComponent
+        KubernetesServicePortsComponent,
+        HelmServicePortsComponent
       ],
       imports: [...BaseTestModules],
     })

@@ -20,6 +20,8 @@ $suse-side-nav-active: #003358;
 
 .stratos .page-content > .page-header {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  // Ensure kube icons don't appear above sub header
+  background-color: #f5f5f5;
 }
 
 .stratos img.stratos-title__logo {
