@@ -75,7 +75,6 @@ describe('AddServiceInstanceComponent', () => {
         MultilineTitleComponent,
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
-        StatefulIconComponent,
         FocusDirective,
         SpecifyUserProvidedDetailsComponent
       ],

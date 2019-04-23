@@ -17,7 +17,6 @@ describe('ServiceRecentInstancesCardComponent', () => {
       declarations: [
         ServiceRecentInstancesCardComponent,
         MetadataCardTestComponents,
-        StatefulIconComponent,
         CompactServiceInstanceCardComponent,
         AppChipsComponent
 

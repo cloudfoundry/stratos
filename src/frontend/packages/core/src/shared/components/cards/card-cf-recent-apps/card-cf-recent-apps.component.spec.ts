@@ -25,8 +25,7 @@ describe('CardCfRecentAppsComponent', () => {
         CardCfRecentAppsComponent,
         ApplicationStateIconComponent,
         CompactAppCardComponent,
-        ApplicationStateIconPipe,
-        StatefulIconComponent
+        ApplicationStateIconPipe
       ],
       imports: [...BaseTestModulesNoShared],
       providers: [
