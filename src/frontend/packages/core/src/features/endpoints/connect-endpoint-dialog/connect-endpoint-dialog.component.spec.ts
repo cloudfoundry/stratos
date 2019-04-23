@@ -25,7 +25,7 @@ class MatDialogDataMock implements ConnectEndpointConfig {
   ssoAllowed = false;
 }
 
-fdescribe('ConnectEndpointDialogComponent', () => {
+describe('ConnectEndpointDialogComponent', () => {
   let component: ConnectEndpointDialogComponent;
   let fixture: ComponentFixture<ConnectEndpointDialogComponent>;
 
