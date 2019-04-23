@@ -36,6 +36,7 @@ require (
 	github.com/gorilla/websocket v1.4.0
 	github.com/govau/cf-common v0.0.7
 	github.com/jessevdk/go-flags v1.4.0 // indirect
+	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
@@ -52,13 +53,15 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.3.0
-	github.com/smartystreets/goconvey v0.0.0-20190222223459-a17d461953aa
+	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
+	github.com/smartystreets/goconvey v0.0.0-20160503033757-d4c757aa9afd
 	github.com/ulikunitz/xz v0.5.6 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20190420063019-afa5a82059c6 // indirect
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.0.0-00010101000000-000000000000
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )
@@ -70,4 +73,6 @@ replace (
 	github.com/russross/blackfriday v2.0.0+incompatible => github.com/russross/blackfriday v1.5.2
 	github.com/sergi/go-diff => github.com/sergi/go-diff v1.0.0
 	github.com/spf13/cobra => github.com/spf13/cobra v0.0.3
+	gopkg.in/DATA-DOG/go-sqlmock.v1 => github.com/DATA-DOG/go-sqlmock v1.1.0
+
 )
