@@ -1,4 +1,9 @@
-import { SetSessionTimeoutAction, TIMEOUT_SESSION, HYDRATE_DASHBOARD_STATE, HydrateDashboardStateAction } from './../actions/dashboard-actions';
+import {
+  SetSessionTimeoutAction,
+  TIMEOUT_SESSION,
+  HYDRATE_DASHBOARD_STATE,
+  HydrateDashboardStateAction
+} from './../actions/dashboard-actions';
 import {
   CHANGE_SIDE_NAV_MODE,
   CLOSE_SIDE_HELP,
