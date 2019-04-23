@@ -39,7 +39,7 @@ export class PageTabsPo extends Component {
   }
 
   getItem(name: string): ElementFinder {
-    return this.locator.element(by.cssContainingText('a', name));
+    return this.locator.element(by.cssContainingText('a span', new RegExp(`^${name}$`)));
   }
 
   clickItem(name: string): promise.Promise<void> {

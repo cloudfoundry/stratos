@@ -36,11 +36,11 @@ export class CfSpaceLevelPage extends CFPage {
   }
 
   goToSITab() {
-    return this.goToTab('Service Instances', 'service-instances');
+    return this.goToTab('Services', 'service-instances');
   }
 
   goToUPSITab() {
-    return this.goToTab('User Service Instances', 'user-service-instances');
+    return this.goToTab('User Services', 'user-service-instances');
   }
 
   goToRoutesTab() {
