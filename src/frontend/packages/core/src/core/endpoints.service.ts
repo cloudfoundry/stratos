@@ -54,7 +54,10 @@ export class EndpointsService implements CanActivate {
     );
 
     this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
-      map((auth) => auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true')
+      map((auth) => auth.sessionData &&
+        auth.sessionData['plugin-config'] &&
+        auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true'
+      )
     );
   }
 
