@@ -1,5 +1,8 @@
 @import '../../../../sass/mixins';
 .event-page {
+  @include breakpoint(tablet) {
+    margin: 0 20%;
+  }
   &__event-row-icon {
     margin-right: 15px;
   }
@@ -11,8 +14,5 @@
   }
   &__event-row-card {
     margin-bottom: 15px;
-  }
-  @include breakpoint(tablet) {
-    margin: 0 20%;
   }
 }
