@@ -31,7 +31,17 @@ import { KubernetesService } from '../services/kubernetes.service';
 })
 export class KubernetesDashboardTabComponent implements OnInit {
 
-  @ViewChild('kubeDash', { read: ElementRef }) kubeDash: ElementRef;
+  private pKubeDash: ElementRef;
+  @ViewChild('kubeDash', { read: ElementRef }) set kubeDash(kubeDash: ElementRef) {
+    if (!this.pKubeDash) {
+      this.pKubeDash = kubeDash;
+      // Need to look at this process again. In tests this is never hit, leading to null references to kubeDash
+      this.setupEventListener();
+    }
+  }
+  get kubeDash(): ElementRef {
+    return this.pKubeDash;
+  }
 
   source: SafeResourceUrl;
   isLoading$ = new BehaviorSubject<boolean>(true);
@@ -40,6 +50,9 @@ export class KubernetesDashboardTabComponent implements OnInit {
   searchTerms: any;
 
   href = '';
+
+  private haveSetupEventLister = false;
+  private hasIframeLoaded = false;
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
@@ -72,6 +85,16 @@ export class KubernetesDashboardTabComponent implements OnInit {
       this.isLoading$.next(false);
       this.toggle(false);
     }
+    this.hasIframeLoaded = true;
+    this.setupEventListener();
+  }
+
+  setupEventListener() {
+    if (this.haveSetupEventLister || !this.kubeDash || !this.hasIframeLoaded) {
+      return;
+    }
+
+    this.haveSetupEventLister = true;
 
     const iframeWindow = this.kubeDash.nativeElement.contentWindow;
     // console.log('iframe loaded');
@@ -100,7 +123,6 @@ export class KubernetesDashboardTabComponent implements OnInit {
         this.href = '';
       }
     });
-
   }
 
   toggle(val: boolean) {
@@ -119,7 +141,8 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   private getKubeDashToolbar() {
-    if (this.kubeDash.nativeElement &&
+    if (this.kubeDash &&
+      this.kubeDash.nativeElement &&
       this.kubeDash.nativeElement.contentDocument &&
       this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
       const kdChrome = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('kd-chrome')[0];

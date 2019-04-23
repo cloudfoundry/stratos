@@ -1,9 +1,9 @@
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { SharedModule } from '../../../../shared/shared.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { KubernetesConfigAuthFormComponent } from './kubernetes-config-auth-form.component';
 import { FormBuilder } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+import { SharedModule } from '../../../../shared/shared.module';
+import { KubernetesConfigAuthFormComponent } from './kubernetes-config-auth-form.component';
 
 describe('KubernetesConfigAuthFormComponent', () => {
   let component: KubernetesConfigAuthFormComponent;
@@ -11,13 +11,13 @@ describe('KubernetesConfigAuthFormComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesConfigAuthFormComponent ],
+      declarations: [KubernetesConfigAuthFormComponent],
       imports: [
         SharedModule,
         NoopAnimationsModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
