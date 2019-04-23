@@ -80,5 +80,5 @@ replace (
 	k8s.io/client-go => k8s.io/client-go v2.0.0-alpha.0.0.20190202011228-6e4752048fde+incompatible
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20180509051136-39cb288412c4
 	k8s.io/kubernetes => k8s.io/kubernetes v1.13.3
-
+  gopkg.in/DATA-DOG/go-sqlmock.v1 => github.com/DATA-DOG/go-sqlmock v1.1.0
 )
