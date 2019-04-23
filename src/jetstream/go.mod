@@ -72,6 +72,7 @@ replace (
 	github.com/russross/blackfriday v2.0.0+incompatible => github.com/russross/blackfriday v1.5.2
 	github.com/sergi/go-diff => github.com/sergi/go-diff v1.0.0
 	github.com/spf13/cobra => github.com/spf13/cobra v0.0.3
+	gopkg.in/DATA-DOG/go-sqlmock.v1 => github.com/DATA-DOG/go-sqlmock v1.1.0
 	k8s.io/api => k8s.io/api v0.0.0-20190222213804-5cb15d344471
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20190221221350-bfb440be4b87
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190221213512-86fb29eff628
@@ -80,5 +81,4 @@ replace (
 	k8s.io/client-go => k8s.io/client-go v2.0.0-alpha.0.0.20190202011228-6e4752048fde+incompatible
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20180509051136-39cb288412c4
 	k8s.io/kubernetes => k8s.io/kubernetes v1.13.3
-  gopkg.in/DATA-DOG/go-sqlmock.v1 => github.com/DATA-DOG/go-sqlmock v1.1.0
 )
