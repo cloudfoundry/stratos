@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { GlobalEventService } from './global-events.service';
 
-import { GlobalEventService } from './global-warnings.service';
 
 describe('GlobalWarningsService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
