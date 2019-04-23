@@ -14,8 +14,8 @@ import {
   StratosTabType,
 } from '../../../core/extension/extension-service';
 import { environment } from '../../../environments/environment.prod';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',

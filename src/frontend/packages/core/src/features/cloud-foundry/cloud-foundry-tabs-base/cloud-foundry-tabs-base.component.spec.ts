@@ -5,6 +5,7 @@ import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { testSCFGuid } from '../../../../test-framework/store-test-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base.component';
@@ -20,7 +21,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
         providers: [
           CloudFoundryEndpointService,
           generateTestCfEndpointServiceProvider(),
-          ActiveRouteCfOrgSpace,
+          { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: testSCFGuid } },
           TabNavService
         ]
       }).compileComponents();
