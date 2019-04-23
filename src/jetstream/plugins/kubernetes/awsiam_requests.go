@@ -96,13 +96,13 @@ func (c *KubernetesSpecification) getTokenIAM(info AWSIAMUserInfo) (string, erro
 
 	creds := credentials.NewCredentials(&info)
 	stsAPI := sts.New(sess, &aws.Config{Credentials: creds})
-	token, err := generator.GetWithSTS(info.Cluster, stsAPI)
+	tok, err := generator.GetWithSTS(info.Cluster, stsAPI)
 	if err != nil {
 		return "", fmt.Errorf("AWS IAM: Failed to get token due to: %+v ", err)
 	}
 
 	// Got the token
-	return token, nil
+	return tok.Token, nil
 }
 
 func (c *KubernetesSpecification) doAWSIAMFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
