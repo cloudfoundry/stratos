@@ -352,9 +352,9 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	var err error
 	if includeDisconnected {
-		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, interfaces.SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
 	} else {
-		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, interfaces.SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
 	}
 
 	if err != nil {
@@ -415,7 +415,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		tr.Metadata = metadata.String
 	}
 	if tokenUserGUID.Valid {
-		tr.SystemShared = tokenUserGUID.String == SystemSharedUserGuid
+		tr.SystemShared = tokenUserGUID.String == interfaces.SystemSharedUserGuid
 	}
 	if linkedTokenGUID.Valid {
 		tr.LinkedGUID = linkedTokenGUID.String

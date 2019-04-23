@@ -8,6 +8,9 @@ import (
 	"github.com/labstack/echo"
 )
 
+// SystemSharedUserGuid is the User ID for the system shared user for endpoints
+const SystemSharedUserGuid = "00000000-1111-2222-3333-444444444444"
+
 type AuthHandlerFunc func(tokenRec TokenRecord, cnsi CNSIRecord) (*http.Response, error)
 type RefreshOAuthTokenFunc func(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 

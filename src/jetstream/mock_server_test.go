@@ -64,7 +64,7 @@ const mockCNSIGUID = "some-guid-1234"
 const mockCFGUID = "some-cf-guid-1234"
 const mockCEGUID = "some-hce-guid-1234"
 const mockUserGUID = "asd-gjfg-bob"
-const mockAdminGUID = tokens.SystemSharedUserGuid
+const mockAdminGUID = interfaces.SystemSharedUserGuid
 const mockTokenGUID = "mock-token-guid"
 
 const mockURLString = "http://localhost:9999/some/fake/url/"

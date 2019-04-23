@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
 var (
@@ -21,9 +21,9 @@ var (
 // InitRepositoryProvider - One time init for the given DB Provider
 func InitRepositoryProvider(databaseProvider string) {
 	// Modify the database statements if needed, for the given database type
-	getFavorites = datastore.ModifySQLStatement(getFavorites, databaseProvider)
-	deleteFavorite = datastore.ModifySQLStatement(deleteFavorite, databaseProvider)
-	saveFavorite = datastore.ModifySQLStatement(saveFavorite, databaseProvider)
+	getFavorites = interfaces.ModifySQLStatement(getFavorites, databaseProvider)
+	deleteFavorite = interfaces.ModifySQLStatement(deleteFavorite, databaseProvider)
+	saveFavorite = interfaces.ModifySQLStatement(saveFavorite, databaseProvider)
 }
 
 // FavoritesDBStore is a DB-backed User Favorites repository

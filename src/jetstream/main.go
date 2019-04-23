@@ -33,7 +33,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
@@ -92,13 +91,13 @@ func getEnvironmentLookup() *env.VarSet {
 	}
 
 	// Fallback to a "config.properties" files in our directory
-	envLookup.AppendSource(config.NewConfigFileLookup("./config.properties"))
+	envLookup.AppendSource(interfaces.NewConfigFileLookup("./config.properties"))
 
 	// Fall back to "default.config.properties" in our directory
-	envLookup.AppendSource(config.NewConfigFileLookup("./default.config.properties"))
+	envLookup.AppendSource(interfaces.NewConfigFileLookup("./default.config.properties"))
 
 	// Fallback to individual files in the "/etc/secrets" directory
-	envLookup.AppendSource(config.NewSecretsDirLookup("/etc/secrets"))
+	envLookup.AppendSource(interfaces.NewSecretsDirLookup("/etc/secrets"))
 
 	return envLookup
 }
@@ -464,7 +463,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.PortalConfig, error) {
 	log.Debug("loadPortalConfig")
 
-	if err := config.Load(&pc, env.Lookup); err != nil {
+	if err := interfaces.Load(&pc, env.Lookup); err != nil {
 		return pc, fmt.Errorf("Unable to load configuration. %v", err)
 	}
 
@@ -491,7 +490,7 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore
 
 	if parsedDBConfig {
 		log.Info("Using Cloud Foundry DB service")
-	} else if err := config.Load(&dc, env.Lookup); err != nil {
+	} else if err := interfaces.Load(&dc, env.Lookup); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
