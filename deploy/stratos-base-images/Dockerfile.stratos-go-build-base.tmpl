@@ -11,8 +11,8 @@ RUN zypper ref
 RUN zypper -n ref && \
 zypper -n up && \
 zypper in -y which tar git gcc curl wget
-RUN wget https://storage.googleapis.com/golang/go1.9.7.linux-amd64.tar.gz && \
-    tar -xzf go1.9.7.linux-amd64.tar.gz -C /usr/local/ && \
+RUN wget https://storage.googleapis.com/golang/go1.12.4.linux-amd64.tar.gz && \
+    tar -xzf go1.12.4.linux-amd64.tar.gz -C /usr/local/ && \
     mkdir -p /home/stratos/go/bin && \
     mkdir -p /home/stratos/go/src
     
