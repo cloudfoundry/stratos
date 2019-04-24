@@ -8,7 +8,6 @@ require (
 	code.cloudfoundry.org/cli v6.43.0+incompatible
 	code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/SermoDigital/jose v0.0.0-00010101000000-000000000000 // indirect
 	github.com/Sirupsen/logrus v0.0.0-00010101000000-000000000000 // indirect
 	github.com/antonlindstrom/pgstore v0.0.0-20170604072116-a407030ba6d0
 	github.com/blang/semver v3.5.1+incompatible // indirect
@@ -26,7 +25,6 @@ require (
 	github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/docker/docker v1.13.1 // indirect
 	github.com/domodwyer/mailyak v3.1.1+incompatible
 	github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 // indirect
 	github.com/fatih/color v1.7.0 // indirect
@@ -60,7 +58,6 @@ require (
 	github.com/ulikunitz/xz v0.5.6 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20190420063019-afa5a82059c6 // indirect
 	google.golang.org/appengine v1.5.0 // indirect
@@ -77,10 +74,10 @@ replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocula
 
 replace (
 	github.com/SermoDigital/jose => github.com/SermoDigital/jose v0.9.2-0.20180104203859-803625baeddc
+	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.4.1
 	github.com/helm/monocular/chartrepo => ./plugins/monocular/chart-repo
 	github.com/helm/monocular/chartsvc => ./plugins/monocular/chartsvc
 	github.com/kubernetes-sigs/aws-iam-authenticator => github.com/kubernetes-sigs/aws-iam-authenticator v0.3.1-0.20190111160901-390d9087a4bc
-	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.4.1
 	github.com/russross/blackfriday v2.0.0+incompatible => github.com/russross/blackfriday v1.5.2
 	github.com/sergi/go-diff => github.com/sergi/go-diff v1.0.0
 	github.com/smartystreets/goconvey => github.com/smartystreets/goconvey v0.0.0-20160503033757-d4c757aa9afd
