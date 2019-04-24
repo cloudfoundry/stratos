@@ -3,7 +3,6 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
-
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
@@ -42,7 +41,7 @@ export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
 export const serviceBindingNoBindingsSchemaKey = 'serviceBindingNoBindings';
 
-const entityCache: {
+export const entityCache: {
   [key: string]: EntitySchema
 } = {};
 

@@ -1,12 +1,13 @@
-import { CoreModule } from '../../../core/core.module';
-import { RouterTestingModule } from '@angular/router/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { SharedModule } from '../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
 
-import { ServiceCatalogPageComponent } from './service-catalog-page.component';
+import { TabNavService } from '../../../../tab-nav.service';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { ServiceCatalogPageComponent } from './service-catalog-page.component';
 
 describe('ServiceCatalogPageComponent', () => {
   let component: ServiceCatalogPageComponent;
@@ -22,7 +23,8 @@ describe('ServiceCatalogPageComponent', () => {
         BrowserAnimationsModule,
         createBasicStoreModule()
       ],
-      declarations: [ServiceCatalogPageComponent]
+      declarations: [ServiceCatalogPageComponent],
+      providers: [TabNavService]
     })
       .compileComponents();
   }));

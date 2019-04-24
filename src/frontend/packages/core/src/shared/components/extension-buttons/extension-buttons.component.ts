@@ -1,6 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { StratosActionMetadata, getActionsFromExtensions, StratosActionType } from '../../../core/extension/extension-service';
-import { LoggerService } from '../../../core/logger.service';
+import { Store } from '@ngrx/store';
+import { of } from 'rxjs';
+
+import { AppState } from '../../../../../store/src/app-state';
+import {
+  getActionsFromExtensions,
+  StratosActionMetadata,
+  StratosActionType,
+} from '../../../core/extension/extension-service';
 
 @Component({
   selector: 'app-extension-buttons',
@@ -13,9 +20,14 @@ export class ExtensionButtonsComponent implements OnInit {
 
   @Input() type: StratosActionType;
 
-  constructor(private logger: LoggerService) { }
+  constructor(
+    private store: Store<AppState>
+  ) { }
 
   ngOnInit() {
-    this.extensionActions = getActionsFromExtensions(this.type);
+    this.extensionActions = getActionsFromExtensions(this.type).map(value => ({
+      ...value,
+      visible$: value.visible$ || value.visible ? value.visible(this.store) : of(true)
+    }));
   }
 }

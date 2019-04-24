@@ -1,5 +1,6 @@
+import { browser, promise } from 'protractor';
+
 import { CFPage } from '../../po/cf-page.po';
-import { promise, browser } from 'protractor';
 
 
 export class CfOrgLevelPage extends CFPage {
@@ -39,7 +40,7 @@ export class CfOrgLevelPage extends CFPage {
   }
 
   private goToTab(label: string, urlSuffix: string) {
-    return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
+    return this.tabs.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
 }

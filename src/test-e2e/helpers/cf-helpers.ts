@@ -102,7 +102,7 @@ export class CFHelpers {
   addSpaceIfMissing(cnsiGuid, orgGuid, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
     const that = this;
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
-      .then(function (space) {
+      .then(function(space) {
         return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, spaceName, userGuid);
       });
   }
@@ -231,6 +231,7 @@ export class CFHelpers {
 
   addRoute(cnsiGuid: string, spaceGuid: string, domainGuid: string, host: string, port?: number, path?: string)
     : promise.Promise<APIResource<IRoute>> {
+    e2e.log(`Creating route ${host} ${path} ${port}`);
     return this.cfRequestHelper.sendCfPost<APIResource<IRoute>>(cnsiGuid, 'routes', {
       domain_guid: domainGuid,
       space_guid: spaceGuid,

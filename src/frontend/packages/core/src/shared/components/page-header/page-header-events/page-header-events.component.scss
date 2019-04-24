@@ -4,6 +4,7 @@
   border-radius: 0 0 2px 2px;
   display: flex;
   margin-top: -$event-top-line-width / 2;
+  min-height: 40px;
   padding: 10px;
   &__message-wrapper {
     margin: 0 $event-top-line-width;
@@ -12,11 +13,14 @@
     border-top-style: solid;
     border-top-width: $event-top-line-width;
     display: flex;
+    height: 0;
     justify-content: center;
+    overflow: visible;
     z-index: 1;
   }
   &--minimized {
     .header-event {
+      min-height: 25px;
       padding: 5px 20px;
       &__error-icon,
       &__message-wrapper {

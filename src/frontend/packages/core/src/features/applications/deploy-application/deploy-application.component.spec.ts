@@ -1,15 +1,19 @@
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ConnectionBackend, Http, HttpModule } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { appReducers } from '../../../../../store/src/reducers.module';
+import { TabNavService } from '../../../../tab-nav.service';
+import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../core/github.helpers';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { SharedModule } from '../../../shared/shared.module';
-import { appReducers } from '../../../../../store/src/reducers.module';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CreateApplicationModule } from '../create-application/create-application.module';
 import {
@@ -26,10 +30,7 @@ import {
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { DeployApplicationComponent } from './deploy-application.component';
-import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
-import { Http, ConnectionBackend, HttpModule } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
@@ -57,7 +58,8 @@ describe('DeployApplicationComponent', () => {
         {
           provide: ConnectionBackend,
           useClass: MockBackend
-        }
+        },
+        TabNavService
       ],
       imports: [
         SharedModule,

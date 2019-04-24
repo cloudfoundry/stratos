@@ -36,11 +36,11 @@ export class CfSpaceLevelPage extends CFPage {
   }
 
   goToSITab() {
-    return this.goToTab('Service Instances', 'service-instances');
+    return this.goToTab('Services', 'service-instances');
   }
 
   goToUPSITab() {
-    return this.goToTab('User Service Instances', 'user-service-instances');
+    return this.goToTab('User Services', 'user-service-instances');
   }
 
   goToRoutesTab() {
@@ -52,7 +52,7 @@ export class CfSpaceLevelPage extends CFPage {
   }
 
   private goToTab(label: string, urlSuffix: string) {
-    return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
+    return this.tabs.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
 }

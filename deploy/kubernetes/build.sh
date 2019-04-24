@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+
+#####
+#
+# Use this script to locally build the Images and Helm Chart
+#
+# Note: This is not used by Concourse
+#
+#####
+
 set -eu
 
 # Set defaults
@@ -10,22 +19,26 @@ OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
 TAG_LATEST="false"
-NO_PUSH="false"
+NO_PUSH="true"
+DOCKER_REG_DEFAULTS="true"
 while getopts ":ho:r:t:Tclb:On" opt; do
   case $opt in
     h)
       echo
-      echo "--- To build images of the Console: "
+      echo "--- To build images of Stratos: "
       echo
       echo " ./build.sh -t 1.0.13"
       echo
+      echo "-p to push images"
       exit 0
       ;;
-     r)
+    r)
       DOCKER_REGISTRY="${OPTARG}"
+      DOCKER_REG_DEFAULTS="false"
       ;;
     o)
       DOCKER_ORG="${OPTARG}"
+      DOCKER_REG_DEFAULTS="false"
       ;;
     t)
       TAG="${OPTARG}"
@@ -35,10 +48,6 @@ while getopts ":ho:r:t:Tclb:On" opt; do
       ;;
     T)
       TAG="$(git describe $(git rev-list --tags --max-count=1))"
-      RELEASE_TAG="$(git describe $(git rev-list --tags --max-count=1))"
-      ;;
-    c)
-      CONCOURSE_BUILD="true"
       ;;
     O)
       ADD_OFFICIAL_TAG="true"
@@ -46,8 +55,8 @@ while getopts ":ho:r:t:Tclb:On" opt; do
     l)
       TAG_LATEST="true"
       ;;
-    n)
-      NO_PUSH="true"
+    p)
+      NO_PUSH="false"
       ;;      
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -101,7 +110,9 @@ function patchDockerfile {
   # Replace registry/organization
   pushd ${FOLDER} > /dev/null 2>&1
   pwd
-  sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" ${FOLDER}/${DOCKER_FILE}
+  if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
+    sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" ${FOLDER}/${DOCKER_FILE}
+  fi
   sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" ${FOLDER}/${DOCKER_FILE}
   popd > /dev/null 2>&1
 
@@ -114,7 +125,9 @@ function unPatchDockerfile {
   # Replace registry/organization
   pushd ${FOLDER} > /dev/null 2>&1
   pwd
-  sed -i.bak "s@${DOCKER_REGISTRY}/${DOCKER_ORG}@splatform@g" ${FOLDER}/${DOCKER_FILE}
+  if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
+    sed -i.bak "s@${DOCKER_REGISTRY}/${DOCKER_ORG}@splatform@g" ${FOLDER}/${DOCKER_FILE}
+  fi
   sed -i.bak "s/${BASE_IMAGE_TAG}/opensuse/g" ${FOLDER}/${DOCKER_FILE}
   popd > /dev/null 2>&1
 
@@ -168,29 +181,34 @@ buildPostflightJob
 buildMariaDb
 buildUI
 
+# Don't change the chart in the repo, copy it and modify it locally
+
+SRC_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/console"
+DEST_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/helm-chart"
+
+rm -rf ${DEST_HELM_CHART_PATH}
+mkdir -p ${DEST_HELM_CHART_PATH}
+cp -R ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
+
+pushd ${DEST_HELM_CHART_PATH} > /dev/null
+
 # Fetch subcharts
 helm dependency update
 
-if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
-  # Patch Values.yaml file
-  cp values.yaml.tmpl values.yaml
-  sed -i.bak -e 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
-  sed -i.bak -e 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
-  sed -i.bak -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
-else
-  sed -i.bak -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
-  sed -i.bak -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' console/values.yaml
-  sed -i.bak -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
-  
-  sed -i.bak -e 's/version: 0.1.0/version: '"${RELEASE_TAG}"'/g' console/Chart.yaml
-fi
+sed -i.bak -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' values.yaml
+sed -i.bak -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' values.yaml
+sed -i.bak -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' values.yaml
+
+sed -i.bak -e 's/version: 0.1.0/version: '"${TAG}"'/g' Chart.yaml
+
+rm -rf *.bak
+popd > /dev/null
 
 echo
 echo "Build complete...."
 echo "Registry: ${DOCKER_REGISTRY}"
 echo "Org: ${DOCKER_ORG}"
 echo "Tag: ${TAG}"
-if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
-  echo "To deploy using Helm, execute the following: "
-  echo "helm install console -f values.yaml --namespace console --name my-console"
-fi
+
+echo "To deploy using Helm, execute the following: "
+echo "helm install helm-chart --namespace console --name my-console"
