@@ -8,7 +8,7 @@ require (
 	code.cloudfoundry.org/cli v6.43.0+incompatible
 	code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/SermoDigital/jose v0.0.0-00010101000000-000000000000
+	github.com/SermoDigital/jose v0.9.1
 	github.com/Sirupsen/logrus v0.0.0-00010101000000-000000000000 // indirect
 	github.com/antonlindstrom/pgstore v0.0.0-20170604072116-a407030ba6d0
 	github.com/blang/semver v3.5.1+incompatible // indirect
