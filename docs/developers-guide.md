@@ -175,25 +175,19 @@ For each new pull request and any subsequent pushes to it the following actions 
 
 Jetstream is the back-end for Stratos. It is written in Go.
 
-We use [dep](https://golang.github.io/dep/) for dependency management.
+We use Go Modules for dependency management.
 
 ### Pre-requisites
 
 You will need the following installed/available:
 
-* go 1.9 or later.
-* dep
+* go 1.12 or later.
 * UAA instance - you will need a UAA running for authentication
 
 ### Building the back-end
 
 
 #### Build
-You will need to ensure that Stratos is cloned into a folder within your GOPATH that matches the Stratos package structure, i.e.
-
-```
-$GOPATH/src/github.com/cloudfoundry-incubator/stratos
-```
 
 From the `src/jetstream` folder, build the Stratos back-end with:
 
