@@ -108,3 +108,4 @@ src/frontend/packages/core/src/index.html
 # Prebuild package
 
 stratos-frontend-prebuild.zip
+go-vendor-*.tgz
