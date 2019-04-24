@@ -61,7 +61,7 @@ export class ApplicationBasePage extends CFPage {
   }
 
   private goToTab(label: string, urlSuffix: string) {
-    return this.subHeader.goToItemAndWait(label, this.navLink.substring(0, this.navLink.lastIndexOf('/')), urlSuffix);
+    return this.tabs.goToItemAndWait(label, this.navLink.substring(0, this.navLink.lastIndexOf('/')), urlSuffix);
   }
 
   public getAppName() {
@@ -70,7 +70,7 @@ export class ApplicationBasePage extends CFPage {
 
   public delete(appName: string): DeleteApplication {
     const deleteApp = new DeleteApplication(this.cfGuid, this.appGuid);
-    this.header.clickIconButton('delete');
+    this.subHeader.clickIconButton('delete');
     deleteApp.waitForPage();
     deleteApp.stepper.waitUntilShown();
     return deleteApp;

@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { BaseKubeGuid } from '../kubernetes-page.types';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { KubernetesService } from '../services/kubernetes.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNamespaceService } from '../services/kubernetes-namespace.service';
-import { Observable } from 'rxjs';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { map } from 'rxjs/operators';
+import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
   selector: 'app-kubernetes-namespace',
@@ -32,7 +33,8 @@ import { map } from 'rxjs/operators';
 export class KubernetesNamespaceComponent {
 
   tabLinks = [
-    { link: 'pods', label: 'Pods' },
+    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
+    { link: 'services', label: 'Services', matIcon: 'service', matIconFont: 'stratos-icons' }
   ];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

@@ -1,24 +1,27 @@
+/* tslint:disable:max-line-length */
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import {
-  HelmReleasePodsTabComponent,
-} from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import {
-  HelmReleaseServicesComponent,
-} from './helm-release/helm-release-services/helm-release-services.component';
+  KubernetesServicePortsComponent,
+} from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
+import { KubernetesReleasePodsTabComponent } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
+import { HelmReleaseServicesComponent } from './helm-release/helm-release-services/helm-release-services.component';
 import {
   HelmReleaseSummaryCardComponent,
 } from './helm-release/helm-release-summary/helm-release-summary-card/helm-release-summary-card.component';
-import {
-  HelmReleaseSummaryComponent,
-} from './helm-release/helm-release-summary/helm-release-summary.component';
+import { HelmReleaseSummaryComponent } from './helm-release/helm-release-summary/helm-release-summary.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
+import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
+import {
+  KubernetesNamespaceServicesComponent,
+} from './kubernetes-namespace/kubernetes-namespace-services/kubernetes-namespace-services.component';
 import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
 import {
   KubernetesNodeMetricStatsCardComponent,
@@ -48,7 +51,7 @@ import {
 } from './list-types/kubernetes-namespaces/kubernetes-namespace-link/kubernetes-namespace-link.component';
 import {
   ConditionCellComponent,
-  InverseConditionCellComponent
+  InverseConditionCellComponent,
 } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 import {
   KubernetesNodeCapacityComponent,
@@ -59,11 +62,9 @@ import {
 import {
   KubernetesNodeConditionCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
-/* tslint:disable:max-line-length */
 import {
   KubernetesNodeConditionComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition/kubernetes-node-condition.component';
-/* tslint:enable */
 import {
   KubernetesNodeInfoCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-info-card/kubernetes-node-info-card.component';
@@ -76,7 +77,10 @@ import {
 import {
   KubernetesNodeTagsCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-tags-card/kubernetes-node-tags-card.component';
+import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
+import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
+import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { HelmReleaseService } from './services/helm-release.service';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
@@ -85,14 +89,16 @@ import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernete
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
-import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
-import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
+import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
+
+/* tslint:enable */
 @NgModule({
   imports: [
     CoreModule,
     CommonModule,
     SharedModule,
+    NgxChartsModule,
     KubernetesRoutingModule,
   ],
   declarations: [
@@ -103,10 +109,12 @@ import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-co
     KubernetesPodsTabComponent,
     KubernetesPodTagsComponent,
     KubernetesNamespacesTabComponent,
+    KubernetesDashboardTabComponent,
+    KubernetesSummaryTabComponent,
     KubernetesAppsTabComponent,
     HelmReleaseComponent,
     AppLinkComponent,
-    HelmReleasePodsTabComponent,
+    KubernetesReleasePodsTabComponent,
     HelmReleaseSummaryComponent,
     HelmReleaseServicesComponent,
     HelmReleaseSummaryCardComponent,
@@ -130,10 +138,15 @@ import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-co
     KubernetesNamespaceLinkComponent,
     KubernetesNamespaceComponent,
     KubernetesNamespacePodsComponent,
+    KubernetesNamespaceServicesComponent,
     KubeAppcreatedDateComponent,
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
+    KubernetesServicePortsComponent
+  ],
+  exports: [
+    KubernetesServicePortsComponent
   ],
   providers: [
     KubernetesService,
@@ -154,6 +167,7 @@ import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-co
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
+    KubernetesServicePortsComponent
   ]
 })
 export class KubernetesModule { }

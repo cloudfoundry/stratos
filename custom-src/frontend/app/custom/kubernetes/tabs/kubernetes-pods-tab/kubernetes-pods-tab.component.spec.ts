@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesPodsTabComponent } from './kubernetes-pods-tab.component';
-import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 
 describe('KubernetesPodsTabComponent', () => {
   let component: KubernetesPodsTabComponent;
@@ -13,7 +13,7 @@ describe('KubernetesPodsTabComponent', () => {
     TestBed.configureTestingModule({
       declarations: [KubernetesPodsTabComponent],
       imports: KubernetesBaseTestModules,
-      providers: [BaseKubeGuid, KubernetesEndpointService ]
+      providers: [BaseKubeGuid, KubernetesEndpointService]
     })
       .compileComponents();
   }));

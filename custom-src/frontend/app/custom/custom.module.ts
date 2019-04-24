@@ -1,18 +1,19 @@
 import { NgModule } from '@angular/core';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 
+import { AppState } from '../../../store/src/app-state';
+import { EndpointHealthCheck } from '../../endpoints-health-checks';
 import { CoreModule } from '../core/core.module';
 import { Customizations, CustomizationsMetadata } from '../core/customizations.types';
+import { EndpointsService } from '../core/endpoints.service';
 import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
+import { DemoHelperComponent } from './demo/demo-helper/demo-helper.component';
 import { KubernetesSetupModule } from './kubernetes/kubernetes.setup.module';
-import { SuseLoginComponent } from './suse-login/suse-login.component';
-import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.component';
-import { EndpointsService } from '../core/endpoints.service';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/src/app-state';
 import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
-import { EndpointHealthCheck } from '../../endpoints-health-checks';
+import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.component';
+import { SuseLoginComponent } from './suse-login/suse-login.component';
 
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
@@ -25,15 +26,22 @@ const SuseCustomizations: CustomizationsMetadata = {
     CoreModule,
     SharedModule,
     MDAppModule,
-    KubernetesSetupModule
+    KubernetesSetupModule,
+    // #150 - Uncomment to enable helm plugin
+    // ---------------------------------------
+    // HelmModule,
+    // HelmSetupModule
+    // ---------------------------------------
   ],
   declarations: [
     SuseLoginComponent,
-    SuseAboutInfoComponent
+    SuseAboutInfoComponent,
+    DemoHelperComponent
   ],
   entryComponents: [
     SuseLoginComponent,
-    SuseAboutInfoComponent
+    SuseAboutInfoComponent,
+    DemoHelperComponent,
   ],
   providers: [
     { provide: Customizations, useValue: SuseCustomizations }

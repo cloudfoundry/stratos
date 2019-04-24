@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { ConditionType, KubernetesNode } from '../../store/kube.types';
+import { AppState } from '../../../../../../store/src/app-state';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../../store/src/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { ConditionType, KubernetesNode } from '../../store/kube.types';
+import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { getConditionSort } from '../kube-sort.helper';
 import { ConditionCellComponent, InverseConditionCellComponent } from './condition-cell/condition-cell.component';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
@@ -68,7 +69,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     },
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
 
   enableTextFilter = true;

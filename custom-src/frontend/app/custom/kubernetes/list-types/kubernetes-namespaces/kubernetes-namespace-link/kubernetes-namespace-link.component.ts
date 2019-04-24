@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
+import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesNamespace } from '../../../store/kube.types';
 
 @Component({
@@ -9,9 +11,10 @@ import { KubernetesNamespace } from '../../../store/kube.types';
 })
 export class KubernetesNamespaceLinkComponent extends TableCellCustom<KubernetesNamespace> implements OnInit {
   routerLink: string;
-  constructor() {
+  dashboardLink: string;
+  constructor(public kubeEndpointService: KubernetesEndpointService) {
     super();
-   }
+  }
 
   ngOnInit() {
     this.routerLink = `${this.row.metadata.name}`;

@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { AppState } from '../../../../../../store/src/app-state';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../../store/src/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesPod } from '../../store/kube.types';
+import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { getContainerLengthSort } from '../kube-sort.helper';
-import { KubernetesPodTagsComponent } from './kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
 
@@ -26,31 +26,24 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       },
       cellFlex: '5',
     },
-    {
-      columnId: 'tags', headerCell: () => 'Tags',
-      cellComponent: KubernetesPodTagsComponent,
-      cellFlex: '5',
-    },
+    // TODO: See #150 - keep out RC bring back after demo
+    // {
+    //   columnId: 'tags', headerCell: () => 'Tags',
+    //   cellComponent: KubernetesPodTagsComponent,
+    //   cellFlex: '5',
+    // },
     {
       columnId: 'containers', headerCell: () => 'No. of Containers',
       cellDefinition: {
-        getValue: (row) => `${row.spec.containers.length}`
+        valuePath: 'spec.containers.length'
       },
       sort: getContainerLengthSort,
       cellFlex: '2',
     },
     {
-      columnId: 'image', headerCell: () => 'Image',
-      cellDefinition: {
-        // Assuming 1 pod = 1 container
-        getValue: (row) => `${row.spec.containers.map(c => c.image)} `
-      },
-      cellFlex: '5',
-    },
-    {
       columnId: 'namespace', headerCell: () => 'Namespace',
       cellDefinition: {
-        getValue: (row) => `${row.metadata.namespace}`
+        valuePath: 'metadata.namespace'
       },
       sort: {
         type: 'sort',
@@ -62,7 +55,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     {
       columnId: 'node', headerCell: () => 'Node',
       cellDefinition: {
-        getValue: (row) => `${row.spec.nodeName}`
+        valuePath: 'spec.nodeName'
       },
       sort: {
         type: 'sort',
@@ -74,7 +67,7 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     {
       columnId: 'status', headerCell: () => 'Status',
       cellDefinition: {
-        getValue: (row) => `${row.status.phase}`
+        valuePath: 'status.phase'
       },
       sort: {
         type: 'sort',
@@ -83,9 +76,20 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       },
       cellFlex: '5',
     },
+    {
+      columnId: 'container-status', headerCell: () => `Ready Containers`,
+      cellDefinition: {
+        getValue: (row) => {
+          const readyPods = row.status.containerStatuses.filter(status => status.ready).length;
+          const allContainers = row.status.containerStatuses.length;
+          return `${readyPods} / ${allContainers}`;
+        }
+      },
+      cellFlex: '5',
+    },
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
   text = {

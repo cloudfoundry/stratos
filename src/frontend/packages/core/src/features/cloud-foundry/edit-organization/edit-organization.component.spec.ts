@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
@@ -16,7 +17,7 @@ describe('EditOrganizationComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditOrganizationComponent, EditOrganizationStepComponent],
       imports: [...BaseTestModules],
-      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider()]
+      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), TabNavService]
 
     })
       .compileComponents();

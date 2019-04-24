@@ -1,9 +1,9 @@
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { SharedModule } from '../../../../shared/shared.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { KubernetesGKEAuthFormComponent } from './kubernetes-gke-auth-form.component';
 import { FormBuilder } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+import { SharedModule } from '../../../../shared/shared.module';
+import { KubernetesGKEAuthFormComponent } from './kubernetes-gke-auth-form.component';
 
 describe('KubernetesGKEAuthFormComponent', () => {
   let component: KubernetesGKEAuthFormComponent;
@@ -11,13 +11,13 @@ describe('KubernetesGKEAuthFormComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesGKEAuthFormComponent ],
+      declarations: [KubernetesGKEAuthFormComponent],
       imports: [
         SharedModule,
         NoopAnimationsModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -27,7 +27,6 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
     useClass: EndpointsListConfigService,
   }, EndpointListHelper]
 })
-
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;

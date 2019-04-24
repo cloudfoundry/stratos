@@ -16,6 +16,9 @@ type KubernetesSpecification struct {
 	endpointType string
 }
 
+// KubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
+const KubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
+
 const (
 	EndpointType                = "k8s"
 	CLIENT_ID_KEY               = "K8S_CLIENT"
@@ -140,6 +143,8 @@ func (c *KubernetesSpecification) Init() error {
 		UserInfo: c.GetGKEUserFromToken,
 	})
 
+	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = "false"
+
 	return nil
 }
 
@@ -148,7 +153,17 @@ func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
-	// no-op
+
+	// Kubernetes Dashboard Proxy
+	echoGroup.GET("/kubedash/ui/:guid/*", c.kubeDashboardProxy)
+	echoGroup.GET("/kubedash/:guid/status", c.kubeDashboardStatus)
+
+	// Helm Routes
+	echoGroup.GET("/helm/releases", c.ListReleases)
+	echoGroup.POST("/helm/install", c.InstallRelease)
+	echoGroup.GET("/helm/versions", c.GetHelmVersions)
+	echoGroup.DELETE("/helm/releases/:endpoint/:name", c.DeleteRelease)
+	echoGroup.GET("/helm/releases/:endpoint/:name", c.GetRelease)
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

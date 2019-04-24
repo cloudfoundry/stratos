@@ -1,0 +1,33 @@
+<app-page-header>
+  <h1>SUSECON '19 Demo</h1>
+</app-page-header>
+
+<img src="https://127.0.0.1:4200/core/assets/custom/susecon-logo.svg" />
+<h1>Helm Repositories</h1>
+
+<ul>
+    <li>https://kubernetes-charts.storage.googleapis.com</li>
+    <li>https://cloudfoundry-incubator.github.io/stratos</li>
+</ul>
+
+<br>
+
+<h1>Kube</h1>
+
+<ul>
+    <li>https://eirinitp-eirinitp-cap-aks-f416cc-a7601367.hcp.eastus.azmk8s.io:443</li>
+</ul>
+
+<br>
+
+<div class="demo-helper-buttons">
+<button (click)="demo('hide')" mat-button color="primary">Hide Existing Endpoints</button>
+
+<button (click)="demo('show')" mat-button color="primary">Reveal All Endpoints</button>
+
+<button (click)="demo('cf')" mat-button color="primary">Reveal Cloud Foundry Endpoints</button>
+
+<button (click)="demo('metrics')" mat-button color="primary">Reveal Metrics Endpoints</button>
+
+<button (click)="demo('k8s')" mat-button color="primary">Reveal Kubernetes Endpoints</button>
+</div>

@@ -26,6 +26,7 @@
 .mat-chip-list {
   $chip-padding: 5px;
   mat-chip {
+    font-weight: 400;
     // Overriding mat-chips overly specific styles.
     &.app-chip,
     &.app-chip + &.app-chip {

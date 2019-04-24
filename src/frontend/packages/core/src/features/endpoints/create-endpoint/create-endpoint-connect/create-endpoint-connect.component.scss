@@ -2,7 +2,6 @@
   flex: 1;
 }
 
-
 .connect {
   &__question {
     padding-bottom: 24px;
@@ -18,11 +17,9 @@
   }
 
   &__title {
-    &_title {
-      align-items: center;
-      display: flex;
-      height: 40px;
-    }
+    align-items: center;
+    display: flex;
+    height: 40px;
   }
   &__successful-reg-text {
     margin-bottom: 30px;

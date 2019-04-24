@@ -1,8 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link.component';
-import { KubernetesStatus } from '../../../store/kube.types';
+import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+import { KubernetesStatus } from '../../../store/kube.types';
+import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link.component';
 
 describe('KubernetesNamespaceLinkComponent', () => {
   let component: KubernetesNamespaceLinkComponent;
@@ -11,7 +13,8 @@ describe('KubernetesNamespaceLinkComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNamespaceLinkComponent],
-      imports: KubernetesBaseTestModules
+      imports: KubernetesBaseTestModules,
+      providers: [KubernetesEndpointService, BaseKubeGuid]
     })
       .compileComponents();
   }));

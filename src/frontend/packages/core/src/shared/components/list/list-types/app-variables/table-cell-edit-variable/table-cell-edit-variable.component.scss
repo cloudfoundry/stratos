@@ -6,12 +6,4 @@ mat-form-field {
 
 .cell-edit-variable {
   width: 100%;
-  &__var-text {
-    cursor: pointer;
-    float: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 95%;
-  }
 }

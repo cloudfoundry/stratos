@@ -1,0 +1,10 @@
+
+// Not currently used but should be - NJ
+@mixin kube-summary-theme($theme, $app-theme) {
+  $backgrounds: map-get($theme, background);
+  $background: mat-color($backgrounds, card);
+  .kube-details__graphs {
+    background: linear-gradient(to bottom, $background 0%, $background 40%, transparent 70%);
+  }
+}
+

@@ -16,6 +16,8 @@ import {
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
   EndpointActionComplete,
+  GET_ENDPOINTS,
+  GetAllEndpoints,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
   REGISTER_ENDPOINTS_FAILED,
@@ -57,6 +59,11 @@ export class EndpointsEffect {
     private store: Store<AppState>
   ) { }
 
+  @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
+    ofType<GetAllEndpoints>(GET_ENDPOINTS),
+    mergeMap((action: GetAllEndpoints) => [new GetSystemInfo(false, action)])
+  );
+
   @Effect() getAllEndpoints$ = this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
     mergeMap(action => {
@@ -94,8 +101,6 @@ export class EndpointsEffect {
   @Effect() connectEndpoint$ = this.actions$.pipe(
     ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
     mergeMap(action => {
-      const actionType = 'update';
-
       // Special-case SSO login - redirect to the back-end
       if (action.authType === 'sso') {
         const loc = window.location.protocol + '//' + window.location.hostname +

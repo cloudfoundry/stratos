@@ -7,7 +7,8 @@ import { EndpointAuthTypeNames } from '../../core/src/features/endpoints/endpoin
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { CloudFoundryComponentsModule } from './shared/components/components.module';
 
-const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
+
+export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
   type: 'cf',
   label: 'Cloud Foundry',
   urlValidation: urlValidationExpression,

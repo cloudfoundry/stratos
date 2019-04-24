@@ -35,7 +35,7 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
     private store: Store<AppState>,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory
+    internalEventMonitorFactory: InternalEventMonitorFactory,
   ) {
     this.columns = endpointColumns.filter(column => {
       return column.columnId !== 'type';

@@ -7,6 +7,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import {KubernetesEndpointsListConfigService} from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';
+import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
 @Component({
   selector: 'app-kubernetes',
@@ -17,6 +18,7 @@ import {KubernetesEndpointsListConfigService} from '../list-types/kubernetes-end
       provide: ListConfig,
       useClass: KubernetesEndpointsListConfigService,
     },
+    EndpointListHelper,
     KubernetesService
   ]
 })

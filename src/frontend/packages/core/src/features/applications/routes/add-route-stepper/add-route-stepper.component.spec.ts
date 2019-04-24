@@ -2,11 +2,12 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { TabNavService } from '../../../../../tab-nav.service';
+import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../core/core.module';
 import { SteppersModule } from '../../../../shared/components/stepper/steppers.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../application.service';
 import { AddRoutesComponent } from '../add-routes/add-routes.component';
 import { MapRoutesComponent } from '../map-routes/map-routes.component';
@@ -33,7 +34,8 @@ describe('AddRouteStepperComponent', () => {
           NoopAnimationsModule
         ],
         providers: [
-          { provide: ApplicationService, useClass: ApplicationServiceMock }
+          { provide: ApplicationService, useClass: ApplicationServiceMock },
+          TabNavService
         ]
       }).compileComponents();
     })

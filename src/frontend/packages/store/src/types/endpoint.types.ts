@@ -42,6 +42,7 @@ export interface EndpointModel {
   guid?: string;
   name: string;
   skip_ssl_validation?: boolean;
+  endpoint_metadata?: any;
   token_endpoint?: string;
   user?: EndpointUser;
   metadata?: {

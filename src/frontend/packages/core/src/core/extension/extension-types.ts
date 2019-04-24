@@ -31,6 +31,10 @@ interface BaseEndpointTypeConfig {
    * When all endpoints are displayed together use the order to define the position. Lower number = earlier position
    */
   order?: number;
+  /**
+   * Indicates if this endpoint types can not be connected (optional - default is false)
+   */
+  doesNotSupportConnect?: boolean;
 
 }
 

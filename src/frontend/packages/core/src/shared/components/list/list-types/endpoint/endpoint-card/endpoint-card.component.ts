@@ -26,6 +26,7 @@ import {
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { CardStatus } from '../../../../../shared.types';
+import { favoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
@@ -70,10 +71,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.pRow = row;
     this.endpointConfig = getEndpointType(row.cnsi_type, row.sub_type);
     this.endpointParentType = row.sub_type ? getEndpointType(row.cnsi_type, null).label : null;
-    this.endpointIds.next([row.guid]);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    this.endpointLink = row.connectionStatus === 'connected' ? EndpointsService.getLinkForEndpoint(row) : null;
+    this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.doesNotSupportConnect ?
+      EndpointsService.getLinkForEndpoint(row) : null;
     this.updateInnerComponent();
 
   }
@@ -110,7 +111,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   ngOnInit() {
-    this.favorite = this.pRow.cnsi_type === 'cf' ? getFavoriteFromEndpointEntity(this.row) : null;
+    const favorite = getFavoriteFromEndpointEntity(this.row);
+    if (favorite) {
+      this.favorite = favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
+    }
     const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }

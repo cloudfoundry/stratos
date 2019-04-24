@@ -9,18 +9,28 @@ export const KubernetesDefaultState = {
   nodes: {}
 };
 
-export interface KubeAPIResource {
+export interface BasicKubeAPIResource {
+  metadata: {
+    uid: string
+  };
+  status: any;
+  spec: any;
+}
+
+export interface KubeAPIResource extends BasicKubeAPIResource {
   metadata: Metadata;
   status: BaseStatus;
   spec: any;
 }
-export interface KubeService {
-  metadata: ServiceMetadata;
+
+export interface KubeService extends BasicKubeAPIResource {
+  metadata: KubeServiceMetadata;
   status: ServiceStatus;
   spec: DeploymentSpec;
 }
-export interface KubernetesStatefulSet {
-  metadata: ServiceMetadata;
+
+export interface KubernetesStatefulSet extends BasicKubeAPIResource {
+  metadata: KubeServiceMetadata;
   status: ServiceStatus;
   spec: ServiceSpec;
 }
@@ -35,8 +45,8 @@ export interface DeploymentSpec {
   type?: string;
 }
 
-export interface KubernetesDeployment {
-  metadata: ServiceMetadata;
+export interface KubernetesDeployment extends BasicKubeAPIResource {
+  metadata: KubeServiceMetadata;
   status: ServiceStatus;
   spec: ServiceSpec;
 }
@@ -68,7 +78,7 @@ export interface GenericMap {
 }
 
 
-export interface KubernetesNode {
+export interface KubernetesNode extends BasicKubeAPIResource {
   metadata: Metadata;
   status: NodeStatus;
   spec: PodSpec;
@@ -172,7 +182,7 @@ export interface Image {
 }
 
 
-export interface KubernetesPod {
+export interface KubernetesPod extends BasicKubeAPIResource {
   metadata: Metadata;
   status: PodStatus;
   spec: PodSpec;
@@ -182,7 +192,7 @@ export enum KubernetesStatus {
   ACTIVE = 'Active',
   RUNNING = 'Running',
 }
-export interface KubernetesNamespace {
+export interface KubernetesNamespace extends BasicKubeAPIResource {
   metadata: Metadata;
   spec: {
     finalizers: string[];
@@ -270,7 +280,7 @@ export interface KubernetesConfigMap {
     },
     kind: string
   };
-  metadata: ServiceMetadata;
+  metadata: KubeServiceMetadata;
 }
 export interface Resources {
   limits?: Limits;
@@ -313,7 +323,7 @@ export interface Metadata extends BaseMetadata {
   generation?: number;
 }
 
-export interface ServiceMetadata extends Metadata {
+export interface KubeServiceMetadata extends Metadata {
   selfLink: string;
 }
 

@@ -2,8 +2,12 @@ import { SortDirection } from '@angular/material';
 
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../../store/src/actions/pagination.actions';
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { PaginatedAction, PaginationParam } from '../../../../../store/src/types/pagination.types';
+import { IRequestAction } from '../../../../../store/src/types/request.types';
 import {
   kubernetesAppsSchemaKey,
+  kubernetesDashboardSchemaKey,
   kubernetesDeploymentsSchemaKey,
   kubernetesNamespacesSchemaKey,
   kubernetesNodesSchemaKey,
@@ -11,9 +15,6 @@ import {
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
 } from './kubernetes.entities';
-import { PaginatedAction, PaginationParam } from '../../../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../../../store/src/types/request.types';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';
@@ -38,6 +39,10 @@ export const GET_PODS_ON_NODE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pods on 
 export const GET_PODS_IN_NAMESPACE_INFO = '[KUBERNETES Endpoint] Get Pods in Namespace Info';
 export const GET_PODS_IN_NAMEPSACE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Pods in Namespace Success';
 export const GET_PODS_IN_NAMEPSACE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Pods in Namespace Failure';
+
+export const GET_SERVICES_IN_NAMESPACE_INFO = '[KUBERNETES Endpoint] Get Services in Namespace Info';
+export const GET_SERVICES_IN_NAMESPACE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Services in Namespace Success';
+export const GET_SERVICES_IN_NAMESPACE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Services in Namespace Failure';
 
 export const GET_NAMESPACES_INFO = '[KUBERNETES Endpoint] Get Namespaces Info';
 export const GET_NAMESPACES_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Namespaces Info Success';
@@ -66,6 +71,11 @@ export const GET_KUBE_STATEFULSETS_FAILURE = '[KUBERNETES Endpoint] Get Stateful
 export const GET_KUBE_DEPLOYMENT = '[KUBERNETES Endpoint] Get K8S Deployments Info';
 export const GET_KUBE_DEPLOYMENT_SUCCESS = '[KUBERNETES Endpoint] Get Deployments Success';
 export const GET_KUBE_DEPLOYMENT_FAILURE = '[KUBERNETES Endpoint] Get Deployments Failure';
+
+export const GET_KUBE_DASHBOARD = '[KUBERNETES Endpoint] Get K8S Dashboard Info';
+export const GET_KUBE_DASHBOARD_SUCCESS = '[KUBERNETES Endpoint] Get Dashboard Success';
+export const GET_KUBE_DASHBOARD_FAILURE = '[KUBERNETES Endpoint] Get Dashboard Failure';
+
 
 const sortPodsByName = {
   'order-direction': 'desc' as SortDirection,
@@ -202,6 +212,24 @@ export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
   initialParams: PaginationParam;
 }
 
+export class GetKubernetesServicesInNamespace implements PaginatedAction, KubeAction {
+  constructor(public kubeGuid: string, public namespaceName: string) {
+    this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, `ns-${namespaceName}`, kubeGuid);
+  }
+  type = GET_SERVICES_IN_NAMESPACE_INFO;
+  entityKey = kubernetesServicesSchemaKey;
+  entity = [entityFactory(kubernetesServicesSchemaKey)];
+  actions = [
+    GET_SERVICES_IN_NAMESPACE_INFO,
+    GET_SERVICES_IN_NAMESPACE_INFO_SUCCESS,
+    GET_SERVICES_IN_NAMESPACE_INFO_FAILURE
+  ];
+  paginationKey: string;
+  initialParams = {
+    ...sortPodsByName
+  };
+}
+
 export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction {
   constructor(public kubeGuid: string, public namespaceName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, `ns-${namespaceName}`, kubeGuid);
@@ -318,6 +346,20 @@ export class GeKubernetesDeployments implements KubePaginationAction {
     GET_KUBE_DEPLOYMENT_FAILURE
   ];
   paginationKey: string;
+}
+
+export class GetKubernetesDashboard implements KubeAction {
+  constructor(public kubeGuid: string) {
+  }
+  type = GET_KUBE_DASHBOARD;
+  entityKey = kubernetesDashboardSchemaKey;
+  entity = [entityFactory(kubernetesDashboardSchemaKey)];
+
+  actions = [
+    GET_KUBE_DASHBOARD,
+    GET_KUBE_DASHBOARD_SUCCESS,
+    GET_KUBE_DASHBOARD_FAILURE
+  ];
 }
 
 function getKubeMetricsAction(guid: string) {

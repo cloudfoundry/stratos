@@ -3,6 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
@@ -42,7 +43,7 @@ describe('CreateEndpointComponent', () => {
             }
           }
         }
-      }]
+      }, TabNavService],
     })
       .compileComponents();
     initEndpointTypes([]);
