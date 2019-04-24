@@ -1,4 +1,4 @@
-# Tag for images
+# Tag for images - do not edit
 consoleVersion: latest
 dockerRegistrySecret: regsecret
 # Specify default DB password
@@ -42,6 +42,9 @@ console:
 
   # Email subject of the user invitation message 
   userInviteSubject: ~
+
+  # Whether to perform the volume migration job on install/upgrade (migrate to secrets)
+  migrateVolumes: true
 
 images:
   console: stratos-console
@@ -114,6 +117,8 @@ env:
   SMTP_PORT: "25"
 
 kube:
+  # Whether RBAC is enable in the Kubernetes cluster
+  auth: "rbac"
   external_console_https_port: 8443
   storage_class:
     persistent:
