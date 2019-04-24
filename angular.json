@@ -19,6 +19,11 @@
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "assets": [
               "src/frontend/packages/core/assets",
+              {
+                "glob": "**/*",
+                "input": "custom-src/frontend/assets/custom",
+                "output": "/core/assets/custom"
+              },
               "src/frontend/packages/core/favicon.ico"
             ],
             "styles": [
@@ -93,6 +98,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "preserveSymlinks": true,
             "outputPath": "dist/core",
             "index": "src/frontend/packages/core/src/index.html",
             "main": "src/frontend/packages/core/src/main.ts",
@@ -100,7 +106,12 @@
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "assets": [
               "src/frontend/packages/core/favicon.ico",
-              "src/frontend/packages/core/assets"
+              "src/frontend/packages/core/assets",
+              {
+                "glob": "**/*",
+                "input": "custom-src/frontend/assets/custom",
+                "output": "/core/assets/custom"
+              }
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.css"
@@ -145,6 +156,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "preserveSymlinks": true,
             "main": "src/frontend/packages/core/src/test.ts",
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.spec.json",
@@ -155,7 +167,16 @@
             "scripts": [],
             "assets": [
               "src/frontend/packages/core/src/favicon.ico",
-              "src/frontend/packages/core/src/assets"
+              {
+                "glob": "**/*",
+                "input": "src/frontend/packages/core/assets",
+                "output": "/core/assets/custom"
+              },
+              {
+                "glob": "**/*",
+                "input": "custom-src/frontend/assets/custom",
+                "output": "/core/assets/custom"
+              }
             ]
           }
         },
@@ -165,7 +186,8 @@
             "tsConfig": ["src/tsconfig.json"],
             "tslintConfig": "src/frontend/packages/core/tslint.json",
             "files": [
-              "src/frontend/packages/core/src/**/*.ts"
+              "src/frontend/packages/core/src/**/*.ts",
+              "src/frontend/packages/core/src/custom/**/*.ts"
             ]
           }
         }

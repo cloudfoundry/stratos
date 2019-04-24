@@ -5,7 +5,9 @@
   $side-nav-bottom-color: map-get($app-theme, subdued-color);
 
   .side-nav {
-    background-color: mat-color($side-nav-colors, background);
+    &__inner {
+      background-color: mat-color($side-nav-colors, background);
+    }
     &__top {
       background-color: mat-color($side-nav-colors, background-top);
     }

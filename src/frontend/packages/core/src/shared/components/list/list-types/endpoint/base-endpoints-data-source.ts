@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
-import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
@@ -16,8 +16,19 @@ import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
 
+export function syncPaginationSection(
+  store: Store<AppState>,
+  action: GetAllEndpoints,
+  paginationKey: string
+) {
+  store.dispatch(new CreatePagination(
+    action.entityKey,
+    paginationKey,
+    action.paginationKey
+  ));
+}
 
-export abstract class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
+export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<AppState>;
   endpointType: string;
 
@@ -28,7 +39,8 @@ export abstract class BaseEndpointsDataSource extends ListDataSource<EndpointMod
     endpointType: string = null,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory
+    internalEventMonitorFactory: InternalEventMonitorFactory,
+    onlyConnected = true
   ) {
     const rowStateHelper = new ListRowSateHelper();
     const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
@@ -56,8 +68,9 @@ export abstract class BaseEndpointsDataSource extends ListDataSource<EndpointMod
       paginationKey: action.paginationKey,
       transformEntities: [
         (entities: EndpointModel[]) => {
-          return endpointType ? entities.filter(endpoint => {
-            return endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === endpointType;
+          return endpointType || onlyConnected ? entities.filter(endpoint => {
+            return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
+              (!endpointType || endpoint.cnsi_type === endpointType);
           }) : entities;
         },
         {
@@ -65,7 +78,6 @@ export abstract class BaseEndpointsDataSource extends ListDataSource<EndpointMod
           field: 'name'
         },
       ],
-      refresh: () => this.store.dispatch(new GetSystemInfo(false, action)),
     });
     this.endpointType = endpointType;
   }

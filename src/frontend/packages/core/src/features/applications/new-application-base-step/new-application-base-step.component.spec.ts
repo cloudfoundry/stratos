@@ -1,10 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
-import { NewApplicationBaseStepComponent } from './new-application-base-step.component';
+import { TabNavService } from '../../../../tab-nav.service';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { RouterTestingModule } from '@angular/router/testing';
+import { NewApplicationBaseStepComponent } from './new-application-base-step.component';
 
 describe('NewApplicationBaseStepComponent', () => {
   let component: NewApplicationBaseStepComponent;
@@ -18,7 +19,8 @@ describe('NewApplicationBaseStepComponent', () => {
         SharedModule,
         createBasicStoreModule(),
         RouterTestingModule
-      ]
+      ],
+      providers: [TabNavService]
     })
       .compileComponents();
   }));

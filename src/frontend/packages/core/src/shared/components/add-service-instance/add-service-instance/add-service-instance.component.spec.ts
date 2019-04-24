@@ -1,9 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
+import { TabNavService } from '../../../../../tab-nav.service';
+import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
-import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { AppNameUniqueDirective } from '../../../app-name-unique.directive/app-name-unique.directive';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
@@ -33,15 +35,16 @@ import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
+import { StatefulIconComponent } from '../../stateful-icon/stateful-icon.component';
 import { SteppersModule } from '../../stepper/steppers.module';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
 import { SelectServiceComponent } from '../select-service/select-service.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
+import {
+  SpecifyUserProvidedDetailsComponent,
+} from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
-import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-details/specify-user-provided-details.component';
-import { AppNameUniqueDirective } from '../../../app-name-unique.directive/app-name-unique.directive';
-import { StatefulIconComponent } from '../../stateful-icon/stateful-icon.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -92,8 +95,10 @@ describe('AddServiceInstanceComponent', () => {
         PaginationMonitorFactory,
         CfOrgSpaceDataService,
         InternalEventMonitorFactory,
-        CloudFoundryService
-      ]
+        CloudFoundryService,
+        TabNavService
+      ],
+
     })
       .compileComponents();
   }));

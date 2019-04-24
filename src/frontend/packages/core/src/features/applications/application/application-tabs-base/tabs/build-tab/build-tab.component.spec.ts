@@ -8,13 +8,17 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../../../../../store/src/reducers.module';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { endpointStoreNames } from '../../../../../../../../store/src/types/endpoint.types';
+import { TabNavService } from '../../../../../../../tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../../../core/core.module';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { GITHUB_API_URL } from '../../../../../../core/github.helpers';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
+import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../../shared/entity.tokens';
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { ApplicationService } from '../../../../application.service';
+import { entityServiceFactory } from '../../../application-base.component';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
@@ -49,7 +53,15 @@ describe('BuildTabComponent', () => {
         AppStoreModule,
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        { provide: GITHUB_API_URL, useValue: null }
+        { provide: GITHUB_API_URL, useValue: null },
+        TabNavService,
+        { provide: CF_GUID, useValue: '' },
+        { provide: APP_GUID, useValue: '' },
+        {
+          provide: ENTITY_SERVICE,
+          useFactory: entityServiceFactory,
+          deps: [CF_GUID, APP_GUID, EntityServiceFactory]
+        },
       ]
     })
       .compileComponents();

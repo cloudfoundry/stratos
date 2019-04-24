@@ -1,6 +1,7 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../tab-nav.service';
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { InviteUsersCreateComponent } from './invite-users-create/invite-users-create.component';
 import { InviteUsersComponent } from './invite-users.component';
@@ -18,7 +19,8 @@ describe('InviteUsersComponent', () => {
       imports: [...BaseTestModules],
       providers: [
         HttpClient,
-        HttpHandler
+        HttpHandler,
+        TabNavService
       ]
     })
       .compileComponents();

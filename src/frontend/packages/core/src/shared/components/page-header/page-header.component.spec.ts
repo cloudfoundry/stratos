@@ -3,9 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { appReducers } from '../../../../../store/src/reducers.module';
+import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
-import { appReducers } from '../../../../../store/src/reducers.module';
 import { InternalEventMonitorFactory } from '../../monitors/internal-event-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { PageHeaderComponent } from './page-header.component';
@@ -26,7 +27,9 @@ describe('PageHeaderComponent', () => {
               queryParams: { breadcrumbs: URL_KEY }
             }
           }
-        }],
+        },
+        TabNavService
+      ],
       imports: [
         MDAppModule,
         CoreModule,
@@ -75,9 +78,9 @@ describe('PageHeaderComponent', () => {
         ]
       }
     ];
-    fixture.detectChanges();
-    const breadcrumbs = fixture.elementRef.nativeElement.getElementsByClassName('page-header__breadcrumb');
-    expect(breadcrumbs.length).toEqual(3);
+    const breadcrumbDefinitions = component.breadcrumbDefinitions;
+    expect(breadcrumbDefinitions).toBeDefined();
+    expect(breadcrumbDefinitions.length).toEqual(3);
   });
 
   it('should have 2 breadcrumb', () => {
@@ -107,8 +110,8 @@ describe('PageHeaderComponent', () => {
         ]
       }
     ];
-    fixture.detectChanges();
-    const breadcrumbs = fixture.elementRef.nativeElement.getElementsByClassName('page-header__breadcrumb');
-    expect(breadcrumbs.length).toEqual(2);
+    const breadcrumbDefinitions = component.breadcrumbDefinitions;
+    expect(breadcrumbDefinitions).toBeDefined();
+    expect(breadcrumbDefinitions.length).toEqual(2);
   });
 });

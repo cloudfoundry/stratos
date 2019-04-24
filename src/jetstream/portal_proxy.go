@@ -16,6 +16,7 @@ type portalProxy struct {
 	SessionStore           interfaces.SessionStorer
 	SessionStoreOptions    *sessions.Options
 	Plugins                map[string]interfaces.StratosPlugin
+	PluginsStatus          map[string]bool
 	Diagnostics            *interfaces.Diagnostics
 	SessionCookieName      string
 	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers

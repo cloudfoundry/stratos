@@ -1,10 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { DiagnosticsPageComponent } from './diagnostics-page.component';
-import { CoreModule } from '../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
-import { SharedModule } from '../../../shared/shared.module';
+
+import { TabNavService } from '../../../../tab-nav.service';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { DiagnosticsPageComponent } from './diagnostics-page.component';
 
 describe('DiagnosticsPageComponent', () => {
   let component: DiagnosticsPageComponent;
@@ -12,15 +13,16 @@ describe('DiagnosticsPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DiagnosticsPageComponent ],
+      declarations: [DiagnosticsPageComponent],
       imports: [
         CoreModule,
         RouterTestingModule,
         SharedModule,
         createBasicStoreModule(),
-      ]
+      ],
+      providers: [TabNavService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

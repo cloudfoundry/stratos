@@ -7,11 +7,8 @@ import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
 
 import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
-import { GetAllEndpoints } from '../../store/src/actions/endpoint.actions';
-import { GetOrganization } from '../../store/src/actions/organization.actions';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { RouterNav } from '../../store/src/actions/router.actions';
-import { GetSpace } from '../../store/src/actions/space.actions';
 import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
@@ -29,6 +26,7 @@ import { APIResource } from '../../store/src/types/api.types';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IRequestDataState } from '../../store/src/types/entity.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
+import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { IAppFavMetadata, IOrgFavMetadata, ISpaceFavMetadata } from './cf-favourite-types';
@@ -43,7 +41,6 @@ import { LoggerService } from './core/logger.service';
 import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
-import { createGetApplicationAction } from './features/applications/application.service';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { getFullEndpointApiUrl, initEndpointExtensions } from './features/endpoints/endpoint-helpers';
@@ -55,7 +52,7 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { ApplicationStateService } from './shared/components/application-state/application-state.service';
-import { favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
+import { FavoriteConfig, favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
 
@@ -117,6 +114,7 @@ export class CustomRouterStateSerializer
     CloudFoundryModule
   ],
   providers: [
+    TabNavService,
     LoggedInService,
     ExtensionService,
     DynamicExtensionRoutes,
@@ -228,7 +226,7 @@ export class AppModule {
     this.registerCfOrgMapper(endpointType);
   }
   private registerCfEndpointMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IEndpointFavMetadata>({
+    favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IEndpointFavMetadata>(new FavoriteConfig({
       endpointType,
       entityType: endpointSchemaKey
     },
@@ -250,7 +248,6 @@ export class AppModule {
           }
         ]
       }),
-      () => new GetAllEndpoints(false),
       endpoint => ({
         name: endpoint.name,
         guid: endpoint.guid,
@@ -258,11 +255,11 @@ export class AppModule {
         user: endpoint.user ? endpoint.user.name : undefined,
         admin: endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined
       })
-    );
+    ));
   }
 
   private registerCfApplicationMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>({
+    favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>(new FavoriteConfig({
       endpointType,
       entityType: applicationSchemaKey
     },
@@ -274,17 +271,16 @@ export class AppModule {
           name: app.name
         };
       },
-      favorite => createGetApplicationAction(favorite.entityId, favorite.endpointId),
       app => ({
         guid: app.metadata.guid,
         cfGuid: app.entity.cfGuid,
         name: app.entity.name,
       })
-    );
+    ));
   }
 
   private registerCfSpaceMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>({
+    favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>(new FavoriteConfig({
       endpointType,
       entityType: spaceSchemaKey
     },
@@ -296,19 +292,18 @@ export class AppModule {
           name: space.name
         };
       },
-      favorite => new GetSpace(favorite.entityId, favorite.endpointId),
       space => ({
         guid: space.metadata.guid,
         orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
         name: space.entity.name,
         cfGuid: space.entity.cfGuid,
       })
-    );
+    ));
 
   }
   private registerCfOrgMapper(endpointType: string) {
 
-    favoritesConfigMapper.registerFavoriteConfig<APIResource<IOrganization>, IOrgFavMetadata>({
+    favoritesConfigMapper.registerFavoriteConfig<APIResource<IOrganization>, IOrgFavMetadata>(new FavoriteConfig({
       endpointType,
       entityType: organizationSchemaKey
     },
@@ -318,14 +313,13 @@ export class AppModule {
         routerLink: `/cloud-foundry/${org.cfGuid}/organizations/${org.guid}`,
         name: org.name
       }),
-      favorite => new GetOrganization(favorite.entityId, favorite.endpointId),
       org => ({
         guid: org.metadata.guid,
         status: this.getOrgStatus(org),
         name: org.entity.name,
         cfGuid: org.entity.cfGuid,
       })
-    );
+    ));
   }
   private getOrgStatus(org: APIResource<IOrganization>) {
     if (!org || !org.entity || !org.entity.status) {

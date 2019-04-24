@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
@@ -17,7 +18,8 @@ describe('ServicesWallComponent', () => {
       ],
       providers: [
         CloudFoundryService,
-        CfOrgSpaceDataService
+        CfOrgSpaceDataService,
+        TabNavService
       ]
     })
       .compileComponents();

@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
@@ -13,7 +13,7 @@ describe('MarkdownPreviewComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [MarkdownPreviewComponent],
-      providers: [LoggerService],
+      providers: [LoggerService, HttpClient, HttpHandler],
       imports: [
         HttpClientModule,
         HttpClientTestingModule,
