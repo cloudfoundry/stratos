@@ -163,10 +163,10 @@ export class EndpointListHelper {
   }
 
   destroyEndpointDetails(refs: EndpointDetailsContainerRefs) {
-    if (refs.componentRef) {
+    if (refs.componentRef && refs.componentRef.destroy) {
       refs.componentRef.destroy();
     }
-    if (refs.endpointDetails) {
+    if (refs.endpointDetails && refs.endpointDetails.clear) {
       refs.endpointDetails.clear();
     }
   }

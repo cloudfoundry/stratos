@@ -66,6 +66,7 @@ deploy/hsc-upgrade-volume/
 deploy/development.rc
 deploy/ci/secrets.yml
 deploy/kubernetes/values.yaml
+deploy/kubernetes/helm-chart/
 deploy/cloud-foundry/db-migration/goose
 outputs/
 deploy/kubernetes/console/charts/
@@ -107,3 +108,4 @@ src/frontend/packages/core/src/index.html
 # Prebuild package
 
 stratos-frontend-prebuild.zip
+go-vendor-*.tgz

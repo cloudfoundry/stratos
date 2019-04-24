@@ -26,8 +26,16 @@
   &__shared {
     padding-bottom: 24px;
   }
+  &__title {
+    display: flex;
+    h2 {
+      flex: 1;
+    }
+  }
+  &__help {
+    height: 32px;
+    line-height: 32px;
+    width: 32px;
+  }
 }
 
-app-connect-endpoint-dialog {
-  position: relative;
-}

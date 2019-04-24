@@ -1,21 +1,29 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
 
-import { IApp } from '../../../../../core/cf-api.types';
-import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
-import { TableCellCustom } from '../../list.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IApp } from '../../../../../core/cf-api.types';
+import { CfOrgSpaceLabelService } from '../../../../services/cf-org-space-label.service';
+import { TableCellCustom } from '../../list.types';
 
 
 export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp>> {
 
-  multipleConnectedEndpoints$: Observable<boolean>;
+  public cfOrgSpace: CfOrgSpaceLabelService;
 
-  constructor(store: Store<AppState>) {
+  constructor(private store: Store<AppState>) {
     super();
-    this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(store);
   }
 
+  protected init(cfGuid?: string, orgGuid?: string, spaceGuid?: string) {
+    if (!this.cfOrgSpace) {
+      this.cfOrgSpace = new CfOrgSpaceLabelService(
+        this.store,
+        cfGuid,
+        orgGuid,
+        spaceGuid
+      );
+    }
+  }
 
 }

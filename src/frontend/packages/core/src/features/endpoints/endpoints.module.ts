@@ -22,7 +22,7 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     ConnectEndpointDialogComponent,
     CredentialsAuthFormComponent,
     SSOAuthFormComponent,
-    NoneAuthFormComponent
+    NoneAuthFormComponent,
   ],
   entryComponents: [
     ConnectEndpointDialogComponent,

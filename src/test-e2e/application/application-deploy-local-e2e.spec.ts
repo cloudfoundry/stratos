@@ -73,9 +73,11 @@ describe('Application Deploy - ', function () {
       browser.executeScript(script);
 
       // Should be on deploy app modal
-      appWall.waitForPage();
       expect(appWall.isActivePage()).toBeTruthy();
-      deployApp = appWall.clickDeployApp();
+      appWall.waitForPage();
+      const baseCreateAppStep = appWall.clickCreateApp();
+      baseCreateAppStep.waitForPage();
+      deployApp = baseCreateAppStep.selectDeploy();
     });
 
     it('Should deploy app', () => {

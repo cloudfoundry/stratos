@@ -5,7 +5,7 @@
   [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
-      <div *ngIf="endpointConfig.imagePath" class="endpoint-card__image">
+      <div *ngIf="!!endpointConfig && endpointConfig.imagePath" class="endpoint-card__image">
         <img class="endpoint-card__image--img" src="{{endpointConfig.imagePath}}" />
       </div>
       <div class="endpoint-card__title__text">

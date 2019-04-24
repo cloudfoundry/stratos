@@ -12,15 +12,16 @@ import { ApplicationStateIconPipe } from '../../../application-state/application
 import { ApplicationStateComponent } from '../../../application-state/application-state.component';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
+import { CfOrgSpaceLinksComponent } from '../../../cf-org-space-links/cf-org-space-links.component';
 import { CfRoleCheckboxComponent } from '../../../cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from '../../../chips/chips.component';
 import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
+import { ServicePlanPriceComponent } from '../../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../../service-plan-public/service-plan-public.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { EventTabActorIconPipe } from '../../list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { listTableCells, TableCellComponent } from './table-cell.component';
-import { ServicePlanPublicComponent } from '../../../service-plan-public/service-plan-public.component';
-import { ServicePlanPriceComponent } from '../../../service-plan-price/service-plan-price.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -45,7 +46,8 @@ describe('TableCellComponent', () => {
         CfRoleCheckboxComponent,
         GithubCommitAuthorComponent,
         ServicePlanPriceComponent,
-        ServicePlanPublicComponent
+        ServicePlanPublicComponent,
+        CfOrgSpaceLinksComponent
       ],
       imports: [
         CoreModule

@@ -4,6 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
+import { LoggerService } from '../../../core/src/core/logger.service';
 import { GitSCMService, GitSCMType } from '../../../core/src/shared/data-services/scm/scm.service';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../actions/github.actions';
 import { AppState } from '../app-state';
@@ -19,7 +20,8 @@ export class GithubEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
-    private scmService: GitSCMService
+    private scmService: GitSCMService,
+    private logger: LoggerService
   ) { }
   @Effect()
   fetchCommit$ = this.actions$.pipe(
@@ -51,7 +53,7 @@ export class GithubEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
         ]
         ));
     }));

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -8,8 +8,8 @@ import {
   errorFetchingFavoritesSelector,
   fetchingFavoritesSelector,
 } from '../../../../../store/src/selectors/favorite-groups.selectors';
-import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
 import { LoggerService } from '../../../core/logger.service';
+import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
 
 
 interface IFavoritesInfo {
@@ -26,6 +26,8 @@ export class FavoritesGlobalListComponent implements OnInit {
   public favInfo$: Observable<IFavoritesInfo>;
   public favoriteGroups$: Observable<IGroupedFavorites[]>;
   constructor(private store: Store<AppState>, private logger: LoggerService) { }
+
+  @Input() showFilters: boolean;
 
   ngOnInit() {
     const manager = new UserFavoriteManager(this.store, this.logger);

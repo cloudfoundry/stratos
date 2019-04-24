@@ -1,30 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 import { AppState } from '../../../../../../../../store/src/app-state';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
-import { endpointSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IApp, ISpace } from '../../../../../../core/cf-api.types';
+import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 
 @Component({
   selector: 'app-table-cell-app-cforgspace',
   templateUrl: './table-cell-app-cforgspace.component.html',
   styleUrls: ['./table-cell-app-cforgspace.component.scss'],
 })
-export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase implements OnInit {
+export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase {
 
-  endpointName$: Observable<string>;
+  @Input('row')
+  set row(row: APIResource<IApp>) {
+    if (row) {
+      this.init(row.entity.cfGuid, (row.entity.space as APIResource<ISpace>).entity.organization_guid, row.entity.space_guid);
+    }
+  }
 
-  constructor(private store: Store<AppState>) {
+  constructor(store: Store<AppState>) {
     super(store);
   }
 
-  ngOnInit() {
-    this.endpointName$ = this.store.select<EndpointModel>(selectEntity(endpointSchemaKey, this.row.entity.cfGuid)).pipe(
-      map(endpoint => endpoint ? endpoint.name : '')
-    );
-  }
 }

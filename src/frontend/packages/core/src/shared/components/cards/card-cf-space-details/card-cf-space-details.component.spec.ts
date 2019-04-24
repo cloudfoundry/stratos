@@ -3,11 +3,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CloudFoundrySpaceService } from '../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import {
   BaseTestModulesNoShared,
-  MetadataCardTestComponents,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../../test-framework/cloud-foundry-space.service.mock';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
+import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 import { CardCfSpaceDetailsComponent } from './card-cf-space-details.component';
 
 describe('CardCfSpaceDetailsComponent', () => {
@@ -16,7 +16,7 @@ describe('CardCfSpaceDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CardCfSpaceDetailsComponent, MetadataCardTestComponents, BooleanIndicatorComponent],
+      declarations: [CardCfSpaceDetailsComponent, MetadataItemComponent, BooleanIndicatorComponent],
       imports: [...BaseTestModulesNoShared],
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },

@@ -1,34 +1,43 @@
-import { e2e } from '../e2e';
+import { by, element } from 'protractor';
+
+import { e2e, E2ESetup } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { ResetsHelpers } from '../helpers/reset-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
-import { SnackBarComponent } from '../po/snackbar.po';
+import { SnackBarPo } from '../po/snackbar.po';
 import { TileSelector } from '../po/tile-selector.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
-import { RegisterDialog } from './register-dialog.po';
+import { RegisterStepper } from './register-dialog.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
   const tileSelector = new TileSelector();
-  const register = new RegisterDialog();
+  const register = new RegisterStepper();
 
   const validEndpoint = e2e.secrets.getDefaultCFEndpoint();
 
   // If there is an endpoint named 'selfsignecf' use that for self signed cert test - otherwise use default
   const selfSignedEndpoint = e2e.secrets.getEndpointByName('selfsignedcf') || validEndpoint;
 
+  let e2eSetup: E2ESetup;
+
   describe('Register Endpoints -', () => {
 
-    beforeAll(() => {
-      e2e.setup(ConsoleUserType.admin)
-        .clearAllEndpoints();
-    });
-
-    beforeEach(() => {
+    function navToRegCf() {
       endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
       endpointsPage.register();
       tileSelector.select('Cloud Foundry');
       expect(register.isRegisterDialog()).toBeTruthy();
       expect(register.stepper.canCancel()).toBeTruthy();
+    }
+
+    beforeAll(() => {
+      e2eSetup = e2e.setup(ConsoleUserType.admin);
+      e2eSetup.clearAllEndpoints();
+    });
+
+    beforeEach(() => {
+      navToRegCf();
     });
 
     it('should show add form detail view when btn in tile is pressed', () => {
@@ -150,7 +159,7 @@ describe('Endpoints', () => {
         });
         register.stepper.next();
 
-        const snackBar = new SnackBarComponent();
+        const snackBar = new SnackBarPo();
         snackBar.waitUntilShown();
 
         // Handle the error case for invalid certificate - could be unknown authority or bad certificate
@@ -161,7 +170,7 @@ describe('Endpoints', () => {
           .toBeTruthy();
       });
 
-      it('Successful register', () => {
+      it('Successful register (no connect)', () => {
         register.form.fill({
           name: validEndpoint.name,
           url: validEndpoint.url,
@@ -171,6 +180,9 @@ describe('Endpoints', () => {
         expect(register.stepper.canNext()).toBeTruthy();
         register.stepper.next();
 
+        register.stepper.waitForStep('Connect (Optional)');
+        register.stepper.next();
+
         expect(endpointsPage.isActivePage()).toBeTruthy();
         expect(endpointsPage.cards.isPresent()).toBeTruthy();
 
@@ -178,6 +190,59 @@ describe('Endpoints', () => {
           expect(data.name).toEqual(validEndpoint.name);
           expect(data.url).toEqual(validEndpoint.url);
           expect(data.connected).toBeFalsy();
+        });
+      });
+
+      it('Successful register (with connect)', () => {
+        const resetHelper = new ResetsHelpers();
+        resetHelper.removeEndpoint(e2eSetup.adminReq, validEndpoint.name);
+
+        endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
+        endpointsPage.list.header.refresh();
+
+        navToRegCf();
+
+        register.form.fill({
+          name: validEndpoint.name,
+          url: validEndpoint.url,
+          skipsll: true
+        });
+
+        expect(register.stepper.canNext()).toBeTruthy();
+        register.stepper.next();
+
+        register.stepper.waitForStep('Connect (Optional)');
+        expect(register.stepper.canPrevious()).toBeFalsy();
+        expect(register.stepper.canNext()).toBeTruthy();
+
+        element(by.css('.connect__checkbox')).click();
+
+        const toConnect = e2e.secrets.getDefaultCFEndpoint();
+        register.stepper.getStepperForm().fill({
+          username: 'junk',
+          password: 'junk'
+        });
+
+        expect(register.stepper.canNext()).toBeTruthy();
+        register.stepper.next();
+
+        const snackBar = new SnackBarPo();
+        snackBar.waitForMessage('Could not connect to the endpoint');
+
+        register.stepper.getStepperForm().fill({
+          username: toConnect.creds.admin.username,
+          password: toConnect.creds.admin.password
+        });
+
+        expect(register.stepper.canNext()).toBeTruthy();
+        register.stepper.next();
+
+        endpointsPage.waitForPage();
+        expect(endpointsPage.cards.isPresent()).toBeTruthy();
+        endpointsPage.cards.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
+          expect(data.name).toEqual(validEndpoint.name);
+          expect(data.url).toEqual(validEndpoint.url);
+          expect(data.connected).toBeTruthy();
         });
       });
     });
