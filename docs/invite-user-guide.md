@@ -80,8 +80,8 @@ The following configuration is required in order to configure the SMTP server an
 
 To use custom email templates, create a folder and add the two templates with the following file names:
 
-1. user-invite-email.txt = Plain text template 
-1. user-invite-email.helm = HTML text template 
+1. user-invite-email.txt = Plain text template
+1. user-invite-email.helm = HTML text template
 
 When deploying Stratos with `cf push` set the environment variable `TEMPLATE_DIR` to the folder name where your custom templates are located. This can be done on the command line or by adding this environment variable to the `manifest.yml` file.
 
@@ -107,7 +107,6 @@ The following configuration is required in order to configure the SMTP server an
 
 If you wish to use custom email templates for user invitation, follow these steps:
 
-
 Create the namespace that you are going to use when installing Stratos:
 
 ```
@@ -116,8 +115,8 @@ kubectl create namespace stratos
 
 Create a Config Map for the template files - this assumes you have the following two files in the current directory:
 
-1. user-invite-email.txt = Plain text template 
-1. user-invite-email.helm = HTML text template 
+1. user-invite-email.txt = Plain text template
+1. user-invite-email.helm = HTML text template
 
 Create the Config Map with:
 
