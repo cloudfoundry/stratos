@@ -1,9 +1,0 @@
-<div class="kube-node-condition">
-  <div class="kube-node-condition__title">
-    <mat-icon [fontSet]="icons[condition][1]">{{ icons[condition][0] }}</mat-icon>
-    <div>
-      <span class="kube-node-condition__title__span">{{ titles[condition] }}</span>
-    </div>
-  </div>
-  <app-boolean-indicator class="kube-node-condition__indicator" [subtle]="false" [inverse]="inverse" [isTrue]="(condition$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
-</div>
