@@ -27,8 +27,8 @@
                   <div class="app-metadata__two-cols">
                     <app-metadata-item label="Effective Duration">
                       <mat-radio-group formControlName="effective_type">
-                        <mat-radio-button value="always" (click)="resetEffectiveType('always')"
-                          class="form-field-left">Always
+                        <mat-radio-button value="always" (click)="resetEffectiveType('always')" class="form-field-left">
+                          Always
                         </mat-radio-button>
                         <mat-radio-button value="custom" (click)="resetEffectiveType('custom')">
                           <span *ngIf="editEffectiveType=='always'">
@@ -107,16 +107,12 @@
                 {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
               </mat-error>
               <mat-error
-                *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleStartDateBeforeNow')">
-                {{policyAlert.alertInvalidPolicyScheduleStartDateBeforeNow}}
+                *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleDateBeforeNow') || editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleDateBeforeNow')">
+                {{policyAlert.alertInvalidPolicyScheduleDateBeforeNow}}
               </mat-error>
               <mat-error
                 *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')">
                 {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
-              </mat-error>
-              <mat-error
-                *ngIf="editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleEndDateBeforeNow')">
-                {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeNow}}
               </mat-error>
               <!-- <mat-error
                     *ngIf="editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')">
@@ -165,5 +161,6 @@
       </app-tile>
     </app-tile-group>
   </app-tile-grid>
-  <button color="accent" mat-button mat-raised-button (click)="addRecurringSchedule()" [disabled]="editIndex!=-1">Add</button>
+  <button color="accent" mat-button mat-raised-button (click)="addRecurringSchedule()"
+    [disabled]="editIndex!=-1">Add</button>
 </div>

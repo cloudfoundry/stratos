@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellAutoscalerEventStatusComponent } from './table-cell-autoscaler-event-status.component';
 import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 
-describe('TableCellAutoscalerEventTypeComponent', () => {
+describe('TableCellAutoscalerEventStatusComponent', () => {
   let component: TableCellAutoscalerEventStatusComponent<EntityInfo>;
   let fixture: ComponentFixture<TableCellAutoscalerEventStatusComponent<EntityInfo>>;
 

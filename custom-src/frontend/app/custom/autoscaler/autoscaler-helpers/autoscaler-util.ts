@@ -6,6 +6,14 @@ export const MetricPercentageTypes = ['memoryutil'];
 export const ScaleTypes = ['upper', 'lower'];
 export const UpperOperators = ['>', '>='];
 export const LowerOperators = ['<', '<='];
+export const WeekdayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+export const MonthdayOptions = (() => {
+  const days = [];
+  for (let i = 0; i < 31; i++) {
+    days[i] = i + 1;
+  }
+  return days;
+})();
 
 export const normalColor = 'rgba(90,167,0,0.6)';
 export const MomentFormateDate = 'YYYY-MM-DD';
@@ -98,8 +106,7 @@ export const PolicyAlert = {
   alertInvalidPolicyTriggerCooldownRange:
     `The cooldown period value must be an integer in the range of ${PolicyDefaultSetting.cool_down_secs_min} to
     ${PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
-  alertInvalidPolicyScheduleStartDateBeforeNow: 'Start date should be after or equal to current date.',
-  alertInvalidPolicyScheduleEndDateBeforeNow: 'End date should be after or equal to current date.',
+  alertInvalidPolicyScheduleDateBeforeNow: 'Start/End date should be after or equal to current date.',
   alertInvalidPolicyScheduleEndDateBeforeStartDate: 'Start date must be earlier than the end date.',
   alertInvalidPolicyScheduleEndTimeBeforeStartTime: 'Start time must be earlier than the end time.',
   alertInvalidPolicyScheduleRepeatOn: 'Please select at least one "Repeat On" day.',

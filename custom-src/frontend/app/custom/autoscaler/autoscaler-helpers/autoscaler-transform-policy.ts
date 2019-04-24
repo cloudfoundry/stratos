@@ -11,13 +11,10 @@ export function autoscalerTransformArrayToMap(newPolicy) {
   newPolicy.enabled = true;
   newPolicy.scaling_rules_map = {};
   newPolicy.scaling_rules_form = [];
-  if (newPolicy.scaling_rules) {
-    newPolicy.scaling_rules.map((trigger) => {
-      initIfUndefined(trigger, 'breach_duration_secs', PolicyDefaultSetting.breach_duration_secs_default);
-      initIfUndefined(trigger, 'cool_down_secs', PolicyDefaultSetting.cool_down_secs_default);
-      pushAndSortTrigger(newPolicy.scaling_rules_map, trigger.metric_type, trigger);
-    });
-  }
+  initIfUndefined(newPolicy, 'scaling_rules', []);
+  newPolicy.scaling_rules.map((trigger) => {
+    pushAndSortTrigger(newPolicy.scaling_rules_map, trigger.metric_type, trigger);
+  });
   let maxThreshold = 0;
   Object.keys(newPolicy.scaling_rules_map).map((metricName) => {
     if (newPolicy.scaling_rules_map[metricName].upper && newPolicy.scaling_rules_map[metricName].upper.length > 0) {
@@ -25,17 +22,10 @@ export function autoscalerTransformArrayToMap(newPolicy) {
       setUpperColor(newPolicy.scaling_rules_map[metricName].upper);
     }
     if (newPolicy.scaling_rules_map[metricName].lower && newPolicy.scaling_rules_map[metricName].lower.length > 0) {
-      maxThreshold = newPolicy.scaling_rules_map[metricName].lower[0].threshold > maxThreshold ?
-        newPolicy.scaling_rules_map[metricName].lower[0].threshold : maxThreshold;
+      maxThreshold = Math.max(newPolicy.scaling_rules_map[metricName].lower[0].threshold, maxThreshold);
       setLowerColor(newPolicy.scaling_rules_map[metricName].lower);
     }
-    ScaleTypes.map((triggerType) => {
-      if (newPolicy.scaling_rules_map[metricName][triggerType]) {
-        newPolicy.scaling_rules_map[metricName][triggerType].map((trigger) => {
-          newPolicy.scaling_rules_form.push(trigger);
-        });
-      }
-    });
+    buildFormUponMap(newPolicy, metricName);
   });
   initIfUndefined(newPolicy, 'schedules', { timezone: moment.tz.guess() });
   initIfUndefined(newPolicy.schedules, 'recurring_schedule', []);
@@ -101,11 +91,9 @@ export function autoscalerTransformMapToArray(newPolicy) {
   delete newPolicy.scaling_rules_form;
   delete newPolicy.scaling_rules_map;
   if (newPolicy.schedules) {
-    deleteIf(
-      newPolicy.schedules, 'recurring_schedule',
+    deleteIf(newPolicy.schedules, 'recurring_schedule',
       newPolicy.schedules.recurring_schedule && newPolicy.schedules.recurring_schedule.length === 0);
-    deleteIf(
-      newPolicy.schedules, 'specific_date',
+    deleteIf(newPolicy.schedules, 'specific_date',
       newPolicy.schedules.specific_date && newPolicy.schedules.specific_date.length === 0);
     deleteIf(newPolicy, 'schedules', !newPolicy.schedules.recurring_schedule && !newPolicy.schedules.specific_date);
   }
@@ -114,6 +102,8 @@ export function autoscalerTransformMapToArray(newPolicy) {
 
 function pushAndSortTrigger(map, metricName, newTrigger) {
   const scaleType = getScaleType(newTrigger.operator);
+  initIfUndefined(newTrigger, 'breach_duration_secs', PolicyDefaultSetting.breach_duration_secs_default);
+  initIfUndefined(newTrigger, 'cool_down_secs', PolicyDefaultSetting.cool_down_secs_default);
   if (!map[metricName]) {
     map[metricName] = {};
   }
@@ -127,6 +117,16 @@ function pushAndSortTrigger(map, metricName, newTrigger) {
     }
   }
   map[metricName][scaleType].push(newTrigger);
+}
+
+function buildFormUponMap(newPolicy, metricName) {
+  ScaleTypes.map((triggerType) => {
+    if (newPolicy.scaling_rules_map[metricName][triggerType]) {
+      newPolicy.scaling_rules_map[metricName][triggerType].map((trigger) => {
+        newPolicy.scaling_rules_form.push(trigger);
+      });
+    }
+  });
 }
 
 function initIfUndefined(fatherEntity, childName, defaultData) {

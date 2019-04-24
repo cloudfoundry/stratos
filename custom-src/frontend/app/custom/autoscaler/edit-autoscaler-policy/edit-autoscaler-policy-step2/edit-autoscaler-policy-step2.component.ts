@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
 import { ApplicationService } from '../../../../features/applications/application.service';
@@ -72,7 +72,6 @@ export class EditAutoscalerPolicyStep2Component implements OnInit {
 
   ngOnInit() {
     this.appAutoscalerPolicy$ = this.store.select(selectUpdateAutoscalerPolicyState).pipe(
-      filter(state => true),
       map(state => {
         this.currentPolicy = state.policy;
         return this.currentPolicy;

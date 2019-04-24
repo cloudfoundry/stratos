@@ -9,6 +9,12 @@
     right: 24px;
     text-align: right;
   }
+  .mat-header-cell:first-of-type {
+    padding-left: unset;
+  }
+  .autoscaler-tab-table-no-record {
+    margin-top: .5em;
+  }
 }
 
 .app-metadata {
@@ -57,14 +63,5 @@ table {
   }
   &-1of6 {
     flex: 0 0 16.78%;
-  }
-}
-
-.autoscaler-tab {
-  th.mat-header-cell:first-of-type {
-    padding-left: unset;
-  }
-  .autoscaler-tab-table-no-record {
-    margin-top: 0.5em;
   }
 }

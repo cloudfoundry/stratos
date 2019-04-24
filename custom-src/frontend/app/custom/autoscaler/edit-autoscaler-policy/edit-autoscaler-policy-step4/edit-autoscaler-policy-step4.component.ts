@@ -41,11 +41,13 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private updateAppAutoscalerPolicyService: EntityService;
-  private editLimitValid = true;
-  private editSpecificDateTimeValid = true;
   private appAutoscalerPolicyErrorSub: Subscription;
   private currentPolicy: any;
   private editIndex = -1;
+  private editMutualValidation = {
+    limit: true,
+    datetime: true
+  };
 
   constructor(
     public applicationService: ApplicationService,
@@ -54,8 +56,8 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
     private entityServiceFactory: EntityServiceFactory,
   ) {
     this.editSpecificDateForm = this.fb.group({
-      instance_min_count: [0, [Validators.required, this.validateRecurringSpecificMin()]],
-      instance_max_count: [0, [Validators.required, this.validateRecurringSpecificMax()]],
+      instance_min_count: [0],
+      instance_max_count: [0],
       initial_min_instance_count: [0, [this.validateSpecificDateInitialMin()]],
       start_date_time: [0, [Validators.required, this.validateSpecificDateStartDateTime()]],
       end_date_time: [0, [Validators.required, this.validateSpecificDateEndDateTime()]]
@@ -64,7 +66,6 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.appAutoscalerPolicy$ = this.store.select(selectUpdateAutoscalerPolicyState).pipe(
-      filter(state => true),
       map(state => {
         this.currentPolicy = state.policy;
         return this.currentPolicy;
@@ -144,6 +145,10 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
       start_date_time: this.currentPolicy.schedules.specific_date[index].start_date_time,
       end_date_time: this.currentPolicy.schedules.specific_date[index].end_date_time,
     });
+    this.editSpecificDateForm.controls.instance_min_count.setValidators([Validators.required,
+    validateRecurringSpecificMin(this.editSpecificDateForm, this.editMutualValidation)]);
+    this.editSpecificDateForm.controls.instance_max_count.setValidators([Validators.required,
+    validateRecurringSpecificMax(this.editSpecificDateForm, this.editMutualValidation)]);
   }
 
   finishSpecificDate() {
@@ -175,25 +180,22 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
       if (!this.editSpecificDateForm) {
         return null;
       }
-      const newSchedule = {
-        start_date_time: control.value,
-        end_date_time: this.editSpecificDateForm.get('end_date_time').value
-      };
-      const lastValid = this.editSpecificDateTimeValid;
-      this.editSpecificDateTimeValid = true;
       const errors: any = {};
+      const newSchedule = { start_date_time: control.value, end_date_time: this.editSpecificDateForm.get('end_date_time').value };
+      const lastValid = this.editMutualValidation.datetime;
+      this.editMutualValidation.datetime = true;
       if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).format(MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleStartDateTimeBeforeNow = { value: control.value };
       }
       if (dateTimeIsSameOrAfter(control.value, this.editSpecificDateForm.get('end_date_time').value)) {
-        this.editSpecificDateTimeValid = false;
+        this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
       if (specificDateRangeOverlapping(newSchedule, this.editIndex, this.currentPolicy.schedules.specific_date)) {
-        this.editSpecificDateTimeValid = false;
+        this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleSpecificConflict = { value: control.value };
       }
-      if (this.editSpecificDateForm && lastValid !== this.editSpecificDateTimeValid) {
+      if (this.editSpecificDateForm && lastValid !== this.editMutualValidation.datetime) {
         this.editSpecificDateForm.controls.end_date_time.updateValueAndValidity();
       }
       return Object.keys(errors).length === 0 ? null : errors;
@@ -205,61 +207,58 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
       if (!this.editSpecificDateForm) {
         return null;
       }
-      const newSchedule = {
-        start_date_time: this.editSpecificDateForm.get('start_date_time').value,
-        end_date_time: control.value
-      };
-      const lastValid = this.editSpecificDateTimeValid;
-      this.editSpecificDateTimeValid = true;
       const errors: any = {};
+      const newSchedule = { start_date_time: this.editSpecificDateForm.get('start_date_time').value, end_date_time: control.value };
+      const lastValid = this.editMutualValidation.datetime;
+      this.editMutualValidation.datetime = true;
       if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).format(MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeNow = { value: control.value };
       }
       if (dateTimeIsSameOrAfter(this.editSpecificDateForm.get('start_date_time').value, control.value)) {
-        this.editSpecificDateTimeValid = false;
+        this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
       if (specificDateRangeOverlapping(newSchedule, this.editIndex, this.currentPolicy.schedules.specific_date)) {
-        this.editSpecificDateTimeValid = false;
+        this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleSpecificConflict = { value: control.value };
       }
-      if (this.editSpecificDateForm && lastValid !== this.editSpecificDateTimeValid) {
+      if (this.editSpecificDateForm && lastValid !== this.editMutualValidation.datetime) {
         this.editSpecificDateForm.controls.start_date_time.updateValueAndValidity();
       }
       return Object.keys(errors).length === 0 ? null : errors;
     };
   }
+}
 
-  validateRecurringSpecificMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.editSpecificDateForm &&
-        numberWithFractionOrExceedRange(control.value, 1, this.editSpecificDateForm.get('instance_max_count').value - 1, true);
-      const lastValid = this.editLimitValid;
-      this.editLimitValid = this.editSpecificDateForm && control.value < this.editSpecificDateForm.get('instance_max_count').value;
-      if (this.editSpecificDateForm && lastValid !== this.editLimitValid) {
-        this.editSpecificDateForm.controls.instance_max_count.updateValueAndValidity();
-      }
-      if (this.editSpecificDateForm) {
-        this.editSpecificDateForm.controls.initial_min_instance_count.updateValueAndValidity();
-      }
-      return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
-    };
-  }
+export function validateRecurringSpecificMin(editForm, editMutualValidation): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } => {
+    const invalid = editForm &&
+      numberWithFractionOrExceedRange(control.value, 1, editForm.get('instance_max_count').value - 1, true);
+    const lastValid = editMutualValidation.limit;
+    editMutualValidation.limit = editForm && control.value < editForm.get('instance_max_count').value;
+    if (editForm && lastValid !== editMutualValidation.limit) {
+      editForm.controls.instance_max_count.updateValueAndValidity();
+    }
+    if (editForm) {
+      editForm.controls.initial_min_instance_count.updateValueAndValidity();
+    }
+    console.log(invalid);
+    return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
+  };
+}
 
-  validateRecurringSpecificMax(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
-      const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
-        this.editSpecificDateForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
-      const lastValid = this.editLimitValid;
-      this.editLimitValid =
-        this.editSpecificDateForm && this.editSpecificDateForm.get('instance_min_count').value < control.value;
-      if (this.editSpecificDateForm && lastValid !== this.editLimitValid) {
-        this.editSpecificDateForm.controls.instance_min_count.updateValueAndValidity();
-      }
-      if (this.editSpecificDateForm) {
-        this.editSpecificDateForm.controls.initial_min_instance_count.updateValueAndValidity();
-      }
-      return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
-    };
-  }
+export function validateRecurringSpecificMax(editForm, editMutualValidation): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } => {
+    const invalid = editForm && numberWithFractionOrExceedRange(control.value,
+      editForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
+    const lastValid = editMutualValidation.limit;
+    editMutualValidation.limit = editForm && editForm.get('instance_min_count').value < control.value;
+    if (editForm && lastValid !== editMutualValidation.limit) {
+      editForm.controls.instance_min_count.updateValueAndValidity();
+    }
+    if (editForm) {
+      editForm.controls.initial_min_instance_count.updateValueAndValidity();
+    }
+    return invalid ? { alertInvalidPolicyMaximumRange: { value: control.value } } : null;
+  };
 }

@@ -249,6 +249,11 @@ function getChartMax(trigger, maxValue) {
     thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));
   }
   thresholdmax = Math.max(maxValue, thresholdmax, 10);
+  thresholdmax = getTrimedInteger(getTrimedInteger);
+  return thresholdmax;
+}
+
+function getTrimedInteger(thresholdmax) {
   for (let i = 10; i < Number.MAX_VALUE && i < thresholdmax; i = i * 10) {
     if (thresholdmax / i >= 1 && thresholdmax / i < 10 && thresholdmax > 100) {
       thresholdmax = (Math.ceil(thresholdmax / i * 10)) * i / 10;
