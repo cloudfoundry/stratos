@@ -7,15 +7,21 @@ import { ExtensionEntitySchema } from '../../core/extension/extension-types';
 
 export const appAutoscalerHealthSchemaKey = 'autoscalerHealth';
 export const appAutoscalerPolicySchemaKey = 'autoscalerPolicy';
+export const appAutoscalerPolicyTriggerSchemaKey = 'autoscalerPolicyTrigger';
 export const appAutoscalerUpdatedPolicySchemaKey = 'autoscalerUpdatedPolicy';
 export const appAutoscalerScalingHistorySchemaKey = 'autoscalerScalingHistory';
 export const appAutoscalerAppMetricSchemaKey = 'autoscalerAppMetric';
 export const appAutoscalerInsMetricSchemaKey = 'autoscalerInsMetric';
 
-
+// TODO: RC check all getAPIResourceGuids
 export const autoscalerEntities: ExtensionEntitySchema[] = [
   {
     entityKey: appAutoscalerPolicySchemaKey,
+    definition: {},
+    options: { idAttribute: getAPIResourceGuid }
+  },
+  {
+    entityKey: appAutoscalerPolicyTriggerSchemaKey,
     definition: {},
     options: { idAttribute: getAPIResourceGuid }
   },

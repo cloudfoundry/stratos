@@ -9,6 +9,7 @@ import {
   appAutoscalerHealthSchemaKey,
   appAutoscalerInsMetricSchemaKey,
   appAutoscalerPolicySchemaKey,
+  appAutoscalerPolicyTriggerSchemaKey,
   appAutoscalerScalingHistorySchemaKey,
   appAutoscalerUpdatedPolicySchemaKey,
 } from './autoscaler.store.module';
@@ -17,6 +18,12 @@ export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
   GET_APP_AUTOSCALER_POLICY_SUCCESS: '[App Autoscaler] Get autoscaler policy success',
   GET_APP_AUTOSCALER_POLICY_FAILED: '[App Autoscaler] Get autoscaler policy failed'
+};
+
+export const AppAutoscalerPolicyTriggerEvents = {
+  GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy trigger',
+  GET_APP_AUTOSCALER_POLICY_SUCCESS: '[App Autoscaler] Get autoscaler policy trigger success',
+  GET_APP_AUTOSCALER_POLICY_FAILED: '[App Autoscaler] Get autoscaler policy trigger failed'
 };
 
 export const AppAutoscalerScalingHistoryEvents = {
@@ -38,6 +45,7 @@ export const AppAutoscalerMetricEvents = {
 // };
 
 export const APP_AUTOSCALER_POLICY = '[New App Autoscaler] Fetch policy';
+export const APP_AUTOSCALER_POLICY_TRIGGER = '[New App Autoscaler] Fetch policy trigger';
 export const UPDATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Update policy';
 export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy';
 export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
@@ -99,13 +107,13 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
     };
   }
   actions = [
-    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY,
-    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_SUCCESS,
-    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_FAILED
+    AppAutoscalerPolicyTriggerEvents.GET_APP_AUTOSCALER_POLICY,
+    AppAutoscalerPolicyTriggerEvents.GET_APP_AUTOSCALER_POLICY_SUCCESS,
+    AppAutoscalerPolicyTriggerEvents.GET_APP_AUTOSCALER_POLICY_FAILED
   ];
-  type = APP_AUTOSCALER_POLICY;
-  entity = [entityFactory(appAutoscalerPolicySchemaKey)];
-  entityKey = appAutoscalerPolicySchemaKey;
+  type = APP_AUTOSCALER_POLICY_TRIGGER;
+  entity = [entityFactory(appAutoscalerPolicyTriggerSchemaKey)];
+  entityKey = appAutoscalerPolicyTriggerSchemaKey;
   options: RequestOptions;
   query: any;
   windowValue: string;

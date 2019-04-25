@@ -6,7 +6,6 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { GetAppAutoscalerPolicyTriggerAction } from '../../../app-autoscaler.actions';
-import { appAutoscalerPolicySchemaKey } from '../../../autoscaler.store.module';
 
 export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResource> {
   action: any;
@@ -21,7 +20,7 @@ export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResour
       {
         store,
         action,
-        schema: entityFactory(appAutoscalerPolicySchemaKey),
+        schema: entityFactory(action.entityKey),
         getRowUniqueId: getRowMetadata,
         paginationKey,
         isLocal: true

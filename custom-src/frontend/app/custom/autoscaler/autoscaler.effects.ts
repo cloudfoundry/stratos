@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
@@ -21,6 +22,7 @@ import { environment } from '../../environments/environment.prod';
 import {
   APP_AUTOSCALER_HEALTH,
   APP_AUTOSCALER_POLICY,
+  APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
@@ -120,38 +122,8 @@ export class AutoscalerEffects {
   @Effect()
   getAppAutoscalerPolicy$ = this.actions$.pipe(
     ofType<GetAppAutoscalerPolicyAction>(APP_AUTOSCALER_POLICY),
-    mergeMap(action => {
-      const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(action, actionType));
-      const options = new RequestOptions();
-      options.url = `${commonPrefix}/apps/${action.guid}/policy`;
-      options.method = 'get';
-      options.headers = this.addHeaders(action.endpointGuid);
-      return this.http
-        .request(new Request(options)).pipe(
-          mergeMap(response => {
-            const policyInfo = autoscalerTransformArrayToMap(response.json());
-            const mappedData = {
-              entities: { [action.entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformData(action.entityKey, mappedData, action.guid, policyInfo);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType)
-            ];
-          }),
-          catchError(err => {
-            if (err.status === 404 && err._body === '{}') {
-              return [
-                new WrapperRequestActionFailed('No policy is defined for this application.', action, actionType)
-              ];
-            } else {
-              return [
-                new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), action, actionType)
-              ];
-            }
-          }));
-    }));
+    mergeMap(action => this.fetchPolicy(action))
+  );
 
   @Effect()
   detachAppAutoscalerPolicy$ = this.actions$.pipe(
@@ -182,32 +154,9 @@ export class AutoscalerEffects {
 
   @Effect()
   fetchAppAutoscalerPolicyTrigger$ = this.actions$.pipe(
-    ofType<GetAppAutoscalerPolicyTriggerAction>(APP_AUTOSCALER_POLICY),
-    withLatestFrom(this.store),
-    mergeMap(([action, state]) => {
-      const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(action, actionType));
-      const options = new RequestOptions();
-      options.url = `${commonPrefix}/apps/${action.guid}/policy`;
-      options.method = 'get';
-      options.headers = this.addHeaders(action.endpointGuid);
-      return this.http
-        .request(new Request(options)).pipe(
-          mergeMap(response => {
-            const policyInfo = autoscalerTransformArrayToMap(response.json());
-            const mappedData = {
-              entities: { [action.entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformTriggerData(action.entityKey, mappedData, policyInfo, action.query);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType, Object.keys(policyInfo.scaling_rules_map).length, 1)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch scaling policy trigger', err), action, actionType)
-          ]));
-    }));
+    ofType<GetAppAutoscalerPolicyTriggerAction>(APP_AUTOSCALER_POLICY_TRIGGER),
+    mergeMap(action => this.fetchPolicy(new GetAppAutoscalerPolicyAction(action.guid, action.endpointGuid), action))
+  );
 
   @Effect()
   fetchAppAutoscalerScalingHistory$ = this.actions$.pipe(
@@ -299,6 +248,60 @@ export class AutoscalerEffects {
             new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch metrics', err), action, actionType)
           ]));
     }));
+
+  private fetchPolicy(
+    getPolicyAction: GetAppAutoscalerPolicyAction,
+    getPolicyTriggerAction?: GetAppAutoscalerPolicyTriggerAction): Observable<Action> {
+    const actionType = 'fetch';
+    this.store.dispatch(new StartRequestAction(getPolicyAction, actionType));
+    const options = new RequestOptions();
+    options.url = `${commonPrefix}/apps/${getPolicyAction.guid}/policy`;
+    options.method = 'get';
+    options.headers = this.addHeaders(getPolicyAction.endpointGuid);
+    return this.http
+      .request(new Request(options)).pipe(
+        mergeMap(response => {
+          const policyInfo = autoscalerTransformArrayToMap(response.json());
+          const mappedData = {
+            entities: { [getPolicyAction.entityKey]: {} },
+            result: []
+          } as NormalizedResponse;
+          this.transformData(getPolicyAction.entityKey, mappedData, getPolicyAction.guid, policyInfo);
+
+          const res = [
+            new WrapperRequestActionSuccess(mappedData, getPolicyAction, actionType)
+          ];
+
+          if (getPolicyTriggerAction) {
+            const mappedPolicyData = {
+              entities: { [getPolicyTriggerAction.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformTriggerData(getPolicyTriggerAction.entityKey, mappedPolicyData, policyInfo, getPolicyTriggerAction.query);
+            // TODO: RC handle failure
+            res.push(
+              new WrapperRequestActionSuccess(
+                mappedPolicyData,
+                getPolicyTriggerAction,
+                actionType,
+                Object.keys(policyInfo.scaling_rules_map).length,
+                1)
+            );
+          }
+          return res;
+        }),
+        catchError(err => {
+          if (err.status === 404 && err._body === '{}') {
+            return [
+              new WrapperRequestActionFailed('No policy is defined for this application.', getPolicyAction, actionType)
+            ];
+          } else {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType)
+            ];
+          }
+        }));
+  }
 
   addMetric(schemaKey: string, mappedData: NormalizedResponse, appid, metricName, data, startTime, endTime, skipFormat, trigger) {
     const id = appid + '-' + metricName;
