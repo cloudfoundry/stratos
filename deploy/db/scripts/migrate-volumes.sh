@@ -1,7 +1,11 @@
 #!/bin/bash
-# set -e
 
+echo "============================================"
 echo "Stratos Volume Migration"
+echo "============================================"
+echo ""
+echo "Migrating volume secrets to Kubernetes secrtets"
+echo ""
 
 function waitForFile() {
   FILE=$1
@@ -36,57 +40,49 @@ curl -k \
     --fail \
     -H "Authorization: Bearer $KUBE_TOKEN" \
     -H 'Content-Type: application/json' \
-    ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets/${RELEASE_NAME}-encryption-key > /dev/null
+    ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets/${RELEASE_NAME}-key-secret > /dev/null
 
 EXISTS=$?
-if [ $EXISTS -eq 0 ]; then
-  echo "Encryption Key secret already exists .. will not create again"
-else
-  # Wait for the Encryption Key to appear
-  echo "Waiting for Encryption Key to be created"
-  waitForFile "${ENCRYPTION_KEY_VOLUME}/${ENCRYPTION_KEY_FILENAME}"
-  echo "Encryption key is now available"
-  KEY=$(cat "${ENCRYPTION_KEY_VOLUME}/${ENCRYPTION_KEY_FILENAME}")
-  cat << EOF > create-secret.yaml
-  {
-    "kind": "Secret",
-    "apiVersion": "v1",
-    "metadata": {
-      "name": "@RELEASE_NAME-encryption-key",
-      "labels": {
-        "app.kubernetes.io/component": "console-encryption-key",
-        "app.kubernetes.io/instance": "@RELEASE_NAME",
-        "app.kubernetes.io/name": "stratos"
-      }
-    },
-    "data": {
-      "key": "@KEY"
-    }
-  }
+if [ $EXISTS -ne 0 ]; then
+  echo "Encryption Key secret does not exist - this should have been created by the Helm Chart"
+  exit $EXISTS
+fi
+
+# Update the secret with the existing Encryption Key value from the Volume
+
+# Wait for the Encryption Key to appear
+echo "Waiting for Encryption Key to be created"
+waitForFile "${ENCRYPTION_KEY_VOLUME}/${ENCRYPTION_KEY_FILENAME}"
+
+echo "Encryption key is now available"
+KEY=$(cat "${ENCRYPTION_KEY_VOLUME}/${ENCRYPTION_KEY_FILENAME}" | base64 | sed -e 's/[\/&]/\\&/g')
+
+cat << EOF > patch-secret.yaml
+{
+  "data": {
 EOF
 
-  sed -i -e 's/@RELEASE_NAME/'"${RELEASE_NAME}"'/g' create-secret.yaml
-  sed -i -e 's/@KEY/'"${KEY}"'/g' create-secret.yaml
+echo "\"key\": \"${KEY}\"" >> patch-secret.yaml
+echo "} }" >> patch-secret.yaml
 
-  echo "Creating secret for the Encryption Key"
+echo "Patching secret for the Encryption Key"
 
-  # Create a secret for the Encryption Key
-  curl -k \
-      --fail \
-      -X POST \
-      -d @create-secret.yaml \
-      -H "Authorization: Bearer $KUBE_TOKEN" \
-      -H 'Accept: application/json' \
-      -H 'Content-Type: application/json' \
-      ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets > /dev/null
+# Patch secret for the Encryption Key
+curl -k \
+    --fail \
+    -X PATCH \
+    -d @patch-secret.yaml \
+    -H "Authorization: Bearer $KUBE_TOKEN" \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/merge-patch+json' \
+    ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets/${RELEASE_NAME}-key-secret > /dev/null
 
-  RET_CREATED=$?
-  echo "Create secret exit code: $RET_CREATED"
-  rm -rf create-secret.yaml
-  if [ $RET_CREATED -ne 0 ]; then
-    echo "Error creating Encryption Key secret $RET_CREATED"
-    exit $RET_CREATED
-  fi
+RET_PATCH=$?
+echo "Patch Encryption Key secret exit code: $RET_PATCH"
+rm -rf patch-secret.yaml
+if [ $RET_PATCH -ne 0 ]; then
+  echo "Error patching Encryption Key secret"
+  exit $RET_PATCH
 fi
 
 # ==============================================================================================================================
@@ -98,58 +94,48 @@ curl -k \
     --fail \
     -H "Authorization: Bearer $KUBE_TOKEN" \
     -H 'Content-Type: application/json' \
-    ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets/${RELEASE_NAME}-certificate > /dev/null
+    ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets/${RELEASE_NAME}-cert-secret > /dev/null
 
 EXISTS=$?
-if [ $EXISTS -eq 0 ]; then
-  echo "Certificate secret already exists .. will not create again"
-else
-  # Wait for the Certificate to appear
-  echo "Waiting for Certificate to be created"
-  waitForFile "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}"
-  waitForFile "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}"
-  echo "Certificate is now available"
-  CERT=$(cat "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}" | base64 | sed -e 's/[\/&]/\\&/g')
-  KEY=$(cat "${ENCRYPTION_KEY_VOLUME}/${CERT_KEY}" | base64 | sed -e 's/[\/&]/\\&/g')
-
-  cat << EOF > create-secret.yaml
-  {
-    "kind": "Secret",
-    "apiVersion": "v1",
-    "metadata": {
-      "name": "@RELEASE_NAME-certificate",
-      "labels": {
-        "app.kubernetes.io/component": "console-certificate",
-        "app.kubernetes.io/instance": "@RELEASE_NAME",
-        "app.kubernetes.io/name": "stratos"
-      }
-    },
-    "data": {
-EOF
-
-  sed -i -e 's/@RELEASE_NAME/'"${RELEASE_NAME}"'/g' create-secret.yaml
-
-  echo "\"console.crt\": \"${CERT}\"," >> create-secret.yaml
-  echo "\"console.key\": \"${KEY}\"" >> create-secret.yaml
-  echo "} }" >> create-secret.yaml
-
-  # Create a secret for the Certificate
-  curl -k \
-      --fail \
-      -X POST \
-      -d @create-secret.yaml \
-      -H "Authorization: Bearer $KUBE_TOKEN" \
-      -H 'Accept: application/json' \
-      -H 'Content-Type: application/json' \
-      ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets > /dev/null
-
-  RET_CREATED=$?
-  echo "Create secret exit code: $?"
-  rm -rf create-secret.yaml
-  if [ $RET_CREATED -ne 0 ]; then
-    echo "Error creating Certificate secret $RET_CREATED"
-    exit $RET_CREATED
-  fi
+if [ $EXISTS -ne 0 ]; then
+  echo "Certificate secret does not exist - this should have been created by the Helm Chart"
+  exit $EXISTS
 fi
 
+# Wait for the Certificate to appear
+echo "Waiting for Certificate to be created"
+waitForFile "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}"
+waitForFile "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}"
+echo "Certificate is now available"
+CERT=$(cat "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}" | base64 | sed -e 's/[\/&]/\\&/g')
+KEY=$(cat "${ENCRYPTION_KEY_VOLUME}/${CERT_KEY}" | base64 | sed -e 's/[\/&]/\\&/g')
+
+cat << EOF > patch-secret.yaml
+{
+  "data": {
+EOF
+
+echo "\"console.crt\": \"${CERT}\"," >> patch-secret.yaml
+echo "\"console.key\": \"${KEY}\"" >> patch-secret.yaml
+echo "} }" >> patch-secret.yaml
+
+# Create a secret for the c
+curl -k \
+    --fail \
+    -X PATCH \
+    -d @patch-secret.yaml \
+    -H "Authorization: Bearer $KUBE_TOKEN" \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/merge-patch+json' \
+    ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets/${RELEASE_NAME}-cert-secret > /dev/null
+
+RET_CREATED=$?
+echo "Patch Certificate secret exit code: $?"
+rm -rf patch-secret.yaml
+if [ $RET_CREATED -ne 0 ]; then
+  echo "Error patching Certificate secret $RET_CREATED"
+  exit $RET_CREATED
+fi
+
+echo ""
 echo "Volume Migration completed"

@@ -97,6 +97,10 @@ spec:
           value: "{{ .Release.Name }}"
         - name: "RELEASE_REVISION"
           value: "{{ .Release.Revision }}"
+        - name: "RELEASE_VERSION"
+          value: "{{ .Chart.AppVersion }}"
+        - name: "HELM_CHART"
+          value:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         - name: ENCRYPTION_KEY_VOLUME
           value: "/{{ .Release.Name }}-encryption-key-volume"
         - name: ENCRYPTION_KEY_FILENAME
@@ -111,6 +115,12 @@ spec:
           - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
             name: "{{ .Release.Name }}-encryption-key-volume"
             readOnly: true
+          - mountPath: /etc/secrets/key
+            name: "{{ .Release.Name }}-key-secret"
+            readOnly: true
+          - mountPath: /etc/secrets/cert
+            name: "{{ .Release.Name }}-cert-secret"
+            readOnly: true
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
@@ -124,5 +134,10 @@ spec:
       - name: "{{ .Release.Name }}-encryption-key-volume"
         persistentVolumeClaim:
           claimName: "{{ .Release.Name }}-encryption-key-volume"
-
+      - name: "{{ .Release.Name }}-key-secret"
+        secret:
+          secretName: "{{ .Release.Name }}-key-secret"
+      - name: "{{ .Release.Name }}-cert-secret"
+        secret:
+          secretName: "{{ .Release.Name }}-cert-secret"
 {{- end -}}
