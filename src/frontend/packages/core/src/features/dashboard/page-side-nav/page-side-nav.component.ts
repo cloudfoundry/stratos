@@ -1,15 +1,20 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Observable } from 'rxjs';
-import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
+import { Component, Input, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable, of } from 'rxjs';
+
+import { AppState } from '../../../../../store/src/app-state';
 import { TabNavService } from '../../../../tab-nav.service';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 export interface IPageSideNavTab {
   key?: string;
   label: string;
-  matIcon?: string;
+  matIcon: string;
   matIconFont?: string;
   link: string;
-  hidden?: Observable<boolean>;
+  hidden$?: Observable<boolean>;
+  hidden?: (store: Store<AppState>, esf: EntityServiceFactory) => Observable<boolean>;
 }
 
 @Component({
@@ -19,15 +24,26 @@ export interface IPageSideNavTab {
 })
 export class PageSideNavComponent implements OnInit {
 
-  @Input()
-  public tabs: IPageSideNavTab[];
+  pTabs: IPageSideNavTab[];
+  @Input() set tabs(tabs: IPageSideNavTab[]) {
+    if (!tabs || this.pTabs) {
+      return;
+    }
+    this.pTabs = tabs.map(tab => ({
+      ...tab,
+      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf) : of(false))
+    }));
+  }
+  get tabs(): IPageSideNavTab[] {
+    return this.pTabs;
+  }
 
   @Input()
   public header: string;
   public activeTab$: Observable<string>;
   public breadcrumbs$: Observable<IBreadcrumb[]>;
 
-  constructor(public tabNavService: TabNavService) { }
+  constructor(private store: Store<AppState>, private esf: EntityServiceFactory, public tabNavService: TabNavService) { }
 
   ngOnInit() {
     this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();

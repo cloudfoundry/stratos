@@ -3,6 +3,21 @@ import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angula
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
+
+import { AppState } from '../../../../store/src/app-state';
+import {
+  resultPerPageParam,
+  resultPerPageParamDefault,
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/src/types/pagination.types';
+import {
+  ICFAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../../../../store/src/types/request.types';
 import { environment } from '../../environments/environment.prod';
 import {
   APP_AUTOSCALER_HEALTH,
@@ -19,24 +34,12 @@ import {
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { UpdateAutoscalerPolicyState } from './app-autoscaler.types';
 import { buildMetricData } from './autoscaler-helpers/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,
   autoscalerTransformMapToArray,
 } from './autoscaler-helpers/autoscaler-transform-policy';
-import { resultPerPageParam, resultPerPageParamDefault } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
-import { PaginationEntityState, PaginationParam } from '../../../../store/src/types/pagination.types';
-import {
-  ICFAction,
-  StartRequestAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess,
-} from '../../../../store/src/types/request.types';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { UpdateAutoscalerPolicyState } from './app-autoscaler.types';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -63,13 +66,13 @@ export class AutoscalerEffects {
       const apiAction = {
         entityKey: action.entityKey,
         type: action.type,
-        guid: action.appGuid
+        guid: action.guid
       } as ICFAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const options = new RequestOptions();
       options.url = `${commonPrefix}/health`;
       options.method = 'get';
-      options.headers = this.addHeaders(action.cfGuid);
+      options.headers = this.addHeaders(action.endpointGuid);
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {
@@ -78,10 +81,10 @@ export class AutoscalerEffects {
               entities: { [action.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformData(action.entityKey, mappedData, action.appGuid, healthInfo);
-            if (healthInfo.uptime > 0 && action.onSucceed) {
-              action.onSucceed();
-            }
+            this.transformData(action.entityKey, mappedData, action.guid, healthInfo);
+            // if (healthInfo.uptime > 0 && action.onSucceed) {
+            //   action.onSucceed();
+            // }
             return [
               new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
             ];

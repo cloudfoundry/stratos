@@ -1,5 +1,6 @@
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
+
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
@@ -46,12 +47,14 @@ export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
 export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Polict] Step';
 
 export class GetAppAutoscalerHealthAction implements IRequestAction {
+  // TODO: RC update ctor names so they match common pattern (we really need to sort out our interfaces)
   constructor(
-    public appGuid: string,
-    public cfGuid: string,
-  ) { }
-  onSucceed: any;
+    public guid: string,
+    public endpointGuid: string,
+  ) {
+  }
   type = APP_AUTOSCALER_HEALTH;
+  entity = entityFactory(appAutoscalerHealthSchemaKey);
   entityKey = appAutoscalerHealthSchemaKey;
 }
 
@@ -197,6 +200,6 @@ export class GetAppAutoscalerInsMetricAction extends GetAppAutoscalerMetricActio
 export class UpdateAppAutoscalerPolicyStepAction implements Action {
   constructor(
     public policy: any
-    ) { }
+  ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY_STEP;
 }

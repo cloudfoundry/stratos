@@ -9,7 +9,7 @@
   </div>
   <ul class="page-side-nav__items">
     <li tabindex="1" *ngFor="let tab of tabs">
-      <a *ngIf="!tab.hidden || !(tab.hidden | async)" class="page-side-nav__item" [routerLink]="[tab.link]"
+      <a *ngIf="!tab.hidden$ || !(tab.hidden$ | async)" class="page-side-nav__item" [routerLink]="[tab.link]"
         [routerLinkActive]="['page-side-nav__item--active']">
         <mat-icon class="page-side-nav__icon" *ngIf="tab.matIcon" [fontSet]="tab.matIconFont">{{ tab.matIcon }}
         </mat-icon>

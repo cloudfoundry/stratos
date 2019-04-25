@@ -1,49 +1,52 @@
-import { StratosTab, StratosTabType } from '../../../core/extension/extension-service';
-import { ApplicationService } from '../../../features/applications/application.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
-import {
-  DetachAppAutoscalerPolicyAction,
-  GetAppAutoscalerAppMetricAction,
-  GetAppAutoscalerPolicyAction,
-  GetAppAutoscalerHealthAction,
-  GetAppAutoscalerScalingHistoryAction,
-  UpdateAppAutoscalerPolicyAction,
-} from '../app-autoscaler.actions';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { MetricTypes } from '../autoscaler-helpers/autoscaler-util';
 import {
-  appAutoscalerHealthSchemaKey,
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
   entityFactory,
 } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import {
-  getPaginationObservables,
-} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
-import {
-  AppAutoscalerAppMetric,
-  AppAutoscalerPolicy,
-  AppAutoscalerScalingHistory,
-} from '../app-autoscaler.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { StratosTab, StratosTabType } from '../../../core/extension/extension-service';
+import { ApplicationService } from '../../../features/applications/application.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import {
+  DetachAppAutoscalerPolicyAction,
+  GetAppAutoscalerAppMetricAction,
+  GetAppAutoscalerHealthAction,
+  GetAppAutoscalerPolicyAction,
+  GetAppAutoscalerScalingHistoryAction,
+  UpdateAppAutoscalerPolicyAction,
+} from '../app-autoscaler.actions';
+import { AppAutoscalerAppMetric, AppAutoscalerPolicy, AppAutoscalerScalingHistory } from '../app-autoscaler.types';
+import { MetricTypes } from '../autoscaler-helpers/autoscaler-util';
 
 @StratosTab({
   type: StratosTabType.Application,
   label: 'Autoscale',
   link: 'autoscale',
-  action: new GetAppAutoscalerHealthAction(window.location.pathname.split('/')[3], window.location.pathname.split('/')[2])
+  icon: 'meter',
+  iconFont: 'stratos-icons',
+  hidden: (store: Store<AppState>, esf: EntityServiceFactory) => {
+    // TODO: RC Find a neater way to fetch guids (ActiveCf..)
+    const action = new GetAppAutoscalerHealthAction(window.location.pathname.split('/')[3], window.location.pathname.split('/')[2]);
+    return esf.create<{ uptime: number }>(action.entityKey, action.entity, action.guid, action).waitForEntity$.pipe(
+      map(health => health.entity.uptime > 0),
+      startWith(true)
+    );
+  }
 })
 @Component({
   selector: 'app-autoscaler-tab-extension',

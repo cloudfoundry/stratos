@@ -97,7 +97,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'routes', label: 'Routes', matIconFont: 'stratos-icons', matIcon: 'network_route' },
       { link: 'log-stream', label: 'Log Stream', matIcon: 'featured_play_list' },
       { link: 'services', label: 'Services', matIconFont: 'stratos-icons', matIcon: 'service' },
-      { link: 'variables', label: 'Variables', matIcon: 'list', hidden: appDoesNotHaveEnvVars$ },
+      { link: 'variables', label: 'Variables', matIcon: 'list', hidden$: appDoesNotHaveEnvVars$ },
       { link: 'events', label: 'Events', matIcon: 'watch_later' }
     ];
 
@@ -117,14 +117,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // Add any tabs from extensions
     const tabs = getTabsFromExtensions(StratosTabType.Application);
     tabs.map((extensionTab) => {
-      if (extensionTab.action) {
-        extensionTab.action.onSucceed = () => {
-          this.tabLinks.push(extensionTab);
-        };
-        this.store.dispatch(extensionTab.action);
-      } else {
-        this.tabLinks.push(extensionTab);
-      }
+      // if (extensionTab.action) {
+      //   extensionTab.action.onSucceed = () => {
+      //     this.tabLinks.push(extensionTab);
+      //   };
+      //   this.store.dispatch(extensionTab.action);
+      // } else {
+      this.tabLinks.push(extensionTab);
+      // }
     });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type

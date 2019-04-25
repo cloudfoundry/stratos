@@ -75,19 +75,19 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
         matIcon: 'select_all',
-        hidden: cellsHidden$
+        hidden$: cellsHidden$
       },
       { link: 'routes', label: 'Routes', matIcon: 'network_route', matIconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
-        hidden: usersHidden$,
+        hidden$: usersHidden$,
         matIcon: 'people'
       },
       {
         link: CloudFoundryTabsBaseComponent.firehose,
         label: 'Firehose',
-        hidden: firehoseHidden$,
+        hidden$: firehoseHidden$,
         matIcon: 'featured_play_list'
       },
       { link: 'feature-flags', label: 'Feature Flags', matIcon: 'flag' },

@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Type } from '@angular/core';
 import { Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { AppState } from '../../../../store/src/app-state';
+import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
+import { EntityServiceFactory } from '../entity-service-factory.service';
 import { EndpointAuthTypeConfig, EndpointTypeExtensionConfig, ExtensionEntitySchema } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
@@ -33,7 +35,18 @@ export interface StratosTabMetadata {
   type: StratosTabType;
   label: string;
   link: string;
-  action: any;
+  icon: string;
+  iconFont?: string;
+  hidden?: (store: Store<AppState>, esf: EntityServiceFactory) => Observable<boolean>;
+  // action: any;
+
+  // TODO: RC Diff between StratosTabMetadata & IPageSideNavTab. One purely for config & other for functionality?
+  // key?: string;
+  // label: string;
+  // matIcon?: string;
+  // matIconFont?: string;
+  // link: string;
+  // hidden?: Observable<boolean>;
 }
 
 // The different types of Action
@@ -71,12 +84,17 @@ export interface StratosEndpointExtensionConfig {
 
 export type StratosRouteType = StratosTabType | StratosActionType;
 
+export interface StratosExtensionRoutes {
+  path: string;
+  component: Type<any>;
+}
+
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
   loginComponent: null,
-  extensionRoutes: {},
-  tabs: {},
-  actions: {},
+  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[] },
+  tabs: {} as { [key: string]: IPageSideNavTab[] },
+  actions: {} as { [key: string]: StratosActionMetadata[] },
   endpointTypes: [],
   authTypes: [],
   entities: [] as ExtensionEntitySchema[]
@@ -117,7 +135,7 @@ export function StratosLoginComponent() {
   return target => extensionMetadata.loginComponent = target;
 }
 
-function addExtensionTab(tab: StratosTabType, target: any, props: any) {
+function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadata) {
   if (!extensionMetadata.tabs[tab]) {
     extensionMetadata.tabs[tab] = [];
   }
@@ -129,10 +147,16 @@ function addExtensionTab(tab: StratosTabType, target: any, props: any) {
     path: props.link,
     component: target
   });
-  extensionMetadata.tabs[tab].push(props);
+  extensionMetadata.tabs[tab].push({
+    label: props.label,
+    link: props.link,
+    matIcon: props.icon,
+    matIconFont: props.iconFont,
+    hidden: props.hidden
+  });
 }
 
-function addExtensionAction(action: StratosActionType, target: any, props: any) {
+function addExtensionAction(action: StratosActionType, target: any, props: StratosActionMetadata) {
   if (!extensionMetadata.actions[action]) {
     extensionMetadata.actions[action] = [];
     extensionMetadata.extensionRoutes[action] = [];
@@ -209,11 +233,11 @@ export class ExtensionService {
 
 // Helpers to access Extension metadata (without using the injectable Extension Service)
 
-export function getRoutesFromExtensions(routeType: StratosRouteType) {
+export function getRoutesFromExtensions(routeType: StratosRouteType): StratosExtensionRoutes[] {
   return extensionMetadata.extensionRoutes[routeType] || [];
 }
 
-export function getTabsFromExtensions(tabType: StratosTabType) {
+export function getTabsFromExtensions(tabType: StratosTabType): IPageSideNavTab[] {
   return extensionMetadata.tabs[tabType] || [];
 }
 

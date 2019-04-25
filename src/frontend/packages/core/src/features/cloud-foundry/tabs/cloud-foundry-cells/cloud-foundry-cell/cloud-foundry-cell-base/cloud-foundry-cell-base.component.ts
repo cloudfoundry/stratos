@@ -72,7 +72,7 @@ export class CloudFoundryCellBaseComponent {
       first()
     );
 
-    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks).hidden =
+    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks).hidden$ =
       cfEndpointService.currentUser$.pipe(
         map(user => !user.admin)
       );
