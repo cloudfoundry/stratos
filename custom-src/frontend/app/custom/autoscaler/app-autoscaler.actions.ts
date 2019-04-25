@@ -136,8 +136,9 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   initialParams = {
     'order-direction-field': GetAppAutoscalerScalingHistoryAction.sortField,
     'order-direction': 'desc',
+    'results-per-page': 5,
     'start-time': 0,
-    'end-time': (new Date()).getTime().toString() + '000000',
+    'end-time': 0,
   };
   query: any;
   windowValue: string;
