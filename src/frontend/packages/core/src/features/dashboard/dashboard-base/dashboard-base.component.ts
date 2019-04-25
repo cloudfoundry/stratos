@@ -74,8 +74,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
         } else {
           return {
             mode: state.sideNavPinned ? 'side' : 'over',
-            opened: state.sidenavOpen || false,
-            iconMode: state.sideNavPinned
+            opened: true,
+            iconMode: !state.sidenavOpen
           };
         }
       })

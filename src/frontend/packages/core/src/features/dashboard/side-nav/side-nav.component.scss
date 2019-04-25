@@ -103,6 +103,9 @@ $icon-nav-width: 50px;
     opacity: 1;
     white-space: nowrap;
   }
+  &__copyright-icon {
+    width: 0;
+  }
 }
 $transition-time: .2s;
 $transition-delay: .5s;
@@ -129,52 +132,75 @@ $transition-delay: .5s;
     &__top-inner {
       overflow-x: hidden;
     }
-  }
-  &:hover {
-    overflow: visible;
-    .side-nav {
-      &__inner {
-        position: fixed;
-        transition-delay: $transition-delay;
-        width: $nav-width;
-      }
-      &,
-      &__top,
-      &__item-icon,
-      &__item-label,
-      &__copyright,
-      &__logo-img,
-      &__copyright-icon,
-      &__logo-icon-img {
-        transition-delay: $transition-delay;
-      }
-      &__copyright-icon {
-        width: 0;
-      }
+    &__top {
+      width: $icon-nav-width;
+    }
+    &__item-icon {
+      font-size: $side-nav-mat-icon-height-large;
+      height: $side-nav-mat-icon-height-large;
+      margin-right: 0;
+      width: $side-nav-mat-icon-height-large;
+    }
+    &__item-label,
+    &__copyright  {
+      opacity: 0;
+    }
+    &__logo-img {
+      width: 0;
+    }
+    &__copyright-icon,
+    &__logo-icon-img {
+      opacity: 1;
+    }
+    &__copyright-icon {
+      width: auto;
     }
   }
-  &:not(:hover) {
-    .side-nav {
-      &__top {
-        width: $icon-nav-width;
-      }
-      &__item-icon {
-        font-size: $side-nav-mat-icon-height-large;
-        height: $side-nav-mat-icon-height-large;
-        margin-right: 0;
-        width: $side-nav-mat-icon-height-large;
-      }
-      &__item-label,
-      &__copyright  {
-        opacity: 0;
-      }
-      &__logo-img {
-        width: 0;
-      }
-      &__copyright-icon,
-      &__logo-icon-img {
-        opacity: 1;
-      }
-    }
-  }
+  // &:hover {
+  //   overflow: visible;
+  //   .side-nav {
+  //     &__inner {
+  //       position: fixed;
+  //       transition-delay: $transition-delay;
+  //       width: $nav-width;
+  //     }
+  //     &,
+  //     &__top,
+  //     &__item-icon,
+  //     &__item-label,
+  //     &__copyright,
+  //     &__logo-img,
+  //     &__copyright-icon,
+  //     &__logo-icon-img {
+  //       transition-delay: $transition-delay;
+  //     }
+  //     &__copyright-icon {
+  //       width: 0;
+  //     }
+  //   }
+  // }
+  // &:not(:hover) {
+  //   .side-nav {
+  //     &__top {
+  //       width: $icon-nav-width;
+  //     }
+  //     &__item-icon {
+  //       font-size: $side-nav-mat-icon-height-large;
+  //       height: $side-nav-mat-icon-height-large;
+  //       margin-right: 0;
+  //       width: $side-nav-mat-icon-height-large;
+  //     }
+  //     &__item-label,
+  //     &__copyright  {
+  //       opacity: 0;
+  //     }
+  //     &__logo-img {
+  //       width: 0;
+  //     }
+  //     &__copyright-icon,
+  //     &__logo-icon-img {
+  //       opacity: 1;
+  //     }
+  //   }
+  // }
 }
