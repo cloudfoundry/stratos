@@ -12,9 +12,10 @@ export class RingChartComponent implements OnInit {
   domain: any[];
   colors: ColorHelper;
 
-  @Input() data: any;
+  @Input() data: any[];
   @Input() label = 'Total';
   @Input() scheme: any = 'cool';
+  @Input() customColors: any[];
 
   @Input() onClick: ($event: Event) => void;
   @Input() onActivate: ($event: Event) => void;
@@ -22,7 +23,6 @@ export class RingChartComponent implements OnInit {
   @Input() valueFormatting: (value: number) => any = value => value;
   @Input() nameFormatting: (value: string) => any = label => label;
   @Input() percentageFormatting: (value: number) => any = percentage => percentage;
-
 
   constructor() { }
 
@@ -35,7 +35,7 @@ export class RingChartComponent implements OnInit {
   }
 
   setColors(): void {
-    this.colors = new ColorHelper(this.scheme, 'ordinal', this.domain, []);
+    this.colors = new ColorHelper(this.scheme, 'ordinal', this.domain, this.customColors || []);
   }
 
   getDomain(): any[] {

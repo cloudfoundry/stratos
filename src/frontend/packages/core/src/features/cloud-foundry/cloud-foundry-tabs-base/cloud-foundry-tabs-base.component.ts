@@ -14,7 +14,7 @@ import {
   StratosTabType,
 } from '../../../core/extension/extension-service';
 import { environment } from '../../../environments/environment.prod';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
+import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 @Component({
@@ -27,7 +27,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   static users = 'users';
   static cells = 'cells';
 
-  public tabLinks: ISubHeaderTabs[];
+  public tabLinks: IPageSideNavTab[];
 
   // Used to hide tab that is not yet implemented when in production
   isDevEnvironment = !environment.production;
@@ -35,7 +35,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   isFetching$: Observable<boolean>;
 
   public canAddOrg$: Observable<boolean>;
-
+  public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
   public favorite$: Observable<UserFavoriteEndpoint>;
@@ -50,8 +50,6 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       first(),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
       map(endpoint => new UserFavoriteEndpoint(
-        this.cfEndpointService.cfGuid,
-        'cf',
         endpoint
       ))
     );
@@ -71,29 +69,33 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
-      { link: 'summary', label: 'Summary' },
-      { link: 'organizations', label: 'Organizations' },
+      { link: 'summary', label: 'Summary', matIcon: 'description' },
+      { link: 'organizations', label: 'Organizations', matIcon: 'organization', matIconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
+        matIcon: 'select_all',
         hidden: cellsHidden$
       },
-      { link: 'routes', label: 'Routes' },
+      { link: 'routes', label: 'Routes', matIcon: 'network_route', matIconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
-        hidden: usersHidden$
+        hidden: usersHidden$,
+        matIcon: 'people'
       },
       {
         link: CloudFoundryTabsBaseComponent.firehose,
         label: 'Firehose',
-        hidden: firehoseHidden$
+        hidden: firehoseHidden$,
+        matIcon: 'featured_play_list'
       },
-      { link: 'feature-flags', label: 'Feature Flags' },
-      { link: 'build-packs', label: 'Build Packs' },
-      { link: 'stacks', label: 'Stacks' },
-      { link: 'security-groups', label: 'Security Groups' }
-    ].concat(getTabsFromExtensions(StratosTabType.CloudFoundry));
+      { link: 'feature-flags', label: 'Feature Flags', matIcon: 'flag' },
+      { link: 'build-packs', label: 'Build Packs', matIcon: 'build' },
+      { link: 'stacks', label: 'Stacks', matIcon: 'code' },
+      { link: 'security-groups', label: 'Security Groups', matIcon: 'security' },
+      ...getTabsFromExtensions(StratosTabType.CloudFoundry)
+    ];
   }
 
   ngOnInit() {

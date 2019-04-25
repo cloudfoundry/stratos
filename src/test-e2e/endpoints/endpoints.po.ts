@@ -37,7 +37,7 @@ export class EndpointCards extends ListCardComponent {
       const isAdmin = safeDetails.endsWith(' (Administrator)');
       return {
         name: t.substring(0, t.indexOf('\n')),
-        connected: m.find(item => item.key === 'Status').value === 'cloud_done',
+        connected: m.find(item => item.key === 'Status').value === 'Connected\ncloud_done',
         type: t.substring(t.indexOf('\n') + 1, t.length),
         user,
         isAdmin,

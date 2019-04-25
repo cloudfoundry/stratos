@@ -35,7 +35,7 @@ spec:
   {{- range $cidr := .Values.console.service.loadBalancerSourceRanges }}
     - {{ $cidr }}
   {{- end }}
-{{- end }}
+{{ end }}
 {{- end }}
 {{- if .Values.console.service -}}
 {{- if .Values.console.service.externalName }}

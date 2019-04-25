@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Route, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 
-import { EndpointAuthTypeConfig, EndpointTypeConfig, ExtensionEntitySchema } from './extension-types';
+import { AppState } from '../../../../store/src/app-state';
+import { EndpointAuthTypeConfig, EndpointTypeExtensionConfig, ExtensionEntitySchema } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -13,7 +16,7 @@ export interface EndpointTypeExtension {
 
 export interface StratosExtensionConfig {
   routes?: Route[];
-  endpointTypes?: EndpointTypeConfig[];
+  endpointTypes?: EndpointTypeExtensionConfig[];
   authTypes?: EndpointAuthTypeConfig[];
   entities?: ExtensionEntitySchema[];
 }
@@ -48,6 +51,8 @@ export interface StratosActionMetadata {
   link: string;
   icon: string;
   iconFont?: string;
+  visible?: (store: Store<AppState>) => Observable<boolean>;
+  visible$?: Observable<boolean>;
 }
 
 export interface StratosEndpointMetadata {
@@ -59,7 +64,7 @@ export interface StratosEndpointMetadata {
 }
 
 export interface StratosEndpointExtensionConfig {
-  endpointTypes?: EndpointTypeConfig[];
+  endpointTypes?: EndpointTypeExtensionConfig[];
   authTypes?: EndpointAuthTypeConfig[];
 }
 
