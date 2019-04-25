@@ -115,8 +115,8 @@ cat << EOF > patch-secret.yaml
   "data": {
 EOF
 
-echo "\"console.crt\": \"${CERT}\"," >> patch-secret.yaml
-echo "\"console.key\": \"${KEY}\"" >> patch-secret.yaml
+echo "\"tls.crt\": \"${CERT}\"," >> patch-secret.yaml
+echo "\"tls.key\": \"${KEY}\"" >> patch-secret.yaml
 echo "} }" >> patch-secret.yaml
 
 # Create a secret for the c

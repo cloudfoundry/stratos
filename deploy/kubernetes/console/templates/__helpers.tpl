@@ -101,6 +101,6 @@ Generate self-signed certificate
 {{- $altNames := list ( printf "%s.%s" (include "console.certName" .) .Release.Namespace ) ( printf "%s.%s.svc" (include "console.certName" .) .Release.Namespace ) -}}
 {{- $ca := genCA "stratos-ca" 365 -}}
 {{- $cert := genSignedCert ( include "console.certName" . ) nil $altNames 365 $ca -}}
-console.crt: {{ $cert.Cert | b64enc }}
-console.key: {{ $cert.Key | b64enc }}
+tls.crt: {{ $cert.Cert | b64enc }}
+tls.key: {{ $cert.Key | b64enc }}
 {{- end -}}
