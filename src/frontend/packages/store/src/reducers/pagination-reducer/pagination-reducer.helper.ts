@@ -275,8 +275,9 @@ function getObservables<T = any>(
       // Entities will never fire in the event of a maxed list, so ensure we start with something
       startWith(false)
     ),
-    totalEntities$: pagination$.pipe(
-      map(pag => pag.totalResults),
+    totalEntities$: combineLatest(pagination$, entities$).pipe(
+      map(([pag]) => pag.totalResults),
+      distinctUntilChanged()
     ),
     fetchingEntities$: paginationMonitor.fetchingCurrentPage$
   };

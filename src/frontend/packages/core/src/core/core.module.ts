@@ -27,8 +27,8 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { PortalModule } from '@angular/cdk/portal';
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
-
 
 @NgModule({
   imports: [
@@ -52,6 +52,7 @@ import { NoContentMessageComponent } from '../shared/components/no-content-messa
     DotContentComponent,
     ButtonBlurOnClickDirective,
     PageNotFoundComponentComponent,
+    PortalModule,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
     NoContentMessageComponent,

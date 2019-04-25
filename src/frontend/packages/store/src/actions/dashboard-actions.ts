@@ -7,9 +7,14 @@ export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';
 export const TOGGLE_SIDE_NAV = '[Dashboard] Toggle side nav';
 export const CHANGE_SIDE_NAV_MODE = '[Dashboard] Change side nav mode';
 export const TOGGLE_HEADER_EVENT = '[Dashboard] Toggle header event';
+export const SET_HEADER_EVENT = '[Dashboard] Set header event';
+
+export const ENABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Enable mobile nav';
+export const DISABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Disable mobile nav';
+
 export const SHOW_SIDE_HELP = '[Dashboard] Show side help';
 export const CLOSE_SIDE_HELP = '[Dashboard] Close side help';
-export const SET_HEADER_EVENT = '[Dashboard] Set header event';
+
 
 export class OpenSideNav implements Action {
   constructor() { }
@@ -48,3 +53,12 @@ export class SetHeaderEvent implements Action {
   constructor(public minimised = false) { }
   type = SET_HEADER_EVENT;
 }
+
+export class EnableMobileNav implements Action {
+  type = ENABLE_SIDE_NAV_MOBILE_MODE;
+}
+
+export class DisableMobileNav implements Action {
+  type = DISABLE_SIDE_NAV_MOBILE_MODE;
+}
+

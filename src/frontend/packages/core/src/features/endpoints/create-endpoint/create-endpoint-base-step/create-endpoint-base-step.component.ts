@@ -3,14 +3,14 @@ import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-
+import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { getEndpointTypes } from '../../endpoint-helpers';
-import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
+  subType: string;
 }
 
 @Component({
@@ -32,7 +32,7 @@ export class CreateEndpointBaseStepComponent {
     this.pSelectedTile = tile;
     if (tile) {
       this.store.dispatch(new RouterNav({
-        path: `endpoints/new/${tile.data.type}`,
+        path: `endpoints/new/${tile.data.type}/${tile.data.subType || ''}`,
         query: {
           [BASE_REDIRECT_QUERY]: 'endpoints/new'
         }
@@ -40,8 +40,7 @@ export class CreateEndpointBaseStepComponent {
     }
   }
   constructor(public store: Store<AppState>) {
-    const endpointTypes = getEndpointTypes();
-    this.tileSelectorConfig = endpointTypes.map(et => {
+    this.tileSelectorConfig = getEndpointTypes().map(et => {
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
         et.label,
         et.imagePath ? {
@@ -50,7 +49,10 @@ export class CreateEndpointBaseStepComponent {
             matIcon: et.icon,
             matIconFont: et.iconFont
           },
-        { type: et.value }
+        {
+          type: et.type,
+          subType: et.subType
+        }
       );
     });
   }

@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../../../tab-nav.service';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
@@ -14,7 +15,7 @@ describe('CloudFoundrySpaceBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySpaceBaseComponent],
       imports: [...BaseTestModules],
-      providers: [generateTestCfEndpointServiceProvider()]
+      providers: [generateTestCfEndpointServiceProvider(), TabNavService]
     })
       .compileComponents();
   }));

@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,6 +12,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { TabNavService } from '../../../../tab-nav.service';
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
@@ -20,11 +22,14 @@ import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from '
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent {
+export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
+  private pTabs: ISubHeaderTabs[];
+
+  @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
 
@@ -34,7 +39,25 @@ export class PageHeaderComponent {
   endpointIds$: Observable<string[]>;
 
   @Input()
-  tabs: ISubHeaderTabs[];
+  set tabs(tabs: ISubHeaderTabs[]) {
+    if (tabs) {
+      this.pTabs = tabs.map(tab => ({
+        ...tab,
+        link: this.router.createUrlTree([tab.link], {
+          relativeTo: this.route
+        }).toString()
+      }));
+      this.tabNavService.setTabs(this.pTabs);
+    }
+  }
+
+  @Input()
+  set tabsHeader(header: string) {
+    if (header) {
+      this.tabNavService.setHeader(header);
+    }
+  }
+
 
   @Input() showUnderFlow = false;
 
@@ -102,7 +125,12 @@ export class PageHeaderComponent {
     this.store.dispatch(new Logout());
   }
 
-  constructor(private store: Store<AppState>, private route: ActivatedRoute) {
+  constructor(
+    private store: Store<AppState>,
+    private route: ActivatedRoute,
+    private tabNavService: TabNavService,
+    private router: Router,
+  ) {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
@@ -111,6 +139,15 @@ export class PageHeaderComponent {
     this.userNameFirstLetter$ = this.username$.pipe(
       map(name => name[0].toLocaleUpperCase())
     );
+  }
+
+  ngOnDestroy() {
+    this.tabNavService.clear();
+  }
+
+  ngAfterViewInit() {
+    const portal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
+    this.tabNavService.setPageHeader(portal);
   }
 
 }

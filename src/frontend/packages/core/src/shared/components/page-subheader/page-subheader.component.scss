@@ -1,13 +1,13 @@
-// Page sub-header
 @import '../../../../sass/mixins';
+// Page sub-header
 .page-subheader {
   display: flex;
   flex-direction: column;
   height: 56px;
   overflow: hidden;
   &__tabs {
-    position: relative;
     height: 46px;
+    position: relative;
   }
 }
 

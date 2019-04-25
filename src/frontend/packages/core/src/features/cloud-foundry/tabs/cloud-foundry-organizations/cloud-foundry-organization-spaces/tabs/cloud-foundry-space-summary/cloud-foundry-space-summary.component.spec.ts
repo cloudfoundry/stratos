@@ -1,11 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../../../../tab-nav.service';
 import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
+import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { CloudFoundrySpaceSummaryComponent } from './cloud-foundry-space-summary.component';
-import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 
 describe('CloudFoundrySpaceSummaryComponent', () => {
   let component: CloudFoundrySpaceSummaryComponent;
@@ -18,7 +20,9 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
       providers: [
         ActiveRouteCfOrgSpace,
         CloudFoundryEndpointService,
-        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock }
+        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
+        CloudFoundryOrganizationService,
+        TabNavService
       ]
     })
       .compileComponents();

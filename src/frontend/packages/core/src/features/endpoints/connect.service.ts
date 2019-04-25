@@ -28,6 +28,7 @@ export interface ConnectEndpointConfig {
   name: string;
   guid: string;
   type: EndpointType;
+  subType: string;
   ssoAllowed: boolean;
 }
 

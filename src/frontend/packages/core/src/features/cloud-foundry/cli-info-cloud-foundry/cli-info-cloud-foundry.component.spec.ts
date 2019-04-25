@@ -1,14 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry.component';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { RouterTestingModule } from '@angular/router/testing';
-import { SharedModule } from '../../../shared/shared.module';
-import { CoreModule } from '../../../core/core.module';
-import { MDAppModule } from '../../../core/md.module';
-import { BaseTestModules, generateTestCfEndpointServiceProvider } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { TabNavService } from '../../../../tab-nav.service';
+import {
+  BaseTestModules,
+  generateTestCfEndpointServiceProvider,
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry.component';
 
 describe('CliInfoCloudFoundryComponent', () => {
   let component: CliInfoCloudFoundryComponent;
@@ -16,15 +15,16 @@ describe('CliInfoCloudFoundryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CliInfoCloudFoundryComponent ],
+      declarations: [CliInfoCloudFoundryComponent],
       imports: [...BaseTestModules],
       providers: [
         CloudFoundryEndpointService,
         generateTestCfEndpointServiceProvider(),
-        ActiveRouteCfOrgSpace
+        ActiveRouteCfOrgSpace,
+        TabNavService
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

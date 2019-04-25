@@ -123,6 +123,9 @@ function getDefaultInitialTestStoreState(): AppState {
         uaaError: false,
         upgradeInProgress: false,
         sessionExpiresOn: 1000,
+        plugins: {
+          demo: false
+        }
       },
       verifying: false
     },
@@ -616,10 +619,12 @@ function getDefaultInitialTestStoreState(): AppState {
     },
     dashboard: {
       sidenavOpen: true,
-      sideNavMode: 'side',
       headerEventMinimized: false,
       sideHelpOpen: false,
-      sideHelpDocument: ''
+      sideHelpDocument: '',
+      isMobile: false,
+      isMobileNavOpen: false,
+      sideNavPinned: false,
     },
     createApplication: {
       cloudFoundryDetails: null,
