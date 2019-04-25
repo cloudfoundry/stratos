@@ -4,10 +4,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { buffer, debounceTime, filter, map } from 'rxjs/operators';
 
 import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
+import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
-import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
@@ -39,9 +39,6 @@ export class SideNavComponent implements OnInit {
     private store: Store<AppState>,
     @Inject(Customizations) public customizations: CustomizationsMetadata
   ) { }
-
-  @Input() tabs: SideNavItem[];
-  @Output() changedMode = new EventEmitter();
   @Input() set iconMode(isIconMode: boolean) {
     if (isIconMode !== this.isIconMode) {
       this.isIconMode = isIconMode;
@@ -51,14 +48,17 @@ export class SideNavComponent implements OnInit {
   get iconMode() {
     return this.isIconMode;
   }
+
+  @Input() tabs: SideNavItem[];
+  @Output() changedMode = new EventEmitter();
   private isIconMode = true;
+
+  // Button is not always visible on load, so manually push through an event
+  logoClicked: BehaviorSubject<any> = new BehaviorSubject(true);
 
   public toggleSidenav() {
     this.store.dispatch(new ToggleSideNav());
   }
-
-  // Button is not always visible on load, so manually push through an event
-  logoClicked: BehaviorSubject<any> = new BehaviorSubject(true);
 
   ngOnInit() {
     const toLength = a => a.length;
