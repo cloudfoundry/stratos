@@ -96,7 +96,7 @@ describe('AddServiceInstanceComponent', () => {
         PaginationMonitorFactory,
         CfOrgSpaceDataService,
         InternalEventMonitorFactory,
-        Cloudhttps://github.com/cloudfoundry-incubator/stratos/pull/3505FoundryService,
+        CloudFoundryService,
         TabNavService
       ],
 
