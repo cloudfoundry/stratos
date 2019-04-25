@@ -66,6 +66,7 @@ deploy/hsc-upgrade-volume/
 deploy/development.rc
 deploy/ci/secrets.yml
 deploy/kubernetes/values.yaml
+deploy/kubernetes/helm-chart/
 deploy/cloud-foundry/db-migration/goose
 outputs/
 deploy/kubernetes/console/charts/
@@ -97,6 +98,7 @@ src/frontend/packages/core/sass/custom.scss
 src/frontend/packages/core/assets/eula.html
 src/frontend/packages/core/assets/logo.png
 src/frontend/packages/core/assets/nav-logo.png
+src/frontend/packages/core/assets/nav-logo-icon.png
 src/frontend/packages/core/assets/login-bg.jpg
 src/frontend/packages/core/src/custom-import.module.ts
 src/frontend/packages/core/src/custom
@@ -107,3 +109,7 @@ src/frontend/packages/core/src/index.html
 # Prebuild package
 
 stratos-frontend-prebuild.zip
+
+src/frontend/assets
+src/frontend/sass
+go-vendor-*.tgz

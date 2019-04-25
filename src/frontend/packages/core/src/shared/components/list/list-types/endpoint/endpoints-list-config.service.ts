@@ -20,7 +20,7 @@ import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
-  return getNameForEndpointType(endpoint.cnsi_type);
+  return getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type);
 }
 
 export const endpointColumns: ITableColumn<EndpointModel>[] = [
@@ -44,7 +44,10 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
       orderKey: 'connection',
       field: 'user'
     },
-    cellFlex: '1'
+    cellFlex: '1',
+    cellConfig: {
+      showLabel: false
+    }
   },
   {
     columnId: 'type',
@@ -112,8 +115,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
       (row: EndpointModel) => new UserFavoriteEndpoint(
-        row.guid,
-        row.cnsi_type,
         row
       )
     );

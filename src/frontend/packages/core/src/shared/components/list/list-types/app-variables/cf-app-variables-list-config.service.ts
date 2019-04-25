@@ -1,22 +1,22 @@
-
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { AppVariablesDelete } from '../../../../../../../store/src/actions/app-variables.actions';
+import { UpdateExistingApplication } from '../../../../../../../store/src/actions/application.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { applicationSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { EntityMonitor } from '../../../../monitors/entity-monitor';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
-import { AppVariablesDelete } from '../../../../../../../store/src/actions/app-variables.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { first, switchMap, map, filter } from 'rxjs/operators';
-import { EntityMonitor } from '../../../../monitors/entity-monitor';
-import { applicationSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
-import { UpdateExistingApplication } from '../../../../../../../store/src/actions/application.actions';
-import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+
 
 @Injectable()
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
@@ -45,7 +45,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     {
       columnId: 'name', headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => `${row.name}`
+        valuePath: 'name'
       },
       sort: {
         type: 'sort',
@@ -54,14 +54,20 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
       }, cellFlex: '5'
     },
     {
-      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: {
+      columnId: 'value',
+      headerCell: () => 'Value',
+      cellComponent: TableCellEditVariableComponent,
+      class: 'app-table__cell--table-column-clip',
+      sort: {
         type: 'sort',
         orderKey: 'value',
         field: 'value'
       }, cellFlex: '10'
     },
     {
-      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'app-table__cell--table-column-edit',
+      columnId: 'edit', headerCell: () => '',
+      cellComponent: TableCellEditComponent,
+      class: 'app-table__cell--table-column-edit',
       cellFlex: '2'
     },
   ];

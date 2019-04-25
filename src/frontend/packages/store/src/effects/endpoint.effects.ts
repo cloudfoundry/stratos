@@ -16,6 +16,8 @@ import {
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
   EndpointActionComplete,
+  GET_ENDPOINTS,
+  GetAllEndpoints,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
   REGISTER_ENDPOINTS_FAILED,
@@ -57,6 +59,11 @@ export class EndpointsEffect {
     private store: Store<AppState>
   ) { }
 
+  @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
+    ofType<GetAllEndpoints>(GET_ENDPOINTS),
+    mergeMap((action: GetAllEndpoints) => [new GetSystemInfo(false, action)])
+  );
+
   @Effect() getAllEndpoints$ = this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
     mergeMap(action => {
@@ -94,8 +101,6 @@ export class EndpointsEffect {
   @Effect() connectEndpoint$ = this.actions$.pipe(
     ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
     mergeMap(action => {
-      const actionType = 'update';
-
       // Special-case SSO login - redirect to the back-end
       if (action.authType === 'sso') {
         const loc = window.location.protocol + '//' + window.location.hostname +
@@ -125,6 +130,7 @@ export class EndpointsEffect {
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
         action.body,
+        response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
       );
     }));
 
@@ -175,15 +181,21 @@ export class EndpointsEffect {
     mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
+      const paramsObj = {
+        cnsi_name: action.name,
+        api_endpoint: action.endpoint,
+        skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
+        cnsi_client_id: action.clientID,
+        cnsi_client_secret: action.clientSecret,
+        sso_allowed: action.ssoAllowed ? 'true' : 'false'
+      };
+      // Do not include sub_type in HttpParams if it doesn't exist (falsies get stringified and sent)
+      if (action.endpointSubType) {
+        /* tslint:disable-next-line:no-string-literal  */
+        paramsObj['sub_type'] = action.endpointSubType;
+      }
       const params: HttpParams = new HttpParams({
-        fromObject: {
-          cnsi_name: action.name,
-          api_endpoint: action.endpoint,
-          skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
-          cnsi_client_id: action.clientID,
-          cnsi_client_secret: action.clientSecret,
-          sso_allowed: action.ssoAllowed ? 'true' : 'false',
-        }
+        fromObject: paramsObj
       });
 
       return this.doEndpointAction(
@@ -200,7 +212,8 @@ export class EndpointsEffect {
 
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
-      `Please ensure the endpoint address is correct and try again (${e.error.error})`;
+      `Please ensure the endpoint address is correct and try again` +
+      `${e.error.error ? '(' + e.error.error + ').' : '.'}`;
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
     }
@@ -242,6 +255,7 @@ export class EndpointsEffect {
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {
         const actions = [];
+        let response: NormalizedResponse<EndpointModel>;
         if (actionStrings[0]) {
           actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
         }
@@ -253,13 +267,21 @@ export class EndpointsEffect {
 
         if (apiActionType === 'create') {
           actions.push(new GetSystemInfo());
+          response = {
+            entities: {
+              [endpointSchemaKey]: {
+                [endpoint.guid]: endpoint
+              }
+            },
+            result: [endpoint.guid]
+          };
         }
 
         if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
           actions.push(this.clearEndpointInternalEvents(apiAction.guid));
         }
 
-        actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
+        actions.push(new WrapperRequestActionSuccess(response, apiAction, apiActionType, null, null, endpoint ? endpoint.guid : null));
         return actions;
       }
       ),

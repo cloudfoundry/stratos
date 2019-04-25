@@ -23,6 +23,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() units: string;
   @Input() value: string;
   @Input() showUsage = false;
+  @Input() textOnly = false;
   @Input() link: () => void | string;
 
   formattedValue: string;

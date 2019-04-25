@@ -42,6 +42,9 @@ export class CloudFoundrySpaceServiceMock {
   allowSsh$ = observableOf('false');
   apps$ = observableOf([]);
   appCount$ = observableOf(0);
+  serviceInstancesCount$ = observableOf(0);
+  userProvidedServiceInstancesCount$ = observableOf(0);
+
 }
 
 export const getCfSpaceServiceMock = {

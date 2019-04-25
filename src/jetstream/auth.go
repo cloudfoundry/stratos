@@ -408,8 +408,8 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 			if err != nil {
 				return nil, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
-					"Could not connect to the endpoint endpoint",
-					"Could not connect to the endpoint endpoint: %s", err)
+					"Could not connect to the endpoint",
+					"Could not connect to the endpoint: %s", err)
 			}
 
 			err = p.setCNSITokenRecord(cnsiGUID, userID, *tokenRecord)

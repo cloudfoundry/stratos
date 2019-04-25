@@ -81,6 +81,7 @@ cp manifest.yml $MANIFEST
 
 echo "    env:" >> $MANIFEST
 echo "      SKIP_AUTO_REGISTER: true" >> $MANIFEST
+echo "      FORCE_ENABLE_PERSISTENCE_FEATURES: true" >> $MANIFEST
 
 # SSO
 SUITE=""
@@ -88,7 +89,7 @@ if [ "$2" == "sso" ] || [ "$3" == "sso" ] ; then
   echo "      SSO_LOGIN: true" >> $MANIFEST
   SUITE=" --suite=sso"
   # Run the helper script to make sure the CF client is set up correctly
-  "$DIRPATH/init-pcfdev-uaa.sh"
+  "$DIRPATH/init-uaa-for-sso.sh"
 fi  
 
 if [ -n "${DB_TYPE}" ]; then

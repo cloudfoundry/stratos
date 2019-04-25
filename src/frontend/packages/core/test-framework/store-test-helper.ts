@@ -123,6 +123,9 @@ function getDefaultInitialTestStoreState(): AppState {
         uaaError: false,
         upgradeInProgress: false,
         sessionExpiresOn: 1000,
+        plugins: {
+          demo: false
+        }
       },
       verifying: false
     },
@@ -616,11 +619,13 @@ function getDefaultInitialTestStoreState(): AppState {
     },
     dashboard: {
       sidenavOpen: true,
-      sideNavMode: 'side',
       headerEventMinimized: false,
       timeoutSession: true,
       sideHelpOpen: false,
-      sideHelpDocument: ''
+      sideHelpDocument: '',
+      isMobile: false,
+      isMobileNavOpen: false,
+      sideNavPinned: false,
     },
     createApplication: {
       cloudFoundryDetails: null,
@@ -5248,7 +5253,7 @@ function getDefaultInitialTestStoreState(): AppState {
             detected_buildpack: null,
             detected_buildpack_guid: null,
             environment_json: {
-              GOVERSION: 'go1.9'
+              GOVERSION: 'go1.12.4'
             },
             memory: 1024,
             instances: 1,

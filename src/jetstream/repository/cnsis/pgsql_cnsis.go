@@ -36,7 +36,7 @@ var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 var updateCNSI = `UPDATE cnsis SET sso_allowed = $1 WHERE guid = $2`
 
 // Update the metadata
-var updateCNSIMetadata = `UPDATE cnsis SET metadata = $1 WHERE guid = $2`
+var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1 WHERE guid = $2`
 
 // PostgresCNSIRepository is a PostgreSQL-backed CNSI repository
 type PostgresCNSIRepository struct {

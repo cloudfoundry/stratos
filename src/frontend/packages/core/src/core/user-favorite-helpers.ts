@@ -23,8 +23,6 @@ export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(entity, ent
 export function getFavoriteFromEndpointEntity(endpoint: EndpointModel) {
   if (isEndpointEntity(endpoint)) {
     return new UserFavoriteEndpoint(
-      endpoint.guid,
-      endpoint.cnsi_type,
       endpoint
     );
   }

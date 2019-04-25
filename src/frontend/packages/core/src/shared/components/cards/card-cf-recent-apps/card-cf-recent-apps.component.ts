@@ -1,16 +1,16 @@
-import { Component, Input, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { filter, first, map, tap } from 'rxjs/operators';
 
+import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../core/cf-api.types';
 import {
   appDataSort,
   CloudFoundryEndpointService,
 } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { AppState } from '../../../../../../store/src/app-state';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 
 const RECENT_ITEMS_COUNT = 10;
 
@@ -21,6 +21,7 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
+  public recentApps$: Observable<APIResource<IApp>[]>;
   @Input() allApps$: Observable<APIResource<IApp>[]>;
   @Input() loading$: Observable<boolean>;
   @Output() refresh = new EventEmitter<any>();
@@ -30,26 +31,28 @@ export class CardCfRecentAppsComponent implements OnInit {
     public cfEndpointService: CloudFoundryEndpointService,
   ) { }
 
-  apps$: Observable<APIResource<IApp>[]>;
-
   ngOnInit() {
-    this.apps$ = this.allApps$.pipe(
-      map(allApps => this.processApps(allApps))
+    this.recentApps$ = this.allApps$.pipe(
+      filter(apps => !!apps),
+      first(),
+      map(apps => this.restrictApps(apps)),
+      tap(apps => this.fetchAppStats(apps))
     );
   }
 
-  private processApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
-    if (!apps) {
-      return apps;
-    }
-
-    const recentApps = [].concat(apps).sort(appDataSort).slice(0, RECENT_ITEMS_COUNT);
+  private fetchAppStats(recentApps: APIResource<IApp>[]) {
     recentApps.forEach(app => {
       if (app.entity.state === 'STARTED') {
         this.store.dispatch(new GetAppStatsAction(app.metadata.guid, this.cfEndpointService.cfGuid));
       }
     });
-    return recentApps;
+  }
+
+  private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
+    if (!apps) {
+      return [];
+    }
+    return apps.sort(appDataSort).slice(0, RECENT_ITEMS_COUNT);
   }
 
 }
