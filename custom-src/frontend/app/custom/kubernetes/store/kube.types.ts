@@ -138,7 +138,8 @@ export enum ConditionType {
 
 export enum ConditionStatus {
   False = 'False',
-  True = 'True'
+  True = 'True',
+  Unknown = 'Unknown'
 }
 
 export interface Condition {
