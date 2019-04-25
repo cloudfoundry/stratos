@@ -98,7 +98,6 @@ src/frontend/packages/core/sass/custom.scss
 src/frontend/packages/core/assets/eula.html
 src/frontend/packages/core/assets/logo.png
 src/frontend/packages/core/assets/nav-logo.png
-src/frontend/packages/core/assets/nav-logo-icon.png
 src/frontend/packages/core/assets/login-bg.jpg
 src/frontend/packages/core/src/custom-import.module.ts
 src/frontend/packages/core/src/custom
