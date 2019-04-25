@@ -47,7 +47,6 @@ export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
 export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Polict] Step';
 
 export class GetAppAutoscalerHealthAction implements IRequestAction {
-  // TODO: RC update ctor names so they match common pattern (we really need to sort out our interfaces)
   constructor(
     public guid: string,
     public endpointGuid: string,
@@ -60,8 +59,8 @@ export class GetAppAutoscalerHealthAction implements IRequestAction {
 
 export class GetAppAutoscalerPolicyAction implements IRequestAction {
   constructor(
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
   ) { }
   type = APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerPolicySchemaKey;
@@ -70,8 +69,8 @@ export class GetAppAutoscalerPolicyAction implements IRequestAction {
 export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
   static updateKey = 'Updating-Existing-Application-Policy';
   constructor(
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
     public policy: any,
   ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY;
@@ -81,8 +80,8 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
 export class DetachAppAutoscalerPolicyAction implements IRequestAction {
   static updateKey = 'Detaching-Existing-Application-Policy';
   constructor(
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
   ) { }
   type = DETACH_APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerPolicySchemaKey;
@@ -91,8 +90,8 @@ export class DetachAppAutoscalerPolicyAction implements IRequestAction {
 export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
   constructor(
     public paginationKey: string,
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
     public normalFormat?,
   ) {
     this.query = {
@@ -116,8 +115,8 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   private static sortField = 'timestamp';
   constructor(
     public paginationKey: string,
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
     public normalFormat?,
     public params?,
   ) {
@@ -146,14 +145,14 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
 
 export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
   constructor(
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
     public metricName: string,
     public skipFormat: boolean,
     public trigger,
     public params
   ) {
-    this.paginationKey = appGuid + '-' + metricName;
+    this.paginationKey = guid + '-' + metricName;
   }
   actions = [
     AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC,
@@ -169,30 +168,30 @@ export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
 
 export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricAction implements PaginatedAction {
   constructor(
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
     public metricName: string,
     public skipFormat: boolean,
     public trigger,
     public params
   ) {
-    super(appGuid, cfGuid, metricName, skipFormat, trigger, params);
-    this.url = `apps/${appGuid}/metric/${metricName}`;
+    super(guid, endpointGuid, metricName, skipFormat, trigger, params);
+    this.url = `apps/${guid}/metric/${metricName}`;
   }
   entityKey = appAutoscalerAppMetricSchemaKey;
 }
 
 export class GetAppAutoscalerInsMetricAction extends GetAppAutoscalerMetricAction implements PaginatedAction {
   constructor(
-    public appGuid: string,
-    public cfGuid: string,
+    public guid: string,
+    public endpointGuid: string,
     public metricName: string,
     public skipFormat: boolean,
     public trigger,
     public params
   ) {
-    super(appGuid, cfGuid, metricName, skipFormat, trigger, params);
-    this.url = `apps/${appGuid}/metric_histories/${metricName}`;
+    super(guid, endpointGuid, metricName, skipFormat, trigger, params);
+    this.url = `apps/${guid}/metric_histories/${metricName}`;
   }
   entityKey = appAutoscalerInsMetricSchemaKey;
 }
