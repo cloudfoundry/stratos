@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
+import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
 import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
@@ -16,6 +17,7 @@ import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.t
 import { EndpointTypeConfig } from '../../../../core/extension/extension-types';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
+import { ConnectEndpointConfig } from '../../connect.service';
 import { getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
 
 
@@ -97,11 +99,24 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     return update$.pipe(pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
       map(([oldVal, newVal]) => newVal),
-      map(result => ({
-        success: !result.error,
-        redirect: !result.error,
-        message: !result.error ? '' : result.message
-      })));
+      map(result => {
+        const data: ConnectEndpointConfig = {
+          guid: result.message,
+          name: this.nameField.value,
+          type: this.endpoint.value,
+          ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
+        };
+        if (!result.error) {
+          this.store.dispatch(new ShowSnackBar(`Successfully registered '${this.nameField.value}'`));
+        }
+        return {
+          success: !result.error,
+          redirect: false,
+          message: !result.error ? '' : result.message,
+          data
+        };
+      })
+    );
   }
 
   private getUpdateSelector(guid) {

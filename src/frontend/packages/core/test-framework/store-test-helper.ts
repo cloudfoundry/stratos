@@ -5247,7 +5247,7 @@ function getDefaultInitialTestStoreState(): AppState {
             detected_buildpack: null,
             detected_buildpack_guid: null,
             environment_json: {
-              GOVERSION: 'go1.9'
+              GOVERSION: 'go1.12.4'
             },
             memory: 1024,
             instances: 1,

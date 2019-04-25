@@ -1,13 +1,14 @@
 FROM splatform/stratos-bk-build-base:opensuse as builder
 ARG stratos_version
-RUN mkdir -p /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos
-WORKDIR /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos
-COPY --chown=stratos:users . /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos
+RUN mkdir -p /home/stratos
+WORKDIR /home/stratos
+COPY --chown=stratos:users . /home/stratos
 RUN npm install
+RUN go version
 RUN npm run build-backend
 
 FROM splatform/stratos-bk-base:opensuse as common-build
-COPY --from=builder /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos/src/jetstream/jetstream /srv/
+COPY --from=builder /home/stratos/src/jetstream/jetstream /srv/
 RUN chmod +x /srv/jetstream
 
 # use --target=db-migrator to build db-migrator image
