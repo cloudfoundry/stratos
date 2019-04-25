@@ -3,18 +3,19 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { GetAppAutoscalerAppMetricAction } from '../../../../app-autoscaler.actions';
 import { AppState } from '../../../../../../../../store/src/app-state';
-import { buildLegendData } from '../../../../autoscaler-helpers/autoscaler-util';
-import { appAutoscalerAppMetricSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
+import { entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import {
   getPaginationObservables,
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { AppAutoscalerAppMetric } from '../../../../app-autoscaler.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 import { CardCell, IListRowCell } from '../../../../../../shared/components/list/list.types';
+import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { GetAppAutoscalerAppMetricAction } from '../../../../app-autoscaler.actions';
+import { AppAutoscalerAppMetric } from '../../../../app-autoscaler.types';
+import { buildLegendData } from '../../../../autoscaler-helpers/autoscaler-util';
+import { appAutoscalerAppMetricSchemaKey } from '../../../../autoscaler.store.module';
 
 @Component({
   selector: 'app-app-autoscaler-metric-chart-card',

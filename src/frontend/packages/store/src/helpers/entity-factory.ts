@@ -3,6 +3,7 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
@@ -35,12 +36,7 @@ export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 export const userFavoritesSchemaKey = 'userFavorites';
 export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
-export const appAutoscalerHealthSchemaKey = 'autoscalerHealth';
-export const appAutoscalerPolicySchemaKey = 'autoscalerPolicy';
-export const appAutoscalerUpdatedPolicySchemaKey = 'autoscalerUpdatedPolicy';
-export const appAutoscalerScalingHistorySchemaKey = 'autoscalerScalingHistory';
-export const appAutoscalerAppMetricSchemaKey = 'autoscalerAppMetric';
-export const appAutoscalerInsMetricSchemaKey = 'autoscalerInsMetric';
+
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -317,24 +313,6 @@ entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
 const UserFavoritesSchemaKey = new EntitySchema(userFavoritesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[userFavoritesSchemaKey] = UserFavoritesSchemaKey;
-
-const AppAutoscalerPolicySchema = new EntitySchema(appAutoscalerPolicySchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[appAutoscalerPolicySchemaKey] = AppAutoscalerPolicySchema;
-
-const AppAutoscalerUpdatedPolicySchema = new EntitySchema(appAutoscalerUpdatedPolicySchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[appAutoscalerUpdatedPolicySchemaKey] = AppAutoscalerUpdatedPolicySchema;
-
-const AppAutoscalerHealthSchema = new EntitySchema(appAutoscalerHealthSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[appAutoscalerHealthSchemaKey] = AppAutoscalerHealthSchema;
-
-const AppAutoscalerScalingHistorySchema = new EntitySchema(appAutoscalerScalingHistorySchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[appAutoscalerScalingHistorySchemaKey] = AppAutoscalerScalingHistorySchema;
-
-const AppAutoscalerAppMetricSchema = new EntitySchema(appAutoscalerAppMetricSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[appAutoscalerAppMetricSchemaKey] = AppAutoscalerAppMetricSchema;
-
-const AppAutoscalerInsMetricSchema = new EntitySchema(appAutoscalerInsMetricSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[appAutoscalerInsMetricSchemaKey] = AppAutoscalerInsMetricSchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,

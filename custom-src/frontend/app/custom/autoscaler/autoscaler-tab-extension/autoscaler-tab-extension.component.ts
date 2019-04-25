@@ -7,12 +7,7 @@ import { distinctUntilChanged, filter, first, map, publishReplay, refCount, star
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import {
-  appAutoscalerAppMetricSchemaKey,
-  appAutoscalerPolicySchemaKey,
-  appAutoscalerScalingHistorySchemaKey,
-  entityFactory,
-} from '../../../../../store/src/helpers/entity-factory';
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
@@ -34,6 +29,11 @@ import {
 } from '../app-autoscaler.actions';
 import { AppAutoscalerAppMetric, AppAutoscalerPolicy, AppAutoscalerScalingHistory } from '../app-autoscaler.types';
 import { MetricTypes } from '../autoscaler-helpers/autoscaler-util';
+import {
+  appAutoscalerAppMetricSchemaKey,
+  appAutoscalerPolicySchemaKey,
+  appAutoscalerScalingHistorySchemaKey,
+} from '../autoscaler.store.module';
 
 @StratosTab({
   type: StratosTabType.Application,

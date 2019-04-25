@@ -11,7 +11,6 @@ import { EntityService } from '../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import {
   entityFactory,
-  appAutoscalerUpdatedPolicySchemaKey
 } from '../../../../../../store/src/helpers/entity-factory';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
 import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
@@ -25,6 +24,7 @@ import {
 } from '../../autoscaler-helpers/autoscaler-validation';
 import * as moment from 'moment-timezone';
 import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
+import { appAutoscalerUpdatedPolicySchemaKey } from '../../autoscaler.store.module';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',

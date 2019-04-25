@@ -29,7 +29,6 @@ import { UpdateAppEffects } from './effects/update-app-effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
-import { AutoscalerEffects} from '../../core/src/custom/autoscaler/autoscaler.effects';
 import { AppReducersModule } from './reducers.module';
 import { AppStoreExtensionsModule } from './store.extensions.module';
 
@@ -66,8 +65,7 @@ import { AppStoreExtensionsModule } from './store.extensions.module';
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
-      UserFavoritesEffect,
-      AutoscalerEffects,
+      UserFavoritesEffect
     ])
   ]
 })

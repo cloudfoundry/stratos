@@ -1,27 +1,23 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
+import * as moment from 'moment-timezone';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { map} from 'rxjs/operators';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { map } from 'rxjs/operators';
+
 import { AppState } from '../../../../../../store/src/app-state';
-import { ApplicationService } from '../../../../features/applications/application.service';
+import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { EntityService } from '../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import {
-  entityFactory,
-  appAutoscalerPolicySchemaKey
-} from '../../../../../../store/src/helpers/entity-factory';
-import {
-  GetAppAutoscalerPolicyAction,
-  UpdateAppAutoscalerPolicyStepAction
-} from '../../app-autoscaler.actions';
+import { ApplicationService } from '../../../../features/applications/application.service';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.actions';
 import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
-import { PolicyDefault, PolicyAlert } from '../../autoscaler-helpers/autoscaler-util';
 import { autoscalerTransformArrayToMap } from '../../autoscaler-helpers/autoscaler-transform-policy';
+import { PolicyAlert, PolicyDefault } from '../../autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../autoscaler-helpers/autoscaler-validation';
-import * as moment from 'moment-timezone';
+import { appAutoscalerPolicySchemaKey } from '../../autoscaler.store.module';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step1',

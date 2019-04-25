@@ -1,6 +1,9 @@
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
+import { entityFactory } from '../../../../store/src/helpers/entity-factory';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { IRequestAction } from '../../../../store/src/types/request.types';
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
@@ -8,10 +11,7 @@ import {
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
   appAutoscalerUpdatedPolicySchemaKey,
-  entityFactory,
-} from '../../../../store/src/helpers/entity-factory';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../../store/src/types/request.types';
+} from './autoscaler.store.module';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -31,11 +31,11 @@ export const AppAutoscalerMetricEvents = {
   GET_APP_AUTOSCALER_METRIC_FAILED: '[App Autoscaler] Get autoscaler metric failed'
 };
 
-export const AppAutoscalerHealthEvents = {
-  GET_APP_AUTOSCALER_HEALTH: '[App Autoscaler] Get autoscaler health',
-  GET_APP_AUTOSCALER_HEALTH_SUCCESS: '[App Autoscaler] Get autoscaler health success',
-  GET_APP_AUTOSCALER_HEALTH_FAILED: '[App Autoscaler] Get autoscaler health failed'
-};
+// export const AppAutoscalerHealthEvents = {
+//   GET_APP_AUTOSCALER_HEALTH: '[App Autoscaler] Get autoscaler health',
+//   GET_APP_AUTOSCALER_HEALTH_SUCCESS: '[App Autoscaler] Get autoscaler health success',
+//   GET_APP_AUTOSCALER_HEALTH_FAILED: '[App Autoscaler] Get autoscaler health failed'
+// };
 
 export const APP_AUTOSCALER_POLICY = '[New App Autoscaler] Fetch policy';
 export const UPDATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Update policy';
@@ -44,7 +44,7 @@ export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
 export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
 export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
 
-export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Polict] Step';
+export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Policy] Step';
 
 export class GetAppAutoscalerHealthAction implements IRequestAction {
   constructor(
