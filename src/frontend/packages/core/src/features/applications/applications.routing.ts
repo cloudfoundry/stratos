@@ -29,9 +29,9 @@ import { CreateApplicationModule } from './create-application/create-application
 import { DeployApplicationComponent } from './deploy-application/deploy-application.component';
 import { DeployApplicationModule } from './deploy-application/deploy-application.module';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
+import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
-import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 
 const applicationsRoutes: Routes = [
   {
@@ -92,7 +92,6 @@ const applicationsRoutes: Routes = [
             path: '',
             component: ApplicationTabsBaseComponent,
             data: {
-              uiFullView: true,
               extensionsActionsKey: StratosActionType.Application
             },
             children: [

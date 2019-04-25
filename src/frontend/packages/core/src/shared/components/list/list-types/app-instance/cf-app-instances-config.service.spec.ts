@@ -12,6 +12,7 @@ import { CfAppInstancesConfigService } from './cf-app-instances-config.service';
 import { endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
 import { entityFactory, applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
+import { CustomImportModule } from '../../../../../custom-import.module';
 
 describe('CfAppInstancesConfigService', () => {
 
@@ -38,6 +39,10 @@ describe('CfAppInstancesConfigService', () => {
         createBasicStoreModule(),
         RouterTestingModule,
       ]
+    }).overrideModule(ApplicationsModule, {
+      remove: {
+        imports: [CustomImportModule]
+      }
     });
   });
 

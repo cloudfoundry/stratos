@@ -14,7 +14,7 @@ import {
 } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
-import { getEndpointTypes } from '../features/endpoints/endpoint-helpers';
+import { getEndpointType } from '../features/endpoints/endpoint-helpers';
 import { UserService } from './user.service';
 
 
@@ -31,7 +31,7 @@ export class EndpointsService implements CanActivate {
     if (!endpoint) {
       return '';
     }
-    const ext = getEndpointTypes().find(ep => ep.value === endpoint.cnsi_type);
+    const ext = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
     if (ext && ext.homeLink) {
       return ext.homeLink(endpoint.guid).join('/');
     }
@@ -45,10 +45,19 @@ export class EndpointsService implements CanActivate {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
-      !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking')));
+      !!Object.values(endpoints).find(endpoint => {
+        const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
+        return epType.doesNotSupportConnect ||
+          endpoint.connectionStatus === 'connected' ||
+          endpoint.connectionStatus === 'checking';
+      }))
+    );
 
     this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
-      map((auth) => auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true')
+      map((auth) => auth.sessionData &&
+        auth.sessionData['plugin-config'] &&
+        auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true'
+      )
     );
   }
 
@@ -114,12 +123,26 @@ export class EndpointsService implements CanActivate {
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
-    return this.endpoints$.pipe(
-      map(endpoints => {
-        const haveAtLeastOne = Object.values(endpoints).find(ep => ep.cnsi_type === type && ep.connectionStatus === 'connected');
-        return !haveAtLeastOne;
-      })
+    return this.connectedEndpointsOfTypes(type).pipe(
+      map(eps => eps.length === 0)
     );
   }
 
+  hasConnectedEndpointType(type: string): Observable<boolean> {
+    return this.connectedEndpointsOfTypes(type).pipe(
+      map(eps => eps.length > 0)
+    );
+  }
+
+  connectedEndpointsOfTypes(type: string): Observable<EndpointModel[]> {
+    return this.endpoints$.pipe(
+      map(ep => {
+        return Object.values(ep)
+          .filter(endpoint => {
+            const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
+            return endpoint.cnsi_type === type && (epType.doesNotSupportConnect || endpoint.connectionStatus === 'connected');
+          });
+      })
+    );
+  }
 }

@@ -16,6 +16,12 @@
     padding: 6px;
     text-align: right;
   }
+  &__actions {
+    display: flex;
+  }
+  &__sub-nav {
+    display: flex;
+  }
 }
 
 .app-metadata {

@@ -1,0 +1,8 @@
+<div class="breadcrumb__list" *ngIf="breadcrumbDefinitions">
+  <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
+    <span class="breadcrumb breadcrumb__link" *ngIf="breadcrumbDef.routerLink"
+      [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+    <span class="breadcrumb" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+    <mat-icon class="breadcrumb__separator">chevron_right</mat-icon>
+  </ng-container>
+</div>

@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 import { DetachServiceInstanceComponent } from './detach-service-instance.component';
@@ -13,7 +14,7 @@ describe('DetachServiceInstanceComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DetachServiceInstanceComponent, DetachAppsComponent],
       imports: [BaseTestModules],
-      providers: [DatePipe]
+      providers: [DatePipe, TabNavService]
     })
       .compileComponents();
   }));

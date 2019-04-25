@@ -1,8 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../../tab-nav.service';
 import {
-  generateTestCfEndpointServiceProvider,
   BaseTestModules,
+  generateTestCfEndpointServiceProvider,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganizationBaseComponent } from './cloud-foundry-organization-base.component';
 
@@ -14,7 +15,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationBaseComponent],
       imports: [...BaseTestModules],
-      providers: [...generateTestCfEndpointServiceProvider()]
+      providers: [...generateTestCfEndpointServiceProvider(), TabNavService]
     })
       .compileComponents();
   }));

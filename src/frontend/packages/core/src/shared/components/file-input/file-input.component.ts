@@ -4,6 +4,7 @@ import {
   EventEmitter,
   Host,
   Input,
+  OnDestroy,
   OnInit,
   Optional,
   Output,
@@ -11,13 +12,17 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
+import { Subscription } from 'rxjs';
+
+import { safeUnsubscribe } from '../../../core/utils.service';
 
 @Component({
   selector: 'app-file-input',
   templateUrl: './file-input.component.html',
   styleUrls: ['./file-input.component.scss']
 })
-export class FileInputComponent implements OnInit {
+export class FileInputComponent implements OnInit, OnDestroy {
+
   @ViewChild('inputFile') nativeInputFile: ElementRef;
 
   @Input() accept: string;
@@ -29,6 +34,8 @@ export class FileInputComponent implements OnInit {
   public name = '';
 
   private formGroupControl: FormGroupName;
+  public disabled = false;
+  private sub: Subscription;
 
   constructor(
     @Optional() @Host() @SkipSelf() private parent: ControlContainer,
@@ -37,7 +44,15 @@ export class FileInputComponent implements OnInit {
   ngOnInit(): void {
     if (this.parent instanceof FormGroupName) {
       this.formGroupControl = this.parent as FormGroupName;
+      this.disabled = this.formGroupControl.control.disabled;
+      this.sub = this.formGroupControl.control.statusChanges.subscribe(a => {
+        this.disabled = a === 'DISABLED';
+      });
     }
+  }
+
+  ngOnDestroy(): void {
+    safeUnsubscribe(this.sub);
   }
 
   get fileCount(): number { return this.files && this.files.length || 0; }

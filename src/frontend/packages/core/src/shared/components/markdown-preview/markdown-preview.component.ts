@@ -18,7 +18,7 @@ export class MarkdownPreviewComponent {
 
   @Input('documentUrl')
   set setDocumentUrl(value: string) {
-    if (this.documentUrl !== value) {
+    if (value && this.documentUrl !== value) {
       this.documentUrl = value;
       this.title = null;
       this.loadDocument();
@@ -55,10 +55,12 @@ export class MarkdownPreviewComponent {
     const h1 = this.markdown.nativeElement.getElementsByTagName('h1');
     if (this.title === null) {
       if (h1.length > 0) {
+        // this.title = titleElement.innerText;
         window.setTimeout(() => {
           const titleElement = h1[0];
           const titleText = titleElement.innerText;
           this.title = titleText;
+          // console.log('Got title: ' + titleText);
         }, 100);
       } else {
         this.title = 'Help';

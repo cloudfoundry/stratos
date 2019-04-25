@@ -22,7 +22,7 @@ const endpointsRoutes: Routes = [
     component: CreateEndpointBaseStepComponent
   },
   {
-    path: 'new/:type',
+    path: 'new/:type/:subtype',
     component: CreateEndpointComponent
   },
   {

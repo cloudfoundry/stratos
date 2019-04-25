@@ -109,7 +109,7 @@ export interface IListMultiFilterConfigItem {
 }
 
 export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
-export const defaultPaginationPageSizeOptionsTable = [5, 20, 80];
+export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
 
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;

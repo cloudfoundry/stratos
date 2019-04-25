@@ -14,7 +14,7 @@ import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { CreateRoutesPage } from './po/routes-create-page.po';
 
-describe('Application View -', function () {
+describe('Application View -', () => {
   let cfHelper: CFHelpers;
   let applicationE2eHelper: ApplicationE2eHelper;
   const appName = ApplicationE2eHelper.createApplicationName();
