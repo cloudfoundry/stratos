@@ -27,7 +27,7 @@ if [ "${VERSION}" == "dev" ]; then
 fi
 
 # Build backend or run tests
-pushd ${STRATOS}/src/jetstream > /dev/null
+pushd "${STRATOS}/src/jetstream" > /dev/null
 
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
