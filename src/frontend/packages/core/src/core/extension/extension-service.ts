@@ -1,5 +1,5 @@
 import { Injectable, Type } from '@angular/core';
-import { Route, Router } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -32,21 +32,15 @@ export enum StratosTabType {
 }
 
 export interface StratosTabMetadata {
-  type: StratosTabType;
   label: string;
   link: string;
   icon: string;
   iconFont?: string;
-  hidden?: (store: Store<AppState>, esf: EntityServiceFactory) => Observable<boolean>;
-  // action: any;
+  hidden?: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => Observable<boolean>;
+}
 
-  // TODO: RC Diff between StratosTabMetadata & IPageSideNavTab. One purely for config & other for functionality?
-  // key?: string;
-  // label: string;
-  // matIcon?: string;
-  // matIconFont?: string;
-  // link: string;
-  // hidden?: Observable<boolean>;
+export interface StratosTabMetadataConfig extends StratosTabMetadata {
+  type: StratosTabType;
 }
 
 // The different types of Action
@@ -101,14 +95,14 @@ const extensionMetadata = {
 };
 
 /**
- * Decortator for a Tab extension
+ * Decorator for a Tab extension
  */
-export function StratosTab(props: StratosTabMetadata) {
+export function StratosTab(props: StratosTabMetadataConfig) {
   return target => addExtensionTab(props.type, target, props);
 }
 
 /**
- * Decortator for an Action extension
+ * Decorator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
   return target => addExtensionAction(props.type, target, props);
@@ -135,7 +129,7 @@ export function StratosLoginComponent() {
   return target => extensionMetadata.loginComponent = target;
 }
 
-function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadata) {
+function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadataConfig) {
   if (!extensionMetadata.tabs[tab]) {
     extensionMetadata.tabs[tab] = [];
   }
@@ -148,11 +142,7 @@ function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMeta
     component: target
   });
   extensionMetadata.tabs[tab].push({
-    label: props.label,
-    link: props.link,
-    matIcon: props.icon,
-    matIconFont: props.iconFont,
-    hidden: props.hidden
+    ...props
   });
 }
 

@@ -1,20 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { TabNavService } from '../../../../tab-nav.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
-export interface IPageSideNavTab {
-  key?: string;
-  label: string;
-  matIcon: string;
-  matIconFont?: string;
-  link: string;
+export interface IPageSideNavTab extends StratosTabMetadata {
   hidden$?: Observable<boolean>;
-  hidden?: (store: Store<AppState>, esf: EntityServiceFactory) => Observable<boolean>;
 }
 
 @Component({
@@ -31,7 +27,7 @@ export class PageSideNavComponent implements OnInit {
     }
     this.pTabs = tabs.map(tab => ({
       ...tab,
-      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf) : of(false))
+      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute) : of(false))
     }));
   }
   get tabs(): IPageSideNavTab[] {
@@ -43,7 +39,12 @@ export class PageSideNavComponent implements OnInit {
   public activeTab$: Observable<string>;
   public breadcrumbs$: Observable<IBreadcrumb[]>;
 
-  constructor(private store: Store<AppState>, private esf: EntityServiceFactory, public tabNavService: TabNavService) { }
+  constructor(
+    private store: Store<AppState>,
+    private esf: EntityServiceFactory,
+    private activatedRoute: ActivatedRoute,
+    public tabNavService: TabNavService
+  ) { }
 
   ngOnInit() {
     this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();

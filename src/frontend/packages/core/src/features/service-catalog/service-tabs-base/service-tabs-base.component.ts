@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { ServicesService } from '../services.service';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { AppState } from '../../../../../store/src/app-state';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
+import { ServicesService } from '../services.service';
 
 @Component({
   selector: 'app-service-tabs-base',
@@ -24,19 +24,19 @@ export class ServiceTabsBaseComponent {
     {
       link: 'summary',
       label: 'Summary',
-      matIcon: 'description'
+      icon: 'description'
     },
     {
       link: 'instances',
       label: 'Instances',
-      matIcon: 'service_instance',
-      matIconFont: 'stratos-icons'
+      icon: 'service_instance',
+      iconFont: 'stratos-icons'
     },
     {
       link: 'plans',
       label: 'Plans',
-      matIcon: 'service_plan',
-      matIconFont: 'stratos-icons'
+      icon: 'service_plan',
+      iconFont: 'stratos-icons'
     }
   ];
 

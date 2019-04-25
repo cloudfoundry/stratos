@@ -26,18 +26,18 @@ export class CloudFoundryCellBaseComponent {
     {
       link: 'summary',
       label: 'Summary',
-      matIcon: 'description'
+      icon: 'description'
     },
     {
       link: 'charts',
       label: 'Metrics',
-      matIcon: 'equalizer'
+      icon: 'equalizer'
     },
     {
       link: CloudFoundryCellBaseComponent.AppsLinks,
       label: 'App Instances',
-      matIcon: 'application_instance',
-      matIconFont: 'stratos-icons'
+      icon: 'application_instance',
+      iconFont: 'stratos-icons'
     },
   ];
 

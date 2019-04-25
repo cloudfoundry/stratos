@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
@@ -19,6 +20,7 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../core/extension/extension-service';
 import { ApplicationService } from '../../../features/applications/application.service';
+import { getGuids } from '../../../features/applications/application/application-base.component';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
@@ -39,9 +41,11 @@ import { MetricTypes } from '../autoscaler-helpers/autoscaler-util';
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: EntityServiceFactory) => {
-    // TODO: RC Find a neater way to fetch guids (ActiveCf..)
-    const action = new GetAppAutoscalerHealthAction(window.location.pathname.split('/')[3], window.location.pathname.split('/')[2]);
+  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
+    // TODO: RC Fix
+    const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
+    const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
+    const action = new GetAppAutoscalerHealthAction(appGuid, endpointGuid);
     return esf.create<{ uptime: number }>(action.entityKey, action.entity, action.guid, action).waitForEntity$.pipe(
       map(health => health.entity.uptime > 0),
       startWith(true)
