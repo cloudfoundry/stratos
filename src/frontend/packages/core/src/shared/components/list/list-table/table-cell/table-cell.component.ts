@@ -24,12 +24,6 @@ import {
 import {
   TableCellEventTypeComponent,
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
-import {
-  TableCellAutoscalerEventChangeComponent,
-} from '../../../../../custom/autoscaler/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
-import {
-  TableCellAutoscalerEventStatusComponent,
-} from '../../../../../custom/autoscaler/list/list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
 import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import {
@@ -134,8 +128,6 @@ export const listTableCells = [
   TableCellEventTypeComponent,
   TableCellEventActionComponent,
   TableCellEventDetailComponent,
-  TableCellAutoscalerEventStatusComponent,
-  TableCellAutoscalerEventChangeComponent,
   TableCellActionsComponent,
   TableCellAppNameComponent,
   TableCellEndpointStatusComponent,

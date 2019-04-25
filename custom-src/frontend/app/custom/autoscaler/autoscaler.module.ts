@@ -27,6 +27,11 @@ import {
   EditAutoscalerPolicyStep4Component,
 } from './edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy/edit-autoscaler-policy.component';
+import { AppAutoscalerMetricChartCardComponent } from './list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
+import { AppAutoscalerComboChartComponent } from './list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-chart.component';
+import { AppAutoscalerComboSeriesVerticalComponent } from './list/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
+import { TableCellAutoscalerEventStatusComponent } from './list/list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
+import { TableCellAutoscalerEventChangeComponent } from './list/list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
 
 @NgModule({
   imports: [
@@ -55,6 +60,13 @@ import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy/edit-aut
   ],
   providers: [
     ApplicationService
+  ],
+  entryComponents: [
+    AppAutoscalerMetricChartCardComponent,
+    AppAutoscalerComboChartComponent,
+    AppAutoscalerComboSeriesVerticalComponent,
+    TableCellAutoscalerEventChangeComponent,
+    TableCellAutoscalerEventStatusComponent
   ]
 })
 export class AutoscalerModule { }
