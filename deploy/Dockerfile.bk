@@ -43,4 +43,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 # use --target=dev-build to build backend image for docker-compose
 FROM prod-build as dev-build
-RUN CERTS_PATH=dev-certs /generate_cert.sh 
+RUN CERTS_PATH=dev-certs /generate_cert.sh
