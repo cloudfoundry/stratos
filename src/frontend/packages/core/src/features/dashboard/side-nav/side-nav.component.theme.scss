@@ -5,6 +5,9 @@
   $side-nav-bottom-color: map-get($app-theme, subdued-color);
 
   .side-nav {
+    &__nav-toggle {
+      color: mat-color($side-nav-colors, text);
+    }
     &__inner {
       background-color: mat-color($side-nav-colors, background);
     }

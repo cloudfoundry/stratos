@@ -7,6 +7,7 @@ import { ActionHistoryDump } from '../../../../../store/src/actions/action-histo
 import { AppState } from '../../../../../store/src/app-state';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
+import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
@@ -51,6 +52,10 @@ export class SideNavComponent implements OnInit {
     return this.isIconMode;
   }
   private isIconMode = true;
+
+  public toggleSidenav() {
+    this.store.dispatch(new ToggleSideNav());
+  }
 
   // Button is not always visible on load, so manually push through an event
   logoClicked: BehaviorSubject<any> = new BehaviorSubject(true);

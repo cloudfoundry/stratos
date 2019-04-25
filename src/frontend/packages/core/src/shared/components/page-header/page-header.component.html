@@ -5,9 +5,6 @@
         <div>
           <mat-toolbar class="page-header__toolbar" color="primary">
             <div class="page-header__nav-toggle-wrapper">
-              <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
-                <mat-icon class="page-header__nav-toggle">menu</mat-icon>
-              </button>
             </div>
             <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
               <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">

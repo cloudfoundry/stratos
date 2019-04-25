@@ -4,9 +4,11 @@
       <div class="side-nav__top-inner">
         <div class="side-nav__logo" (click)="logoClicked.next(true)">
           <div class="side-nav__logo-img"></div>
-          <div class="side-nav__logo-icon-img"></div>
           <div class="side-nav__logo-text">{{ customizations.logoText || '' }}
           </div>
+          <button mat-icon-button (click)="toggleSidenav()">
+            <mat-icon class="side-nav__nav-toggle">menu</mat-icon>
+          </button>
         </div>
       </div>
     </div>

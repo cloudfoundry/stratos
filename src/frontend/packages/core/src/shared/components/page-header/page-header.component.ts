@@ -117,10 +117,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }) || breadcrumbs[0];
   }
 
-  toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
-  }
-
   logout() {
     this.store.dispatch(new Logout());
   }

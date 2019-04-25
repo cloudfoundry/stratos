@@ -64,20 +64,13 @@ $icon-nav-width: 50px;
       text-align: center;
       text-transform: uppercase;
     }
-    &-img,
-    &-icon-img {
+    &-img {
+      background-image: url('/core/assets/nav-logo.png');
       background-position: center;
       background-repeat: no-repeat;
       background-size: contain;
       height: 100%;
-      position: absolute;
       width: 100%;
-    }
-    &-img {
-      background-image: url('/core/assets/nav-logo.png');
-    }
-    &-icon-img {
-      background-image: url('/core/assets/nav-logo-icon.png');
     }
   }
   &__top-inner {
@@ -156,6 +149,7 @@ $transition-delay: .5s;
       width: auto;
     }
   }
+  // This will allow hover nav
   // &:hover {
   //   overflow: visible;
   //   .side-nav {
