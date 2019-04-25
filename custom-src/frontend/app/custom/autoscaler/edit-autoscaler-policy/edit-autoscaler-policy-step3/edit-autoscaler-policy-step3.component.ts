@@ -1,23 +1,30 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { Component } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
 import * as moment from 'moment-timezone';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
+import { Observable, of as observableOf } from 'rxjs';
+
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
-import { UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.actions';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import {
-  MomentFormateDate, PolicyAlert, shiftArray, PolicyDefaultRecurringSchedule, cloneObject, WeekdayOptions, MonthdayOptions
+  cloneObject,
+  MomentFormateDate,
+  MonthdayOptions,
+  PolicyAlert,
+  PolicyDefaultRecurringSchedule,
+  shiftArray,
+  WeekdayOptions,
 } from '../../autoscaler-helpers/autoscaler-util';
 import {
-  numberWithFractionOrExceedRange, dateIsAfter, timeIsSameOrAfter, recurringSchedulesOverlapping,
+  dateIsAfter,
+  numberWithFractionOrExceedRange,
+  recurringSchedulesOverlapping,
+  timeIsSameOrAfter,
 } from '../../autoscaler-helpers/autoscaler-validation';
 import {
-  validateRecurringSpecificMin, validateRecurringSpecificMax
+  validateRecurringSpecificMax,
+  validateRecurringSpecificMin,
 } from '../edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 
 @Component({
@@ -28,7 +35,7 @@ import {
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep3Component implements OnInit {
+export class EditAutoscalerPolicyStep3Component {
 
   policyAlert = PolicyAlert;
   weekdayOptions = WeekdayOptions;
@@ -36,7 +43,7 @@ export class EditAutoscalerPolicyStep3Component implements OnInit {
   editRecurringScheduleForm: FormGroup;
   appAutoscalerPolicy$: Observable<any>;
 
-  private currentPolicy: any;
+  public currentPolicy: AppAutoscalerPolicy;
   private editIndex = -1;
   private editEffectiveType = 'always';
   private editRepeatType = 'week';
@@ -48,7 +55,6 @@ export class EditAutoscalerPolicyStep3Component implements OnInit {
 
   constructor(
     public applicationService: ApplicationService,
-    private store: Store<AppState>,
     private fb: FormBuilder,
   ) {
     this.editRecurringScheduleForm = this.fb.group({
@@ -66,13 +72,8 @@ export class EditAutoscalerPolicyStep3Component implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.appAutoscalerPolicy$ = this.store.select(selectUpdateAutoscalerPolicyState).pipe(
-      map(state => {
-        this.currentPolicy = state.policy;
-        return this.currentPolicy;
-      })
-    );
+  onEnter = (data: AppAutoscalerPolicy) => {
+    this.currentPolicy = data;
   }
 
   addRecurringSchedule = () => {
@@ -165,10 +166,10 @@ export class EditAutoscalerPolicyStep3Component implements OnInit {
     this.editIndex = -1;
   }
 
-  onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new UpdateAppAutoscalerPolicyStepAction(this.currentPolicy));
-    return observableOf({ success: true });
-  }
+  onNext: StepOnNextFunction = () => observableOf({
+    success: true,
+    data: { ...this.currentPolicy }
+  })
 
   validateRecurringScheduleGlobal(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {

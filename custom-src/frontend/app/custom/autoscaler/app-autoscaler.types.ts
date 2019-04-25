@@ -2,7 +2,12 @@ export interface AppAutoscalerPolicy {
   instance_min_count: number;
   instance_max_count: number;
   scaling_rules_form: any;
-  schedules: any;
+  scaling_rules: any[];
+  schedules: {
+    timezone: string,
+    recurring_schedule: any[],
+    specific_date: any[]
+  };
 }
 
 export interface AppAutoscalerHealth {
@@ -23,6 +28,3 @@ export interface AppAutoscalerInsMetric {
   total_results: number;
 }
 
-export interface UpdateAutoscalerPolicyState {
-  policy: AppAutoscalerPolicy;
-}

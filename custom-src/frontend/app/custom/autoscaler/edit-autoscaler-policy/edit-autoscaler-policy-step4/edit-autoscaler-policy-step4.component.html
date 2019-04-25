@@ -1,7 +1,7 @@
-<div *ngIf="appAutoscalerPolicy$ | async as policy">
+<div *ngIf="currentPolicy">
   <app-tile-grid>
     <app-tile-group
-      *ngFor="let rule of policy && policy.schedules && policy.schedules.specific_date; let index = index">
+      *ngFor="let rule of currentPolicy.schedules && currentPolicy.schedules.specific_date; let index = index">
       <app-tile>
         <mat-card>
           <mat-card-header>
@@ -105,5 +105,6 @@
       </app-tile>
     </app-tile-group>
   </app-tile-grid>
-  <button color="accent" mat-button mat-raised-button (click)="addSpecificDate()" [disabled]="editIndex!=-1">Add</button>
+  <button color="accent" mat-button mat-raised-button (click)="addSpecificDate()"
+    [disabled]="editIndex!=-1">Add</button>
 </div>

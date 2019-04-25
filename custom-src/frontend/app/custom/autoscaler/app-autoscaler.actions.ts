@@ -1,5 +1,4 @@
 import { RequestOptions } from '@angular/http';
-import { Action } from '@ngrx/store';
 
 import { entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
@@ -205,9 +204,3 @@ export class GetAppAutoscalerInsMetricAction extends GetAppAutoscalerMetricActio
   entityKey = appAutoscalerInsMetricSchemaKey;
 }
 
-export class UpdateAppAutoscalerPolicyStepAction implements Action {
-  constructor(
-    public policy: any
-  ) { }
-  type = UPDATE_APP_AUTOSCALER_POLICY_STEP;
-}

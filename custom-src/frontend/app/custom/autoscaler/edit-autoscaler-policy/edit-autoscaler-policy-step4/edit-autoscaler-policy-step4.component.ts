@@ -1,29 +1,30 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
+import * as moment from 'moment-timezone';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, distinctUntilChanged, take } from 'rxjs/operators';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+
 import { AppState } from '../../../../../../store/src/app-state';
-import { ApplicationService } from '../../../../features/applications/application.service';
+import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { EntityService } from '../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import {
-  entityFactory,
-} from '../../../../../../store/src/helpers/entity-factory';
+import { ApplicationService } from '../../../../features/applications/application.service';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
 import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import {
-  MomentFormateDateTimeT, PolicyAlert, PolicyDefaultSpecificDate, cloneObject
+  cloneObject,
+  MomentFormateDateTimeT,
+  PolicyAlert,
+  PolicyDefaultSpecificDate,
 } from '../../autoscaler-helpers/autoscaler-util';
 import {
-  numberWithFractionOrExceedRange,
   dateTimeIsSameOrAfter,
-  specificDateRangeOverlapping
+  numberWithFractionOrExceedRange,
+  specificDateRangeOverlapping,
 } from '../../autoscaler-helpers/autoscaler-validation';
-import * as moment from 'moment-timezone';
-import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
 import { appAutoscalerUpdatedPolicySchemaKey } from '../../autoscaler.store.module';
 
 @Component({
@@ -34,15 +35,14 @@ import { appAutoscalerUpdatedPolicySchemaKey } from '../../autoscaler.store.modu
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
+export class EditAutoscalerPolicyStep4Component implements OnDestroy {
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private updateAppAutoscalerPolicyService: EntityService;
   private appAutoscalerPolicyErrorSub: Subscription;
-  private currentPolicy: any;
+  public currentPolicy: AppAutoscalerPolicy;
   private editIndex = -1;
   private editMutualValidation = {
     limit: true,
@@ -65,12 +65,6 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.appAutoscalerPolicy$ = this.store.select(selectUpdateAutoscalerPolicyState).pipe(
-      map(state => {
-        this.currentPolicy = state.policy;
-        return this.currentPolicy;
-      })
-    );
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
       appAutoscalerUpdatedPolicySchemaKey,
       entityFactory(appAutoscalerUpdatedPolicySchemaKey),
@@ -78,6 +72,10 @@ export class EditAutoscalerPolicyStep4Component implements OnInit, OnDestroy {
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
       false
     );
+  }
+
+  onEnter = (data: AppAutoscalerPolicy) => {
+    this.currentPolicy = data;
   }
 
   ngOnDestroy(): void {

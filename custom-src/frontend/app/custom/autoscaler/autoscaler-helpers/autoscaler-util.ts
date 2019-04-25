@@ -1,5 +1,6 @@
 
 import * as moment from 'moment-timezone';
+import { AppAutoscalerPolicy } from '../app-autoscaler.types';
 
 export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'];
 export const MetricPercentageTypes = ['memoryutil'];
@@ -29,10 +30,11 @@ export const PolicyDefaultSetting = {
   cool_down_secs_min: 60,
   cool_down_secs_max: 3600,
 };
-export const PolicyDefault = {
+export const PolicyDefault: AppAutoscalerPolicy = {
   instance_min_count: 1,
   instance_max_count: 10,
   scaling_rules: [],
+  scaling_rules_form: [],
   schedules: {
     timezone: moment.tz.guess(),
     recurring_schedule: [],

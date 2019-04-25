@@ -125,7 +125,9 @@
                   <tr mat-header-row *matHeaderRowDef="scalingRuleColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: scalingRuleColumns;"></tr>
                 </table>
-                <div class="autoscaler-tab-table-no-record" *ngIf="policy && policy.scaling_rules_form && policy.scaling_rules_form.length == 0">No scaling rules.</div>
+                <div class="autoscaler-tab-table-no-record"
+                  *ngIf="policy && policy.scaling_rules_form && policy.scaling_rules_form.length == 0">No scaling rules.
+                </div>
               </div>
             </mat-card-content>
             <mat-card-actions class="autoscaler-tab__actions">
@@ -172,7 +174,9 @@
                   <tr mat-header-row *matHeaderRowDef="specificDateColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: specificDateColumns;"></tr>
                 </table>
-                <div class="autoscaler-tab-table-no-record" *ngIf="policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length == 0">No specific date schedule.</div>
+                <div class="autoscaler-tab-table-no-record"
+                  *ngIf="policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length == 0">
+                  No specific date schedule.</div>
               </div>
               <br />
               <div class="app-metadata app-metadata-table">
@@ -212,7 +216,9 @@
                   <tr mat-header-row *matHeaderRowDef="recurringScheduleColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: recurringScheduleColumns;"></tr>
                 </table>
-                <div class="autoscaler-tab-table-no-record" *ngIf="policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length == 0">No recurring schedule.</div>
+                <div class="autoscaler-tab-table-no-record"
+                  *ngIf="policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length == 0">
+                  No recurring schedule.</div>
               </div>
             </mat-card-content>
             <mat-card-actions class="autoscaler-tab__actions">

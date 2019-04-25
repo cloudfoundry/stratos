@@ -35,7 +35,6 @@ import {
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
-import { UpdateAutoscalerPolicyState } from './app-autoscaler.types';
 import { buildMetricData } from './autoscaler-helpers/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,
@@ -390,5 +389,3 @@ export class AutoscalerEffects {
   }
 
 }
-
-export const selectUpdateAutoscalerPolicyState = (state: AppState): UpdateAutoscalerPolicyState => state.updateAutoscalerPolicy;

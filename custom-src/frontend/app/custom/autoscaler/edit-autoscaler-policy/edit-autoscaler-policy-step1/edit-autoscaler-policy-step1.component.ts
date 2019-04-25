@@ -4,7 +4,7 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
@@ -12,7 +12,7 @@ import { EntityService } from '../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.actions';
+import { GetAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
 import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import { autoscalerTransformArrayToMap } from '../../autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert, PolicyDefault } from '../../autoscaler-helpers/autoscaler-util';
@@ -37,7 +37,7 @@ export class EditAutoscalerPolicyStep1Component implements OnInit, OnDestroy {
   private editLimitValid = true;
   private appAutoscalerPolicyErrorSub: Subscription;
   private appAutoscalerPolicyService: EntityService;
-  private currentPolicy: any;
+  private currentPolicy: AppAutoscalerPolicy;
 
   constructor(
     public applicationService: ApplicationService,
@@ -61,6 +61,7 @@ export class EditAutoscalerPolicyStep1Component implements OnInit, OnDestroy {
       false
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
+      filter(({ entityRequestInfo }) => entityRequestInfo && entityRequestInfo.fetching === false),
       map(({ entity }) => {
         if (entity && entity.entity) {
           this.currentPolicy = entity.entity;
@@ -90,8 +91,12 @@ export class EditAutoscalerPolicyStep1Component implements OnInit, OnDestroy {
     this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count').value);
     this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count').value);
     this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone').value;
-    this.store.dispatch(new UpdateAppAutoscalerPolicyStepAction(this.currentPolicy));
-    return observableOf({ success: true });
+    return observableOf({
+      success: true,
+      data: {
+        ...this.currentPolicy
+      }
+    });
   }
 
   validateGlobalLimitMin(): ValidatorFn {

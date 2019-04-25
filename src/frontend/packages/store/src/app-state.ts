@@ -15,7 +15,6 @@ import { IRecentlyVisitedState } from './types/recently-visited.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
 import { UsersRolesState } from './types/users-roles.types';
-import { UpdateAutoscalerPolicyState } from '../../core/src/custom/autoscaler/app-autoscaler.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
@@ -42,5 +41,4 @@ export interface AppState {
   currentUserRoles: ICurrentUserRolesState;
   userFavoritesGroups: IUserFavoritesGroupsState;
   recentlyVisited: IRecentlyVisitedState;
-  updateAutoscalerPolicy: UpdateAutoscalerPolicyState;
 }

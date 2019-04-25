@@ -1,31 +1,28 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { Component } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
+import { of as observableOf } from 'rxjs';
+
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import {
-  UpperOperators,
-  LowerOperators,
-  PolicyDefaultSetting,
-  MetricTypes,
-  getScaleType,
+  cloneObject,
   getAdjustmentType,
-  PolicyAlert,
-  PolicyDefaultTrigger,
+  getScaleType,
+  LowerOperators,
   MetricPercentageTypes,
-  cloneObject
+  MetricTypes,
+  PolicyAlert,
+  PolicyDefaultSetting,
+  PolicyDefaultTrigger,
+  UpperOperators,
 } from '../../autoscaler-helpers/autoscaler-util';
 import {
-  numberWithFractionOrExceedRange,
+  getThresholdMax,
   getThresholdMin,
-  getThresholdMax
+  numberWithFractionOrExceedRange,
 } from '../../autoscaler-helpers/autoscaler-validation';
-import { selectUpdateAutoscalerPolicyState } from '../../autoscaler.effects';
-import { UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.actions';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step2',
@@ -35,22 +32,21 @@ import { UpdateAppAutoscalerPolicyStepAction } from '../../app-autoscaler.action
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep2Component implements OnInit {
+export class EditAutoscalerPolicyStep2Component {
 
   policyAlert = PolicyAlert;
   metricTypes = MetricTypes;
   operatorTypes = UpperOperators.concat(LowerOperators);
   editTriggerForm: FormGroup;
-  appAutoscalerPolicy$: Observable<any>;
 
-  public currentPolicy: any;
+  public currentPolicy: AppAutoscalerPolicy;
+  public testing = false;
   private editIndex = -1;
   private editScaleType = 'upper';
   private editAdjustmentType = 'value';
 
   constructor(
     public applicationService: ApplicationService,
-    private store: Store<AppState>,
     private fb: FormBuilder,
   ) {
     this.editTriggerForm = this.fb.group({
@@ -70,13 +66,8 @@ export class EditAutoscalerPolicyStep2Component implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.appAutoscalerPolicy$ = this.store.select(selectUpdateAutoscalerPolicyState).pipe(
-      map(state => {
-        this.currentPolicy = state.policy;
-        return this.currentPolicy;
-      })
-    );
+  onEnter = (data: AppAutoscalerPolicy) => {
+    this.currentPolicy = data;
   }
 
   addTrigger = () => {
@@ -128,10 +119,10 @@ export class EditAutoscalerPolicyStep2Component implements OnInit {
     this.editIndex = -1;
   }
 
-  onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new UpdateAppAutoscalerPolicyStepAction(this.currentPolicy));
-    return observableOf({ success: true });
-  }
+  onNext: StepOnNextFunction = () => observableOf({
+    success: true,
+    data: { ...this.currentPolicy }
+  })
 
   validateTriggerMetricType(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
