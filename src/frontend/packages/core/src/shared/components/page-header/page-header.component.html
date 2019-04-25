@@ -44,10 +44,6 @@
             </mat-menu>
             <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button
               [matMenuTriggerFor]="menu">
-          </mat-icon>
-        </button>
-        <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button
-          [matMenuTriggerFor]="menu">
               <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
             </button>
             <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
