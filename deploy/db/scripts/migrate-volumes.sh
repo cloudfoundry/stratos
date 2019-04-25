@@ -4,7 +4,7 @@ echo "============================================"
 echo "Stratos Volume Migration"
 echo "============================================"
 echo ""
-echo "Migrating volume secrets to Kubernetes secrtets"
+echo "Migrating volume secrets to Kubernetes secrets"
 echo ""
 
 function waitForFile() {
