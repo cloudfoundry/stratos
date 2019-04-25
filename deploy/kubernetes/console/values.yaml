@@ -117,7 +117,7 @@ env:
   SMTP_PORT: "25"
 
 kube:
-  # Whether RBAC is enable in the Kubernetes cluster
+  # Whether RBAC is enabled in the Kubernetes cluster
   auth: "rbac"
   external_console_https_port: 8443
   storage_class:
