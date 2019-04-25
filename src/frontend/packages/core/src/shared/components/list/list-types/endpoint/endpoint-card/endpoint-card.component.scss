@@ -14,24 +14,28 @@
   }
 
   &__image {
-    height: 48px;
-    margin-right: 10px;
+    height: 100%;
+    width: auto;
 
-    &--img {
-      height: 100%;
-      width: auto;
+    &-wrapper {
+      height: 48px;
+      margin-right: 10px;
     }
   }
 
   &__title {
+    align-items: center;
     display: flex;
-    &__text {
+    // margin-top: 16px;
+    &-subtext {
+      font-size: 14px;
+      margin-top: 4px;
+      opacity: .6;
+    }
+    &-text {
       display: flex;
       flex-direction: column;
-      &--subtext {
-        font-size: 13px;
-        opacity: .6;
-      }
+      font-size: 16px;
     }
   }
 }

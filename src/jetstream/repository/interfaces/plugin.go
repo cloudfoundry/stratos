@@ -22,3 +22,8 @@ var JetstreamConfigPlugins []JetstreamConfigInit
 func RegisterJetstreamConfigPlugin(plugin JetstreamConfigInit) {
 	JetstreamConfigPlugins = append(JetstreamConfigPlugins, plugin)
 }
+
+// i is the interface for a Jetstream plugin
+type EndpointNotificationPlugin interface {
+	OnEndpointNotification(EndpointAction, *CNSIRecord)
+}

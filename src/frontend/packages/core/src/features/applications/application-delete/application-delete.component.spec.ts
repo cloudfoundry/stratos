@@ -1,12 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ApplicationDeleteComponent } from './application-delete.component';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationsModule } from '../applications.module';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
-import { entityFactory, applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { GetApplication } from '../../../../../store/src/actions/application.actions';
+import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { TabNavService } from '../../../../tab-nav.service';
+import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
+import { ApplicationsModule } from '../applications.module';
+import { CustomImportModule } from './../../../custom-import.module';
+import { ApplicationDeleteComponent } from './application-delete.component';
 
 describe('ApplicationDeleteComponent', () => {
   let component: ApplicationDeleteComponent<any>;
@@ -26,9 +28,13 @@ describe('ApplicationDeleteComponent', () => {
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),
+        TabNavService
       ]
-    })
-      .compileComponents();
+    }).overrideModule(ApplicationsModule, {
+      remove: {
+        imports: [CustomImportModule]
+      }
+    }).compileComponents();
   }));
 
   beforeEach(() => {

@@ -4,12 +4,14 @@
 <app-steppers [cancel]="'/endpoints'">
   <app-step [hideNextButton]="true">
     <div class="select-step">
-      <h3>Select the endpoint type</h3>
+      <h3>Select the type of the endpoint to register</h3>
+      <!--
       <p class="select-step__help">
         To access additional resources register a new endpoint. Most endpoints will require credentials that can
         be supplied during
         the 'Connecting' process. To do this return to the Endpoints page.
       </p>
+    -->
       <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
     </div>
   </app-step>

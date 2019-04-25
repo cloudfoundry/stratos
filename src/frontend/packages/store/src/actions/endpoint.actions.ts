@@ -121,6 +121,7 @@ export class UnregisterEndpoint extends EndpointAction {
 export class RegisterEndpoint extends EndpointAction {
   constructor(
     public endpointType: EndpointType,
+    public endpointSubType: string = null,
     public name: string,
     public endpoint: string,
     public skipSslValidation: boolean,

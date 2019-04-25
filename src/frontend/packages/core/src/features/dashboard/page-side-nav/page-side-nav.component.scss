@@ -1,0 +1,90 @@
+@import '../../../../sass/mixins';
+.page-side-nav {
+  $item-header-padding: 20px;
+  $border-color: rgba(0, 0, 0, .1);
+  border-right: 1px solid $border-color;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 200px;
+  z-index: 1;
+  @include breakpoint(tablet) {
+    border-bottom: 0;
+    height: 100%;
+    position: relative;
+  }
+  &:hover {
+    .page-side-nav__items {
+      display: block;
+    }
+  }
+  &__icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+  &__item {
+    align-items: center;
+    border-color: transparent;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    letter-spacing: .01em;
+    line-height: 18px;
+    outline: 0;
+    padding: 10px;
+    padding-left: $item-header-padding;
+    text-decoration: none;
+    mat-icon {
+      margin-right: 10px;
+      text-align: center;
+    }
+  }
+  &__items {
+    border-bottom: 1px solid $border-color;
+    display: none;
+    flex: 1;
+    list-style-type: none;
+    margin: 0;
+    overflow: auto;
+    padding: 0;
+
+    @include breakpoint(tablet) {
+      display: block;
+    }
+  }
+  &__items-header {
+    align-items: center;
+    border-bottom: 1px solid $border-color;
+    display: none;
+    font-weight: bold;
+    height: 48px;
+    opacity: .6;
+    overflow: hidden;
+    padding: 0 $item-header-padding;
+    position: relative;
+    @include breakpoint(tablet) {
+      display: flex;
+    }
+  }
+  &__breadcrumbs {
+    direction: ltr;
+  }
+  &__items-compact-header {
+    align-items: baseline;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    @include breakpoint(tablet) {
+      display: none;
+    }
+  }
+  &__items-compact-tab-label {
+    font-weight: bold;
+  }
+  &__items-compact-dropdown {
+    position: absolute;
+    right: 4px;
+  }
+}

@@ -15,6 +15,7 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
+import { CreateApplication } from './po/create-application.po';
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;

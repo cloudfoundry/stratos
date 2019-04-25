@@ -1,6 +1,35 @@
 <div>
-  <mat-icon *ngIf="row.connectionStatus === 'connected'" matTooltip="Connected">cloud_done</mat-icon>
-  <mat-icon *ngIf="row.connectionStatus === 'disconnected'" matTooltip="Disconnected">cloud_off</mat-icon>
-  <mat-spinner *ngIf="row.connectionStatus === 'checking'" diameter="20"></mat-spinner>
-  <mat-icon *ngIf="!row.connectionStatus || row.connectionStatus === 'unknown'">help_outline</mat-icon>
+  <ng-container *ngIf="connectable; else notConnectable">
+    <ng-container *ngIf="row.connectionStatus === 'connected'">
+      <span *ngIf="config?.showLabel">Connected </span>
+      <mat-icon>cloud_done</mat-icon>
+    </ng-container>
+    <ng-container *ngIf="row.connectionStatus === 'disconnected'">
+      <span *ngIf="config?.showLabel">Disconnected </span>
+      <mat-icon>cloud_off</mat-icon>
+    </ng-container>
+    <ng-container *ngIf="row.connectionStatus === 'checking'">
+      <span *ngIf="config?.showLabel">Updating </span>
+      <mat-spinner diameter="20"></mat-spinner>
+    </ng-container>
+    <ng-container *ngIf="!row.connectionStatus || row.connectionStatus === 'unknown'">
+      <span *ngIf="config?.showLabel">Unknown </span>
+      <mat-icon>help_outline</mat-icon>
+    </ng-container>
+  </ng-container>
+  <ng-template #notConnectable>
+    <ng-container *ngIf="row?.endpoint_metadata?.status as status; else noStatus">
+      <ng-container *ngIf="status === 'Synchronized'">
+        <span *ngIf="config?.showLabel">Synchronized </span>
+        <mat-icon>cloud_done</mat-icon>
+      </ng-container>
+      <ng-container *ngIf="status === 'Synchronizing'">
+        <span *ngIf="config?.showLabel">Synchronizing </span>
+        <mat-spinner diameter="20"></mat-spinner>
+      </ng-container>
+    </ng-container>
+    <ng-template #noStatus>
+      -
+    </ng-template>
+  </ng-template>
 </div>

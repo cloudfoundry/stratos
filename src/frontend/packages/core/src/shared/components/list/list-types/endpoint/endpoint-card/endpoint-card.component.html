@@ -1,15 +1,21 @@
-<app-page-header-events class="endpoint-warning" [endpointIds$]="endpointIds$" [simpleErrorMessage]="true"></app-page-header-events>
+<app-page-header-events class="endpoint-warning" [endpointIds$]="endpointIds$" [simpleErrorMessage]="true">
+</app-page-header-events>
 <app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
-  [ngClass]="{'no-link': !endpointLink }" [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$" [statusIcon]="false"
-  [statusBackground]="true">
+  [ngClass]="{'no-link': !endpointLink }" [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$"
+  [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
-      <div *ngIf="!!endpointConfig && endpointConfig.imagePath" class="endpoint-card__image">
-        <img class="endpoint-card__image--img" src="{{endpointConfig.imagePath}}" />
+      <div *ngIf="!!endpointConfig && endpointConfig.imagePath" class="endpoint-card__image-wrapper">
+        <img class="endpoint-card__image" src="{{endpointConfig.imagePath}}" />
       </div>
-      <div class="endpoint-card__title__text">
+      <div class="endpoint-card__title-text">
         <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
-        <div class="endpoint-card__title__text--subtext">{{!endpointConfig ? 'Unknown' : endpointConfig.label}}</div>
+        <div class="endpoint-card__title-subtext">{{!endpointConfig ? 'Unknown' : endpointConfig.label}}
+          <!--
+          <ng-container *ngIf="endpointParentType">
+            ({{ endpointParentType }})</ng-container>
+          -->
+        </div>
       </div>
     </div>
   </app-meta-card-title>
@@ -17,6 +23,13 @@
     <app-meta-card-key>Status</app-meta-card-key>
     <app-meta-card-value>
       <app-table-cell-endpoint-status [row]="row"></app-table-cell-endpoint-status>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="row.system_shared_token">
+    <app-meta-card-key>Shared Connection</app-meta-card-key>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="true" type="yes-no" [showText]="false"
+        matTooltip="This endpoint's connection is shared by the administrator"></app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>

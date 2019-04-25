@@ -97,7 +97,7 @@ export class UserProfileEffect {
         }));
     }));
 
-  @Effect() updateUserPrassword$ = this.actions$.pipe(
+  @Effect() updateUserPassword$ = this.actions$.pipe(
     ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD),
     mergeMap(action => {
       const apiAction = {

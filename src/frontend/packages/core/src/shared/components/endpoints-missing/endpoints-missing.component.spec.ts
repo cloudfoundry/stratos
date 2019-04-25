@@ -1,10 +1,12 @@
-import { CoreModule } from '../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { EndpointsMissingComponent } from './endpoints-missing.component';
 import { RouterTestingModule } from '@angular/router/testing';
+
+import { cloudFoundryEndpointTypes } from '../../../../../cloud-foundry/src/cloud-foundry.module';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../core/core.module';
+import { initEndpointTypes } from '../../../features/endpoints/endpoint-helpers';
 import { SharedModule } from '../../shared.module';
+import { EndpointsMissingComponent } from './endpoints-missing.component';
 
 describe('EndpointsMissingComponent', () => {
   let component: EndpointsMissingComponent;
@@ -20,6 +22,7 @@ describe('EndpointsMissingComponent', () => {
       ]
     })
       .compileComponents();
+    initEndpointTypes(cloudFoundryEndpointTypes);
   }));
 
   beforeEach(() => {

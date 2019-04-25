@@ -18,8 +18,7 @@ import { EndpointTypeConfig } from '../../../../core/extension/extension-types';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 import { ConnectEndpointConfig } from '../../connect.service';
-import { getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
-
+import { getEndpointType, getFullEndpointApiUrl } from '../../endpoint-helpers';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -70,8 +69,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         })
       );
 
-    const endpointType = getIdFromRoute(activatedRoute, 'type');
-    this.endpoint = getEndpointTypes().find(e => e.value === endpointType);
+    const epType = getIdFromRoute(activatedRoute, 'type');
+    const epSubType = getIdFromRoute(activatedRoute, 'subtype');
+    this.endpoint = getEndpointType(epType, epSubType);
     this.setUrlValidation(this.endpoint);
 
     // Client Redirect URI for SSO
@@ -81,7 +81,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   onNext: StepOnNextFunction = () => {
     const action = new RegisterEndpoint(
-      this.endpoint.value,
+      this.endpoint.type,
+      this.endpoint.subType,
       this.nameField.value,
       this.urlField.value,
       !!this.skipSllField.value,
@@ -103,7 +104,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         const data: ConnectEndpointConfig = {
           guid: result.message,
           name: this.nameField.value,
-          type: this.endpoint.value,
+          type: this.endpoint.type,
+          subType: this.endpoint.subType,
           ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
         };
         if (!result.error) {
@@ -141,9 +143,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
   setAdvancedFields(endpoint: EndpointTypeConfig) {
-    this.showAdvancedFields = endpoint.value === 'cf';
+    this.showAdvancedFields = endpoint.type === 'cf';
 
     // Only allow SSL if the endpoint type is Cloud Foundry
-    this.endpointTypeSupportsSSO = endpoint.value === 'cf';
+    this.endpointTypeSupportsSSO = endpoint.type === 'cf';
   }
 }
