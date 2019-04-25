@@ -70,8 +70,13 @@ import {
     EditAutoscalerPolicyStep3Component,
     EditAutoscalerPolicyStep4Component,
     CardAutoscalerDefaultComponent,
+    AppAutoscalerMetricChartCardComponent,
+    AppAutoscalerComboChartComponent,
+    AppAutoscalerComboSeriesVerticalComponent,
+    TableCellAutoscalerEventChangeComponent,
+    TableCellAutoscalerEventStatusComponent,
     TableCellAutoscalerEventStatusIconPipe,
-    TableCellAutoscalerEventChangeIconPipe
+    TableCellAutoscalerEventChangeIconPipe,
   ],
   exports: [
     CardAutoscalerDefaultComponent
