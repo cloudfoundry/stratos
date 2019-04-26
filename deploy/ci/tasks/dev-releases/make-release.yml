@@ -177,6 +177,17 @@ run:
         cd ${HELM_RELEASE_REPO_FOLDER}
         cp ${ROOT_DIR}/helm-chart/${HELM_FILE} .
         tar -xvf ${HELM_FILE}
+
+        # Patch the registry hostname and org if needed
+        if [ ! -z "${HELM_RELEASE_REGISTRY_HOST}" ]; then
+          echo "Patching Helm Chart Docker Registry and Organisation"
+          cat ./console/values.yaml
+          sed -i -e 's/hostname: '"${DOCKER_REG}"'/hostname: '"${HELM_RELEASE_REGISTRY_HOST}"'/g' ./console/values.yaml
+          sed -i -e 's/organization: '"${DOCKER_ORG}"'/organization: '"${HELM_RELEASE_REGISTRY_ORG}"'/g' ./console/values.yaml
+          echo "Updated Chart..."
+          cat ./console/values.yaml
+        fi
+
         rm -rf ./${HELM_FILE}
         git add -A
         git status
