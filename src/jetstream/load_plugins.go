@@ -6,7 +6,9 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundryhosting"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/demo"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/metrics"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinfo"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinvite"
@@ -32,6 +34,8 @@ func (pp *portalProxy) loadPlugins() {
 		{"userinfo", userinfo.Init},
 		// userinvite depends on cloudfoundry & cloudfoundryhosting
 		{"userinvite", userinvite.Init},
+		{"kubernetes", kubernetes.Init},
+		{"monocular", monocular.Init},
 		{"userfavorites", userfavorites.Init},
 		{"demo", demo.Init},
 	} {

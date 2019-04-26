@@ -6,7 +6,6 @@ files:
   login-bg.jpg: "assets/login-bg.jpg"
   logo.png: "assets/logo.png"
   nav-logo.png: "assets/nav-logo.png"
-  nav-logo-icon.png: "assets/nav-logo-icon.png"
   eula.html: "assets/eula.html" 
 
 folders:

@@ -1,10 +1,4 @@
 import {
-  SetSessionTimeoutAction,
-  TIMEOUT_SESSION,
-  HYDRATE_DASHBOARD_STATE,
-  HydrateDashboardStateAction
-} from './../actions/dashboard-actions';
-import {
   CHANGE_SIDE_NAV_MODE,
   CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
@@ -17,6 +11,12 @@ import {
   TOGGLE_HEADER_EVENT,
   TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
+import {
+  HYDRATE_DASHBOARD_STATE,
+  HydrateDashboardStateAction,
+  SetSessionTimeoutAction,
+  TIMEOUT_SESSION,
+} from './../actions/dashboard-actions';
 
 export interface DashboardState {
   timeoutSession: boolean;

@@ -3,7 +3,7 @@ import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map, tap, publishReplay, refCount } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
@@ -13,11 +13,12 @@ import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { TabNavService } from '../../../../tab-nav.service';
+import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import { StratosStatus } from '../../shared.types';
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { GlobalEventService, IGlobalEvent, GlobalEventTypes } from '../../global-events.service';
-import { StratosStatus } from '../../shared.types';
+import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 
 @Component({
   selector: 'app-page-header',
@@ -30,6 +31,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
   private pTabs: ISubHeaderTabs[];
+
+  public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
   @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
 
@@ -123,12 +126,12 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }) || breadcrumbs[0];
   }
 
-  toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
-  }
-
   logout() {
     this.store.dispatch(new Logout());
+  }
+
+  public toggleSidenav() {
+    this.store.dispatch(new ToggleSideNav());
   }
 
   constructor(
