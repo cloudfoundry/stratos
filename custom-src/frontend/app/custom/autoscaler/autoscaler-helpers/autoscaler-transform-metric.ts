@@ -1,12 +1,6 @@
 import * as moment from 'moment';
-import {
-  getScaleType,
-  metricMap,
-  S2NS,
-  MomentFormateTimeS,
-  normalColor,
-  MetricPercentageTypes
-} from './autoscaler-util';
+
+import { getScaleType, metricMap, MetricPercentageTypes, MomentFormateTimeS, normalColor, S2NS } from './autoscaler-util';
 
 function initMeticData(metricName) {
   return {
@@ -249,7 +243,7 @@ function getChartMax(trigger, maxValue) {
     thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));
   }
   thresholdmax = Math.max(maxValue, thresholdmax, 10);
-  thresholdmax = getTrimedInteger(getTrimedInteger);
+  thresholdmax = getTrimedInteger(thresholdmax);
   return thresholdmax;
 }
 
