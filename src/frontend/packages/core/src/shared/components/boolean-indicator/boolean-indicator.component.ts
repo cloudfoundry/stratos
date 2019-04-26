@@ -81,7 +81,6 @@ export class BooleanIndicatorComponent {
       };
     }
     const text = this.getText({ isTrue, inverse });
-    console.log(text, inverse, isTrue)
     return {
       icon: this.icons[text],
       text,
