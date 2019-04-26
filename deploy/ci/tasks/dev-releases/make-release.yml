@@ -185,7 +185,7 @@ run:
         TITLE="Stratos Release ${VERSION}"
 
         curl --fail -H "Content-Type: application/json" -H "Authorization: token ${GITHUB_TOKEN}" \
-        -d '{"title":"'"${TITLE}"'", "head": "'"${GIT_BRANCH}"'", "base": "'"${HELM_RELEASE_REPO_BRANCH}"'"}' ${URL}
+        -d '{"title":"'"${TITLE}"'", "head": "'"${HELM_RELEASE_REPO_BRANCH}"'", "base": "'"${HELM_RELEASE_REPO_BRANCH}"'"}' ${URL}
       fi
 
       set +e
