@@ -3,7 +3,7 @@ import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
@@ -21,7 +21,12 @@ import { GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.ac
 import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 import { KubernetesPod } from './../../store/kube.types';
 import { GetKubernetesApps } from './../../store/kubernetes.actions';
-
+interface IValueLabels {
+  usedLabel?: string;
+  remainingLabel?: string;
+  unknownLabel?: string;
+  warningText?: string;
+}
 interface IEndpointDetails {
   imagePath: string;
   label: string;
@@ -136,24 +141,36 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     );
   }
 
-  private getNodeStatusCount(nodes$: Observable<KubernetesNode[]>, conditionType: string, countStatus = 'False') {
+  private getNodeStatusCount(
+    nodes$: Observable<KubernetesNode[]>,
+    conditionType: string,
+    valueLabels: IValueLabels = {},
+    countStatus = 'True'
+  ) {
     return nodes$.pipe(
       map(nodes => {
-        const result = {
-          total: nodes.length,
-          supported: true,
-          // Depends on K8S version as to what is supported
-          unavailable: nodes.reduce((cap, node) => {
-            const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
-            return !conditionStatus ? ++cap : cap;
-          }, 0),
-          used: nodes.reduce((cap, node) => {
-            const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
-            if (!conditionStatus || !conditionStatus.status || conditionStatus.status === countStatus) {
-              return cap;
+        const total = nodes.length;
+        const { unknown, unavailable, used } = nodes.reduce((cap, node) => {
+          const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
+          if (!conditionStatus || !conditionStatus.status) {
+            ++cap.unavailable;
+          } else {
+            if (conditionStatus.status === countStatus) {
+              ++cap.used;
+            } else if (conditionStatus.status === 'Unknown') {
+              ++cap.unknown;
             }
-            return ++cap;
-          }, 0)
+          }
+          return cap;
+        }, { unavailable: 0, used: 0, unknown: 0 });
+        const result = {
+          total,
+          supported: total !== unavailable,
+          // Depends on K8S version as to what is supported
+          unavailable,
+          used,
+          unknown,
+          ...valueLabels
         };
         result.supported = result.total !== result.unavailable;
         return result;
@@ -192,12 +209,36 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     this.appCount$ = this.getCountObservable(applications$);
 
     this.podCapacity$ = this.getPodCapacity(nodes$, pods$);
-    this.diskPressure$ = this.getNodeStatusCount(nodes$, 'DiskPressure');
-    this.memoryPressure$ = this.getNodeStatusCount(nodes$, 'MemoryPressure');
-    this.outOfDisk$ = this.getNodeStatusCount(nodes$, 'OutOfDisk');
-    this.networkUnavailable$ = this.getNodeStatusCount(nodes$, 'NetworkUnavailable', 'True');
-    this.nodesReady$ = this.getNodeStatusCount(nodes$, 'Ready');
-
+    this.diskPressure$ = this.getNodeStatusCount(nodes$, 'DiskPressure', {
+      usedLabel: 'Nodes with disk pressure',
+      remainingLabel: 'Nodes with no disk pressure',
+      unknownLabel: 'Nodes with unknown disk pressure',
+      warningText: 'Nodes with unknown disk pressure found'
+    });
+    this.memoryPressure$ = this.getNodeStatusCount(nodes$, 'MemoryPressure', {
+      usedLabel: 'Nodes with memory pressure',
+      remainingLabel: 'Nodes with no memory pressure',
+      unknownLabel: 'Nodes with unknown memory pressure',
+      warningText: 'Nodes with unknown memory pressure found'
+    });
+    this.outOfDisk$ = this.getNodeStatusCount(nodes$, 'OutOfDisk', {
+      usedLabel: 'Nodes that are out of disk space',
+      remainingLabel: 'Nodes that have disk space remaining',
+      unknownLabel: 'Nodes with unknown remaining disk space',
+      warningText: 'Nodes with unknown remaining disk space found'
+    });
+    this.networkUnavailable$ = this.getNodeStatusCount(nodes$, 'NetworkUnavailable', {
+      usedLabel: 'Nodes with available networks',
+      remainingLabel: 'Nodes with unavailable networks',
+      unknownLabel: 'Nodes with unknown networks availability',
+      warningText: 'Nodes with unknown networks availability found'
+    }, 'False');
+    this.nodesReady$ = this.getNodeStatusCount(nodes$, 'Ready', {
+      usedLabel: 'Nodes are ready',
+      remainingLabel: 'Nodes are not ready',
+      unknownLabel: 'Nodes with unknown ready status',
+      warningText: `Nodes with unknown ready status found`
+    });
     this.dashboardLink = `/kubernetes/${guid}/dashboard`;
 
     this.kubeNodeVersions$ = this.getNodeKubeVersions(nodes$).pipe(startWith('-'));

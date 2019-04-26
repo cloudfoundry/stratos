@@ -52,6 +52,7 @@ import {
 import {
   ConditionCellComponent,
   InverseConditionCellComponent,
+  SubtleConditionCellComponent
 } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 import {
   KubernetesNodeCapacityComponent,
@@ -135,6 +136,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNodeSimpleMetricComponent,
     ConditionCellComponent,
     InverseConditionCellComponent,
+    SubtleConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubernetesNamespaceComponent,
     KubernetesNamespacePodsComponent,
@@ -162,6 +164,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNodeLinkComponent,
     ConditionCellComponent,
     InverseConditionCellComponent,
+    SubtleConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubeAppcreatedDateComponent,
     KubeNamespacePodCountComponent,

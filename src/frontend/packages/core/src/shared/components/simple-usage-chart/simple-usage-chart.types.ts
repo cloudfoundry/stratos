@@ -7,6 +7,12 @@
 export interface ISimpleUsageChartData {
   total: number;
   used: number;
+  unknown?: number;
+  usedLabel?: string;
+  remainingLabel?: string;
+  unknownLabel?: string;
+  // Will show on hover when one or more unknown values are found.
+  warningText?: string;
 }
 /**
  * The % usage thresholds at which to show the various colors on the chart.
@@ -31,7 +37,7 @@ export interface IChartThresholds {
  * @export
  */
 export interface IUsageColor {
-  domain: [string, string];
+  domain: [string, string, string];
 }
 
 /**
@@ -43,13 +49,19 @@ export interface IChartData {
   colors: IUsageColor;
   total: number;
   used: number;
+  unknown: number;
+  warningText: string;
   results: [
     {
-      name: 'Used',
+      name: string,
       value: number
     },
     {
-      name: 'Remaining',
+      name: string,
+      value: number
+    },
+    {
+      name: string,
       value: number
     }
   ];

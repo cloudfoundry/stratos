@@ -8,7 +8,7 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { ConditionType, KubernetesNode } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { getConditionSort } from '../kube-sort.helper';
-import { ConditionCellComponent, InverseConditionCellComponent } from './condition-cell/condition-cell.component';
+import { ConditionCellComponent, SubtleConditionCellComponent } from './condition-cell/condition-cell.component';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
 import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
@@ -41,7 +41,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     },
     {
       columnId: 'diskPressure', headerCell: () => 'Disk Pressure',
-      cellComponent: InverseConditionCellComponent,
+      cellComponent: SubtleConditionCellComponent,
       cellConfig: {
         conditionType: ConditionType.DiskPressure
       },
@@ -50,7 +50,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     },
     {
       columnId: 'memPressure', headerCell: () => 'Memory Pressure',
-      cellComponent: InverseConditionCellComponent,
+      cellComponent: SubtleConditionCellComponent,
       cellConfig: {
         conditionType: ConditionType.MemoryPressure
       },
