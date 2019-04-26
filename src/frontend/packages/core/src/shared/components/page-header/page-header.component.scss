@@ -9,6 +9,9 @@ $bottom-index: $top-index - 1;
   &__toolbar {
     padding: 0 20px;
   }
+  &__notification-button {
+    margin-right: 5px;
+  }
   &__notifications-button {
     display: inline-block;
   }

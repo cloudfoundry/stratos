@@ -23,7 +23,6 @@ export class LoggedInService {
   ) {
   }
 
-  private auth: AuthState;
   private userInteractionChecker: Subscription;
 
   private lastUserInteraction = Date.now();
