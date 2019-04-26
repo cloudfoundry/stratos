@@ -4,6 +4,8 @@ inputs:
 - name: stratos
 - name: image-tag
 - name: helm-repo
+outputs:
+- name: helm-chart
 image_resource:
   type: docker-image
   source:
@@ -100,6 +102,9 @@ run:
       HELM_FILE=console-helm-chart-${VERSION}-${COMMIT}.tgz
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/${HELM_FILE}
+      
+      # Temp folder for helm-chart
+      mkdir -p ${ROOT_DIR}/helm-chart
 
       # Add helm chart to the helm repository
       cd ${ROOT_DIR}/helm-chart/
@@ -154,10 +159,26 @@ run:
       fi
 
       set +e
+      set +x
 
-      echo "RELEASE COMPLETE"
+      echo "=================================================================================================================="
+      echo ""
+      echo "RELEASE COMPLETE ================================================================================================="
+      echo ""
       echo "Version      : ${VERSION}"
       echo "Base Version : ${LAST_TAG}"
       echo ""
       echo "Helm Chart filename : ${HELM_FILE}"
       echo "Helm Chart URL      : https://github.com/${HELM_REPOSITORY}/releases/download/${VERSION}/${HELM_FILE}"
+      echo ""
+      echo "=================================================================================================================="
+
+      # If we have a mirror URL for the Helm Chart then output that at the end
+      if [ ! -z "${HELM_MIRROR_BASE_URL}" ]; then
+        echo ""
+        echo "=================================================================================================================="
+        echo "Helm Chart will be mirrored to:"
+        echo "${HELM_MIRROR_BASE_URL}${HELM_FILE}"
+        echo "=================================================================================================================="
+      fi
+
