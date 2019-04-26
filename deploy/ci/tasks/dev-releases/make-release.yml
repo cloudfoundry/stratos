@@ -149,7 +149,7 @@ run:
       github-release release -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG} --description "${RELEASE_DESCRIPTION}"
 
       # Upload Helm chart to release
-      github-release upload -t ${VERSION} --file ./tmp/${HELM_FILE} --name "${HELM_FILE}"
+      github-release upload -t ${VERSION} --file ${ROOT_DIR}/helm-chart/${HELM_FILE} --name "${HELM_FILE}"
 
       # Create a release if the source repo is not the same as the helm repo
       if [ "${SOURCE_REPO}" != "${ARTIFACT_REPO}" ]; then
