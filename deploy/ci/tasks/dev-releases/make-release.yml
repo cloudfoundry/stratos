@@ -21,6 +21,9 @@ run:
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
       source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
+
+      SOURCE_REPO=${SOURCE_REPO_ORG}/${SOURCE_REPO_REPO}
+      ARTIFACT_REPO=${GITHUB_ORG}/${GITHUB_REPO}
       
       HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
       GIT_TAG=$(cat image-tag/v2-alpha-tag)
@@ -50,6 +53,16 @@ run:
       fi
 
       echo "Making release"
+
+      # Check to see if the release tag already exists - if so, abort - we won't re-release
+      set +e
+      github-release info -t ${VERSION}
+      RETVAL=$?
+      set -e
+      if [ $RETVAL -eq 0 ]; then
+        echo "Release already exists... aborting"
+        exit 1
+      fi
 
       # Delete Stable release on GitHub and recreate it again
       # This ensures it has the correct date/time and appears in the correct place in the release history
@@ -132,6 +145,13 @@ run:
 
       # Upload Helm chart to release
       github-release upload -t ${VERSION} --file ./tmp/${HELM_FILE} --name "${HELM_FILE}"
+
+      # Create a release if the source repo is not the same as the helm repo
+      if [ "${SOURCE_REPO}" != "${ARTIFACT_REPO}" ]; then
+        echo "Creating release in GitHub Repository: ${SOURCE_REPO}"
+        # Create new release in the source repository
+        github-release release --user ${SOURCE_REPO_ORG} --repo ${SOURCE_REPO_REPO} -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG} --description "${RELEASE_DESCRIPTION}"
+      fi
 
       set +e
 
