@@ -57,7 +57,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       map(() => this.isNoMarginView(this.activatedRoute.snapshot)),
       startWith(this.isNoMarginView(this.activatedRoute.snapshot))
     );
-    this.isMobile$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
+    this.isMobile$ = this.breakpointObserver.observe(Breakpoints.HandsetPortrait).pipe(
       map(breakpoint => breakpoint.matches),
       startWith(false),
       distinctUntilChanged()
