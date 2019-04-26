@@ -20,8 +20,9 @@ export class ConditionCellComponent extends TableCellCustom<KubernetesNode> impl
   }
 
   ngOnInit() {
-    const condition = this.row.status.conditions.filter(c => c.type === this.config.conditionType)[0];
-    if (condition) {
+    const conditions = this.row.status.conditions.filter(c => c.type === this.config.conditionType);
+    if (conditions && conditions.length) {
+      const condition = conditions[0];
       switch (condition.status) {
         case 'True':
           this.isTrue = true;
