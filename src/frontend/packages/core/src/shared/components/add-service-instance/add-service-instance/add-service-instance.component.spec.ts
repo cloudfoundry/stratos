@@ -78,7 +78,6 @@ describe('AddServiceInstanceComponent', () => {
         MultilineTitleComponent,
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
-        StatefulIconComponent,
         FocusDirective,
         SpecifyUserProvidedDetailsComponent
       ],
@@ -86,7 +85,6 @@ describe('AddServiceInstanceComponent', () => {
         PageHeaderModule,
         SteppersModule,
         MaterialDesignFrameworkModule,
-        // CoreModule,
         BaseTestModulesNoShared
       ],
       providers: [
