@@ -188,8 +188,10 @@ spec:
           value: cf
         - name: CONSOLE_CLIENT_SECRET
           value:
+        {{- if .Values.env.DOMAIN }}  
         - name: AUTO_REG_CF_URL
           value: https://api.{{.Values.env.DOMAIN}}
+        {{- end }}
         - name: CONSOLE_ADMIN_SCOPE 
           value: cloud_controller.admin
         - name: SKIP_SSL_VALIDATION 
