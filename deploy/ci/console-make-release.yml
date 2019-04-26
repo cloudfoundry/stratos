@@ -73,4 +73,6 @@ jobs:
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
+        SOURCE_REPO_ORG: ((stratos-repository-organization))
+        SOURCE_REPO_REPO: ((stratos-repository))
 
