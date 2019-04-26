@@ -5,5 +5,6 @@
       <span class="kube-node-condition__title__span">{{ titles[condition] }}</span>
     </div>
   </div>
-  <app-boolean-indicator class="kube-node-condition__indicator" [subtle]="false" [inverse]="inverse" [isTrue]="(condition$ | async)?.status == 'True'" type="yes-no"></app-boolean-indicator>
+  <app-boolean-indicator class="kube-node-condition__indicator" [subtle]="subtle" [inverse]="inverse"
+    [isTrue]="condition$ | async" type="yes-no"></app-boolean-indicator>
 </div>

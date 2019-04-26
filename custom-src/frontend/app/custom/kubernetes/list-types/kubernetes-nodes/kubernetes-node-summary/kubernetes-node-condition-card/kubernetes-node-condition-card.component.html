@@ -6,9 +6,12 @@
     <mat-card-content>
       <div class="kubernetes-node-summary-card__content">
         <app-kubernetes-node-condition condition="Ready"></app-kubernetes-node-condition>
-        <app-kubernetes-node-condition [inverse]="true" condition="MemoryPressure"></app-kubernetes-node-condition>
-        <app-kubernetes-node-condition [inverse]="true" condition="DiskPressure"></app-kubernetes-node-condition>
-        <app-kubernetes-node-condition [inverse]="true" condition="OutOfDisk"></app-kubernetes-node-condition>
+        <app-kubernetes-node-condition [inverse]="true" [subtle]="true" condition="MemoryPressure">
+        </app-kubernetes-node-condition>
+        <app-kubernetes-node-condition [inverse]="true" [subtle]="true" condition="DiskPressure">
+        </app-kubernetes-node-condition>
+        <app-kubernetes-node-condition [inverse]="true" [subtle]="true" condition="OutOfDisk">
+        </app-kubernetes-node-condition>
       </div>
     </mat-card-content>
   </mat-card>

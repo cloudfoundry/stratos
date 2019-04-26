@@ -15,10 +15,13 @@ export class KubernetesNodeConditionComponent implements OnInit {
 
   @Input()
   condition: ConditionType;
-  condition$: Observable<Condition>;
+  condition$: Observable<boolean>;
 
   @Input()
   inverse = false;
+
+  @Input()
+  subtle = false;
 
   public titles = {
     Ready: 'Ready',
@@ -42,14 +45,13 @@ export class KubernetesNodeConditionComponent implements OnInit {
     this.condition$ = this.kubeNodeService.node$.pipe(
       filter(p => !!p && !!p.entity),
       map(p => p.entity.status.conditions),
-      map(conditions => conditions.filter(o => o.type === this.condition)[0])
+      map(conditions => conditions.filter(o => o.type === this.condition)),
+      filter(conditions => !!conditions.length),
+      map(conditions => this.shouldBeGreen(conditions[0]))
     );
   }
 
   shouldBeGreen(condition: Condition) {
-    if (!condition) {
-      return false;
-    }
     if (condition.status === 'True') {
       if (condition.type === ConditionType.Ready) {
         return true;
