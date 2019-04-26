@@ -1,4 +1,4 @@
-<nav class="page-side-nav">
+<nav class="page-side-nav" [ngClass]="{'page-side-nav__desktop': !(isMobile$ | async)}">
   <div class="page-side-nav__items-header">
     {{ header }}
   </div>
