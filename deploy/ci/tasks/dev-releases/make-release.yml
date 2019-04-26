@@ -182,7 +182,7 @@ run:
         if [ ! -z "${HELM_RELEASE_REGISTRY_HOST}" ]; then
           echo "Patching Helm Chart Docker Registry and Organisation"
           cat ./console/values.yaml
-          sed -i -e 's/hostname: '"${DOCKER_REG}"'/hostname: '"${HELM_RELEASE_REGISTRY_HOST}"'/g' ./console/values.yaml
+          sed -i -e 's/hostname: '"${DOCKER_REGISTRY}"'/hostname: '"${HELM_RELEASE_REGISTRY_HOST}"'/g' ./console/values.yaml
           sed -i -e 's/organization: '"${DOCKER_ORG}"'/organization: '"${HELM_RELEASE_REGISTRY_ORG}"'/g' ./console/values.yaml
           echo "Updated Chart..."
           cat ./console/values.yaml
