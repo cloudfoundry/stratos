@@ -37,8 +37,10 @@ run:
 
       cd ${ROOT_DIR}/stratos
 
-      # Set git username and password so that we can push changes
+      # Set git username and password so that we can push changes (Don't log)
+      set +x
       setupGitConfig
+      set -x
 
       # $VERSION is version number - e.g. 2.3.0
       # Find the last tag created for this release tag
@@ -117,7 +119,9 @@ run:
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${RELEASE_VERSION}/
       cp index.yaml ${HELM_REPO}
       cd ${HELM_REPO}
+      set +x
       setupAndPushChange
+      set -x
 
       # Tag the repo and create the release on GitHub
       cd ${ROOT_DIR}/stratos
