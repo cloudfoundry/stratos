@@ -5,7 +5,9 @@
         <app-stratos-title></app-stratos-title>
         <p class="uaa-wizard__intro">Welcome to Stratos</p>
         <p>
-          Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
+          Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and
+          administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management
+          tasks.
         </p>
         <p>Before accessing Stratos for the first time some configuration information is required.</p>
 
@@ -14,7 +16,8 @@
     </app-step>
     <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
       <div class="uaa-wizard__form">
-        <p class="uaa-wizard__form-section">Please enter the following information to allow Stratos to authenticate with your UAA:</p>
+        <p class="uaa-wizard__form-section">Please enter the following information to allow Stratos to authenticate with
+          your UAA:</p>
         <form class="uaa-wizard__form" [formGroup]="uaaForm" class="stepper-form">
           <div class="uaa-wizard__form-block">
             <mat-form-field>
@@ -28,7 +31,8 @@
               <input matInput formControlName="clientSecret" placeholder="Client Secret">
             </mat-form-field>
           </div>
-          <p class="uaa-wizard__form-section">Enter the username and password of an admin user (this is used to retrieve scope metadata)</p>
+          <p class="uaa-wizard__form-section">Enter the username and password of an admin user (this is used to retrieve
+            scope metadata)</p>
           <div class="uaa-wizard__form-block">
             <mat-form-field>
               <input matInput formControlName="adminUsername" placeholder="Admin Username">
@@ -40,8 +44,10 @@
           <!-- Single Sign-on -->
           <p class="uaa-wizard__form-section">UAA Single Sign On (SSO)</p>
           <div class="uaa-wizard__form-block">
-            <mat-checkbox matInput formControlName="useSSO">Use SSO (Use the UAA's UI to login rather than the Stratos login UI)</mat-checkbox>
-            <p *ngIf="uaaForm.value.useSSO" class="uaa-wizard__sso-block">You must ensure that the client specified above has its 'redirect_uri' configured to include the Stratos SSO Callback URL:
+            <mat-checkbox matInput formControlName="useSSO">Use SSO (Use the UAA's UI to login rather than the Stratos
+              login UI)</mat-checkbox>
+            <p *ngIf="uaaForm.value.useSSO" class="uaa-wizard__sso-block">You must ensure that the client specified
+              above has its 'redirect_uri' configured to include the Stratos SSO Callback URL:
               <code>{{ clientRedirectURI }}</code>
             </p>
           </div>
@@ -50,7 +56,8 @@
       </div>
     </app-step>
     <app-step title="Stratos Admin Scope" [onNext]="uaaScopeNext">
-      <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration" text="Please wait - this will take a few moments">
+      <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
+        text="Please wait - this will take a few moments">
         <div class="uaa-wizard__form">
           <p>Please select the UAA scope to use to identify users as Stratos Administrators:</p>
           <form class="stepper-form">
@@ -67,6 +74,6 @@
     </app-step>
   </app-steppers>
 </div>
-<app-page-header hideSideNavButton="true" hideMenu="true">
+<app-page-header hideMenu="true">
   <h1>Stratos Setup</h1>
 </app-page-header>

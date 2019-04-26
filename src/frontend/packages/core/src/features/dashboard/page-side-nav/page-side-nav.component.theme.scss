@@ -14,8 +14,13 @@
 
   .page-side-nav {
     background-color: $background-color;
-    @include breakpoint(tablet) {
+    &__desktop {
       background-color: $darker-background-color;
+      .page-side-nav__items-header {
+        &::before {
+          background: gradient-generator($darker-background-color);
+        }
+      }
     }
     &__item {
       color: rgba(0, 0, 0, .6);
@@ -27,9 +32,6 @@
     &__items-header {
       &::before {
         background: gradient-generator($background-color);
-        @include breakpoint(tablet) {
-          background: gradient-generator($darker-background-color);
-        }
       }
     }
   }

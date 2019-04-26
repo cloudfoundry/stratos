@@ -8,11 +8,6 @@
   position: absolute;
   width: 200px;
   z-index: 1;
-  @include breakpoint(tablet) {
-    border-bottom: 0;
-    height: 100%;
-    position: relative;
-  }
   &:hover {
     .page-side-nav__items {
       display: block;
@@ -48,37 +43,30 @@
     margin: 0;
     overflow: auto;
     padding: 0;
-
-    @include breakpoint(tablet) {
-      display: block;
-    }
   }
-  &__items-header {
-    align-items: center;
+  %base-item-header {
     border-bottom: 1px solid $border-color;
-    display: none;
     font-weight: bold;
     height: 48px;
     opacity: .6;
     overflow: hidden;
     padding: 0 $item-header-padding;
     position: relative;
-    @include breakpoint(tablet) {
-      display: flex;
-    }
+  }
+  &__items-header {
+    @extend %base-item-header;
+    display: none;
   }
   &__breadcrumbs {
     direction: ltr;
   }
   &__items-compact-header {
+    @extend %base-item-header;
     align-items: baseline;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    @include breakpoint(tablet) {
-      display: none;
-    }
   }
   &__items-compact-tab-label {
     font-weight: bold;
@@ -86,5 +74,22 @@
   &__items-compact-dropdown {
     position: absolute;
     right: 4px;
+  }
+  &#{&}__desktop {
+    border-bottom: 0;
+    height: 100%;
+    position: relative;
+    .page-side-nav {
+      &__items-compact-header {
+        display: none;
+      }
+      &__items-header {
+        align-items: center;
+        display: flex;
+      }
+      &__items {
+        display: block;
+      }
+    }
   }
 }
