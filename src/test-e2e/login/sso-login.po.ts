@@ -21,7 +21,7 @@ export class SSOLoginPage {
 
   isUAALoginPage(): promise.Promise<boolean> {
     const welcome = element(by.css('.island > h1'));
-    return welcome.getText().then(text => text === 'Welcome!');
+    return welcome.getText().then(text => text.indexOf('Welcome') === 0);
   }
 
   getTitle() {
