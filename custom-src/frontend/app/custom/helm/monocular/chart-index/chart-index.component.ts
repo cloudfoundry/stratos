@@ -25,7 +25,7 @@ export class ChartIndexComponent implements OnInit {
   loadCharts(): void {
     this.chartsService.getCharts().pipe(first()).subscribe(charts => {
       this.loading = false;
-      this.charts = charts;
+      this.charts = charts || [];
       this.totalChartsNumber = charts.length;
     });
   }

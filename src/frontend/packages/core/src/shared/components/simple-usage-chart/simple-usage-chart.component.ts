@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 
-import { IChartData, IChartThresholds, ISimpleUsageChartData } from './simple-usage-chart.types';
+import { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from './simple-usage-chart.types';
 
 
 @Component({
@@ -13,12 +13,18 @@ export class SimpleUsageChartComponent {
   static BASE_BACKGROUND_COLOR_SELECTOR = 'background';
   public chartData: IChartData = {
     colors: {
-      domain: ['#94949440', '#94949440']
+      domain: ['#94949440', '#94949440', '#94949440']
     },
     total: 0,
     used: 0,
+    unknown: 0,
+    warningText: 'Unknown data found',
     results: [{
       name: 'Used',
+      value: 0
+    },
+    {
+      name: 'Unknown',
       value: 0
     },
     {
@@ -29,7 +35,7 @@ export class SimpleUsageChartComponent {
 
   @ViewChild('colors') colorsElement: ElementRef;
 
-  @Input() title = 'Usage';
+  @Input() chartTitle = 'Usage';
 
   @Input() height = '250px';
 
@@ -39,21 +45,33 @@ export class SimpleUsageChartComponent {
   };
 
   @Input() set data(usageData: ISimpleUsageChartData) {
-    // console.log(usageData)
     if (usageData) {
-      const { total, used } = usageData;
-      const remaining = total - used;
-      // console.log(this.getColors(total, used))
+      const {
+        total,
+        used = 0,
+        unknown = 0,
+        usedLabel = 'Used',
+        remainingLabel = 'Remaining',
+        unknownLabel = 'Unknown',
+        warningText = 'Unknown data found'
+      } = usageData;
+      const remaining = total - (used + unknown);
       this.chartData = {
         colors: this.getColors(total, used),
         total,
         used,
+        unknown,
+        warningText,
         results: [{
-          name: 'Used',
+          name: usedLabel,
           value: used
         },
         {
-          name: 'Remaining',
+          name: unknownLabel,
+          value: unknown
+        },
+        {
+          name: remainingLabel,
           value: remaining
         }]
       };
@@ -61,18 +79,20 @@ export class SimpleUsageChartComponent {
   }
 
   private getColorScheme = (() => {
-    const cache = {};
-    return (selector: string) => {
+    const cache: { [selector: string]: IUsageColor } = {};
+    return (selector: string): IUsageColor => {
       if (cache[selector]) {
         return cache[selector];
       }
       const baseSelector = `${SimpleUsageChartComponent.BASE_COLOR_SELECTOR}--${selector}`;
+      const baseUnknownSelector = `${SimpleUsageChartComponent.BASE_COLOR_SELECTOR}--unknown`;
       const baseColor = this.getColor(baseSelector);
+      const unknownColor = this.getColor(baseUnknownSelector);
       const backgroundColor = this.getColor(
         `${baseSelector}-${SimpleUsageChartComponent.BASE_BACKGROUND_COLOR_SELECTOR}`
       );
       const scheme = {
-        domain: [baseColor, backgroundColor]
+        domain: [baseColor, unknownColor, backgroundColor] as [string, string, string]
       };
       cache[selector] = scheme;
       return scheme;

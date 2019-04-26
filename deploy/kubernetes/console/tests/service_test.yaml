@@ -282,3 +282,17 @@ tests:
             port: 8443
             protocol: TCP
             targetPort: 443
+  - it: should support loadBalancerSourceRanges
+    set:
+      console.service.loadBalancerSourceRanges:
+        - 1.2.3.4/16
+        - 5.6.7.8/24
+    asserts:
+      - contains:
+          path: spec.loadBalancerSourceRanges
+          content:
+            1.2.3.4/16
+      - contains:
+          path: spec.loadBalancerSourceRanges
+          content:
+            5.6.7.8/24

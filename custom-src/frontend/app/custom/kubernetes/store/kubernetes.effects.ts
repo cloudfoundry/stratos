@@ -147,7 +147,7 @@ export class KubernetesEffects {
       return this.processSingleItemAction<KubernetesNode>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes/${action.nodeName}`,
         kubernetesNodesSchemaKey,
-        getKubeAPIResourceGuid);
+        (node) => node.metadata.name);
     })
   );
 

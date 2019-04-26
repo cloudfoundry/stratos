@@ -1,0 +1,143 @@
+{{- if .Values.console.migrateVolumes }}
+---
+# Service account "volume-migration"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  name: "volume-migration"
+  labels:
+    app.kubernetes.io/component: "volume-migration"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- end }}
+---
+# Role "volume-migration-role" only used by account "[- volume-migration]"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  name: "volume-migration-role"
+  labels:
+    app.kubernetes.io/component: "volume-migration-role"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - "configmaps"
+  - "secrets"
+  verbs:
+  - "create"
+  - "post"
+  - "get"
+  - "list"
+  - "patch"
+  - "update"
+  - "delete"
+{{- end }}
+---
+# Role binding for service account "volume-migration" and role "volume-migration-role"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  name: "volume-migration-secrets-role-binding"
+  labels:
+    app.kubernetes.io/component: "volume-migration-secrets-role-binding"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+subjects:
+- kind: "ServiceAccount"
+  name: "volume-migration"
+roleRef:
+  apiGroup: "rbac.authorization.k8s.io"
+  kind: "Role"
+  name: "volume-migration-role"
+{{- end }}
+---
+# Volume Migration job will create secrets for the Encryption Key and Certificate so that we can remove them later
+apiVersion: "batch/v1"
+kind: "Job"
+metadata:
+  name: "volume-migration-{{ .Release.Revision }}"
+  labels:
+    app.kubernetes.io/component: "volume-migration-{{ .Release.Revision }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  template:
+    metadata:
+      name: "volume-migration"
+      labels:
+        app.kubernetes.io/component: "volume-migration"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    spec:
+      containers:
+      - env:
+        - name: "STRATOS_VOLUME_MIGRATION"
+          value: "true"
+        - name: "IS_UPGRADE"
+          value: "{{ .Release.IsUpgrade }}"
+        - name: "NAMESPACE"
+          value: "{{ .Release.Namespace }}"
+        - name: "RELEASE_NAME"
+          value: "{{ .Release.Name }}"
+        - name: "RELEASE_REVISION"
+          value: "{{ .Release.Revision }}"
+        - name: "RELEASE_VERSION"
+          value: "{{ .Chart.AppVersion }}"
+        - name: "HELM_CHART"
+          value:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        - name: ENCRYPTION_KEY_VOLUME
+          value: "/{{ .Release.Name }}-encryption-key-volume"
+        - name: ENCRYPTION_KEY_FILENAME
+          value: key
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
+        command: ["/migrate-volumes.sh"]
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        livenessProbe: ~
+        name: "volume-migration"
+        readinessProbe: ~
+        volumeMounts:
+          - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
+            name: "{{ .Release.Name }}-encryption-key-volume"
+            readOnly: true
+          - mountPath: /etc/secrets/key
+            name: "{{ .Release.Name }}-key-secret"
+            readOnly: true
+          - mountPath: /etc/secrets/cert
+            name: "{{ .Release.Name }}-cert-secret"
+            readOnly: true
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
+      imagePullSecrets:
+      - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      restartPolicy: "OnFailure"
+      {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+      serviceAccountName: "volume-migration"
+      {{- end }}
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - name: "{{ .Release.Name }}-encryption-key-volume"
+        persistentVolumeClaim:
+          claimName: "{{ .Release.Name }}-encryption-key-volume"
+      - name: "{{ .Release.Name }}-key-secret"
+        secret:
+          secretName: "{{ .Release.Name }}-key-secret"
+      - name: "{{ .Release.Name }}-cert-secret"
+        secret:
+          secretName: "{{ .Release.Name }}-cert-secret"
+{{- end -}}

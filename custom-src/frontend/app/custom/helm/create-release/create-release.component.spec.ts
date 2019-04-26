@@ -15,7 +15,6 @@ import {
 } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { FocusDirective } from '../../../shared/components/focus.directive';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
-import { StatefulIconComponent } from '../../../shared/components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from '../../../shared/components/stepper/steppers.module';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
@@ -32,7 +31,6 @@ describe('CreateReleaseComponent', () => {
       declarations: [
         CreateReleaseComponent,
         CreateApplicationStep1Component,
-        StatefulIconComponent,
         FocusDirective
       ],
       imports: [

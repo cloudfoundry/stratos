@@ -1,16 +1,8 @@
-<div class="boolean-indicator">
-  <div class="boolean-indicator__container" *ngIf="isTrue"
-    [ngClass]="{'boolean-indicator__container__show-text': showText}">
+<div class="boolean-indicator" *ngIf="booleanOutput">
+  <div class="boolean-indicator__container" [ngClass]="{'boolean-indicator__container__show-text': showText}">
     <mat-icon
-      [ngClass]="{'boolean-indicator__container__icon-subtle': subtle, 'boolean-indicator__container__icon-true': !inverse, 'boolean-indicator__container__icon-false': inverse}">
-      {{ getIcon() }}</mat-icon>
-    <div *ngIf="showText">{{ getText() }}</div>
-  </div>
-  <div class="boolean-indicator__container" *ngIf="!isTrue"
-    [ngClass]="{'boolean-indicator__container__show-text': showText}">
-    <mat-icon
-      [ngClass]="{'boolean-indicator__container__icon-subtle': subtle, 'boolean-indicator__container__icon-false': !inverse, 'boolean-indicator__container__icon-true': inverse}">
-      {{ getIcon() }}</mat-icon>
-    <div *ngIf="showText">{{ getText() }}</div>
+      [ngClass]="{'boolean-indicator__container__icon-subtle': booleanOutput.subtle, 'boolean-indicator__container__icon-true': booleanOutput.isTrue, 'boolean-indicator__container__icon-false': !booleanOutput.isTrue}">
+      {{ booleanOutput.icon }}</mat-icon>
+    <div *ngIf="showText">{{ booleanOutput.text }}</div>
   </div>
 </div>

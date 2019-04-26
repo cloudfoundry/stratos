@@ -39,7 +39,7 @@ import {
   getServicePlanName,
   populateServicePlanExtraTyped,
 } from '../../../../features/service-catalog/services-helper';
-import { CardStatus } from '../../../shared.types';
+import { StratosStatus } from '../../../shared.types';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
@@ -57,7 +57,7 @@ import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.co
 })
 export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$: Observable<APIResource<IServicePlan>>;
-  selectedPlanAccessibility$ = new BehaviorSubject<CardStatus>(null);
+  selectedPlanAccessibility$ = new BehaviorSubject<StratosStatus>(null);
   cSIHelperService: CreateServiceInstanceHelper;
   @ViewChild('noplans', { read: ViewContainerRef })
   noPlansDiv: ViewContainerRef;

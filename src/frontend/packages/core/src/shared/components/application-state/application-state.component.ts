@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { CardStatus } from '../../shared.types';
+import { StratosStatus } from '../../shared.types';
 import { ApplicationStateData } from './application-state.service';
 
 @Component({
@@ -15,7 +15,7 @@ export class ApplicationStateComponent implements OnInit {
   @Input()
   public state: Observable<ApplicationStateData>;
 
-  public status$: Observable<CardStatus>;
+  public status$: Observable<StratosStatus>;
 
   public subLabel$: Observable<string>;
 

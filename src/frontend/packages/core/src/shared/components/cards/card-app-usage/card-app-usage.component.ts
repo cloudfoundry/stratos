@@ -5,7 +5,7 @@ import { map, share, startWith } from 'rxjs/operators';
 import { pathGet } from '../../../../core/utils.service';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { CardStatus } from '../../../shared.types';
+import { StratosStatus } from '../../../shared.types';
 
 @Component({
   selector: 'app-card-app-usage',
@@ -17,7 +17,7 @@ export class CardAppUsageComponent implements OnInit {
   constructor(private appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
 
   appData$: Observable<any>;
-  status$: Observable<CardStatus>;
+  status$: Observable<StratosStatus>;
 
   ngOnInit() {
     this.appData$ = observableCombineLatest(
