@@ -105,7 +105,7 @@ fi
 # Wait for the Certificate to appear
 echo "Waiting for Certificate to be created"
 waitForFile "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}"
-waitForFile "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}"
+waitForFile "${ENCRYPTION_KEY_VOLUME}/${CERT_KEY}"
 echo "Certificate is now available"
 CERT=$(cat "${ENCRYPTION_KEY_VOLUME}/${CERT_FILE}" | base64 | sed -e 's/[\/&]/\\&/g')
 KEY=$(cat "${ENCRYPTION_KEY_VOLUME}/${CERT_KEY}" | base64 | sed -e 's/[\/&]/\\&/g')
@@ -119,7 +119,7 @@ echo "\"tls.crt\": \"${CERT}\"," >> patch-secret.yaml
 echo "\"tls.key\": \"${KEY}\"" >> patch-secret.yaml
 echo "} }" >> patch-secret.yaml
 
-# Create a secret for the c
+# Create a secret for the Certificate
 curl -k \
     --fail \
     -X PATCH \
