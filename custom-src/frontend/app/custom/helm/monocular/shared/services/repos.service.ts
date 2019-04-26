@@ -42,7 +42,9 @@ export class ReposService {
   private handleError(error: any) {
     const errMsg = (error.json().message) ? error.json().message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    this.loggerService.error(errMsg); // log to console instead
+    if (!!this.loggerService) {
+      this.loggerService.error(errMsg);
+    }
     return throwError(errMsg);
   }
 }

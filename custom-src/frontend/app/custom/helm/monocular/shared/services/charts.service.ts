@@ -168,7 +168,9 @@ export class ChartsService {
   private handleError(error: any) {
     const errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    this.loggerService.error(errMsg);
+    if (!!this.loggerService) {
+      this.loggerService.error(errMsg);
+    }
     return throwError(errMsg);
   }
 
