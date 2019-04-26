@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { CardStatus } from '../../../shared.types';
+import { StratosStatus } from '../../../shared.types';
 
 @Component({
   selector: 'app-card-app-status',
@@ -11,7 +11,7 @@ import { CardStatus } from '../../../shared.types';
   styleUrls: ['./card-app-status.component.scss']
 })
 export class CardAppStatusComponent implements OnInit {
-  status$: Observable<CardStatus>;
+  status$: Observable<StratosStatus>;
   constructor(public applicationService: ApplicationService) { }
 
   ngOnInit() {

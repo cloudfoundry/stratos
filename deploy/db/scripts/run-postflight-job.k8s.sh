@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "=== Stratos Postlight Job ==="
+echo "=== Stratos Postflight Job ==="
 echo "Running postflight job"
 
 # mysql commands will timeout after 5 seconds

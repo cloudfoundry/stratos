@@ -32,7 +32,7 @@ import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { safeStringToObj } from '../../core/utils.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { CardStatus } from '../../shared/shared.types';
+import { StratosStatus } from '../../shared/shared.types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 
@@ -157,15 +157,15 @@ export const getServicePlanAccessibility = (
 export const getServicePlanAccessibilityCardStatus = (
   servicePlan: APIResource<IServicePlan>,
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>,
-  serviceBroker$: Observable<APIResource<IServiceBroker>>): Observable<CardStatus> => {
+  serviceBroker$: Observable<APIResource<IServiceBroker>>): Observable<StratosStatus> => {
   return getServicePlanAccessibility(servicePlan, servicePlanVisibilities$, serviceBroker$).pipe(
     map((servicePlanAccessibility: ServicePlanAccessibility) => {
       if (servicePlanAccessibility.isPublic) {
-        return CardStatus.OK;
+        return StratosStatus.OK;
       } else if (servicePlanAccessibility.spaceScoped || servicePlanAccessibility.hasVisibilities) {
-        return CardStatus.WARNING;
+        return StratosStatus.WARNING;
       } else {
-        return CardStatus.ERROR;
+        return StratosStatus.ERROR;
       }
     }),
     first()

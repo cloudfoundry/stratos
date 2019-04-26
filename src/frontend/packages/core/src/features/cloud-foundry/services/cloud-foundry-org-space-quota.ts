@@ -5,7 +5,7 @@ import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { truthyIncludingZero } from '../../../core/utils.service';
 import { determineCardStatus } from '../../../shared/components/cards/card-status/card-status.component';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { CardStatus } from '../../../shared/shared.types';
+import { StratosStatus } from '../../../shared/shared.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
@@ -30,9 +30,9 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
 
   protected abstract quotaPropertyName: 'quota_definition' | 'space_quota_definition';
   protected abstract fetchAppsFn: (orgOrSpace: APIResource<T>) => Observable<APIResource<IApp>[]>;
-  protected abstract getOrgOrSpaceCardStatus: (orgOrSpace: APIResource<T>, apps: APIResource<IApp>[]) => CardStatus;
+  protected abstract getOrgOrSpaceCardStatus: (orgOrSpace: APIResource<T>, apps: APIResource<IApp>[]) => StratosStatus;
 
-  public createStateObs(): Observable<CardStatus> {
+  public createStateObs(): Observable<StratosStatus> {
     return combineLatest(
       this.hasQuotas(),
       this.cfEndpointService.appsPagObs.hasEntities$
@@ -41,11 +41,11 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
         // It can be expensive to iterate over apps to determine usage, so cut out early if there's no quotas or we can't determine all apps
         validQuotas && hasApps ?
           this.internalCreateStateObs() :
-          observableOf(CardStatus.NONE))
+          observableOf(StratosStatus.NONE))
     );
   }
 
-  private internalCreateStateObs(): Observable<CardStatus> {
+  private internalCreateStateObs(): Observable<StratosStatus> {
     return combineLatest(
       this.orgOrSpace$,
       this.createAllAppsObs()
@@ -55,9 +55,9 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
     );
   }
 
-  protected handleQuotaStatus(value: number, limit: number): CardStatus {
+  protected handleQuotaStatus(value: number, limit: number): StratosStatus {
     const status = determineCardStatus(value, limit);
-    return status === CardStatus.WARNING || status === CardStatus.ERROR ? CardStatus.WARNING : null;
+    return status === StratosStatus.WARNING || status === StratosStatus.ERROR ? StratosStatus.WARNING : null;
   }
 
   private hasQuotas(): Observable<boolean> {

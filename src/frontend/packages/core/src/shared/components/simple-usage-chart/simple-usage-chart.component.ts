@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 
 import { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from './simple-usage-chart.types';
 
+
 @Component({
   selector: 'app-simple-usage-chart',
   templateUrl: './simple-usage-chart.component.html',

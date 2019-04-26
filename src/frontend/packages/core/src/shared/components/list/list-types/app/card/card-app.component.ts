@@ -12,7 +12,7 @@ import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
-import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
 
@@ -26,7 +26,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   @Input() row: APIResource<IApp>;
   applicationState$: Observable<ApplicationStateData>;
 
-  appStatus$: Observable<CardStatus>;
+  appStatus$: Observable<StratosStatus>;
   entityConfig: ComponentEntityMonitorConfig;
   cfOrgSpace: CfOrgSpaceLabelService;
 
