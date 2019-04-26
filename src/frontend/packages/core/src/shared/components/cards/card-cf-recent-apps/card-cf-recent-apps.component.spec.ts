@@ -6,7 +6,7 @@ import {
   ApplicationStateIconComponent,
 } from '../../application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../../application-state/application-state-icon/application-state-icon.pipe';
-import { StatefulIconComponent } from '../../stateful-icon/stateful-icon.component';
+import { StatefulIconComponent } from '../../../../core/stateful-icon/stateful-icon.component';
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -25,8 +25,7 @@ describe('CardCfRecentAppsComponent', () => {
         CardCfRecentAppsComponent,
         ApplicationStateIconComponent,
         CompactAppCardComponent,
-        ApplicationStateIconPipe,
-        StatefulIconComponent
+        ApplicationStateIconPipe
       ],
       imports: [...BaseTestModulesNoShared],
       providers: [

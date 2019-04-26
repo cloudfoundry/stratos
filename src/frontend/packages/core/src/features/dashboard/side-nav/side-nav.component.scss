@@ -92,7 +92,7 @@ $icon-nav-width: 50px;
     pointer-events: none;
   }
   &__logo-img,
-  &__item-label  {
+  &__item-label {
     opacity: 1;
   }
   &__copyright-icon,
@@ -165,7 +165,7 @@ $transition-delay: .5s;
         width: $side-nav-mat-icon-height-large;
       }
       &__item-label,
-      &__copyright  {
+      &__copyright {
         opacity: 0;
       }
       &__logo-img {

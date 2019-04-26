@@ -1,20 +1,28 @@
+import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { fromEvent, interval, merge, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, withLatestFrom } from 'rxjs/operators';
 
 import { VerifySession } from '../../store/src/actions/auth.actions';
 import { AppState } from '../../store/src/app-state';
 import { AuthState } from '../../store/src/reducers/auth.reducer';
-import { SessionData } from '../../store/src/types/auth.types';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
+import { PageVisible } from './core/page-visible';
+import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
 
 @Injectable()
 export class LoggedInService {
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private store: Store<AppState>,
+    private dialog: MatDialog,
+    private ngZone: NgZone
+  ) {
+  }
 
-  private sessionData: SessionData;
   private userInteractionChecker: Subscription;
 
   private lastUserInteraction = Date.now();
@@ -31,7 +39,6 @@ export class LoggedInService {
 
   // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
   private autoLogoutDelta = 5 * 1000;
-
   // When we see the following events, we consider the user as active
   private userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
@@ -41,14 +48,6 @@ export class LoggedInService {
 
   private destroying = false;
 
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private store: Store<AppState>,
-    private dialog: MatDialog,
-    private ngZone: NgZone
-  ) {
-  }
-
   init() {
     const eventStreams = this.userActiveEvents.map((eventName) => {
       return fromEvent(document, eventName);
@@ -56,7 +55,6 @@ export class LoggedInService {
 
     this.sub = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
-        this.sessionData = auth.sessionData;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
           if (!this.sessionChecker || this.sessionChecker.closed) {
             this.openSessionCheckerPoll();
@@ -93,9 +91,13 @@ export class LoggedInService {
     this.ngZone.runOutsideAngular(() => {
       this.sessionChecker = interval(this.checkSessionInterval)
         .pipe(
-          tap(() => {
+          withLatestFrom(
+            this.store.select(selectDashboardState),
+            this.store.select(s => s.auth)
+          ),
+          tap(([i, dashboardState, authState]) => {
             this.ngZone.run(() => {
-              this._checkSession();
+              this._checkSession(dashboardState, authState);
             });
           })
         ).subscribe();
@@ -126,20 +128,21 @@ export class LoggedInService {
     });
   }
 
-  private _checkSession() {
+  private _checkSession(dashboardState: DashboardState, authState: AuthState) {
     if (this.activityPromptShown || this.destroying) {
       return;
     }
 
     const now = Date.now();
-    const sessionExpiresOn = this.sessionData.sessionExpiresOn;
+    const sessionExpiresOn = authState.sessionData.sessionExpiresOn;
     const safeExpire = sessionExpiresOn - this.autoLogoutDelta;
     const delta = safeExpire - now;
     const aboutToExpire = delta < this.warnBeforeLogout;
     if (aboutToExpire) {
       const idleDelta = now - this.lastUserInteraction;
       const userIsActive = idleDelta < this.userIdlePeriod;
-      if (userIsActive) {
+      const pageVisible = new PageVisible(document);
+      if ((!dashboardState.timeoutSession && pageVisible.isPageVisible()) || userIsActive) {
         this.store.dispatch(new VerifySession(false, false));
       } else {
         this._promptInactiveUser(safeExpire);
@@ -148,3 +151,4 @@ export class LoggedInService {
     }
   }
 }
+

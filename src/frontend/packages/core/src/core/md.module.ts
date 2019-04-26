@@ -36,6 +36,7 @@ import {
   DateAdapter,
   MAT_DATE_LOCALE,
   MAT_DATE_FORMATS,
+  MatBadgeModule,
 } from '@angular/material';
 
 const importExport = [
@@ -68,7 +69,8 @@ const importExport = [
   MatSnackBarModule,
   MatListModule,
   MatRadioModule,
-  MatDatepickerModule
+  MatDatepickerModule,
+  MatBadgeModule
 ];
 
 @NgModule({

@@ -1,5 +1,6 @@
+import { localStorageSync } from 'ngrx-store-localstorage';
 import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule } from '@ngrx/store';
+import { ActionReducerMap, StoreModule, ActionReducer } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
 
@@ -21,6 +22,7 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
+import { getDashboardStateSessionId } from './helpers/store-helpers';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -53,7 +55,30 @@ export const appReducers = {
   recentlyVisited: recentlyVisitedReducer
 } as ActionReducerMap<{}>;
 
-const metaReducers = [];
+export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
+  // This is done to ensure we don't accidentally apply state from session storage from another user.
+  let globalUserId = null;
+  return localStorageSync({
+    storageKeySerializer: (id) => {
+      return globalUserId || id;
+    },
+    syncCondition: () => {
+      if (globalUserId) {
+        return true;
+      }
+      const userId = getDashboardStateSessionId();
+      if (userId) {
+        globalUserId = userId;
+        return true;
+      }
+      return false;
+    },
+    keys: ['dashboard'],
+    rehydrate: false,
+
+  })(reducer);
+}
+const metaReducers = [localStorageSyncReducer];
 if (!environment.production) {
   metaReducers.push(storeFreeze);
   // if (environment.logEnableConsoleActions) {

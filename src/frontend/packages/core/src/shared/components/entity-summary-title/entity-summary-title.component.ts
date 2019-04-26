@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-entity-summary-title',
@@ -12,5 +12,4 @@ export class EntitySummaryTitleComponent {
   @Input() subText: string;
   @Input() imagePath: string;
   @Input() inlineImagePath: string;
-  constructor() { }
 }

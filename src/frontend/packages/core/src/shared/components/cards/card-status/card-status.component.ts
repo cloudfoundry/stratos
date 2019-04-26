@@ -1,22 +1,22 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CardStatus } from '../../../shared.types';
+import { StratosStatus } from '../../../shared.types';
 
 
-export function determineCardStatus(value: number, limit: number): CardStatus {
+export function determineCardStatus(value: number, limit: number): StratosStatus {
   if ((limit !== 0 && !limit) || limit === -1) {
-    return CardStatus.NONE;
+    return StratosStatus.NONE;
   }
 
   const usage = value / limit;
   // Limit can be zero, which results in infinity
   if (usage > 0.9 || usage === Infinity) {
-    return CardStatus.ERROR;
+    return StratosStatus.ERROR;
   } else if (usage > 0.8) {
-    return CardStatus.WARNING;
+    return StratosStatus.WARNING;
   }
-  return CardStatus.NONE;
+  return StratosStatus.NONE;
 }
 
 @Component({
@@ -26,9 +26,9 @@ export function determineCardStatus(value: number, limit: number): CardStatus {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardStatusComponent {
-  @Input() status$: Observable<CardStatus>;
+  @Input() status$: Observable<StratosStatus>;
 
-  private cardStatus = CardStatus;
+  private cardStatus = StratosStatus;
 
   constructor() { }
 }

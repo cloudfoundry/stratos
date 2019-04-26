@@ -29,6 +29,7 @@ export interface AuthState {
   sessionData: SessionData;
   verifying: boolean;
   redirect?: RouterRedirect;
+  keepAlive?: boolean;
 }
 
 const defaultState: AuthState = {

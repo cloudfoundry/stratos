@@ -11,6 +11,28 @@ $user-profile-avatar-size: 48px;
   mat-card:not(:first-child) {
     margin-top: 24px;
   }
+  &__option {
+    $margin: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    &-warning-icon {
+      padding-left: 5px;
+    }
+    &-subtext {
+      font-size: 12px;
+      margin-top: $margin;
+      opacity: .6;
+    }
+    &-header {
+      align-items: center;
+      display: flex;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: $margin;
+    }
+  }
   &__info {
     flex: 1;
     overflow: auto;
