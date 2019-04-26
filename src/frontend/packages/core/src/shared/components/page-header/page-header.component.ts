@@ -29,6 +29,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public pFavorite: UserFavorite<IFavoriteMetadata>;
   private pTabs: ISubHeaderTabs[];
 
+  public isMobile$: Observable<boolean> = this.store.select('dashboard').pipe(map(state => state.isMobile));
+
   @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
@@ -119,6 +121,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   logout() {
     this.store.dispatch(new Logout());
+  }
+
+  public toggleSidenav() {
+    this.store.dispatch(new ToggleSideNav());
   }
 
   constructor(
