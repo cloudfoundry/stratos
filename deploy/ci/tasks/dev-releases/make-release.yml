@@ -162,6 +162,32 @@ run:
         github-release release --user ${SOURCE_REPO_ORG} --repo ${SOURCE_REPO_REPO} -t ${VERSION} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG} --description "${RELEASE_DESCRIPTION}"
       fi
 
+      # Create the PR for the Helm Chart changes if configured
+      if [ ! -z "${HELM_RELEASE_GITCLONE}" ]; then
+        echo "Creating PR for Helm Chart Changes for this release"
+
+        mkdir -p ${ROOT_DIR}/helm-pr
+        cd ${ROOT_DIR}/helm-pr
+        git clone ${HELM_RELEASE_GITCLONE} helm-git-repo
+        cd helm-git-repo
+        git checkout ${HELM_RELEASE_REPO_BRANCH}
+        cd ${HELM_RELEASE_REPO_FOLDER}
+        cp ${ROOT_DIR}/helm-chart/${HELM_FILE} .
+        tar -xvf ${HELM_FILE}
+        rm -rf ./${HELM_FILE}
+        git add -A
+        git status
+        git commit -m "Stratos Release ${VERSION} Helm Chart Changes"
+        git push -u origin ${HELM_RELEASE_REPO_BRANCH}
+
+        # Now create a PR for the changes
+        URL=https://api.github.com/repos/${HELM_RELEASE_REPO_NAME}/pulls
+        TITLE="Stratos Release ${VERSION}"
+
+        curl --fail -H "Content-Type: application/json" -H "Authorization: token ${GITHUB_TOKEN}" \
+        -d '{"title":"'"${TITLE}"'", "head": "'"${GIT_BRANCH}"'", "base": "'"${HELM_RELEASE_REPO_BRANCH}"'"}' ${URL}
+      fi
+
       set +e
       set +x
 
