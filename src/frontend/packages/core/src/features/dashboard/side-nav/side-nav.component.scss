@@ -1,11 +1,17 @@
-$side-nav-padding-h: 12px;
+$side-nav-padding-h: 18px;
 $side-nav-mat-icon-height: 18px;
 $side-nav-mat-icon-height-large: 24px;
 $side-nav-mat-icon-padding-right: 10px;
-$nav-width: 175px;
+$nav-width: 200px;
 $icon-nav-width: 50px;
 .side-nav {
   height: 100%;
+  &__nav-toggle {
+    margin-left: 10px;
+    &-icon {
+      font-size: 20px;
+    }
+  }
   &__inner {
     display: flex;
     flex-direction: column;
@@ -115,6 +121,9 @@ $transition-delay: .5s;
     transition: 0s opacity, 0s width;
   }
   .side-nav {
+    &__item {
+      padding: 15px 12px;
+    }
     &__inner {
       transition: $transition-time width;
       width: $icon-nav-width;
@@ -127,6 +136,9 @@ $transition-delay: .5s;
     }
     &__top {
       width: $icon-nav-width;
+    }
+    &__nav-toggle {
+      margin-left: 0;
     }
     &__item-icon {
       font-size: $side-nav-mat-icon-height-large;

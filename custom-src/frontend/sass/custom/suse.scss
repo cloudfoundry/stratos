@@ -61,18 +61,20 @@ $suse-side-nav-active: #003358;
 
 // Use SUSE Blue Side Navigation
 .stratos {
-
+  // This is themeable, we really don't need this.
   .side-nav__inner,
   .side-nav__top,
   .side-nav__item--active:hover {
     background-color: $suse-side-nav;
   }
-
+ 
   .side-nav__item--active,
   .side-nav__item:hover {
     background-color: $suse-side-nav-active;
   }
-
+  .side-nav__top {
+    border-color: $suse-side-nav-active;
+  }
   .side-nav__bottom {
     color: $suse-text-gray;
   }
