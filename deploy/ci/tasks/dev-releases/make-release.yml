@@ -51,6 +51,16 @@ run:
 
       echo "Making release"
 
+      # Check to see if the release tag already exists - if so, abort - we won't re-release
+      set +e
+      github-release info -t ${VERSION}
+      RETVAL=$?
+      set -e
+      if [ $RETVAL -eq 0 ]; then
+        echo "Release already exists... aborting"
+        exit 1
+      fi
+
       # Delete Stable release on GitHub and recreate it again
       # This ensures it has the correct date/time and appears in the correct place in the release history
 

@@ -63,13 +63,13 @@ run:
 
       echo "Created v2-alpha-tag, v2-version and build-args."
 
-      echo "Contens of build-args:"
+      echo "Contents of build-args:"
       cat build-args
 
-      echo "Contens of ui-build-args:"
+      echo "Contents of ui-build-args:"
       cat ui-build-args
 
-      echo "Contens of v2-alpha-tag:"
+      echo "Contents of v2-alpha-tag:"
       cat v2-alpha-tag
       
       echo "Creating tag file tar..."
