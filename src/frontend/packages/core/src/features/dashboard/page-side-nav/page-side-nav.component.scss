@@ -44,10 +44,8 @@
     overflow: auto;
     padding: 0;
   }
-  &__items-header {
-    align-items: center;
+  %base-item-header {
     border-bottom: 1px solid $border-color;
-    display: none;
     font-weight: bold;
     height: 48px;
     opacity: .6;
@@ -55,10 +53,15 @@
     padding: 0 $item-header-padding;
     position: relative;
   }
+  &__items-header {
+    @extend %base-item-header;
+    display: none;
+  }
   &__breadcrumbs {
     direction: ltr;
   }
   &__items-compact-header {
+    @extend %base-item-header;
     align-items: baseline;
     cursor: pointer;
     display: flex;
@@ -72,7 +75,7 @@
     position: absolute;
     right: 4px;
   }
-  &__desktop {
+  &#{&}__desktop {
     border-bottom: 0;
     height: 100%;
     position: relative;
@@ -81,6 +84,7 @@
         display: none;
       }
       &__items-header {
+        align-items: center;
         display: flex;
       }
       &__items {
