@@ -34,7 +34,7 @@ export class SimpleUsageChartComponent {
 
   @ViewChild('colors') colorsElement: ElementRef;
 
-  @Input() title = 'Usage';
+  @Input() chartTitle = 'Usage';
 
   @Input() height = '250px';
 
