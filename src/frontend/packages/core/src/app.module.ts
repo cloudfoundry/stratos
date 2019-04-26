@@ -1,3 +1,4 @@
+import { EndpointState } from './../../store/src/types/endpoint.types';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -12,7 +13,7 @@ import { RouterNav } from '../../store/src/actions/router.actions';
 import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { AppState } from '../../store/src/app-state';
+import { AppState, IRequestEntityTypeState } from '../../store/src/app-state';
 import {
   applicationSchemaKey,
   endpointSchemaKey,
@@ -24,7 +25,7 @@ import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visi
 import { AppStoreModule } from '../../store/src/store.module';
 import { APIResource } from '../../store/src/types/api.types';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
-import { IRequestDataState } from '../../store/src/types/entity.types';
+import { IRequestDataState, IRequestState } from '../../store/src/types/entity.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
@@ -55,6 +56,7 @@ import { ApplicationStateService } from './shared/components/application-state/a
 import { FavoriteConfig, favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
+import { GlobalEventService, GlobalEventData } from './shared/global-events.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -129,10 +131,36 @@ export class AppModule {
   constructor(
     ext: ExtensionService,
     private permissionService: CurrentUserPermissionsService,
-    private appStateService: ApplicationStateService,
     private store: Store<AppState>,
-    private logger: LoggerService
+    logger: LoggerService,
+    eventService: GlobalEventService
   ) {
+    eventService.addEventConfig<boolean>(
+      {
+        eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),
+        message: 'Timeout session is disabled - this is considered a security risk.',
+        key: 'timeoutSessionWarning',
+        link: '/user-profile'
+      }
+    );
+    // This should be brought back in in the future
+    // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
+    //   {
+    //     selector: (state: AppState) => state.requestData.endpoint,
+    //     eventTriggered: (state: IRequestEntityTypeState<EndpointModel>) => {
+    //       return Object.values(state).reduce((events, endpoint) => {
+    //         if (endpoint.connectionStatus === 'checking') {
+    //           events.push(new GlobalEventData(true, endpoint));
+    //         }
+    //         return events;
+    //       }, []);
+    //     },
+    //     message: (endpoint: EndpointModel) => `Connecting endpoint ${endpoint.name}`,
+    //     link: '/endpoints',
+    //     key: 'endpoint-connect',
+    //     type: 'process'
+    //   }
+    // );
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     initEndpointExtensions(ext);

@@ -35,7 +35,6 @@ import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
-import { StatefulIconComponent } from '../../stateful-icon/stateful-icon.component';
 import { SteppersModule } from '../../stepper/steppers.module';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
@@ -45,6 +44,7 @@ import {
   SpecifyUserProvidedDetailsComponent,
 } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { StatefulIconComponent } from '../../../../core/stateful-icon/stateful-icon.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -78,7 +78,6 @@ describe('AddServiceInstanceComponent', () => {
         MultilineTitleComponent,
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
-        StatefulIconComponent,
         FocusDirective,
         SpecifyUserProvidedDetailsComponent
       ],
@@ -86,7 +85,6 @@ describe('AddServiceInstanceComponent', () => {
         PageHeaderModule,
         SteppersModule,
         MaterialDesignFrameworkModule,
-        // CoreModule,
         BaseTestModulesNoShared
       ],
       providers: [

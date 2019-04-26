@@ -27,6 +27,7 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
 import { PortalModule } from '@angular/cdk/portal';
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 
@@ -55,6 +56,8 @@ import { NoContentMessageComponent } from '../shared/components/no-content-messa
     PortalModule,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
+    DisableRouterLinkDirective,
+    StatefulIconComponent,
     NoContentMessageComponent,
     DisableRouterLinkDirective
   ],
@@ -72,6 +75,7 @@ import { NoContentMessageComponent } from '../shared/components/no-content-messa
     CurrentUserPermissionsService
   ],
   declarations: [
+    StatefulIconComponent,
     LogOutDialogComponent,
     TruncatePipe,
     InfinityPipe,

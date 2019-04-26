@@ -3,7 +3,7 @@ import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap, publishReplay, refCount } from 'rxjs/operators';
 
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
@@ -16,6 +16,8 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { GlobalEventService, IGlobalEvent, GlobalEventTypes } from '../../global-events.service';
+import { StratosStatus } from '../../shared.types';
 
 @Component({
   selector: 'app-page-header',
@@ -62,6 +64,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @Input() showUnderFlow = false;
 
   @Input() showHistory = true;
+
+  public events$: Observable<IGlobalEvent[]>;
+  public eventCount$: Observable<number>;
+  public eventPriorityStatus$: Observable<StratosStatus>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
@@ -130,7 +136,13 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private route: ActivatedRoute,
     private tabNavService: TabNavService,
     private router: Router,
+    eventService: GlobalEventService
   ) {
+    this.eventCount$ = eventService.events$.pipe(
+      map(events => events.length)
+    );
+    this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
+
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(

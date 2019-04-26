@@ -11,7 +11,7 @@ import {
 } from '../../../application-state/application-state.service';
 import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { CardStatus } from '../../../../shared.types';
+import { StratosStatus } from '../../../../shared.types';
 
 
 @Component({
@@ -25,7 +25,7 @@ export class CompactAppCardComponent implements OnInit {
 
   applicationState$: Observable<ApplicationStateData>;
 
-  appStatus$: Observable<CardStatus>;
+  appStatus$: Observable<StratosStatus>;
 
   bcType: any;
 

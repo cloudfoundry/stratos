@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { CardStatus } from '../../../shared.types';
+import { StratosStatus } from '../../../shared.types';
 
 
 @Component({
@@ -10,6 +10,6 @@ import { CardStatus } from '../../../shared.types';
 })
 export class ApplicationStateIconComponent {
 
-  @Input() public status: CardStatus;
+  @Input() public status: StratosStatus;
 
 }

@@ -1,4 +1,10 @@
 import {
+  SetSessionTimeoutAction,
+  TIMEOUT_SESSION,
+  HYDRATE_DASHBOARD_STATE,
+  HydrateDashboardStateAction
+} from './../actions/dashboard-actions';
+import {
   CHANGE_SIDE_NAV_MODE,
   CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
@@ -13,6 +19,7 @@ import {
 } from '../actions/dashboard-actions';
 
 export interface DashboardState {
+  timeoutSession: boolean;
   sidenavOpen: boolean;
   isMobile: boolean;
   isMobileNavOpen: boolean;
@@ -23,6 +30,7 @@ export interface DashboardState {
 }
 
 export const defaultDashboardState: DashboardState = {
+  timeoutSession: true,
   sidenavOpen: true,
   isMobile: false,
   isMobileNavOpen: false,
@@ -65,6 +73,18 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       const setHeaderEvent = action as SetHeaderEvent;
       return {
         ...state, headerEventMinimized: setHeaderEvent.minimised
+      };
+    case TIMEOUT_SESSION:
+      const timeoutSessionAction = action as SetSessionTimeoutAction;
+      return {
+        ...state,
+        timeoutSession: timeoutSessionAction.timeoutSession
+      };
+    case HYDRATE_DASHBOARD_STATE:
+      const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
+      return {
+        ...state,
+        ...hydrateDashboardStateAction.dashboardState
       };
     default:
       return state;
