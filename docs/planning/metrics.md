@@ -12,7 +12,7 @@ can be gated. We would most likely use basic authentication and ensure HTTPS acc
 
 This basic setup would allow an administrator to deploy Prometheus and configure it to collect metrics from a Cloud Foundry deployment and for APi of Prometheus to be accessed securely.
 
-An intial PoC to get Prometheus deployed with a firehose exported using Helm is here - https://github.com/cloudfoundry-incubator/stratos-metrics.
+An intial PoC to get Prometheus deployed with a firehose exported using Helm is here - https://github.com/SUSE/stratos-metrics.
 
 In Stratos, we would add a new endpoint type "Cloud Foundry Metrics" that a user can register with the endpoint of the Prometheus API and then connect to with their credentials as configured above. This would allow the Stratos backend to be able to talk to Prometheus securely and retrieve metrics.
 
