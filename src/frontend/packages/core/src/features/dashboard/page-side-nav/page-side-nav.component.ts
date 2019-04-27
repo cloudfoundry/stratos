@@ -2,6 +2,9 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 import { TabNavService } from '../../../../tab-nav.service';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../../store/src/app-state';
+import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 
 export interface IPageSideNavTab {
   key?: string;
@@ -26,8 +29,12 @@ export class PageSideNavComponent implements OnInit {
   public header: string;
   public activeTab$: Observable<string>;
   public breadcrumbs$: Observable<IBreadcrumb[]>;
+  public isMobile$ = this.store.select(selectIsMobile);
 
-  constructor(public tabNavService: TabNavService) { }
+  constructor(
+    public tabNavService: TabNavService,
+    private store: Store<Pick<AppState, 'dashboard'>>
+  ) { }
 
   ngOnInit() {
     this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();

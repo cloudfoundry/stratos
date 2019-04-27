@@ -4,14 +4,15 @@
   $status-ok: map-get($status-colors, success);
   $status-warning: map-get($status-colors, warning);
   $status-danger: map-get($status-colors, danger);
-  $colors: 'danger' $status-danger, 'warning' $status-warning, 'ok' $status-ok;
+  $status-tentative: map-get($status-colors, tentative);
+  $colors: 'danger' $status-danger, 'warning' $status-warning, 'ok' $status-ok, 'unknown' $status-tentative;
   .simple-graph__wrapper {
     color: transparentize(mat-color($foreground, text), .4);
    }
   .simple-usage-graph-color {
     @each $color in $colors {
       &--#{nth($color, 1)} {
-        background-color: #{nth($color, 2)};
+        background-color: #{nth($color, 2)}
       }
       &--#{nth($color, 1)}-background {
         background-color: transparentize(nth($color, 2), .8);

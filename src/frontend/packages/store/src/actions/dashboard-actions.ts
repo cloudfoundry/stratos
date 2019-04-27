@@ -1,7 +1,7 @@
-import { DashboardState } from './../reducers/dashboard-reducer';
 import { Action } from '@ngrx/store';
 
 import { SideNavModes } from '../types/dashboard.types';
+import { DashboardState } from './../reducers/dashboard-reducer';
 
 export const OPEN_SIDE_NAV = '[Dashboard] Open side nav';
 export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';

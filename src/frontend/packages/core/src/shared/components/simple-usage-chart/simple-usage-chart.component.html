@@ -1,8 +1,11 @@
 <div class="simple-graph__wrapper">
-  <h2 class="simple-graph__title">{{ title }}</h2>
+  <div class="simple-graph__title"><span class="simple-graph__title-inner-text">{{ chartTitle }}</span>
+    <mat-icon [matTooltip]="chartData.warningText" class="simple-graph__title-unknown-warning" inline
+      *ngIf="chartData.unknown > 0">warning</mat-icon>
+  </div>
   <div class="simple-graph" [ngStyle]="{height: height}">
     <div class="simple-graph__inner">
-      <ngx-charts-pie-chart [tooltipDisabled]="true" [scheme]="chartData.colors" [animations]="false" [doughnut]="true"
+      <ngx-charts-pie-chart [scheme]="chartData.colors" [animations]="false" [doughnut]="true"
         [results]="chartData.results" [gradient]="false">
       </ngx-charts-pie-chart>
       <div class="simple-graph__counts" *ngIf="chartData.total; else noTotal">
@@ -24,4 +27,5 @@
   <div class="simple-usage-graph-color simple-usage-graph-color--warning-background"></div>
   <div class="simple-usage-graph-color simple-usage-graph-color--ok"></div>
   <div class="simple-usage-graph-color simple-usage-graph-color--ok-background"></div>
+  <div class="simple-usage-graph-color simple-usage-graph-color--unknown"></div>
 </div>

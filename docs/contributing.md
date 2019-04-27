@@ -3,7 +3,7 @@
 ## Reporting issues
 
 Before reporting an issue, please check whether it has already been reported
-[here](https://github.com/SUSE/stratos/issues). If this is the case, please:
+[here](https://github.com/cloudfoundry-incubator/stratos/issues). If this is the case, please:
 
 - Read all the comments to confirm that it's the same issue you're having.
 - Refrain from adding "same thing here" or "+1" comments. Just hit the

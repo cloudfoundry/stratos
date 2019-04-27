@@ -23,6 +23,7 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 
 
 @Component({
@@ -57,12 +58,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       map(() => this.isNoMarginView(this.activatedRoute.snapshot)),
       startWith(this.isNoMarginView(this.activatedRoute.snapshot))
     );
-    this.isMobile$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
+    this.isMobile$ = this.breakpointObserver.observe([Breakpoints.Small, Breakpoints.XSmall]).pipe(
       map(breakpoint => breakpoint.matches),
       startWith(false),
       distinctUntilChanged()
     );
-    this.dashboardState$ = this.store.select('dashboard');
+    this.dashboardState$ = this.store.select(selectDashboardState);
     this.mainNavState$ = this.dashboardState$.pipe(
       map(state => {
         if (state.isMobile) {
@@ -74,8 +75,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
         } else {
           return {
             mode: state.sideNavPinned ? 'side' : 'over',
-            opened: state.sidenavOpen || false,
-            iconMode: state.sideNavPinned
+            opened: true,
+            iconMode: !state.sidenavOpen
           };
         }
       })
