@@ -37,10 +37,12 @@ export interface EndpointModel {
   api_endpoint?: IApiEndpointInfo;
   authorization_endpoint?: string;
   cnsi_type?: EndpointType;
+  sub_type?: string;
   doppler_logging_endpoint?: string;
   guid?: string;
   name: string;
   skip_ssl_validation?: boolean;
+  endpoint_metadata?: any;
   token_endpoint?: string;
   user?: EndpointUser;
   metadata?: {

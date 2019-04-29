@@ -1,12 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { TabNavService } from '../../../../tab-nav.service';
 import {
   BaseTestModules,
-  generateTestCfServiceProvider
+  generateTestCfServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { CloudFoundryComponent } from './cloud-foundry.component';
 
 describe('CloudFoundryComponent', () => {
@@ -18,7 +18,7 @@ describe('CloudFoundryComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryComponent],
         imports: [...BaseTestModules, BrowserAnimationsModule],
-        providers: [PaginationMonitorFactory, CloudFoundryService, generateTestCfServiceProvider()]
+        providers: [PaginationMonitorFactory, generateTestCfServiceProvider(), TabNavService]
       }).compileComponents();
     })
   );

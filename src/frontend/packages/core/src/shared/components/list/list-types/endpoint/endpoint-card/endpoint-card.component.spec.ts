@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { initEndpointTypes } from '../../../../../../features/endpoints/endpoint-helpers';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { EndpointCardComponent } from './endpoint-card.component';
 
@@ -16,6 +17,7 @@ describe('EndpointCardComponent', () => {
       providers: [EndpointListHelper]
     })
       .compileComponents();
+    initEndpointTypes([]);
   }));
 
   beforeEach(() => {

@@ -10,9 +10,10 @@
     <div class="metrics-chart" *ngIf="!(isFetching$ | async)">
       <div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
         <div class="metrics-chart" *ngIf="results.length; else other_content">
-          <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results" [legend]="hasMultipleInstances"
-            [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true"
-            [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="chartConfig.autoScale" [yAxisTicks]="chartConfig.yAxisTicks"
+          <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results"
+            [legend]="hasMultipleInstances" [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel"
+            [showXAxisLabel]="true" [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true"
+            [autoScale]="chartConfig.autoScale" [yAxisTicks]="chartConfig.yAxisTicks"
             [yAxisTickFormatting]="chartConfig.yAxisTickFormatting">
           </ngx-charts-line-chart>
           <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>

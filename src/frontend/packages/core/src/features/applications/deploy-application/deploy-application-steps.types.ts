@@ -1,5 +1,6 @@
-import { SourceType } from '../../../../../store/src/types/deploy-application.types';
 import { ActivatedRoute } from '@angular/router';
+
+import { SourceType } from '../../../../../store/src/types/deploy-application.types';
 
 export enum DEPLOY_TYPES_IDS {
   GITLAB = 'gitlab',
@@ -42,7 +43,7 @@ export const getApplicationDeploySourceTypes = (): SourceType[] => [
     name: 'Application Archive File',
     id: DEPLOY_TYPES_IDS.FILE,
     helpText: 'Please select the archive file that contains the application you would like to deploy.',
-    graphic: { matIcon: 'archive' }
+    graphic: { matIcon: 'unarchive' }
   },
   {
     name: 'Application Folder',

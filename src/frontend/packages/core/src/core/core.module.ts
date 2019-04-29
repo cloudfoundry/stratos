@@ -1,8 +1,10 @@
+import { PortalModule } from '@angular/cdk/portal';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MomentModule } from 'ngx-moment';
 
+import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
@@ -23,12 +25,11 @@ import { MDAppModule } from './md.module';
 import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { SafeImgPipe } from './safe-img.pipe';
+import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
 import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
-import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
-
 
 @NgModule({
   imports: [
@@ -52,8 +53,11 @@ import { NoContentMessageComponent } from '../shared/components/no-content-messa
     DotContentComponent,
     ButtonBlurOnClickDirective,
     PageNotFoundComponentComponent,
+    PortalModule,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
+    DisableRouterLinkDirective,
+    StatefulIconComponent,
     NoContentMessageComponent,
     DisableRouterLinkDirective
   ],
@@ -71,6 +75,7 @@ import { NoContentMessageComponent } from '../shared/components/no-content-messa
     CurrentUserPermissionsService
   ],
   declarations: [
+    StatefulIconComponent,
     LogOutDialogComponent,
     TruncatePipe,
     InfinityPipe,

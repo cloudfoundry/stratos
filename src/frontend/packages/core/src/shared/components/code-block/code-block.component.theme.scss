@@ -4,8 +4,8 @@
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
   .app-code-block {
-    color: darken(mat-color($background-colors, background), 2%);
     background-color: mat-color($foreground-colors, text);
+    color: darken(mat-color($background-colors, background), 2%);
     &___copied-icon {
       color: mat-color($primary);
     }

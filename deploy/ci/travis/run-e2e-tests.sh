@@ -47,13 +47,11 @@ echo "Using local deployment for e2e tests"
 # Start a local UAA - this will take a few seconds to come up in the background
 docker run -d -p 8080:8080 splatform/stratos-uaa
 
-# Get go 1.0 and dep
+# Get go
 curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
 chmod +x ~/bin/gimme
-eval "$(gimme 1.9)"
-curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+eval "$(gimme 1.12.4)"
 go version
-dep version
 
 npm run build
 npm run build-backend

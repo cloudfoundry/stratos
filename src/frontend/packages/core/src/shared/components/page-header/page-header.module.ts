@@ -6,7 +6,6 @@ import { PageSubheaderComponent } from '../page-subheader/page-subheader.compone
 import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
 import { PageHeaderComponent } from './page-header.component';
 
-
 @NgModule({
   imports: [
     CoreModule,

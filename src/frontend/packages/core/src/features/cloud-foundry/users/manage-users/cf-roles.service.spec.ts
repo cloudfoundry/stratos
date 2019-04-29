@@ -7,6 +7,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CloudFoundryModule } from '../../cloud-foundry.module';
 import { CfRolesService } from './cf-roles.service';
+import { CustomImportModule } from '../../../../custom-import.module';
 
 
 describe('CfRolesService', () => {
@@ -23,6 +24,10 @@ describe('CfRolesService', () => {
         CfRolesService,
         CfUserService,
       ]
+    }).overrideModule(CloudFoundryModule, {
+      remove: {
+        imports: [CustomImportModule]
+      }
     });
   });
 

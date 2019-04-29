@@ -20,16 +20,16 @@ const until = protractor.ExpectedConditions;
 /**
  * Page Object for page sub header component
  */
-export class PageSubHeaderComponent extends Component {
+export class PageTabsPo extends Component {
 
-  constructor(locator = element(by.css('.page-subheader nav'))) {
+  constructor(locator = element(by.css('.page-side-nav'))) {
     super(locator);
   }
 
   getItems(): promise.Promise<MenuItem[]> {
     return this.locator.all(by.tagName('a')).map((elm, index) => {
       return {
-        index: index,
+        index,
         label: elm.getText(),
         class: elm.getAttribute('class'),
         click: elm.click,
@@ -39,7 +39,7 @@ export class PageSubHeaderComponent extends Component {
   }
 
   getItem(name: string): ElementFinder {
-    return this.locator.element(by.cssContainingText('a', ' ' + name + ' '));
+    return this.locator.element(by.cssContainingText('a span', new RegExp(`^${name}$`)));
   }
 
   clickItem(name: string): promise.Promise<void> {

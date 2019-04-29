@@ -8,6 +8,13 @@
   $warning: map-get($status-colors, warning);
   $info: lighten($primmary-color, 20%);
   .page-header {
+    &__warning-count {
+      background-color: mat-color($primary);
+      color: mat-contrast($primary, 500);
+    }
+    &__warning-icon {
+      color: $warning;
+    }
     &__menu-separator {
       background-color: mat-color($foreground, divider);
     }
@@ -24,6 +31,9 @@
     &__username-icon {
       background-color: mat-color($primary);
       color: mat-contrast($primary, 500);
+    }
+    &__menu-icon {
+      background-color: mat-contrast($primary, 500);
     }
   }
 }

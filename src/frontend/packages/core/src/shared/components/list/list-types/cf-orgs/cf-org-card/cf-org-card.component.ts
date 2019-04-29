@@ -25,7 +25,7 @@ import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -51,7 +51,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   currentUser$: Observable<EndpointUser>;
   public entityConfig: ComponentEntityMonitorConfig;
   public favorite: UserFavorite<IFavoriteMetadata>;
-  public orgStatus$: Observable<CardStatus>;
+  public orgStatus$: Observable<StratosStatus>;
 
   constructor(
     private cfUserService: CfUserService,

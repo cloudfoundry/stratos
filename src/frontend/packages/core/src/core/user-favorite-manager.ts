@@ -55,7 +55,7 @@ export class UserFavoriteManager {
   constructor(
     private store: Store<AppState>,
     private logger: LoggerService
-    ) { }
+  ) { }
 
   private getTypeAndID(favorite: UserFavorite<IFavoriteMetadata>) {
     const type = favorite.entityType;
@@ -129,8 +129,6 @@ export class UserFavoriteManager {
           const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid, this.logger);
           const endpointEntity = endpoints[endpointGuid];
           return new UserFavoriteEndpoint(
-            endpointGuid,
-            endpointEntity.cnsi_type,
             endpointEntity
           );
         }),

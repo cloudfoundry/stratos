@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../../../../../../core/current-user-permissions.config';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 
 @Component({
@@ -12,9 +14,12 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 })
 export class CloudFoundrySpaceSummaryComponent {
   detailsLoading$: Observable<boolean>;
+  public permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
+  public permsSpaceDelete = CurrentUserPermissions.SPACE_DELETE;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
+    public cfOrgService: CloudFoundryOrganizationService,
     public cfSpaceService: CloudFoundrySpaceService
   ) {
     this.detailsLoading$ = combineLatest([

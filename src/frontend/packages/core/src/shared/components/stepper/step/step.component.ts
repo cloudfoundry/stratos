@@ -5,6 +5,7 @@ import { IRouterNavPayload } from '../../../../../../store/src/actions/router.ac
 
 export interface IStepperStep {
   validate: Observable<boolean>;
+  valid?: boolean;
   onNext: StepOnNextFunction;
   onEnter?: (data?: any) => void;
 }
@@ -58,6 +59,9 @@ export class StepComponent {
 
   @Input()
   canClose = true;
+
+  @Input()
+  hideCloseButton = false;
 
   @Input()
   hideNextButton = false;

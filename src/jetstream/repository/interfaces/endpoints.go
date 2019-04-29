@@ -17,3 +17,10 @@ type RoutePlugin interface {
 	AddSessionGroupRoutes(echoContext *echo.Group)
 	AddAdminGroupRoutes(echoContext *echo.Group)
 }
+
+type EndpointAction int
+
+const (
+	EndpointRegisterAction EndpointAction = iota
+	EndpointUnregisterAction
+)

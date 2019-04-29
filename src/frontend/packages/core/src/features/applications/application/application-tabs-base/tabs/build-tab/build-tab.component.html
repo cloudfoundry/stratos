@@ -1,3 +1,40 @@
+<app-page-sub-nav *ngIf="isBusyUpdating$ | async as busy">
+  <div class="summary__sub-nav">
+    <div class="summary__actions" *ngIf="applicationService.appSpace$ | async as space">
+      <ng-container *appUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
+        <app-page-sub-nav-section>
+          <button mat-icon-button name="edit" *ngIf="(applicationService.applicationState$ | async)" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button name="delete" (click)="redirectToDeletePage()" matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </app-page-sub-nav-section>
+        <div *ngIf="applicationService.applicationState$ | async as appState" class="app-page-header__actions">
+          <app-page-sub-nav-section>
+            <button mat-icon-button name="restart" [disabled]="busy.updating || !appState.actions.restart" (click)="restartApplication()" matTooltip="Restart">
+              <mat-icon>settings_backup_restore</mat-icon>
+            </button>
+            <button mat-icon-button name="stop" [disabled]="busy.updating" *ngIf="appState.actions.stop;else startButton" (click)="stopApplication()" matTooltip="Stop">
+              <mat-icon>stop</mat-icon>
+            </button>
+            <ng-template #startButton>
+              <button mat-icon-button name="start" [disabled]="busy.updating || !appState.actions.start && !appState.actions.stop" (click)="startApplication()" matTooltip="Start">
+                <mat-icon>play_arrow</mat-icon>
+              </button>
+            </ng-template>
+            <button mat-icon-button name="restage" [disabled]="busy.updating || !appState.actions.restage" (click)="restageApplication()" matTooltip="Restage">
+              <mat-icon>redo</mat-icon>
+            </button>
+          </app-page-sub-nav-section>
+        </div>
+      </ng-container>
+    </div>
+    <a class="app-page-header__anchor" mat-icon-button [disabled]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'" href="{{applicationService.applicationUrl$ | async}}" target="_blank" matTooltip="Visit">
+      <mat-icon>launch</mat-icon>
+    </a>
+  </div>
+</app-page-sub-nav>
 <div class="summary" *ngIf="applicationService.application$ | async as appSvc">
   <app-tile-grid>
     <app-tile-group>

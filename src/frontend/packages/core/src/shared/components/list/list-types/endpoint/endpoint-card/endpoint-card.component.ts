@@ -25,7 +25,8 @@ import {
   getEndpointType,
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
-import { CardStatus } from '../../../../../shared.types';
+import { StratosStatus } from '../../../../../shared.types';
+import { favoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
@@ -46,9 +47,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public endpointConfig: EndpointTypeConfig;
   public hasDetails = true;
   public endpointLink: string = null;
+  public endpointParentType: string;
   private endpointIds = new ReplaySubject<string[]>();
   public endpointIds$: Observable<string[]>;
-  public cardStatus$: Observable<CardStatus>;
+  public cardStatus$: Observable<StratosStatus>;
   private subs: Subscription[] = [];
 
   private componentRef: ComponentRef<EndpointListDetailsComponent>;
@@ -67,11 +69,12 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       return;
     }
     this.pRow = row;
-    this.endpointIds.next([row.guid]);
-    this.endpointConfig = getEndpointType(row.cnsi_type);
+    this.endpointConfig = getEndpointType(row.cnsi_type, row.sub_type);
+    this.endpointParentType = row.sub_type ? getEndpointType(row.cnsi_type, null).label : null;
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    this.endpointLink = row.connectionStatus === 'connected' ? EndpointsService.getLinkForEndpoint(row) : null;
+    this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.doesNotSupportConnect ?
+      EndpointsService.getLinkForEndpoint(row) : null;
     this.updateInnerComponent();
 
   }
@@ -108,8 +111,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   ngOnInit() {
-    this.favorite = this.pRow.cnsi_type === 'cf' ? getFavoriteFromEndpointEntity(this.row) : null;
-    const e = getEndpointType(this.pRow.cnsi_type);
+    const favorite = getFavoriteFromEndpointEntity(this.row);
+    if (favorite) {
+      this.favorite = favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
+    }
+    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
@@ -126,7 +132,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = getEndpointType(this.pRow.cnsi_type);
+    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     if (!e || !e.listDetailsComponent) {
       return;
     }
@@ -150,7 +156,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   updateCardStatus() {
     if (this.row && this.dataSource && this.dataSource.getRowState && !this.cardStatus$) {
       this.cardStatus$ = this.dataSource.getRowState(this.row).pipe(
-        map(rowState => rowState.error ? CardStatus.ERROR : null),
+        map(rowState => rowState.error ? StratosStatus.ERROR : null),
         startWith(null)
       );
 

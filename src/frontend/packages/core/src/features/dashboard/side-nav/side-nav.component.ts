@@ -1,20 +1,27 @@
-import { Component, Inject, InjectionToken, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, InjectionToken, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { buffer, debounceTime, filter, map } from 'rxjs/operators';
 
 import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
+import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
+import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
-export interface SideNavItem {
-  text: string;
-  matIcon: string;
+export interface SideNavItem extends ISubHeaderTabs {
+  label: string;
+  /**
+   * deprecated
+   */
+  text?: string;
+  matIcon?: string;
   matIconFont?: string;
   link: string;
+  position?: number;
   hidden?: Observable<boolean>;
   requiresEndpointType?: string;
   requiresPersistence?: boolean;
@@ -32,10 +39,26 @@ export class SideNavComponent implements OnInit {
     private store: Store<AppState>,
     @Inject(Customizations) public customizations: CustomizationsMetadata
   ) { }
+  @Input() set iconMode(isIconMode: boolean) {
+    if (isIconMode !== this.isIconMode) {
+      this.isIconMode = isIconMode;
+      this.changedMode.next();
+    }
+  }
+  get iconMode() {
+    return this.isIconMode;
+  }
 
   @Input() tabs: SideNavItem[];
+  @Output() changedMode = new EventEmitter();
+  private isIconMode = true;
+
   // Button is not always visible on load, so manually push through an event
   logoClicked: BehaviorSubject<any> = new BehaviorSubject(true);
+
+  public toggleSidenav() {
+    this.store.dispatch(new ToggleSideNav());
+  }
 
   ngOnInit() {
     const toLength = a => a.length;

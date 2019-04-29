@@ -9,7 +9,7 @@ import { LoggerService } from '../../../../../../core/logger.service';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
@@ -36,7 +36,7 @@ export class MetaCardComponent {
   title: MetaCardTitleComponent;
 
   @Input()
-  status$: Observable<CardStatus>;
+  status$: Observable<StratosStatus>;
 
   @Input()
   public favorite: UserFavorite<IFavoriteMetadata>;

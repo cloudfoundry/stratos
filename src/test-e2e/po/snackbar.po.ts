@@ -9,7 +9,7 @@ const until = protractor.ExpectedConditions;
 /**
  * Page Object for snack bar component
  */
-export class SnackBarComponent extends Component {
+export class SnackBarPo extends Component {
 
   constructor() {
     super(element(by.css('.mat-simple-snackbar')));

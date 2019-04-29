@@ -29,6 +29,7 @@ export interface AuthState {
   sessionData: SessionData;
   verifying: boolean;
   redirect?: RouterRedirect;
+  keepAlive?: boolean;
 }
 
 const defaultState: AuthState = {
@@ -70,7 +71,10 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
         ...state,
         sessionData: {
           valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
-          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null
+          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null,
+          plugins: {
+            demo: false
+          }
         },
         verifying: false
       };

@@ -35,13 +35,13 @@ func (invite *UserInvite) Validate(userGUID string, cnsiRecord interfaces.CNSIRe
 
 // UpdateMetadata will add metadata for each Cloud Foundry endpoint to indicate if user invitation is allowed
 func (invite *UserInvite) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
-	log.Info("User Invite:: UpdateMetadata")
+	log.Debug("User Invite:: UpdateMetadata")
 	endpoints, err := invite.portalProxy.ListEndpointsByUser(UserInviteUserID)
 	if err == nil {
 		// Update all of the Cloud Foundry endpoints that have an invite token set to indicate that user invitation is enabled
 		if info.Endpoints["cf"] != nil {
 			for guid, ep := range info.Endpoints["cf"] {
-				log.Infof("Checking endpoint: %s", guid)
+				log.Debugf("Checking endpoint: %s", guid)
 				ep.Metadata["userInviteAllowed"] = hasInviteToken(endpoints, guid)
 			}
 		}

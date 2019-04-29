@@ -27,7 +27,7 @@ export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> 
       new ActionSchemaConfig(
         marketplaceAction,
         serviceInstancesWithSpaceSchemaKey,
-        'Marketplace'
+        'Marketplace Provided'
       ),
       new ActionSchemaConfig(
         userProvidedAction,

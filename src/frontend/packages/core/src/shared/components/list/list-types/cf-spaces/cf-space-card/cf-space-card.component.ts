@@ -28,7 +28,7 @@ import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/servi
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { CardStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -54,7 +54,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   currentUser$: Observable<EndpointUser>;
   entityConfig: ComponentEntityMonitorConfig;
   favorite: UserFavorite<ISpaceFavMetadata>;
-  spaceStatus$: Observable<CardStatus>;
+  spaceStatus$: Observable<StratosStatus>;
 
   constructor(
     private cfUserService: CfUserService,
