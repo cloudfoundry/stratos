@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetSpace } from '../../../../../store/src/actions/space.actions';
@@ -30,7 +30,7 @@ import { fetchServiceInstancesCount } from '../../service-catalog/services-helpe
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { createQuotaDefinition } from './cloud-foundry-organization.service';
+import { CloudFoundryOrganizationService, createQuotaDefinition } from './cloud-foundry-organization.service';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -39,7 +39,7 @@ export class CloudFoundrySpaceService {
   orgGuid: string;
   spaceGuid: string;
   userRole$: Observable<string>;
-  quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
+  quotaDefinition$: Observable<IQuotaDefinition>;
   allowSsh$: Observable<string>;
   totalMem$: Observable<number>;
   routes$: Observable<APIResource<IRoute>[]>;
@@ -59,7 +59,8 @@ export class CloudFoundrySpaceService {
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,
-    private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService
+    private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService,
+    private cfOrgService: CloudFoundryOrganizationService
   ) {
 
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
@@ -133,13 +134,17 @@ export class CloudFoundrySpaceService {
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
-    this.quotaDefinition$ = this.space$.pipe(map(q => {
-      if (q.entity.entity.space_quota_definition) {
-        return q.entity.entity.space_quota_definition;
-      } else {
-        return createQuotaDefinition(this.orgGuid);
-      }
-    }));
+    this.quotaDefinition$ = this.space$.pipe(
+      map(q => q.entity.entity.space_quota_definition),
+      switchMap(def => def ? of(def.entity) : this.cfOrgService.quotaDefinition$),
+      map(def => def ?
+        {
+          ...def,
+          organization_guid: this.orgGuid
+        } :
+        createQuotaDefinition(this.orgGuid)
+      )
+    );
   }
 
   private initialiseAppObservables() {
