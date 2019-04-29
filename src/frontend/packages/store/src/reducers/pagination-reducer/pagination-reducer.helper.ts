@@ -1,6 +1,6 @@
 import { TryEntityPaginationFetchAction } from './../../effects/entity-fetcher.effect';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 import { doOnFirstSubscribe } from '../../../../core/src/core/custom-operators';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
