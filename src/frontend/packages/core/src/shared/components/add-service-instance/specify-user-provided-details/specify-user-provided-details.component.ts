@@ -38,6 +38,30 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
   styleUrls: ['./specify-user-provided-details.component.scss']
 })
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
+
+  constructor(
+    route: ActivatedRoute,
+    private upsService: CloudFoundryUserProvidedServicesService,
+    public modeService: CsiModeService,
+    private store: Store<AppState>,
+  ) {
+    const { endpointId, serviceInstanceId } =
+      route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
+    this.isUpdate = endpointId && serviceInstanceId;
+
+    this.createEditServiceInstance = new FormGroup({
+      name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
+      syslog_drain_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
+      credentials: new FormControl('', isValidJsonValidator()),
+      route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
+      tags: new FormControl([]),
+    });
+    this.bindExistingInstance = new FormGroup({
+      serviceInstances: new FormControl('', [Validators.required]),
+    });
+    this.initUpdate(serviceInstanceId, endpointId);
+    this.setupValidate();
+  }
   public createEditServiceInstance: FormGroup;
   public bindExistingInstance: FormGroup;
   public separatorKeysCodes = [ENTER, COMMA, SPACE];
@@ -47,6 +71,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public tags: { label: string }[] = [];
   public valid = new BehaviorSubject(false);
   private subscriptions: Subscription[] = [];
+  private tagsChanged = new BehaviorSubject(true);
+
   @Input()
   public cfGuid: string;
   @Input()
@@ -74,46 +100,53 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   ];
   formMode = CreateServiceFormMode.CreateServiceInstance;
 
-  constructor(
-    route: ActivatedRoute,
-    private upsService: CloudFoundryUserProvidedServicesService,
-    public modeService: CsiModeService,
-    private store: Store<AppState>,
-  ) {
-    const { endpointId, serviceInstanceId } =
-      route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
-    this.isUpdate = endpointId && serviceInstanceId;
-
-    this.createEditServiceInstance = new FormGroup({
-      name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
-      syslog_drain_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
-      credentials: new FormControl('', isValidJsonValidator()),
-      route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
-      tags: new FormControl([]),
-    });
-    this.bindExistingInstance = new FormGroup({
-      serviceInstances: new FormControl('', [Validators.required]),
-    });
-    this.initUpdate(serviceInstanceId, endpointId);
-    this.setupValidate();
-  }
+  private originalFormValue;
 
   ngOnDestroy(): void {
     safeUnsubscribe(...this.subscriptions);
   }
 
   private setupValidate() {
-    this.subscriptions.push(
-      obsCombineLatest([
-        this.createEditServiceInstance.statusChanges.pipe(startWith('INVALID')),
-        this.bindExistingInstance.statusChanges.pipe(startWith('INVALID')),
-      ]).pipe(
-        map(([createValid, bindValid]) => this.formMode === CreateServiceFormMode.CreateServiceInstance ?
-          this.formStatusToBool(createValid) :
-          this.formStatusToBool(bindValid))
-      )
-        .subscribe(valid => this.valid.next(valid))
+    const obs = obsCombineLatest([
+      this.createEditServiceInstance.statusChanges.pipe(startWith('INVALID')),
+      this.bindExistingInstance.statusChanges.pipe(startWith('INVALID')),
+      this.tagsChanged
+    ]).pipe(
+      map(([createValid, bindValid]) =>
+        this.formStatusToBool(this.formMode === CreateServiceFormMode.CreateServiceInstance ? createValid : bindValid)
+      ),
+      map(valid => this.validAndChanged(valid)),
     );
+    this.subscriptions.push(obs.subscribe(valid => this.valid.next(valid)));
+  }
+
+  private validAndChanged(isValid = false): boolean {
+    // Determine if the step is valid given
+    // 1) the form element's validation state
+    // 2) if process is update... also consider whether the form values have changed
+
+    // Not valid, return immediately
+    if (!isValid) {
+      return false;
+    }
+
+    // Valid, but not update. Skip second part
+    if (!this.isUpdate) {
+      return true;
+    }
+
+    // Haven't yet initialised correctly, skip
+    if (!this.originalFormValue) {
+      return false;
+    }
+
+    // Compare original and new form values
+    const newFormValue = this.getServiceData();
+    if (JSON.stringify(this.originalFormValue) === JSON.stringify(newFormValue)) {
+      // No change, return false
+      return false;
+    }
+    return true;
   }
 
   private formStatusToBool(status: string): boolean {
@@ -155,7 +188,6 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       publishReplay(1),
       refCount()
     );
-
   }
   private initUpdate(serviceInstanceId: string, endpointId: string) {
     if (this.isUpdate) {
@@ -174,6 +206,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
           tags: []
         });
         this.tags = this.tagsArrayToChips(serviceEntity.tags);
+        this.originalFormValue = this.getServiceData();
       });
     }
   }
@@ -267,7 +300,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private getServiceData() {
     const data = {
       ...this.createEditServiceInstance.value,
-      spaceGuid: this.spaceGuid
+      spaceGuid: this.spaceGuid || null
     };
     data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
 
@@ -291,6 +324,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     const label = (event.value || '').trim();
     if (label) {
       this.tags.push({ label });
+      this.tagsChanged.next(true);
     }
 
     if (input) {
@@ -303,6 +337,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
     if (index >= 0) {
       this.tags.splice(index, 1);
+      this.tagsChanged.next(true);
     }
   }
 
