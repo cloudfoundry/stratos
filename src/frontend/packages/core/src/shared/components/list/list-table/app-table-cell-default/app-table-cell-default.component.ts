@@ -1,107 +1,124 @@
-import { Component, Input, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-
+import { Component, Input } from '@angular/core';
+import { combineLatest, Observable, of as observableOf, ReplaySubject } from 'rxjs';
+import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
 import { TableCellCustom } from '../../list.types';
 import { ICellDefinition } from '../table.types';
 
+
+interface IValueContext {
+  value: string;
+  link: string;
+  linkConfig: {
+    linkTarget: string;
+    isExternalLink: boolean;
+    showShortLink: boolean;
+  };
+}
+interface ILinkConfig {
+  linkTarget: string;
+  isExternalLink: boolean;
+  showShortLink: boolean;
+}
 @Component({
   moduleId: module.id,
   selector: 'app-table-cell-default',
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss']
 })
-export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
+export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
 
   public cellDefinition: ICellDefinition<T>;
-
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
   set row(row: T) {
-    this.pRow = row;
-    if (row) {
-      this.setValue(row, this.schemaKey);
-    }
+    this.rowSubject.next(row);
   }
 
-  private pSchemaKey: string;
   @Input('schemaKey')
-  get schemaKey() { return this.pSchemaKey; }
   set schemaKey(schemaKey: string) {
-    this.pSchemaKey = schemaKey;
-    if (this.row) {
-      this.setValue(this.row, schemaKey);
-    }
+    this.schemaKeySubject.next(schemaKey);
   }
-
-  private asyncSub: Subscription;
 
   public valueContext = { value: null };
-  public isLink = false;
-  public isExternalLink = false;
-  public linkValue: string;
-  public linkTarget = '_self';
-  public valueGenerator: (row: T, schemaKey?: string) => string;
-  public showShortLink = false;
+  public rowSubject = new ReplaySubject<T>();
+  public schemaKeySubject = new ReplaySubject<string>();
+  public asyncValueContext$: Observable<IValueContext>;
 
   public init() {
-    this.setValueGenerator();
-    this.setValue(this.row);
-    this.setSyncLink();
+    const row$ = this.rowSubject.asObservable().pipe(distinctUntilChanged());
+    const schemaKey$ = this.schemaKeySubject.asObservable().pipe(startWith(null), distinctUntilChanged());
+    this.asyncValueContext$ = this.getValueContext(row$, schemaKey$, this.cellDefinition);
   }
 
-  private setupLinkDeps() {
-    if (this.cellDefinition.newTab) {
-      this.linkTarget = '_blank';
-    }
-    this.isExternalLink = this.isLink && this.cellDefinition.externalLink;
-    this.showShortLink = this.cellDefinition.showShortLink;
-    if (this.showShortLink && !this.isExternalLink) {
-      throw Error('Short links must be external links');
-    }
+  private getValueContext(
+    row$: Observable<T>,
+    schemaKey$: Observable<string>,
+    cellDefinition: ICellDefinition<T>
+  ): Observable<IValueContext> {
+    const valueGenerator = this.getValueGenerator(cellDefinition);
+    const asyncConfig = cellDefinition.asyncValue;
+    return combineLatest(row$, schemaKey$).pipe(
+      switchMap(([row, schemaKey]) => {
+        const obs$ = asyncConfig ? row[asyncConfig.pathToObs] : null;
+        const value$ = this.getValue(row, cellDefinition, schemaKey, valueGenerator, obs$);
+        const link$ = this.getLink(row, cellDefinition, obs$);
+        const linkConfig$ = this.getLinkConfig(cellDefinition, link$);
+        return combineLatest(value$, link$, linkConfig$).pipe(
+          map(([value, link, linkConfig]) => ({
+            value,
+            link,
+            linkConfig
+          }))
+        );
+      })
+    );
   }
 
-  private setSyncLink() {
-    if (!this.cellDefinition.getLink) {
-      return;
-    }
-    this.isLink = true;
-    this.linkValue = this.cellDefinition.getLink(this.row);
-    this.setupLinkDeps();
-  }
-
-  private setupAsyncLink(value) {
-    if (!this.cellDefinition.getAsyncLink) {
-      return;
-    }
-    this.isLink = true;
-    this.linkValue = this.cellDefinition.getAsyncLink(value);
-    this.setupLinkDeps();
-  }
-
-  private setupAsync(row) {
-    if (this.asyncSub) {
-      return;
-    }
-    const asyncConfig = this.cellDefinition.asyncValue;
-    this.asyncSub = row[asyncConfig.pathToObs].subscribe(value => {
-      this.valueContext.value = pathGet(asyncConfig.pathToValue, value);
-      this.setupAsyncLink(value);
-    });
-  }
-
-  private setValue(row: T, schemaKey?: string) {
-    if (this.cellDefinition && this.cellDefinition.asyncValue) {
-      this.setupAsync(row);
-    } else if (this.valueGenerator) {
-      this.valueContext.value = this.valueGenerator(row, schemaKey);
+  private getValue(
+    row: T,
+    cellDefinition: ICellDefinition<T>,
+    schemaKey: string,
+    valueGenerator: (row: T, schemaKey?: string) => string,
+    obs$: Observable<any>
+  ) {
+    if (obs$) {
+      const asyncConfig = cellDefinition.asyncValue;
+      return obs$.pipe(
+        map(value => {
+          return pathGet(asyncConfig.pathToValue, value);
+        })
+      );
+    } else {
+      return observableOf(valueGenerator(row, schemaKey));
     }
   }
 
-  private setValueGenerator() {
-    this.valueGenerator = this.getValueGenerator(this.cellDefinition);
+  private getLink(row: T, cellDefinition: ICellDefinition<T>, obs$: Observable<any>): Observable<string> {
+    if (cellDefinition.getAsyncLink) {
+      return obs$.pipe(
+        map(value => cellDefinition.getAsyncLink(value))
+      );
+    } else if (cellDefinition.getLink) {
+      return observableOf(cellDefinition.getLink(row));
+    }
+    return observableOf(null);
+  }
+
+  private getLinkConfig(cellDefinition: ICellDefinition<T>, link$: Observable<string>): Observable<ILinkConfig> {
+    return link$.pipe(
+      distinctUntilChanged(),
+      map(link => {
+        if (!link) {
+          return null;
+        }
+        return {
+          linkTarget: cellDefinition.newTab ? '_blank' : '_self',
+          isExternalLink: cellDefinition.externalLink,
+          showShortLink: cellDefinition.showShortLink
+        };
+      })
+    );
   }
 
   private getValueGenerator(cellDefinition: ICellDefinition<T>) {
@@ -116,11 +133,4 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     }
     return null;
   }
-
-  ngOnDestroy() {
-    if (this.asyncSub) {
-      this.asyncSub.unsubscribe();
-    }
-  }
-
 }

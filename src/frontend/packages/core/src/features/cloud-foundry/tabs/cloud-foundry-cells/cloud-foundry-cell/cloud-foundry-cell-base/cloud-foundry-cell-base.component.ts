@@ -35,7 +35,7 @@ export class CloudFoundryCellBaseComponent {
     },
     {
       link: CloudFoundryCellBaseComponent.AppsLinks,
-      label: 'App Instances',
+      label: 'Application Instances',
       matIcon: 'application_instance',
       matIconFont: 'stratos-icons'
     },
