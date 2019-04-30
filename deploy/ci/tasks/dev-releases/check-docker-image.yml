@@ -1,0 +1,36 @@
+---
+platform: linux
+inputs:
+- name: stratos
+- name: image-tag
+image_resource:
+  type: docker-image
+  source:
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
+   tag: "latest"
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Check that an image with the same Commit DOES NOT exist
+      ROOT_DIR=${PWD}
+      VERSION=$(cat image-tag/v2-version)
+      FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
+      GIT_TAG=$(cat image-tag/v2-tag) 
+      STRATOS=${ROOT_DIR}/stratos
+
+      # Make the Docker Auth token
+      AUTH="${DOCKER_USERNAME}:${DOCKER_PASSWORD}"
+      TOKEN=`echo ${AUTH} | base64"
+
+      URL=https://${DOCKER_REGISTRY}/v2/${DOCKER_ORG}/${IMAGE_NAME}/tags/list
+
+      # Fetch the image tags
+      curl -s -H "Authorization: Basic ${TOKEN}" ${URL}
+
+      echo "okay"
+
+

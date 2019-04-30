@@ -1,5 +1,7 @@
 # Stable image build pipeline
-# This pipeline builds the stable Docker images for Docker Compose and AIO when the stable tag is updated
+# This pipeline builds the stable Docker image for the AIO when the stable tag is updated
+# It also tags this stable image with the tag of the release version - e.g. 2.3.0
+# The latest tag is also updated as this track 'stable'
 ---
 resource_types:
 - name: docker-image
@@ -24,6 +26,18 @@ resources:
     private_key: ((github-private-key))
     # Match stable tag
     tag_filter: "stable"
+
+# Artifacts
+- name: image-tag
+  type: s3
+  source:
+    bucket: ((minio-bucket))
+    endpoint: ((minio-server-endpoint))
+    regexp: temp-artifacts/release-(.*).tar
+    access_key_id: ((minio-access-key))
+    secret_access_key: ((minio-secret-access-key))
+    region_name: eu-central-1
+
 - name: aio-docker-image
   type: docker-image
   source:
@@ -31,76 +45,62 @@ resources:
     password: ((docker-password))
     repository: splatform/stratos
 # Docker Images
-- name: jetstream-dc-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-jetstream
-- name: dc-db-migrator-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-db-migrator
-- name: mariadb-dc-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-mariadb
 - name: ui-dc-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-organization))/stratos-dc-console
-groups:
-- name: tests
-  jobs:
-  - build-dc-images
-  - build-aio-image
 
 jobs:
-- name: build-dc-images
+- name: generate-tag-files
   plan:
   - get: stratos
     trigger: true
-  - aggregate:
-    - do:
-      - put: jetstream-dc-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  dev-build
-          tag: stratos/deploy/ci/tasks/build-images/stable-tag
-      - put: dc-db-migrator-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  db-migrator
-          tag: stratos/deploy/ci/tasks/build-images/stable-tag
-      - put: mariadb-dc-image
-        params:
-          dockerfile: stratos/deploy/db/Dockerfile.mariadb
-          build: stratos/deploy/db
-          tag: stratos/deploy/ci/tasks/build-images/stable-tag
-      - put: ui-dc-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.ui
-          build: stratos/
-          target_name: prod-build
-          tag: stratos/deploy/ci/tasks/build-images/stable-tag
-      timeout: 2h30m
-
+  - do:
+    - task: generate-tag
+      file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+      params:
+        TAG_SUFFIX: ((tag-suffix))
+    - put: image-tag
+      params:
+        file: image-tag/*.tar
+        acl: public-read
+- name: check-github
+  plan:
+  - get: stratos
+    passed: [generate-tag-files]
+    trigger: true
+  - get: image-tag
+    passed: [generate-tag-files] 
+    params:
+     unpack: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos/deploy/ci/tasks/dev-releases/check-docker-image.yml
+      params:
+        DOCKER_REGISTRY: ((docker-registry))
+        DOCKER_ORG: ((docker-organization))
+        DOCKER_USERNAME: ((docker-username))
+        DOCKER_PASSWORD: ((docker-password))
+        IMAGE_NAME: stratos
 - name: build-aio-image
   public: true
   serial: true
   plan:
   - get: stratos
+    passed: [check-github]
     trigger: true
+  - get: image-tag
+    passed: [check-github]
+    params:
+     unpack: true
   - put: aio-docker-image
     params:
       build: stratos
       dockerfile: stratos/deploy/Dockerfile.all-in-one
       tag: stratos/deploy/ci/tasks/build-images/stable-tag
+      tas_as_latest: true
+      labels_file: image-tag/image-labels
