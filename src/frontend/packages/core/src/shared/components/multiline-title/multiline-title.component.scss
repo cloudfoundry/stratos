@@ -19,6 +19,8 @@
 // Firefox does not support multi-line text ellipsis
 // So fade out the end of the last line in the div
 // Firefox only
+// Removed via https://github.com/cloudfoundry-incubator/stratos/issues/3544
+// This is no longer fit for purpose. 
 // @media screen and (min--moz-device-pixel-ratio:0) {
 //   .app-multiline-title {
 //     // Fade
