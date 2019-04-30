@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 import { FavoritesStarMock } from '../po/favorites/favorite-star.po';
 
-=======
->>>>>>> v2-master
 import { browser, by, element, promise } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 

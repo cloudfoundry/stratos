@@ -65,10 +65,7 @@ export class E2E {
    */
   debugLog(log: string) {
     protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
-<<<<<<< HEAD
     /* tslint:disable */
-=======
->>>>>>> v2-master
   }
 }
 
