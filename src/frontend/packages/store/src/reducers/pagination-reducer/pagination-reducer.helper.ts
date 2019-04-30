@@ -146,21 +146,6 @@ function getObservables<T = any>(
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
-  // Keep this separate, we don't want tap executing every time someone subscribes
-  // const fetchPagination$ = paginationSelect$.pipe(
-  //   startWith(null),
-  //   pairwise(),
-  //   tap(([prevPag, newPag]: [PaginationEntityState, PaginationEntityState]) => {
-  //     if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, newPag, prevPag)) {
-  //       hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-  //       combineLatest(arrayAction.map(action => safePopulatePaginationFromParent(store, action))).pipe(
-  //         first(),
-  //       ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
-  //     }
-  //   }),
-  //   map(([prevPag, newPag]) => newPag)
-  // );
-
   const entities$: Observable<T[]> = paginationMonitor.currentPage$.pipe(
     doOnFirstSubscribe(() => {
       store.dispatch(new TryEntityPaginationValidationAction(
@@ -177,29 +162,6 @@ function getObservables<T = any>(
       ));
     })
   );
-  // combineLatest(
-  //   store.select(selectEntities(entityKey)),
-  //   fetchPagination$
-  // )
-  //   .pipe(
-  // filter(([ent, pagination]) => {
-  //   return !!pagination && isPageReady(pagination, isLocal);
-  // }),
-  //     publishReplay(1),
-  //     refCount(),
-  //     tap(([ent, pagination]) => {
-  //       const newValidationFootprint = getPaginationCompareString(pagination);
-  //       if (lastValidationFootprint !== newValidationFootprint) {
-  //         lastValidationFootprint = newValidationFootprint;
-  // arrayAction.forEach(action => store.dispatch(new ValidateEntitiesStart(
-  //   action,
-  //   pagination.ids[action.__forcedPageNumber__ || pagination.currentPage],
-  //   false
-  // )));
-  //       }
-  //     }),
-  //     switchMap(() => paginationMonitor.currentPage$),
-  //   );
 
   return {
     pagination$: pagination$.pipe(
