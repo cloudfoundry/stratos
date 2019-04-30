@@ -18,6 +18,7 @@ import {
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
+  serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../../../store/src/helpers/entity-factory';
 import {
@@ -85,6 +86,7 @@ export class CloudFoundryEndpointService {
         createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
         createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with
         // lots of spaces it saves spaces x routes requests
       ]);

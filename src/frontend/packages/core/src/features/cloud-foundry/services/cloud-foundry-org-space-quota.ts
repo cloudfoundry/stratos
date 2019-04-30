@@ -1,14 +1,14 @@
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { truthyIncludingZero } from '../../../core/utils.service';
 import { determineCardStatus } from '../../../shared/components/cards/card-status/card-status.component';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../shared/shared.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 
 
 export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
@@ -65,7 +65,6 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
       map(resource =>
         !!resource.entity[this.quotaPropertyName] && (
           truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.total_routes) ||
-          truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.total_services) ||
           truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.total_private_domains) ||
           truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.app_instance_limit) ||
           truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.memory_limit))

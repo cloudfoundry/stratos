@@ -5,6 +5,7 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import {
   entityFactory,
   organizationSchemaKey,
+  serviceInstancesSchemaKey,
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
@@ -22,6 +23,7 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid);
     const action = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [
+      createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
       createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
     ]);
     super({
