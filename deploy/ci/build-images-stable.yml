@@ -61,10 +61,6 @@ jobs:
       params:
         file: image-tag/*.tar
         acl: public-read
-- name: get-image-metadata
-  plan:
-  - get: stratos
-    trigger: true
 - name: check-docker-image
   plan:
   - get: stratos
@@ -75,7 +71,6 @@ jobs:
     params:
      unpack: true
   - get: aio-docker-image
-    passed: [generate-tag-files] 
   - do:
     - task: build
       privileged: true
