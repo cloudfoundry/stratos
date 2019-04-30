@@ -2,10 +2,16 @@ $side-nav-padding-h: 12px;
 $side-nav-mat-icon-height: 18px;
 $side-nav-mat-icon-height-large: 24px;
 $side-nav-mat-icon-padding-right: 10px;
-$nav-width: 175px;
+$nav-width: 200px;
 $icon-nav-width: 50px;
 .side-nav {
   height: 100%;
+  &__nav-toggle {
+    margin: 0 5px;
+    &-icon {
+      font-size: 20px;
+    }
+  }
   &__inner {
     display: flex;
     flex-direction: column;
@@ -22,7 +28,7 @@ $icon-nav-width: 50px;
     &-inner {
       display: flex;
       flex: 1;
-      padding: 5px;
+      padding: 0 3px 0 10px;
     }
   }
   &__items {
@@ -41,7 +47,7 @@ $icon-nav-width: 50px;
     letter-spacing: .01em;
     line-height: $side-nav-mat-icon-height;
     outline: 0;
-    padding: 15px $side-nav-padding-h;
+    padding: 12px $side-nav-padding-h;
     text-decoration: none;
     white-space: nowrap;
     &-icon {
@@ -56,6 +62,7 @@ $icon-nav-width: 50px;
   &__logo {
     align-items: center;
     display: flex;
+    justify-content: center;
     position: relative;
     width: 100%;
     &-text {
@@ -64,20 +71,13 @@ $icon-nav-width: 50px;
       text-align: center;
       text-transform: uppercase;
     }
-    &-img,
-    &-icon-img {
+    &-img {
+      background-image: url('/core/assets/nav-logo.png');
       background-position: center;
       background-repeat: no-repeat;
       background-size: contain;
       height: 100%;
-      position: absolute;
       width: 100%;
-    }
-    &-img {
-      background-image: url('/core/assets/nav-logo.png');
-    }
-    &-icon-img {
-      background-image: url('/core/assets/nav-logo-icon.png');
     }
   }
   &__top-inner {
@@ -102,6 +102,9 @@ $icon-nav-width: 50px;
   &__copyright {
     opacity: 1;
     white-space: nowrap;
+  }
+  &__copyright-icon {
+    width: 0;
   }
 }
 $transition-time: .2s;
@@ -129,52 +132,85 @@ $transition-delay: .5s;
     &__top-inner {
       overflow-x: hidden;
     }
-  }
-  &:hover {
-    overflow: visible;
-    .side-nav {
-      &__inner {
-        position: fixed;
-        transition-delay: $transition-delay;
-        width: $nav-width;
-      }
-      &,
-      &__top,
-      &__item-icon,
-      &__item-label,
-      &__copyright,
-      &__logo-img,
-      &__copyright-icon,
-      &__logo-icon-img {
-        transition-delay: $transition-delay;
-      }
-      &__copyright-icon {
-        width: 0;
-      }
+    &__top-inner {
+      padding: 0;
+    }
+    &__top {
+      width: $icon-nav-width;
+    }
+    &__nav-toggle {
+      margin: 0;
+    }
+    &__item-icon {
+      font-size: $side-nav-mat-icon-height-large;
+      height: $side-nav-mat-icon-height-large;
+      margin-right: 0;
+      width: $side-nav-mat-icon-height-large;
+    }
+    &__item-label,
+    &__copyright  {
+      opacity: 0;
+    }
+    &__logo-img {
+      width: 0;
+    }
+    &__copyright-icon,
+    &__logo-icon-img {
+      opacity: 1;
+    }
+    &__copyright-icon {
+      width: auto;
+    }
+    &__logo-text {
+      display: none;
     }
   }
-  &:not(:hover) {
-    .side-nav {
-      &__top {
-        width: $icon-nav-width;
-      }
-      &__item-icon {
-        font-size: $side-nav-mat-icon-height-large;
-        height: $side-nav-mat-icon-height-large;
-        margin-right: 0;
-        width: $side-nav-mat-icon-height-large;
-      }
-      &__item-label,
-      &__copyright {
-        opacity: 0;
-      }
-      &__logo-img {
-        width: 0;
-      }
-      &__copyright-icon,
-      &__logo-icon-img {
-        opacity: 1;
-      }
-    }
-  }
+  // This will allow hover nav
+  // &:hover {
+  //   overflow: visible;
+  //   .side-nav {
+  //     &__inner {
+  //       position: fixed;
+  //       transition-delay: $transition-delay;
+  //       width: $nav-width;
+  //     }
+  //     &,
+  //     &__top,
+  //     &__item-icon,
+  //     &__item-label,
+  //     &__copyright,
+  //     &__logo-img,
+  //     &__copyright-icon,
+  //     &__logo-icon-img {
+  //       transition-delay: $transition-delay;
+  //     }
+  //     &__copyright-icon {
+  //       width: 0;
+  //     }
+  //   }
+  // }
+  // &:not(:hover) {
+  //   .side-nav {
+  //     &__top {
+  //       width: $icon-nav-width;
+  //     }
+  //     &__item-icon {
+  //       font-size: $side-nav-mat-icon-height-large;
+  //       height: $side-nav-mat-icon-height-large;
+  //       margin-right: 0;
+  //       width: $side-nav-mat-icon-height-large;
+  //     }
+  //     &__item-label,
+  //     &__copyright  {
+  //       opacity: 0;
+  //     }
+  //     &__logo-img {
+  //       width: 0;
+  //     }
+  //     &__copyright-icon,
+  //     &__logo-icon-img {
+  //       opacity: 1;
+  //     }
+  //   }
+  // }
 }

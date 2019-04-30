@@ -127,7 +127,7 @@ More information on the E2E tests and pre-requisites for running them is availab
 
 ### Code Climate
 
-We use [Code Climate](https://codeclimate.com/github/SUSE/stratos) to check for general code quality issues. This executes against Pull
+We use [Code Climate](https://codeclimate.com/github/cloudfoundry-incubator/stratos) to check for general code quality issues. This executes against Pull
 Requests on creation/push.
 
 #### Running Code Climate locally

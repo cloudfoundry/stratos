@@ -32,5 +32,18 @@ export const createPaginationCompleteWatcher = (store: Store<AppState>, action: 
   );
 
 export function initStore() {
-    setDefaultPaginationState({ ...defaultCfEntitiesState });
- }
+  setDefaultPaginationState({ ...defaultCfEntitiesState });
+}
+
+
+export function getDashboardStateSessionId(username?: string) {
+  const prefix = 'stratos-';
+  if (username) {
+    return prefix + username;
+  }
+  const idElement = document.getElementById('__stratos-userid__');
+  if (idElement) {
+    return prefix + idElement.innerText;
+  }
+  return null;
+}

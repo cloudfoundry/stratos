@@ -13,9 +13,12 @@ import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { TabNavService } from '../../../../tab-nav.service';
+import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import { StratosStatus } from '../../shared.types';
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 
 @Component({
   selector: 'app-page-header',
@@ -28,6 +31,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
   private pTabs: ISubHeaderTabs[];
+
+  public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
   @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
 
@@ -62,6 +67,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @Input() showUnderFlow = false;
 
   @Input() showHistory = true;
+
+  public events$: Observable<IGlobalEvent[]>;
+  public eventCount$: Observable<number>;
+  public eventPriorityStatus$: Observable<StratosStatus>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
@@ -117,12 +126,12 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }) || breadcrumbs[0];
   }
 
-  toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
-  }
-
   logout() {
     this.store.dispatch(new Logout());
+  }
+
+  public toggleSidenav() {
+    this.store.dispatch(new ToggleSideNav());
   }
 
   constructor(
@@ -130,7 +139,13 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private route: ActivatedRoute,
     private tabNavService: TabNavService,
     private router: Router,
+    eventService: GlobalEventService
   ) {
+    this.eventCount$ = eventService.events$.pipe(
+      map(events => events.length)
+    );
+    this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
+
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(

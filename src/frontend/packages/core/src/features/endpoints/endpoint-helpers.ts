@@ -156,11 +156,20 @@ export function getEndpointTypes() {
 }
 
 export function getEndpointType(type: string, subType: string): EndpointTypeConfig {
-  return getEndpointTypeByKey(createEndpointKey(type, subType));
+  return getEndpointTypeByKey(createEndpointKey(type, subType)) || getDefaultEndpointTypeConfig(type, subType);
 }
 
 function getEndpointTypeByKey(key: string): EndpointTypeConfig {
   return endpointTypesMap[key];
+}
+
+function getDefaultEndpointTypeConfig(type: string, subType?: string): EndpointTypeConfig {
+  return {
+    label: 'Unknown',
+    type,
+    subType,
+    doesNotSupportConnect: true
+  };
 }
 
 export function getIconForEndpoint(type: string, subType: string): EndpointIcon {

@@ -370,7 +370,7 @@ This is the first release candidate of Version 2 of Stratos.
 The main focus of this release are bug fixes for release.
 
 **Improvements:**
-- Add ingress example and docs for kubernetes deloyment [\#2510](https://github.com/cloudfoundry-incubator/stratos/pull/2510)
+- Add ingress example and docs for kubernetes deployment [\#2510](https://github.com/cloudfoundry-incubator/stratos/pull/2510)
 
 **Fixed bugs:**
 - Fix for app count being stuck after adding an app in org card [\#2511](https://github.com/cloudfoundry-incubator/stratos/pull/2511)

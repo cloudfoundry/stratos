@@ -87,8 +87,11 @@ run:
 
       # Need to create the Helm chart
       # Download the Helm chart from the last RC/Beta/Alpha - we'll modify it
-      HELM_CHART_URL=https://github.com/${HELM_REPOSITORY}/releases/download/${LAST_TAG}/console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
-      echo "Downloaing Helm Chart for Release Candidate from: $HELM_CHART_URL"
+      # Note: Use helper to ensure this works with a private GitHub repository
+      echo "Downloaing Helm Chart for Release Candidate"
+      downloadReleaseFile ${GITHUB_TOKEN} ${HELM_REPOSITORY} ${LAST_TAG} console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
+      echo "Downloaded Helm Chart"
+      ls -al console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
 
       mkdir tmp
       cd tmp

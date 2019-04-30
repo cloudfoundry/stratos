@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MDAppModule } from '../../../core/md.module';
+import { MDAppModule } from '../md.module';
 import { StatefulIconComponent } from './stateful-icon.component';
 
 describe('StatefulIconComponent', () => {
