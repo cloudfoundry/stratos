@@ -44,7 +44,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: splatform/stratos
+    repository: ((docker-organization))/stratos
 
 jobs:
 - name: generate-tag-files
