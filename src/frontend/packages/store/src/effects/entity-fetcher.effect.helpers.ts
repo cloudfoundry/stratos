@@ -1,5 +1,4 @@
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
-
 import { PaginationEntityState } from '../types/pagination.types';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
@@ -17,7 +16,7 @@ export function isPageReady(pagination: PaginationEntityState, isLocal = false) 
     return false;
   }
   if (isLocal) {
-    return !Object.values(pagination.pageRequests).find((paginationPage) => paginationPage.busy);
+    return pagination.pageRequests[1] && !Object.values(pagination.pageRequests).find((paginationPage) => paginationPage.busy);
   }
   if (!pagination.pageRequests[pagination.currentPage]) {
     return false;
