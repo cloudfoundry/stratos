@@ -125,6 +125,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.valid.next(res);
     }));
 
+    // Set initial valid status
+    this.endpointForm.updateValueAndValidity();
   }
 
   ngOnInit() {
