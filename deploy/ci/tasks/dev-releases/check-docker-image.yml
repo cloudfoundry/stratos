@@ -13,7 +13,7 @@ image_resource:
 run:
   path: sh
   args:
-    - -ec
+    - -c
     - |
       # Check that an image with the same Commit DOES NOT exist
       ROOT_DIR=${PWD}
@@ -21,6 +21,10 @@ run:
       FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
       GIT_TAG=$(cat image-tag/v2-tag) 
       STRATOS=${ROOT_DIR}/stratos
+
+      ls ${ROOT_DIR}
+      ls /aio-docker-image
+      cat /aio-docker-image/docker_inspect.json
 
       # Make the Docker Auth token
       AUTH="${DOCKER_USERNAME}:${DOCKER_PASSWORD}"
