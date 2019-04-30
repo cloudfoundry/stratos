@@ -187,8 +187,8 @@ export class TryFetchEffect {
 
   @Effect({ dispatch: false })
   tryPaginationFetch$ = this.actions$.pipe(
-    ofType<TryEntityPaginationValidationAction>(TRY_PAGINATION_VALIDATION),
-    mergeMap((action: TryEntityPaginationValidationAction) => {
+    ofType<TryEntityPaginationFetchAction>(TRY_PAGINATION_FETCH),
+    mergeMap((action: TryEntityPaginationFetchAction) => {
       return this.store.select(selectPaginationState(action.entityKey, action.paginationKey)).pipe(
         startWith(null),
         pairwise(),
