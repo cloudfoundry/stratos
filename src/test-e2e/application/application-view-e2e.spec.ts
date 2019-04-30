@@ -1,7 +1,7 @@
-import { promise, protractor, browser } from 'protractor';
+import { promise, protractor } from 'protractor';
 
-import { IApp } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { IApp } from '../../frontend/packages/core/src/core/cf-api.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
@@ -14,7 +14,7 @@ import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { CreateRoutesPage } from './po/routes-create-page.po';
 
-describe('Application View -', function () {
+describe('Application View -', () => {
   let cfHelper: CFHelpers;
   let applicationE2eHelper: ApplicationE2eHelper;
   const appName = ApplicationE2eHelper.createApplicationName();

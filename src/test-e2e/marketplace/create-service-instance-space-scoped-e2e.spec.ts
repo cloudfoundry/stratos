@@ -7,24 +7,31 @@ import { ServicesWallPage } from './services-wall.po';
 
 describe('Create Service Instance of Space Scoped Service', () => {
   const createServiceInstance = new CreateServiceInstance();
+  let createMarketplaceServiceInstance;
+  let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
+  let serviceInstanceName: string;
+
   beforeAll(() => {
-    const e2eSetup = e2e.setup(ConsoleUserType.user)
+    e2eSetup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.user)
-      .connectAllEndpoints(ConsoleUserType.admin);
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .getInfo();
   });
 
   beforeEach(() => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
+    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
   });
 
+
   it('- should reach create service instance page', () => {
-    expect(createServiceInstance.isActivePage()).toBeTruthy();
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
 
   describe('Long running tests - ', () => {
@@ -32,11 +39,12 @@ describe('Create Service Instance of Space Scoped Service', () => {
     extendE2ETestTime(timeout);
 
     it('- should be able to to create a service instance', () => {
+      serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
 
-      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name);
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name, serviceInstanceName);
       servicesWall.waitForPage();
 
-      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, servicesHelperE2E.serviceInstanceName);
+      servicesHelperE2E.getServiceCardWithTitle(servicesWall.serviceInstancesList, serviceInstanceName);
 
     }, timeout);
   });
@@ -46,7 +54,7 @@ describe('Create Service Instance of Space Scoped Service', () => {
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.invalidOrgName,
       e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.invalidSpaceName);
-    createServiceInstance.stepper.next();
+    createMarketplaceServiceInstance.stepper.next();
 
     // Select Service
     servicesHelperE2E.setServiceSelection(e2e.secrets.getDefaultCFEndpoint().services.spaceScopedService.name, true);
@@ -54,5 +62,5 @@ describe('Create Service Instance of Space Scoped Service', () => {
   });
 
 
-  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
 });

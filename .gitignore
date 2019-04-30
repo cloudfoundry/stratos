@@ -66,6 +66,7 @@ deploy/hsc-upgrade-volume/
 deploy/development.rc
 deploy/ci/secrets.yml
 deploy/kubernetes/values.yaml
+deploy/kubernetes/helm-chart/
 deploy/cloud-foundry/db-migration/goose
 outputs/
 deploy/kubernetes/console/charts/
@@ -92,18 +93,22 @@ src/jetstream/config.properties
 
 # Customisations
 
-src/frontend/favicon.ico
-src/frontend/sass/custom.scss
-src/frontend/assets/eula.html
-src/frontend/assets/logo.png
-src/frontend/assets/nav-logo.png
-src/frontend/assets/login-bg.jpg
-src/frontend/app/custom-import.module.ts
-src/frontend/app/custom
-src/frontend/assets/custom
-src/frontend/sass/custom
-src/frontend/index.html
+src/frontend/packages/core/favicon.ico
+src/frontend/packages/core/sass/custom.scss
+src/frontend/packages/core/assets/eula.html
+src/frontend/packages/core/assets/logo.png
+src/frontend/packages/core/assets/nav-logo.png
+src/frontend/packages/core/assets/login-bg.jpg
+src/frontend/packages/core/src/custom-import.module.ts
+src/frontend/packages/core/src/custom
+src/frontend/packages/core/assets/custom
+src/frontend/packages/core/sass/custom
+src/frontend/packages/core/src/index.html
 
 # Prebuild package
 
 stratos-frontend-prebuild.zip
+
+src/frontend/assets
+src/frontend/sass
+go-vendor-*.tgz

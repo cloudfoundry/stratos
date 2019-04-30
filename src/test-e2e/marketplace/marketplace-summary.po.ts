@@ -1,6 +1,6 @@
-import { by, ElementFinder, element, promise, browser, protractor, Key } from 'protractor';
+import { by, element, ElementFinder } from 'protractor';
+
 import { Page } from '../po/page.po';
-import { ListComponent } from '../po/list.po';
 
 export class MarketplaceSummaryPage extends Page {
 

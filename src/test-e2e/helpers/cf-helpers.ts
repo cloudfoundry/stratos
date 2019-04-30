@@ -1,8 +1,8 @@
 import { promise } from 'protractor';
 
-import { IApp, IDomain, IOrganization, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
-import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
-import { CfUser } from '../../frontend/app/store/types/user.types';
+import { IApp, IDomain, IOrganization, IRoute, ISpace } from '../../frontend/packages/core/src/core/cf-api.types';
+import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
+import { CfUser } from '../../frontend/packages/store/src/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFRequestHelpers } from './cf-request-helpers';
@@ -102,7 +102,7 @@ export class CFHelpers {
   addSpaceIfMissing(cnsiGuid, orgGuid, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
     const that = this;
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
-      .then(function (space) {
+      .then(function(space) {
         return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, spaceName, userGuid);
       });
   }
@@ -231,6 +231,7 @@ export class CFHelpers {
 
   addRoute(cnsiGuid: string, spaceGuid: string, domainGuid: string, host: string, port?: number, path?: string)
     : promise.Promise<APIResource<IRoute>> {
+    e2e.log(`Creating route ${host} ${path} ${port}`);
     return this.cfRequestHelper.sendCfPost<APIResource<IRoute>>(cnsiGuid, 'routes', {
       domain_guid: domainGuid,
       space_guid: spaceGuid,

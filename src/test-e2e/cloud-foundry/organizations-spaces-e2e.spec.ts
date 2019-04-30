@@ -56,20 +56,20 @@ describe('CF - Manage Organizations and Spaces', () => {
       const card = new MetaCard(cards[0], MetaCardTitleType.CUSTOM);
       card.getTitle().then(existingTitle => {
         // Click the add button to add an organization
-        cloudFoundry.header.clickIconButton('add');
+        cloudFoundry.subHeader.clickIconButton('add');
         const modal = new StepperComponent();
 
         // Can't add with empty name
         expect(modal.canNext()).toBeFalsy();
 
         modal.getStepperForm().fill({
-          'orgname': testOrgName
+          orgname: testOrgName
         });
         expect(modal.canNext()).toBeTruthy();
 
         // Can't use a name already taken
         modal.getStepperForm().fill({
-          'orgname': existingTitle
+          orgname: existingTitle
         });
         expect(modal.canNext()).toBeFalsy();
 
@@ -84,10 +84,10 @@ describe('CF - Manage Organizations and Spaces', () => {
     const cardView = cloudFoundry.goToOrgView();
 
     // Click the add button to add an organization
-    cloudFoundry.header.clickIconButton('add');
+    cloudFoundry.subHeader.clickIconButton('add');
     const modal = new StepperComponent();
     modal.getStepperForm().fill({
-      'orgname': testOrgName
+      orgname: testOrgName
     });
     expect(modal.canNext()).toBeTruthy();
     modal.next();
@@ -112,7 +112,7 @@ describe('CF - Manage Organizations and Spaces', () => {
     card.getTitle().then(title => {
       card.click();
       // Should be org view
-      cloudFoundry.header.clickIconButton('keyboard');
+      cloudFoundry.subHeader.clickIconButton('keyboard');
       expect(cloudFoundry.header.getTitleText()).toBe('CLI Info');
       cloudFoundry.breadcrumbs.getBreadcrumbs().then(breadcrumbs => {
         expect(breadcrumbs.length).toBe(2);
@@ -139,22 +139,22 @@ describe('CF - Manage Organizations and Spaces', () => {
       cardView.cards.findCardByTitle(testOrgName, MetaCardTitleType.CUSTOM, true).then(org => {
         org.click();
 
-        cloudFoundry.subHeader.clickItem('Spaces');
+        cloudFoundry.tabs.clickItem('Spaces');
         cardView.cards.waitUntilShown();
         list.header.refresh();
 
         // Add space
         // Click the add button to add a space
-        cloudFoundry.header.clickIconButton('add');
+        cloudFoundry.subHeader.clickIconButton('add');
 
         const modal = new StepperComponent();
         modal.getStepperForm().fill({
-          'spacename': testSpaceName
+          spacename: testSpaceName
         });
         expect(modal.canNext()).toBeTruthy();
         modal.next();
 
-        cloudFoundry.subHeader.clickItem('Spaces');
+        cloudFoundry.tabs.clickItem('Spaces');
         cardView.cards.waitUntilShown();
 
         // Get the card for the space
@@ -175,10 +175,10 @@ describe('CF - Manage Organizations and Spaces', () => {
     const cardView = cloudFoundry.goToOrgView();
 
     // Click the add button to add an organization
-    cloudFoundry.header.clickIconButton('add');
+    cloudFoundry.subHeader.clickIconButton('add');
     const modal = new StepperComponent();
     modal.getStepperForm().fill({
-      'orgname': testOrg2Name
+      orgname: testOrg2Name
     });
     modal.waitUntilCanNext('Create');
     modal.next();
@@ -189,22 +189,22 @@ describe('CF - Manage Organizations and Spaces', () => {
     cardView.cards.findCardByTitle(testOrg2Name, MetaCardTitleType.CUSTOM, true).then(org => {
       org.click();
 
-      cloudFoundry.subHeader.clickItem('Spaces');
+      cloudFoundry.tabs.clickItem('Spaces');
       cardView.cards.waitUntilShown();
       const list = new ListComponent();
       list.header.refresh();
 
       // Add space
       // Click the add button to add a space
-      cloudFoundry.header.clickIconButton('add');
+      cloudFoundry.subHeader.clickIconButton('add');
 
       modal.getStepperForm().fill({
-        'spacename': testSpaceName
+        spacename: testSpaceName
       });
       expect(modal.canNext()).toBeTruthy();
       modal.next();
 
-      cloudFoundry.subHeader.clickItem('Spaces');
+      cloudFoundry.tabs.clickItem('Spaces');
       cardView.cards.waitUntilShown();
     });
 

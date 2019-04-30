@@ -44,6 +44,8 @@ type CNSIRecord struct {
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
 	SSOAllowed             bool     `json:"sso_allowed"`
+	SubType                string   `json:"sub_type"`
+	Metadata               string   `json:"metadata"`
 }
 
 // ConnectedEndpoint
@@ -58,6 +60,8 @@ type ConnectedEndpoint struct {
 	AuthorizationEndpoint  string   `json:"-"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	TokenMetadata          string   `json:"-"`
+	SubType                string   `json:"sub_type"`
+	EndpointMetadata       string   `json:"metadata"`
 }
 
 const (
@@ -130,6 +134,10 @@ type LoginRes struct {
 }
 
 type LoginHookFunc func(c echo.Context) error
+type LoginHook struct {
+	Priority int
+	Function LoginHookFunc
+}
 
 type ProxyRequestInfo struct {
 	EndpointGUID string
@@ -187,6 +195,7 @@ type Info struct {
 	User         *ConnectedUser                        `json:"user"`
 	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
 	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
+	Plugins      map[string]bool                       `json:"plugins"`
 	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
 }
@@ -194,6 +203,7 @@ type Info struct {
 // Extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
+	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
 	User              *ConnectedUser    `json:"user"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
 	TokenMetadata     string            `json:"-"`
@@ -262,7 +272,7 @@ type PortalConfig struct {
 	EncryptionKeyInBytes            []byte
 	ConsoleVersion                  string
 	IsCloudFoundry                  bool
-	LoginHook                       LoginHookFunc
+	LoginHooks                      []LoginHook
 	SessionStore                    SessionStorer
 	ConsoleConfig                   *ConsoleConfig
 	PluginConfig                    map[string]string

@@ -84,3 +84,23 @@ Service port:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "console.certName" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+
+{{/*
+Generate self-signed certificate
+*/}}
+{{- define "console.generateCertificate" -}}
+{{- $altNames := list ( printf "%s.%s" (include "console.certName" .) .Release.Namespace ) ( printf "%s.%s.svc" (include "console.certName" .) .Release.Namespace ) -}}
+{{- $ca := genCA "stratos-ca" 365 -}}
+{{- $cert := genSignedCert ( include "console.certName" . ) nil $altNames 365 $ca -}}
+tls.crt: {{ $cert.Cert | b64enc }}
+tls.key: {{ $cert.Key | b64enc }}
+{{- end -}}

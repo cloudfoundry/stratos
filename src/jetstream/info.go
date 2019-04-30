@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
@@ -66,7 +68,10 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			// Plugin doesn't implement an Endpoint Plugin interface, skip
 			continue
 		}
-		s.Endpoints[endpointPlugin.GetType()] = make(map[string]*interfaces.EndpointDetail)
+		// Empty Type can be used if a plugin just wants to implement UpdateMetadata
+		if len(endpointPlugin.GetType()) > 0 {
+			s.Endpoints[endpointPlugin.GetType()] = make(map[string]*interfaces.EndpointDetail)
+		}
 	}
 
 	// get the CNSI Endpoints
@@ -75,6 +80,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		// Extend the CNSI record
 		endpoint := &interfaces.EndpointDetail{
 			CNSIRecord:        cnsi,
+			EndpointMetadata:  marshalEndpointMetadata(cnsi.Metadata),
 			Metadata:          make(map[string]string),
 			SystemSharedToken: false,
 		}
@@ -97,5 +103,17 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		}
 	}
 
+	s.Plugins = p.PluginsStatus
+
 	return s, nil
+}
+
+func marshalEndpointMetadata(metadata string) interface{} {
+	if len(metadata) > 2 && strings.Index(metadata, "{") == 0 {
+		var anyJSON map[string]interface{}
+		json.Unmarshal([]byte(metadata), &anyJSON)
+		return anyJSON
+	} else {
+		return metadata
+	}
 }

@@ -1,14 +1,13 @@
 import { browser } from 'protractor';
 
-import { IApp } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { IApp } from '../../frontend/packages/core/src/core/cf-api.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
-import { CreateApplicationStepper } from './po/create-application-stepper.po';
 
 describe('Application Create', function () {
 
@@ -39,8 +38,9 @@ describe('Application Create', function () {
     const testAppName = ApplicationE2eHelper.createApplicationName(testTime);
 
     // Press '+' button
-    appWall.clickCreateApp();
-    const createAppStepper = new CreateApplicationStepper();
+    const baseCreateAppStep = appWall.clickCreateApp();
+    baseCreateAppStep.waitForPage();
+    const createAppStepper = baseCreateAppStep.selectShell();
     createAppStepper.waitUntilShown();
 
     // Expect cf step

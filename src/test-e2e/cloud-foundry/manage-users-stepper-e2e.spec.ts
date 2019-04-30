@@ -6,10 +6,10 @@ import { E2EHelpers } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
 import { CheckboxComponent } from '../po/checkbox.po';
+import { StepperComponent } from '../po/stepper.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 import { ManagerUsersPage } from './manage-users-page.po';
 import { setUpTestOrgSpaceE2eTest } from './users-list-e2e.helper';
-import { StepperComponent } from '../po/stepper.po';
 
 describe('Manage Users Stepper', () => {
 

@@ -1,0 +1,40 @@
+<app-meta-card *ngIf="serviceInstanceEntity" class="app-service-card" [actionMenu]="cardMenu"
+  [entityConfig]="entityConfig">
+  <app-meta-card-title>
+    <app-multiline-title class="service-instance-card__title">{{ serviceInstanceEntity.entity.name }}
+    </app-multiline-title>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>{{cfOrgSpace.getLabel() | async}}</app-meta-card-key>
+    <app-meta-card-value>
+      <app-cf-org-space-links [service]="cfOrgSpace" [spaceBreadCrumbs]="getSpaceBreadcrumbs()">
+      </app-cf-org-space-links>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service</app-meta-card-key>
+    <app-meta-card-value>User Provided</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Applications Attached</app-meta-card-key>
+    <app-meta-card-value>{{ serviceInstanceEntity.entity.service_bindings?.length }} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Route Service URL</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceInstanceEntity.entity.route_service_url  || 'None' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceInstanceEntity.entity.syslog_drain_url || 'None' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Tags</app-meta-card-key>
+    <app-meta-card-value>
+      <app-chips [chips]="serviceInstanceTags"></app-chips>
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

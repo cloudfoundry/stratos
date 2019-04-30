@@ -1,6 +1,6 @@
+import { browser, promise } from 'protractor';
+
 import { CFPage } from '../../po/cf-page.po';
-import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
-import { promise, browser } from 'protractor';
 
 
 export class CfSpaceLevelPage extends CFPage {
@@ -36,7 +36,11 @@ export class CfSpaceLevelPage extends CFPage {
   }
 
   goToSITab() {
-    return this.goToTab('Service Instances', 'service-instances');
+    return this.goToTab('Services', 'service-instances');
+  }
+
+  goToUPSITab() {
+    return this.goToTab('User Services', 'user-service-instances');
   }
 
   goToRoutesTab() {
@@ -48,7 +52,7 @@ export class CfSpaceLevelPage extends CFPage {
   }
 
   private goToTab(label: string, urlSuffix: string) {
-    return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
+    return this.tabs.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
 }

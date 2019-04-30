@@ -3,7 +3,6 @@ FROM splatform/stratos-aio-base:opensuse as builder
 
 COPY --chown=stratos:users *.json ./
 COPY --chown=stratos:users gulpfile.js ./
-COPY --chown=stratos:users Gopkg.* ./
 COPY --chown=stratos:users src ./src
 COPY --chown=stratos:users build ./build/
 COPY --chown=stratos:users deploy/tools/generate_cert.sh generate_cert.sh

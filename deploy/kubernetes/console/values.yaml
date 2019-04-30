@@ -1,4 +1,4 @@
-# Tag for images
+# Tag for images - do not edit
 consoleVersion: latest
 dockerRegistrySecret: regsecret
 # Specify default DB password
@@ -36,6 +36,16 @@ console:
       enabled: false
       servicePort: 80
       # nodePort: 30001
+
+  # Name of config map that provides the template files for user invitation emails
+  templatesConfigMapName:
+
+  # Email subject of the user invitation message 
+  userInviteSubject: ~
+
+  # Whether to perform the volume migration job on install/upgrade (migrate to secrets)
+  migrateVolumes: true
+
 images:
   console: stratos-console
   proxy: stratos-jetstream
@@ -86,7 +96,29 @@ env:
   DOMAIN:
   UAA_HOST: 
   UAA_PORT: 2793
+
+  # SMTP Settings for Email Sending (User Invites)
+  # If true, authenticate against the SMTP server using AUTH command.
+  SMTP_AUTH: "false"
+
+  # SMTP from address
+  SMTP_FROM_ADDRESS: ~
+
+  # SMTP server username
+  SMTP_USER: ~
+
+  # SMTP server password
+  SMTP_PASSWORD: ~
+
+  # SMTP server host address
+  SMTP_HOST: ~
+
+  # SMTP server port
+  SMTP_PORT: "25"
+
 kube:
+  # Whether RBAC is enabled in the Kubernetes cluster
+  auth: "rbac"
   external_console_https_port: 8443
   storage_class:
     persistent:
