@@ -60,7 +60,7 @@ jobs:
       params:
         file: image-tag/*.tar
         acl: public-read
-- name: check-github
+- name: check-docker-image
   plan:
   - get: stratos
     passed: [generate-tag-files]
@@ -85,10 +85,10 @@ jobs:
   serial: true
   plan:
   - get: stratos
-    passed: [check-github]
+    passed: [check-docker-image]
     trigger: true
   - get: image-tag
-    passed: [check-github]
+    passed: [check-docker-image]
     params:
      unpack: true
   - put: aio-docker-image

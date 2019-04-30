@@ -13,7 +13,7 @@ image_resource:
 run:
   path: sh
   args:
-    - -exc
+    - -ec
     - |
       # Check that an image with the same Commit DOES NOT exist
       ROOT_DIR=${PWD}
@@ -24,7 +24,7 @@ run:
 
       # Make the Docker Auth token
       AUTH="${DOCKER_USERNAME}:${DOCKER_PASSWORD}"
-      TOKEN=`echo ${AUTH} | base64"
+      TOKEN=`echo "${AUTH}" | base64`
 
       URL=https://${DOCKER_REGISTRY}/v2/${DOCKER_ORG}/${IMAGE_NAME}/tags/list
 
