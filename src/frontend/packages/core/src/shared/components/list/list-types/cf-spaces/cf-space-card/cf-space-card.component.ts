@@ -28,7 +28,7 @@ import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/servi
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -140,14 +140,15 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
   setValues = (roles: string, apps: APIResource<IApp>[]) => {
     this.userRolesInSpace = roles;
-    const quotaDefinition = this.row.entity.space_quota_definition || createQuotaDefinition(this.orgGuid);
+    const quotaDefinition = this.row.entity.space_quota_definition ?
+      this.row.entity.space_quota_definition.entity : createQuotaDefinition(this.orgGuid);
     if (apps) {
       this.setAppsDependentCounts(apps);
       this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
-      this.normalisedMemoryUsage = this.memoryTotal / quotaDefinition.entity.memory_limit * 100;
+      this.normalisedMemoryUsage = this.memoryTotal / quotaDefinition.memory_limit * 100;
     }
-    this.appInstancesLimit = truthyIncludingZeroString(quotaDefinition.entity.app_instance_limit);
-    this.memoryLimit = truthyIncludingZeroString(quotaDefinition.entity.memory_limit);
+    this.appInstancesLimit = truthyIncludingZeroString(quotaDefinition.app_instance_limit);
+    this.memoryLimit = truthyIncludingZeroString(quotaDefinition.memory_limit);
   }
 
   ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());

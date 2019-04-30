@@ -44,7 +44,7 @@
         cancelButtonText="Cancel">
         <app-bind-apps-step #bindApp [boundAppId]="appId" [apps$]="apps$"></app-bind-apps-step>
       </app-step>
-      <app-step title="Service Instance" [onEnter]="supd.onEnter" [onNext]="supd.onNext" [valid]="supd.valid | async">
+      <app-step title="Service Instance" [onNext]="supd.onNext" [valid]="supd.valid | async">
         <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="cfGuid$ | async"
           [spaceGuid]="spaceGuid$ | async" [serviceInstanceId]="serviceInstanceId" #supd>
         </app-specify-user-provided-details>
