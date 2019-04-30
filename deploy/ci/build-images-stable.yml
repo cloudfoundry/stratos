@@ -38,19 +38,13 @@ resources:
     secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
 
+# Docker Images
 - name: aio-docker-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
     repository: splatform/stratos
-# Docker Images
-- name: ui-dc-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-console
 
 jobs:
 - name: generate-tag-files
