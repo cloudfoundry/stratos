@@ -19,17 +19,17 @@
 // Firefox does not support multi-line text ellipsis
 // So fade out the end of the last line in the div
 // Firefox only
-@media screen and (min--moz-device-pixel-ratio:0) {
-  .app-multiline-title {
-    // Fade
-    &::after {
-      bottom: 0;
-      content: '';
-      height: 1.2em;
-      position: absolute;
-      right: 0;
-      text-align: right;
-      width: 24px;
-    }
-  }
-}
+// @media screen and (min--moz-device-pixel-ratio:0) {
+//   .app-multiline-title {
+//     // Fade
+//     &::after {
+//       bottom: 0;
+//       content: '';
+//       height: 1.2em;
+//       position: absolute;
+//       right: 0;
+//       text-align: right;
+//       width: 24px;
+//     }
+//   }
+// }
