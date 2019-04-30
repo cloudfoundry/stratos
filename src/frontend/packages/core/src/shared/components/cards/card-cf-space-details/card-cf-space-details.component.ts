@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-
-import { CloudFoundrySpaceService } from '../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { CloudFoundrySpaceService } from '../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 
 @Component({
   selector: 'app-card-cf-space-details',
