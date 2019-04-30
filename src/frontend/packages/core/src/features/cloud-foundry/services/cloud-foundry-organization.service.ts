@@ -32,17 +32,14 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
-export const createQuotaDefinition = (orgGuid: string): APIResource<IQuotaDefinition> => ({
-  entity: {
-    memory_limit: -1,
-    app_instance_limit: -1,
-    instance_memory_limit: -1,
-    name: 'None assigned',
-    organization_guid: orgGuid,
-    total_services: -1,
-    total_routes: -1
-  },
-  metadata: null
+export const createQuotaDefinition = (orgGuid: string): IQuotaDefinition => ({
+  memory_limit: -1,
+  app_instance_limit: -1,
+  instance_memory_limit: -1,
+  name: 'None assigned',
+  organization_guid: orgGuid,
+  total_services: -1,
+  total_routes: -1
 });
 
 @Injectable()
