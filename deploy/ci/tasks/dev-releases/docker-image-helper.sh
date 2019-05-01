@@ -6,10 +6,6 @@ function dockerMakeCurl() {
   local URL=$1
   local MANIFEST=$2
 
-  echo $URL
-  echo $MANIFEST
-  echo $TOKEN
-
   if [ "$MANIFEST" == "true" ]; then
 
     if [ "$TOKEN" != "" ]; then
