@@ -35,5 +35,9 @@ run:
 
       echo "Current Docker Image has Commit $COMMIT"
 
+      if [ "$COMMIT" == "$COMMIT_HASH" ]; then
+        echo "Image has already been built and published for commit ${COMMIT_HASH}"
+        exit 1
+      fi
 
       echo "okay"

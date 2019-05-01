@@ -43,14 +43,7 @@ function getDockerImageCommitLabel() {
     TOKEN=""
   fi
 
-  echo $TOKEN
-  echo $REG
-  echo $ORG
-  echo $IMAGE
-  echo $TAG
-
   local URL="$REGISTRY_ADDRESS/v2/$ORG/$IMAGE/manifests/$TAG"
-  echo "URL: $URL"
 
   dockerMakeCurl $URL "true" | jq .
 
