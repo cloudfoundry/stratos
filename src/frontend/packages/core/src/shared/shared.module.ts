@@ -135,7 +135,6 @@ import {
 } from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
 import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
-import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
 import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
@@ -183,7 +182,6 @@ import { UserPermissionDirective } from './user-permission.directive';
   declarations: [
     LoadingPageComponent,
     DisplayValueComponent,
-    StatefulIconComponent,
     EditableDisplayValueComponent,
     MbToHumanSizePipe,
     PercentagePipe,
@@ -308,7 +306,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     EditableDisplayValueComponent,
     DetailsCardComponent,
     SteppersModule,
-    StatefulIconComponent,
     MbToHumanSizePipe,
     ValuesPipe,
     PercentagePipe,

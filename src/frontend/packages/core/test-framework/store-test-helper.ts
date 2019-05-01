@@ -620,6 +620,7 @@ function getDefaultInitialTestStoreState(): AppState {
     dashboard: {
       sidenavOpen: true,
       headerEventMinimized: false,
+      timeoutSession: true,
       sideHelpOpen: false,
       sideHelpDocument: '',
       isMobile: false,

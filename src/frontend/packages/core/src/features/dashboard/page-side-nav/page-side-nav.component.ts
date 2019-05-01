@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { TabNavService } from '../../../../tab-nav.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
@@ -38,13 +39,15 @@ export class PageSideNavComponent implements OnInit {
   public header: string;
   public activeTab$: Observable<string>;
   public breadcrumbs$: Observable<IBreadcrumb[]>;
-
+  public isMobile$: Observable<boolean>;
   constructor(
     private store: Store<AppState>,
     private esf: EntityServiceFactory,
     private activatedRoute: ActivatedRoute,
     public tabNavService: TabNavService
-  ) { }
+  ) {
+    this.isMobile$ = this.store.select(selectIsMobile);
+  }
 
   ngOnInit() {
     this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -10,6 +10,22 @@ export enum BooleanIndicatorType {
   succeededFailed = 'success-failed'
 }
 
+interface IBooleanConfig {
+  isTrue?: boolean;
+  isUnknown?: boolean;
+  inverse?: boolean;
+  subtle?: boolean;
+}
+
+interface IBooleanOutput {
+  icon: string;
+  text: string;
+  isUnknown?: boolean;
+  isTrue?: boolean;
+  subtle: boolean;
+}
+
+export type booleanStringType = 'True' | 'False' | 'Unknown';
 
 @Component({
   selector: 'app-boolean-indicator',
@@ -17,16 +33,23 @@ export enum BooleanIndicatorType {
   styleUrls: ['./boolean-indicator.component.scss']
 })
 export class BooleanIndicatorComponent {
-
-  @Input() isTrue: boolean;
+  public booleanOutput: IBooleanOutput;
+  // Invert the text labels with the icons (No text for yes value and vice-versa)
+  @Input() inverse = false;
+  // Should we use a subtle display - this won't show the No option as danger (typically red)
+  @Input() subtle = true;
   @Input() type: BooleanIndicatorType;
   @Input() showText = true;
 
-  // Should we use a subtle display - this won't show the No option as danger (typically red)
-  @Input() subtle = true;
-
-  // Invert the text labels with the icons (No text for yes value and vice-versa)
-  @Input() inverse = false;
+  @Input() set isTrue(isTrue: boolean) {
+    const isUnknown = typeof isTrue !== 'boolean';
+    this.booleanOutput = this.getIconTextAndSeverity({
+      isTrue,
+      isUnknown,
+      inverse: this.inverse,
+      subtle: this.subtle
+    });
+  }
 
   private icons = {
     Yes: 'check_circle',
@@ -43,19 +66,36 @@ export class BooleanIndicatorComponent {
     Remove: 'remove_circle',
     Locked: 'lock_outline',
     Unlocked: 'lock_open',
+    Unknown: 'help_outline'
   };
 
-  getIcon = () => {
-    return this.icons[this.getText(this.inverse)];
+  private getIconTextAndSeverity = (
+    { isTrue = false, isUnknown = false, inverse = false, subtle = true }: IBooleanConfig
+  ): IBooleanOutput => {
+    if (isUnknown) {
+      return {
+        icon: this.icons.Unknown,
+        text: 'Unknown',
+        isUnknown: true,
+        subtle: true
+      };
+    }
+    const text = this.getText({ isTrue, inverse });
+    return {
+      icon: this.icons[text],
+      text,
+      isTrue: inverse ? !isTrue : isTrue,
+      subtle
+    };
   }
 
-  getText = (inverse = false): string => {
+  private getText = ({ isTrue = false, inverse = false }: IBooleanConfig): string => {
     const [enabledText, disabledText] = this.getTypeText(this.type);
-    const value = inverse ? !this.isTrue : this.isTrue;
+    const value = inverse ? !isTrue : isTrue;
     return this.capitalizeFirstLetter(value ? enabledText : disabledText);
   }
 
-  getTypeText = (s: string) => s.split('-');
+  private getTypeText = (s: string) => s.split('-');
 
-  capitalizeFirstLetter = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  private capitalizeFirstLetter = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 }

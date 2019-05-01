@@ -26,7 +26,6 @@ import {
   SetCreateServiceInstanceServicePlan,
   SetServiceInstanceGuid,
 } from '../../../../../../store/src/actions/create-service-instance.actions';
-import { IRouterNavPayload } from '../../../../../../store/src/actions/router.actions';
 import { GetServiceInstance } from '../../../../../../store/src/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../../../store/src/actions/space.actions';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -138,6 +137,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),
       distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
       switchMap(csi => {
+        this.appsEmitted.next(false);
         const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, csi.spaceGuid);
         return getPaginationObservables<APIResource<IApp>>({
           store: this.store,
@@ -148,12 +148,12 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           )
         }, true).entities$;
       }),
+      tap(() => this.appsEmitted.next(true)),
       publishReplay(1),
       refCount(),
     );
     this.skipApps$ = this.apps$.pipe(
       map(apps => apps.length === 0),
-      tap(() => this.appsEmitted.next(true)),
       publishReplay(1),
       refCount(),
     );
@@ -169,8 +169,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       filter(emitted => emitted),
       delay(1),
       map(() => ({ success: true })),
-      tap(() => this.appsEmitted.next(false))
-
     );
   }
 
