@@ -322,19 +322,17 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 	if metrics, ok := info.Endpoints[EndpointType]; ok {
 		for _, endpoint := range metrics {
 			// Parse out the metadata
-			var m []MetricsProviderMetadata
-			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
+			var meta MetricsProviderMetadata
+			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &meta)
 			if err == nil {
-				for _, item := range m {
-					info := MetricsMetadata{}
-					info.EndpointGUID = endpoint.GUID
-					info.Type = item.Type
-					info.URL = item.URL
-					info.Job = item.Job
-					info.Environment = item.Environment
-					log.Debugf("Metrics provider: %+v", info)
-					metricsProviders = append(metricsProviders, info)
-				}
+				info := MetricsMetadata{}
+				info.EndpointGUID = endpoint.GUID
+				info.Type = meta.Type
+				info.URL = meta.URL
+				info.Job = meta.Job
+				info.Environment = meta.Environment
+				log.Debugf("Metrics provider: %+v", info)
+				metricsProviders = append(metricsProviders, info)
 			}
 		}
 	}
@@ -405,18 +403,16 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 			endpointsMap[endpoint.GUID] = endpoint
 		} else if endpoint.CNSIType == "metrics" {
 			// Parse out the metadata
-			var m []MetricsProviderMetadata
-			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
+			var meta MetricsProviderMetadata
+			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &meta)
 			if err == nil {
-				for _, item := range m {
-					info := MetricsMetadata{}
-					info.EndpointGUID = endpoint.GUID
-					info.Type = item.Type
-					info.URL = item.URL
-					info.Job = item.Job
-					info.Environment = item.Environment
-					metricsProviders = append(metricsProviders, info)
-				}
+				info := MetricsMetadata{}
+				info.EndpointGUID = endpoint.GUID
+				info.Type = meta.Type
+				info.URL = meta.URL
+				info.Job = meta.Job
+				info.Environment = meta.Environment
+				metricsProviders = append(metricsProviders, info)
 			}
 		}
 	}
