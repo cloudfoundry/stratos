@@ -31,7 +31,7 @@ run:
       cat $COMMIT_HASH
 
       # Get the Commit Label for the image
-      getDockerImageCommitLabel $DOCKER_REGISTRY $DOCKER_USERNAME $DOCKER_PASSWORD $DOCKER_ORG $IMAGE $TAG_NAME
+      getDockerImageCommitLabel $DOCKER_REGISTRY $DOCKER_USERNAME $DOCKER_PASSWORD $DOCKER_ORG $IMAGE_NAME $TAG_NAME
 
       echo "Current Docker Image has Commit $COMMIT"
 
