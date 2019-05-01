@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { CardStatus } from '../../../../../core/src/shared/shared.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -12,6 +11,7 @@ import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selecto
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../features/applications/application.service';
+import { StratosStatus } from '../../../shared/shared.types';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../app-autoscaler.actions';
 import { autoscalerTransformArrayToMap } from '../autoscaler-helpers/autoscaler-transform-policy';
 import { appAutoscalerPolicySchemaKey } from '../autoscaler.store.module';
@@ -37,7 +37,7 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
     );
   }
 
-  status$: Observable<CardStatus>;
+  status$: Observable<StratosStatus>;
   appAutoscalerPolicyService: EntityService;
   appAutoscalerPolicyUpdateService: EntityService;
   public appAutoscalerPolicy$: Observable<any>;
