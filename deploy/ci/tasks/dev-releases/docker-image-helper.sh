@@ -6,10 +6,14 @@ function dockerMakeCurl() {
   local URL=$1
   local MANIFEST=$2
 
+  echo $URL
+  echo $MANIFEST
+  echo $TOKEN
+
   if [ "$MANIFEST" == "true" ]; then
 
     if [ "$TOKEN" != "" ]; then
-      curl --location -s -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $TOKEN"  $URL
+      curl --location -s -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $TOKEN" $URL
     else
       curl --location -s -H "Accept: application/vnd.docker.distribution.manifest.v2+json" $USER_AUTH $URL
     fi
@@ -49,7 +53,8 @@ function getDockerImageCommitLabel() {
   echo $IMAGE
   echo $TAG
 
-  URL=$REGISTRY_ADDRESS/v2/$ORG/$IMAGE/manifests/$TAG
+  local URL="$REGISTRY_ADDRESS/v2/$ORG/$IMAGE/manifests/$TAG"
+  echo "URL: $URL"
 
   dockerMakeCurl $URL "true" | jq .
 
