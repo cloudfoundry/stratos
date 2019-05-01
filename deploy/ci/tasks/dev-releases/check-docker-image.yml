@@ -3,7 +3,6 @@ platform: linux
 inputs:
 - name: stratos
 - name: image-tag
-- name: aio-docker-image
 image_resource:
   type: docker-image
   source:
@@ -22,20 +21,20 @@ run:
       FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
       GIT_TAG=$(cat image-tag/v2-tag) 
       STRATOS=${ROOT_DIR}/stratos
+      COMMIT_HASH=$(cat image-tag/v2-commit)
 
       ls ${ROOT_DIR}
-      ls /aio-docker-image
-      cat /aio-docker-image/docker_inspect.json
+      
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/docker-image-helper.sh
 
-      # Make the Docker Auth token
-      AUTH="${DOCKER_USERNAME}:${DOCKER_PASSWORD}"
-      TOKEN=`echo "${AUTH}" | base64`
+      # Get the Commit Label for the image
+      COMMIT=`getDockerImageCommitLabel $DOCKER_REGISTRY $DOCKER_USERNAME $DOCKER_PASSWORD $DOCKER_ORG $IMAGE $TAG_NAME`
 
-      URL=https://${DOCKER_REGISTRY}/v2/${DOCKER_ORG}/${IMAGE_NAME}/tags/list
+      echo "Current Docker Image has Commit $COMMIT"
 
-      # Fetch the image tags
-      curl -s -H "Authorization: Basic ${TOKEN}" ${URL}
+      cat $GIT_TAG
+      cat $FULL_VERSION
+      cat $VERSION
+      cat $COMMIT_HASH
 
       echo "okay"
-
-
