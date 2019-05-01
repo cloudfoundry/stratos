@@ -34,7 +34,6 @@ function getDockerImageCommitLabel() {
   local USER_AUTH=""
 
   if [ "$REG" == "docker.io" ]; then
-    echo "Getting TOKEN for docker.io access"
     TOKEN=`curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$ORG/$IMAGE:pull" | jq -r .token`
     AUTH_TYPE="Bearer"
     REGISTRY_ADDRESS=https://registry.hub.docker.com
