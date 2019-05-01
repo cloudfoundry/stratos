@@ -99,6 +99,6 @@ jobs:
       build: stratos
       dockerfile: stratos/deploy/Dockerfile.all-in-one
       tag: stratos/deploy/ci/tasks/build-images/stable-tag
-      tas_as_latest: true
+      tag_as_latest: true
       labels_file: image-tag/image-labels
       additional_tags: image-tag/v2-version      
