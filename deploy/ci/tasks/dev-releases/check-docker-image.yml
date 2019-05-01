@@ -23,18 +23,17 @@ run:
       STRATOS=${ROOT_DIR}/stratos
       COMMIT_HASH=$(cat image-tag/v2-commit)
 
-      ls ${ROOT_DIR}
-      
       source ${STRATOS}/deploy/ci/tasks/dev-releases/docker-image-helper.sh
+
+      cat $GIT_TAG
+      cat $FULL_VERSION
+      cat $VERSION
+      cat $COMMIT_HASH
 
       # Get the Commit Label for the image
       COMMIT=`getDockerImageCommitLabel $DOCKER_REGISTRY $DOCKER_USERNAME $DOCKER_PASSWORD $DOCKER_ORG $IMAGE $TAG_NAME`
 
       echo "Current Docker Image has Commit $COMMIT"
 
-      cat $GIT_TAG
-      cat $FULL_VERSION
-      cat $VERSION
-      cat $COMMIT_HASH
 
       echo "okay"

@@ -43,7 +43,16 @@ function getDockerImageCommitLabel() {
     TOKEN=""
   fi
 
+  echo $TOKEN
+  echo $REG
+  echo $ORG
+  echo $IMAGE
+  echo $TAG
+
   URL=$REGISTRY_ADDRESS/v2/$ORG/$IMAGE/manifests/$TAG
+
+  dockerMakeCurl $URL "true" | jq .
+
   DIGEST=`dockerMakeCurl $URL "true" | jq -r '.config.digest'`
   
   COMMIT=`dockerMakeCurl "$REGISTRY_ADDRESS/v2/$ORG/$IMAGE/blobs/$DIGEST" "false" | jq -r .container_config.Labels.commit`
