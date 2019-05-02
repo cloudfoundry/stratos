@@ -2,6 +2,8 @@
 import * as moment from 'moment-timezone';
 import { AppAutoscalerPolicy } from '../app-autoscaler.types';
 
+// TODO: RC This feels like it should be wrapped in a helper class, which avoids lots of global consts
+
 export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'];
 export const MetricPercentageTypes = ['memoryutil'];
 export const ScaleTypes = ['upper', 'lower'];
@@ -29,17 +31,6 @@ export const PolicyDefaultSetting = {
   cool_down_secs_default: 300,
   cool_down_secs_min: 60,
   cool_down_secs_max: 3600,
-};
-export const PolicyDefault: AppAutoscalerPolicy = {
-  instance_min_count: 1,
-  instance_max_count: 10,
-  scaling_rules: [],
-  scaling_rules_form: [],
-  schedules: {
-    timezone: moment.tz.guess(),
-    recurring_schedule: [],
-    specific_date: []
-  }
 };
 export const PolicyDefaultTrigger = {
   metric_type: 'memoryused',
@@ -254,6 +245,3 @@ export function shiftArray(array, step) {
   return days;
 }
 
-export function cloneObject(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}

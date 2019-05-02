@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { of as observableOf } from 'rxjs';
+import { Observable } from 'rxjs';
 
+import { cloneObject } from '../../../../core/utils.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import {
-  cloneObject,
   getAdjustmentType,
   getScaleType,
   LowerOperators,
@@ -23,6 +22,8 @@ import {
   getThresholdMin,
   numberWithFractionOrExceedRange,
 } from '../../autoscaler-helpers/autoscaler-validation';
+import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
+import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step2',
@@ -32,12 +33,13 @@ import {
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep2Component {
+export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy implements OnInit {
 
   policyAlert = PolicyAlert;
   metricTypes = MetricTypes;
   operatorTypes = UpperOperators.concat(LowerOperators);
   editTriggerForm: FormGroup;
+  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   public currentPolicy: AppAutoscalerPolicy;
   public testing = false;
@@ -48,7 +50,9 @@ export class EditAutoscalerPolicyStep2Component {
   constructor(
     public applicationService: ApplicationService,
     private fb: FormBuilder,
+    service: EditAutoscalerPolicyService
   ) {
+    super(service)
     this.editTriggerForm = this.fb.group({
       metric_type: [0, this.validateTriggerMetricType()],
       operator: [0, this.validateTriggerOperator()],
@@ -64,10 +68,6 @@ export class EditAutoscalerPolicyStep2Component {
       ]],
       adjustment_type: [0]
     });
-  }
-
-  onEnter = (data: AppAutoscalerPolicy) => {
-    this.currentPolicy = data;
   }
 
   addTrigger = () => {
@@ -98,13 +98,13 @@ export class EditAutoscalerPolicyStep2Component {
   }
 
   finishTrigger() {
-    const adjustmentp = this.editTriggerForm.get('adjustment_type').value === 'value' ? '' : '%';
-    const adjustmenti = this.editTriggerForm.get('adjustment').value;
-    const adjustmentm = this.editScaleType === 'upper' ? `+${adjustmenti}${adjustmentp}` : `-${adjustmenti}${adjustmentp}`;
+    const adjustmentP = this.editTriggerForm.get('adjustment_type').value === 'value' ? '' : '%';
+    const adjustmentI = this.editTriggerForm.get('adjustment').value;
+    const adjustmentM = this.editScaleType === 'upper' ? `+${adjustmentI}${adjustmentP}` : `-${adjustmentI}${adjustmentP}`;
     this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type').value;
     this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator').value;
     this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold').value;
-    this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentm;
+    this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentM;
     if (this.editTriggerForm.get('breach_duration_secs').value) {
       this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
         this.editTriggerForm.get('breach_duration_secs').value;
@@ -118,11 +118,6 @@ export class EditAutoscalerPolicyStep2Component {
     }
     this.editIndex = -1;
   }
-
-  onNext: StepOnNextFunction = () => observableOf({
-    success: true,
-    data: { ...this.currentPolicy }
-  })
 
   validateTriggerMetricType(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {

@@ -1,6 +1,6 @@
-<div *ngIf="currentPolicy">
+<div *ngIf="appAutoscalerPolicy$ | async as policy">
   <app-tile-grid>
-    <app-tile-group *ngFor="let rule of currentPolicy.scaling_rules_form; let index = index">
+    <app-tile-group *ngFor="let rule of policy.scaling_rules_form; let index = index">
       <app-tile>
         <mat-card>
           <mat-card-header>

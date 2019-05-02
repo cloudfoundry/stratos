@@ -1,14 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import * as moment from 'moment-timezone';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable } from 'rxjs';
 
+import { cloneObject } from '../../../../core/utils.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import {
-  cloneObject,
   MomentFormateDate,
   MonthdayOptions,
   PolicyAlert,
@@ -22,6 +21,8 @@ import {
   recurringSchedulesOverlapping,
   timeIsSameOrAfter,
 } from '../../autoscaler-helpers/autoscaler-validation';
+import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
+import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import {
   validateRecurringSpecificMax,
   validateRecurringSpecificMin,
@@ -35,13 +36,13 @@ import {
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep3Component {
+export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy implements OnInit {
 
   policyAlert = PolicyAlert;
   weekdayOptions = WeekdayOptions;
   monthdayOptions = MonthdayOptions;
   editRecurringScheduleForm: FormGroup;
-  appAutoscalerPolicy$: Observable<any>;
+  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   public currentPolicy: AppAutoscalerPolicy;
   private editIndex = -1;
@@ -56,7 +57,9 @@ export class EditAutoscalerPolicyStep3Component {
   constructor(
     public applicationService: ApplicationService,
     private fb: FormBuilder,
+    service: EditAutoscalerPolicyService
   ) {
+    super(service);
     this.editRecurringScheduleForm = this.fb.group({
       days_of_week: [0],
       days_of_month: [0],
@@ -70,10 +73,6 @@ export class EditAutoscalerPolicyStep3Component {
       effective_type: [0, [Validators.required, this.validateRecurringScheduleGlobal()]],
       repeat_type: [0, [Validators.required, this.validateRecurringScheduleGlobal()]],
     });
-  }
-
-  onEnter = (data: AppAutoscalerPolicy) => {
-    this.currentPolicy = data;
   }
 
   addRecurringSchedule = () => {
@@ -165,11 +164,6 @@ export class EditAutoscalerPolicyStep3Component {
     currentSchedule.end_time = this.editRecurringScheduleForm.get('end_time').value;
     this.editIndex = -1;
   }
-
-  onNext: StepOnNextFunction = () => observableOf({
-    success: true,
-    data: { ...this.currentPolicy }
-  })
 
   validateRecurringScheduleGlobal(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {

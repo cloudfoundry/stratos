@@ -1,7 +1,6 @@
-<div *ngIf="currentPolicy">
+<div *ngIf="appAutoscalerPolicy$ | async as policy">
   <app-tile-grid>
-    <app-tile-group
-      *ngFor="let rule of currentPolicy.schedules && currentPolicy.schedules.specific_date; let index = index">
+    <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.specific_date; let index = index">
       <app-tile>
         <mat-card>
           <mat-card-header>

@@ -2,7 +2,7 @@ export interface AppAutoscalerPolicy {
   instance_min_count: number;
   instance_max_count: number;
   scaling_rules_form: any;
-  scaling_rules: any[];
+  scaling_rules: any[]; // TODO: RC Typing
   schedules: {
     timezone: string,
     recurring_schedule: any[],

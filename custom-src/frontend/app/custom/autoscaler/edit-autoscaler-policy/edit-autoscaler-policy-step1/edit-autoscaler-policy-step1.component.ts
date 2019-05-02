@@ -1,23 +1,17 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { of as observableOf } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
-import { EntityService } from '../../../../core/entity-service';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { GetAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
 import { autoscalerTransformArrayToMap } from '../../autoscaler-helpers/autoscaler-transform-policy';
-import { PolicyAlert, PolicyDefault } from '../../autoscaler-helpers/autoscaler-util';
+import { PolicyAlert } from '../../autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../autoscaler-helpers/autoscaler-validation';
-import { appAutoscalerPolicySchemaKey } from '../../autoscaler.store.module';
+import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
+import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step1',
@@ -27,24 +21,20 @@ import { appAutoscalerPolicySchemaKey } from '../../autoscaler.store.module';
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep1Component implements OnInit, OnDestroy {
+export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicy implements OnInit {
 
   policyAlert = PolicyAlert;
   timezoneOptions = moment.tz.names();
   editLimitForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private editLimitValid = true;
-  private appAutoscalerPolicyErrorSub: Subscription;
-  private appAutoscalerPolicyService: EntityService;
-  private currentPolicy: AppAutoscalerPolicy;
 
   constructor(
     public applicationService: ApplicationService,
-    private store: Store<AppState>,
     private fb: FormBuilder,
-    private entityServiceFactory: EntityServiceFactory,
+    service: EditAutoscalerPolicyService
   ) {
+    super(service);
     this.editLimitForm = this.fb.group({
       instance_min_count: [0, [Validators.required, this.validateGlobalLimitMin()]],
       instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]],
@@ -53,21 +43,10 @@ export class EditAutoscalerPolicyStep1Component implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.appAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
-      this.applicationService.appGuid,
-      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
-      false
-    );
-    this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      filter(({ entityRequestInfo }) => entityRequestInfo && entityRequestInfo.fetching === false),
-      map(({ entity }) => {
-        if (entity && entity.entity) {
-          this.currentPolicy = entity.entity;
-        } else {
-          this.currentPolicy = PolicyDefault;
-        }
+    this.service.updateFromStore(this.applicationService.appGuid, this.applicationService.cfGuid);
+    this.appAutoscalerPolicy$ = this.service.getState().pipe(
+      map(policy => {
+        this.currentPolicy = policy;
         if (!this.currentPolicy.scaling_rules_form) {
           this.currentPolicy = autoscalerTransformArrayToMap(this.currentPolicy);
         }
@@ -81,22 +60,12 @@ export class EditAutoscalerPolicyStep1Component implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy(): void {
-    if (this.appAutoscalerPolicyErrorSub) {
-      this.appAutoscalerPolicyErrorSub.unsubscribe();
-    }
-  }
-
-  finishLimit: StepOnNextFunction = () => {
+  onNext: StepOnNextFunction = () => {
     this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count').value);
     this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count').value);
     this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone').value;
-    return observableOf({
-      success: true,
-      data: {
-        ...this.currentPolicy
-      }
-    });
+    this.service.setState(this.currentPolicy);
+    return observableOf({ success: true });
   }
 
   validateGlobalLimitMin(): ValidatorFn {

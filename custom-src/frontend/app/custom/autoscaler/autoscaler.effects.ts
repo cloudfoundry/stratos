@@ -46,7 +46,7 @@ const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 // const commonPrefix = `/pp/${proxyAPIVersion}/proxy/${autoscalerAPIVersion}`;
 // const healthPrefix = `/pp/${proxyAPIVersion}/proxy`;
 
-export function createAutoscalerRequestMessage(requestType: string, error: { status: string, _body: string }) {
+function createAutoscalerRequestMessage(requestType: string, error: { status: string, _body: string }) {
   return `Unable to ${requestType}: ${error.status} ${error._body}`;
 }
 
