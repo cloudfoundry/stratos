@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
+import { of } from 'rxjs';
 
 const customRoutes: Routes = [
   {
@@ -9,7 +10,8 @@ const customRoutes: Routes = [
       stratosNavigation: {
         text: 'Applications',
         matIcon: 'apps',
-        position: 20
+        position: 20,
+        hidden: of(true)
       }
     },
   },
