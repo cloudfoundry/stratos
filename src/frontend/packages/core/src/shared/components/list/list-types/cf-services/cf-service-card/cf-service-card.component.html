@@ -55,6 +55,13 @@
     <app-meta-card-key>Provider</app-meta-card-key>
     <app-meta-card-value>{{ extraInfo?.providerDisplayName }}</app-meta-card-value>
   </app-meta-card-item>
+  <app-meta-card-item *ngIf="cfOrgSpace.multipleConnectedEndpoints$ | async">
+    <app-meta-card-key>CF Endpoint</app-meta-card-key>
+    <app-meta-card-value>
+      <app-cf-org-space-links [service]="cfOrgSpace" [spaceBreadCrumbs]="getSpaceBreadcrumbs()">
+      </app-cf-org-space-links>
+    </app-meta-card-value>
+  </app-meta-card-item>
   <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
