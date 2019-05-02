@@ -45,19 +45,11 @@ func (m *Monocular) GetChartStore() chartsvc.ChartSvcDatastore {
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
 
-	return errors.New("Manually disabled")
-	// #150 - Uncomment to enable helm plugin
-	// ---------------------------------------
-	// m.ConfigureSQL()
-
-	// m.chartSvcRoutes = chartsvc.GetRoutes()
-
-	// m.InitSync()
-
-	// m.syncOnStartup()
-
-	// return nil
-	// ---------------------------------------
+	m.ConfigureSQL()
+	m.chartSvcRoutes = chartsvc.GetRoutes()
+	m.InitSync()
+	m.syncOnStartup()
+	return nil
 }
 
 func (m *Monocular) syncOnStartup() {
