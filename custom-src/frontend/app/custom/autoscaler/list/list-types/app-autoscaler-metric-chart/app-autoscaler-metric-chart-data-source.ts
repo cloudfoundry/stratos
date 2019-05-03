@@ -5,6 +5,7 @@ import { entityFactory } from '../../../../../../../store/src/helpers/entity-fac
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
+import { IListConfig } from '../../../../../shared/components/list/list.component.types';
 import { GetAppAutoscalerPolicyTriggerAction } from '../../../app-autoscaler.actions';
 
 export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResource> {
@@ -13,6 +14,7 @@ export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResour
     store: Store<AppState>,
     cfGuid: string,
     appGuid: string,
+    listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-autoscaler-policy-triggers:${cfGuid}${appGuid}`;
     const action = new GetAppAutoscalerPolicyTriggerAction(paginationKey, appGuid, cfGuid);
@@ -23,7 +25,8 @@ export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResour
         schema: entityFactory(action.entityKey),
         getRowUniqueId: getRowMetadata,
         paginationKey,
-        isLocal: true
+        isLocal: true,
+        listConfig
       }
     );
   }

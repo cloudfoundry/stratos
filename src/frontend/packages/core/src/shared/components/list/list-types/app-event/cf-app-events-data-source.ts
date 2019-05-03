@@ -8,6 +8,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 export class CfAppEventsDataSource extends ListDataSource<APIResource> {
 
@@ -36,6 +37,7 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     store: Store<AppState>,
     cfGuid: string,
     appGuid: string,
+    listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
     const action = new GetAllAppEvents(paginationKey, appGuid, cfGuid);
@@ -47,6 +49,7 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
         schema: entityFactory(appEventSchemaKey),
         getRowUniqueId: getRowMetadata,
         paginationKey,
+        listConfig
       }
     );
 

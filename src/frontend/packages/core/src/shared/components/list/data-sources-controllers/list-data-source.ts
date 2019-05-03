@@ -450,9 +450,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         field: pag.params['order-direction-field']
       })),
       filter(x => !!x),
-      distinctUntilChanged((x, y) => {
-        return x.direction === y.direction && x.field === y.field;
-      }),
+      distinctUntilChanged((x, y) => x.direction === y.direction && x.field === y.field),
       tag('list-sort')
     );
   }

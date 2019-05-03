@@ -3,12 +3,12 @@ import { Store } from '@ngrx/store';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../shared/components/list/list.component.types';
 import { BaseCfListConfig } from '../../../../../shared/components/list/list-types/base-cf/base-cf-list-config';
+import { ListViewTypes } from '../../../../../shared/components/list/list.component.types';
+import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import {
   AppAutoscalerMetricChartCardComponent,
 } from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
@@ -20,12 +20,12 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   cardComponent = AppAutoscalerMetricChartCardComponent;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
       columnId: 'name',
       headerCell: () => 'Metric type',
       cellDefinition: {
-        getValue: (row: any) => row.metadata.guid
+        valuePath: 'metadata.guid'
       },
       cellFlex: '2'
     }
@@ -66,6 +66,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
+      this
     );
   }
 

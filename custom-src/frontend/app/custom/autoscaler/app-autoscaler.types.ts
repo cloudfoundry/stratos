@@ -28,3 +28,15 @@ export interface AppAutoscalerInsMetric {
   total_results: number;
 }
 
+export interface AutoscalerEvent {
+  app_id: string;
+  error: string;
+  message: string;
+  new_instances: number;
+  old_instances: number;
+  reason: string;
+  scaling_type: number;
+  status: number;
+  timestamp: number;
+}
+

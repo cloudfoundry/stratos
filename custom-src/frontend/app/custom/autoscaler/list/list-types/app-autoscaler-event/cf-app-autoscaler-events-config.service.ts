@@ -1,12 +1,14 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { DatePipe } from '@angular/common';
+
 import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../../../../shared/components/list/list.component.types';
+import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
+import { AutoscalerEvent } from '../../../app-autoscaler.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import {
   TableCellAutoscalerEventChangeComponent,
@@ -16,16 +18,27 @@ import {
 } from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
 
 @Injectable()
-export class CfAppAutoscalerEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
+export class CfAppAutoscalerEventsConfigService
+  extends ListConfig<APIResource<AutoscalerEvent>>
+  implements IListConfig<APIResource<AutoscalerEvent>> {
   autoscalerEventSource: CfAppAutoscalerEventsDataSource;
-  columns: Array<ITableColumn<APIResource>> = [
+  columns: Array<ITableColumn<APIResource<AutoscalerEvent>>> = [
     {
       columnId: 'timestamp',
       headerCell: () => 'Timestamp',
       cellDefinition: {
         getValue: row => this.datePipe.transform(row.entity.timestamp / 1000000, 'medium')
       },
-      sort: true,
+      // TODO: RC Sort is broken for non-local lists that use the metrics date selector
+      // metrics date selector works on an action that's dispatched in list data source when date changes OR refresh occurrs
+      // for non-local lists a change of sort means pagination is reset. the pagination observable then fires off the initial action sans
+      // metrics date
+      sort: false,
+      // sort: {
+      //   type: 'sort',
+      //   orderKey: 'timestamp',
+      //   field: 'entity.timestamp'
+      // },
       cellFlex: '3'
     },
     {
@@ -65,7 +78,7 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<APIResource> 
       columnId: 'error',
       headerCell: () => 'Error',
       cellDefinition: {
-        getValue: row => row.entity.error
+        valuePath: 'entity.error'
       },
       cellFlex: '4'
     },
@@ -73,8 +86,9 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<APIResource> 
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: null,
-    noEntries: 'There are no scale events'
+    noEntries: 'There are no scaling events'
   };
+  isLocal = true;
 
   showMetricsRange = true;
   pollInterval = 120000;
@@ -107,6 +121,7 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<APIResource> 
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
+      this
     );
   }
 
