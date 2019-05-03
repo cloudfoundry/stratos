@@ -3,7 +3,6 @@ platform: linux
 inputs:
 - name: stratos
 - name: image-tag
-- name: aio-docker-image
 image_resource:
   type: docker-image
   source:
