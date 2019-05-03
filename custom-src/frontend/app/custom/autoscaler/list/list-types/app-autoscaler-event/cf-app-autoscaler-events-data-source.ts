@@ -18,15 +18,14 @@ export class CfAppAutoscalerEventsDataSource extends ListDataSource<APIResource<
     appGuid: string,
     listConfig: IListConfig<APIResource<AutoscalerEvent>>
   ) {
-    const paginationKey = `app-autoscaler-events:${cfGuid}${appGuid}`;
-    const action = new GetAppAutoscalerScalingHistoryAction(paginationKey, appGuid, cfGuid);
+    const action = new GetAppAutoscalerScalingHistoryAction(null, appGuid, cfGuid);
     super(
       {
         store,
         action,
         schema: entityFactory(appAutoscalerScalingHistorySchemaKey),
         getRowUniqueId: getRowMetadata,
-        paginationKey,
+        paginationKey: action.paginationKey,
         isLocal: false,
         listConfig
       }

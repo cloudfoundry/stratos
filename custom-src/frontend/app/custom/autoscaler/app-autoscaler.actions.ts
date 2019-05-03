@@ -1,6 +1,7 @@
 import { RequestOptions } from '@angular/http';
 
-import { entityFactory } from '../../../../store/src/helpers/entity-factory';
+import { applicationSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../../store/src/types/request.types';
 import { AppAutoscalerPolicyLocal } from './app-autoscaler.types';
@@ -102,6 +103,7 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
     public endpointGuid: string,
     public normalFormat?,
   ) {
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
   }
   actions = [
     AppAutoscalerPolicyTriggerEvents.GET_APP_AUTOSCALER_POLICY,
@@ -144,6 +146,7 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
     public normalFormat?,
     public params?,
   ) {
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
   }
   actions = [
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY,
@@ -176,7 +179,7 @@ export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
     public trigger,
     public params
   ) {
-    this.paginationKey = guid + '-' + metricName;
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid, metricName);
   }
   actions = [
     AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC,

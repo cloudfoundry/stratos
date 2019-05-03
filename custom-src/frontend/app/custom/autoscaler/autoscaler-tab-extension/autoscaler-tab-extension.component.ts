@@ -7,10 +7,12 @@ import { distinctUntilChanged, filter, first, map, publishReplay, refCount, star
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../core/extension/extension-service';
@@ -71,9 +73,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   scalingHistoryColumns: string[] = ['event', 'trigger', 'date', 'error'];
   metricTypes: string[] = MetricTypes;
 
-  appAutoscalerHealthService: EntityService;
-  appAutoscalerPolicyService: EntityService;
-  appAutoscalerScalingHistoryService: EntityService;
+  appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
+  appAutoscalerScalingHistoryService: EntityService; // TODO: RC typing
   appAutoscalerEnablement$: Observable<boolean>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
@@ -168,12 +169,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       publishReplay(1),
       refCount()
     );
+    // TODO: RC add a refresh button to dispatch this action
+    const scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
+      createEntityRelationPaginationKey(applicationSchemaKey, this.applicationService.appGuid, 'latest'),
+      this.applicationService.appGuid,
+      this.applicationService.cfGuid,
+      true,
+      this.paramsHistory
+    );
     this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
       appAutoscalerScalingHistorySchemaKey,
       entityFactory(appAutoscalerScalingHistorySchemaKey),
       this.applicationService.appGuid,
-      new GetAppAutoscalerScalingHistoryAction('', this.applicationService.appGuid,
-        this.applicationService.cfGuid, true, this.paramsHistory),
+      scalingHistoryAction,
       false
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(

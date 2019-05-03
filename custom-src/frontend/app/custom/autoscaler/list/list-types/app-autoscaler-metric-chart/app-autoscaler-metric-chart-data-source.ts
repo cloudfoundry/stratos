@@ -16,15 +16,14 @@ export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResour
     appGuid: string,
     listConfig: IListConfig<APIResource>
   ) {
-    const paginationKey = `app-autoscaler-policy-triggers:${cfGuid}${appGuid}`;
-    const action = new GetAppAutoscalerPolicyTriggerAction(paginationKey, appGuid, cfGuid);
+    const action = new GetAppAutoscalerPolicyTriggerAction(null, appGuid, cfGuid);
     super(
       {
         store,
         action,
         schema: entityFactory(action.entityKey),
         getRowUniqueId: getRowMetadata,
-        paginationKey,
+        paginationKey: action.paginationKey,
         isLocal: true,
         listConfig
       }
