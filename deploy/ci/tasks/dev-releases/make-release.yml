@@ -110,7 +110,7 @@ run:
       # Package modified Helm chart
       HELM_FILE=console-helm-chart-${VERSION}-${COMMIT}.tgz
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/${HELM_FILE}
+      cp console-${VERSION}.tgz ${ROOT_DIR}/helm-chart/${HELM_FILE}
       
       # Temp folder for helm-chart
       mkdir -p ${ROOT_DIR}/helm-chart
