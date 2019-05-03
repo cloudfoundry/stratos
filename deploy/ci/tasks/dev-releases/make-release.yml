@@ -170,7 +170,7 @@ run:
       fi
 
       # Create the PR for the Helm Chart changes if configured
-      if [ ! -z "${HELM_RELEASE_GITCLONE}" ]; then
+      if [ "${HELM_RELEASE_GITCLONE}" != "null" ]; then
         echo "Creating PR for Helm Chart Changes for this release"
 
         NEW_BRANCH="stratos-${VERSION}"
