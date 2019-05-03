@@ -14,7 +14,7 @@ import { cloneObject } from '../../../../core/utils.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../app-autoscaler.types';
 import { MomentFormateDateTimeT, PolicyAlert, PolicyDefaultSpecificDate } from '../../autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
@@ -22,8 +22,8 @@ import {
   specificDateRangeOverlapping,
 } from '../../autoscaler-helpers/autoscaler-validation';
 import { appAutoscalerUpdatedPolicySchemaKey } from '../../autoscaler.store.module';
-import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
+import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',
@@ -40,7 +40,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private updateAppAutoscalerPolicyService: EntityService;
-  public currentPolicy: AppAutoscalerPolicy;
+  public currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
   private editMutualValidation = {
     limit: true,
@@ -118,14 +118,14 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
 
-  removeSpecificDate(index) {
+  removeSpecificDate(index: number) {
     if (this.editIndex === index) {
       this.editIndex = -1;
     }
     this.currentPolicy.schedules.specific_date.splice(index, 1);
   }
 
-  editSpecificDate(index) {
+  editSpecificDate(index: number) {
     this.editIndex = index;
     this.editSpecificDateForm.setValue({
       instance_min_count: this.currentPolicy.schedules.specific_date[index].instance_min_count,

@@ -3,13 +3,13 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { AppAutoscalerPolicy } from '../app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 
 export abstract class EditAutoscalerPolicy implements OnInit {
-  public currentPolicy: AppAutoscalerPolicy;
-  protected appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  public currentPolicy: AppAutoscalerPolicyLocal;
+  public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   constructor(protected service: EditAutoscalerPolicyService) { }
 

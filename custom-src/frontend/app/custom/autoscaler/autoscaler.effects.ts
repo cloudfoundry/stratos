@@ -233,6 +233,10 @@ export class AutoscalerEffects {
       options.method = 'get';
       options.headers = this.addHeaders(action.endpointGuid);
       options.params = this.buildParams(action.initialParams, action.params);
+      if (options.params.has('order-direction')) {
+        options.params.set('order', options.params.get('order-direction'));
+        options.params.delete('order-direction');
+      }
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {
@@ -281,7 +285,6 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformTriggerData(getPolicyTriggerAction.entityKey, mappedPolicyData, policyInfo, getPolicyTriggerAction.query);
-            // TODO: RC handle failure
             res.push(
               new WrapperRequestActionSuccess(
                 mappedPolicyData,

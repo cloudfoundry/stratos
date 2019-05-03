@@ -3,6 +3,7 @@ import { RequestOptions } from '@angular/http';
 import { entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../../store/src/types/request.types';
+import { AppAutoscalerPolicyLocal } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
@@ -78,7 +79,7 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
-    public policy: any,
+    public policy: AppAutoscalerPolicyLocal,
   ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerUpdatedPolicySchemaKey;
@@ -101,9 +102,6 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
     public endpointGuid: string,
     public normalFormat?,
   ) {
-    this.query = {
-      metric: 'policy'
-    };
   }
   actions = [
     AppAutoscalerPolicyTriggerEvents.GET_APP_AUTOSCALER_POLICY,
@@ -114,8 +112,27 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
   entity = [entityFactory(appAutoscalerPolicyTriggerSchemaKey)];
   entityKey = appAutoscalerPolicyTriggerSchemaKey;
   options: RequestOptions;
-  query: any;
+  query: AutoscalerQuery = {
+    metric: 'policy'
+  };
   windowValue: string;
+}
+
+export interface AutoscalerPaginationParams {
+  'order-direction-field'?: string;
+  'order-direction': 'asc' | 'desc';
+  'results-per-page': string;
+  'start-time': string;
+  'end-time': string;
+  'page'?: string;
+}
+
+export interface AutoscalerQuery {
+  metric: string;
+  params?: {
+    start: number;
+    end: number
+  };
 }
 
 export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
@@ -127,9 +144,6 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
     public normalFormat?,
     public params?,
   ) {
-    this.query = {
-      metric: 'history'
-    };
   }
   actions = [
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY,
@@ -140,14 +154,16 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   entity = [entityFactory(appAutoscalerScalingHistorySchemaKey)];
   entityKey = appAutoscalerScalingHistorySchemaKey;
   options: RequestOptions;
-  initialParams = {
+  initialParams: AutoscalerPaginationParams = {
     'order-direction-field': GetAppAutoscalerScalingHistoryAction.sortField,
     'order-direction': 'desc',
-    'results-per-page': 5,
-    'start-time': 0,
-    'end-time': 0,
+    'results-per-page': '5',
+    'start-time': '0',
+    'end-time': '0',
   };
-  query: any;
+  query: AutoscalerQuery = {
+    metric: 'history'
+  };
   windowValue: string;
 }
 

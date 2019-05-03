@@ -12,7 +12,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { CardCell, IListRowCell } from '../../../../../../shared/components/list/list.types';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
-import { GetAppAutoscalerAppMetricAction } from '../../../../app-autoscaler.actions';
+import { AutoscalerPaginationParams, GetAppAutoscalerAppMetricAction } from '../../../../app-autoscaler.actions';
 import { AppAutoscalerAppMetric } from '../../../../app-autoscaler.types';
 import { buildLegendData } from '../../../../autoscaler-helpers/autoscaler-util';
 import { appAutoscalerAppMetricSchemaKey } from '../../../../autoscaler.store.module';
@@ -47,12 +47,12 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   };
 
   public current = (new Date()).getTime();
-  public paramsMetrics = {
+  public paramsMetrics: AutoscalerPaginationParams = {
     'start-time': this.current - 30 * 60 * 1000 + '000000',
     'end-time': this.current + '000000',
     page: '1',
     'results-per-page': '10000000',
-    order: 'asc'
+    'order-direction': 'asc'
   };
 
   constructor(

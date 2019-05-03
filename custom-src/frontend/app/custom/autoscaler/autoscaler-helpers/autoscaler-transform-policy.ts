@@ -1,16 +1,15 @@
 import * as moment from 'moment-timezone';
 
-import {
-  getScaleType,
-  PolicyDefaultSetting,
-  ScaleTypes,
-  isEqual
-} from './autoscaler-util';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
+import { getScaleType, isEqual, PolicyDefaultSetting, ScaleTypes } from './autoscaler-util';
 
-export function autoscalerTransformArrayToMap(newPolicy) {
-  newPolicy.enabled = true;
-  newPolicy.scaling_rules_map = {};
-  newPolicy.scaling_rules_form = [];
+export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
+  const newPolicy: AppAutoscalerPolicyLocal = {
+    ...policy,
+    enabled: true,
+    scaling_rules_map: {},
+    scaling_rules_form: []
+  };
   initIfUndefined(newPolicy, 'scaling_rules', []);
   newPolicy.scaling_rules.map((trigger) => {
     pushAndSortTrigger(newPolicy.scaling_rules_map, trigger.metric_type, trigger);

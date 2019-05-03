@@ -20,6 +20,7 @@ import { ConfirmationDialogConfig } from '../../../shared/components/confirmatio
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import {
+  AutoscalerPaginationParams,
   DetachAppAutoscalerPolicyAction,
   GetAppAutoscalerAppMetricAction,
   GetAppAutoscalerHealthAction,
@@ -27,7 +28,12 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UpdateAppAutoscalerPolicyAction,
 } from '../app-autoscaler.actions';
-import { AppAutoscalerAppMetric, AppAutoscalerPolicy, AppAutoscalerScalingHistory } from '../app-autoscaler.types';
+import {
+  AppAutoscalerAppMetric,
+  AppAutoscalerPolicy,
+  AppAutoscalerPolicyLocal,
+  AppAutoscalerScalingHistory,
+} from '../app-autoscaler.types';
 import { MetricTypes } from '../autoscaler-helpers/autoscaler-util';
 import {
   appAutoscalerAppMetricSchemaKey,
@@ -42,7 +48,7 @@ import {
   icon: 'meter',
   iconFont: 'stratos-icons',
   hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
-    // TODO: RC Fix
+    // TODO: RC Improve
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
     const action = new GetAppAutoscalerHealthAction(appGuid, endpointGuid);
@@ -83,19 +89,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   appAutoscalerInsMetrics = {};
   appAutoscalerAppMetricNames = [];
 
-  paramsMetrics = {
-    'start-time': 0,
+  paramsMetrics: AutoscalerPaginationParams = {
+    'start-time': '0',
     'end-time': (new Date()).getTime().toString() + '000000',
     page: '1',
     'results-per-page': '1',
-    order: 'desc'
+    'order-direction': 'desc'
   };
-  paramsHistory = {
-    'start-time': 0,
+  paramsHistory: AutoscalerPaginationParams = {
+    'start-time': '0',
     'end-time': (new Date()).getTime().toString() + '000000',
     page: '1',
     'results-per-page': '5',
-    order: 'desc'
+    'order-direction': 'desc'
   };
 
   ngOnDestroy(): void {
@@ -191,7 +197,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }, false).entities$;
   }
 
-  loadLatestMetricsUponPolicy(policyEntity) {
+  loadLatestMetricsUponPolicy(policyEntity: AppAutoscalerPolicyLocal) {
     if (policyEntity.scaling_rules_map) {
       this.appAutoscalerAppMetrics = {};
       Object.keys(policyEntity.scaling_rules_map).map((metricName) => {
@@ -225,7 +231,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     });
   }
 
-  diableAutoscaler() {
+  disableAutoscaler() {
     const confirmation = new ConfirmationDialogConfig(
       'Detach And Delete Policy',
       'Are you sure you want to detach and delete the policy?',

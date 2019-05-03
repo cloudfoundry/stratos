@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 
 import { cloneObject } from '../../../../core/utils.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../app-autoscaler.types';
 import {
   MomentFormateDate,
   MonthdayOptions,
@@ -44,7 +44,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   editRecurringScheduleForm: FormGroup;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
-  public currentPolicy: AppAutoscalerPolicy;
+  public currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
   private editEffectiveType = 'always';
   private editRepeatType = 'week';
@@ -235,17 +235,17 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     };
   }
 
-  resetEffectiveType(key) {
+  resetEffectiveType(key: string) {
     this.editEffectiveType = key;
     this.setRecurringScheduleValidator();
   }
 
-  resetRepeatType(key) {
+  resetRepeatType(key: string) {
     this.editRepeatType = key;
     this.setRecurringScheduleValidator();
   }
 
-  mutualValidate(inputName, lastValid, currentValid) {
+  mutualValidate(inputName: string, lastValid: boolean, currentValid: boolean) {
     if (this.editRecurringScheduleForm && lastValid !== currentValid) {
       this.editRecurringScheduleForm.controls[inputName].updateValueAndValidity();
     }

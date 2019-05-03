@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 import { cloneObject } from '../../../../core/utils.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { AppAutoscalerPolicy } from '../../app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../app-autoscaler.types';
 import {
   getAdjustmentType,
   getScaleType,
@@ -41,7 +41,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
   editTriggerForm: FormGroup;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
-  public currentPolicy: AppAutoscalerPolicy;
+  public currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
   private editIndex = -1;
   private editScaleType = 'upper';

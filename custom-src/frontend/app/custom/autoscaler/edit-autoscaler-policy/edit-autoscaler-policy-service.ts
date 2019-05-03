@@ -8,23 +8,24 @@ import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { cloneObject } from '../../../core/utils.service';
 import { GetAppAutoscalerPolicyAction } from '../app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
+import { autoscalerTransformArrayToMap } from '../autoscaler-helpers/autoscaler-transform-policy';
 import { appAutoscalerPolicySchemaKey } from '../autoscaler.store.module';
 
 @Injectable()
 export class EditAutoscalerPolicyService {
 
-  private initialState: AppAutoscalerPolicy = {
+  private initialState: AppAutoscalerPolicyLocal = autoscalerTransformArrayToMap({
+    enabled: true,
     instance_min_count: 1,
     instance_max_count: 10,
     scaling_rules: [],
-    scaling_rules_form: [],
     schedules: {
       timezone: moment.tz.guess(),
       recurring_schedule: [],
       specific_date: []
     }
-  };
+  });
 
   private stateSubject = new BehaviorSubject(this.initialState);
 
@@ -32,7 +33,7 @@ export class EditAutoscalerPolicyService {
   constructor(private entityServiceFactory: EntityServiceFactory) { }
 
   updateFromStore(appGuid: string, cfGuid: string) {
-    const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicy>>(
+    const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicyLocal>>(
       appAutoscalerPolicySchemaKey,
       entityFactory(appAutoscalerPolicySchemaKey),
       appGuid,
@@ -57,7 +58,7 @@ export class EditAutoscalerPolicyService {
     this.stateSubject.next(cloneObject(state));
   }
 
-  getState(): Observable<AppAutoscalerPolicy> {
+  getState(): Observable<AppAutoscalerPolicyLocal> {
     return this.stateSubject.asObservable();
   }
 

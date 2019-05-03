@@ -15,6 +15,7 @@ import { StratosStatus } from '../../../shared/shared.types';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../app-autoscaler.actions';
 import { autoscalerTransformArrayToMap } from '../autoscaler-helpers/autoscaler-transform-policy';
 import { appAutoscalerPolicySchemaKey } from '../autoscaler.store.module';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
 
 @Component({
   selector: 'app-card-autoscaler-default',
@@ -42,7 +43,7 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
   appAutoscalerPolicyUpdateService: EntityService;
   public appAutoscalerPolicy$: Observable<any>;
 
-  currentPolicy: any;
+  currentPolicy: AppAutoscalerPolicyLocal;
   public isEditing = false;
   public instanceMinCountCurrent: number;
   public instanceMinCountEdit: number;
