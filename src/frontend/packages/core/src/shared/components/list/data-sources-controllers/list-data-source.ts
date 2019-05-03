@@ -26,7 +26,7 @@ import {
 
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
+import { SetParams, SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory, EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -440,7 +440,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   public updateMetricsAction(newAction: MetricsAction) {
     this.metricsAction = newAction;
-    this.store.dispatch(newAction);
+
+    if (this.isLocal) {
+      this.store.dispatch(newAction);
+    } else {
+      this.pagination$.pipe(
+        first()
+      ).subscribe(pag => {
+        this.store.dispatch(new SetParams(newAction.entityKey, this.paginationKey, {
+          ...pag.params,
+          metricConfig: newAction.query
+        }, false, true));
+      });
+    }
   }
 
   private createSortObservable(): Observable<ListSort> {

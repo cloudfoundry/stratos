@@ -27,7 +27,7 @@ export class CfAppAutoscalerEventsDataSource extends ListDataSource<APIResource<
         schema: entityFactory(appAutoscalerScalingHistorySchemaKey),
         getRowUniqueId: getRowMetadata,
         paginationKey,
-        isLocal: true,
+        isLocal: false,
         listConfig
       }
     );

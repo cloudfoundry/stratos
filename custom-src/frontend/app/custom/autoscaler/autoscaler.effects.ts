@@ -178,7 +178,8 @@ export class AutoscalerEffects {
       paginatedAction.pageNumber = paginationState
         ? paginationState.currentPage
         : 1;
-      options.params = this.buildParams(action.initialParams, paginationParams, action.params);
+      const { metricConfig, ...trimmedPaginationParams } = paginationParams;
+      options.params = this.buildParams(action.initialParams, trimmedPaginationParams, action.params);
       if (!options.params.has(resultPerPageParam)) {
         options.params.set(
           resultPerPageParam,
@@ -192,7 +193,10 @@ export class AutoscalerEffects {
         options.params.set('order', options.params.get('order-direction'));
         options.params.delete('order-direction');
       }
-      if (action.query && action.query.params) {
+      if (metricConfig && metricConfig.params) {
+        options.params.set('start-time', metricConfig.params.start + '000000000');
+        options.params.set('end-time', metricConfig.params.end + '000000000');
+      } else if (action.query && action.query.params) {
         options.params.set('start-time', action.query.params.start + '000000000');
         options.params.set('end-time', action.query.params.end + '000000000');
       }

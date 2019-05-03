@@ -29,16 +29,7 @@ export class CfAppAutoscalerEventsConfigService
       cellDefinition: {
         getValue: row => this.datePipe.transform(row.entity.timestamp / 1000000, 'medium')
       },
-      // TODO: RC Sort is broken for non-local lists that use the metrics date selector
-      // metrics date selector works on an action that's dispatched in list data source when date changes OR refresh occurrs
-      // for non-local lists a change of sort means pagination is reset. the pagination observable then fires off the initial action sans
-      // metrics date
-      sort: false,
-      // sort: {
-      //   type: 'sort',
-      //   orderKey: 'timestamp',
-      //   field: 'entity.timestamp'
-      // },
+      sort: true,
       cellFlex: '3'
     },
     {
@@ -88,7 +79,7 @@ export class CfAppAutoscalerEventsConfigService
     title: null,
     noEntries: 'There are no scaling events'
   };
-  isLocal = true;
+  isLocal = false;
 
   showMetricsRange = true;
   pollInterval = 120000;
