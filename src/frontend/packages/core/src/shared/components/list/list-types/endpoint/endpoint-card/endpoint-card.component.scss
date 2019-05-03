@@ -6,7 +6,16 @@
 
 .endpoint-card {
   cursor: pointer;
-  &.no-link {
+  &--disconnected {
+    opacity: .6;
+    &:hover {
+      opacity: 1;
+    }
+  }
+  &--checking {
+    opacity: .6;
+  }
+  &--no-link {
     cursor: default;
   }
   &:focus {
