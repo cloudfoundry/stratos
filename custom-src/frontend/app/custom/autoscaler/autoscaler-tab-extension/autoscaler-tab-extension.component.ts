@@ -171,7 +171,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       false
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
-      map(({ entity }) => entity && entity.entity)
+      map(({ entity }) => entity && entity.entity),
+      publishReplay(1),
+      refCount()
     );
     this.initErrorSub();
   }
