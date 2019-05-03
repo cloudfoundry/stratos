@@ -26,6 +26,7 @@
     doShowVersions()
     doCustomize(false);
     doGenerateIndexHtml(true);
+    console.log('Finished applying customizations')
     cb();
   });
 
@@ -33,6 +34,7 @@
   gulp.task('customize-default', function (cb) {
     doCustomize(true);
     doGenerateIndexHtml(false);
+    console.log('Finished applying default customizations')
     cb();
   });
 
@@ -40,6 +42,7 @@
   gulp.task('customize-reset', function (cb) {
     doCustomize(true, true);
     doGenerateIndexHtml(false);
+    console.log('Finished resetting customizations')
     cb();
   });
 
@@ -112,6 +115,7 @@
 
       if (!reset) {
         fs.symlinkSync(srcFile, destFile);
+        console.log('  + Linking file   : ' + srcFile + ' ==> ' + destFile);
       }
     })
 
@@ -133,6 +137,7 @@
       }
       if (!reset && fs.existsSync(srcFolder)) {
         fs.symlinkSync(srcFolder, destFolder);
+        console.log('  + Linking folder : ' + srcFolder + ' ==> ' + destFolder);
       }
     });
   }
@@ -140,12 +145,9 @@
   // Copy the correct custom module to either import the supplied custom module or provide an empty module
   function doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
     const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom');
-    console.log(baseFolder);
     const destFile = path.join(baseFolder, 'src/custom-import.module.ts');
     const customModuleFile = path.join(baseFolder, 'src/custom/custom.module.ts');
     const customRoutingModuleFile = path.join(baseFolder, 'src/custom/custom-routing.module.ts');
-
-    console.log(customModuleFile);
 
     // Delete the existing file if it exists
     if (fs.existsSync(destFile)) {
@@ -158,9 +160,15 @@
         srcFile = 'custom-src.module.ts_';
         if (fs.existsSync(customRoutingModuleFile)) {
           srcFile = 'custom-src-routing.module.ts_';
+          console.log('  + Found custom module with routing');
+        } else {
+          console.log('  + Found custom module without routing');
         }
+        } else {
+        console.log('  + No custom module found - linking empty custom module');
       }
       fs.copySync(path.join(defaultSrcFolder, srcFile), destFile);
+      console.log('  + Copying file   : ' + path.join(defaultSrcFolder, srcFile) + ' ==> ' + destFile);
     }
   }
 
@@ -208,6 +216,8 @@
 
   // Generate index.html from template
   function doGenerateIndexHtml(customize) {
+
+    console.log('  + Generating index.html');
     // Copy the default
     fs.copySync(INDEX_TEMPLATE, INDEX_HTML);
 
@@ -223,6 +233,10 @@
       }
     }
 
+    if (metadata.title) {
+      console.log('  + Overridding title to: "' + metadata.title + '"');
+    }
+
     // Patch different page title if there is one
     var title = metadata.title || 'Stratos';
     replace.sync({ files: INDEX_HTML, from: /@@TITLE@@/g, to: title });
@@ -236,6 +250,7 @@
 
     if (fs.existsSync(GIT_METADATA)) {
       gitMetadata = JSON.parse(fs.readFileSync(GIT_METADATA));
+      console.log("  + Project Metadata: " + JSON.stringify(gitMetadata));
     }
 
     // Git Information
