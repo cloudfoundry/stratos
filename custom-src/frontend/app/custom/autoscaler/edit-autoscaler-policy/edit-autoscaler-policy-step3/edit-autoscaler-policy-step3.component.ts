@@ -7,14 +7,7 @@ import { Observable } from 'rxjs';
 import { cloneObject } from '../../../../core/utils.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../app-autoscaler.types';
-import {
-  MomentFormateDate,
-  MonthdayOptions,
-  PolicyAlert,
-  PolicyDefaultRecurringSchedule,
-  shiftArray,
-  WeekdayOptions,
-} from '../../autoscaler-helpers/autoscaler-util';
+import { PolicyAlert, shiftArray, AutoscalerConstants } from '../../autoscaler-helpers/autoscaler-util';
 import {
   dateIsAfter,
   numberWithFractionOrExceedRange,
@@ -39,8 +32,8 @@ import {
 export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy implements OnInit {
 
   policyAlert = PolicyAlert;
-  weekdayOptions = WeekdayOptions;
-  monthdayOptions = MonthdayOptions;
+  weekdayOptions = AutoscalerConstants.WeekdayOptions;
+  monthdayOptions = AutoscalerConstants.MonthdayOptions;
   editRecurringScheduleForm: FormGroup;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
@@ -76,7 +69,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   addRecurringSchedule = () => {
-    this.currentPolicy.schedules.recurring_schedule.push(cloneObject(PolicyDefaultRecurringSchedule));
+    this.currentPolicy.schedules.recurring_schedule.push(cloneObject(AutoscalerConstants.PolicyDefaultRecurringSchedule));
     this.editRecurringSchedule(this.currentPolicy.schedules.recurring_schedule.length - 1);
   }
 
@@ -115,8 +108,8 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     if (this.editEffectiveType === 'custom') {
       if (!this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_date &&
         !this.editRecurringScheduleForm.get('start_date').value) {
-        this.editRecurringScheduleForm.controls.start_date.setValue(moment().add(1, 'days').format(MomentFormateDate));
-        this.editRecurringScheduleForm.controls.end_date.setValue(moment().add(1, 'days').format(MomentFormateDate));
+        this.editRecurringScheduleForm.controls.start_date.setValue(moment().add(1, 'days').format(AutoscalerConstants.MomentFormateDate));
+        this.editRecurringScheduleForm.controls.end_date.setValue(moment().add(1, 'days').format(AutoscalerConstants.MomentFormateDate));
       }
       this.editRecurringScheduleForm.controls.start_date.setValidators([Validators.required,
       this.validateRecurringScheduleDate('end_date'), this.validateRecurringScheduleGlobal()]);
@@ -193,7 +186,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
         return null;
       }
       const errors: any = {};
-      if (dateIsAfter(moment().format(MomentFormateDate), control.value)) {
+      if (dateIsAfter(moment().format(AutoscalerConstants.MomentFormateDate), control.value)) {
         errors.alertInvalidPolicyScheduleDateBeforeNow = { value: control.value };
       }
       const lastValid = this.editMutualValidation.date;

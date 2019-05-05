@@ -1,7 +1,7 @@
 import * as moment from 'moment-timezone';
 
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
-import { getScaleType, isEqual, PolicyDefaultSetting, ScaleTypes } from './autoscaler-util';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppScalingRule, AppScalingTrigger } from '../app-autoscaler.types';
+import { getScaleType, isEqual, AutoscalerConstants } from './autoscaler-util';
 
 export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
   const newPolicy: AppAutoscalerPolicyLocal = {
@@ -32,7 +32,7 @@ export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
   return newPolicy;
 }
 
-function setUpperColor(array) {
+function setUpperColor(array: AppScalingRule[]) {
   // from FF0000 to FFFF00
   // from rgba(255,0,0,0.6) to rgba(255,255,0,0.6)
   const max = 255; // parseInt('FF', 16)
@@ -52,7 +52,7 @@ function setUpperColor(array) {
   }
 }
 
-function setLowerColor(array) {
+function setLowerColor(array: AppScalingRule[]) {
   // from 3344ff to 33ccff
   // from rgba(51,68,255,0.6) to rgba(51,204,255,0.6)
   const max = 204; // parseInt('CC', 16)
@@ -72,12 +72,14 @@ function setLowerColor(array) {
   }
 }
 
-export function autoscalerTransformMapToArray(newPolicy) {
+export function autoscalerTransformMapToArray(newPolicy: AppAutoscalerPolicyLocal) {
+  newPolicy = JSON.parse(JSON.stringify(newPolicy));
   const scalingRules = [];
   if (newPolicy.scaling_rules_form) {
     newPolicy.scaling_rules_form.map((trigger) => {
-      deleteIf(trigger, 'breach_duration_secs', trigger.breach_duration_secs === PolicyDefaultSetting.breach_duration_secs_default);
-      deleteIf(trigger, 'cool_down_secs', trigger.cool_down_secs === PolicyDefaultSetting.cool_down_secs_default);
+      deleteIf(trigger, 'breach_duration_secs',
+        trigger.breach_duration_secs === AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default);
+      deleteIf(trigger, 'cool_down_secs', trigger.cool_down_secs === AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default);
       delete trigger.color;
       scalingRules.push(trigger);
     });
@@ -99,10 +101,10 @@ export function autoscalerTransformMapToArray(newPolicy) {
   return newPolicy;
 }
 
-function pushAndSortTrigger(map, metricName, newTrigger) {
+function pushAndSortTrigger(map: { [metricName: string]: AppScalingTrigger }, metricName: string, newTrigger: AppScalingRule) {
   const scaleType = getScaleType(newTrigger.operator);
-  initIfUndefined(newTrigger, 'breach_duration_secs', PolicyDefaultSetting.breach_duration_secs_default);
-  initIfUndefined(newTrigger, 'cool_down_secs', PolicyDefaultSetting.cool_down_secs_default);
+  initIfUndefined(newTrigger, 'breach_duration_secs', AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default);
+  initIfUndefined(newTrigger, 'cool_down_secs', AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default);
   if (!map[metricName]) {
     map[metricName] = {};
   }
@@ -118,8 +120,8 @@ function pushAndSortTrigger(map, metricName, newTrigger) {
   map[metricName][scaleType].push(newTrigger);
 }
 
-function buildFormUponMap(newPolicy, metricName) {
-  ScaleTypes.map((triggerType) => {
+function buildFormUponMap(newPolicy: AppAutoscalerPolicyLocal, metricName: string) {
+  AutoscalerConstants.ScaleTypes.map((triggerType) => {
     if (newPolicy.scaling_rules_map[metricName][triggerType]) {
       newPolicy.scaling_rules_map[metricName][triggerType].map((trigger) => {
         newPolicy.scaling_rules_form.push(trigger);
@@ -128,18 +130,18 @@ function buildFormUponMap(newPolicy, metricName) {
   });
 }
 
-function initIfUndefined(fatherEntity, childName, defaultData) {
+function initIfUndefined(fatherEntity: any, childName: string, defaultData: any) {
   if (fatherEntity[childName] === undefined || fatherEntity[childName] === '') {
     fatherEntity[childName] = defaultData;
   }
 }
 
-function deleteIf(fatherEntity, childName, condition) {
+function deleteIf(fatherEntity: any, childName: string, condition: boolean) {
   if (condition) {
     delete fatherEntity[childName];
   }
 }
 
-export function isPolicyMapEqual(a, b) {
+export function isPolicyMapEqual(a: AppAutoscalerPolicyLocal, b: AppAutoscalerPolicyLocal) {
   return isEqual(autoscalerTransformMapToArray(a), autoscalerTransformMapToArray(b));
 }

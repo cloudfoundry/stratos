@@ -1,6 +1,7 @@
 import * as moment from 'moment';
 
-import { getScaleType, metricMap, MetricPercentageTypes, MomentFormateTimeS, normalColor, S2NS } from './autoscaler-util';
+import { getScaleType, AutoscalerConstants } from './autoscaler-util';
+import { AppAutoscalerAppMetric, AppScalingTrigger, AppScalingRule } from '../app-autoscaler.types';
 
 function initMeticData(metricName) {
   return {
@@ -21,20 +22,20 @@ function initMeticData(metricName) {
       colorTarget: []
     },
     markline: [],
-    unit: metricMap[metricName].unit_internal,
+    unit: AutoscalerConstants.metricMap[metricName].unit_internal,
     chartMaxValue: 0,
   };
 }
 
-export function buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger) {
+export function buildMetricData(metricName, data: AppAutoscalerAppMetric, startTime, endTime, skipFormat, trigger: AppScalingTrigger) {
   const result = initMeticData(metricName);
   if (data.resources.length > 0) {
     const basicInfo = getMetricBasicInfo(metricName, data.resources, trigger);
     result.unit = basicInfo.unit;
     result.chartMaxValue = basicInfo.chartMaxValue;
     if (!skipFormat) {
-      startTime = Math.round(startTime / S2NS);
-      endTime = Math.round(endTime / S2NS);
+      startTime = Math.round(startTime / AutoscalerConstants.S2NS);
+      endTime = Math.round(endTime / AutoscalerConstants.S2NS);
       const target = transformMetricData(data.resources, basicInfo.interval, startTime, endTime);
       const colorTarget = buildMetricColorData(target, trigger);
       result.formated = {
@@ -68,7 +69,7 @@ export function insertEmptyMetrics(data, startTime, endTime, interval) {
 function buildSingleMetricData(timestamp, value) {
   return {
     time: timestamp,
-    name: moment(timestamp * 1000).format(MomentFormateTimeS),
+    name: moment(timestamp * 1000).format(AutoscalerConstants.MomentFormateTimeS),
     value
   };
 }
@@ -79,7 +80,7 @@ function transformMetricData(source, interval, startTime, endTime) {
   }
   const scope = Math.round(interval / 2);
   const target = [];
-  let targetTimestamp = Math.round(source[0].timestamp / S2NS);
+  let targetTimestamp = Math.round(source[0].timestamp / AutoscalerConstants.S2NS);
   let targetIndex = insertEmptyMetrics(target, targetTimestamp - interval, startTime, -interval).length;
   let sourceIndex = 0;
   while (sourceIndex < source.length) {
@@ -87,7 +88,7 @@ function transformMetricData(source, interval, startTime, endTime) {
       target[targetIndex] = buildSingleMetricData(targetTimestamp, 0);
     }
     const metric = source[sourceIndex];
-    const sourceTimestamp = Math.round(metric.timestamp / S2NS);
+    const sourceTimestamp = Math.round(metric.timestamp / AutoscalerConstants.S2NS);
     if (sourceTimestamp < targetTimestamp - scope) {
       sourceIndex++;
     } else if (sourceTimestamp > targetTimestamp + scope) {
@@ -101,7 +102,7 @@ function transformMetricData(source, interval, startTime, endTime) {
   return insertEmptyMetrics(target, target[targetIndex].time + interval, endTime, interval);
 }
 
-function buildMetricColorData(metricData, trigger) {
+function buildMetricColorData(metricData, trigger: AppScalingTrigger) {
   const colorTarget = [];
   metricData.map((item) => {
     colorTarget.push({
@@ -144,7 +145,7 @@ function buildTriggerName(item) {
   return `${type} threshold: ${item.operator} ${item.threshold}`;
 }
 
-function buildSingleMarkLine(lineChartSeries, metricData, ul) {
+function buildSingleMarkLine(lineChartSeries, metricData, ul: AppScalingRule[]) {
   ul.map((item) => {
     const lineData = {
       name: buildTriggerName(item),
@@ -173,8 +174,8 @@ function executeCompare(val1, operator, val2) {
   }
 }
 
-function getColor(trigger, value) {
-  let color = normalColor;
+function getColor(trigger: AppScalingTrigger, value) {
+  let color = AutoscalerConstants.normalColor;
   if (Number.isNaN(value)) {
     return color;
   }
@@ -194,17 +195,17 @@ function getColor(trigger, value) {
   return color;
 }
 
-function getMetricBasicInfo(metricName, source, trigger) {
+function getMetricBasicInfo(metricName, source, trigger: AppScalingTrigger) {
   const map = {};
-  let interval = metricMap[metricName].interval;
+  let interval = AutoscalerConstants.metricMap[metricName].interval;
   let maxCount = 1;
   let preTimestamp = 0;
   let maxValue = -1;
-  const unit = metricMap[metricName].unit_internal;
+  const unit = AutoscalerConstants.metricMap[metricName].unit_internal;
   map[interval] = 1;
   for (const item of source) {
     maxValue = Math.max(Number(item.value), maxValue);
-    const thisTimestamp = Math.round(parseInt(item.timestamp, 10) / S2NS);
+    const thisTimestamp = Math.round(parseInt(item.timestamp, 10) / AutoscalerConstants.S2NS);
     const currentInterval = thisTimestamp - preTimestamp;
     map[currentInterval] = map[currentInterval] ? map[currentInterval] + 1 : 1;
     if (map[currentInterval] > maxCount) {
@@ -221,7 +222,7 @@ function getMetricBasicInfo(metricName, source, trigger) {
   };
 }
 
-function getChartMax(trigger, maxValue) {
+function getChartMax(trigger: AppScalingTrigger, maxValue) {
   let thresholdCount = 0;
   let maxThreshold = 0;
   let thresholdmax = 0;
@@ -236,7 +237,7 @@ function getChartMax(trigger, maxValue) {
     maxThreshold = Math.max(trigger.lower[0].threshold, maxThreshold);
     metricType = trigger.lower[0].metric_type;
   }
-  if (MetricPercentageTypes.indexOf(metricType) >= 0) {
+  if (AutoscalerConstants.MetricPercentageTypes.indexOf(metricType) >= 0) {
     return 100;
   }
   if (maxThreshold > 0) {

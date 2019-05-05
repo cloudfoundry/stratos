@@ -3,12 +3,12 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CardAutoscalerDefaultComponent } from './card-autoscaler-default.component';
 import { CoreModule } from '../../../core/core.module';
 import { ApplicationService } from '../../../features/applications/application.service';
-import { ApplicationServiceMock } from '../../../test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
-import { ApplicationStateService } from '../../application-state/application-state.service';
+import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
+import { createBasicStoreModule } from '../../../..//test-framework/store-test-helper';
+import { ApplicationStateService } from '../../../../../core/src/shared/components/application-state/application-state.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
-import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 
 describe('CardAutoscalerDefaultComponent', () => {
   let component: CardAutoscalerDefaultComponent;

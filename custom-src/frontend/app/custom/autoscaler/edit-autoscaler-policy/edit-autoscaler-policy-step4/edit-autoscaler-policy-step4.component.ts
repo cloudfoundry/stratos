@@ -14,8 +14,8 @@ import { cloneObject } from '../../../../core/utils.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../app-autoscaler.actions';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../app-autoscaler.types';
-import { MomentFormateDateTimeT, PolicyAlert, PolicyDefaultSpecificDate } from '../../autoscaler-helpers/autoscaler-util';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppSpecificDate } from '../../app-autoscaler.types';
+import { AutoscalerConstants, PolicyAlert } from '../../autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
@@ -114,7 +114,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   addSpecificDate = () => {
-    this.currentPolicy.schedules.specific_date.push(cloneObject(PolicyDefaultSpecificDate));
+    this.currentPolicy.schedules.specific_date.push(cloneObject(AutoscalerConstants.PolicyDefaultSpecificDate));
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
 
@@ -170,10 +170,16 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
         return null;
       }
       const errors: any = {};
-      const newSchedule = { start_date_time: control.value, end_date_time: this.editSpecificDateForm.get('end_date_time').value };
+      const newSchedule: AppSpecificDate = {
+        instance_min_count: 0,
+        instance_max_count: 0,
+        start_date_time: control.value,
+        end_date_time: this.editSpecificDateForm.get('end_date_time').value
+      };
       const lastValid = this.editMutualValidation.datetime;
       this.editMutualValidation.datetime = true;
-      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).format(MomentFormateDateTimeT), control.value)) {
+      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone)
+        .format(AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleStartDateTimeBeforeNow = { value: control.value };
       }
       if (dateTimeIsSameOrAfter(control.value, this.editSpecificDateForm.get('end_date_time').value)) {
@@ -197,10 +203,16 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
         return null;
       }
       const errors: any = {};
-      const newSchedule = { start_date_time: this.editSpecificDateForm.get('start_date_time').value, end_date_time: control.value };
+      const newSchedule = {
+        instance_min_count: 0,
+        instance_max_count: 0,
+        start_date_time: this.editSpecificDateForm.get('start_date_time').value,
+        end_date_time: control.value
+      };
       const lastValid = this.editMutualValidation.datetime;
       this.editMutualValidation.datetime = true;
-      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).format(MomentFormateDateTimeT), control.value)) {
+      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).
+        format(AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeNow = { value: control.value };
       }
       if (dateTimeIsSameOrAfter(this.editSpecificDateForm.get('start_date_time').value, control.value)) {
@@ -231,7 +243,6 @@ export function validateRecurringSpecificMin(editForm, editMutualValidation): Va
     if (editForm) {
       editForm.controls.initial_min_instance_count.updateValueAndValidity();
     }
-    console.log(invalid);
     return invalid ? { alertInvalidPolicyMinimumRange: { value: control.value } } : null;
   };
 }

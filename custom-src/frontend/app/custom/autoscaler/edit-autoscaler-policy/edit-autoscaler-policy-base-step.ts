@@ -6,7 +6,6 @@ import { StepOnNextFunction } from '../../../shared/components/stepper/step/step
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
-
 export abstract class EditAutoscalerPolicy implements OnInit {
   public currentPolicy: AppAutoscalerPolicyLocal;
   public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;

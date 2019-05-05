@@ -32,11 +32,10 @@ import {
 } from '../app-autoscaler.actions';
 import {
   AppAutoscalerAppMetric,
-  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppAutoscalerScalingHistory,
 } from '../app-autoscaler.types';
-import { MetricTypes } from '../autoscaler-helpers/autoscaler-util';
+import { AutoscalerConstants } from '../autoscaler-helpers/autoscaler-util';
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerPolicySchemaKey,
@@ -71,12 +70,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
   recurringScheduleColumns: string[] = ['effect', 'repeat', 'from', 'to', 'init', 'min', 'max'];
   scalingHistoryColumns: string[] = ['event', 'trigger', 'date', 'error'];
-  metricTypes: string[] = MetricTypes;
+  metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  appAutoscalerScalingHistoryService: EntityService; // TODO: RC typing
+  appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
   appAutoscalerEnablement$: Observable<boolean>;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
 
   private appAutoscalerPolicyErrorSub: Subscription;
@@ -131,26 +130,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    // this.appAutoscalerHealthService = this.entityServiceFactory.create(
-    //   appAutoscalerHealthSchemaKey,
-    //   entityFactory(appAutoscalerHealthSchemaKey),
-    //   this.applicationService.appGuid,
-    //   new GetAppAutoscalerHealthAction(this.applicationService.appGuid, this.applicationService.cfGuid),
-    //   false
-    // );
-    // this.appAutoscalerEnablement$ = this.appAutoscalerHealthService.entityObs$.pipe(
-    //   map(({ entity }) => {
-    //     if (entity &&  entity.entity && entity.entity.uptime > 0) {
-    //       console.log(true)
-    //       return true;
-    //     } else {
-    //       console.log(false)
-    //       return false;
-    //     }
-    //   }),
-    //   publishReplay(1),
-    //   refCount()
-    // );
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       appAutoscalerPolicySchemaKey,
       entityFactory(appAutoscalerPolicySchemaKey),
@@ -164,6 +143,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
           this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
           this.loadLatestMetricsUponPolicy(entity.entity);
         }
+        this.initErrorSub();
         return entity && entity.entity;
       }),
       publishReplay(1),
@@ -185,7 +165,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       false
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
-      map(({ entity }) => entity && entity.entity),
+      map(({ entity }) => {
+        this.initErrorSub();
+        return entity && entity.entity;
+      }),
       publishReplay(1),
       refCount()
     );
@@ -218,7 +201,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   initErrorSub() {
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       filter(request => !!request.error),
-      map(request => request.message),
+      map(request => {
+        const msg = request.message;
+        request.error = false;
+        request.message = '';
+        return msg;
+      }),
       distinctUntilChanged(),
     ).subscribe(errorMessage => {
       if (this.appAutoscalerPolicySnackBarRef) {

@@ -8,7 +8,7 @@ import { ApplicationService } from '../../../../../features/applications/applica
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../../../../shared/components/list/list.component.types';
 import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
-import { AutoscalerEvent } from '../../../app-autoscaler.types';
+import { AppAutoscalerEvent } from '../../../app-autoscaler.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import {
   TableCellAutoscalerEventChangeComponent,
@@ -19,10 +19,10 @@ import {
 
 @Injectable()
 export class CfAppAutoscalerEventsConfigService
-  extends ListConfig<APIResource<AutoscalerEvent>>
-  implements IListConfig<APIResource<AutoscalerEvent>> {
+  extends ListConfig<APIResource<AppAutoscalerEvent>>
+  implements IListConfig<APIResource<AppAutoscalerEvent>> {
   autoscalerEventSource: CfAppAutoscalerEventsDataSource;
-  columns: Array<ITableColumn<APIResource<AutoscalerEvent>>> = [
+  columns: Array<ITableColumn<APIResource<AppAutoscalerEvent>>> = [
     {
       columnId: 'timestamp',
       headerCell: () => 'Timestamp',

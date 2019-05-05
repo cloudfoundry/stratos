@@ -15,7 +15,7 @@ import { StratosStatus } from '../../../shared/shared.types';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../app-autoscaler.actions';
 import { autoscalerTransformArrayToMap } from '../autoscaler-helpers/autoscaler-transform-policy';
 import { appAutoscalerPolicySchemaKey } from '../autoscaler.store.module';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
+import { AppAutoscalerPolicyLocal } from '../app-autoscaler.types';
 
 @Component({
   selector: 'app-card-autoscaler-default',

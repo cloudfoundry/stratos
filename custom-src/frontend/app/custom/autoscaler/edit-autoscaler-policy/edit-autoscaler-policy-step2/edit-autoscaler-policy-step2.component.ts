@@ -9,13 +9,8 @@ import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../app-autosca
 import {
   getAdjustmentType,
   getScaleType,
-  LowerOperators,
-  MetricPercentageTypes,
-  MetricTypes,
+  AutoscalerConstants,
   PolicyAlert,
-  PolicyDefaultSetting,
-  PolicyDefaultTrigger,
-  UpperOperators,
 } from '../../autoscaler-helpers/autoscaler-util';
 import {
   getThresholdMax,
@@ -36,8 +31,8 @@ import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy implements OnInit {
 
   policyAlert = PolicyAlert;
-  metricTypes = MetricTypes;
-  operatorTypes = UpperOperators.concat(LowerOperators);
+  metricTypes = AutoscalerConstants.MetricTypes;
+  operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
   editTriggerForm: FormGroup;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
@@ -52,26 +47,26 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
     private fb: FormBuilder,
     service: EditAutoscalerPolicyService
   ) {
-    super(service)
+    super(service);
     this.editTriggerForm = this.fb.group({
       metric_type: [0, this.validateTriggerMetricType()],
       operator: [0, this.validateTriggerOperator()],
       threshold: [0, [Validators.required, Validators.min(1), this.validateTriggerThreshold()]],
       adjustment: [0, [Validators.required, Validators.min(1), this.validateTriggerAdjustment()]],
       breach_duration_secs: [0, [
-        Validators.min(PolicyDefaultSetting.breach_duration_secs_min),
-        Validators.max(PolicyDefaultSetting.breach_duration_secs_max)
+        Validators.min(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min),
+        Validators.max(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_max)
       ]],
       cool_down_secs: [0, [
-        Validators.min(PolicyDefaultSetting.cool_down_secs_min),
-        Validators.max(PolicyDefaultSetting.cool_down_secs_max)
+        Validators.min(AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_min),
+        Validators.max(AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_max)
       ]],
       adjustment_type: [0]
     });
   }
 
   addTrigger = () => {
-    this.currentPolicy.scaling_rules_form.push(cloneObject(PolicyDefaultTrigger));
+    this.currentPolicy.scaling_rules_form.push(cloneObject(AutoscalerConstants.PolicyDefaultTrigger));
     this.editTrigger(this.currentPolicy.scaling_rules_form.length - 1);
   }
 
@@ -109,12 +104,14 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
         this.editTriggerForm.get('breach_duration_secs').value;
     } else {
-      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs = PolicyDefaultSetting.breach_duration_secs_default;
+      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
+        AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default;
     }
     if (this.editTriggerForm.get('cool_down_secs').value) {
       this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = this.editTriggerForm.get('cool_down_secs').value;
     } else {
-      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = PolicyDefaultSetting.cool_down_secs_default;
+      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs =
+        AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default;
     }
     this.editIndex = -1;
   }
@@ -146,7 +143,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       const metricType = this.editTriggerForm.get('metric_type').value;
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
       const errors: any = {};
-      if (MetricPercentageTypes.indexOf(metricType) >= 0) {
+      if (AutoscalerConstants.MetricPercentageTypes.indexOf(metricType) >= 0) {
         if (numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
           errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
         }

@@ -1,87 +1,86 @@
 
 import * as moment from 'moment-timezone';
-import { AppAutoscalerPolicy } from '../app-autoscaler.types';
+import { AppScalingRule, AppScalingTrigger } from '../app-autoscaler.types';
 
-// TODO: RC This feels like it should be wrapped in a helper class, which avoids lots of global consts
+export class AutoscalerConstants {
+  public static S2NS = 1000000000;
+  public static MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'];
+  public static MetricPercentageTypes = ['memoryutil'];
+  public static ScaleTypes = ['upper', 'lower'];
+  public static UpperOperators = ['>', '>='];
+  public static LowerOperators = ['<', '<='];
+  public static WeekdayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  public static MonthdayOptions = (() => {
+    const days = [];
+    for (let i = 0; i < 31; i++) {
+      days[i] = i + 1;
+    }
+    return days;
+  })();
 
-export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'];
-export const MetricPercentageTypes = ['memoryutil'];
-export const ScaleTypes = ['upper', 'lower'];
-export const UpperOperators = ['>', '>='];
-export const LowerOperators = ['<', '<='];
-export const WeekdayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-export const MonthdayOptions = (() => {
-  const days = [];
-  for (let i = 0; i < 31; i++) {
-    days[i] = i + 1;
-  }
-  return days;
-})();
+  public static normalColor = 'rgba(90,167,0,0.6)';
+  public static MomentFormateDate = 'YYYY-MM-DD';
+  public static MomentFormateDateTimeT = 'YYYY-MM-DDTHH:mm';
+  public static MomentFormateTime = 'HH:mm';
+  public static MomentFormateTimeS = 'HH:mm:ss';
 
-export const normalColor = 'rgba(90,167,0,0.6)';
-export const MomentFormateDate = 'YYYY-MM-DD';
-export const MomentFormateDateTimeT = 'YYYY-MM-DDTHH:mm';
-export const MomentFormateTime = 'HH:mm';
-export const MomentFormateTimeS = 'HH:mm:ss';
+  public static PolicyDefaultSetting = {
+    breach_duration_secs_default: 120,
+    breach_duration_secs_min: 60,
+    breach_duration_secs_max: 3600,
+    cool_down_secs_default: 300,
+    cool_down_secs_min: 60,
+    cool_down_secs_max: 3600,
+  };
+  public static PolicyDefaultTrigger = {
+    metric_type: 'memoryused',
+    breach_duration_secs: AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default,
+    threshold: 10,
+    operator: '<=',
+    cool_down_secs: AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default,
+    adjustment: '-1'
+  };
+  public static PolicyDefaultRecurringSchedule = {
+    start_time: '10:00',
+    end_time: '18:00',
+    days_of_week: [
+      1, 2, 3
+    ],
+    instance_min_count: 1,
+    instance_max_count: 10,
+    initial_min_instance_count: 5
+  };
+  public static PolicyDefaultSpecificDate = {
+    start_date_time: moment().add(1, 'days').set('hour', 10).set('minute', 0).format(AutoscalerConstants.MomentFormateDateTimeT),
+    end_date_time: moment().add(1, 'days').set('hour', 18).set('minute', 0).format(AutoscalerConstants.MomentFormateDateTimeT),
+    instance_min_count: 1,
+    instance_max_count: 10,
+    initial_min_instance_count: 5
+  };
 
-export const PolicyDefaultSetting = {
-  breach_duration_secs_default: 120,
-  breach_duration_secs_min: 60,
-  breach_duration_secs_max: 3600,
-  cool_down_secs_default: 300,
-  cool_down_secs_min: 60,
-  cool_down_secs_max: 3600,
-};
-export const PolicyDefaultTrigger = {
-  metric_type: 'memoryused',
-  breach_duration_secs: PolicyDefaultSetting.breach_duration_secs_default,
-  threshold: 10,
-  operator: '<=',
-  cool_down_secs: PolicyDefaultSetting.cool_down_secs_default,
-  adjustment: '-1'
-};
-export const PolicyDefaultRecurringSchedule = {
-  start_time: '10:00',
-  end_time: '18:00',
-  days_of_week: [
-    1, 2, 3
-  ],
-  instance_min_count: 1,
-  instance_max_count: 10,
-  initial_min_instance_count: 5
-};
-export const PolicyDefaultSpecificDate = {
-  start_date_time: moment().add(1, 'days').set('hour', 10).set('minute', 0).format(MomentFormateDateTimeT),
-  end_date_time: moment().add(1, 'days').set('hour', 18).set('minute', 0).format(MomentFormateDateTimeT),
-  instance_min_count: 1,
-  instance_max_count: 10,
-  initial_min_instance_count: 5
-};
-
-export const metricMap = {
-  memoryused: {
-    unit_internal: 'MB',
-    interval: 40,
-  },
-  memoryutil: {
-    unit_internal: ' % ',
-    interval: 40,
-  },
-  responsetime: {
-    unit_internal: 'ms',
-    interval: 40,
-  },
-  throughput: {
-    unit_internal: 'rps',
-    interval: 40,
-  },
-  cpu: {
-    unit_internal: ' % ',
-    interval: 40,
-  }
-};
-
-export const S2NS = 1000000000;
+  public static metricMap = {
+    memoryused: {
+      unit_internal: 'MB',
+      interval: 40,
+    },
+    memoryutil: {
+      unit_internal: ' % ',
+      interval: 40,
+    },
+    responsetime: {
+      unit_internal: 'ms',
+      interval: 40,
+    },
+    throughput: {
+      unit_internal: 'rps',
+      interval: 40,
+    },
+    cpu: {
+      unit_internal: ' % ',
+      interval: 40,
+    }
+  };
+}
 
 export const PolicyAlert = {
   alertInvalidPolicyMinimumRange: 'The Minimum Instance Count must be a integer less than the Maximum Instance Count.',
@@ -94,11 +93,11 @@ export const PolicyAlert = {
   alertInvalidPolicyTriggerStepPercentageRange: 'The Instance Step Up/Down percentage must be a integer greater than 1.',
   alertInvalidPolicyTriggerStepRange: 'The Instance Step Up/Down value must be a integer in the range of 1 to (Maximum Instance-1).',
   alertInvalidPolicyTriggerBreachDurationRange:
-    `The breach duration value must be an integer in the range of ${PolicyDefaultSetting.breach_duration_secs_min} to
-    ${PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
+    `The breach duration value must be an integer in the range of ${AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min} to
+    ${AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
   alertInvalidPolicyTriggerCooldownRange:
-    `The cooldown period value must be an integer in the range of ${PolicyDefaultSetting.cool_down_secs_min} to
-    ${PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
+    `The cooldown period value must be an integer in the range of ${AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_min} to
+    ${AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
   alertInvalidPolicyScheduleDateBeforeNow: 'Start/End date should be after or equal to current date.',
   alertInvalidPolicyScheduleEndDateBeforeStartDate: 'Start date must be earlier than the end date.',
   alertInvalidPolicyScheduleEndTimeBeforeStartTime: 'Start time must be earlier than the end time.',
@@ -110,7 +109,7 @@ export const PolicyAlert = {
   alertInvalidPolicyScheduleSpecificConflict: 'Specific date configuration conflict occurs.',
 };
 
-export function isEqual(a, b) {
+export function isEqual(a: any, b: any) {
   if (typeof (a) !== typeof (b)) {
     return false;
   } else {
@@ -129,21 +128,21 @@ export function isEqual(a, b) {
   }
 }
 
-export function getScaleType(operator) {
-  if (LowerOperators.indexOf(operator) >= 0) {
+export function getScaleType(operator: string) {
+  if (AutoscalerConstants.LowerOperators.indexOf(operator) >= 0) {
     return 'lower';
   } else {
     return 'upper';
   }
 }
 
-export function getAdjustmentType(adjustment) {
+export function getAdjustmentType(adjustment: string) {
   return adjustment.indexOf('%') >= 0 ? 'percentage' : 'value';
 }
 
-export function buildLegendData(trigger) {
+export function buildLegendData(trigger: AppScalingTrigger) {
   const legendData = [];
-  let latestUl = {};
+  let latestUl = null;
   if (trigger.upper && trigger.upper.length > 0) {
     latestUl = buildUpperLegendData(legendData, trigger.upper, !trigger.lower || trigger.lower.length === 0);
   }
@@ -153,7 +152,7 @@ export function buildLegendData(trigger) {
   return legendData;
 }
 
-function buildUpperLegendData(legendData, upper, nolower) {
+function buildUpperLegendData(legendData: any, upper: AppScalingRule[], nolower: boolean) {
   let latestUl: any = {};
   upper.map((item, index) => {
     let name = '';
@@ -172,13 +171,13 @@ function buildUpperLegendData(legendData, upper, nolower) {
   if (nolower) {
     legendData.push({
       name: `${upper[0].metric_type} ${getOppositeOperator(latestUl.operator)} ${latestUl.threshold}`,
-      value: normalColor
+      value: AutoscalerConstants.normalColor
     });
   }
   return latestUl;
 }
 
-function buildLowerLegendData(legendData, lower, latestUl) {
+function buildLowerLegendData(legendData: any, lower: AppScalingRule[], latestUl: AppScalingRule) {
   lower.map((item, index) => {
     let name = '';
     if (!latestUl.threshold) {
@@ -189,7 +188,7 @@ function buildLowerLegendData(legendData, lower, latestUl) {
     }
     legendData.push({
       name,
-      value: index === 0 ? normalColor : latestUl.color
+      value: index === 0 ? AutoscalerConstants.normalColor : latestUl.color
     });
     latestUl = item;
   });
@@ -200,7 +199,7 @@ function buildLowerLegendData(legendData, lower, latestUl) {
   return {};
 }
 
-function getOppositeOperator(operator) {
+function getOppositeOperator(operator: string) {
   switch (operator) {
     case '>':
       return '<=';
@@ -213,7 +212,7 @@ function getOppositeOperator(operator) {
   }
 }
 
-function getRightOperator(operator) {
+function getRightOperator(operator: string) {
   switch (operator) {
     case '>':
       return '<=';
@@ -224,7 +223,7 @@ function getRightOperator(operator) {
   }
 }
 
-function getLeftOperator(operator) {
+function getLeftOperator(operator: string) {
   switch (operator) {
     case '>':
       return '<';
@@ -237,11 +236,10 @@ function getLeftOperator(operator) {
   }
 }
 
-export function shiftArray(array, step) {
+export function shiftArray(array: number[], step: number) {
   const days = [];
   for (let i = 0; i < array.length; i++) {
     days[i] = array[i] + step;
   }
   return days;
 }
-

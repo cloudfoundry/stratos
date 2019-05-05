@@ -11,7 +11,7 @@ import { endpointStoreNames } from '../../../../../../../store/src/types/endpoin
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
-import { SharedModule } from '../../../../shared.module';
+import { SharedModule } from '../../../../../shared/shared.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
 
 

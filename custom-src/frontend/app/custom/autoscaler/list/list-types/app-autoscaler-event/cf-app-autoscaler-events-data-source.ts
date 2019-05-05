@@ -7,16 +7,16 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../shared/components/list/list.component.types';
 import { GetAppAutoscalerScalingHistoryAction } from '../../../app-autoscaler.actions';
-import { AutoscalerEvent } from '../../../app-autoscaler.types';
+import { AppAutoscalerEvent } from '../../../app-autoscaler.types';
 import { appAutoscalerScalingHistorySchemaKey } from '../../../autoscaler.store.module';
 
-export class CfAppAutoscalerEventsDataSource extends ListDataSource<APIResource<AutoscalerEvent>> {
+export class CfAppAutoscalerEventsDataSource extends ListDataSource<APIResource<AppAutoscalerEvent>> {
   action: any;
   constructor(
     store: Store<AppState>,
     cfGuid: string,
     appGuid: string,
-    listConfig: IListConfig<APIResource<AutoscalerEvent>>
+    listConfig: IListConfig<APIResource<AppAutoscalerEvent>>
   ) {
     const action = new GetAppAutoscalerScalingHistoryAction(null, appGuid, cfGuid);
     super(
