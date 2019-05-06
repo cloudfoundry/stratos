@@ -6,7 +6,6 @@ import { MDAppModule } from '../core/md.module';
 import { CoreModule } from '../core/core.module';
 import { AutoscalerModule } from './autoscaler/autoscaler.module';
 import { AutoscalerTabExtensionComponent } from './autoscaler/autoscaler-tab-extension/autoscaler-tab-extension.component';
-// import { CardAutoscalerDefaultComponent } from './autoscaler/card-autoscaler-default/card-autoscaler-default.component';
 
 @NgModule({
   imports: [
@@ -19,7 +18,6 @@ import { AutoscalerTabExtensionComponent } from './autoscaler/autoscaler-tab-ext
   ],
   declarations: [
     AutoscalerTabExtensionComponent,
-    // CardAutoscalerDefaultComponent
   ],
   entryComponents: [AutoscalerTabExtensionComponent]
 })

@@ -9,6 +9,9 @@ import { ApplicationStateService } from '../../../../../core/src/shared/componen
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
+import { RunningInstancesComponent } from '../../../shared/components/running-instances/running-instances.component';
+import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 describe('CardAutoscalerDefaultComponent', () => {
   let component: CardAutoscalerDefaultComponent;
@@ -19,6 +22,7 @@ describe('CardAutoscalerDefaultComponent', () => {
       declarations: [
         CardAutoscalerDefaultComponent,
         MetadataItemComponent,
+        RunningInstancesComponent,
       ],
       imports: [
         CoreModule,
@@ -29,6 +33,8 @@ describe('CardAutoscalerDefaultComponent', () => {
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
+        EntityMonitorFactory,
+        PaginationMonitorFactory,
       ]
     })
       .compileComponents();

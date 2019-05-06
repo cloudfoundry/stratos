@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { MockBackend } from '@angular/http/testing';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
@@ -13,8 +14,7 @@ import { generateTestEntityServiceProvider } from '../../../../../../test-framew
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
-
-
+import { Http, ConnectionBackend } from '@angular/http';
 
 describe('CfAppAutoscalerEventsConfigService', () => {
   const initialState = getInitialTestStoreState();
@@ -31,7 +31,9 @@ describe('CfAppAutoscalerEventsConfigService', () => {
           entityFactory(applicationSchemaKey),
           new GetApplication(appGuid, cfGuid)
         ),
-        generateTestApplicationServiceProvider(appGuid, cfGuid)
+        generateTestApplicationServiceProvider(appGuid, cfGuid),
+        Http,
+        { provide: ConnectionBackend, useClass: MockBackend },
       ],
       imports: [
         CommonModule,
