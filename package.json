@@ -23,6 +23,7 @@
     "test-frontend:core": "ng test core --code-coverage --watch=false",
     "test-frontend:store": "ng test store --code-coverage --watch=false",
     "test-frontend:cloud-foundry": "ng test cloud-foundry --code-coverage --watch=false",
+    "test-frontend:cf-autoscaler": "ng test cf-autoscaler --code-coverage --watch=false",
     "posttest": "istanbul report json && node build/combine-coverage.js",
     "codecov": "codecov -f coverage/coverage-final.json",
     "lint": "ng lint --format stylish",
