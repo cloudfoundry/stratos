@@ -117,14 +117,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // Add any tabs from extensions
     const tabs = getTabsFromExtensions(StratosTabType.Application);
     tabs.map((extensionTab) => {
-      // if (extensionTab.action) {
-      //   extensionTab.action.onSucceed = () => {
-      //     this.tabLinks.push(extensionTab);
-      //   };
-      //   this.store.dispatch(extensionTab.action);
-      // } else {
       this.tabLinks.push(extensionTab);
-      // }
     });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type

@@ -23,7 +23,7 @@ export class PageSideNavComponent implements OnInit {
 
   pTabs: IPageSideNavTab[];
   @Input() set tabs(tabs: IPageSideNavTab[]) {
-    if (!tabs || this.pTabs) {
+    if (!tabs || (this.pTabs && tabs.length === this.pTabs.length)) {
       return;
     }
     this.pTabs = tabs.map(tab => ({
