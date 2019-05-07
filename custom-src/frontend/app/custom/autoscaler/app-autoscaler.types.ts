@@ -1,3 +1,5 @@
+import { AutoscalerQuery } from './app-autoscaler.actions';
+
 export interface AppAutoscalerPolicy {
   enabled: boolean;
   instance_min_count: number;
@@ -31,6 +33,7 @@ export interface AppScalingRule {
 export interface AppScalingTrigger {
   upper?: AppScalingRule[];
   lower?: AppScalingRule[];
+  query?: AutoscalerQuery;
 }
 
 export interface AppRecurringSchedule {
@@ -79,19 +82,53 @@ export interface AppAutoscalerEvent {
   timestamp: number;
 }
 
-export interface AppAutoscalerAppMetric {
-  next_url: string;
-  prev_url: string;
-  page: number;
-  resources: AppAutoscalerMetric[];
-  total_pages: number;
-  total_results: number;
-}
-
-export interface AppAutoscalerMetric {
+export interface AppAutoscalerMetricData {
   app_id: string;
   name: string;
   timestamp: number;
   unit: string;
   value: string;
+  chartMaxValue?: string;
 }
+
+export interface AppAutoscalerMetricDataLocal {
+  latest: {
+    target: AppAutoscalerMetricDataPoint[],
+    colorTarget: AppAutoscalerMetricDataPoint[]
+  };
+  formated: {
+    target: AppAutoscalerMetricDataPoint[],
+    colorTarget: AppAutoscalerMetricDataPoint[]
+  };
+  markline: AppAutoscalerMetricDataLine[];
+  unit: string;
+  chartMaxValue: number;
+}
+
+export interface AppAutoscalerMetricDataPoint {
+  name: string;
+  value: number | string;
+  time?: number;
+}
+
+export interface AppAutoscalerMetricLegend {
+  name: string;
+  value: string;
+}
+
+export interface AppAutoscalerMetricDataLine {
+  name: string;
+  series: AppAutoscalerMetricDataPoint[];
+}
+
+export interface AppAutoscalerMetricMapInfo {
+  unit_internal: string;
+  interval: number;
+}
+
+export interface AppAutoscalerMetricBasicInfo {
+  interval: number;
+  unit: string;
+  chartMaxValue: number;
+}
+

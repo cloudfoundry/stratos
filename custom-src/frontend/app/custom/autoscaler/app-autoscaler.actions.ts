@@ -101,7 +101,7 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
     public paginationKey: string,
     public guid: string,
     public endpointGuid: string,
-    public normalFormat?,
+    public normalFormat?: boolean
   ) {
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
   }
@@ -208,6 +208,7 @@ export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricActio
   entityKey = appAutoscalerAppMetricSchemaKey;
 }
 
+// TODO: RC Check - is this being used?
 export class GetAppAutoscalerInsMetricAction extends GetAppAutoscalerMetricAction implements PaginatedAction {
   constructor(
     public guid: string,

@@ -1,7 +1,7 @@
 <mat-card *ngIf="metricData$ | async as metricData">
   <mat-card-header>
     <mat-card-title>
-      {{row.metadata.guid}} <br />
+      {{metricType}} <br />
       <div class="autoscaler-metric-subtitle">
         {{paramsMetrics['start-time'] / 1000000 | date:'medium'}} ~
         {{paramsMetrics['end-time'] / 1000000 | date:'medium'}}
@@ -24,7 +24,7 @@
           [animations]="true" [lineChart]="metricData[0].entity.markline" [tooltipDisabled]="false"
           [yLeftAxisScaleFactor]="yLeftAxisScale" [gradient]="false" [xAxis]="true" [yAxis]="true" [legend]="false"
           [showGridLines]="true" [showXAxisLabel]="true" [showYAxisLabel]="true"
-          [yAxisLabel]="metricData[0].entity.unit" [metricName]="row.metadata.guid"
+          [yAxisLabel]="metricData[0].entity.unit" [metricName]="metricType"
           [yScaleMax]="metricData[0].entity.chartMaxValue" (select)="onSelect($event)">
         </app-autoscaler-combo-chart-component>
       </div>

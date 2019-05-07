@@ -9,23 +9,25 @@ import { ITableColumn } from '../../../../../shared/components/list/list-table/t
 import { BaseCfListConfig } from '../../../../../shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ListViewTypes } from '../../../../../shared/components/list/list.component.types';
 import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
+import { AppScalingTrigger } from '../../../app-autoscaler.types';
+import { AutoscalerConstants } from '../../../autoscaler-helpers/autoscaler-util';
 import {
   AppAutoscalerMetricChartCardComponent,
 } from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
 import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
 
 @Injectable()
-export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource> {
+export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource<AppScalingTrigger>> {
   autoscalerMetricSource: AppAutoscalerMetricChartDataSource;
   cardComponent = AppAutoscalerMetricChartCardComponent;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  columns: Array<ITableColumn<APIResource>> = [
+  columns: Array<ITableColumn<APIResource<AppScalingTrigger>>> = [
     {
       columnId: 'name',
       headerCell: () => 'Metric type',
       cellDefinition: {
-        valuePath: 'metadata.guid'
+        getValue: (row) => AutoscalerConstants.getMetricFromMetricId(row.metadata.guid)
       },
       cellFlex: '2'
     }

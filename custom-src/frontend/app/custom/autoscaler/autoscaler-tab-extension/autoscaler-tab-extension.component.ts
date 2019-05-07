@@ -30,11 +30,7 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UpdateAppAutoscalerPolicyAction,
 } from '../app-autoscaler.actions';
-import {
-  AppAutoscalerAppMetric,
-  AppAutoscalerPolicyLocal,
-  AppAutoscalerScalingHistory,
-} from '../app-autoscaler.types';
+import { AppAutoscalerPolicyLocal, AppAutoscalerScalingHistory, AppAutoscalerMetricData } from '../app-autoscaler.types';
 import { AutoscalerConstants } from '../autoscaler-helpers/autoscaler-util';
 import {
   appAutoscalerAppMetricSchemaKey,
@@ -178,7 +174,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   getAppMetric(metricName: string, trigger: any, params: any) {
     const action = new GetAppAutoscalerAppMetricAction(this.applicationService.appGuid,
       this.applicationService.cfGuid, metricName, true, trigger, params);
-    return getPaginationObservables<AppAutoscalerAppMetric>({
+    return getPaginationObservables<AppAutoscalerMetricData>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(

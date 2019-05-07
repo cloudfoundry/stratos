@@ -13,8 +13,8 @@ import { ApplicationService } from '../../../../../../features/applications/appl
 import { CardCell, IListRowCell } from '../../../../../../shared/components/list/list.types';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 import { AutoscalerPaginationParams, GetAppAutoscalerAppMetricAction } from '../../../../app-autoscaler.actions';
-import { AppAutoscalerAppMetric } from '../../../../app-autoscaler.types';
-import { buildLegendData } from '../../../../autoscaler-helpers/autoscaler-util';
+import { AppScalingTrigger, AppAutoscalerMetricData, AppAutoscalerMetricDataPoint } from '../../../../app-autoscaler.types';
+import { buildLegendData, AutoscalerConstants } from '../../../../autoscaler-helpers/autoscaler-util';
 import { appAutoscalerAppMetricSchemaKey } from '../../../../autoscaler.store.module';
 
 @Component({
@@ -54,6 +54,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     'results-per-page': '10000000',
     'order-direction': 'asc'
   };
+  public metricType: string;
 
   constructor(
     private appService: ApplicationService,
@@ -63,12 +64,12 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     super();
   }
 
-  public metricData$;
+  public metricData$: Observable<any>;
   public appAutoscalerAppMetricLegend;
 
-  getLegend2(trigger) {
+  getLegend2(trigger: AppScalingTrigger) {
     const legendColor = buildLegendData(trigger);
-    const legendValue = [];
+    const legendValue: AppAutoscalerMetricDataPoint[] = [];
     legendColor.map((item) => {
       legendValue.push({
         name: item.name,
@@ -87,14 +88,15 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
       this.paramsMetrics['end-time'] = this.row.entity.query.params.end + '000000000';
     }
     this.appAutoscalerAppMetricLegend = this.getLegend2(this.row.entity);
-    this.metricData$ = this.getAppMetric(this.row.metadata.guid, this.row.entity, this.paramsMetrics);
+    this.metricType = AutoscalerConstants.getMetricFromMetricId(this.row.metadata.guid);
+    this.metricData$ = this.getAppMetric(this.metricType, this.row.entity, this.paramsMetrics);
   }
 
-  getAppMetric(metricName: string, trigger: any, params: any) {
+  getAppMetric(metricName: string, trigger: any, params: any): Observable<AppAutoscalerMetricData[]> {
     const action = new GetAppAutoscalerAppMetricAction(this.appService.appGuid,
       this.appService.cfGuid, metricName, false, trigger, params);
     this.store.dispatch(action);
-    return getPaginationObservables<AppAutoscalerAppMetric>({
+    return getPaginationObservables<AppAutoscalerMetricData>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(

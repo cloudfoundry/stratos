@@ -1,6 +1,11 @@
 
 import * as moment from 'moment-timezone';
-import { AppScalingRule, AppScalingTrigger } from '../app-autoscaler.types';
+import {
+  AppScalingRule,
+  AppScalingTrigger,
+  AppAutoscalerMetricDataPoint,
+  AppAutoscalerMetricLegend,
+  AppAutoscalerMetricMapInfo } from '../app-autoscaler.types';
 
 export class AutoscalerConstants {
   public static S2NS = 1000000000;
@@ -58,7 +63,7 @@ export class AutoscalerConstants {
     initial_min_instance_count: 5
   };
 
-  public static metricMap = {
+  public static metricMap: { [metricName: string]: AppAutoscalerMetricMapInfo } = {
     memoryused: {
       unit_internal: 'MB',
       interval: 40,
@@ -80,6 +85,14 @@ export class AutoscalerConstants {
       interval: 40,
     }
   };
+
+  public static createMetricId(appGuid: string, metricType: string): string {
+    return appGuid + ':' + metricType;
+  }
+
+  public static getMetricFromMetricId(metricId: string): string {
+    return metricId.slice(metricId.indexOf(':') + 1, metricId.length);
+  }
 }
 
 export const PolicyAlert = {
@@ -109,7 +122,7 @@ export const PolicyAlert = {
   alertInvalidPolicyScheduleSpecificConflict: 'Specific date configuration conflict occurs.',
 };
 
-export function isEqual(a: any, b: any) {
+export function isEqual(a: any, b: any): boolean {
   if (typeof (a) !== typeof (b)) {
     return false;
   } else {
@@ -128,7 +141,7 @@ export function isEqual(a: any, b: any) {
   }
 }
 
-export function getScaleType(operator: string) {
+export function getScaleType(operator: string): string {
   if (AutoscalerConstants.LowerOperators.indexOf(operator) >= 0) {
     return 'lower';
   } else {
@@ -136,13 +149,13 @@ export function getScaleType(operator: string) {
   }
 }
 
-export function getAdjustmentType(adjustment: string) {
+export function getAdjustmentType(adjustment: string): string {
   return adjustment.indexOf('%') >= 0 ? 'percentage' : 'value';
 }
 
-export function buildLegendData(trigger: AppScalingTrigger) {
-  const legendData = [];
-  let latestUl = null;
+export function buildLegendData(trigger: AppScalingTrigger): AppAutoscalerMetricLegend[] {
+  const legendData: AppAutoscalerMetricLegend[] = [];
+  let latestUl: AppScalingRule = null;
   if (trigger.upper && trigger.upper.length > 0) {
     latestUl = buildUpperLegendData(legendData, trigger.upper, !trigger.lower || trigger.lower.length === 0);
   }
@@ -152,8 +165,8 @@ export function buildLegendData(trigger: AppScalingTrigger) {
   return legendData;
 }
 
-function buildUpperLegendData(legendData: any, upper: AppScalingRule[], nolower: boolean) {
-  let latestUl: any = {};
+function buildUpperLegendData(legendData: any, upper: AppScalingRule[], noLower: boolean): AppScalingRule {
+  let latestUl: AppScalingRule;
   upper.map((item, index) => {
     let name = '';
     if (index === 0) {
@@ -168,7 +181,7 @@ function buildUpperLegendData(legendData: any, upper: AppScalingRule[], nolower:
     });
     latestUl = item;
   });
-  if (nolower) {
+  if (noLower) {
     legendData.push({
       name: `${upper[0].metric_type} ${getOppositeOperator(latestUl.operator)} ${latestUl.threshold}`,
       value: AutoscalerConstants.normalColor
@@ -177,10 +190,10 @@ function buildUpperLegendData(legendData: any, upper: AppScalingRule[], nolower:
   return latestUl;
 }
 
-function buildLowerLegendData(legendData: any, lower: AppScalingRule[], latestUl: AppScalingRule) {
+function buildLowerLegendData(legendData: AppAutoscalerMetricDataPoint[], lower: AppScalingRule[], latestUl: AppScalingRule): AppScalingRule {
   lower.map((item, index) => {
     let name = '';
-    if (!latestUl.threshold) {
+    if (!latestUl || !latestUl.threshold) {
       name = `${item.metric_type} ${getOppositeOperator(item.operator)} ${item.threshold}`;
     } else {
       name = `${item.threshold} ${getLeftOperator(item.operator)} ${item.
@@ -196,10 +209,10 @@ function buildLowerLegendData(legendData: any, lower: AppScalingRule[], latestUl
     name: `${lower[0].metric_type} ${latestUl.operator} ${latestUl.threshold}`,
     value: latestUl.color
   });
-  return {};
+  return latestUl;
 }
 
-function getOppositeOperator(operator: string) {
+function getOppositeOperator(operator: string): string {
   switch (operator) {
     case '>':
       return '<=';
@@ -212,7 +225,7 @@ function getOppositeOperator(operator: string) {
   }
 }
 
-function getRightOperator(operator: string) {
+function getRightOperator(operator: string): string {
   switch (operator) {
     case '>':
       return '<=';
@@ -223,7 +236,7 @@ function getRightOperator(operator: string) {
   }
 }
 
-function getLeftOperator(operator: string) {
+function getLeftOperator(operator: string): string {
   switch (operator) {
     case '>':
       return '<';
@@ -236,7 +249,7 @@ function getLeftOperator(operator: string) {
   }
 }
 
-export function shiftArray(array: number[], step: number) {
+export function shiftArray(array: number[], step: number): number[] {
   const days = [];
   for (let i = 0; i < array.length; i++) {
     days[i] = array[i] + step;

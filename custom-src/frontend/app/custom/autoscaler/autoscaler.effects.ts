@@ -11,7 +11,7 @@ import {
   resultPerPageParamDefault,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/src/types/pagination.types';
 import {
   StartRequestAction,
@@ -24,6 +24,7 @@ import {
   APP_AUTOSCALER_POLICY,
   APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
+  AutoscalerQuery,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
@@ -35,11 +36,13 @@ import {
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
+import { AppAutoscalerMetricDataLocal, AppScalingTrigger } from './app-autoscaler.types';
 import { buildMetricData } from './autoscaler-helpers/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,
   autoscalerTransformMapToArray,
 } from './autoscaler-helpers/autoscaler-transform-policy';
+import { AutoscalerConstants } from './autoscaler-helpers/autoscaler-util';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -284,7 +287,13 @@ export class AutoscalerEffects {
               entities: { [getPolicyTriggerAction.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformTriggerData(getPolicyTriggerAction.entityKey, mappedPolicyData, policyInfo, getPolicyTriggerAction.query);
+            this.transformTriggerData(
+              getPolicyTriggerAction.entityKey,
+              mappedPolicyData,
+              policyInfo,
+              getPolicyTriggerAction.query,
+              getPolicyAction.guid
+            );
             res.push(
               new WrapperRequestActionSuccess(
                 mappedPolicyData,
@@ -309,11 +318,27 @@ export class AutoscalerEffects {
         }));
   }
 
-  addMetric(schemaKey: string, mappedData: NormalizedResponse, appid, metricName, data, startTime, endTime, skipFormat, trigger) {
-    const id = appid + '-' + metricName;
+  addMetric(
+    schemaKey: string,
+    mappedData: NormalizedResponse<APIResource<AppAutoscalerMetricDataLocal>>,
+    appId: string,
+    metricName: string,
+    data,
+    startTime: number,
+    endTime: number,
+    skipFormat: boolean,
+    trigger: AppScalingTrigger
+  ) {
+    const id = AutoscalerConstants.createMetricId(appId, metricName);
+
     mappedData.entities[schemaKey][id] = {
       entity: buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger),
-      metadata: {}
+      metadata: {
+        guid: id,
+        created_at: null,
+        updated_at: null,
+        url: null
+      }
     };
     mappedData.result.push(id);
   }
@@ -321,19 +346,22 @@ export class AutoscalerEffects {
   transformData(key: string, mappedData: NormalizedResponse, appGuid: string, data: any) {
     mappedData.entities[key][appGuid] = {
       entity: data,
-      metadata: {}
+      metadata: {
+        guid: appGuid
+      }
     };
     mappedData.result.push(appGuid);
   }
 
   transformEventData(key: string, mappedData: NormalizedResponse, appGuid: string, data: any) {
     mappedData.entities[key] = [];
-    data.resources.map((item) => {
-      mappedData.entities[key][item.timestamp] = {
+    data.resources.forEach((item) => {
+      const id = AutoscalerConstants.createMetricId(appGuid, item.timestamp);
+      mappedData.entities[key][id] = {
         entity: item,
         metadata: {
           created_at: item.timestamp,
-          guid: item.timestamp,
+          guid: id,
           updated_at: item.timestamp
         }
       };
@@ -341,14 +369,15 @@ export class AutoscalerEffects {
     mappedData.result = Object.keys(mappedData.entities[key]);
   }
 
-  transformTriggerData(key: string, mappedData: NormalizedResponse, data: any, query: any) {
+  transformTriggerData(key: string, mappedData: NormalizedResponse, data: any, query: AutoscalerQuery, appGuid: string) {
     mappedData.entities[key] = [];
-    Object.keys(data.scaling_rules_map).map((metricType) => {
+    Object.keys(data.scaling_rules_map).forEach((metricType) => {
+      const id = AutoscalerConstants.createMetricId(appGuid, metricType);
       data.scaling_rules_map[metricType].query = query;
-      mappedData.entities[key][metricType] = {
+      mappedData.entities[key][id] = {
         entity: data.scaling_rules_map[metricType],
         metadata: {
-          guid: metricType
+          guid: id
         }
       };
     });
@@ -366,17 +395,17 @@ export class AutoscalerEffects {
   buildParams(initialParams, params?, paginationParams?) {
     const searchParams = new URLSearchParams();
     if (initialParams) {
-      Object.keys(initialParams).map((key) => {
+      Object.keys(initialParams).forEach((key) => {
         searchParams.set(key, initialParams[key]);
       });
     }
     if (params) {
-      Object.keys(params).map((key) => {
+      Object.keys(params).forEach((key) => {
         searchParams.set(key, params[key]);
       });
     }
     if (paginationParams) {
-      Object.keys(paginationParams).map((key) => {
+      Object.keys(paginationParams).forEach((key) => {
         searchParams.set(key, paginationParams[key]);
       });
     }

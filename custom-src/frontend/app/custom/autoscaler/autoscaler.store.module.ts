@@ -13,7 +13,6 @@ export const appAutoscalerScalingHistorySchemaKey = 'autoscalerScalingHistory';
 export const appAutoscalerAppMetricSchemaKey = 'autoscalerAppMetric';
 export const appAutoscalerInsMetricSchemaKey = 'autoscalerInsMetric';
 
-// TODO: RC check all getAPIResourceGuids
 export const autoscalerEntities: ExtensionEntitySchema[] = [
   {
     entityKey: appAutoscalerPolicySchemaKey,
