@@ -30,7 +30,7 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UpdateAppAutoscalerPolicyAction,
 } from '../app-autoscaler.actions';
-import { AppAutoscalerPolicyLocal, AppAutoscalerScalingHistory, AppAutoscalerMetricData } from '../app-autoscaler.types';
+import { AppAutoscalerMetricData, AppAutoscalerPolicyLocal, AppAutoscalerScalingHistory } from '../app-autoscaler.types';
 import { AutoscalerConstants } from '../autoscaler-helpers/autoscaler-util';
 import {
   appAutoscalerAppMetricSchemaKey,
@@ -45,7 +45,6 @@ import {
   icon: 'meter',
   iconFont: 'stratos-icons',
   hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
-    // TODO: RC Improve
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
     const action = new GetAppAutoscalerHealthAction(appGuid, endpointGuid);
@@ -69,7 +68,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
+  public appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
   appAutoscalerEnablement$: Observable<boolean>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
@@ -78,6 +77,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private appAutoscalerScalingHistoryErrorSub: Subscription;
   private appAutoscalerPolicySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
   private appAutoscalerScalingHistorySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private scalingHistoryAction: GetAppAutoscalerScalingHistoryAction;
 
   private detachConfirmOk = 0;
 
@@ -145,8 +145,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       publishReplay(1),
       refCount()
     );
-    // TODO: RC add a refresh button to dispatch this action
-    const scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
+    this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
       createEntityRelationPaginationKey(applicationSchemaKey, this.applicationService.appGuid, 'latest'),
       this.applicationService.appGuid,
       this.applicationService.cfGuid,
@@ -157,7 +156,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       appAutoscalerScalingHistorySchemaKey,
       entityFactory(appAutoscalerScalingHistorySchemaKey),
       this.applicationService.appGuid,
-      scalingHistoryAction,
+      this.scalingHistoryAction,
       false
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
@@ -286,5 +285,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
         'app-autoscaler-scale-history-page'
       ]
     }));
+  }
+
+  fetchScalingHistory() {
+    this.store.dispatch(this.scalingHistoryAction);
   }
 }
