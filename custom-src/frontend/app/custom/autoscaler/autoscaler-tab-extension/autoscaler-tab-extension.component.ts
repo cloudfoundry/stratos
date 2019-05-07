@@ -139,7 +139,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
           this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
           this.loadLatestMetricsUponPolicy(entity.entity);
         }
-        this.initErrorSub();
         return entity && entity.entity;
       }),
       publishReplay(1),
@@ -160,10 +159,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       false
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
-      map(({ entity }) => {
-        this.initErrorSub();
-        return entity && entity.entity;
-      }),
+      map(({ entity }) => entity && entity.entity),
       publishReplay(1),
       refCount()
     );
@@ -194,6 +190,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   initErrorSub() {
+    if (this.appAutoscalerPolicyErrorSub) {
+      this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
+    }
+
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       filter(request => !!request.error),
       map(request => {
@@ -210,6 +210,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicySnackBarRef = this.appAutoscalerPolicySnackBar.open(errorMessage, 'Dismiss');
     });
 
+    if (this.appAutoscalerScalingHistoryErrorSub) {
+      this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
+    }
     this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.entityMonitor.entityRequest$.pipe(
       filter(request => !!request.error),
       map(request => request.message),

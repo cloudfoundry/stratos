@@ -42,6 +42,7 @@
       </app-tile>
     </app-tile-group>
     <app-tile-group *ngIf="appAutoscalerPolicy$ | async as policy">
+
       <app-tile>
         <mat-card>
           <mat-card-header>
@@ -237,7 +238,9 @@
             <mat-card-header class="autoscaler-tile-events__header">
               <mat-card-title>Latest Events </mat-card-title>
               <button mat-icon-button [disabled]="loading$ | async" (click)="fetchScalingHistory()">
-                <mat-icon class="refresh-icon" [ngClass]="{refreshing: (appAutoscalerScalingHistoryService.isFetchingEntity$ | async)}" aria-label="Refresh list data">
+                <mat-icon class="refresh-icon"
+                  [ngClass]="{refreshing: (appAutoscalerScalingHistoryService.isFetchingEntity$ | async)}"
+                  aria-label="Refresh list data">
                   refresh</mat-icon>
               </button>
             </mat-card-header>
