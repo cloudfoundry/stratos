@@ -12,6 +12,7 @@ import { AppState } from '../../../../store/src/app-state';
 import { entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../store/src/types/api.types';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
@@ -42,7 +43,7 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
   status$: Observable<StratosStatus>;
   appAutoscalerPolicyService: EntityService;
   appAutoscalerPolicyUpdateService: EntityService;
-  public appAutoscalerPolicy$: Observable<any>;
+  public appAutoscalerPolicy$: Observable<APIResource<AppAutoscalerPolicyLocal>>;
 
   currentPolicy: AppAutoscalerPolicyLocal;
   public isEditing = false;
@@ -57,7 +58,7 @@ export class CardAutoscalerDefaultComponent implements OnInit, OnDestroy {
   onUpdate: () => void = () => { }
 
   ngOnInit() {
-    this.appAutoscalerPolicyService = this.entityServiceFactory.create(
+    this.appAutoscalerPolicyService = this.entityServiceFactory.create<APIResource<AppAutoscalerPolicyLocal>>(
       appAutoscalerPolicySchemaKey,
       entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,

@@ -26,7 +26,7 @@ import { appAutoscalerAppMetricSchemaKey } from '../../../../store/autoscaler.st
   styleUrls: ['./app-autoscaler-metric-chart-card.component.scss']
 })
 
-export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<any>> implements OnInit, IListRowCell {
+export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements OnInit, IListRowCell {
   static columns = 1;
   listData: {
     label: string;

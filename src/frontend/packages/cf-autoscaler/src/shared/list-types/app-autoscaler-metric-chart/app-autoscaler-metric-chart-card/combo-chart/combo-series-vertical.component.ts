@@ -1,6 +1,8 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 
+import { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
+
 function formatLabel(label: any): string {
   if (label instanceof Date) {
     label = label.toLocaleDateString();
@@ -63,7 +65,7 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
   @Input() colors;
   @Input() tooltipDisabled = false;
   @Input() gradient: boolean;
-  @Input() activeEntries: any[];
+  @Input() activeEntries: AppAutoscalerMetricDataLine[];
   @Input() seriesName: string;
   @Input() animations = true;
 
@@ -180,12 +182,14 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
       return bar;
     });
   }
-  getSeriesTooltips(seriesLine, index) {
+
+  getSeriesTooltips(seriesLine: AppAutoscalerMetricDataLine[], index): AppAutoscalerMetricDataPoint[] {
     return seriesLine.map(d => {
       return d.series[index];
     });
   }
-  isActive(entry): boolean {
+
+  isActive(entry: AppAutoscalerMetricDataLine): boolean {
     if (!this.activeEntries) {
       return false;
     }
