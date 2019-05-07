@@ -48,7 +48,7 @@ function waitForHelmRelease {
     if [ $COUNT -ge 3 ]; then
       READY=$(kubectl get po --namespace=${NAMESPACE} | grep "Running" | wc -l)
       COMPLETED=$(kubectl get po --namespace=${NAMESPACE} | grep "Completed" | wc -l)
-      TOTAL=$(($READY1+ $COMPLETED))
+      TOTAL=$(($READY + $COMPLETED))
       if [ $TOTAL -eq $COUNT ]; then
         READY1=$(kubectl get po --namespace=${NAMESPACE} | grep "3/3" | wc -l)
         READY2=$(kubectl get po --namespace=${NAMESPACE} | grep "1/1" | wc -l)
