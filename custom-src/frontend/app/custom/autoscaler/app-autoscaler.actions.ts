@@ -2,6 +2,7 @@ import { RequestOptions } from '@angular/http';
 
 import { applicationSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../../store/src/types/request.types';
 import { AppAutoscalerPolicyLocal } from './app-autoscaler.types';
@@ -94,6 +95,7 @@ export class DetachAppAutoscalerPolicyAction implements IRequestAction {
   ) { }
   type = DETACH_APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerPolicySchemaKey;
+  requestType: ApiRequestTypes = 'delete';
 }
 
 export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {

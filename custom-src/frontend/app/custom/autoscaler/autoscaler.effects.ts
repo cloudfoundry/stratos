@@ -131,7 +131,7 @@ export class AutoscalerEffects {
   detachAppAutoscalerPolicy$ = this.actions$.pipe(
     ofType<DetachAppAutoscalerPolicyAction>(DETACH_APP_AUTOSCALER_POLICY),
     mergeMap(action => {
-      const actionType = 'update';
+      const actionType = 'delete';
       this.store.dispatch(new StartRequestAction(action, actionType));
       const options = new RequestOptions();
       options.url = `${commonPrefix}/apps/${action.guid}/policy`;
