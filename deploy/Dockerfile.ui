@@ -5,7 +5,13 @@ ARG commit
 
 COPY --chown=stratos:users . /usr/src/app
 WORKDIR /usr/src/app
-RUN bash deploy/provision.sh -u
+ENV PATH="${PATH}:/usr/src/app/node_modules/.bin"
+
+# Build front-end
+RUN npm install && \
+    npm run build && \
+    mkdir -p /usr/dist && \
+    cp -R dist/* /usr/dist
 
 FROM splatform/stratos-nginx-base:opensuse as prod-build
 RUN mkdir -p /usr/share/doc/suse
