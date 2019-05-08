@@ -46,10 +46,12 @@ function waitForHelmRelease {
     COUNT=$(kubectl get po --namespace=${NAMESPACE} | wc -l)
     kubectl get po --namespace=${NAMESPACE}
     if [ $COUNT -ge 3 ]; then
+      # COUNT includes the column header line
       READY=$(kubectl get po --namespace=${NAMESPACE} | grep "Running" | wc -l)
       COMPLETED=$(kubectl get po --namespace=${NAMESPACE} | grep "Completed" | wc -l)
-      TOTAL=$(($READY1+ $COMPLETED))
-      if [ $TOTAL -eq $COUNT ]; then
+      TOTAL=$(($READY + $COMPLETED))
+      EXPECTED=$(($COUNT - 1))
+      if [ $TOTAL -eq $EXPECTED ]; then
         READY1=$(kubectl get po --namespace=${NAMESPACE} | grep "3/3" | wc -l)
         READY2=$(kubectl get po --namespace=${NAMESPACE} | grep "1/1" | wc -l)
         READY=$(($READY1 + $READY2))
