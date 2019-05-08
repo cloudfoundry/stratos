@@ -8,7 +8,6 @@ echo "================="
 echo "Checking docker version"
 
 docker version
-docker-compose version
 
 echo "Preparing for e2e tests..."
 

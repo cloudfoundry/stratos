@@ -21,7 +21,7 @@ if [ "$BUILD" == "true" ]; then
   echo "Building Docker All-In-One Container Image..."
   ${STRATOS}/build/store-git-metadata.sh
   pushd ${STRATOS} > /dev/null
-  docker build -f deploy/Dockerfile.all-in-one . -t splatform/stratos
+  docker build --force-rm -f deploy/Dockerfile.all-in-one -t splatform/stratos:latest .
   popd > /dev/null
 fi
 
