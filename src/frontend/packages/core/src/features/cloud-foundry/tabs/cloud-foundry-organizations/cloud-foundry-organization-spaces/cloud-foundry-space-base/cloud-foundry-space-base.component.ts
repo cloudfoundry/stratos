@@ -26,6 +26,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
+import { FavoritesConfigMapper } from '../../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -97,10 +98,11 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     public cfSpaceService: CloudFoundrySpaceService,
     public cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    favoritesConfigMapper: FavoritesConfigMapper
   ) {
     this.favorite$ = cfSpaceService.space$.pipe(
-      map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey))
+      map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey, favoritesConfigMapper))
     );
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)

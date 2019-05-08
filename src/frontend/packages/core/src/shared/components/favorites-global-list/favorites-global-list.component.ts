@@ -25,13 +25,15 @@ interface IFavoritesInfo {
 export class FavoritesGlobalListComponent implements OnInit {
   public favInfo$: Observable<IFavoritesInfo>;
   public favoriteGroups$: Observable<IGroupedFavorites[]>;
-  constructor(private store: Store<AppState>, private logger: LoggerService) { }
+  constructor(
+    private store: Store<AppState>,
+    private userFavoriteManager: UserFavoriteManager
+  ) { }
 
   @Input() showFilters: boolean;
 
   ngOnInit() {
-    const manager = new UserFavoriteManager(this.store, this.logger);
-    this.favoriteGroups$ = manager.hydrateAllFavorites().pipe(
+    this.favoriteGroups$ = this.userFavoriteManager.hydrateAllFavorites().pipe(
       map(favs => this.sortFavoriteGroups(favs))
     );
 

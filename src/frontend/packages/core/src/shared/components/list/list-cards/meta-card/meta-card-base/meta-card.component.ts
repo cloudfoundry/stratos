@@ -12,6 +12,7 @@ import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.fac
 import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 
 
 export interface MetaCardMenuItem {
@@ -44,8 +45,6 @@ export class MetaCardComponent {
   @Input()
   public confirmFavoriteRemoval = false;
 
-  userFavoriteManager: UserFavoriteManager;
-
   @Input()
   statusIcon = true;
   @Input()
@@ -67,7 +66,7 @@ export class MetaCardComponent {
       if (!this.favorite) {
         entityMonitor.entity$.pipe(
           first(),
-          tap(entity => this.favorite = getFavoriteFromCfEntity(entity, entityConfig.schema.key))
+          tap(entity => this.favorite = getFavoriteFromCfEntity(entity, entityConfig.schema.key, this.favoritesConfigMapper))
         ).subscribe();
       }
     }
@@ -102,8 +101,8 @@ export class MetaCardComponent {
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
-    store: Store<AppState>,
-    private logger: LoggerService
+    public userFavoriteManager: UserFavoriteManager,
+    private favoritesConfigMapper: FavoritesConfigMapper
   ) {
     if (this.actionMenu) {
       this.actionMenu = this.actionMenu.map(element => {
@@ -113,7 +112,6 @@ export class MetaCardComponent {
         return element;
       });
     }
-    this.userFavoriteManager = new UserFavoriteManager(store, logger);
   }
 
   cancelPropagation = (event) => {

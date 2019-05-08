@@ -1,20 +1,26 @@
 import { CfAPIResource } from '../../../store/src/types/api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from '../../../store/src/types/user-favorites.types';
+import { FavoritesConfigMapper } from '../shared/components/favorites-meta-card/favorite-config-mapper';
 
 export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
   return !favorite.entityId;
 }
 
 
-export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(entity, entityKey: string) {
+export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(
+  entity,
+  entityKey: string,
+  favoritesConfigMapper: FavoritesConfigMapper
+) {
   if (isCfEntity(entity as CfAPIResource)) {
     return new UserFavorite<T>(
       entity.entity.cfGuid,
       'cf',
       entityKey,
       entity.metadata.guid,
-      entity
+      entity,
+      favoritesConfigMapper
     );
   }
   return null;

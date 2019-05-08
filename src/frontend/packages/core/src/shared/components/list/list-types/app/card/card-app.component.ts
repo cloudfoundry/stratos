@@ -15,6 +15,7 @@ import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-lab
 import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-card-app',
@@ -34,7 +35,8 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
 
   constructor(
     private store: Store<AppState>,
-    private appStateService: ApplicationStateService
+    private appStateService: ApplicationStateService,
+    private favoritesConfigMapper: FavoritesConfigMapper
   ) {
     super();
   }
@@ -48,7 +50,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
       this.row.entity.space_guid
     );
 
-    this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey);
+    this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey, this.favoritesConfigMapper);
 
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(

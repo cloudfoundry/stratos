@@ -40,15 +40,13 @@ const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 @Injectable()
 export class UserFavoritesEffect {
 
-  private userFavoriteManager: UserFavoriteManager;
 
   constructor(
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
-    private logger: LoggerService
+    private userFavoriteManager: UserFavoriteManager
   ) {
-    this.userFavoriteManager = new UserFavoriteManager(this.store, this.logger);
   }
 
   @Effect() saveFavorite = this.actions$.pipe(

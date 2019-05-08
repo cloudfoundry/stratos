@@ -4,7 +4,7 @@ import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, scan, startWith } from 'rxjs/operators';
 
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { favoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/favorite-config-mapper';
+import { IFavoriteTypes, FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-favorites-entity-list',
@@ -12,7 +12,9 @@ import { favoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/fa
   styleUrls: ['./favorites-entity-list.component.scss']
 })
 export class FavoritesEntityListComponent implements AfterViewInit {
+  constructor(private favoritesConfigMapper: FavoritesConfigMapper) {
 
+  }
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
     this.pEntities = favoriteEntities ? [...favoriteEntities] : favoriteEntities;
@@ -35,11 +37,11 @@ export class FavoritesEntityListComponent implements AfterViewInit {
         this.favoriteTypes = types.reduce((allTypes, endpointType) => {
           return [
             ...allTypes,
-            ...favoritesConfigMapper.getAllTypesForEndpoint(endpointType)
+            ...this.favoritesConfigMapper.getAllTypesForEndpoint(endpointType)
           ];
         }, []);
       } else {
-        this.favoriteTypes = favoritesConfigMapper.getAllTypesForEndpoint(types) || [];
+        this.favoriteTypes = this.favoritesConfigMapper.getAllTypesForEndpoint(types) || [];
       }
     }
   }

@@ -20,6 +20,7 @@ import { IPageSideNavTab } from '../../../../dashboard/page-side-nav/page-side-n
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { FavoritesConfigMapper } from '../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -67,11 +68,12 @@ export class CloudFoundryOrganizationBaseComponent {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
+    favoritesConfigMapper: FavoritesConfigMapper
   ) {
     this.schema = entityFactory(organizationSchemaKey);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),
-      map(org => getFavoriteFromCfEntity(org.entity, organizationSchemaKey))
+      map(org => getFavoriteFromCfEntity(org.entity, organizationSchemaKey, favoritesConfigMapper))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),

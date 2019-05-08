@@ -1,7 +1,8 @@
-import { favoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { EndpointModel } from './endpoint.types';
 import { LoggerService } from '../../../core/src/core/logger.service';
+import { FavoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
+import { IEntityMetadata } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
@@ -14,6 +15,7 @@ export interface IFavoriteTypeInfo {
 }
 
 export interface IFavoriteMetadata {
+  name: string;
   [key: string]: string;
 }
 export interface IEndpointFavMetadata extends IFavoriteMetadata {
@@ -21,6 +23,7 @@ export interface IEndpointFavMetadata extends IFavoriteMetadata {
   address: string;
   user: string;
   admin: string;
+  subType: string;
 }
 
 // Metadata is a json string when stored in the backend so we use this interface to
@@ -35,9 +38,9 @@ export interface BackendUserFavorite {
 
 const favoriteGuidSeparator = '-';
 
-export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavoriteTypeInfo {
+export class UserFavorite<Y = any> implements IFavoriteTypeInfo {
   public guid: string;
-  public metadata: T = null;
+  public metadata: IEntityMetadata = null;
   constructor(
     public endpointId: string,
     public endpointType: string,
@@ -47,8 +50,9 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
     public entityType: string,
     public entityId?: string,
     entity?: Y,
+    favoritesConfigMapper?: FavoritesConfigMapper
   ) {
-    if (entity) {
+    if (entity && favoritesConfigMapper) {
       this.metadata = favoritesConfigMapper.getEntityMetadata(this, entity);
     }
     this.guid = UserFavorite.buildFavoriteStoreEntityGuid(this);

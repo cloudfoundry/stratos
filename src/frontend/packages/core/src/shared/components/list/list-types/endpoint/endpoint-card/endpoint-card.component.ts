@@ -26,11 +26,11 @@ import {
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
-import { favoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -104,7 +104,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   constructor(
     private store: Store<AppState>,
     private endpointListHelper: EndpointListHelper,
-    private componentFactoryResolver: ComponentFactoryResolver
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private favoritesConfigMapper: FavoritesConfigMapper
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();
@@ -113,7 +114,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   ngOnInit() {
     const favorite = getFavoriteFromEndpointEntity(this.row);
     if (favorite) {
-      this.favorite = favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
+      this.favorite = this.favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     }
     const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
     this.hasDetails = !!e && !!e.listDetailsComponent;

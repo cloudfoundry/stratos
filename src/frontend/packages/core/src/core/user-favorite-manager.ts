@@ -20,10 +20,11 @@ import {
   UserFavoriteEndpoint,
 } from '../../../store/src/types/user-favorites.types';
 import {
-  favoritesConfigMapper,
-  TFavoriteMapperFunction,
+  TFavoriteMapperFunction, FavoritesConfigMapper,
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
 import { LoggerService } from './logger.service';
+import { EntityCatalogueService } from './entity-catalogue/entity-catalogue.service';
+import { Injectable } from '@angular/core';
 
 export interface IFavoriteEntity {
   type: string;
@@ -50,11 +51,15 @@ export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetada
   prettyName: string;
   favorite: UserFavorite<T>;
 }
-
+@Injectable({
+  providedIn: 'root'
+})
 export class UserFavoriteManager {
   constructor(
     private store: Store<AppState>,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private entityCatalogueService: EntityCatalogueService,
+    private favoritesConfigMapper: FavoritesConfigMapper
   ) { }
 
   private getTypeAndID(favorite: UserFavorite<IFavoriteMetadata>) {
@@ -145,10 +150,12 @@ export class UserFavoriteManager {
   }
 
   private mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
+    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.entityType, favorite.endpointType);
+
     return {
-      type: this.getTypeAndID(favorite).type,
-      cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
-      prettyName: favoritesConfigMapper.getPrettyTypeName(favorite),
+      type: catalogueEntity.entity.type,
+      cardMapper: this.favoritesConfigMapper.getMapperFunction(favorite),
+      prettyName: catalogueEntity.entity.label,
       favorite
     };
   }

@@ -23,7 +23,12 @@ export class HomePageComponent {
   public showFilterToggle$: Observable<boolean>;
   public showFilters = false;
 
-  constructor(endpointsService: EndpointsService, store: Store<AppState>, logger: LoggerService) {
+  constructor(
+    endpointsService: EndpointsService,
+    store: Store<AppState>,
+    logger: LoggerService,
+    public userFavoriteManager: UserFavoriteManager
+  ) {
     this.allEndpointIds$ = endpointsService.endpoints$.pipe(
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
@@ -44,8 +49,7 @@ export class HomePageComponent {
       first()
     ).subscribe();
 
-    const manager = new UserFavoriteManager(store, logger);
-    this.showFilterToggle$ = manager.getAllFavorites().pipe(
+    this.showFilterToggle$ = userFavoriteManager.getAllFavorites().pipe(
       map(([, favEntities]: [IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite<IFavoriteMetadata, any>>]) => {
         for (const favEntity of Object.values(favEntities)) {
           if (favEntity.entityType !== 'endpoint') {
