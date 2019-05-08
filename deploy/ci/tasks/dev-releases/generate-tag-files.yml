@@ -60,6 +60,9 @@ run:
       cat > build-args << EOF
       { "stratos_version": "${LATEST_TAG}" }
       EOF
+      cat > image-labels << EOF
+      { "commit": "${COMMIT_HASH}" }
+      EOF
 
       echo "Created v2-alpha-tag, v2-version and build-args."
 
@@ -73,7 +76,7 @@ run:
       cat v2-alpha-tag
       
       echo "Creating tag file tar..."
-      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version v2-tag v2-commit build-args ui-build-args
+      tar -cf ${FILENAME}.tar v2-alpha-tag v2-version v2-tag v2-commit build-args ui-build-args image-labels
 
       echo "Created tag file tar as ${FILENAME}.tar"
       echo "Generate tag files complete!"
