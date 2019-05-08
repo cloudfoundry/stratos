@@ -14,11 +14,12 @@ import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/he
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.types';
-import { EndpointTypeConfig } from '../../../../core/extension/extension-types';
-import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 import { ConnectEndpointConfig } from '../../connect.service';
-import { getEndpointType, getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -45,15 +46,15 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('clientIDField') clientIDField: NgModel;
   @ViewChild('clientSecretField') clientSecretField: NgModel;
 
-  endpoint: EndpointTypeConfig;
   urlValidation: string;
 
   showAdvancedFields = false;
   clientRedirectURI: string;
 
   endpointTypeSupportsSSO = false;
+  endpoint: StratosCatalogueEndpointEntity;
 
-  constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute) {
+  constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute, entityCatalogueService: EntityCatalogueService) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
@@ -71,7 +72,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
-    this.endpoint = getEndpointType(epType, epSubType);
+    this.endpoint = entityCatalogueService.getEndpoint(epType, epSubType);
     this.setUrlValidation(this.endpoint);
 
     // Client Redirect URI for SSO
@@ -80,9 +81,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   }
 
   onNext: StepOnNextFunction = () => {
+    const { subType, type } = this.endpoint.getTypeAndSubtype();
     const action = new RegisterEndpoint(
-      this.endpoint.type,
-      this.endpoint.subType,
+      type,
+      subType,
       this.nameField.value,
       this.urlField.value,
       !!this.skipSllField.value,
@@ -104,8 +106,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         const data: ConnectEndpointConfig = {
           guid: result.message,
           name: this.nameField.value,
-          type: this.endpoint.type,
-          subType: this.endpoint.subType,
+          type,
+          subType,
           ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
         };
         if (!result.error) {
@@ -136,16 +138,16 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       }));
   }
 
-  setUrlValidation(endpoint: EndpointTypeConfig) {
-    this.urlValidation = endpoint ? endpoint.urlValidation : '';
+  setUrlValidation(endpoint: StratosCatalogueEndpointEntity) {
+    this.urlValidation = endpoint ? endpoint.entity.urlValidationRegexString : '';
     this.setAdvancedFields(endpoint);
   }
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
-  setAdvancedFields(endpoint: EndpointTypeConfig) {
-    this.showAdvancedFields = endpoint.type === 'cf';
+  setAdvancedFields(endpoint: StratosCatalogueEndpointEntity) {
+    this.showAdvancedFields = endpoint.entity.type === 'cf';
 
     // Only allow SSL if the endpoint type is Cloud Foundry
-    this.endpointTypeSupportsSSO = endpoint.type === 'cf';
+    this.endpointTypeSupportsSSO = endpoint.entity.type === 'cf';
   }
 }

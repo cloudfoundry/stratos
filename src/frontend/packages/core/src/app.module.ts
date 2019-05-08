@@ -39,6 +39,8 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
+import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
+import { StratosCatalogueEndpointEntity } from './core/entity-catalogue/entity-catalogue.types';
 
 
 // Create action for router navigation. See
@@ -119,6 +121,16 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) {
+    entityCatalogueService.register(new StratosCatalogueEndpointEntity({
+      type: 'metrics',
+      label: 'Metrics',
+      labelPlural: 'Metrics',
+      tokenSharing: true,
+      logoUrl: '/core/assets/endpoint-icons/metrics.svg',
+      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
+    },
+      metadata => `/endpoints/metrics/${metadata.guid}`
+    ));
     eventService.addEventConfig<boolean>(
       {
         eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),

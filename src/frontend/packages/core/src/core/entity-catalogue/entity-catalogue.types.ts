@@ -1,7 +1,10 @@
 import { Observable } from 'rxjs';
 import { StratosStatus } from '../../shared/shared.types';
-import { EntitySchema } from '../../../../store/src/helpers/entity-factory';
+import { EntitySchema, entityFactory, endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
+import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
+import { EndpointModel, EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 
 export interface IStratosEntityWithIcons {
   icon?: string;
@@ -24,11 +27,11 @@ export interface IStratosBaseEntityDefinition extends IStratosEntityWithIcons {
   readonly schema: EntitySchema;
   readonly label: string;
   readonly labelPlural: string;
-  readonly priority?: number;
+  readonly renderPriority?: number;
   // This should be typed
   readonly listDetailsComponent?: any;
   readonly parentType?: string;
-  readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
+  readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
 }
 
 /**
@@ -43,7 +46,10 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   readonly unConnectable?: boolean;
   readonly urlValidationRegexString?: string;
   readonly authTypes: EndpointAuthTypeConfig[];
+  readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
 }
+
+export interface IStratosEndpointWithoutSchemaDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
 
 /**
  * Static information describing a stratos entity.
@@ -67,8 +73,6 @@ export interface IStratosEntityBuilder<T, Y extends IEntityMetadata> {
   getLink(entityMetadata: Y): string;
   getGuid(entityMetadata: Y): string;
   getLines?(entityMetadata: Y): [string, string | Observable<string>][];
-  getIcon(entityMetadata?: Y): { icon: string, iconFont?: string };
-  getImage?(entityMetadata?: Y): string;
   getSubTypeLabels?(entityMetadata: Y): {
     singular: string,
     plural: string
@@ -108,8 +112,7 @@ export class StratosBaseCatalogueEntity<T = any, Y extends IEntityMetadata = IEn
   }
   constructor(
     public entity: IStratosEntityDefinition | IStratosEndpointDefinition,
-    public builder: IStratosEntityBuilder<T, Y>,
-    public rendererPriority = 0
+    public builder: IStratosEntityBuilder<T, Y>
   ) {
     const baseEntity = entity as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
@@ -130,25 +133,56 @@ export class StratosBaseCatalogueEntity<T = any, Y extends IEntityMetadata = IEn
       globalActions: this.builder.getGlobalActions ? this.builder.getGlobalActions() : null
     };
   }
+  public getTypeAndSubtype() {
+    const type = this.entity.parentType || this.entity.type;
+    const subType = this.entity.parentType ? this.entity.type : null;
+    return {
+      type,
+      subType
+    }
+  }
 }
 
 export class StratosCatalogueEntity<T = any, Y extends IEntityMetadata = IEntityMetadata> extends StratosBaseCatalogueEntity<T, Y> {
   constructor(
     public entity: IStratosEntityDefinition,
-    builder: IStratosEntityBuilder<T, Y>,
-    rendererPriority = 0
+    builder: IStratosEntityBuilder<T, Y>
   ) {
-    super(entity, builder, rendererPriority);
+    super(entity, builder);
   }
 }
 
-export class StratosCatalogueEndpointEntity<T = any, Y extends IEntityMetadata = IEntityMetadata> extends StratosBaseCatalogueEntity<T, Y> {
+export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<EndpointModel, IEndpointFavMetadata> {
+  static readonly baseEndpointRender = {
+    getMetadata: endpoint => ({
+      name: endpoint.name,
+      guid: endpoint.guid,
+      address: getFullEndpointApiUrl(endpoint),
+      user: endpoint.user ? endpoint.user.name : undefined,
+      subType: endpoint.sub_type,
+      admin: endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined
+    }),
+    getLink: () => null,
+    getGuid: metadata => metadata.guid,
+    getLines: metadata => [
+      ['Address', metadata.address],
+      ['User', metadata.user],
+      ['Admin', metadata.admin]
+    ]
+  } as IStratosEntityBuilder<EndpointModel, IEndpointFavMetadata>;
+  // This is needed here for typing
+  public entity: IStratosEndpointDefinition;
   constructor(
-    public entity: IStratosEndpointDefinition,
-    builder: IStratosEntityBuilder<T, Y>,
-    rendererPriority = 0
+    entity: IStratosEndpointWithoutSchemaDefinition,
+    getLink?: (metadata: IEndpointFavMetadata) => string
   ) {
-    super(entity, builder, rendererPriority);
+    super({
+      ...entity,
+      schema: entityFactory(endpointSchemaKey)
+    }, {
+        ...StratosCatalogueEndpointEntity.baseEndpointRender,
+        getLink: getLink || StratosCatalogueEndpointEntity.baseEndpointRender.getLink
+      });
   }
 }
 

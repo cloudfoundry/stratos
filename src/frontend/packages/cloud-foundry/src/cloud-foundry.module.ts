@@ -77,31 +77,9 @@ export class CloudFoundryModule {
     this.registerCfOrgMapper(endpointDefinition);
   }
   private registerCfEndpointMapper(endpointDefinition: IStratosEndpointDefinition) {
-    const cfEntity = new StratosCatalogueEndpointEntity<EndpointModel, IEndpointFavMetadata>(
+    const cfEntity = new StratosCatalogueEndpointEntity(
       endpointDefinition,
-      {
-        getMetadata: endpoint => ({
-          name: endpoint.name,
-          guid: endpoint.guid,
-          address: getFullEndpointApiUrl(endpoint),
-          user: endpoint.user ? endpoint.user.name : undefined,
-          subType: endpoint.sub_type,
-          admin: endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined
-        }),
-        getLink: metadata => `/cloud-foundry/${metadata.guid}`,
-        getGuid: metadata => metadata.guid,
-        getLines: metadata => [
-          ['Address', metadata.address],
-          ['User', metadata.user],
-          ['Admin', metadata.admin]
-        ],
-        getIcon: () => ({
-          icon: 'cloud_foundry',
-          iconFont: 'stratos-icons'
-        }),
-        getImage: () => '/core/assets/endpoint-icons/cloudfoundry.png',
-        getStatusObservable: () => null
-      }
+      metadata => `/cloud-foundry/${metadata.guid}`,
     );
     this.entityCatalogueService.register(cfEntity);
   }
@@ -124,8 +102,6 @@ export class CloudFoundryModule {
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
-        getIcon: () => ({ icon: 'apps' }),
-
       }
     );
     this.entityCatalogueService.register(applicationEntity);
@@ -167,8 +143,7 @@ export class CloudFoundryModule {
           cfGuid: space.entity.cfGuid,
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid,
-        getIcon: () => ({ icon: 'apps' }),
+        getGuid: metadata => metadata.guid
       }
     );
     this.entityCatalogueService.register(spaceEntity);
@@ -210,8 +185,7 @@ export class CloudFoundryModule {
           cfGuid: org.entity.cfGuid,
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
-        getGuid: metadata => metadata.guid,
-        getIcon: () => ({ icon: 'apps' }),
+        getGuid: metadata => metadata.guid
       }
     );
     this.entityCatalogueService.register(orgEntity);
