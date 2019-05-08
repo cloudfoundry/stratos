@@ -80,6 +80,15 @@ export class FavoritesConfigMapper {
   public getMapperFunction<T extends IEntityMetadata = IEntityMetadata>(favorite: IFavoriteTypeInfo) {
     const catalogueEntity = this.entityCatalogueService.getEntity(favorite.entityType, favorite.endpointType);
     return (entity: T) => {
+      if (!entity) {
+        return {
+          lines: null,
+          type: null,
+          routerLink: null,
+          name: null,
+          menuItems: null
+        };
+      }
       return {
         lines: catalogueEntity.builder.getLines ? catalogueEntity.builder.getLines(entity) : null,
         type: catalogueEntity.entity.type,
@@ -108,9 +117,9 @@ export class FavoritesConfigMapper {
   /**
    * For a given favorite, return the corresponding hydration action
    */
-  public getEntityMetadata<T = any>(favorite: IFavoriteTypeInfo, entity: T): IEntityMetadata {
-    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.entityType, favorite.endpointType);
-    return catalogueEntity ? catalogueEntity.builder.getMetaData(entity) : null;
+  public getEntityMetadata<T extends IEntityMetadata = any>(favorite: IFavoriteTypeInfo, entity: any): T {
+    const catalogueEntity = this.entityCatalogueService.getEntity<T>(favorite.entityType, favorite.endpointType);
+    return catalogueEntity ? catalogueEntity.builder.getMetadata(entity) : null;
   }
 
   /**

@@ -75,7 +75,6 @@ export class FavoritesMetaCardComponent {
         map(connected => connected ? this.config.menuItems : [])
       );
       const { cardMapper, favorite, prettyName } = favoriteEntity;
-      console.log(favoriteEntity);
       this.favorite = favorite;
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
       this.prettyName = prettyName || 'Unknown';

@@ -31,6 +31,8 @@ import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
+import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { StratosCatalogueEndpointEntity } from '../../../../../../core/entity-catalogue/entity-catalogue.types';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -44,7 +46,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public favorite: UserFavoriteEndpoint;
   public address: string;
   public cardMenu: MetaCardMenuItem[];
-  public endpointConfig: EndpointTypeConfig;
+  public endpointConfig: StratosCatalogueEndpointEntity;
   public hasDetails = true;
   public endpointLink: string = null;
   public endpointParentType: string;
@@ -69,12 +71,16 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       return;
     }
     this.pRow = row;
-    this.endpointConfig = getEndpointType(row.cnsi_type, row.sub_type);
-    this.endpointParentType = row.sub_type ? getEndpointType(row.cnsi_type, null).label : null;
+
+    this.endpointConfig = this.entityCatalogueService.getEndpoint(row.cnsi_type, row.sub_type);
+    // this.endpointParentType = row.sub_type ? getEndpointType(row.cnsi_type, null).label : null;
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.doesNotSupportConnect ?
-      EndpointsService.getLinkForEndpoint(row) : null;
+    if (this.endpointConfig) {
+      const metadata = this.endpointConfig.builder.getMetadata(row);
+      this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.entity.unConnectable ?
+        this.endpointConfig.builder.getLink(metadata) : null;
+    }
     this.updateInnerComponent();
 
   }
@@ -105,7 +111,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private store: Store<AppState>,
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private favoritesConfigMapper: FavoritesConfigMapper,
+    private entityCatalogueService: EntityCatalogueService
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();

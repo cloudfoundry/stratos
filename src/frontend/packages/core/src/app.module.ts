@@ -5,34 +5,21 @@ import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
-
 import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
-import {
-  UpdateUserFavoriteMetadataAction,
-} from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
+import { UpdateUserFavoriteMetadataAction } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { AppState } from '../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  endpointSchemaKey,
-  organizationSchemaKey,
-  spaceSchemaKey,
-  entityFactory,
-} from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
-import { APIResource } from '../../store/src/types/api.types';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IRequestDataState } from '../../store/src/types/entity.types';
-import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
-import { IAppFavMetadata, IOrgFavMetadata, ISpaceFavMetadata } from './cf-favourite-types';
-import { IApp, IOrganization, ISpace } from './core/cf-api.types';
 import { CoreModule } from './core/core.module';
 import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
+import { EntityCatalogueService } from './core/entity-catalogue/entity-catalogue.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -41,7 +28,6 @@ import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
-import { getFullEndpointApiUrl, initEndpointExtensions, EndpointAuthTypeNames } from './features/endpoints/endpoint-helpers';
 import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
@@ -49,16 +35,11 @@ import { ServiceCatalogModule } from './features/service-catalog/service-catalog
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
+import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
+import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { GlobalEventService, GlobalEventData } from './shared/global-events.service';
-import { EntityCatalogueService } from './core/entity-catalogue/entity-catalogue.service';
-import {
-  IStratosEndpointDefinition,
-  StratosCatalogueEndpointEntity,
-  StratosCatalogueEntity
-} from './core/entity-catalogue/entity-catalogue.types';
-import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
+
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -166,9 +147,7 @@ export class AppModule {
     // );
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
-    initEndpointExtensions(ext);
     // Once the CF modules become an extension point, these should be moved to a CF specific module
-    this.registerCfFavoriteMappers();
 
     const allFavs$ = this.userFavoriteManager.getAllFavorites();
     const recents$ = this.store.select(recentlyVisitedSelector);
@@ -247,186 +226,4 @@ export class AppModule {
     }
     return false;
   }
-
-  private registerCfFavoriteMappers() {
-    const endpointType = 'cf';
-    const endpointDefinition = {
-      type: 'cf',
-      schema: entityFactory(endpointSchemaKey),
-      label: 'Cloud Foundry',
-      labelPlural: 'Cloud Foundry',
-      icon: 'cloud_foundry',
-      iconFont: 'stratos-icons',
-      logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
-      authTypes: [EndpointAuthTypeNames.CREDS, EndpointAuthTypeNames.SSO]
-    } as IStratosEndpointDefinition;
-    this.registerCfEndpointMapper(endpointDefinition);
-    this.registerCfApplicationMapper(endpointDefinition);
-    this.registerCfSpaceMapper(endpointDefinition);
-    this.registerCfOrgMapper(endpointDefinition);
-  }
-  private registerCfEndpointMapper(endpointDefinition: IStratosEndpointDefinition) {
-    const cfEntity = new StratosCatalogueEndpointEntity<EndpointModel, IEndpointFavMetadata>(
-      endpointDefinition,
-      {
-        getMetaData: endpoint => ({
-          name: endpoint.name,
-          guid: endpoint.guid,
-          address: getFullEndpointApiUrl(endpoint),
-          user: endpoint.user ? endpoint.user.name : undefined,
-          subType: endpoint.sub_type,
-          admin: endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined
-        }),
-        getLink: metadata => `/cloud-foundry/${metadata.guid}`,
-        getGuid: metadata => metadata.guid,
-        getLines: metadata => [
-          ['Address', metadata.address],
-          ['User', metadata.user],
-          ['Admin', metadata.admin]
-        ],
-        getIcon: () => ({
-          icon: 'cloud_foundry',
-          iconFont: 'stratos-icons'
-        }),
-        getImage: () => '/core/assets/endpoint-icons/cloudfoundry.png',
-        getStatusObservable: () => null
-      }
-    );
-    this.entityCatalogueService.register(cfEntity);
-  }
-
-  private registerCfApplicationMapper(endpointDefinition: IStratosEndpointDefinition) {
-    const applicationDefinition = {
-      type: applicationSchemaKey,
-      schema: entityFactory(applicationSchemaKey),
-      label: 'Application',
-      labelPlural: 'Applications',
-      endpoint: endpointDefinition
-    };
-    const applicationEntity = new StratosCatalogueEntity<APIResource<IApp>, IAppFavMetadata>(
-      applicationDefinition,
-      {
-        getMetaData: app => ({
-          guid: app.metadata.guid,
-          cfGuid: app.entity.cfGuid,
-          name: app.entity.name,
-        }),
-        getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid,
-        getIcon: () => ({ icon: 'apps' }),
-
-      }
-    );
-    this.entityCatalogueService.register(applicationEntity);
-    // favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>(new FavoriteConfig({
-    //   endpointType,
-    //   entityType: applicationSchemaKey
-    // },
-    //   'Application',
-    //   (app: IAppFavMetadata) => {
-    //     return {
-    //       type: applicationSchemaKey,
-    //       routerLink: `/applications/${app.cfGuid}/${app.guid}/summary`,
-    //       name: app.name
-    //     };
-    //   },
-    //   app => ({
-    //     guid: app.metadata.guid,
-    //     cfGuid: app.entity.cfGuid,
-    //     name: app.entity.name,
-    //   })
-    // ));
-  }
-
-  private registerCfSpaceMapper(endpointDefinition: IStratosEndpointDefinition) {
-    const spaceDefinition = {
-      type: spaceSchemaKey,
-      schema: entityFactory(spaceSchemaKey),
-      label: 'Space',
-      labelPlural: 'Spaces',
-      endpoint: endpointDefinition
-    };
-    const spaceEntity = new StratosCatalogueEntity<APIResource<ISpace>, ISpaceFavMetadata>(
-      spaceDefinition,
-      {
-        getMetaData: space => ({
-          guid: space.metadata.guid,
-          orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
-          name: space.entity.name,
-          cfGuid: space.entity.cfGuid,
-        }),
-        getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid,
-        getIcon: () => ({ icon: 'apps' }),
-      }
-    );
-    this.entityCatalogueService.register(spaceEntity);
-    // favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>(new FavoriteConfig({
-    //   endpointType,
-    //   entityType: spaceSchemaKey
-    // },
-    //   'Space',
-    //   (space: ISpaceFavMetadata) => {
-    //     return {
-    //       type: spaceSchemaKey,
-    //       routerLink: `/cloud-foundry/${space.cfGuid}/organizations/${space.orgGuid}/spaces/${space.guid}/summary`,
-    //       name: space.name
-    //     };
-    //   },
-    //   space => ({
-    //     guid: space.metadata.guid,
-    //     orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
-    //     name: space.entity.name,
-    //     cfGuid: space.entity.cfGuid,
-    //   })
-    // ));
-  }
-  private registerCfOrgMapper(endpointDefinition: IStratosEndpointDefinition) {
-    const orgDefinition = {
-      type: organizationSchemaKey,
-      schema: entityFactory(organizationSchemaKey),
-      label: 'Organization',
-      labelPlural: 'Organizations',
-      endpoint: endpointDefinition
-    };
-    const orgEntity = new StratosCatalogueEntity<APIResource<IOrganization>, IOrgFavMetadata>(
-      orgDefinition,
-      {
-        getMetaData: org => ({
-          guid: org.metadata.guid,
-          status: this.getOrgStatus(org),
-          name: org.entity.name,
-          cfGuid: org.entity.cfGuid,
-        }),
-        getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
-        getGuid: metadata => metadata.guid,
-        getIcon: () => ({ icon: 'apps' }),
-      }
-    );
-    this.entityCatalogueService.register(orgEntity);
-    // favoritesConfigMapper.registerFavoriteConfig<APIResource<IOrganization>, IOrgFavMetadata>(new FavoriteConfig({
-    //   endpointType,
-    //   entityType: organizationSchemaKey
-    // },
-    //   'Organization',
-    //   (org: IOrgFavMetadata) => ({
-    //     type: organizationSchemaKey,
-    //     routerLink: `/cloud-foundry/${org.cfGuid}/organizations/${org.guid}`,
-    //     name: org.name
-    //   }),
-    //   org => ({
-    //     guid: org.metadata.guid,
-    //     status: this.getOrgStatus(org),
-    //     name: org.entity.name,
-    //     cfGuid: org.entity.cfGuid,
-    //   })
-    // ));
-  }
-  private getOrgStatus(org: APIResource<IOrganization>) {
-    if (!org || !org.entity || !org.entity.status) {
-      return 'Unknown';
-    }
-    return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
-  }
 }
-

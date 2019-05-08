@@ -82,14 +82,14 @@ const extensionMetadata = {
 };
 
 /**
- * Decortator for a Tab extension
+ * Decorator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadata) {
   return target => addExtensionTab(props.type, target, props);
 }
 
 /**
- * Decortator for an Action extension
+ * Decorator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
   return target => addExtensionAction(props.type, target, props);

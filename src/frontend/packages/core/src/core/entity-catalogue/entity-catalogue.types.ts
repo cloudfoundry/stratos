@@ -1,9 +1,10 @@
 import { Observable } from 'rxjs';
 import { StratosStatus } from '../../shared/shared.types';
 import { EntitySchema } from '../../../../store/src/helpers/entity-factory';
+import { EndpointAuthTypeConfig } from '../extension/extension-types';
 
 export interface IStratosEntityWithIcons {
-  icon: string;
+  icon?: string;
   // TODO (nj): can we allow entity import custom icon fonts?
   iconFont?: string;
 }
@@ -12,18 +13,22 @@ export interface IEntityMetadata {
   name: string;
   [key: string]: string;
 }
-
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /**
  * Static information describing a base stratos entity.
  *
  * @export
  */
-export interface IStratosBaseEntityDefinition {
-  type: string;
-  schema: EntitySchema;
-  label: string;
-  labelPlural: string;
-  priority?: number;
+export interface IStratosBaseEntityDefinition extends IStratosEntityWithIcons {
+  readonly type: string;
+  readonly schema: EntitySchema;
+  readonly label: string;
+  readonly labelPlural: string;
+  readonly priority?: number;
+  // This should be typed
+  readonly listDetailsComponent?: any;
+  readonly parentType?: string;
+  readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
 }
 
 /**
@@ -32,12 +37,12 @@ export interface IStratosBaseEntityDefinition {
  * @export
  */
 export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition {
-  logoUrl: string;
-  tokenSharing?: boolean;
-  urlValidation?: boolean;
-  unConnectable?: boolean;
-  urlValidationRegexString?: string;
-  authTypes: string[];
+  readonly logoUrl: string;
+  readonly tokenSharing?: boolean;
+  readonly urlValidation?: boolean;
+  readonly unConnectable?: boolean;
+  readonly urlValidationRegexString?: string;
+  readonly authTypes: EndpointAuthTypeConfig[];
 }
 
 /**
@@ -46,18 +51,18 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
  * @export
  */
 export interface IStratosEntityDefinition extends IStratosBaseEntityDefinition {
-  endpoint: IStratosEndpointDefinition;
+  readonly endpoint: IStratosEndpointDefinition;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {
-  label: string;
-  action: () => void;
-  actionable?: Observable<boolean>;
-  disabled?: Observable<boolean>;
+  readonly label: string;
+  readonly action: () => void;
+  readonly actionable?: Observable<boolean>;
+  readonly disabled?: Observable<boolean>;
 }
 
 export interface IStratosEntityBuilder<T, Y extends IEntityMetadata> {
-  getMetaData(entity: T): Y;
+  getMetadata(entity: T): Y;
   getStatusObservable?(entityMetadata: T): Observable<StratosStatus>;
   getLink(entityMetadata: Y): string;
   getGuid(entityMetadata: Y): string;
@@ -114,7 +119,7 @@ export class StratosBaseCatalogueEntity<T = any, Y extends IEntityMetadata = IEn
       StratosBaseCatalogueEntity.buildId(baseEntity.type, baseEntity.endpoint.type);
   }
   public getGeneratedData(entity: T, previousMetadata?: Y): IStratosEntityStatusData<Y> {
-    const metadata = previousMetadata ? previousMetadata : this.builder.getMetaData(entity);
+    const metadata = previousMetadata ? previousMetadata : this.builder.getMetadata(entity);
     return {
       metadata,
       status$: this.builder.getStatusObservable(entity),

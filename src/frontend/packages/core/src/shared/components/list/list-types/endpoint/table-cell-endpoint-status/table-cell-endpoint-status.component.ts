@@ -3,8 +3,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
+import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
   selector: 'app-table-cell-endpoint-status',
   templateUrl: './table-cell-endpoint-status.component.html',
@@ -19,14 +19,14 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
     showLabel: true
   };
 
-  constructor() {
+  constructor(private entityCatalogueService: EntityCatalogueService) {
     super();
   }
 
   ngOnInit() {
-    const ep = getEndpointType(this.row.cnsi_type, this.row.sub_type);
+    const ep = this.entityCatalogueService.getEndpoint(this.row.cnsi_type, this.row.sub_type);
     if (!!ep) {
-      this.connectable = !ep.doesNotSupportConnect;
+      this.connectable = !ep.entity.unConnectable;
     }
   }
 }

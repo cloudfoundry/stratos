@@ -7,10 +7,11 @@ import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepp
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { getEndpointTypes } from '../../endpoint-helpers';
+import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
-  subType: string;
+  parentType: string;
 }
 
 @Component({
@@ -32,26 +33,28 @@ export class CreateEndpointBaseStepComponent {
     this.pSelectedTile = tile;
     if (tile) {
       this.store.dispatch(new RouterNav({
-        path: `endpoints/new/${tile.data.type}/${tile.data.subType || ''}`,
+        path: `endpoints/new/${tile.data.parentType || tile.data.type}/${tile.data.parentType ? tile.data.type : ''}`,
         query: {
           [BASE_REDIRECT_QUERY]: 'endpoints/new'
         }
       }));
     }
   }
-  constructor(public store: Store<AppState>) {
-    this.tileSelectorConfig = getEndpointTypes().map(et => {
+  constructor(public store: Store<AppState>, entityCatalogueService: EntityCatalogueService) {
+    this.tileSelectorConfig = entityCatalogueService.getAllEndpointTypes().map(catalogueEndpoint => {
+      console.log(catalogueEndpoint);
+      const endpoint = catalogueEndpoint.entity;
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
-        et.label,
-        et.imagePath ? {
-          location: et.imagePath
+        endpoint.label,
+        endpoint.logoUrl ? {
+          location: endpoint.logoUrl
         } : {
-            matIcon: et.icon,
-            matIconFont: et.iconFont
+            matIcon: endpoint.icon,
+            matIconFont: endpoint.iconFont
           },
         {
-          type: et.type,
-          subType: et.subType
+          type: endpoint.type,
+          parentType: endpoint.parentType
         }
       );
     });

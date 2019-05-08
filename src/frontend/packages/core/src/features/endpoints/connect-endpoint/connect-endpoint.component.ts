@@ -18,7 +18,9 @@ import { map } from 'rxjs/operators';
 import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
-import { getCanShareTokenForEndpointType, getEndpointAuthTypes, getEndpointType } from '../endpoint-helpers';
+import { getCanShareTokenForEndpointType, getEndpointType } from '../endpoint-helpers';
+import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { BaseEndpointAuth } from '../endpoint-auth';
 
 
 @Component({
@@ -75,25 +77,22 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private resolver: ComponentFactoryResolver
-  ) {
-
-  }
+    private resolver: ComponentFactoryResolver,
+    private entityCatalogueService: EntityCatalogueService
+  ) { }
 
   private init(config: ConnectEndpointConfig) {
     const endpointType = getEndpointType(config.type, config.subType);
-
+    const endpoint = this.entityCatalogueService.getEndpoint(config.type, config.subType);
     // Populate the valid auth types for the endpoint that we want to connect to
-    getEndpointAuthTypes().forEach(authType => {
-      const authTypeHasEndpoint = authType.types.find(t => t === config.type);
-      const endpointHasAuthType = endpointType.authTypes && endpointType.authTypes.find(t => t === authType.value);
-      if (authTypeHasEndpoint || endpointHasAuthType) {
-        this.authTypesForEndpoint.push(authType);
-      }
-    });
 
     // Remove SSO if not allowed on this endpoint
-    this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || config.ssoAllowed);
+    if (config.ssoAllowed) {
+      this.authTypesForEndpoint = endpoint.entity.authTypes;
+    } else {
+      this.authTypesForEndpoint = endpoint.entity.authTypes.filter(authType => authType.value !== BaseEndpointAuth.SSO.value);
+    }
+
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
     this.canShareEndpointToken = getCanShareTokenForEndpointType(endpointType.type, endpointType.subType);
