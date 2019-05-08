@@ -51,13 +51,13 @@ export function createEmptyCfResponse<T = any>(): CFResponse<T> {
   };
 }
 
-export interface CFResponse<T = any> extends PaginationResponse<APIResource<T>> {
-}
-
 export interface PaginationResponse<T = any> {
   total_results: number;
   total_pages: number;
   prev_url: string;
   next_url: string;
   resources: T[];
+}
+
+export interface CFResponse<T = any> extends PaginationResponse<APIResource<T>> {
 }
