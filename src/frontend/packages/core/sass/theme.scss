@@ -4,8 +4,7 @@
 @import './mat-colors';
 
 // Custom theme support
-// TODO Un-comment - NJ
-// @import './custom';
+@import './custom';
 
 // Themes palettes and colors
 $oss-theme-primary: mat-palette($mat-blue);

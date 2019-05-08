@@ -10,10 +10,11 @@
             {{ (cfSpaceService.userRole$ | async) }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition Name">
-            {{ (cfSpaceService.quotaDefinition$ | async)?.entity.name }}
+            {{ (cfSpaceService.quotaDefinition$ | async)?.name }}
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
-            <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no">
+            <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed"
+              type="yes-no">
             </app-boolean-indicator>
           </app-metadata-item>
         </div>

@@ -188,8 +188,10 @@ spec:
           value: cf
         - name: CONSOLE_CLIENT_SECRET
           value:
+        {{- if .Values.env.DOMAIN }}  
         - name: AUTO_REG_CF_URL
           value: https://api.{{.Values.env.DOMAIN}}
+        {{- end }}
         - name: CONSOLE_ADMIN_SCOPE 
           value: cloud_controller.admin
         - name: SKIP_SSL_VALIDATION 
@@ -226,6 +228,27 @@ spec:
           value: {{default "false" .Values.console.ssoLogin | quote}}
         - name: SSO_OPTIONS
           value: {{default "" .Values.console.ssoOptions | quote}}
+        {{- if .Values.console.templatesConfigMapName }}
+        - name: TEMPLATE_DIR
+          value: /etc/templates
+        {{- else }}
+        - name: TEMPLATE_DIR
+          value: /srv/templates
+        {{- end }}
+        - name: SMTP_AUTH
+          value: {{ default "false" .Values.env.SMTP_AUTH | quote }}
+        - name: SMTP_FROM_ADDRESS
+          value: {{ default "" .Values.env.SMTP_FROM_ADDRESS | quote }}
+        - name: SMTP_HOST
+          value: {{ default "" .Values.env.SMTP_HOST | quote }}
+        - name: SMTP_PORT
+          value: {{ default "" .Values.env.SMTP_PORT | quote }}
+        - name: SMTP_USER
+          value: {{ default "" .Values.env.SMTP_USER | quote }}
+        - name: SMTP_PASSWORD
+          value: {{ default "" .Values.env.SMTP_PASSWORD | quote }}
+        - name: INVITE_USER_SUBJECT
+          value: {{ default "" .Values.console.userInviteSubject | quote }}
         ports:
         - containerPort: 3003
           name: proxy
@@ -238,6 +261,11 @@ spec:
         - mountPath: /etc/secrets/
           name: "{{ .Release.Name }}-secret"
           readOnly: true
+        {{- if .Values.console.templatesConfigMapName }}
+        - mountPath: /etc/templates/
+          name: "{{ .Release.Name }}-templates"
+          readOnly: true
+        {{- end }}
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
@@ -252,6 +280,11 @@ spec:
       - name: "{{ .Release.Name }}-secret"
         secret:
           secretName: "{{ .Release.Name }}-secret"
+      {{- if .Values.console.templatesConfigMapName }}
+      - name: {{ .Release.Name }}-templates
+        configMap:
+          name: {{ .Values.console.templatesConfigMapName }}
+      {{- end }}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment

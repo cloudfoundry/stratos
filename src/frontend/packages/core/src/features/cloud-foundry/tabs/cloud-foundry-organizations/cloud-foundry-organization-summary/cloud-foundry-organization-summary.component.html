@@ -1,3 +1,15 @@
+<app-page-sub-nav>
+  <button mat-icon-button name="edit-org" *appUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid"
+    routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org"
+    matTooltip="Edit Organization">
+    <mat-icon>mode_edit</mat-icon>
+  </button>
+  <button mat-icon-button name="cli"
+    routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli"
+    matTooltip="CLI Info">
+    <mat-icon>keyboard</mat-icon>
+  </button>
+</app-page-sub-nav>
 <div>
   <app-tile-grid fit="true">
     <app-tile-group>

@@ -13,7 +13,7 @@ import { ssoHelper } from './helpers/sso-helper';
 export class E2E {
 
   // Turn on debug logging for test helpers
-  public static DEBUG_LOGGING = !!process.env['STRATOS_E2E_DEBUG'] || false;
+  public static DEBUG_LOGGING = !!process.env.STRATOS_E2E_DEBUG || false;
 
   // General helpers
   public helper = new E2EHelpers();
@@ -51,7 +51,11 @@ export class E2E {
    */
   log(log: string, ...optionalParams: any[]) {
     /* tslint:disable:no-console*/
-    protractor.promise.controlFlow().execute(() => console.log(log, optionalParams));
+    if (optionalParams && optionalParams.length) {
+      protractor.promise.controlFlow().execute(() => console.log(log, optionalParams));
+    } else {
+      protractor.promise.controlFlow().execute(() => console.log(log));
+    }
     /* tslint:disable */
   }
 
@@ -60,9 +64,7 @@ export class E2E {
    * Log message in the control flow if debug logging is set
    */
   debugLog(log: string) {
-    /* tslint:disable:no-console*/
     protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
-    /* tslint:disable */
   }
 }
 

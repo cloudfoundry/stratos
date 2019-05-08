@@ -4,6 +4,7 @@
 @import '../src/features/home/home/home-page.component.theme';
 @import '../src/features/login/login-page/login-page.component.theme';
 @import '../src/features/applications/deploy-application/deploy-application.component.theme';
+@import '../src/features/dashboard/page-side-nav/page-side-nav.component.theme';
 @import '../src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../src/features/about/about-page/about-page.component.theme';
 @import '../src/shared/components/display-value/display-value.component.theme';
@@ -25,6 +26,7 @@
 @import '../src/shared/components/log-viewer/log-viewer.component.theme';
 @import '../src/shared/components/chips/chips.component.theme';
 @import '../src/shared/components/cards/card-number-metric/card-number-metric.component.theme';
+@import '../src/shared/components/simple-usage-chart/simple-usage-chart.component.theme';
 @import '../src/core/dot-content/dot-content.component.theme';
 @import '../src/shared/components/stratos-title/stratos-title.component.theme';
 @import '../src/shared/components/page-header/page-header.component.theme';
@@ -41,7 +43,10 @@
 @import '../src/features/services/services-wall/services-wall.component.theme';
 @import '../src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../src/shared/components/tile-selector/tile-selector.component.theme';
+@import '../src/shared/components/entity-summary-title/entity-summary-title.component.theme';
 @import '../src/shared/components/multiline-title/multiline-title.component.theme';
+@import '../src/features/user-profile/profile-info/profile-info.component.theme';
+@import '../src/core/stateful-icon/stateful-icon.component.theme';
 @import '../src/shared/components/markdown-preview/markdown-preview.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
@@ -132,8 +137,15 @@ $side-nav-light-active: #484848;
   @include app-multiline-title-theme($theme, $app-theme);
   @include app-markdown-preview-theme($theme, $app-theme);
   @include tile-selector-theme($theme, $app-theme);
+  @include profile-page-theme($theme, $app-theme);
+  @include stateful-icon($theme, $app-theme);
+  @include app-markdown-preview-theme($theme, $app-theme);
+  @include app-simple-usage-chart($theme, $app-theme);
   @include home-page-theme($theme, $app-theme);
   @include favorites-global-list-theme($theme, $app-theme);
+  @include page-side-nav-theme($theme, $app-theme);
+  @include cf-admin-add-user-warning($theme, $app-theme);
+  @include entity-summary-title-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

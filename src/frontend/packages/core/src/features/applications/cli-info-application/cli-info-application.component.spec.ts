@@ -1,17 +1,18 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { GetApplication } from '../../../../../store/src/actions/application.actions';
+import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { TabNavService } from '../../../../tab-nav.service';
+import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
+import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../shared/shared.module';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CliInfoApplicationComponent } from './cli-info-application.component';
-import { entityFactory, applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { GetApplication } from '../../../../../store/src/actions/application.actions';
 
 describe('CliInfoApplicationComponent', () => {
   let component: CliInfoApplicationComponent;
@@ -38,7 +39,8 @@ describe('CliInfoApplicationComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsHelper
+        ApplicationEnvVarsHelper,
+        TabNavService
       ]
     })
       .compileComponents();

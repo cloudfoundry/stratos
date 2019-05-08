@@ -74,10 +74,11 @@ mat-header-cell {
 
     &--table-column-clip {
       app-table-cell {
-        display: inline-block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        // display: inline-block;
+        // overflow: hidden;
+        // text-overflow: ellipsis;
+        // white-space: nowrap;
+        word-break: break-all;
       }
     }
   }

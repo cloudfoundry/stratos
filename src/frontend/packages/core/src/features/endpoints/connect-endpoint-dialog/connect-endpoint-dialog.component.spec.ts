@@ -10,6 +10,7 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig } from '../connect.service';
+import { initEndpointTypes } from '../endpoint-helpers';
 import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form.component';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
 
@@ -19,7 +20,8 @@ class MatDialogRefMock {
 class MatDialogDataMock implements ConnectEndpointConfig {
   guid = '57ab08d8-86cc-473a-8818-25d5e8d0ea23';
   name = 'Test';
-  type = 'cf';
+  type = 'metrics';
+  subType = null;
   ssoAllowed = false;
 }
 
@@ -31,7 +33,7 @@ describe('ConnectEndpointDialogComponent', () => {
     const testingModule = TestBed.configureTestingModule({
       providers: [
         { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
+        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock }
       ],
       declarations: [
         ConnectEndpointDialogComponent,
@@ -52,6 +54,7 @@ describe('ConnectEndpointDialogComponent', () => {
       }
     });
     testingModule.compileComponents();
+    initEndpointTypes([]);
   }));
 
   beforeEach(() => {

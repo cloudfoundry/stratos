@@ -4,6 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
@@ -28,7 +29,8 @@ describe('ConsoleUaaWizardComponent', () => {
         MDAppModule,
         StoreModule.forRoot({}),
         BrowserAnimationsModule,
-      ]
+      ],
+      providers: [TabNavService]
     })
       .compileComponents();
   }));

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, mergeMap, switchMap, tap, filter, first } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
@@ -26,6 +26,10 @@ import {
   VERIFY_SESSION,
   VerifySession,
 } from './../actions/auth.actions';
+import { Store } from '@ngrx/store';
+import { AppState } from '../app-state';
+import { getDashboardStateSessionId } from '../helpers/store-helpers';
+import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -37,7 +41,8 @@ export class AuthEffect {
 
   constructor(
     private http: HttpClient,
-    private actions$: Actions
+    private actions$: Actions,
+    private store: Store<AppState>
   ) { }
 
   @Effect() loginRequest$ = this.actions$.pipe(
@@ -75,6 +80,7 @@ export class AuthEffect {
         mergeMap(response => {
           const sessionData = response.body;
           sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
+          this.rehydrateDashboardState(this.store, sessionData);
           return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
         }),
         catchError((err, caught) => {
@@ -143,5 +149,19 @@ export class AuthEffect {
       return !okay;
     }
     return false;
+  }
+
+  private rehydrateDashboardState(store: Store<AppState>, sessionData: SessionData) {
+    const storage = localStorage || window.localStorage;
+    // We use the username to key the session storage. We could replace this with the users id?
+    if (storage && sessionData.user) {
+      const sessionId = getDashboardStateSessionId(sessionData.user.name);
+      if (sessionId) {
+        try {
+          const dashboardData = JSON.parse(storage.getItem(sessionId));
+          store.dispatch(new HydrateDashboardStateAction(dashboardData));
+        } catch (e) { }
+      }
+    }
   }
 }

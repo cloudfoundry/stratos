@@ -17,4 +17,6 @@ export class CloudFoundryOrganizationServiceMock {
     });
   apps$ = observableOf([]);
   appCount$ = observableOf(0);
+  serviceInstancesCount$ = observableOf(0);
+  userProvidedServiceInstancesCount$ = observableOf(0);
 }

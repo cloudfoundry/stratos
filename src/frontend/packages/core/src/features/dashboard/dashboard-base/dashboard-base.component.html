@@ -1,17 +1,47 @@
-<mat-sidenav-container class="dashboard">
-  <app-routing-indicator class="routing-indicator"></app-routing-indicator>
-  <mat-sidenav #sidenav class="dashboard__side-nav" mode="side">
-    <app-side-nav [tabs]="sideNavTabs">
-    </app-side-nav>
-  </mat-sidenav>
-  <div class="dashboard__inner">
-    <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView, 'dashboard__noMargin': noMargin}">
-      <router-outlet></router-outlet>
-    </div>
-  </div>
-  <mat-sidenav #sideHelp mode="over" position="end" (closedStart)="sideHelpClosed()">
+<div class="dashboard__outer">
+  <mat-drawer-container autosize class="dashboard">
+    <mat-drawer #sidenav *ngIf="mainNavState$ | async as navState" class="dashboard__side-nav" [mode]="navState.mode"
+      [opened]="navState.opened">
+      <app-side-nav (changedMode)="redrawSideNav()" [iconMode]="navState.iconMode" [tabs]="sideNavTabs">
+      </app-side-nav>
+    </mat-drawer>
+    <mat-drawer-content>
+      <div class="page-content">
+        <div class="page-header" *ngIf="tabNavService.pageHeader$ | async as portal">
+          <ng-container [cdkPortalOutlet]="portal"></ng-container>
+        </div>
+        <app-routing-indicator class="routing-indicator"></app-routing-indicator>
+        <div class="dashboard__inner">
+          <div class="dashboard__page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
+            <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs">
+            </app-page-side-nav>
+          </div>
+          <div class="dashboard__main">
+            <div *ngIf="subNavData$ | async as data">
+              <div class="page-header-sub-nav" *ngIf="data[0] || data[1]">
+                <div class="page-header-sub-nav__container">
+                  <div *ngIf="data[0] as activeTabLabel" class="page-header-sub-nav__title">
+                    {{ activeTabLabel }}
+                  </div>
+                  <ng-container *ngIf="data[1] as portal" [cdkPortalOutlet]="portal"></ng-container>
+                </div>
+              </div>
+            </div>
+            <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}">
+              <router-outlet></router-outlet>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-drawer-content>
+  </mat-drawer-container>
+  <mat-drawer class="dashboard__side-help-outer" #sideHelp *ngIf="rightNavState$ | async as rightNavState"
+    [autoFocus]="false" mode="over" position="end" [opened]="rightNavState.opened" (closedStart)="sideHelpClosed()">
     <div class="dashboard__side-help">
-      <app-markdown-preview [documentUrl]="helpDocumentUrl"></app-markdown-preview>
-    </div>    
-  </mat-sidenav>
-</mat-sidenav-container>
+      <button class="dashboard__side-help-button" mat-icon-button (click)="rightNavState.opened = false">
+        <mat-icon>close</mat-icon>
+      </button>
+      <app-markdown-preview [documentUrl]="rightNavState.documentUrl"></app-markdown-preview>
+    </div>
+  </mat-drawer>
+</div>

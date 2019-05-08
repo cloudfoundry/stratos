@@ -1,4 +1,13 @@
-import { Component, ComponentFactoryResolver, Input, OnDestroy, Type, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Input,
+  OnDestroy,
+  Type,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
@@ -12,8 +21,13 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
 })
 export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointModel> implements OnDestroy {
 
+  private componentRef: ComponentRef<EndpointListDetailsComponent>;
   @Input() component: Type<EndpointListDetailsComponent>;
-  @ViewChild('target', { read: ViewContainerRef }) target;
+
+  private endpointDetails: ViewContainerRef;
+  @ViewChild('target', { read: ViewContainerRef }) set target(content: ViewContainerRef) {
+    this.endpointDetails = content;
+  }
 
   cell: EndpointListDetailsComponent;
 
@@ -26,14 +40,14 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
   set row(row: EndpointModel) {
     this.pRow = row;
 
-    const e = getEndpointType(row.cnsi_type);
+    const e = getEndpointType(row.cnsi_type, row.sub_type);
     if (!e || !e.listDetailsComponent) {
       return;
     }
     if (!this.cell) {
       const res =
-        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.target, this.componentFactoryResolver);
-      this.target = res.componentRef;
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
+      this.componentRef = res.componentRef;
       this.cell = res.component;
     }
 
@@ -49,9 +63,9 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
 
   ngOnDestroy(): void {
     this.endpointListHelper.destroyEndpointDetails({
-      componentRef: this.target,
+      componentRef: this.componentRef,
       component: this.cell,
-      endpointDetails: this.target
+      endpointDetails: this.endpointDetails
     });
   }
 }

@@ -38,6 +38,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
@@ -250,13 +251,16 @@ func main() {
 	portalProxy.loadPlugins()
 
 	initedPlugins := make(map[string]interfaces.StratosPlugin)
+	portalProxy.PluginsStatus = make(map[string]bool)
 
 	// Initialise general plugins
 	for name, plugin := range portalProxy.Plugins {
 		if err = plugin.Init(); err == nil {
 			initedPlugins[name] = plugin
+			portalProxy.PluginsStatus[name] = true
 		} else {
 			log.Infof("Plugin %s is disabled: %s", name, err.Error())
+			portalProxy.PluginsStatus[name] = false
 		}
 	}
 
@@ -277,6 +281,12 @@ func main() {
 // GetDatabaseConnection makes db connection available to plugins
 func (portalProxy *portalProxy) GetDatabaseConnection() *sql.DB {
 	return portalProxy.DatabaseConnectionPool
+}
+
+func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
+	plugin := portalProxy.Plugins[name]
+	log.Warn(portalProxy.Plugins)
+	return plugin
 }
 
 func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware, error) {
@@ -641,6 +651,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowCredentials: true,
 	}))
+	// See #151
 	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
 		XFrameOptions: "DENY",
 	}))

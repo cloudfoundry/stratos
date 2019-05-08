@@ -3,8 +3,9 @@ import { browser, by, element, promise, protractor } from 'protractor';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { BreadcrumbsComponent } from './breadcrumbs.po';
 import { LoadingIndicatorComponent } from './loading-indicator.po';
+import { PageHeaderSubPo } from './page-header-sub.po';
 import { PageHeader } from './page-header.po';
-import { PageSubHeaderComponent } from './page-subheader.po';
+import { PageTabsPo } from './page-tabs.po';
 import { SideNavigation } from './side-nav.po';
 
 
@@ -22,7 +23,10 @@ export abstract class Page {
   public header = new PageHeader();
 
   // Subheader (if present)
-  public subHeader = new PageSubHeaderComponent();
+  public subHeader = new PageHeaderSubPo();
+
+  // Tabs (if present)
+  public tabs = new PageTabsPo();
 
   // Breadcrumbs (if present)
   public breadcrumbs = new BreadcrumbsComponent();

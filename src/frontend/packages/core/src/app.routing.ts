@@ -30,12 +30,11 @@ const appRoutes: Routes = [
         path: 'home', component: HomePageComponent,
         data: {
           stratosNavigation: {
-            text: 'Home',
+            label: 'Home',
             matIcon: 'home',
             position: 10,
             requiresPersistence: true
-          },
-          uiNoMargin: true
+          }
         }
       },
       {
@@ -43,7 +42,7 @@ const appRoutes: Routes = [
         loadChildren: './features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
-            text: 'Applications',
+            label: 'Applications',
             matIcon: 'apps',
             position: 20
           }
@@ -53,7 +52,7 @@ const appRoutes: Routes = [
         path: 'endpoints',
         data: {
           stratosNavigation: {
-            text: 'Endpoints',
+            label: 'Endpoints',
             matIcon: 'settings_ethernet',
             position: 100,
             requiresPersistence: true
@@ -72,7 +71,7 @@ const appRoutes: Routes = [
         path: 'marketplace', loadChildren: './features/service-catalog/service-catalog.module#ServiceCatalogModule',
         data: {
           stratosNavigation: {
-            text: 'Marketplace',
+            label: 'Marketplace',
             matIcon: 'store',
             position: 30
           }
@@ -82,7 +81,7 @@ const appRoutes: Routes = [
         path: 'services', loadChildren: './features/services/services.module#ServicesModule',
         data: {
           stratosNavigation: {
-            text: 'Services',
+            label: 'Services',
             matIcon: 'service',
             matIconFont: 'stratos-icons',
             position: 40
@@ -93,7 +92,7 @@ const appRoutes: Routes = [
         path: 'cloud-foundry', loadChildren: './features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
         data: {
           stratosNavigation: {
-            text: 'Cloud Foundry',
+            label: 'Cloud Foundry',
             matIcon: 'cloud_foundry',
             matIconFont: 'stratos-icons',
             position: 50
@@ -102,6 +101,7 @@ const appRoutes: Routes = [
       },
       { path: 'about', loadChildren: './features/about/about.module#AboutModule' },
       { path: 'user-profile', loadChildren: './features/user-profile/user-profile.module#UserProfileModule' },
+      { path: 'events', loadChildren: './features/event-page/event-page.module#EventPageModule' },
     ]
   },
   {

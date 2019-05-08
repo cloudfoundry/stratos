@@ -11,7 +11,7 @@ import {
   getServicePlanAccessibilityCardStatus,
 } from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
-import { CardStatus } from '../../shared.types';
+import { StratosStatus } from '../../shared.types';
 
 @Component({
   selector: 'app-service-plan-public',
@@ -20,7 +20,7 @@ import { CardStatus } from '../../shared.types';
 })
 export class ServicePlanPublicComponent {
 
-  planAccessibility$: Observable<CardStatus>;
+  planAccessibility$: Observable<StratosStatus>;
   planAccessibilityMessage$: Observable<string>;
   private pServicePlan: APIResource<IServicePlan>;
   @Input()
@@ -39,9 +39,9 @@ export class ServicePlanPublicComponent {
     );
     this.planAccessibilityMessage$ = this.planAccessibility$.pipe().pipe(
       map(o => {
-        if (o === CardStatus.WARNING) {
+        if (o === StratosStatus.WARNING) {
           return 'Service Plan has limited visibility';
-        } else if (o === CardStatus.ERROR) {
+        } else if (o === StratosStatus.ERROR) {
           return 'Service Plan has no visibility';
         }
       })

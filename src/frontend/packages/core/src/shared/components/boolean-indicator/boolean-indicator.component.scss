@@ -8,9 +8,10 @@
       height: 20px;
       width: 20px;
     }
-    &__icon-true,
-    &__icon-false {
-      margin-right: 4px;
+    &__show-text {
+      mat-icon {
+        margin-right: 4px;
+      }
     }
   }
 }

@@ -39,7 +39,7 @@ Stratos can be deployed in the following environments:
 Please see our [Troubleshooting](docs/troubleshooting) page.
 
 ## Project Planning
-We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/SUSE/stratos#boards)
+We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/cloudfoundry-incubator/stratos#boards)
 tab and have a look through our pipelines and milestones. Please note in order to view the Github ZenHub Boards tab you will need the [ZenHub
 browser extension](https://www.zenhub.com/extension). Alternatively, to view the planning board without the extension visit our [ZenHub Project Page](https://app.zenhub.com/workspace/o/cloudfoundry-incubator/stratos/boards)
 
@@ -53,7 +53,7 @@ Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are he
 
 Browse through features and issues in the project's [issues](https://github.com/cloudfoundry-incubator/stratos/issues) page or [Zenhub Board](https://github.com/cloudfoundry-incubator/stratos#boards).
 
-What kind of code is in Stratos? We've integrated [Code Climate](https://codeclimate.com) for some code quality and maintainability metrics. Take a stroll around the [project page](https://codeclimate.com/github/SUSE/stratos)
+What kind of code is in Stratos? We've integrated [Code Climate](https://codeclimate.com) for some code quality and maintainability metrics. Take a stroll around the [project page](https://codeclimate.com/github/cloudfoundry-incubator/stratos)
 
 ## Contributing
 

@@ -13,7 +13,7 @@ import { endpointStoreNames } from '../../../../../../../store/src/types/endpoin
 import { entityFactory, applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
 import { ApplicationsModule } from '../../../../../features/applications/applications.module';
-
+import { CustomImportModule } from '../../../../../custom-import.module';
 
 describe('CfAppVariablesListConfigService', () => {
 
@@ -40,6 +40,10 @@ describe('CfAppVariablesListConfigService', () => {
         ApplicationsModule,
         RouterTestingModule
       ]
+    }).overrideModule(ApplicationsModule, {
+      remove: {
+        imports: [CustomImportModule]
+      }
     });
   });
 
