@@ -115,6 +115,14 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Security Groups', 'security-groups');
   }
 
+  clickOnOrg(orgName: string) {
+    const list = new ListComponent();
+    list.cards.findCardByTitle(orgName).then((card) => {
+      expect(card).toBeDefined();
+      card.click();
+    });
+  }
+
   private goToTab(label: string, urlSuffix: string): promise.Promise<any> {
     // Some tabs don't appear until the page has fully loaded - so wait until the tab is present
     const tabElement = this.tabs.getItem(label);

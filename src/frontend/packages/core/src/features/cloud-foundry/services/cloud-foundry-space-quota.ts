@@ -29,7 +29,7 @@ export class SpaceQuotaHelper extends OrgSpaceQuotaHelper<ISpace> {
     const spaceQuota = space.entity.space_quota_definition;
     // Ensure we check each on in turn
     return this.handleQuotaStatus(space.entity.routes.length, spaceQuota.entity.total_routes) ||
-      this.handleQuotaStatus(space.entity.service_instances.length, spaceQuota.entity.total_services) ||
+      this.handleQuotaStatus(space.entity.service_instances && space.entity.service_instances.length, spaceQuota.entity.total_services) ||
       this.handleQuotaStatus(getStartedAppInstanceCount(apps), spaceQuota.entity.app_instance_limit) ||
       this.handleQuotaStatus(this.cfEndpointService.getMetricFromApps(apps, 'memory'), spaceQuota.entity.memory_limit) ?
       StratosStatus.WARNING :

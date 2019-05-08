@@ -8,6 +8,7 @@ import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
@@ -23,20 +24,27 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   cfUrl: string;
   createSpaceForm: FormGroup;
+  quotaDefinitions$: any;
+
   get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }; }
+
+  get quotaDefinition(): any { return this.createSpaceForm ? this.createSpaceForm.get('quotaDefinition') : { value: '' }; }
 
   constructor(
     store: Store<AppState>,
     activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    private entityServiceFactory: EntityServiceFactory
   ) {
     super(store, activatedRoute, paginationMonitorFactory, activeRouteCfOrgSpace);
+    console.log(this.entityServiceFactory);
   }
 
   ngOnInit() {
     this.createSpaceForm = new FormGroup({
       spaceName: new FormControl('', [Validators.required as any, this.spaceNameTakenValidator()]),
+      quotaDefinition: new FormControl(),
     });
   }
 
@@ -51,10 +59,14 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   submit: StepOnNextFunction = () => {
-    const spaceName = this.createSpaceForm.value.spaceName;
-    this.store.dispatch(new CreateSpace(spaceName, this.orgGuid, this.cfGuid));
+    this.store.dispatch(new CreateSpace(this.cfGuid, this.orgGuid, {
+      name: this.spaceName.value,
+      organization_guid: this.orgGuid,
+      space_quota_definition_guid: this.quotaDefinition.value
+    }));
 
-    return this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(
+    const entityGuid = `${this.orgGuid}-${this.spaceName.value}`;
+    return this.store.select(selectRequestInfo(spaceSchemaKey, entityGuid)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),
       this.map('Failed to create space: ')
     );

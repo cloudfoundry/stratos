@@ -1,10 +1,10 @@
 import { browser, promise } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
 
 
 export class CfOrgLevelPage extends CFPage {
-
   static forEndpoint(guid: string, orgGuid): CfOrgLevelPage {
     const page = new CfOrgLevelPage();
     page.navLink = '/cloud-foundry/' + guid + '/organizations/' + orgGuid;
@@ -37,6 +37,14 @@ export class CfOrgLevelPage extends CFPage {
 
   goToUsersTab() {
     return this.goToTab('Users', 'users');
+  }
+
+  clickOnSpace(spaceName: string) {
+    const list = new ListComponent();
+    list.cards.findCardByTitle(spaceName).then((card) => {
+      expect(card).toBeDefined();
+      card.click();
+    });
   }
 
   private goToTab(label: string, urlSuffix: string) {

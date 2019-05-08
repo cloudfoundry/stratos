@@ -46,6 +46,8 @@ import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
+import { updateOrganizationQuotaReducer } from './organization-quota.reducer';
+import { updateSpaceQuotaReducer } from './space-quota.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -146,11 +148,13 @@ export function requestDataReducer(state: IRequestDataState, action: Action) {
       endpointDisconnectApplicationReducer()
     ],
     [spaceSchemaKey]: [
+      updateSpaceQuotaReducer,
       endpointDisconnectApplicationReducer(),
       applicationAddRemoveReducer(),
       userSpaceOrgReducer(true)
     ],
     [organizationSchemaKey]: [
+      updateOrganizationQuotaReducer,
       updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)
