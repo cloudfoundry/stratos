@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Fetch the backend dependencies using dep
+# Fetch the backend dependencies using go modules
 
 set -euo pipefail
 
@@ -9,5 +9,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 STRATOS="`cd "${DIR}/..";pwd`"
 
 echo "Fetching backend dependencies"
-export DEPPROJECTROOT="${STRATOS}"
-dep ensure -vendor-only -v
+
+pushd "${STRATOS}/src/jetstream" > /dev/null
+go mod download
+popd > /dev/null

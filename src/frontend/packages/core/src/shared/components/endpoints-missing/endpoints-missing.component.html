@@ -1,0 +1,3 @@
+<app-no-content-message *ngIf="noContent$ | async as message" [icon]="'settings_ethernet'" [hidden]="!message"
+  [firstLine]="message.firstLine" [secondLine]="message.secondLine" [toolbarLink]="message.toolbarLink">
+</app-no-content-message>

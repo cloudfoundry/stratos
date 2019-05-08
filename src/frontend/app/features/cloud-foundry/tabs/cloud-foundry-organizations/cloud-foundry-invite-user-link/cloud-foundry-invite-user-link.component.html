@@ -1,6 +1,0 @@
-<mat-card class="invite-user-details" *ngIf="(inviteUserDetails$ | async) as inviteUserDetails">
-  <mat-card-content>
-    <div>{{inviteUserDetails.text}}</div>
-    <button mat-button color="primary" (click)="inviteUser(inviteUserDetails.url)">Invite Users</button>
-  </mat-card-content>
-</mat-card>

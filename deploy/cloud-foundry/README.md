@@ -30,6 +30,44 @@ Note:
 1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
 1. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
+### Running Stratos in Production Environments
+
+Please be aware of the following when running Stratos in a production environment:
+
+#### Configure a Session Store Secret
+
+Stratos uses a Session Store Secret to protect the user session cookie. We recommend that you set your own value for this secret - choosing an alphanumeric string of your choice.
+
+You can configure this secret by editing the application manifest and adding to the `env` section, e.g.
+
+```
+applications:
+- name: console
+  ... memory, disk settings here
+  env:
+    SESSION_STORE_SECRET: <your session store secret here>
+```
+
+#### Pre-configure UAA client used for user invites
+
+> You can skip this step and configure any CFs invite clients via the Stratos UI.
+
+ To set the UAA client for user invites, supply the client id and client secret as environment variables as shown below:
+
+  ```
+  INVITE_USER_CLIENT_ID=<UAA_CLIENT_ID>
+  INVITE_USER_CLIENT_SECRET=<UAA_CLIENT_SECRET>
+  ```
+
+This will set the the UAA client and UAA secret used to invite users for the default CF only.
+
+See the [invite users guide](../../docs/invite-user-guide.md) for more information about user invites in Stratos.
+
+#### Use of the Default Embedded SQLite Database
+
+We do not recommend deploying Stratos to a production environment using the default embedded SQLite Database. Instead we recommend creating
+and binding a database service instance to Stratos - for more information see [here](db-migration/README.md).
+
 ### Deploy Stratos from source
 
 To do so, `clone` the **stratos** repository, `cd` into the newly cloned repository and `push` to Cloud Foundry. This can be done with:

@@ -1,13 +1,15 @@
 package userinvite
 
 import (
+	"errors"
 	"fmt"
 	html "html/template"
 	"path"
 	text "text/template"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 
+	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,22 +57,22 @@ const (
 )
 
 // LoadConfig loads the configuration for inviting users
-func (userinvite *UserInvite) LoadConfig() (*Config, error) {
+func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 
 	c := &Config{}
 
 	smtpConfig := &SMTPConfig{}
-	if err := config.Load(smtpConfig); err != nil {
+	if err := config.Load(smtpConfig, env.Lookup); err != nil {
 		return c, fmt.Errorf("Unable to load SMTP configuration. %v", err)
 	}
 
 	templateConfig := &TemplateConfig{}
-	if err := config.Load(templateConfig); err != nil {
+	if err := config.Load(templateConfig, env.Lookup); err != nil {
 		return c, fmt.Errorf("Unable to load Template configuration. %v", err)
 	}
 
 	clientConfig := &ClientConfig{}
-	if err := config.Load(clientConfig); err != nil {
+	if err := config.Load(clientConfig, env.Lookup); err != nil {
 		return c, fmt.Errorf("Unable to load invite client configuration. %v", err)
 	}
 
@@ -91,7 +93,6 @@ func (userinvite *UserInvite) LoadConfig() (*Config, error) {
 
 // ValidateConfig will validate that enough configuration is available
 func (userinvite *UserInvite) ValidateConfig(c *Config) error {
-	//return fmt.Errorf("Not configured")
 
 	if len(c.TemplateConfig.HTMLTemplate) == 0 {
 		c.TemplateConfig.HTMLTemplate = defaultHTMLTemplate
@@ -102,7 +103,20 @@ func (userinvite *UserInvite) ValidateConfig(c *Config) error {
 	}
 
 	err := userinvite.loadTemplates(c)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Check SMTP Configuration
+	if len(c.SMTP.Host) == 0 {
+		return errors.New("SMTP Server Host is not configured")
+	}
+
+	if len(c.SMTP.FromAddress) == 0 {
+		return errors.New("SMTP From Address is not configured")
+	}
+
+	return nil
 }
 
 func (userinvite *UserInvite) loadTemplates(c *Config) error {
@@ -115,6 +129,7 @@ func (userinvite *UserInvite) loadTemplates(c *Config) error {
 	}
 
 	textFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.PlainTextTemplate)
+	log.Debugf("Loading plain text email template from: %s", textFile)
 	textTmpl, err := text.ParseFiles(textFile)
 	if err != nil {
 		log.Warn("User Invite failed to load Plain Text template")
@@ -123,6 +138,7 @@ func (userinvite *UserInvite) loadTemplates(c *Config) error {
 	c.PlainTextTemplate = textTmpl
 
 	htmlFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.HTMLTemplate)
+	log.Debugf("Loading HTML email template from: %s", htmlFile)
 	htmlTmpl, err := html.ParseFiles(htmlFile)
 	if err == nil {
 		c.HTMLTemplate = htmlTmpl

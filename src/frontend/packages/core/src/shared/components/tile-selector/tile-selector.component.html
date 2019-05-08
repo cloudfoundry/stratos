@@ -1,0 +1,28 @@
+<div class="tile-selectors">
+  <ng-container *ngTemplateOutlet="tile; context:{ options: options, selected: selected }"></ng-container>
+  <ng-container *ngIf="showingMore && hiddenOptions.length > 0">
+    <ng-container *ngTemplateOutlet="tile; context:{ options: hiddenOptions, selected: selected }"></ng-container>
+  </ng-container>
+  <ng-container *ngIf="hiddenOptions.length > 0">
+    <div (click)="toggleMore()" class="tile-selector__more">
+      {{ showingMore ? 'Show less' : 'Show more' }}
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #tile let-options="options" let-selected="selected">
+  <div class="tile-selector"
+    [ngClass]="{'tile-selector__selected': selected === tile, 'tile-selector__active': !selected}"
+    (click)="selectionChange(tile)" *ngFor="let tile of options">
+    <div class="tile-selector__header">
+      <mat-icon *ngIf="tile.graphic.matIcon; else imgIcon" class="tile-selector__icon"
+        [fontSet]="tile.graphic.matIconFont"> {{ tile.graphic.matIcon }}</mat-icon>
+      <ng-template #imgIcon>
+        <img src="{{tile.graphic.location}}" />
+      </ng-template>
+    </div>
+    <div class="tile-selector__content">
+      <h3>{{ tile.label }}</h3>
+    </div>
+  </div>
+</ng-template>

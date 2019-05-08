@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 const customRoutes: Routes = [{
   path: 'example',
-  loadChildren: 'app/custom/nav-extension/nav-extension.module#NavExtensionModule',
+  loadChildren: './nav-extension/nav-extension.module#NavExtensionModule',
   data: {
     stratosNavigation: {
       text: 'Example',

@@ -31,8 +31,16 @@ mkdir -p "${E2E_REPORT_FOLDER}/logs"
 
 echo "Running Stratos in Docker Compose"
 pushd deploy
-#docker-compose -f docker-compose.development.yml up -d | tee "${E2E_REPORT_FOLDER}/logs/build.log"
-docker-compose -f docker-compose.development.yml up -d
+
+# Patch the docker compose file to run Stratos on a different port
+rm -f docker-compose.testing.yml
+rm -f common.testing.yml
+rm -f *.bak
+sed -e 's/80:80/2080:80/g' common.yml > common.testing.yml
+sed -i.bak -e 's/443:443/2443:443/g' common.testing.yml
+sed -e 's/file: common.yml/file: common.testing.yml/g' docker-compose.development.yml > docker-compose.testing.yml
+
+docker-compose -f docker-compose.testing.yml up -d
 popd
 
 echo "Docker Containers"
@@ -42,16 +50,12 @@ docker ps
 echo "Waiting 30 seconds for UAA to start up ..."
 sleep 30
 
-# Get the E2E config
-rm -f secrets.yaml
-curl -k ${TEST_CONFIG_URL} --output secrets.yaml
-
 # Need node modules to run the tests
 rm -rf node_modules
 npm install
 
 # Run the E2E tests
-"$DIRPATH/runandrecord.sh" https://127.0.0.1
+"$DIRPATH/runandrecord.sh" https://127.0.0.1:2443
 RET=$?
 
 set +e
@@ -60,13 +64,13 @@ pushd deploy
 
 # Store logs if there was a test failure
 if [ $RET -ne 0 ]; then
-  docker-compose -f docker-compose.development.yml logs proxy > "${E2E_REPORT_FOLDER}/logs/jetstream.log"
-  docker-compose -f docker-compose.development.yml logs db-migrator > "${E2E_REPORT_FOLDER}/logs/db-migrator.log"
-  docker-compose -f docker-compose.development.yml logs nginx > "${E2E_REPORT_FOLDER}/logs/nginx.log"
-  docker-compose -f docker-compose.development.yml logs mariadb > "${E2E_REPORT_FOLDER}/logs/mariadb.log"
+  docker-compose -f docker-compose.testing.yml logs proxy > "${E2E_REPORT_FOLDER}/logs/jetstream.log"
+  docker-compose -f docker-compose.testing.yml logs db-migrator > "${E2E_REPORT_FOLDER}/logs/db-migrator.log"
+  docker-compose -f docker-compose.testing.yml logs nginx > "${E2E_REPORT_FOLDER}/logs/nginx.log"
+  docker-compose -f docker-compose.testing.yml logs mariadb > "${E2E_REPORT_FOLDER}/logs/mariadb.log"
 fi
 
-docker-compose -f docker-compose.development.yml down
+docker-compose -f docker-compose.testing.yml down
 popd
 
 echo "All done"

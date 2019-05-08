@@ -81,13 +81,34 @@ jobs:
       params:
         file: image-tag/*.tar
         acl: public-read
-- name: build-images
+- name: check-github
   plan:
   - get: stratos
     passed: [generate-tag-files]
     trigger: true
   - get: image-tag
-    passed: [generate-tag-files]
+    passed: [generate-tag-files] 
+    params:
+     unpack: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos/deploy/ci/tasks/dev-releases/check-gh-release.yml
+      params:
+        GITHUB_TOKEN: ((github-access-token))
+        GITHUB_USER: ((helm-repo-github-organization))
+        GITHUB_REPO: ((helm-repo-github-repository))
+        GIT_USER: ((concourse-user))
+        GIT_EMAIL: ((concourse-email))
+        GIT_PRIVATE_KEY: ((github-private-key))
+- name: build-images
+  plan:
+  - get: stratos
+    passed: [check-github]
+    trigger: true
+  - get: image-tag
+    passed: [check-github]
     params:
       unpack: true
   - aggregate:

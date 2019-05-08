@@ -39,7 +39,7 @@ jobs:
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
-    - eval "$(gimme 1.9)"
+    - eval "$(gimme 1.12.4)"
     - go get -u golang.org/x/lint/golint
     script:
     - golint src/jetstream/...
@@ -49,14 +49,13 @@ jobs:
     env:
     - CI_ENV=true
     script:
-    - npm test
+    - npm run test
     - npm run codecov
   - name: Backend Unit Tests
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
-    - eval "$(gimme 1.9)"
-    - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+    - eval "$(gimme 1.12.4)"
     script:
     - npm run test-backend
   - name: Helm Chart Unit Tests

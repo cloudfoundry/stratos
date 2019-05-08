@@ -4,7 +4,7 @@ applications:
     disk_quota: 1024M
     host: console
     timeout: 180
-    buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v2
+    buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v2.4
     health-check-type: port
 #    env:
 # Override CF API endpoint URL inferred from VCAP_APPLICATION env 
@@ -14,3 +14,9 @@ applications:
 # Turn on backend debugging
 #       LOG_LEVEL: debug
 
+# User provided services can also be used to set environment properties:
+#   env:
+#     CF_UPS_NAME: stratos-properties
+#   services:
+#   - stratos-properties
+# cf create-user-provided-service stratos-properties -p '{"CF_CLIENT":"stratos","CF_CLIENT_SECRET":"xxxx"}'

@@ -110,12 +110,12 @@ Run `npm run lint` to execute tslint lint checking.
 
 ### Unit tests
 
-Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in ./coverage
+Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in `./coverage`
+
+To execute an individual package run `ng test <package name>`. To execute the tests again automatically on code changes add `--watch=true`
 
 > **NOTE** npm test will search for chrome on your path. If this is not so please set an env var CHROME_BIN pointing to your executable
 (chromium is fine too).
-
-Run `npm test-debug` to execute unit tests in a mode that will re-run whenever there's a code change
 
 ### End-to-end tests
 
@@ -127,7 +127,7 @@ More information on the E2E tests and pre-requisites for running them is availab
 
 ### Code Climate
 
-We use [Code Climate](https://codeclimate.com/github/SUSE/stratos) to check for general code quality issues. This executes against Pull
+We use [Code Climate](https://codeclimate.com/github/cloudfoundry-incubator/stratos) to check for general code quality issues. This executes against Pull
 Requests on creation/push.
 
 #### Running Code Climate locally
@@ -175,25 +175,19 @@ For each new pull request and any subsequent pushes to it the following actions 
 
 Jetstream is the back-end for Stratos. It is written in Go.
 
-We use [dep](https://golang.github.io/dep/) for dependency management.
+We use Go Modules for dependency management.
 
 ### Pre-requisites
 
 You will need the following installed/available:
 
-* go 1.9 or later.
-* dep
+* go 1.12 or later.
 * UAA instance - you will need a UAA running for authentication
 
 ### Building the back-end
 
 
 #### Build
-You will need to ensure that Stratos is cloned into a folder within your GOPATH that matches the Stratos package structure, i.e.
-
-```
-$GOPATH/src/github.com/cloudfoundry-incubator/stratos
-```
 
 From the `src/jetstream` folder, build the Stratos back-end with:
 

@@ -111,9 +111,9 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		log.Infof("Auto-registering cloud foundry endpoint %s as \"%s\"", cfAPI, autoRegName)
 
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, false, cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, false, "", cfEndpointSpec.Info)
 		if err != nil {
-			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
+			log.Errorf("Could not auto-register Cloud Foundry endpoint: %v", err)
 			return nil
 		}
 	} else {

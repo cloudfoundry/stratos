@@ -13,9 +13,9 @@
   var replace = require('replace-in-file');
   var execSync = require('child_process').execSync;
 
-  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/misc/custom/custom.yaml');
-  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/misc/custom/index.html');
-  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/index.html');
+  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/custom.yaml');
+  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/index.html');
+  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/packages/core/src/index.html');
   const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
   const GIT_FOLDER = path.resolve(__dirname, '../.git');
   const GIT_METADATA = path.resolve(__dirname, '../.stratos-git-metadata.json');
@@ -26,6 +26,7 @@
     doShowVersions()
     doCustomize(false);
     doGenerateIndexHtml(true);
+    console.log('Finished applying customizations')
     cb();
   });
 
@@ -33,6 +34,7 @@
   gulp.task('customize-default', function (cb) {
     doCustomize(true);
     doGenerateIndexHtml(false);
+    console.log('Finished applying default customizations')
     cb();
   });
 
@@ -40,6 +42,7 @@
   gulp.task('customize-reset', function (cb) {
     doCustomize(true, true);
     doGenerateIndexHtml(false);
+    console.log('Finished resetting customizations')
     cb();
   });
 
@@ -74,7 +77,7 @@
       process.exit(1);
     }
 
-    const baseFolder = path.resolve(__dirname, '../src/frontend');
+    const baseFolder = path.resolve(__dirname, '../src/frontend/packages/core');
     const customBaseFolder = path.resolve(__dirname, '../custom-src/frontend');
     doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
     doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
@@ -88,7 +91,8 @@
   };
 
   function doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
-    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
+    // This is where we find the default files, if there are no customizations
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom');
     // Symlink custom files
     Object.keys(customConfig.files).forEach(file => {
       const dest = customConfig.files[file];
@@ -107,10 +111,11 @@
       try {
         const existingLink = fs.readlinkSync(destFile);
         fs.unlinkSync(destFile);
-      } catch (e) {}
+      } catch (e) { }
 
       if (!reset) {
         fs.symlinkSync(srcFile, destFile);
+        console.log('  + Linking file   : ' + srcFile + ' ==> ' + destFile);
       }
     })
 
@@ -119,23 +124,30 @@
   function doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
     // Symlink custom app folders if they are present
     customConfig.folders.forEach(folder => {
-      var destFolder = path.join(baseFolder, folder);
-      var srcFolder = path.join(customBaseFolder, folder);
+      var parts = folder.split(':')
+      var src = parts[0];
+      var dest = src;
+      if (parts.length > 1) {
+        dest = parts[1];
+      }
+      var destFolder = path.join(baseFolder, dest);
+      var srcFolder = path.join(customBaseFolder, src);
       if (fs.existsSync(destFolder)) {
         fs.unlinkSync(destFolder);
       }
       if (!reset && fs.existsSync(srcFolder)) {
         fs.symlinkSync(srcFolder, destFolder);
+        console.log('  + Linking folder : ' + srcFolder + ' ==> ' + destFolder);
       }
     });
   }
 
   // Copy the correct custom module to either import the supplied custom module or provide an empty module
   function doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
-    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
-    const destFile = path.join(baseFolder, 'app/custom-import.module.ts');
-    const customModuleFile = path.join(baseFolder, 'app/custom/custom.module.ts');
-    const customRoutingModuleFile = path.join(baseFolder, 'app/custom/custom-routing.module.ts');
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom');
+    const destFile = path.join(baseFolder, 'src/custom-import.module.ts');
+    const customModuleFile = path.join(baseFolder, 'src/custom/custom.module.ts');
+    const customRoutingModuleFile = path.join(baseFolder, 'src/custom/custom-routing.module.ts');
 
     // Delete the existing file if it exists
     if (fs.existsSync(destFile)) {
@@ -148,9 +160,15 @@
         srcFile = 'custom-src.module.ts_';
         if (fs.existsSync(customRoutingModuleFile)) {
           srcFile = 'custom-src-routing.module.ts_';
+          console.log('  + Found custom module with routing');
+        } else {
+          console.log('  + Found custom module without routing');
         }
+        } else {
+        console.log('  + No custom module found - linking empty custom module');
       }
       fs.copySync(path.join(defaultSrcFolder, srcFile), destFile);
+      console.log('  + Copying file   : ' + path.join(defaultSrcFolder, srcFile) + ' ==> ' + destFile);
     }
   }
 
@@ -198,6 +216,8 @@
 
   // Generate index.html from template
   function doGenerateIndexHtml(customize) {
+
+    console.log('  + Generating index.html');
     // Copy the default
     fs.copySync(INDEX_TEMPLATE, INDEX_HTML);
 
@@ -213,6 +233,10 @@
       }
     }
 
+    if (metadata.title) {
+      console.log('  + Overridding title to: "' + metadata.title + '"');
+    }
+
     // Patch different page title if there is one
     var title = metadata.title || 'Stratos';
     replace.sync({ files: INDEX_HTML, from: /@@TITLE@@/g, to: title });
@@ -226,6 +250,7 @@
 
     if (fs.existsSync(GIT_METADATA)) {
       gitMetadata = JSON.parse(fs.readFileSync(GIT_METADATA));
+      console.log("  + Project Metadata: " + JSON.stringify(gitMetadata));
     }
 
     // Git Information

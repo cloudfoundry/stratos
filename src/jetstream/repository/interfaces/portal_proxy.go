@@ -1,10 +1,12 @@
 package interfaces
 
 import (
+	"database/sql"
 	"net/http"
 	"net/url"
 
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 )
 
@@ -13,7 +15,7 @@ type PortalProxy interface {
 	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
 
-	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, fetchInfo InfoFunc) (CNSIRecord, error)
+	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, fetchInfo InfoFunc) (CNSIRecord, error)
 
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
@@ -41,7 +43,10 @@ type PortalProxy interface {
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
+	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
+	ListEndpoints() ([]*CNSIRecord, error)
+	UpdateEndointMetadata(guid string, metadata string) error
 
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)
@@ -58,6 +63,8 @@ type PortalProxy interface {
 	DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string, headers http.Header, body []byte) (*CNSIRequest, error)
 	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 
+	// Database Connection
+	GetDatabaseConnection() *sql.DB
 	AddAuthProvider(name string, provider AuthProvider)
 	GetAuthProvider(name string) AuthProvider
 	DoAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error)
@@ -69,4 +76,8 @@ type PortalProxy interface {
 
 	AddLoginHook(priority int, function LoginHookFunc) error
 	ExecuteLoginHooks(c echo.Context) error
+	
+	// Plugins
+	GetPlugin(name string) interface{}
+	
 }

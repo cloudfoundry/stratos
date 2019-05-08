@@ -26,8 +26,9 @@ const UAAClientAuthType = "uaa-client"
 
 // Init creates a new UserInvite
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+
 	init := &UserInvite{portalProxy: portalProxy}
-	c, err := init.LoadConfig()
+	c, err := init.LoadConfig(*portalProxy.Env())
 	if err != nil {
 		return init, err
 	}

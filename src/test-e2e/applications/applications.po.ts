@@ -3,6 +3,7 @@ import { by, element } from 'protractor';
 import { DeployApplication } from '../application/po/deploy-app.po';
 import { CFPage } from '../po/cf-page.po';
 import { ListComponent } from '../po/list.po';
+import { CreateApplication } from '../application/po/create-application.po';
 
 export class ApplicationsPage extends CFPage {
 
@@ -18,15 +19,8 @@ export class ApplicationsPage extends CFPage {
     super('/applications');
   }
 
-  clickCreateApp(): any {
+  clickCreateApp() {
     this.helpers.waitForElementAndClick(element(by.id('appwall-create-application')));
+    return new CreateApplication();
   }
-
-  clickDeployApp(): DeployApplication {
-    this.helpers.waitForElementAndClick(element(by.id('appwall-deploy-application')));
-    const deployApp = new DeployApplication();
-    deployApp.waitForPage();
-    return deployApp;
-  }
-
 }

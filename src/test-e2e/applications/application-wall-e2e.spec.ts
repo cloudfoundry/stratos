@@ -1,12 +1,13 @@
 import { browser, promise } from 'protractor';
 
-import { IOrganization, ISpace } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { IOrganization, ISpace } from '../../frontend/packages/core/src/core/cf-api.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationE2eHelper } from '../application/application-e2e-helpers';
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { FormComponent } from '../po/form.po';
 import { ListComponent } from '../po/list.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
@@ -351,6 +352,9 @@ describe('Application Wall Tests -', () => {
     }
 
     describe('CF/Org/Space Filters', () => {
+
+      const timeout = 60000;
+      extendE2ETestTime(timeout);
 
       let filters: FormComponent;
       beforeAll(() => {
