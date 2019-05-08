@@ -68,7 +68,7 @@ jobs:
     - "./deploy/ci/travis/job-e2e-script.sh longSuite"
   - name: E2E Tests - All Other Suite
     before_script:
-    - "./deploy/ci/travis/job-e2e-before_script.sh"
+    - "./deploy/ci/travis/job-e2e-before_script.sh true"
     script:
     - "./deploy/ci/travis/job-e2e-script.sh fullMinusLongSuite"
 notifications:

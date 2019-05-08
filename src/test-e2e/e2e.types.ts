@@ -29,7 +29,6 @@ export interface E2EServicesConfig {
 }
 
 export interface E2ECfInviteConfig {
-  run: boolean;
   clientId: string;
   clientSecret: string;
 }

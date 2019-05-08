@@ -21,11 +21,6 @@ export function setupInviteUserTests(
   let defaultCf: E2EConfigCloudFoundry = e2e.secrets.getDefaultCFEndpoint();
   let cfHelper: CFHelpers;
 
-  if (!defaultCf.invite || !defaultCf.invite.run) {
-    e2e.log('Skipping Org Invite User');
-    return;
-  }
-
   beforeAll(() => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
     const setup = e2e.setup(ConsoleUserType.admin)
