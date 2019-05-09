@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import * as moment from 'moment';
 
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
@@ -15,6 +16,7 @@ import {
   AppAutoscalerMetricChartCardComponent,
 } from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
 import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
+
 
 @Injectable()
 export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource<AppScalingTrigger>> {
@@ -40,7 +42,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   showMetricsRange = true;
   pollInterval = 60000;
   selectedTimeValue = '30:minute';
-  times: ITimeRange[] = [
+  customTimeWindows: ITimeRange[] = [
     {
       value: '30:minute',
       label: 'The past 30 minutes',
@@ -61,6 +63,19 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
       queryType: MetricQueryType.RANGE_QUERY
     }
   ];
+
+  private twoHours = 1000 * 60 * 60 * 2;
+  customTimeValidation = (start: moment.Moment, end: moment.Moment) => {
+    if (!end || !start) {
+      return null;
+    }
+    if (!start.isBefore(end)) {
+      return 'Start date must be before end date.';
+    }
+    if (end.diff(start) > this.twoHours) {
+      return 'Time window must be two hours or less';
+    }
+  }
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {
     super();

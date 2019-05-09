@@ -84,7 +84,7 @@ export class CfAppAutoscalerEventsConfigService
   showMetricsRange = true;
   pollInterval = 120000;
   selectedTimeValue = '1:week';
-  times: ITimeRange[] = [
+  customTimeWindows: ITimeRange[] = [
     {
       value: '1:day',
       label: 'The past day',

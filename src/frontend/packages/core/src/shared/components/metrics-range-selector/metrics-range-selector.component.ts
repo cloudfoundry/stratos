@@ -1,13 +1,14 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 
+import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { entityFactory, metricSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { MetricQueryType, ITimeRange } from '../../services/metrics-range-selector.types';
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { ITimeRange, MetricQueryType } from '../../services/metrics-range-selector.types';
 
 @Component({
   selector: 'app-metrics-range-selector',
@@ -82,6 +83,9 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
       this.rangeSelectorManager.pollInterval = interval;
     }
   }
+
+  @Input()
+  public validate: (start: moment.Moment, end: moment.Moment) => string;
 
   set showOverlay(show: boolean) {
     this.showOverlayValue = show;
