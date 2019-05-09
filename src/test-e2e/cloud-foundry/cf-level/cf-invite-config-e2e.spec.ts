@@ -2,6 +2,7 @@ import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
 import { CFPage } from '../../po/cf-page.po';
+import { ConfirmDialogComponent } from '../../po/confirm-dialog';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 import { ConfigInviteClientDialog } from './config-invite-client-dialog.po';
@@ -12,11 +13,6 @@ import { ConfigInviteClientDialog } from './config-invite-client-dialog.po';
  */
 describe('CF - Invite User Configuration - ', () => {
   let defaultCf: E2EConfigCloudFoundry = e2e.secrets.getDefaultCFEndpoint();
-
-  if (!defaultCf.invite || !defaultCf.invite.run) {
-    e2e.log('Skipping Invite User Configuration Tests');
-    return;
-  }
 
   let cfPage: CfTopLevelPage;
 
@@ -30,7 +26,7 @@ describe('CF - Invite User Configuration - ', () => {
     // There is only one CF endpoint registered (since that is what we setup)
     const page = new CFPage();
     page.sideNav.goto(SideNavMenuItem.CloudFoundry);
-    CfTopLevelPage.detect().then(p => {
+    return CfTopLevelPage.detect().then(p => {
       cfPage = p;
       cfPage.waitForPageOrChildPage();
       cfPage.loadingIndicator.waitUntilNotShown();
@@ -38,6 +34,14 @@ describe('CF - Invite User Configuration - ', () => {
   });
 
   describe('Configure - ', () => {
+    beforeAll(() => cfPage.isUserInviteConfigured().then(configured => {
+      if (configured) {
+        cfPage.clickInviteDisable();
+        return ConfirmDialogComponent.expectDialogAndConfirm('Disable', 'Disable User Invitations');
+      }
+    })
+    );
+
     it('Initial State', () => {
       expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
       expect(cfPage.canConfigureUserInvite()).toBeTruthy();
@@ -79,6 +83,7 @@ describe('CF - Invite User Configuration - ', () => {
 
     it('UnConfigure', () => {
       cfPage.clickInviteDisable();
+      ConfirmDialogComponent.expectDialogAndConfirm('Disable', 'Disable User Invitations');
     });
 
     it('End State', () => {

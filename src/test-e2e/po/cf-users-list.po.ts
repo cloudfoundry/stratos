@@ -1,4 +1,4 @@
-import { by, ElementFinder, promise } from 'protractor';
+import { browser, by, ElementFinder, promise } from 'protractor';
 
 import { ChipComponent } from './chip.po';
 import { ChipsComponent } from './chips.po';
@@ -82,7 +82,7 @@ export class CFUsersListComponent extends ListComponent {
   }
 
   getInviteUserButton(): ElementFinder {
-    return this.header.getComponent().element(by.css('.list-component__header__right-globals > button:first-of-type'));
+    return browser.element(by.css('.invite-user-details__button'));
   }
 
   getInviteUserButtonComponent(): Component {

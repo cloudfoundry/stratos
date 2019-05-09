@@ -1,7 +1,6 @@
 import { e2e, E2ESetup } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
-import { CFPage } from '../../po/cf-page.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 
@@ -13,7 +12,7 @@ describe('CF - Top Level - ', () => {
 
   function navToCfPage() {
     // There is only one CF endpoint registered (since that is what we setup)
-    const page = new CFPage();
+    const page = new CfTopLevelPage();
     page.sideNav.goto(SideNavMenuItem.CloudFoundry);
     CfTopLevelPage.detect().then(p => {
       cfPage = p;
