@@ -52,6 +52,7 @@ export class CloudFoundryModule {
     this.registerCfSpaceMapper(endpointDefinition);
     this.registerCfOrgMapper(endpointDefinition);
   }
+
   private registerCfEndpointMapper(endpointDefinition: IStratosEndpointDefinition) {
     const cfEntity = new StratosCatalogueEndpointEntity(
       endpointDefinition,

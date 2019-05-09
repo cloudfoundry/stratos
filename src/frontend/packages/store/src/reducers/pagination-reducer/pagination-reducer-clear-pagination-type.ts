@@ -1,4 +1,3 @@
-import { getEndpointSchemeKeys } from '../../../../core/src/core/extension/extension-service';
 import { EndpointAction } from '../../actions/endpoint.actions';
 import {
   applicationSchemaKey,
@@ -48,13 +47,14 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
   }
 
   // Check extensions
-  const entityKeys = getEndpointSchemeKeys(action.endpointType);
-  if (entityKeys.length > 0) {
-    return paginationClearAllTypes(
-      state,
-      entityKeys,
-      defaultPaginationEntityState
-    );
-  }
+  // TODO Drive this from the catalogue
+  // const entityKeys = getEndpointSchemeKeys(action.endpointType);
+  // if (entityKeys.length > 0) {
+  //   return paginationClearAllTypes(
+  //     state,
+  //     entityKeys,
+  //     defaultPaginationEntityState
+  //   );
+  // }
   return state;
 }

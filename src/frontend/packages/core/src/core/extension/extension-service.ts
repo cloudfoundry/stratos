@@ -4,15 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { AppState } from '../../../../store/src/app-state';
-import { EndpointAuthTypeConfig, EndpointTypeExtensionConfig, ExtensionEntitySchema } from './extension-types';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
-
-export interface EndpointTypeExtension {
-  type: string;
-  label: string;
-  authTypes: string[];
-}
 
 
 // The different types of Tab
@@ -49,19 +42,6 @@ export interface StratosActionMetadata {
   visible$?: Observable<boolean>;
 }
 
-export interface StratosEndpointMetadata {
-  type: string;
-  label: string;
-  authTypes: string[];
-  icon: string;
-  iconFont: string;
-}
-
-export interface StratosEndpointExtensionConfig {
-  endpointTypes?: EndpointTypeExtensionConfig[];
-  authTypes?: EndpointAuthTypeConfig[];
-}
-
 export type StratosRouteType = StratosTabType | StratosActionType;
 
 // Stores the extension metadata as defined by the decorators
@@ -69,10 +49,7 @@ const extensionMetadata = {
   loginComponent: null,
   extensionRoutes: {},
   tabs: {},
-  actions: {},
-  endpointTypes: [],
-  authTypes: [],
-  entities: [] as ExtensionEntitySchema[]
+  actions: {}
 };
 
 /**
@@ -135,10 +112,6 @@ export class ExtensionService {
     this.applyRoutesFromExtensions(this.router);
   }
 
-  public getEndpointExtensionConfig(): StratosEndpointExtensionConfig {
-    return this.metadata as StratosEndpointExtensionConfig;
-  }
-
   /**
    * Apply route configuration
    */
@@ -195,13 +168,4 @@ export function getTabsFromExtensions(tabType: StratosTabType) {
 
 export function getActionsFromExtensions(actionType: StratosActionType): StratosActionMetadata[] {
   return extensionMetadata.actions[actionType] || [];
-}
-
-export function getEndpointSchemeKeys(type: string): string[] {
-  const ep = extensionMetadata.endpointTypes.find(e => e.value === type);
-  return ep ? ep.entitySchemaKeys || [] : [];
-}
-
-export function getEntitiesFromExtensions() {
-  return extensionMetadata.entities;
 }

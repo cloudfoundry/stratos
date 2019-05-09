@@ -42,23 +42,23 @@ interface BaseEndpointTypeConfig {
  * Configuration for an endpoint type used to defined endpoints via extensions and at runtime. All EndpointTypeExtensionConfig and their
  * subtypes will be in a flat list of this type
  */
-export interface EndpointTypeConfig extends BaseEndpointTypeConfig {
-  type: EndpointType;
-}
+// export interface EndpointTypeConfig extends BaseEndpointTypeConfig {
+//   type: EndpointType;
+// }
 
-/**
- * Configuration for an endpoint sub type extension
- */
-interface EndpointSubTypeExtensionConfig extends BaseEndpointTypeConfig {
-  subType: string;
-}
+// /**
+//  * Configuration for an endpoint sub type extension
+//  */
+// interface EndpointSubTypeExtensionConfig extends BaseEndpointTypeConfig {
+//   subType: string;
+// }
 
 /**
  * Configuration for an endpoint type extension
  */
-export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
-  subTypes?: EndpointSubTypeExtensionConfig[];
-}
+// export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
+//   subTypes?: EndpointSubTypeExtensionConfig[];
+// }
 export interface EndpointAuthTypeConfig {
   name: string;
   value: string;

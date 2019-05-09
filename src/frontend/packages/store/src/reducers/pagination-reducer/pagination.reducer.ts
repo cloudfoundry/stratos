@@ -93,6 +93,7 @@ export function createPaginationReducer(types: [string, string, string]) {
 
 function paginationReducer(updatePagination) {
   return (state, action) => {
+    console.log(state)
     state = state || defaultPaginationState;
     return paginate(action, state, updatePagination);
   };

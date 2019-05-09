@@ -8,19 +8,18 @@ import { registerAPIRequestEntity } from '../../store/src/reducers/api-request-r
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { defaultCfEntitiesState } from '../../store/src/types/entity.types';
 import { createUserRoleInOrg } from '../../store/src/types/user.types';
-import { getEntitiesFromExtensions } from '../src/core/extension/extension-service';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
 /* tslint:disable */
 export function getInitialTestStoreState(): AppState {
-  const entities = getEntitiesFromExtensions();
+  // const entities = getEntitiesFromExtensions();
   const state = getDefaultInitialTestStoreState();
-  entities.forEach(entity => {
-    state.pagination[entity.entityKey] = {};
-    state.request[entity.entityKey] = {};
-    state.requestData[entity.entityKey] = {};
-  });
+  // entities.forEach(entity => {
+  //   state.pagination[entity.entityKey] = {};
+  //   state.request[entity.entityKey] = {};
+  //   state.requestData[entity.entityKey] = {};
+  // });
 
   return state;
 }

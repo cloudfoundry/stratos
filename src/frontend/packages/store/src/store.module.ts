@@ -30,11 +30,9 @@ import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
-import { AppStoreExtensionsModule } from './store.extensions.module';
 
 @NgModule({
   imports: [
-    AppStoreExtensionsModule,
     AppReducersModule,
     HttpModule,
     HttpClientModule,

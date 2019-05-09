@@ -1,13 +1,10 @@
 import { Injectable } from '@angular/core';
-import { UserFavorite, UserFavoriteEndpoint } from '../../../../store/src/types/user-favorites.types';
 import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
-  IStratosEntityDefinition,
   IEntityMetadata
 } from './entity-catalogue.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 
 @Injectable({
   providedIn: 'root'
@@ -91,7 +88,11 @@ export class EntityCatalogueService {
   }
 
   public getAllEntitiesForEndpointType(endpointType: string) {
-    return Array.from(this.entities.values()).filter(entities => entities.entity.endpoint.type === endpointType)
+    return this.getAllEntitiesTypes().filter(entities => entities.entity.endpoint.type === endpointType);
+  }
+
+  public getAllEntitiesTypes() {
+    return Array.from(this.entities.values());
   }
 
   public getAllBaseEndpointTypes() {
@@ -104,11 +105,6 @@ export class EntityCatalogueService {
       allEndpoints.push(baseEndpoint);
       if (baseEndpoint.entity.subTypes) {
         baseEndpoint.entity.subTypes.forEach(subType => {
-          // // Remove schema
-          // const {
-          //   schema,
-          //   ...endpointColumns
-          // } = baseEndpoint.entity;
           allEndpoints.push(new StratosCatalogueEndpointEntity({
             ...baseEndpoint.entity,
             ...subType,

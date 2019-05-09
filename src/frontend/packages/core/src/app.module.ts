@@ -41,6 +41,7 @@ import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
 import { StratosCatalogueEndpointEntity } from './core/entity-catalogue/entity-catalogue.types';
+import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 
 
 // Create action for router navigation. See
@@ -82,10 +83,12 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
+    CloudFoundryModule,
+    AppStoreExtensionsModule,
+    AppStoreModule,
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
-    AppStoreModule,
     SharedModule,
     RouteModule,
     ApplicationsModule,
@@ -98,7 +101,6 @@ export class CustomRouterStateSerializer
     AboutModule,
     CustomImportModule,
     XSRFModule,
-    CloudFoundryModule
   ],
   providers: [
     TabNavService,
