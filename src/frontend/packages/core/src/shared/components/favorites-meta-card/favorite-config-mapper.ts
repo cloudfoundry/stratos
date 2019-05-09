@@ -1,11 +1,20 @@
 import { Observable } from 'rxjs';
 
 import { IRequestAction } from '../../../../../store/src/types/request.types';
-import { IFavoriteMetadata, IFavoriteTypeInfo, UserFavorite, UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
+import {
+  IFavoriteMetadata,
+  IFavoriteTypeInfo,
+  UserFavorite,
+  UserFavoriteEndpoint
+} from '../../../../../store/src/types/user-favorites.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { Injectable } from '@angular/core';
 import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata, StratosBaseCatalogueEntity, IStratosEntityDefinition } from '../../../core/entity-catalogue/entity-catalogue.types';
+import {
+  IEntityMetadata,
+  StratosBaseCatalogueEntity,
+  IStratosEntityDefinition
+} from '../../../core/entity-catalogue/entity-catalogue.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 

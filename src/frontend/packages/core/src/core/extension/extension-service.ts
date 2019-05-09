@@ -14,12 +14,6 @@ export interface EndpointTypeExtension {
   authTypes: string[];
 }
 
-export interface StratosExtensionConfig {
-  routes?: Route[];
-  endpointTypes?: EndpointTypeExtensionConfig[];
-  authTypes?: EndpointAuthTypeConfig[];
-  entities?: ExtensionEntitySchema[];
-}
 
 // The different types of Tab
 export enum StratosTabType {
@@ -93,23 +87,6 @@ export function StratosTab(props: StratosTabMetadata) {
  */
 export function StratosAction(props: StratosActionMetadata) {
   return target => addExtensionAction(props.type, target, props);
-}
-
-/**
- * Decorator for an Extension module
- */
-export function StratosExtension(config: StratosExtensionConfig) {
-  return target => {
-    if (config.endpointTypes) {
-      extensionMetadata.endpointTypes.push(...config.endpointTypes);
-    }
-    if (config.authTypes) {
-      extensionMetadata.authTypes.push(...config.authTypes);
-    }
-    if (config.entities) {
-      extensionMetadata.entities.push(...config.entities);
-    }
-  };
 }
 
 export function StratosLoginComponent() {

@@ -7,10 +7,6 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity
 } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { StratosExtension } from '../../core/src/core/extension/extension-service';
-import { EndpointTypeExtensionConfig } from '../../core/src/core/extension/extension-types';
-import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { EndpointAuthTypeNames, getFullEndpointApiUrl } from '../../core/src/features/endpoints/endpoint-helpers';
 import {
   applicationSchemaKey,
   endpointSchemaKey,
@@ -19,8 +15,6 @@ import {
   spaceSchemaKey
 } from '../../store/src/helpers/entity-factory';
 import { APIResource } from '../../store/src/types/api.types';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
-import { IEndpointFavMetadata } from '../../store/src/types/user-favorites.types';
 import {
   CfEndpointDetailsComponent
 } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
@@ -29,24 +23,6 @@ import {
 } from './shared/components/components.module';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 
-
-
-export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
-  type: 'cf',
-  label: 'Cloud Foundry',
-  urlValidation: urlValidationExpression,
-  icon: 'cloud_foundry',
-  iconFont: 'stratos-icons',
-  imagePath: '/core/assets/endpoint-icons/cloudfoundry.png',
-  homeLink: (guid) => ['/cloud-foundry', guid],
-  listDetailsComponent: CfEndpointDetailsComponent,
-  order: 0,
-  authTypes: [EndpointAuthTypeNames.CREDS, EndpointAuthTypeNames.SSO]
-}];
-
-@StratosExtension({
-  endpointTypes: cloudFoundryEndpointTypes,
-})
 @NgModule({
   imports: [
     CloudFoundryComponentsModule
@@ -105,24 +81,6 @@ export class CloudFoundryModule {
       }
     );
     this.entityCatalogueService.register(applicationEntity);
-    // favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>(new FavoriteConfig({
-    //   endpointType,
-    //   entityType: applicationSchemaKey
-    // },
-    //   'Application',
-    //   (app: IAppFavMetadata) => {
-    //     return {
-    //       type: applicationSchemaKey,
-    //       routerLink: `/applications/${app.cfGuid}/${app.guid}/summary`,
-    //       name: app.name
-    //     };
-    //   },
-    //   app => ({
-    //     guid: app.metadata.guid,
-    //     cfGuid: app.entity.cfGuid,
-    //     name: app.entity.name,
-    //   })
-    // ));
   }
 
   private registerCfSpaceMapper(endpointDefinition: IStratosEndpointDefinition) {
@@ -147,25 +105,6 @@ export class CloudFoundryModule {
       }
     );
     this.entityCatalogueService.register(spaceEntity);
-    // favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>(new FavoriteConfig({
-    //   endpointType,
-    //   entityType: spaceSchemaKey
-    // },
-    //   'Space',
-    //   (space: ISpaceFavMetadata) => {
-    //     return {
-    //       type: spaceSchemaKey,
-    //       routerLink: `/cloud-foundry/${space.cfGuid}/organizations/${space.orgGuid}/spaces/${space.guid}/summary`,
-    //       name: space.name
-    //     };
-    //   },
-    //   space => ({
-    //     guid: space.metadata.guid,
-    //     orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
-    //     name: space.entity.name,
-    //     cfGuid: space.entity.cfGuid,
-    //   })
-    // ));
   }
   private registerCfOrgMapper(endpointDefinition: IStratosEndpointDefinition) {
     const orgDefinition = {
@@ -189,23 +128,6 @@ export class CloudFoundryModule {
       }
     );
     this.entityCatalogueService.register(orgEntity);
-    // favoritesConfigMapper.registerFavoriteConfig<APIResource<IOrganization>, IOrgFavMetadata>(new FavoriteConfig({
-    //   endpointType,
-    //   entityType: organizationSchemaKey
-    // },
-    //   'Organization',
-    //   (org: IOrgFavMetadata) => ({
-    //     type: organizationSchemaKey,
-    //     routerLink: `/cloud-foundry/${org.cfGuid}/organizations/${org.guid}`,
-    //     name: org.name
-    //   }),
-    //   org => ({
-    //     guid: org.metadata.guid,
-    //     status: this.getOrgStatus(org),
-    //     name: org.entity.name,
-    //     cfGuid: org.entity.cfGuid,
-    //   })
-    // ));
   }
   private getOrgStatus(org: APIResource<IOrganization>) {
     if (!org || !org.entity || !org.entity.status) {

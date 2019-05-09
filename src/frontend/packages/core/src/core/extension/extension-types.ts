@@ -59,7 +59,6 @@ interface EndpointSubTypeExtensionConfig extends BaseEndpointTypeConfig {
 export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
   subTypes?: EndpointSubTypeExtensionConfig[];
 }
-
 export interface EndpointAuthTypeConfig {
   name: string;
   value: string;
