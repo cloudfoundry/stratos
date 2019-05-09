@@ -19,7 +19,10 @@ describe('Manage Users Stepper', () => {
   const spaceName = E2EHelpers.createCustomName(customOrgSpacesLabel);
   const userName = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
 
-  let manageUsersPage: ManagerUsersPage, cfHelper: CFHelpers, cfGuid, userGuid;
+  let manageUsersPage: ManagerUsersPage;
+  let cfHelper: CFHelpers;
+  let cfGuid: string;
+  let userGuid: string;
 
   beforeAll(() => {
     setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true).then(res => {
@@ -43,11 +46,13 @@ describe('Manage Users Stepper', () => {
 
 
   let managerUsersStepper: StepperComponent;
-  let orgManagerCheckbox: CheckboxComponent,
-    orgAuditorCheckbox: CheckboxComponent,
-    orgBillingManagerCheckbox: CheckboxComponent,
-    orgUserCheckbox: CheckboxComponent;
-  let spaceManagerCheckbox: CheckboxComponent, spaceAuditorCheckbox: CheckboxComponent, spaceDeveloperCheckbox: CheckboxComponent;
+  let orgManagerCheckbox: CheckboxComponent;
+  let orgAuditorCheckbox: CheckboxComponent;
+  let orgBillingManagerCheckbox: CheckboxComponent;
+  let orgUserCheckbox: CheckboxComponent;
+  let spaceManagerCheckbox: CheckboxComponent;
+  let spaceAuditorCheckbox: CheckboxComponent;
+  let spaceDeveloperCheckbox: CheckboxComponent;
 
   // Note - Test are sequential, all are required in the stated order
 
@@ -58,7 +63,7 @@ describe('Manage Users Stepper', () => {
 
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
-    expect(usersTable.getTotalResults()).toBe(1);
+    expect(usersTable.table.getCell(0, 1).getText()).toBe(userName);
 
     const selectUser = new CheckboxComponent(usersTable.table.getCell(0, 0));
     selectUser.getComponent().click();
@@ -171,11 +176,7 @@ describe('Manage Users Stepper', () => {
 
     // Wait until all of the spinners have gone
     const spinners = element.all(by.tagName('mat-progress-spinner'));
-    browser.wait(function () {
-      return spinners.isPresent().then(function (present) {
-        return !present;
-      });
-    });
+    browser.wait(() => spinners.isPresent().then(present => !present));
 
     // ... action table state after submit
     expect(confirmStep.actionTable.table.getTableData()).toEqual(createActionTableDate(orgTarget, spaceTarget, 'done'));
