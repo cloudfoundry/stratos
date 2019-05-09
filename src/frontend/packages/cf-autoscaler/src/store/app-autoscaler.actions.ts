@@ -9,7 +9,6 @@ import { AppAutoscalerPolicyLocal } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
-  appAutoscalerInsMetricSchemaKey,
   appAutoscalerPolicySchemaKey,
   appAutoscalerPolicyTriggerSchemaKey,
   appAutoscalerScalingHistorySchemaKey,
@@ -209,20 +208,3 @@ export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricActio
   }
   entityKey = appAutoscalerAppMetricSchemaKey;
 }
-
-// TODO: RC Check - is this being used?
-export class GetAppAutoscalerInsMetricAction extends GetAppAutoscalerMetricAction implements PaginatedAction {
-  constructor(
-    public guid: string,
-    public endpointGuid: string,
-    public metricName: string,
-    public skipFormat: boolean,
-    public trigger,
-    public params
-  ) {
-    super(guid, endpointGuid, metricName, skipFormat, trigger, params);
-    this.url = `apps/${guid}/metric_histories/${metricName}`;
-  }
-  entityKey = appAutoscalerInsMetricSchemaKey;
-}
-

@@ -3,7 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../core/src/core/entity-service';
@@ -76,6 +76,12 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   updatePolicy: StepOnNextFunction = () => {
+    if (this.validateGlobalSetting()) {
+      return observableOf({
+        success: false,
+        message: `Could not update policy: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}`,
+      });
+    }
     this.store.dispatch(
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
@@ -228,6 +234,12 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       }
       return Object.keys(errors).length === 0 ? null : errors;
     };
+  }
+
+  validateGlobalSetting() {
+    return this.currentPolicy.scaling_rules_form.length === 0
+      && this.currentPolicy.schedules.recurring_schedule.length === 0
+      && this.currentPolicy.schedules.specific_date.length === 0;
   }
 }
 

@@ -407,7 +407,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective,
-    RunningInstancesComponent
+    RunningInstancesComponent,
+    CardAppUsageComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,

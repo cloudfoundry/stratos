@@ -75,3 +75,21 @@ app-tile-grid {
   font-size: .9em;
   margin-top: .3em;
 }
+
+.autoscaler-chart-bar-legend {
+  ngx-charts-bar-vertical {
+    ngx-charts-chart {
+      .ngx-charts {
+        display: none;
+      }
+      ngx-charts-legend {
+        .legend-wrap {
+          width: unset;
+          .legend-labels {
+            width: unset;
+          }
+        }
+      }
+    }
+  }
+}

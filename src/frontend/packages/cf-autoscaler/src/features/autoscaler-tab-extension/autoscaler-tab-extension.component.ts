@@ -9,6 +9,7 @@ import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
 import { ApplicationService } from '../../../../core/src/features/applications/application.service';
+import { ApplicationMonitorService } from '../../../../core/src/features/applications/application-monitor.service';
 import { getGuids } from '../../../../core/src/features/applications/application/application-base.component';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
@@ -62,6 +63,9 @@ import {
   selector: 'app-autoscaler-tab-extension',
   templateUrl: './autoscaler-tab-extension.component.html',
   styleUrls: ['./autoscaler-tab-extension.component.scss'],
+  providers: [
+    ApplicationMonitorService
+  ]
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
@@ -86,7 +90,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private detachConfirmOk = 0;
 
   appAutoscalerAppMetrics = {};
-  appAutoscalerInsMetrics = {};
   appAutoscalerAppMetricNames = [];
 
   paramsMetrics: AutoscalerPaginationParams = {

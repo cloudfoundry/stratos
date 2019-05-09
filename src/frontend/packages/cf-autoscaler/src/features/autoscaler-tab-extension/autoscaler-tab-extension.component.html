@@ -71,7 +71,8 @@
         <app-card-autoscaler-default [onUpdate]="updatePolicyPage"></app-card-autoscaler-default>
       </app-tile>
       <app-tile *ngIf="policy.enabled" class="autoscaler-tab-tile-1of2">
-        <mat-card>
+        <app-card-app-usage *ngIf="policy.scaling_rules.length == 0"></app-card-app-usage>
+        <mat-card *ngIf="policy.scaling_rules.length > 0">
           <mat-card-header>
             <mat-card-title>Latest Metrics</mat-card-title>
           </mat-card-header>
