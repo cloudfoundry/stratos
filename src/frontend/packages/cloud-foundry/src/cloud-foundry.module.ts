@@ -92,7 +92,7 @@ export class CloudFoundryModule {
       labelPlural: 'Applications',
       endpoint: endpointDefinition
     };
-    const applicationEntity = new StratosCatalogueEntity<APIResource<IApp>, IAppFavMetadata>(
+    const applicationEntity = new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
       applicationDefinition,
       {
         getMetadata: app => ({
@@ -133,7 +133,7 @@ export class CloudFoundryModule {
       labelPlural: 'Spaces',
       endpoint: endpointDefinition
     };
-    const spaceEntity = new StratosCatalogueEntity<APIResource<ISpace>, ISpaceFavMetadata>(
+    const spaceEntity = new StratosCatalogueEntity<ISpaceFavMetadata, APIResource<ISpace>>(
       spaceDefinition,
       {
         getMetadata: space => ({
@@ -175,7 +175,7 @@ export class CloudFoundryModule {
       labelPlural: 'Organizations',
       endpoint: endpointDefinition
     };
-    const orgEntity = new StratosCatalogueEntity<APIResource<IOrganization>, IOrgFavMetadata>(
+    const orgEntity = new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(
       orgDefinition,
       {
         getMetadata: org => ({

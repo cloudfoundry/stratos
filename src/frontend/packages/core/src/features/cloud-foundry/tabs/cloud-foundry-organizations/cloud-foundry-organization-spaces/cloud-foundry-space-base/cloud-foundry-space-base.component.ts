@@ -102,7 +102,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     favoritesConfigMapper: FavoritesConfigMapper
   ) {
     this.favorite$ = cfSpaceService.space$.pipe(
-      map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey, favoritesConfigMapper))
+      map(space => getFavoriteFromCfEntity<ISpaceFavMetadata>(space.entity, spaceSchemaKey, favoritesConfigMapper))
     );
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)

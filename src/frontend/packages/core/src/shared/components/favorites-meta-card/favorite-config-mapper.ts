@@ -1,11 +1,12 @@
 import { Observable } from 'rxjs';
 
 import { IRequestAction } from '../../../../../store/src/types/request.types';
-import { IFavoriteMetadata, IFavoriteTypeInfo, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, IFavoriteTypeInfo, UserFavorite, UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { Injectable } from '@angular/core';
 import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { IEntityMetadata, StratosBaseCatalogueEntity, IStratosEntityDefinition } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 
 export interface IFavoriteTypes {
@@ -117,8 +118,8 @@ export class FavoritesConfigMapper {
   /**
    * For a given favorite, return the corresponding hydration action
    */
-  public getEntityMetadata<T extends IEntityMetadata = any>(favorite: IFavoriteTypeInfo, entity: any): T {
-    const catalogueEntity = this.entityCatalogueService.getEntity<T>(favorite.entityType, favorite.endpointType);
+  public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
+    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.entityType, favorite.endpointType);
     return catalogueEntity ? catalogueEntity.builder.getMetadata(entity) : null;
   }
 
@@ -130,6 +131,47 @@ export class FavoritesConfigMapper {
       type: catalogueEntity.entity.type,
       prettyName: catalogueEntity.entity.label
     }));
+  }
+
+  private buildFavoriteFromCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    catalogueEntity: StratosBaseCatalogueEntity<T, Y>,
+    entity: any,
+    endpointId: string
+  ) {
+    const isEndpoint = catalogueEntity.isEndpoint;
+    const entityDefinition = catalogueEntity.entity as IStratosEntityDefinition;
+    const endpointType = isEndpoint ? catalogueEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
+    const entityType = isEndpoint ? StratosBaseCatalogueEntity.endpointType : entityDefinition.type;
+    const metadata = catalogueEntity.builder.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogueEntity.builder.getGuid(metadata);
+    return new UserFavorite<T>(
+      endpointId,
+      endpointType,
+      entityType,
+      guid,
+      metadata
+    );
+  }
+
+  public getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    entityType: string,
+    endpointType: string,
+    endpointId: string,
+    entity: Y
+  ) {
+    const catalogueEntity = this.entityCatalogueService.getEntity<T, Y>(entityType, endpointType) as StratosBaseCatalogueEntity<T, Y>;
+    return this.buildFavoriteFromCatalogueEntity<T, Y>(catalogueEntity, entity, endpointId);
+  }
+
+  public getFavoriteEndpointFromEntity(
+    endpoint: EndpointModel
+  ) {
+    return this.getFavoriteFromEntity(
+      StratosBaseCatalogueEntity.endpointType,
+      endpoint.cnsi_type,
+      endpoint.guid,
+      endpoint
+    ) as UserFavoriteEndpoint;
   }
 
 }

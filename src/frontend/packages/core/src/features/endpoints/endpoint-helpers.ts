@@ -111,27 +111,27 @@ const createEndpointKey = (type: EndpointType, subType: string) => type + '-' + 
 // }
 
 // Get the name to display for a given Endpoint type
-export function getNameForEndpointType(type: string, subType: string): string {
-  const epT = getEndpointType(type, subType);
-  return epT ? epT.label : 'Unknown';
-}
+// export function getNameForEndpointType(type: string, subType: string): string {
+//   const epT = getEndpointType(type, subType);
+//   return epT ? epT.label : 'Unknown';
+// }
 
-export function getCanShareTokenForEndpointType(type: string, subType: string): boolean {
-  const epT = getEndpointType(type, subType);
-  return epT ? !!epT.allowTokenSharing : false;
-}
+// export function getCanShareTokenForEndpointType(type: string, subType: string): boolean {
+//   const epT = getEndpointType(type, subType);
+//   return epT ? !!epT.allowTokenSharing : false;
+// }
 
-export function getEndpointTypes() {
-  return endpointTypes;
-}
+// export function getEndpointTypes() {
+//   return endpointTypes;
+// }
 
-export function getEndpointType(type: string, subType: string): EndpointTypeConfig {
-  return getEndpointTypeByKey(createEndpointKey(type, subType)) || getDefaultEndpointTypeConfig(type, subType);
-}
+// export function getEndpointType(type: string, subType: string): EndpointTypeConfig {
+//   return getEndpointTypeByKey(createEndpointKey(type, subType)) || getDefaultEndpointTypeConfig(type, subType);
+// }
 
-function getEndpointTypeByKey(key: string): EndpointTypeConfig {
-  return endpointTypesMap[key];
-}
+// function getEndpointTypeByKey(key: string): EndpointTypeConfig {
+//   return endpointTypesMap[key];
+// }
 
 function getDefaultEndpointTypeConfig(type: string, subType?: string): EndpointTypeConfig {
   return {
@@ -142,19 +142,19 @@ function getDefaultEndpointTypeConfig(type: string, subType?: string): EndpointT
   };
 }
 
-export function getIconForEndpoint(type: string, subType: string): EndpointIcon {
-  const icon = {
-    name: 'settings_ethernet',
-    font: ''
-  };
+// export function getIconForEndpoint(type: string, subType: string): EndpointIcon {
+//   const icon = {
+//     name: 'settings_ethernet',
+//     font: ''
+//   };
 
-  const ep = getEndpointType(type, subType);
-  if (ep && ep.icon) {
-    icon.name = ep.icon;
-    icon.font = ep.iconFont;
-  }
-  return icon;
-}
+//   const ep = getEndpointType(type, subType);
+//   if (ep && ep.icon) {
+//     icon.name = ep.icon;
+//     icon.font = ep.iconFont;
+//   }
+//   return icon;
+// }
 
 export function endpointHasMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
   return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(

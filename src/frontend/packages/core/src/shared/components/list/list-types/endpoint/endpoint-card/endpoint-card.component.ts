@@ -16,13 +16,9 @@ import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashbo
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
-import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { EndpointTypeConfig } from '../../../../../../core/extension/extension-types';
-import { getFavoriteFromEndpointEntity } from '../../../../../../core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
-  getEndpointType,
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
@@ -119,11 +115,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   ngOnInit() {
-    const favorite = getFavoriteFromEndpointEntity(this.row);
+    const favorite = this.favoritesConfigMapper.getFavoriteEndpointFromEntity(this.row);
     if (favorite) {
       this.favorite = this.favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     }
-    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
+    const e = this.endpointConfig.entity;
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
@@ -140,7 +136,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
+    const e = this.endpointConfig.entity;
     if (!e || !e.listDetailsComponent) {
       return;
     }

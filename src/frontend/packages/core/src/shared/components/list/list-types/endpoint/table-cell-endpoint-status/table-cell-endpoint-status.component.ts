@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
 import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 

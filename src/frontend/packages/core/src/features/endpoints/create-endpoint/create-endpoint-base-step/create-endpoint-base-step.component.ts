@@ -6,7 +6,6 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
-import { getEndpointTypes } from '../../endpoint-helpers';
 import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 interface ICreateEndpointTilesData extends ITileData {
@@ -42,7 +41,6 @@ export class CreateEndpointBaseStepComponent {
   }
   constructor(public store: Store<AppState>, entityCatalogueService: EntityCatalogueService) {
     this.tileSelectorConfig = entityCatalogueService.getAllEndpointTypes().map(catalogueEndpoint => {
-      console.log(catalogueEndpoint);
       const endpoint = catalogueEndpoint.entity;
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
         endpoint.label,

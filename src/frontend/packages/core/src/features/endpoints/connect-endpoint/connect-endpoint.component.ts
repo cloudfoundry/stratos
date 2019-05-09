@@ -18,7 +18,6 @@ import { map } from 'rxjs/operators';
 import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
-import { getCanShareTokenForEndpointType, getEndpointType } from '../endpoint-helpers';
 import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { BaseEndpointAuth } from '../endpoint-auth';
 
@@ -82,8 +81,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   ) { }
 
   private init(config: ConnectEndpointConfig) {
-    const endpointType = getEndpointType(config.type, config.subType);
     const endpoint = this.entityCatalogueService.getEndpoint(config.type, config.subType);
+    const endpointType = endpoint.getTypeAndSubtype().type;
     // Populate the valid auth types for the endpoint that we want to connect to
 
     // Remove SSO if not allowed on this endpoint
@@ -95,7 +94,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
-    this.canShareEndpointToken = getCanShareTokenForEndpointType(endpointType.type, endpointType.subType);
+    this.canShareEndpointToken = endpoint.entity.tokenSharing;
 
     // Create the endpoint form
     this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : { form: null } as EndpointAuthTypeConfig;

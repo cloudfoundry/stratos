@@ -32,6 +32,8 @@ import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+import { getFavoriteFromCfEntity } from '../../../../core/user-favorite-helpers';
+import { FavoritesConfigMapper } from '../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -44,13 +46,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => new UserFavorite<IAppFavMetadata, APIResource<IApp>>(
-      this.applicationService.cfGuid,
-      'cf',
-      applicationSchemaKey,
-      this.applicationService.appGuid,
-      app.entity
-    ))
+    map(app => getFavoriteFromCfEntity<IAppFavMetadata>(app.entity, applicationSchemaKey, this.favoritesConfigMapper))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean }>;
@@ -64,7 +60,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private endpointsService: EndpointsService,
     private ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    scmService: GitSCMService
+    scmService: GitSCMService,
+    private favoritesConfigMapper: FavoritesConfigMapper
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(

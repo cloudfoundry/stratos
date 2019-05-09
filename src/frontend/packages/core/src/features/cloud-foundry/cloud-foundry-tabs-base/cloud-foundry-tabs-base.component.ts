@@ -16,6 +16,8 @@ import {
 import { environment } from '../../../environments/environment.prod';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { FavoritesConfigMapper } from '../../../shared/components/favorites-meta-card/favorite-config-mapper';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
@@ -43,15 +45,14 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    endpointsService: EndpointsService
+    endpointsService: EndpointsService,
+    favoritesConfigMapper: FavoritesConfigMapper
   ) {
 
     this.favorite$ = endpointsService.endpoints$.pipe(
       first(),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
-      map(endpoint => new UserFavoriteEndpoint(
-        endpoint
-      ))
+      map(endpoint => favoritesConfigMapper.getFavoriteEndpointFromEntity(endpoint))
     );
 
     const firehoseHidden$ = this.currentUserPermissionsService

@@ -13,9 +13,9 @@ import {
   endpointStatusSelector,
 } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
-import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
-import { getEndpointType } from '../features/endpoints/endpoint-helpers';
+import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
 import { UserService } from './user.service';
+import { EntityCatalogueService } from './entity-catalogue/entity-catalogue.service';
 
 
 
@@ -27,27 +27,30 @@ export class EndpointsService implements CanActivate {
   haveConnected$: Observable<boolean>;
   disablePersistenceFeatures$: Observable<boolean>;
 
-  static getLinkForEndpoint(endpoint: EndpointModel): string {
+  static getLinkForEndpoint(endpoint: EndpointModel, entityCatalogueService: EntityCatalogueService): string {
     if (!endpoint) {
       return '';
     }
-    const ext = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-    if (ext && ext.homeLink) {
-      return ext.homeLink(endpoint.guid).join('/');
+    const ext = entityCatalogueService.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = ext.builder.getMetadata(endpoint);
+    if (ext) {
+      return ext.builder.getLink(metadata);
     }
     return '';
   }
 
   constructor(
     private store: Store<AppState>,
-    private userService: UserService
+    private userService: UserService,
+    private endpointHealthChecks: EndpointHealthChecks,
+    private entityCatalogueService: EntityCatalogueService
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
-        const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-        return epType.doesNotSupportConnect ||
+        const epType = entityCatalogueService.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity;
+        return epType.unConnectable ||
           endpoint.connectionStatus === 'connected' ||
           endpoint.connectionStatus === 'checking';
       }))
@@ -62,11 +65,11 @@ export class EndpointsService implements CanActivate {
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
-    endpointHealthChecks.registerHealthCheck(healthCheck);
+    this.endpointHealthChecks.registerHealthCheck(healthCheck);
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
-    endpointHealthChecks.checkEndpoint(endpoint);
+    this.endpointHealthChecks.checkEndpoint(endpoint);
   }
 
   public checkAllEndpoints() {
@@ -139,8 +142,8 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
-            const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-            return endpoint.cnsi_type === type && (epType.doesNotSupportConnect || endpoint.connectionStatus === 'connected');
+            const epType = this.entityCatalogueService.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity;
+            return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
           });
       })
     );

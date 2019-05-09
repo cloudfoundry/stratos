@@ -38,9 +38,9 @@ export interface BackendUserFavorite {
 
 const favoriteGuidSeparator = '-';
 
-export class UserFavorite<T extends IEntityMetadata, Y = any> implements IFavoriteTypeInfo {
+export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo {
   public guid: string;
-  public metadata: T = null;
+
   constructor(
     public endpointId: string,
     public endpointType: string,
@@ -49,12 +49,8 @@ export class UserFavorite<T extends IEntityMetadata, Y = any> implements IFavori
     */
     public entityType: string,
     public entityId?: string,
-    entity?: Y,
-    favoritesConfigMapper?: FavoritesConfigMapper
+    public metadata: T = null
   ) {
-    if (entity && favoritesConfigMapper) {
-      this.metadata = favoritesConfigMapper.getEntityMetadata<T>(this, entity);
-    }
     this.guid = UserFavorite.buildFavoriteStoreEntityGuid(this);
   }
 
@@ -99,17 +95,5 @@ export class UserFavorite<T extends IEntityMetadata, Y = any> implements IFavori
   }
 }
 
-export class UserFavoriteEndpoint extends UserFavorite<IEndpointFavMetadata> {
-  constructor(
-    endpoint: EndpointModel
-  ) {
-    super(
-      endpoint.guid,
-      endpoint.cnsi_type,
-      endpointSchemaKey,
-      null,
-      endpoint
-    );
-  }
-}
+export type UserFavoriteEndpoint = UserFavorite<IEndpointFavMetadata>;
 

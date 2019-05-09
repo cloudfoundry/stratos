@@ -10,9 +10,9 @@ import {
 } from '@angular/core';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-table-cell-endpoint-details',
@@ -31,7 +31,11 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
 
   cell: EndpointListDetailsComponent;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private endpointListHelper: EndpointListHelper) {
+  constructor(
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private endpointListHelper: EndpointListHelper,
+    private entityCatalogueService: EntityCatalogueService
+  ) {
     super();
   }
 
@@ -40,7 +44,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
   set row(row: EndpointModel) {
     this.pRow = row;
 
-    const e = getEndpointType(row.cnsi_type, row.sub_type);
+    const e = this.entityCatalogueService.getEndpoint(row.cnsi_type, row.sub_type).entity;
     if (!e || !e.listDetailsComponent) {
       return;
     }

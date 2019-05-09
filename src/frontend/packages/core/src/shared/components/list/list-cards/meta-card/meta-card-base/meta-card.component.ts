@@ -1,11 +1,8 @@
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { LoggerService } from '../../../../../../core/logger.service';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
@@ -70,7 +67,6 @@ export class MetaCardComponent {
         ).subscribe();
       }
     }
-
   }
 
   public isDeleting$: Observable<boolean> = observableOf(false);
@@ -102,7 +98,7 @@ export class MetaCardComponent {
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
     public userFavoriteManager: UserFavoriteManager,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
     if (this.actionMenu) {
       this.actionMenu = this.actionMenu.map(element => {

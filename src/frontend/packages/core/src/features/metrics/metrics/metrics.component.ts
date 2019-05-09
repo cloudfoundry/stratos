@@ -8,8 +8,9 @@ import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/ac
 import { AppState } from '../../../../../store/src/app-state';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
-import { EndpointIcon, getIconForEndpoint, getNameForEndpointType } from '../../endpoints/endpoint-helpers';
+import { EndpointIcon } from '../../endpoints/endpoint-helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
+import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
 
 interface EndpointMetadata {
   type: string;
@@ -40,8 +41,6 @@ interface PrometheusJobs {
 })
 export class MetricsComponent {
 
-  getNameForEndpointType = getNameForEndpointType;
-
   public metricsEndpoint$: Observable<MetricsInfo>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   public jobDetails$: Observable<PrometheusJobs>;
@@ -50,6 +49,7 @@ export class MetricsComponent {
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
     private store: Store<AppState>,
+    private entityCatalogueService: EntityCatalogueService
   ) {
 
     const metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
@@ -61,9 +61,10 @@ export class MetricsComponent {
       map((ep) => {
         const metadata = {};
         ep.endpoints.forEach(endpoint => {
+          const catalogueEndpoint = this.entityCatalogueService.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
           metadata[endpoint.guid] = {
-            type: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
-            icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type)
+            type: catalogueEndpoint.entity.type,
+            icon: catalogueEndpoint.entity.icon
           };
         });
         return {

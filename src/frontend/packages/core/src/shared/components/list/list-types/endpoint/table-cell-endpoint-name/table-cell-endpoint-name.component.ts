@@ -7,8 +7,8 @@ import { endpointSchemaKey, entityFactory } from '../../../../../../../../store/
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
+import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 export interface RowWithEndpointId {
   endpointId: string;
@@ -23,7 +23,10 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
 
   public endpoint$: Observable<any>;
 
-  constructor(private entityServiceFactory: EntityServiceFactory) {
+  constructor(
+    private entityServiceFactory: EntityServiceFactory,
+    private entityCatalogueService: EntityCatalogueService
+  ) {
     super();
   }
 
@@ -40,9 +43,9 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     ).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => {
-        const ep = getEndpointType(data.cnsi_type, data.sub_type);
-        data.canShowLink = data.connectionStatus === 'connected' || ep.doesNotSupportConnect;
-        data.link = EndpointsService.getLinkForEndpoint(data);
+        const ep = this.entityCatalogueService.getEndpoint(data.cnsi_type, data.sub_type).entity;
+        data.canShowLink = data.connectionStatus === 'connected' || ep.unConnectable;
+        data.link = EndpointsService.getLinkForEndpoint(data, this.entityCatalogueService);
         return data;
       })
     );

@@ -73,7 +73,7 @@ export class CloudFoundryOrganizationBaseComponent {
     this.schema = entityFactory(organizationSchemaKey);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),
-      map(org => getFavoriteFromCfEntity(org.entity, organizationSchemaKey, favoritesConfigMapper))
+      map(org => getFavoriteFromCfEntity<IOrgFavMetadata>(org.entity, organizationSchemaKey, favoritesConfigMapper))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),

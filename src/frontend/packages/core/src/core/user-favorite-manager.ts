@@ -17,7 +17,6 @@ import {
   IEndpointFavMetadata,
   IFavoriteMetadata,
   UserFavorite,
-  UserFavoriteEndpoint,
 } from '../../../store/src/types/user-favorites.types';
 import {
   TFavoriteMapperFunction, FavoritesConfigMapper,
@@ -61,14 +60,6 @@ export class UserFavoriteManager {
     private entityCatalogueService: EntityCatalogueService,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) { }
-
-  private getTypeAndID(favorite: UserFavorite<IFavoriteMetadata>) {
-    const type = favorite.entityType;
-    return {
-      type,
-      id: favorite.entityId || favorite.endpointId
-    };
-  }
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
@@ -133,9 +124,7 @@ export class UserFavoriteManager {
         map(endpoints => {
           const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid, this.logger);
           const endpointEntity = endpoints[endpointGuid];
-          return new UserFavoriteEndpoint(
-            endpointEntity
-          );
+          return this.favoritesConfigMapper.getFavoriteEndpointFromEntity(endpointEntity);
         }),
         map(endpointFavorite => ({
           endpoint: this.mapToHydrated<IEndpointFavMetadata>(endpointFavorite),

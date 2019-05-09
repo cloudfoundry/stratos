@@ -9,8 +9,8 @@ import { PaginationMonitorFactory } from '../../../../monitors/pagination-monito
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointCardComponent } from '../endpoint/endpoint-card/endpoint-card.component';
-import { endpointColumns } from '../endpoint/endpoints-list-config.service';
 import { CFEndpointsDataSource } from './cf-endpoints-data-source';
+import { EndpointsListConfigService } from '../endpoint/endpoints-list-config.service';
 
 
 @Injectable()
@@ -32,9 +32,10 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
     private store: Store<AppState>,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory
+    internalEventMonitorFactory: InternalEventMonitorFactory,
+    endpointsListConfigService: EndpointsListConfigService
   ) {
-    this.columns = endpointColumns.filter(column => {
+    this.columns = endpointsListConfigService.columns.filter(column => {
       return column.columnId !== 'type';
     });
     this.dataSource = new CFEndpointsDataSource(
