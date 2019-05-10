@@ -21,6 +21,10 @@ if [ "$BUILD" == "true" ]; then
   echo "Building Docker All-In-One Container Image..."
   ${STRATOS}/build/store-git-metadata.sh
   pushd ${STRATOS} > /dev/null
+  # Ensure that we have the latest images
+  docker pull splatform/stratos-aio-base:opensuse
+  docker pull splatform/stratos-bk-base
+  # Build the aio image
   docker build --force-rm -f deploy/Dockerfile.all-in-one -t splatform/stratos:latest .
   popd > /dev/null
 fi
