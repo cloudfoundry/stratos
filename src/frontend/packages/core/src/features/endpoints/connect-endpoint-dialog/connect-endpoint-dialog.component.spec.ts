@@ -10,7 +10,6 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig } from '../connect.service';
-import { initEndpointTypes } from '../endpoint-helpers';
 import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form.component';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
 
@@ -54,7 +53,6 @@ describe('ConnectEndpointDialogComponent', () => {
       }
     });
     testingModule.compileComponents();
-    initEndpointTypes([]);
   }));
 
   beforeEach(() => {
