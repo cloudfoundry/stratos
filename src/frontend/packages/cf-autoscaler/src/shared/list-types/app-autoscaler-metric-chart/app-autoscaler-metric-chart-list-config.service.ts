@@ -39,9 +39,9 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     noEntries: 'There are no metrics defined in the policy'
   };
 
-  showMetricsRange = true;
-  pollInterval = 60000;
-  selectedTimeValue = '30:minute';
+  showCustomTime = true;
+  customTimePollingInterval = 6000000;
+  customTimeInitialValue = '1:minute';
   customTimeWindows: ITimeRange[] = [
     {
       value: '30:minute',

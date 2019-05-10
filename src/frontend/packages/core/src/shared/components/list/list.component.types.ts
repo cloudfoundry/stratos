@@ -92,8 +92,7 @@ export interface IListConfig<T> {
   /**
    * For metrics based data show a metrics range selector
    */
-  showMetricsRange?: boolean;
-
+  showCustomTime?: boolean;
   /**
    * Custom time window to show in metrics range selector
    */
@@ -102,6 +101,14 @@ export interface IListConfig<T> {
    * Custom time window validation for metrics range selector
    */
   customTimeValidation?: (start: moment.Moment, end: moment.Moment) => string;
+  /**
+   * Custom time polling interval. Falsy for disabled.
+   */
+  customTimePollingInterval?: number;
+  /**
+   * When enabled set the initial value
+   */
+  customTimeInitialValue?: string;
 }
 
 export interface IListMultiFilterConfig {

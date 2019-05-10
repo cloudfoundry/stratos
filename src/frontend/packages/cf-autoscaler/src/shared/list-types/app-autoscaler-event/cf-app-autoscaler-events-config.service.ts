@@ -81,9 +81,9 @@ export class CfAppAutoscalerEventsConfigService
   };
   isLocal = false;
 
-  showMetricsRange = true;
-  pollInterval = 120000;
-  selectedTimeValue = '1:week';
+  showCustomTime = true;
+  customTimePollingInterval = 120000;
+  customTimeInitialValue = '1:week';
   customTimeWindows: ITimeRange[] = [
     {
       value: '1:day',
