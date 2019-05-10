@@ -24,7 +24,7 @@ export class CloudFoundryEffects {
     private actions$: Actions,
     private store: Store<AppState>
   ) { }
-
+  // TODO(nj): do we need this?
   @Effect()
   fetchInfo$ = this.actions$.pipe(
     ofType<GetCFInfo>(GET_INFO),

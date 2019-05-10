@@ -1,5 +1,5 @@
 import { RequestMethod } from '@angular/http';
-import { IRequestTypeState, AppState } from '../../app-state';
+import { AppState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
@@ -20,7 +20,7 @@ import { pathGet } from '../../../../core/src/core/utils.service';
 import { Store } from '@ngrx/store';
 
 
-export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {
+export function getEntityRequestState(state: IRequestDataState, action: SingleEntityAction): RequestInfoState {
   const { entityKey, guid } = action;
   const requestState = { ...state[entityKey][guid] };
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
@@ -29,7 +29,7 @@ export function getEntityRequestState(state: IRequestTypeState, action: SingleEn
   return getDefaultRequestState();
 }
 
-export function setEntityRequestState(state: IRequestTypeState, requestState, { entityKey, guid }: IRequestAction) {
+export function setEntityRequestState(state: IRequestDataState, requestState, { entityKey, guid }: IRequestAction) {
   const newState = {
     [entityKey]: {
       [guid]: {
@@ -41,7 +41,7 @@ export function setEntityRequestState(state: IRequestTypeState, requestState, { 
 }
 
 
-export function createRequestStateFromResponse(response: NormalizedResponse, state: IRequestTypeState) {
+export function createRequestStateFromResponse(response: NormalizedResponse, state: IRequestDataState) {
   if (!response || !response.entities) {
     return state;
   }

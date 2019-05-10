@@ -7,29 +7,34 @@ import { CreateServiceInstanceState } from './types/create-service-instance.type
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
-import { IRequestDataState, IRequestState } from './types/entity.types';
+import { ExtendedRequestState, CFRequestDataState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import { InternalEventsState } from './types/internal-events.types';
-import { PaginationState } from './types/pagination.types';
+import { PaginationEntityTypeState } from './types/pagination.types';
 import { IRecentlyVisitedState } from './types/recently-visited.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
 import { UsersRolesState } from './types/users-roles.types';
+import { RequestInfoState } from './reducers/api-request-reducer/types';
 
 export interface IRequestTypeState {
-  [entityKey: string]: IRequestEntityTypeState<any>;
+  [entityKey: string]: any;
 }
 export interface IRequestEntityTypeState<T> {
   [guid: string]: T;
 }
-export interface AppState {
+export abstract class AppState<
+  T extends Record<string, any> = CFRequestDataState
+  > {
   actionHistory: ActionHistoryState;
   auth: AuthState;
   uaaSetup: UAASetupState;
   endpoints: EndpointState;
-  pagination: PaginationState;
-  request: IRequestState;
-  requestData: IRequestDataState;
+  pagination: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
+  // request: IRequestState;
+  request: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
+  // requestData: IRequestDataState;
+  requestData: T;
   dashboard: DashboardState;
   createApplication: CreateNewApplicationState;
   deployApplication: DeployApplicationState;

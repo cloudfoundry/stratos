@@ -141,11 +141,15 @@ function getDefaultInitialTestStoreState(): AppState {
       message: ''
     },
     pagination: {
+      private_domains: {},
+      space_quota_definition: {},
+      userProfile: {},
       featureFlag: {},
       serviceBroker: {},
       securityGroup: {},
       servicePlanVisibility: {},
       buildpack: {},
+      system: {},
       application: {
         applicationWall: {
           pageCount: 1,
@@ -570,7 +574,6 @@ function getDefaultInitialTestStoreState(): AppState {
       },
       environmentVars: {},
       stats: {},
-      summary: {},
       user: {
         endpointUsersService: {
           pageCount: 1,
@@ -611,10 +614,12 @@ function getDefaultInitialTestStoreState(): AppState {
       serviceBinding: {},
       service: {},
       gitCommits: {},
+      gitBranches: {},
       domain: {},
       metrics: {},
       servicePlan: {},
-      [userProvidedServiceInstanceSchemaKey]: {}
+      userProvidedServiceInstance: {},
+      cloudFoundryInfo: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -658,16 +663,19 @@ function getDefaultInitialTestStoreState(): AppState {
       }
     },
     request: {
+      userProfile: {},
       servicePlanVisibility: {},
       serviceBroker: {},
       serviceInstance: {},
       servicePlan: {},
+      environmentVars: {},
+      stats: {},
       service: {},
       serviceBinding: {},
       securityGroup: {},
       featureFlag: {},
-      securityRule: {},
       buildpack: {},
+      metrics: {},
       userFavorites: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
@@ -3917,6 +3925,10 @@ function getDefaultInitialTestStoreState(): AppState {
       [userProvidedServiceInstanceSchemaKey]: {}
     },
     requestData: {
+      environmentVars: {},
+      stats: {},
+      private_domains: {},
+      space_quota_definition: {},
       userFavorites: {},
       servicePlanVisibility: {},
       serviceBroker: {
@@ -4040,7 +4052,6 @@ function getDefaultInitialTestStoreState(): AppState {
       serviceBinding: {},
       securityGroup: {},
       featureFlag: {},
-      securityRule: {},
       buildpack: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
@@ -21791,6 +21802,7 @@ function getDefaultInitialTestStoreState(): AppState {
         },
         userName: 'tesy-user-name',
         meta: {
+          version: 1,
           created: '',
           lastModified: '',
         },
@@ -21802,7 +21814,10 @@ function getDefaultInitialTestStoreState(): AppState {
             value: 'test@test.com',
           }
         ],
-        passwordLastModified: ''
+        passwordLastModified: '',
+        schemas: '',
+        zoneId: '',
+        origin: ''
       },
       [userProvidedServiceInstanceSchemaKey]: {}
     },

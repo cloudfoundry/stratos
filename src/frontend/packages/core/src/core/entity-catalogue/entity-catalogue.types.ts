@@ -108,7 +108,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   public isEndpoint: boolean;
 
   static buildId(entityType: string, endpointType: string): string {
-    return endpointType ? `${endpointType}-${entityType}` : entityType;
+    // Camelcased to make it work better with the store.
+    return endpointType ? `${endpointType}${entityType.charAt(0).toUpperCase() + entityType.slice(1)}` : entityType;
   }
   constructor(
     public entity: IStratosEntityDefinition | IStratosEndpointDefinition,
