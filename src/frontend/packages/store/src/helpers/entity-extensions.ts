@@ -8,10 +8,8 @@ import { EntityCatalogueService } from '../../../core/src/core/entity-catalogue/
 export function addExtensionEntities(entityCatalogue: EntityCatalogueService) {
   entityCatalogue.getAllEntitiesTypes().forEach(definition => {
     const { entity } = definition;
-    console.log(definition);
     addEntityToCache(entity.schema);
     defaultCfEntitiesState[definition.id] = {};
-    console.log(defaultCfEntitiesState);
     registerAPIRequestEntity(definition.id);
   });
 

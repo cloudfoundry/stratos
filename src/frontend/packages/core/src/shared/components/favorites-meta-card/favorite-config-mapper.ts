@@ -106,7 +106,7 @@ export class FavoritesConfigMapper {
         name: entity.name,
         menuItems: catalogueEntity.builder.getActions ? catalogueEntity.builder.getActions(entity) : null
       };
-    }
+    };
   }
 
   /**

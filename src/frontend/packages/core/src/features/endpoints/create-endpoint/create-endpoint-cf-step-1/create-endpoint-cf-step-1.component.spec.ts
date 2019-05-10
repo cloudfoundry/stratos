@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { initEndpointTypes } from '../../endpoint-helpers';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
 
 describe('CreateEndpointCfStep1Component', () => {
@@ -32,7 +31,6 @@ describe('CreateEndpointCfStep1Component', () => {
       }]
     })
       .compileComponents();
-    initEndpointTypes([]);
   }));
 
   beforeEach(() => {
