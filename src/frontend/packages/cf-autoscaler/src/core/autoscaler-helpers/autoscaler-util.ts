@@ -122,7 +122,7 @@ export const PolicyAlert = {
   alertInvalidPolicyScheduleEndDateTimeBeforeNow: 'End date and time must be after or equal the current date and time.',
   alertInvalidPolicyScheduleRecurringConflict: 'Recurring schedule configuration conflict occurs.',
   alertInvalidPolicyScheduleSpecificConflict: 'Specific date configuration conflict occurs.',
-  alertInvalidPolicyTriggerScheduleEmpty: 'At least one trigger rule or schedule should be defined.',
+  alertInvalidPolicyTriggerScheduleEmpty: 'At least one Scaling Rule or Schedule should be defined.',
 };
 
 export function isEqual(a: any, b: any): boolean {

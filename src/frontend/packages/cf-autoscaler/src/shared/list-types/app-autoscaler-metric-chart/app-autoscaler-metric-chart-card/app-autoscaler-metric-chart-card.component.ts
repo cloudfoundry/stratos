@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -26,7 +26,7 @@ import { appAutoscalerAppMetricSchemaKey } from '../../../../store/autoscaler.st
   styleUrls: ['./app-autoscaler-metric-chart-card.component.scss']
 })
 
-export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements OnInit, IListRowCell {
+export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements IListRowCell {
   static columns = 1;
   listData: {
     label: string;
@@ -59,6 +59,20 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   };
   public metricType: string;
 
+  @Input('row')
+  set row(row: APIResource<AppScalingTrigger>) {
+    if (row) {
+      if (row.entity.query && row.entity.query.params) {
+        this.paramsMetrics['start-time'] = row.entity.query.params.start + '000000000';
+        this.paramsMetrics['end-time'] = row.entity.query.params.end + '000000000';
+
+        this.appAutoscalerAppMetricLegend = this.getLegend2(row.entity);
+        this.metricType = AutoscalerConstants.getMetricFromMetricId(row.metadata.guid);
+        this.metricData$ = this.getAppMetric(this.metricType, row.entity, this.paramsMetrics);
+      }
+    }
+  }
+
   constructor(
     private appService: ApplicationService,
     private store: Store<AppState>,
@@ -83,16 +97,6 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
       legendValue,
       legendColor
     };
-  }
-
-  ngOnInit(): void {
-    if (this.row.entity.query && this.row.entity.query.params) {
-      this.paramsMetrics['start-time'] = this.row.entity.query.params.start + '000000000';
-      this.paramsMetrics['end-time'] = this.row.entity.query.params.end + '000000000';
-    }
-    this.appAutoscalerAppMetricLegend = this.getLegend2(this.row.entity);
-    this.metricType = AutoscalerConstants.getMetricFromMetricId(this.row.metadata.guid);
-    this.metricData$ = this.getAppMetric(this.metricType, this.row.entity, this.paramsMetrics);
   }
 
   getAppMetric(metricName: string, trigger: any, params: any): Observable<AppAutoscalerMetricData[]> {
