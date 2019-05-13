@@ -32,8 +32,7 @@ Stratos can be deployed in the following environments:
 
 1. Cloud Foundry, as an application. See [guide](deploy/cloud-foundry)
 2. Kubernetes, using a Helm chart. See [guide](deploy/kubernetes)
-3. Docker, using docker compose. See [guide](deploy/docker-compose)
-4. Docker, single container deploying all components. See [guide](deploy/all-in-one)
+3. Docker, single container deploying all components. See [guide](deploy/all-in-one)
 
 ## Troubleshooting
 Please see our [Troubleshooting](docs/troubleshooting) page.
