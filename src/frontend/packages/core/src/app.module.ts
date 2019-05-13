@@ -123,16 +123,6 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) {
-    entityCatalogueService.register(new StratosCatalogueEndpointEntity({
-      type: 'metrics',
-      label: 'Metrics',
-      labelPlural: 'Metrics',
-      tokenSharing: true,
-      logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
-    },
-      metadata => `/endpoints/metrics/${metadata.guid}`
-    ));
     eventService.addEventConfig<boolean>(
       {
         eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),

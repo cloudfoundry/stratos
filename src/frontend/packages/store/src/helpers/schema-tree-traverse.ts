@@ -20,6 +20,7 @@ import {
   stackSchemaKey,
   userProvidedServiceInstanceSchemaKey,
 } from './entity-factory';
+import { IRequestTypeState } from '../app-state';
 
 export interface IFlatTree {
   [entityKey: string]: Set<string>;
@@ -91,7 +92,7 @@ export class EntitySchemaTreeBuilder {
   }) { }
 
   private entityExcludes: string[];
-  public getFlatTree(treeDefinition: IRecursiveDelete, state: Partial<IRequestDataState>): IFlatTree {
+  public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
     this.entityExcludes = this.excludes[schema.key] || [];

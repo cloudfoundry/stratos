@@ -79,7 +79,7 @@ export class ApplicationServiceMock {
   applicationRunning$: Observable<boolean> = observableOf(false);
 }
 
-export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
+export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: string) {
   return {
     provide: ApplicationService,
     useFactory: (

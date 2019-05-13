@@ -5,9 +5,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpModule } from '@angular/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
-
-import { appReducers } from '../../../../../store/src/reducers.module';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
@@ -18,6 +15,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 import { CreateApplicationComponent } from './create-application.component';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 describe('CreateApplicationComponent', () => {
   let component: CreateApplicationComponent;
@@ -39,9 +37,7 @@ describe('CreateApplicationComponent', () => {
         SharedModule,
         HttpClientModule,
         HttpClientTestingModule,
-        StoreModule.forRoot(
-          appReducers
-        )
+        createBasicStoreModule(),
       ],
       providers: [
         PaginationMonitorFactory,

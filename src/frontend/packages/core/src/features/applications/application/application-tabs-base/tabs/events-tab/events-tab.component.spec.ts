@@ -24,6 +24,7 @@ describe('EventsTabComponent', () => {
   let fixture: ComponentFixture<EventsTabComponent>;
   const initialState = { ...getInitialTestStoreState() };
   initialState.pagination = {
+    ...initialState.pagination,
     event: {
       ['app-events:mockCfGuidmockAppGuid']: {
         pageCount: 1,

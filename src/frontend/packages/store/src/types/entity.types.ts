@@ -53,7 +53,7 @@ import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
-import { GitBranch, GitCommit } from './git.types';
+import { GitBranch, GitCommit, GitRepo } from './git.types';
 import { SystemInfo } from './system.types';
 import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 import { CfUser } from './user.types';
@@ -95,6 +95,7 @@ interface EntityValues {
   route: IRequestEntityTypeState<APIResource<IRoute>>;
   event: IRequestEntityTypeState<APIResource>;
   gitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
+  gitRepo: IRequestEntityTypeState<APIResource<GitRepo>>;
   gitCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
   domain: IRequestEntityTypeState<APIResource<IDomain>>;
   user: IRequestEntityTypeState<APIResource<CfUser>>;

@@ -615,6 +615,7 @@ function getDefaultInitialTestStoreState(): AppState {
       service: {},
       gitCommits: {},
       gitBranches: {},
+      gitRepo: {},
       domain: {},
       metrics: {},
       servicePlan: {},
@@ -663,6 +664,7 @@ function getDefaultInitialTestStoreState(): AppState {
       }
     },
     request: {
+      gitRepo: {},
       userProfile: {},
       servicePlanVisibility: {},
       serviceBroker: {},
@@ -3927,6 +3929,7 @@ function getDefaultInitialTestStoreState(): AppState {
     requestData: {
       environmentVars: {},
       stats: {},
+      gitRepo: {},
       private_domains: {},
       space_quota_definition: {},
       userFavorites: {},

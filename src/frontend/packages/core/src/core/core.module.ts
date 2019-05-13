@@ -30,6 +30,9 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { BaseEndpointAuth } from '../features/endpoints/endpoint-auth';
+import { EntityCatalogueService } from './entity-catalogue/entity-catalogue.service';
+import { StratosCatalogueEndpointEntity } from './entity-catalogue/entity-catalogue.types';
 
 @NgModule({
   imports: [
@@ -95,5 +98,19 @@ import { WindowRef } from './window-ref/window-ref.service';
     LogOutDialogComponent
   ],
 })
-export class CoreModule { }
+export class CoreModule {
+  constructor(private entityCatalogueService: EntityCatalogueService) {
+    entityCatalogueService.register(new StratosCatalogueEndpointEntity({
+      type: 'metrics',
+      label: 'Metrics',
+      labelPlural: 'Metrics',
+      tokenSharing: true,
+      logoUrl: '/core/assets/endpoint-icons/metrics.svg',
+      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
+    },
+      metadata => `/endpoints/metrics/${metadata.guid}`
+    ));
+  }
+
+}
 

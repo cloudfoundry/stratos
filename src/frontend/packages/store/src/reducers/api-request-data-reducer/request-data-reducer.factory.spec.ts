@@ -5,6 +5,7 @@ import { applicationSchemaKey, endpointSchemaKey } from '../../helpers/entity-fa
 import { IRequestDataState } from '../../types/entity.types';
 import { APIResource } from '../../types/api.types';
 import { IDomain } from '../../../../core/src/core/cf-api.types';
+import { IRequestTypeState } from '../../app-state';
 
 describe('RequestDataReducerFactory', () => {
   it('should create', () => {
@@ -16,7 +17,7 @@ describe('RequestDataReducerFactory', () => {
     const id2 = endpointSchemaKey;
     const reducer = requestDataReducerFactory([id1, id2], ['a', 'b', 'c', 'd']);
     const state = reducer(undefined, { type: 'UNKNOWN_INIT' });
-    expect(state).toEqual({ [id1]: {}, [id2]: {} } as IRequestDataState);
+    expect(state).toEqual({ [id1]: {}, [id2]: {} });
   });
   it('should create with add new entity', () => {
     const testEntityTypeUnused = 'test-unused';

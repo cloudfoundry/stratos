@@ -19,20 +19,19 @@ describe('GitSCMTabComponent', () => {
   let component: GitSCMTabComponent;
   let fixture: ComponentFixture<GitSCMTabComponent>;
   const initialState = getInitialTestStoreState();
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [GitSCMTabComponent],
       imports: [
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
         StoreModule.forRoot(
           appReducers,
           {
             initialState
           }
         ),
+        CoreModule,
+        SharedModule,
+        RouterTestingModule,
         NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule
