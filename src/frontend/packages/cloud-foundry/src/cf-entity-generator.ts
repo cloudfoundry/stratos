@@ -205,7 +205,7 @@ function generateCFServiceBindingEntity(endpointDefinition: IStratosEndpointDefi
     type: serviceBindingSchemaKey,
     schema: {
       default: entityFactory(serviceBindingSchemaKey),
-      [serviceBindingNoBindingsSchemaKey]: entityFactory(serviceBindingNoBindingsSchemaKey);
+      [serviceBindingNoBindingsSchemaKey]: entityFactory(serviceBindingNoBindingsSchemaKey)
     },
     label: 'Service Binding',
     labelPlural: 'Service Bindings',
