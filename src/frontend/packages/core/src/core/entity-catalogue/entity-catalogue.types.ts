@@ -25,8 +25,8 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export interface IStratosBaseEntityDefinition extends IStratosEntityWithIcons {
   readonly type: string;
   readonly schema: EntitySchema;
-  readonly label: string;
-  readonly labelPlural: string;
+  readonly label?: string;
+  readonly labelPlural?: string;
   readonly renderPriority?: number;
   // This should be typed
   readonly listDetailsComponent?: any;
@@ -70,8 +70,8 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   getStatusObservable?(entity: Y): Observable<StratosStatus>;
-  getLink(entityMetadata: T): string;
   getGuid(entityMetadata: T): string;
+  getLink?(entityMetadata: T): string;
   getLines?(entityMetadata: T): [string, string | Observable<string>][];
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
@@ -105,33 +105,33 @@ export interface IStratosEntityStatusData<Y extends IEntityMetadata = IEntityMet
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   static endpointType = endpointSchemaKey;
   public id: string;
+  public entity: IStratosEntityDefinition | IStratosEndpointDefinition;
   public isEndpoint: boolean;
+  public hasBuilder: boolean;
 
   static buildId(entityType: string, endpointType: string): string {
     // Camelcased to make it work better with the store.
     return endpointType ? `${endpointType}${entityType.charAt(0).toUpperCase() + entityType.slice(1)}` : entityType;
   }
   constructor(
-    public entity: IStratosEntityDefinition | IStratosEndpointDefinition,
-    public builder: IStratosEntityBuilder<T, Y>
+    entity: IStratosEntityDefinition | IStratosEndpointDefinition,
+    // TODO: remove the need for a builder for entities that it doesn't make sense? NJ
+    public builder?: IStratosEntityBuilder<T, Y>
   ) {
+    this.entity = this.populateEntity(entity);
     const baseEntity = entity as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
+    this.hasBuilder = !!builder;
     this.id = this.isEndpoint ?
       // 'endpoint' should be in the baseEntity somewhere - nj
       StratosBaseCatalogueEntity.buildId(StratosBaseCatalogueEntity.endpointType, baseEntity.type) :
       StratosBaseCatalogueEntity.buildId(baseEntity.type, baseEntity.endpoint.type);
   }
-  public getGeneratedData(entity: Y, previousMetadata?: T): IStratosEntityStatusData<T> {
-    const metadata = previousMetadata ? previousMetadata : this.builder.getMetadata(entity);
+  private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition) {
     return {
-      metadata,
-      status$: this.builder.getStatusObservable(entity),
-      link: this.builder.getLink(metadata),
-      guid: this.builder.getGuid(metadata),
-      lines: this.builder.getLines(metadata),
-      actions: this.builder.getActions ? this.builder.getActions(metadata) : null,
-      globalActions: this.builder.getGlobalActions ? this.builder.getGlobalActions() : null
+      ...entity,
+      label: entity.label || 'Unknown',
+      labelPlural: entity.labelPlural || entity.label || 'Unknown',
     };
   }
   public getTypeAndSubtype() {
@@ -147,7 +147,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
 export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {
   constructor(
     public entity: IStratosEntityDefinition,
-    builder: IStratosEntityBuilder<T, Y>
+    builder?: IStratosEntityBuilder<T, Y>
   ) {
     super(entity, builder);
   }

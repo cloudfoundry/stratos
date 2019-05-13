@@ -49,8 +49,12 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
-        const epType = entityCatalogueService.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity;
-        return epType.unConnectable ||
+        const epType = entityCatalogueService.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        if (!epType.entity) {
+          return false;
+        }
+        const epEntity = epType.entity;
+        return epEntity.unConnectable ||
           endpoint.connectionStatus === 'connected' ||
           endpoint.connectionStatus === 'checking';
       }))

@@ -39,8 +39,6 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
-import { StratosCatalogueEndpointEntity } from './core/entity-catalogue/entity-catalogue.types';
 import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 
 
@@ -109,15 +107,13 @@ export class CustomRouterStateSerializer
     DynamicExtensionRoutes,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
-    { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
+    // { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule {
   constructor(
-    private entityCatalogueService: EntityCatalogueService,
     ext: ExtensionService,
-    private permissionService: CurrentUserPermissionsService,
     private store: Store<AppState>,
     eventService: GlobalEventService,
     private userFavoriteManager: UserFavoriteManager,

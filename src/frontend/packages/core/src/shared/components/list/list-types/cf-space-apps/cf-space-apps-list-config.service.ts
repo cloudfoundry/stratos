@@ -7,7 +7,6 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import { applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
-import { ISpaceFavMetadata } from '../../../../../cf-favourite-types';
 import { IApp } from '../../../../../core/cf-api.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
@@ -16,6 +15,7 @@ import { defaultPaginationPageSizeOptionsTable, IListConfig, ListViewTypes } fro
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
 import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
+import { ISpaceFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Injectable()
 export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {

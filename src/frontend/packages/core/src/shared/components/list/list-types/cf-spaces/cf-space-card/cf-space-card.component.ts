@@ -9,7 +9,6 @@ import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
 import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -34,6 +33,7 @@ import { ConfirmationDialogService } from '../../../../confirmation-dialog.servi
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
+import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Component({
   selector: 'app-cf-space-card',
@@ -158,7 +158,9 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   edit = () => {
     this.store.dispatch(
       new RouterNav({
-        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.spaceGuid, 'edit-space']
+        path: [
+          'cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.spaceGuid, 'edit-space'
+        ]
       })
     );
   }

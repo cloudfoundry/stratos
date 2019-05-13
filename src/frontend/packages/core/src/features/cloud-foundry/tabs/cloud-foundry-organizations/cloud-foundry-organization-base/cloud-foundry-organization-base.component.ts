@@ -4,7 +4,6 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { entityFactory, EntitySchema, organizationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
-import { IOrgFavMetadata } from '../../../../../cf-favourite-types';
 import {
   getActionsFromExtensions,
   getTabsFromExtensions,
@@ -21,6 +20,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { FavoritesConfigMapper } from '../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
+import { IOrgFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',

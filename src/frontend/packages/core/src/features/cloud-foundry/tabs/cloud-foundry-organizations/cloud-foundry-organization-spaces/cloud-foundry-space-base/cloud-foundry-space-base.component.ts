@@ -7,7 +7,6 @@ import { RouterNav } from '../../../../../../../../store/src/actions/router.acti
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { ISpaceFavMetadata } from '../../../../../../cf-favourite-types';
 import {
   getActionsFromExtensions,
   getTabsFromExtensions,
@@ -27,6 +26,7 @@ import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 import { FavoritesConfigMapper } from '../../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
+import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',

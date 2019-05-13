@@ -13,7 +13,7 @@ export class EntityCatalogueService {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
   private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
 
-  public register(entity: StratosCatalogueEntity | StratosCatalogueEndpointEntity) {
+  public register(entity: StratosBaseCatalogueEntity) {
     if (entity.isEndpoint) {
       this.registerEndpoint(entity as StratosCatalogueEndpointEntity);
     } else {
@@ -23,10 +23,11 @@ export class EntityCatalogueService {
   }
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
+    if (endpoint.id === 'metricsEndpoint') {
+      console.log('met');
+    }
     if (this.endpoints.has(endpoint.id)) {
-      throw (
-        new Error(`Duplicate entity found. ID: ${endpoint.id} - Type: ${endpoint.entity.type}`)
-      );
+      console.warn(`Duplicate endpoint catalogue entity found. ID: ${endpoint.id} - Type: ${endpoint.entity.type}`)
     } else {
       this.endpoints.set(endpoint.id, endpoint);
     }
@@ -34,9 +35,8 @@ export class EntityCatalogueService {
 
   private registerEntity(entity: StratosCatalogueEntity) {
     if (this.entities.has(entity.id)) {
-      throw (
-        new Error(`Duplicate entity found. ID: ${entity.id} - Type: ${entity.entity.type} - Endpoint type: ${entity.entity.endpoint}`)
-      );
+      const { type } = entity.entity;
+      console.warn(`Duplicate catalogue entity found. ID: ${entity.id} - Type: ${type} - Endpoint: ${entity.entity.endpoint.type}`)
     } else {
       this.entities.set(entity.id, entity);
     }

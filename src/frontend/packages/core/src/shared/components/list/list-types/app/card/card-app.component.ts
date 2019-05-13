@@ -7,7 +7,6 @@ import { AppState } from '../../../../../../../../store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { IAppFavMetadata } from '../../../../../../cf-favourite-types';
 import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
@@ -16,6 +15,7 @@ import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shar
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { CardCell } from '../../../list.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
+import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Component({
   selector: 'app-card-app',

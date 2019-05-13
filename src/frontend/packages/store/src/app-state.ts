@@ -31,9 +31,7 @@ export abstract class AppState<
   uaaSetup: UAASetupState;
   endpoints: EndpointState;
   pagination: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
-  // request: IRequestState;
   request: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
-  // requestData: IRequestDataState;
   requestData: T;
   dashboard: DashboardState;
   createApplication: CreateNewApplicationState;

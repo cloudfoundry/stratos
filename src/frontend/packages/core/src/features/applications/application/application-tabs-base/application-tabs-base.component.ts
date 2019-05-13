@@ -11,8 +11,6 @@ import { ActionState } from '../../../../../../store/src/reducers/api-request-re
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
-import { IAppFavMetadata } from '../../../../cf-favourite-types';
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
@@ -34,6 +32,7 @@ import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
 import { getFavoriteFromCfEntity } from '../../../../core/user-favorite-helpers';
 import { FavoritesConfigMapper } from '../../../../shared/components/favorites-meta-card/favorite-config-mapper';
+import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Component({
   selector: 'app-application-tabs-base',

@@ -14,9 +14,13 @@ export interface IOrgFavMetadata extends IFavoriteMetadata {
   cfGuid: string;
 }
 
-
 export interface IAppFavMetadata extends IFavoriteMetadata {
   guid: string;
   cfGuid: string;
+  name: string;
+}
+
+export interface IBasicCFMetaData extends IFavoriteMetadata {
+  guid: string;
   name: string;
 }
