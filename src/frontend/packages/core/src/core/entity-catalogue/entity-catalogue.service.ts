@@ -23,9 +23,6 @@ export class EntityCatalogueService {
   }
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
-    if (endpoint.id === 'metricsEndpoint') {
-      console.log('met');
-    }
     if (this.endpoints.has(endpoint.id)) {
       console.warn(`Duplicate endpoint catalogue entity found. ID: ${endpoint.id} - Type: ${endpoint.entity.type}`)
     } else {

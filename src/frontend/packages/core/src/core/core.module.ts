@@ -99,7 +99,7 @@ import { StratosCatalogueEndpointEntity } from './entity-catalogue/entity-catalo
   ],
 })
 export class CoreModule {
-  constructor(private entityCatalogueService: EntityCatalogueService) {
+  constructor(entityCatalogueService: EntityCatalogueService) {
     // TODO(NJ): This gets called a few times do to lazy loaded modules that import this.
     // It's completely harmless but needs to be moved at some point.
     entityCatalogueService.register(new StratosCatalogueEndpointEntity({

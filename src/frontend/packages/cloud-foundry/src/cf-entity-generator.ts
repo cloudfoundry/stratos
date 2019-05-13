@@ -31,7 +31,11 @@ import {
   cfInfoSchemaKey,
   privateDomainsSchemaKey,
   spaceQuotaSchemaKey,
-  serviceSchemaKey
+  serviceSchemaKey,
+  serviceBindingNoBindingsSchemaKey,
+  spaceWithOrgKey,
+  serviceInstancesWithSpaceSchemaKey,
+  serviceInstancesWithNoBindingsSchemaKey
 } from '../../store/src/helpers/entity-factory';
 import { APIResource } from '../../store/src/types/api.types';
 import {
@@ -199,7 +203,10 @@ function generateCFSecurityGroupEntity(endpointDefinition: IStratosEndpointDefin
 function generateCFServiceBindingEntity(endpointDefinition: IStratosEndpointDefinition) {
   const definition = {
     type: serviceBindingSchemaKey,
-    schema: entityFactory(serviceBindingSchemaKey),
+    schema: {
+      default: entityFactory(serviceBindingSchemaKey),
+      [serviceBindingNoBindingsSchemaKey]: entityFactory(serviceBindingNoBindingsSchemaKey);
+    },
     label: 'Service Binding',
     labelPlural: 'Service Bindings',
     endpoint: endpointDefinition
@@ -256,7 +263,11 @@ function generateCFServicePlanEntity(endpointDefinition: IStratosEndpointDefinit
 function generateCFServiceInstanceEntity(endpointDefinition: IStratosEndpointDefinition) {
   const definition = {
     type: serviceInstancesSchemaKey,
-    schema: entityFactory(serviceInstancesSchemaKey),
+    schema: {
+      default: entityFactory(serviceInstancesSchemaKey),
+      [serviceInstancesWithSpaceSchemaKey]: entityFactory(serviceInstancesWithSpaceSchemaKey),
+      [serviceInstancesWithNoBindingsSchemaKey]: entityFactory(serviceInstancesWithNoBindingsSchemaKey),
+    },
     label: 'Marketplace Service Instance',
     labelPlural: 'Marketplace Service Instances',
     endpoint: endpointDefinition
@@ -472,7 +483,10 @@ function generateCfApplicationEntity(endpointDefinition: IStratosEndpointDefinit
 function generateCfSpaceEntity(endpointDefinition: IStratosEndpointDefinition) {
   const spaceDefinition = {
     type: spaceSchemaKey,
-    schema: entityFactory(spaceSchemaKey),
+    schema: {
+      default: entityFactory(spaceSchemaKey),
+      [spaceWithOrgKey]: entityFactory(spaceWithOrgKey)
+    },
     label: 'Space',
     labelPlural: 'Spaces',
     endpoint: endpointDefinition

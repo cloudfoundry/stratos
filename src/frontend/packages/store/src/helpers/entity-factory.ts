@@ -201,11 +201,13 @@ const RouteSchema = new EntitySchema(routeSchemaKey, {
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
+
 const RouteNoAppsSchema = new EntitySchema(routeSchemaKey, {
   entity: {
     domain: DomainSchema,
   }
 }, { idAttribute: getAPIResourceGuid });
+// TODO(NJ): Are we intentionally overriding the schema?
 entityCache[routeSchemaKey] = RouteSchema;
 
 

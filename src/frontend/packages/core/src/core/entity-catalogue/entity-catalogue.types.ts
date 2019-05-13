@@ -6,6 +6,10 @@ import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 
+export interface EntityCatalogueSchamas {
+  default: EntitySchema;
+  [schemaKey: string]: EntitySchema;
+}
 export interface IStratosEntityWithIcons {
   icon?: string;
   // TODO (nj): can we allow entity import custom icon fonts?
@@ -24,7 +28,7 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
  */
 export interface IStratosBaseEntityDefinition extends IStratosEntityWithIcons {
   readonly type: string;
-  readonly schema: EntitySchema;
+  readonly schema: EntitySchema | EntityCatalogueSchamas;
   readonly label?: string;
   readonly labelPlural?: string;
   readonly renderPriority?: number;
@@ -115,7 +119,6 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   }
   constructor(
     entity: IStratosEntityDefinition | IStratosEndpointDefinition,
-    // TODO: remove the need for a builder for entities that it doesn't make sense? NJ
     public builder?: IStratosEntityBuilder<T, Y>
   ) {
     this.entity = this.populateEntity(entity);
@@ -128,11 +131,21 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       StratosBaseCatalogueEntity.buildId(baseEntity.type, baseEntity.endpoint.type);
   }
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition) {
+    const schema = entity.schema instanceof EntitySchema ? {
+      default: entity.schema
+    } : entity.schema;
     return {
       ...entity,
       label: entity.label || 'Unknown',
       labelPlural: entity.labelPlural || entity.label || 'Unknown',
+      schema
     };
+  }
+  public getSchema(schemaKey?: string) {
+    // TODO(NJ) We should do a better job at typeing schema 
+    // schema always gets changed to a EntityCatalogueSchamas.
+    const schema = this.entity.schema as EntityCatalogueSchamas;
+    return schemaKey ? schema[schemaKey] : (this.entity.schema as EntityCatalogueSchamas).default;
   }
   public getTypeAndSubtype() {
     const type = this.entity.parentType || this.entity.type;
