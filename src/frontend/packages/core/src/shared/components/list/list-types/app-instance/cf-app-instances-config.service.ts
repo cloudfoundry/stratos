@@ -4,6 +4,12 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
 
+import { DeleteApplicationInstance } from '../../../../../../../store/src/actions/application.actions';
+import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityFactory, metricSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
@@ -18,12 +24,6 @@ import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
-import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
-import { DeleteApplicationInstance } from '../../../../../../../store/src/actions/application.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { metricSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
 export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
   return new FetchApplicationMetricsAction(
@@ -193,7 +193,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     entityServiceFactory: EntityServiceFactory
   ) {
 
-    this.initialised$ = this.endpointsService.hasMetrics(appService.cfGuid).pipe(
+    this.initialised$ = this.endpointsService.hasCellMetrics(appService.cfGuid).pipe(
       map(hasMetrics => {
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
