@@ -8,7 +8,13 @@ import { EntityCatalogueService } from '../../../core/src/core/entity-catalogue/
 export function addExtensionEntities(entityCatalogue: EntityCatalogueService) {
   entityCatalogue.getAllEntitiesTypes().forEach(definition => {
     const { entity } = definition;
-    addEntityToCache(entity.schema);
+    // TODO: This will not be needed once the entity catalogue work is finished
+    Object.keys(entity.schema).forEach(
+      schemaKey => schemaKey === 'default' ?
+        addEntityToCache(entity.schema[schemaKey]) :
+        addEntityToCache(entity.schema[schemaKey], schemaKey)
+    );
+
     defaultCfEntitiesState[definition.id] = {};
     registerAPIRequestEntity(definition.id);
   });

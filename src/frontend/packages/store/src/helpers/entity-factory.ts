@@ -410,8 +410,8 @@ export function entityFactory(key: string): EntitySchema {
   return entity;
 }
 
-export function addEntityToCache(entitySchema: EntitySchema) {
-  entityCache[entitySchema.key] = entitySchema;
+export function addEntityToCache(entitySchema: EntitySchema, key?: string) {
+  entityCache[key || entitySchema.key] = entitySchema;
 }
 
 const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
