@@ -6,7 +6,7 @@ import { first, map } from 'rxjs/operators';
 
 import { FetchAllServiceBindings } from '../../../../../../store/src/actions/service-bindings.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory, serviceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { serviceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -22,6 +22,9 @@ import {
 import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
+import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CloudFoundryPackageModule } from '../../../../../../cloud-foundry/src/cloud-foundry.module';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
@@ -46,6 +49,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     appService: ApplicationService,
     datePipe: DatePipe,
     currentUserPermissionService: CurrentUserPermissionsService,
+    private entityCatalogueService: EntityCatalogueService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     super(store, appService, datePipe, currentUserPermissionService);
@@ -59,6 +63,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     this.viewType = ListViewTypes.TABLE_ONLY;
     this.allowSelection = true;
 
+
     // Disable select if there is more than one service binding associated with a service instance
     this.dataSource.getRowState = (serviceBinding: APIResource<IServiceBinding>): Observable<RowState> => {
       if (!serviceBinding) {
@@ -69,12 +74,13 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
           appService.cfGuid,
           serviceBinding.entity.service_instance_guid
         );
+        const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, action.entityKey);
         const pagObs = getPaginationObservables({
           store,
           action,
           paginationMonitor: this.paginationMonitorFactory.create(
             action.paginationKey,
-            entityFactory(action.entityKey)
+            catalogueEntity.getSchema()
           )
         });
         this.obsCache[serviceBinding.entity.service_instance_guid] = pagObs.pagination$.pipe(

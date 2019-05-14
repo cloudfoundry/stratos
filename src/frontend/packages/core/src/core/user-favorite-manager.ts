@@ -139,7 +139,7 @@ export class UserFavoriteManager {
   }
 
   private mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
-    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.entityType, favorite.endpointType);
+    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.endpointType, favorite.entityType);
 
     return {
       type: catalogueEntity.entity.type,

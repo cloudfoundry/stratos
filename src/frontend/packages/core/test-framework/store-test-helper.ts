@@ -141,6 +141,7 @@ function getDefaultInitialTestStoreState(): AppState {
       message: ''
     },
     pagination: {
+      appSummarySchemaKey: {},
       private_domains: {},
       space_quota_definition: {},
       userProfile: {},
@@ -664,6 +665,7 @@ function getDefaultInitialTestStoreState(): AppState {
       }
     },
     request: {
+      appSummarySchemaKey: {},
       gitRepo: {},
       userProfile: {},
       servicePlanVisibility: {},
@@ -3927,6 +3929,7 @@ function getDefaultInitialTestStoreState(): AppState {
       [userProvidedServiceInstanceSchemaKey]: {}
     },
     requestData: {
+      appSummarySchemaKey: {},
       environmentVars: {},
       stats: {},
       gitRepo: {},

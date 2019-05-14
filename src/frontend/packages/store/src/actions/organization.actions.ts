@@ -85,6 +85,7 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
     public populateMissing = true
   ) {
     super();
+    const schema = entityFactory(organizationSchemaKey);
     this.options = new RequestOptions();
     this.options.url = 'organizations';
     this.options.method = 'get';

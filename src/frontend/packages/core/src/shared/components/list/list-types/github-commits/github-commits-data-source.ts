@@ -3,7 +3,7 @@ import { of as observableOf } from 'rxjs';
 
 import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { EntitySchema, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { EntitySchema, gitCommitSchemaKey, CFEntitySchema } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 import { GitSCM } from '../../../../data-services/scm/scm';
@@ -37,7 +37,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
     super({
       store,
       action,
-      schema: new EntitySchema(gitCommitSchemaKey),
+      schema: new CFEntitySchema(gitCommitSchemaKey),
       getRowUniqueId: object => object.entity.sha,
       paginationKey,
       isLocal: true,

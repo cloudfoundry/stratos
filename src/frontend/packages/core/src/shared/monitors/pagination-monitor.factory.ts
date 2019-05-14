@@ -3,6 +3,7 @@ import { PaginationMonitor } from './pagination-monitor';
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
 import { AppState } from '../../../../store/src/app-state';
+import { EntitySchema } from '../../../../store/src/helpers/entity-factory';
 
 @Injectable()
 export class PaginationMonitorFactory {
@@ -15,7 +16,7 @@ export class PaginationMonitorFactory {
 
   public create<T = any>(
     paginationKey: string,
-    schema: normalizrSchema.Entity,
+    schema: EntitySchema,
   ) {
     const cacheKey = paginationKey + schema.key;
     if (this.monitorCache[cacheKey]) {

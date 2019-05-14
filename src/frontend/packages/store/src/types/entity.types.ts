@@ -17,6 +17,7 @@ import {
   ISpace,
   IStack,
   IBuildpack,
+  IAppSummary,
 } from '../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState, AppState } from '../app-state';
 import {
@@ -114,6 +115,7 @@ interface EntityValues {
   cloudFoundryInfo: IRequestEntityTypeState<any>;
   private_domains: IRequestEntityTypeState<any>;
   space_quota_definition: IRequestEntityTypeState<any>;
+  appSummarySchemaKey: IRequestEntityTypeState<IAppSummary>;
 }
 export type ExtendedRequestState<T extends string | number | symbol, Y> = Record<T, Y>;
 
@@ -144,32 +146,32 @@ export interface IRequestState extends IRequestTypeState {
 
 
 export const defaultCfEntitiesState = {
-  [applicationSchemaKey]: {},
-  [stackSchemaKey]: {},
-  [spaceSchemaKey]: {},
-  [organizationSchemaKey]: {},
-  [routeSchemaKey]: {},
-  [appEventSchemaKey]: {},
-  [endpointSchemaKey]: {},
-  [gitBranchesSchemaKey]: {},
-  [gitCommitSchemaKey]: {},
-  [cfUserSchemaKey]: {},
-  [domainSchemaKey]: {},
-  [appEnvVarsSchemaKey]: {},
-  [appStatsSchemaKey]: {},
-  [appSummarySchemaKey]: {},
-  [serviceInstancesSchemaKey]: {},
-  [servicePlanSchemaKey]: {},
-  [serviceSchemaKey]: {},
-  [serviceBindingSchemaKey]: {},
-  [buildpackSchemaKey]: {},
-  [securityGroupSchemaKey]: {},
-  [featureFlagSchemaKey]: {},
-  [privateDomainsSchemaKey]: {},
-  [spaceQuotaSchemaKey]: {},
-  [metricSchemaKey]: {},
-  [servicePlanVisibilitySchemaKey]: {},
-  [serviceBrokerSchemaKey]: {},
-  [userFavoritesSchemaKey]: {},
-  [userProvidedServiceInstanceSchemaKey]: []
+  // [applicationSchemaKey]: {},
+  // [stackSchemaKey]: {},
+  // [spaceSchemaKey]: {},
+  // [organizationSchemaKey]: {},
+  // [routeSchemaKey]: {},
+  // [appEventSchemaKey]: {},
+  // [endpointSchemaKey]: {},
+  // [gitBranchesSchemaKey]: {},
+  // [gitCommitSchemaKey]: {},
+  // [cfUserSchemaKey]: {},
+  // [domainSchemaKey]: {},
+  // [appEnvVarsSchemaKey]: {},
+  // [appStatsSchemaKey]: {},
+  // [appSummarySchemaKey]: {},
+  // [serviceInstancesSchemaKey]: {},
+  // [servicePlanSchemaKey]: {},
+  // [serviceSchemaKey]: {},
+  // [serviceBindingSchemaKey]: {},
+  // [buildpackSchemaKey]: {},
+  // [securityGroupSchemaKey]: {},
+  // [featureFlagSchemaKey]: {},
+  // [privateDomainsSchemaKey]: {},
+  // [spaceQuotaSchemaKey]: {},
+  // [metricSchemaKey]: {},
+  // [servicePlanVisibilitySchemaKey]: {},
+  // [serviceBrokerSchemaKey]: {},
+  // [userFavoritesSchemaKey]: {},
+  // [userProvidedServiceInstanceSchemaKey]: []
 };

@@ -5,7 +5,14 @@ import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 
+export interface EntityCatalogueEntityConfig {
+  entityType: string;
+  endpointType: string;
+  subType?: string;
+  schemaKey?: string;
+}
 export interface EntityCatalogueSchemas {
   default: EntitySchema;
   [schemaKey: string]: EntitySchema;
@@ -26,9 +33,9 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
  *
  * @export
  */
-export interface IStratosBaseEntityDefinition extends IStratosEntityWithIcons {
+export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogueSchemas> extends IStratosEntityWithIcons {
   readonly type: string;
-  readonly schema: EntitySchema | EntityCatalogueSchemas;
+  readonly schema: T;
   readonly label?: string;
   readonly labelPlural?: string;
   readonly renderPriority?: number;
@@ -43,7 +50,7 @@ export interface IStratosBaseEntityDefinition extends IStratosEntityWithIcons {
  *
  * @export
  */
-export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition {
+export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition<EntityCatalogueSchemas> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
   readonly urlValidation?: boolean;
@@ -60,7 +67,7 @@ export interface IStratosEndpointWithoutSchemaDefinition extends Omit<IStratosEn
  *
  * @export
  */
-export interface IStratosEntityDefinition extends IStratosBaseEntityDefinition {
+export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSchemas> extends IStratosBaseEntityDefinition<T> {
   readonly endpoint: IStratosEndpointDefinition;
 }
 
@@ -107,16 +114,11 @@ export interface IStratosEntityStatusData<Y extends IEntityMetadata = IEntityMet
 }
 
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
-  static endpointType = endpointSchemaKey;
-  public id: string;
-  public entity: IStratosEntityDefinition | IStratosEndpointDefinition;
-  public isEndpoint: boolean;
-  public hasBuilder: boolean;
+  public readonly id: string;
+  public readonly entity: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition;
+  public readonly isEndpoint: boolean;
+  public readonly hasBuilder: boolean;
 
-  static buildId(entityType: string, endpointType: string): string {
-    // Camelcased to make it work better with the store.
-    return endpointType ? `${endpointType}${entityType.charAt(0).toUpperCase() + entityType.slice(1)}` : entityType;
-  }
   constructor(
     entity: IStratosEntityDefinition | IStratosEndpointDefinition,
     public builder?: IStratosEntityBuilder<T, Y>
@@ -127,8 +129,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     this.hasBuilder = !!builder;
     this.id = this.isEndpoint ?
       // 'endpoint' should be in the baseEntity somewhere - nj
-      StratosBaseCatalogueEntity.buildId(StratosBaseCatalogueEntity.endpointType, baseEntity.type) :
-      StratosBaseCatalogueEntity.buildId(baseEntity.type, baseEntity.endpoint.type);
+      EntityCatalogueHelpers.buildId(EntityCatalogueHelpers.endpointType, baseEntity.type) :
+      EntityCatalogueHelpers.buildId(baseEntity.type, baseEntity.endpoint.type);
   }
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition) {
     const schema = entity.schema instanceof EntitySchema ? {
@@ -141,22 +143,26 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       schema
     };
   }
+  /**
+   * Gets the schema associated with the entity type.
+   * If no schemaKey is provided then the default schema will be returned
+   */
   public getSchema(schemaKey?: string) {
     // TODO(NJ) We should do a better job at typeing schema
     // schema always gets changed to a EntityCatalogueSchamas.
     const catalogueSchema = (this.entity.schema as EntityCatalogueSchemas);
-    if (this.isEndpoint) {
+    if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }
     const entityCatalogue = this.entity as IStratosEntityDefinition;
-
-    const tempId = StratosBaseCatalogueEntity.buildId(entityCatalogue.endpoint.type, schemaKey);
+    const tempId = EntityCatalogueHelpers.buildId(entityCatalogue.endpoint.type, schemaKey);
     if (!catalogueSchema[schemaKey] && tempId === this.id) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogueSchema.default;
     }
-    return schemaKey ? catalogueSchema[schemaKey] : catalogueSchema.default;
+    return catalogueSchema[schemaKey];
   }
+
   public getTypeAndSubtype() {
     const type = this.entity.parentType || this.entity.type;
     const subType = this.entity.parentType ? this.entity.type : null;
@@ -168,8 +174,9 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
 }
 
 export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {
+  public entity: IStratosEntityDefinition<EntityCatalogueSchemas>;
   constructor(
-    public entity: IStratosEntityDefinition,
+    entity: IStratosEntityDefinition,
     builder?: IStratosEntityBuilder<T, Y>
   ) {
     super(entity, builder);
@@ -200,13 +207,16 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     entity: IStratosEndpointWithoutSchemaDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string
   ) {
-    super({
+    const fullEntity = {
       ...entity,
-      schema: entityFactory(endpointSchemaKey)
-    }, {
-        ...StratosCatalogueEndpointEntity.baseEndpointRender,
-        getLink: getLink || StratosCatalogueEndpointEntity.baseEndpointRender.getLink
-      });
+      schema: {
+        default: entityFactory(endpointSchemaKey)
+      }
+    } as IStratosEndpointDefinition;
+    super(fullEntity, {
+      ...StratosCatalogueEndpointEntity.baseEndpointRender,
+      getLink: getLink || StratosCatalogueEndpointEntity.baseEndpointRender.getLink
+    });
   }
 }
 

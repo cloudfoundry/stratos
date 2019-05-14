@@ -3,6 +3,8 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
@@ -62,17 +64,19 @@ export class EntitySchema extends schema.Entity {
    * spaces, manager spaces, auditor space, etc
    */
   constructor(
-    private entityKey: string,
+    public entityType: string,
+    public endpointType?: string,
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string
   ) {
-    super(entityKey, definition, options);
+    super(endpointType ? EntityCatalogueHelpers.buildId(entityType, endpointType) : entityType, definition, options);
     this.schema = definition || {};
   }
   public withEmptyDefinition() {
     return new EntitySchema(
-      this.entityKey,
+      this.entityType,
+      this.endpointType,
       {},
       this.options,
       this.relationKey
@@ -80,37 +84,55 @@ export class EntitySchema extends schema.Entity {
   }
 }
 
+export class CFEntitySchema extends EntitySchema {
+  /**
+   * @param entityKey As per schema.Entity ctor
+   * @param [definition] As per schema.Entity ctor
+   * @param [options] As per schema.Entity ctor
+   * @param [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
+   * spaces, manager spaces, auditor space, etc
+   */
+  constructor(
+    entityKey: string,
+    definition?: Schema,
+    options?: schema.EntityOptions,
+    relationKey?: string
+  ) {
+    super(entityKey, CF_ENDPOINT_TYPE, definition, options, relationKey);
+  }
+}
+
 // Note - The cache entry is added as a secondary step. This helps keep the child entity definition's clear and easier to spot circular
 // dependencies which would otherwise be hidden (if we assigned directly to entityCache and references via entityCache in other entities)
 
-const AppSummarySchema = new EntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const AppSummarySchema = new CFEntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appSummarySchemaKey] = AppSummarySchema;
 
-const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const AppStatSchema = new CFEntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appStatsSchemaKey] = AppStatSchema;
 
-const AppEnvVarSchema = new EntitySchema(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const AppEnvVarSchema = new CFEntitySchema(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEnvVarsSchemaKey] = AppEnvVarSchema;
 
-const GithubBranchSchema = new EntitySchema(gitBranchesSchemaKey, {}, { idAttribute: 'entityId' });
+const GithubBranchSchema = new CFEntitySchema(gitBranchesSchemaKey, {}, { idAttribute: 'entityId' });
 entityCache[gitBranchesSchemaKey] = GithubBranchSchema;
 
-const GithubRepoSchema = new EntitySchema(gitRepoSchemaKey);
+const GithubRepoSchema = new CFEntitySchema(gitRepoSchemaKey);
 entityCache[gitRepoSchemaKey] = GithubRepoSchema;
 
-const GithubCommitSchema = new EntitySchema(gitCommitSchemaKey, {}, { idAttribute: commit => commit.sha });
+const GithubCommitSchema = new CFEntitySchema(gitCommitSchemaKey, {}, { idAttribute: commit => commit.sha });
 entityCache[gitCommitSchemaKey] = GithubCommitSchema;
 
-const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);
+const CFInfoSchema = new CFEntitySchema(cfInfoSchemaKey);
 entityCache[cfInfoSchemaKey] = CFInfoSchema;
 
-const EventSchema = new EntitySchema(appEventSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const EventSchema = new CFEntitySchema(appEventSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEventSchemaKey] = EventSchema;
 
-const StackSchema = new EntitySchema(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const StackSchema = new CFEntitySchema(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[stackSchemaKey] = StackSchema;
 
-const DomainSchema = new EntitySchema(domainSchemaKey, {}, {
+const DomainSchema = new CFEntitySchema(domainSchemaKey, {}, {
   idAttribute: getAPIResourceGuid,
   // Work around for an issue where router_group_type can come back null from one API call but
   // for shared_domains call it is correctly populated - the null values can overwrite the
@@ -128,38 +150,38 @@ const DomainSchema = new EntitySchema(domainSchemaKey, {}, {
 });
 entityCache[domainSchemaKey] = DomainSchema;
 
-const ServiceSchema = new EntitySchema(serviceSchemaKey, {
+const ServiceSchema = new CFEntitySchema(serviceSchemaKey, {
   entity: {
-    service_plans: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
+    service_plans: [new CFEntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
   }
 }, { idAttribute: getAPIResourceGuid });
-const ServiceNoPlansSchema = new EntitySchema(serviceSchemaKey, {
+const ServiceNoPlansSchema = new CFEntitySchema(serviceSchemaKey, {
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceSchemaKey] = ServiceSchema;
 
-const MetricSchema = new EntitySchema(metricSchemaKey);
+const MetricSchema = new CFEntitySchema(metricSchemaKey);
 entityCache[metricSchemaKey] = MetricSchema;
 
-const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const SpaceQuotaSchema = new CFEntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
 
-const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
+const ServicePlanSchema = new CFEntitySchema(servicePlanSchemaKey, {
   entity: {
     service: ServiceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanSchemaKey] = ServicePlanSchema;
 
-const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
+const ServiceBindingsSchema = new CFEntitySchema(serviceBindingSchemaKey, {
   entity: {
-    app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
-    service_instance: new EntitySchema(serviceInstancesSchemaKey, {
+    app: new CFEntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    service_instance: new CFEntitySchema(serviceInstancesSchemaKey, {
       entity: {
-        service_bindings: [new EntitySchema(serviceBindingSchemaKey, {
-          app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service_bindings: [new CFEntitySchema(serviceBindingSchemaKey, {
+          app: new CFEntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
         }, { idAttribute: getAPIResourceGuid })],
-        service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
-        service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service: new CFEntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service_plan: new CFEntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
       },
     }, { idAttribute: getAPIResourceGuid }),
     service: ServiceNoPlansSchema
@@ -167,13 +189,13 @@ const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
 
-const ServiceBindingsNoBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
+const ServiceBindingsNoBindingsSchema = new CFEntitySchema(serviceBindingSchemaKey, {
   entity: {
-    app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
-    service_instance: new EntitySchema(serviceInstancesSchemaKey, {
+    app: new CFEntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    service_instance: new CFEntitySchema(serviceInstancesSchemaKey, {
       entity: {
-        service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
-        service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service: new CFEntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        service_plan: new CFEntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
       },
     }, { idAttribute: getAPIResourceGuid }),
     service: ServiceNoPlansSchema
@@ -181,7 +203,7 @@ const ServiceBindingsNoBindingsSchema = new EntitySchema(serviceBindingSchemaKey
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBindingNoBindingsSchemaKey] = ServiceBindingsNoBindingsSchema;
 
-const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
+const ServiceInstancesSchema = new CFEntitySchema(serviceInstancesSchemaKey, {
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
@@ -190,19 +212,19 @@ const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
 
-const BuildpackSchema = new EntitySchema(buildpackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const BuildpackSchema = new CFEntitySchema(buildpackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[buildpackSchemaKey] = BuildpackSchema;
 
-const RouteSchema = new EntitySchema(routeSchemaKey, {
+const RouteSchema = new CFEntitySchema(routeSchemaKey, {
   entity: {
     domain: DomainSchema,
-    apps: [new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
-    space: new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    apps: [new CFEntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    space: new CFEntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
 
-const RouteNoAppsSchema = new EntitySchema(routeSchemaKey, {
+const RouteNoAppsSchema = new CFEntitySchema(routeSchemaKey, {
   entity: {
     domain: DomainSchema,
   }
@@ -211,10 +233,10 @@ const RouteNoAppsSchema = new EntitySchema(routeSchemaKey, {
 entityCache[routeSchemaKey] = RouteSchema;
 
 
-const QuotaDefinitionSchema = new EntitySchema(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const QuotaDefinitionSchema = new CFEntitySchema(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[quotaDefinitionSchemaKey] = QuotaDefinitionSchema;
 
-const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
+const ApplicationWithoutSpaceEntitySchema = new CFEntitySchema(
   applicationSchemaKey,
   {
     entity: {
@@ -231,12 +253,12 @@ const coreSpaceSchemaParams = {
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
   [SpaceUserRoleNames.DEVELOPER]: [
-    new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.DEVELOPER)
+    new CFEntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.DEVELOPER)
   ],
-  [SpaceUserRoleNames.MANAGER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.MANAGER)],
-  [SpaceUserRoleNames.AUDITOR]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.AUDITOR)]
+  [SpaceUserRoleNames.MANAGER]: [new CFEntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.MANAGER)],
+  [SpaceUserRoleNames.AUDITOR]: [new CFEntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.AUDITOR)]
 };
-const SpaceSchema = new EntitySchema(spaceSchemaKey, {
+const SpaceSchema = new CFEntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,
     apps: [ApplicationWithoutSpaceEntitySchema]
@@ -246,7 +268,7 @@ const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   });
 entityCache[spaceSchemaKey] = SpaceSchema;
 
-const PrivateDomainsSchema = new EntitySchema(privateDomainsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const PrivateDomainsSchema = new CFEntitySchema(privateDomainsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[privateDomainsSchemaKey] = PrivateDomainsSchema;
 
 const coreOrgSchemaParams = {
@@ -254,27 +276,27 @@ const coreOrgSchemaParams = {
   quota_definition: QuotaDefinitionSchema,
   private_domains: [PrivateDomainsSchema]
 };
-const OrganizationsWithoutSpaces = new EntitySchema(organizationSchemaKey, {
+const OrganizationsWithoutSpaces = new CFEntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,
   }
 }, { idAttribute: getAPIResourceGuid });
 
-const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
+const OrganizationSchema = new CFEntitySchema(organizationSchemaKey, {
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
-    [OrgUserRoleNames.USER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.USER)],
-    [OrgUserRoleNames.MANAGER]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.MANAGER)],
+    [OrgUserRoleNames.USER]: [new CFEntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.USER)],
+    [OrgUserRoleNames.MANAGER]: [new CFEntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.MANAGER)],
     [OrgUserRoleNames.BILLING_MANAGERS]: [
-      new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.BILLING_MANAGERS)
+      new CFEntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.BILLING_MANAGERS)
     ],
-    [OrgUserRoleNames.AUDITOR]: [new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.AUDITOR)]
+    [OrgUserRoleNames.AUDITOR]: [new CFEntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid }, OrgUserRoleNames.AUDITOR)]
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[organizationSchemaKey] = OrganizationSchema;
 
-const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
+const SpaceWithOrgsEntitySchema = new CFEntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,
     apps: [ApplicationWithoutSpaceEntitySchema],
@@ -284,7 +306,7 @@ const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
 
 
-const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaKey, {
+const ServiceInstancesWithSpaceSchema = new CFEntitySchema(serviceInstancesSchemaKey, {
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
@@ -294,32 +316,32 @@ const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaK
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;
 
-const ServiceInstancesWithNoBindingsSchema = new EntitySchema(serviceInstancesSchemaKey, {
+const ServiceInstancesWithNoBindingsSchema = new CFEntitySchema(serviceInstancesSchemaKey, {
   entity: {
-    service_plan: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
-    service: [new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    service_plan: [new CFEntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+    service: [new CFEntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
     space: SpaceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesWithNoBindingsSchemaKey] = ServiceInstancesWithNoBindingsSchema;
 
-const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {
+const ServicePlanVisibilitySchema = new CFEntitySchema(servicePlanVisibilitySchemaKey, {
   entity: {
     organization: OrganizationSchema,
-    service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    service_plan: new CFEntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
-const UserFavoritesSchemaKey = new EntitySchema(userFavoritesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const UserFavoritesSchemaKey = new CFEntitySchema(userFavoritesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[userFavoritesSchemaKey] = UserFavoritesSchemaKey;
 
-const ApplicationEntitySchema = new EntitySchema(
+const ApplicationEntitySchema = new CFEntitySchema(
   applicationSchemaKey,
   {
     entity: {
       stack: StackSchema,
-      space: new EntitySchema(spaceSchemaKey, {
+      space: new CFEntitySchema(spaceSchemaKey, {
         entity: {
           ...coreSpaceSchemaParams,
           routes: [RouteNoAppsSchema],
@@ -333,17 +355,17 @@ const ApplicationEntitySchema = new EntitySchema(
   }, { idAttribute: getAPIResourceGuid });
 entityCache[applicationSchemaKey] = ApplicationEntitySchema;
 
-const EndpointSchema = new EntitySchema(endpointSchemaKey, {}, { idAttribute: 'guid' });
+const EndpointSchema = new EntitySchema(endpointSchemaKey, null, {}, { idAttribute: 'guid' });
 entityCache[endpointSchemaKey] = EndpointSchema;
 
-const SecurityGroupSchema = new EntitySchema(securityGroupSchemaKey, {
+const SecurityGroupSchema = new CFEntitySchema(securityGroupSchemaKey, {
   entity: {
     spaces: [SpaceSchema]
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[securityGroupSchemaKey] = SecurityGroupSchema;
 
-const FeatureFlagSchema = new EntitySchema(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const FeatureFlagSchema = new CFEntitySchema(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[featureFlagSchemaKey] = FeatureFlagSchema;
 
 const SpaceEmptySchema = SpaceSchema.withEmptyDefinition();
@@ -353,14 +375,14 @@ const orgUserEntity = {
   }
 };
 
-const ServiceBrokerSchema = new EntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const ServiceBrokerSchema = new CFEntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBrokerSchemaKey] = ServiceBrokerSchema;
 
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
-  return new EntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
+  return new CFEntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
 }
 
-const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
+const CFUserSchema = new CFEntitySchema(cfUserSchemaKey, {
   entity: {
     organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.ORGANIZATIONS)],
     audited_organizations: [createUserOrgSpaceSchema(organizationSchemaKey, orgUserEntity, CfUserRoleParams.AUDITED_ORGS)],
@@ -392,7 +414,7 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
 entityCache[cfUserSchemaKey] = CFUserSchema;
 
 
-const UserProvidedServiceInstanceSchema = new EntitySchema(userProvidedServiceInstanceSchemaKey, {
+const UserProvidedServiceInstanceSchema = new CFEntitySchema(userProvidedServiceInstanceSchemaKey, {
   entity: {
     space: SpaceWithOrgsEntitySchema,
     service_bindings: [ServiceBindingsSchema],
@@ -414,5 +436,5 @@ export function addEntityToCache(entitySchema: EntitySchema, key?: string) {
   entityCache[key || entitySchema.key] = entitySchema;
 }
 
-const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
+const UserProfileInfoSchema = new CFEntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
 entityCache[userProfileSchemaKey] = UserProfileInfoSchema;

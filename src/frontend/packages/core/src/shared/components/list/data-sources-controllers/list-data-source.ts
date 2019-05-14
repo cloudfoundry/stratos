@@ -88,7 +88,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // Store related
   public entityKey: string;
   // TODO: this should not be default, all data sources should provide this.
-  public endpointType = 'cf';
+  public endpointType: string;
 
   // Add item
   public addItem: T;
@@ -136,6 +136,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public refresh: () => void;
 
   public isMultiAction$: Observable<boolean>;
+  entityType: string;
 
   static initializeServices(entityCatalogueService: EntityCatalogueService) {
     // TODO: This isn't very nice, fix it - nj.
@@ -149,6 +150,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   ) {
     super();
     this.init(config);
+    // console.log(this.action)
     const paginationMonitor = new PaginationMonitor(
       this.store,
       this.paginationKey,
@@ -236,6 +238,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+    this.entityType = this.sourceScheme.entityType;
+    this.endpointType = this.sourceScheme.endpointType;
     this.masterAction = this.action as PaginatedAction;
     this.setupAction(config);
     if (!this.isLocal && this.config.listConfig) {
@@ -272,7 +276,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => {
-      const catalogueEntity = services.entityCatalogue.getEntity(schemaConfig.paginationAction.entityKey, this.endpointType);
+      const catalogueEntity = services.entityCatalogue.getEntity(this.endpointType, schemaConfig.paginationAction.entityKey);
       const idPage = {
         page: i + 1,
         label: catalogueEntity.entity.label || 'Unknown',
@@ -307,7 +311,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
     if (schema instanceof MultiActionConfig) {
       const { paginationAction, schemaKey } = schema.schemaConfigs[0];
-      const catalogueEntity = services.entityCatalogue.getEntity(paginationAction.entityKey, this.endpointType);
+      const catalogueEntity = services.entityCatalogue.getEntity(this.endpointType, paginationAction.entityKey);
       return catalogueEntity.getSchema(schemaKey);
     }
     return schema;

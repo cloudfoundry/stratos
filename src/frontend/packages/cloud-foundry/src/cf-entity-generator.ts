@@ -35,7 +35,8 @@ import {
   serviceBindingNoBindingsSchemaKey,
   spaceWithOrgKey,
   serviceInstancesWithSpaceSchemaKey,
-  serviceInstancesWithNoBindingsSchemaKey
+  serviceInstancesWithNoBindingsSchemaKey,
+  appSummarySchemaKey
 } from '../../store/src/helpers/entity-factory';
 import { APIResource } from '../../store/src/types/api.types';
 import {
@@ -64,11 +65,11 @@ import {
   IUserProvidedServiceInstance,
 } from '../../core/src/core/cf-api-svc.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition = {
-    type: 'cf',
-    schema: entityFactory(endpointSchemaKey),
+    type: CF_ENDPOINT_TYPE,
     label: 'Cloud Foundry',
     labelPlural: 'Cloud Foundry',
     icon: 'cloud_foundry',
@@ -104,7 +105,17 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     generateCFInfoEntity(endpointDefinition),
     generateCFPrivateDomainEntity(endpointDefinition),
     generateCFSpaceQuotaEntity(endpointDefinition),
+    generateCFAppSummaryEntity(endpointDefinition),
   ];
+}
+
+function generateCFAppSummaryEntity(endpointDefinition: IStratosEndpointDefinition) {
+  const definition = {
+    type: appSummarySchemaKey,
+    schema: entityFactory(appSummarySchemaKey),
+    endpoint: endpointDefinition
+  };
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition);
 }
 
 function generateCFSpaceQuotaEntity(endpointDefinition: IStratosEndpointDefinition) {
@@ -152,7 +163,6 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: IStrato
     }
   );
 }
-
 
 function generateCFAppStatsEntity(endpointDefinition: IStratosEndpointDefinition) {
   const definition = {

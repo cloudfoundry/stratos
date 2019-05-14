@@ -5,7 +5,7 @@ import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
-import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
+import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { UpdateUserFavoriteMetadataAction } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { AppState } from '../../store/src/app-state';
@@ -82,7 +82,7 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
-    CloudFoundryModule,
+    CloudFoundryPackageModule,
     AppStoreExtensionsModule,
     AppStoreModule,
     BrowserModule,

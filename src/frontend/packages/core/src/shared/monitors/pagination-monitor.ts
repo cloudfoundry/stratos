@@ -15,7 +15,7 @@ import {
 } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
-import { entityFactory } from '../../../../store/src/helpers/entity-factory';
+import { entityFactory, EntitySchema } from '../../../../store/src/helpers/entity-factory';
 import { ActionState, ListActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
@@ -63,7 +63,7 @@ export class PaginationMonitor<T = any> {
   constructor(
     private store: Store<AppState>,
     public paginationKey: string,
-    public schema: normalizrSchema.Entity,
+    public schema: EntitySchema,
     public isLocal = false
   ) {
     this.init(store, paginationKey, schema);

@@ -3,7 +3,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../store/src/app-state';
-import { entityFactory, featureFlagSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { featureFlagSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
@@ -27,6 +27,9 @@ import {
   PermissionValues,
   ScopeStrings,
 } from './current-user-permissions.config';
+import { EntityCatalogueService } from './entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+
 
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
@@ -38,7 +41,7 @@ export enum CHECKER_GROUPS {
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, private entityCatalogueService: EntityCatalogueService) { }
   public check(
     type: PermissionTypes,
     permission: PermissionValues,
@@ -190,12 +193,18 @@ export class CurrentUserPermissionsChecker {
   public getFeatureFlagCheck(config: PermissionConfig, endpointGuid?: string): Observable<boolean> {
     const permission = config.permission as CFFeatureFlagTypes;
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
+    const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, featureFlagSchemaKey);
+    const schema = catalogueEntity.getSchema();
     return endpointGuids$.pipe(
       switchMap(guids => {
         const paginationKeys = guids.map(guid => createCFFeatureFlagPaginationKey(guid));
         return combineLatest(
           paginationKeys.map(
-            key => new PaginationMonitor<APIResource<IFeatureFlag>>(this.store, key, entityFactory(featureFlagSchemaKey)).currentPage$
+            key => new PaginationMonitor<APIResource<IFeatureFlag>>(
+              this.store,
+              key,
+              schema
+            ).currentPage$
           ));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),

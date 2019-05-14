@@ -8,6 +8,7 @@ import { ApplicationService } from '../../../../../../features/applications/appl
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { TableCellCustom } from '../../../list.types';
+import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-table-cell-app-status',
@@ -34,7 +35,8 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private entityCatalogueService: EntityCatalogueService
+
   ) {
     super();
   }
@@ -43,6 +45,7 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
     const applicationState = this.appStateService.get(this.row.entity, null);
     this.fetchAppState$ = ApplicationService.getApplicationState(
       this.store,
+      this.entityCatalogueService,
       this.appStateService,
       this.row.entity,
       this.row.metadata.guid,

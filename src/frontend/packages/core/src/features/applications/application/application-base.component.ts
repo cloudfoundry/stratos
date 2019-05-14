@@ -3,13 +3,15 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 
 
@@ -20,7 +22,8 @@ export function applicationServiceFactory(
   entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
-  paginationMonitorFactory: PaginationMonitorFactory
+  paginationMonitorFactory: PaginationMonitorFactory,
+  entityCatalogueService: EntityCatalogueService
 ) {
   return new ApplicationService(
     cfId,
@@ -29,7 +32,8 @@ export function applicationServiceFactory(
     entityServiceFactoryInstance,
     appStateService,
     appEnvVarsService,
-    paginationMonitorFactory
+    paginationMonitorFactory,
+    entityCatalogueService
   );
 }
 
@@ -37,10 +41,12 @@ export function entityServiceFactory(
   cfId: string,
   id: string,
   esf: EntityServiceFactory,
+  entityCatalogueService: EntityCatalogueService
 ) {
+  const catalogueEntity = entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
   return esf.create(
     applicationSchemaKey,
-    entityFactory(applicationSchemaKey),
+    catalogueEntity.getSchema(),
     id,
     createGetApplicationAction(id, cfId),
     true
@@ -76,12 +82,21 @@ export function getGuids(type?: string) {
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
-      deps: [CF_GUID, APP_GUID, Store, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsHelper, PaginationMonitorFactory]
+      deps: [
+        CF_GUID,
+        APP_GUID,
+        Store,
+        EntityServiceFactory,
+        ApplicationStateService,
+        ApplicationEnvVarsHelper,
+        PaginationMonitorFactory,
+        EntityCatalogueService
+      ]
     },
     {
       provide: ENTITY_SERVICE,
       useFactory: entityServiceFactory,
-      deps: [CF_GUID, APP_GUID, EntityServiceFactory]
+      deps: [CF_GUID, APP_GUID, EntityServiceFactory, EntityCatalogueService]
     },
 
   ]

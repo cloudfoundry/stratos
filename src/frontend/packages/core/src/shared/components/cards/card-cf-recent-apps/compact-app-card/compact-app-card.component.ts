@@ -12,6 +12,7 @@ import {
 import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { StratosStatus } from '../../../../shared.types';
+import { EntityCatalogueService } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 
 @Component({
@@ -33,7 +34,8 @@ export class CompactAppCardComponent implements OnInit {
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    private entityCatalogueService: EntityCatalogueService
   ) { }
   ngOnInit() {
 
@@ -41,6 +43,7 @@ export class CompactAppCardComponent implements OnInit {
     const initState = this.appStateService.get(this.app.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.store,
+      this.entityCatalogueService,
       this.appStateService,
       this.app.entity,
       this.app.metadata.guid,

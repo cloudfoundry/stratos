@@ -9,7 +9,9 @@ import {
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { GetAppEnvVarsAction } from '../../../../../../../../store/src/actions/app-metadata.actions';
-import { entityFactory, appEnvVarsSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { appEnvVarsSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 
 export interface EnvVarStratosProject {
@@ -32,17 +34,19 @@ export class ApplicationEnvVarsHelper {
 
   constructor(
     private store: Store<AppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    private entityCatalogueService: EntityCatalogueService
   ) { }
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
+    const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, appEnvVarsSchemaKey);
     const action = new GetAppEnvVarsAction(appGuid, cfGuid);
     return getPaginationObservables<APIResource>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        entityFactory(appEnvVarsSchemaKey)
+        catalogueEntity.getSchema()
       )
     }, true);
   }

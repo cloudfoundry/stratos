@@ -46,10 +46,19 @@ import { paginationFailure } from './pagination-reducer.failure';
 import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
 
 // Initialized when all entity types have been registered
-export let defaultPaginationState = {};
+export let defaultPaginationState = {
+  endpoint: {},
+  system: {},
+  userProfile: {},
+  metrics: {},
+  userFavorites: {}
+};
 
 export function setDefaultPaginationState(state: any) {
-  defaultPaginationState = state;
+  defaultPaginationState = {
+    ...state,
+    ...defaultPaginationState
+  };
 }
 
 const getPaginationUpdater = (types: [string, string, string]) => {
@@ -146,7 +155,7 @@ function enterPaginationReducer(state: PaginationState, action, updatePagination
   const actionType = getActionType(action);
   const key = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);
-
+  // console.log(key)
   if (actionType && key && paginationKey) {
     const newState = { ...state };
     const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);

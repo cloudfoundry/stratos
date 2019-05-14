@@ -13,7 +13,6 @@ import { DeleteUserProvidedInstance } from '../../../../../store/src/actions/use
 import { AppState } from '../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
-  entityFactory,
   routeSchemaKey,
   serviceInstancesSchemaKey,
   userProvidedServiceInstanceSchemaKey,
@@ -53,6 +52,9 @@ import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../cloud-foundry/cf.helpers';
 import { ApplicationService } from '../application.service';
+import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { CloudFoundryPackageModule } from '../../../../../cloud-foundry/src/cloud-foundry.module';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -174,7 +176,8 @@ export class ApplicationDeleteComponent<T> {
     private applicationService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private entityCatalogueService: EntityCatalogueService
   ) {
     this.setupAppMonitor();
     this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;
@@ -220,10 +223,11 @@ export class ApplicationDeleteComponent<T> {
   }
 
   public getApplicationMonitor() {
+    const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
     return this.entityMonitorFactory.create<APIResource<IApp>>(
       this.applicationService.appGuid,
       applicationSchemaKey,
-      entityFactory(applicationSchemaKey)
+      catalogueEntity.getSchema()
     );
   }
   /**

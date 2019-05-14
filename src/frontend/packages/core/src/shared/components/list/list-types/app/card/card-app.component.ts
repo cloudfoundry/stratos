@@ -16,6 +16,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../appli
 import { CardCell } from '../../../list.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
+import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-card-app',
@@ -36,7 +37,9 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private favoritesConfigMapper: FavoritesConfigMapper,
+    private entityCatalogueService: EntityCatalogueService
+
   ) {
     super();
   }
@@ -55,6 +58,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.store,
+      this.entityCatalogueService,
       this.appStateService,
       this.row.entity,
       this.row.metadata.guid,

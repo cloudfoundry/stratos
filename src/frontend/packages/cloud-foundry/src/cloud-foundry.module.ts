@@ -10,8 +10,7 @@ import { generateCFEntities } from './cf-entity-generator';
     CloudFoundryComponentsModule
   ],
 })
-export class CloudFoundryModule {
-
+export class CloudFoundryPackageModule {
   constructor(
     private entityCatalogueService: EntityCatalogueService
   ) {

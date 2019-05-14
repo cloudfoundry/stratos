@@ -13,6 +13,7 @@ import { AppState } from '../../store/src/app-state';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { Observable, of as observableOf } from 'rxjs';
+import { EntityCatalogueService } from '../src/core/entity-catalogue/entity-catalogue.service';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -87,7 +88,8 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
       entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,
-      paginationMonitorFactory: PaginationMonitorFactory
+      paginationMonitorFactory: PaginationMonitorFactory,
+      entityCatalogueService: EntityCatalogueService
     ) => {
       const appService = new ApplicationService(
         cfGuid,
@@ -96,7 +98,8 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
         entityServiceFactory,
         applicationStateService,
         applicationEnvVarsService,
-        paginationMonitorFactory
+        paginationMonitorFactory,
+        entityCatalogueService,
       );
       return appService;
     },
@@ -105,7 +108,8 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
       EntityServiceFactory,
       ApplicationStateService,
       ApplicationEnvVarsHelper,
-      PaginationMonitorFactory
+      PaginationMonitorFactory,
+      EntityCatalogueService
     ]
   };
 }

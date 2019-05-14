@@ -3,8 +3,10 @@ import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
-  IEntityMetadata
+  IEntityMetadata,
+  IStratosEndpointDefinition
 } from './entity-catalogue.types';
+import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +26,7 @@ export class EntityCatalogueService {
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
     if (this.endpoints.has(endpoint.id)) {
-      console.warn(`Duplicate endpoint catalogue entity found. ID: ${endpoint.id} - Type: ${endpoint.entity.type}`)
+      console.warn(`Duplicate endpoint catalogue entity found. ID: ${endpoint.id} - Type: ${endpoint.entity.type}`);
     } else {
       this.endpoints.set(endpoint.id, endpoint);
     }
@@ -33,7 +35,7 @@ export class EntityCatalogueService {
   private registerEntity(entity: StratosCatalogueEntity) {
     if (this.entities.has(entity.id)) {
       const { type } = entity.entity;
-      console.warn(`Duplicate catalogue entity found. ID: ${entity.id} - Type: ${type} - Endpoint: ${entity.entity.endpoint.type}`)
+      console.warn(`Duplicate catalogue entity found. ID: ${entity.id} - Type: ${type} - Endpoint: ${entity.entity.endpoint.type}`);
     } else {
       this.entities.set(entity.id, entity);
     }
@@ -43,8 +45,8 @@ export class EntityCatalogueService {
     T extends IEntityMetadata = IEntityMetadata,
     Y = any
   >(entityType: string, endpointType: string): StratosBaseCatalogueEntity {
-    const id = StratosBaseCatalogueEntity.buildId(entityType, endpointType);
-    if (entityType === StratosBaseCatalogueEntity.endpointType) {
+    const id = EntityCatalogueHelpers.buildId(entityType, endpointType);
+    if (entityType === EntityCatalogueHelpers.endpointType) {
       return this.endpoints.get(id);
     }
     return this.entities.get(id) as StratosCatalogueEntity<T, Y>;
@@ -60,16 +62,18 @@ export class EntityCatalogueService {
 
 
 
-  public getEntity<
-    T extends IEntityMetadata = IEntityMetadata,
-    Y = any
-  >(entityType: string, endpointType: string, subType?: string): StratosBaseCatalogueEntity {
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    endpointType: string,
+    entityType: string,
+    subType?: string
+  ): StratosBaseCatalogueEntity {
     const entityOfType = this.getEntityOfType<T, Y>(entityType, endpointType);
-    if (entityType === StratosBaseCatalogueEntity.endpointType && subType) {
+    if (entityType === EntityCatalogueHelpers.endpointType && subType) {
       const subtype = this.getEndpointSubtype(entityOfType as StratosCatalogueEndpointEntity, subType);
+      const endpoint = entityOfType.entity as IStratosEndpointDefinition;
       // Ensure the subtype inherits parent
       return new StratosCatalogueEndpointEntity({
-        ...entityOfType,
+        ...endpoint,
         ...subtype
       }, entityOfType.builder.getLink);
     }
@@ -78,8 +82,8 @@ export class EntityCatalogueService {
 
   public getEndpoint(endpointType: string, subType?: string) {
     return this.getEntity(
-      StratosBaseCatalogueEntity.endpointType,
       endpointType,
+      EntityCatalogueHelpers.endpointType,
       subType
     ) as StratosCatalogueEndpointEntity;
   }

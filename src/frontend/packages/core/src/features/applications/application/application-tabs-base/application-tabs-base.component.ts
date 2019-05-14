@@ -6,7 +6,7 @@ import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'r
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { applicationSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { applicationSchemaKey, EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -33,6 +33,8 @@ import { EndpointsService } from './../../../../core/endpoints.service';
 import { getFavoriteFromCfEntity } from '../../../../core/user-favorite-helpers';
 import { FavoritesConfigMapper } from '../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
+import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -40,8 +42,8 @@ import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
-  public schema = entityFactory(applicationSchemaKey);
   public appState$: Observable<ApplicationStateData>;
+  public schema: EntitySchema;
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
@@ -60,8 +62,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private favoritesConfigMapper: FavoritesConfigMapper,
+    entityCatalogueService: EntityCatalogueService
   ) {
+    const catalogueEntity = entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
+    this.schema = catalogueEntity.getSchema();
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(
