@@ -93,7 +93,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   appAutoscalerAppMetricNames = [];
 
   paramsMetrics: AutoscalerPaginationParams = {
-    'start-time': '0',
+    'start-time': ((new Date()).getTime() - 60000).toString() + '000000',
     'end-time': (new Date()).getTime().toString() + '000000',
     page: '1',
     'results-per-page': '1',

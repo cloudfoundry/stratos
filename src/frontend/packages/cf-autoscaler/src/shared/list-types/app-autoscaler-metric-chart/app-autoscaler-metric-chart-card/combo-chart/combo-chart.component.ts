@@ -123,6 +123,14 @@ import { curveLinear } from 'd3-shape';
         </svg:g>
       </svg:g>
     </ngx-charts-chart>
+    <ngx-charts-legend
+      class="chart-legend"
+      [data]="legendOptionsExtra.domain"
+      [title]="legendOptionsExtra.title"
+      [colors]="legendOptionsExtra.colors"
+      [height]="height"
+      [activeEntries]="activeEntries">
+    </ngx-charts-legend>
   `,
   styleUrls: ['./combo-chart.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -157,6 +165,7 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
   @Input() animations = true;
   @Input() yScaleMax: number;
   @Input() metricName: string;
+  @Input() legendData: any[];
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -172,10 +181,12 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
   transform: string;
   colors: ColorHelper;
   colorsLine: ColorHelper;
+  colorsExtra: ColorHelper;
   margin: any[] = [10, 20, 10, 20];
   xAxisHeight = 0;
   yAxisWidth = 0;
   legendOptions: any;
+  legendOptionsExtra: any;
   scaleType = 'linear';
   xScaleLine;
   yScaleLine;
@@ -235,6 +246,7 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
 
     this.setColors();
     this.legendOptions = this.getLegendOptions();
+    this.legendOptionsExtra = this.getLegendOptionsExtra();
 
     this.transform = `translate(${this.dims.xOffset} , ${this.margin[0]})`;
   }
@@ -442,24 +454,41 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
     }
     this.colors = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
     this.colorsLine = new ColorHelper(this.colorSchemeLine, this.schemeType, domain, this.customColors);
+    this.colorsExtra = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
   }
 
   getLegendOptions() {
     const opts = {
       scaleType: this.schemeType,
       colors: undefined,
-      domain: [],
+      domain: this.seriesDomain,
       title: undefined,
       position: this.legendPosition
     };
     if (opts.scaleType === 'ordinal') {
-      opts.domain = this.seriesDomain;
       opts.colors = this.colorsLine;
       opts.title = this.legendTitle;
     } else {
-      opts.domain = this.seriesDomain;
       opts.colors = this.colors.scale;
     }
+    return opts;
+  }
+
+  getLegendOptionsExtra() {
+    const opts = {
+      scaleType: this.schemeType,
+      colors: this.colorsExtra,
+      domain: [],
+      title: this.legendTitle,
+      position: this.legendPosition
+    };
+    opts.colors.colorDomain = [];
+    opts.colors.customColors = this.legendData;
+    this.legendData.map((item) => {
+      opts.colors.colorDomain.push(item.value);
+      opts.colors.domain.push(item.name);
+      opts.domain.push(item.name);
+    });
     return opts;
   }
 
