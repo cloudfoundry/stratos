@@ -26,13 +26,11 @@ export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> 
     const actionSchemaConfigs = [
       new ActionSchemaConfig(
         marketplaceAction,
-        serviceInstancesWithSpaceSchemaKey,
-        'Marketplace Provided'
+        serviceInstancesWithSpaceSchemaKey
       ),
       new ActionSchemaConfig(
         userProvidedAction,
-        userProvidedServiceInstanceSchemaKey,
-        'User Provided'
+        userProvidedServiceInstanceSchemaKey
       ),
     ];
     const multiAction = new MultiActionConfig(

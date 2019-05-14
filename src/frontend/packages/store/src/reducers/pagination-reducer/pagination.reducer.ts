@@ -149,9 +149,6 @@ function enterPaginationReducer(state: PaginationState, action, updatePagination
 
   if (actionType && key && paginationKey) {
     const newState = { ...state };
-    if (paginationKey === 'application-2' || paginationKey === 'endpointOrgSpaceService') {
-      console.log(newState, key, paginationKey);
-    }
     const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
     if (state[key][paginationKey] === updatedPaginationState) {
       return state;

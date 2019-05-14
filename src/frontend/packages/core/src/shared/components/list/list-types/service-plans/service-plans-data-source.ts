@@ -17,9 +17,15 @@ import {
   entityFactory
 } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetServicePlansForService } from '../../../../../../../store/src/actions/service.actions';
+import { EntityCatalogueService } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 export class ServicePlansDataSource extends ListDataSource<APIResource<IServicePlan>> {
-  constructor(cfGuid: string, serviceGuid: string, store: Store<AppState>, listConfig: IListConfig<APIResource>) {
+  constructor(
+    cfGuid: string,
+    serviceGuid: string,
+    store: Store<AppState>,
+    listConfig: IListConfig<APIResource>
+  ) {
 
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, serviceGuid);
     const action = new GetServicePlansForService(serviceGuid, cfGuid, paginationKey, [

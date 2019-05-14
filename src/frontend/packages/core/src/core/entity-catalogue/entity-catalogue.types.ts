@@ -6,7 +6,7 @@ import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 
-export interface EntityCatalogueSchamas {
+export interface EntityCatalogueSchemas {
   default: EntitySchema;
   [schemaKey: string]: EntitySchema;
 }
@@ -28,7 +28,7 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
  */
 export interface IStratosBaseEntityDefinition extends IStratosEntityWithIcons {
   readonly type: string;
-  readonly schema: EntitySchema | EntityCatalogueSchamas;
+  readonly schema: EntitySchema | EntityCatalogueSchemas;
   readonly label?: string;
   readonly labelPlural?: string;
   readonly renderPriority?: number;
@@ -142,10 +142,20 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     };
   }
   public getSchema(schemaKey?: string) {
-    // TODO(NJ) We should do a better job at typeing schema 
+    // TODO(NJ) We should do a better job at typeing schema
     // schema always gets changed to a EntityCatalogueSchamas.
-    const schema = this.entity.schema as EntityCatalogueSchamas;
-    return schemaKey ? schema[schemaKey] : (this.entity.schema as EntityCatalogueSchamas).default;
+    const catalogueSchema = (this.entity.schema as EntityCatalogueSchemas);
+    if (this.isEndpoint) {
+      return catalogueSchema.default;
+    }
+    const entityCatalogue = this.entity as IStratosEntityDefinition;
+
+    const tempId = StratosBaseCatalogueEntity.buildId(entityCatalogue.endpoint.type, schemaKey);
+    if (!catalogueSchema[schemaKey] && tempId === this.id) {
+      // We've requested the default by passing the schema key that matches the entity type
+      return catalogueSchema.default;
+    }
+    return schemaKey ? catalogueSchema[schemaKey] : catalogueSchema.default;
   }
   public getTypeAndSubtype() {
     const type = this.entity.parentType || this.entity.type;

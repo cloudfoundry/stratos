@@ -8,6 +8,7 @@ import { PaginatedAction } from '../../../../../../store/src/types/pagination.ty
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
+import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 
 /**
@@ -36,14 +37,9 @@ export class MultiActionConfig {
  * @export
  */
 export class ActionSchemaConfig {
-  /**
-   * Creates an instance of ActionSchemaConfig.
-   * @param [prettyName] The value that will be shown in the entity dropdown.
-   */
   constructor(
     public paginationAction: PaginatedAction,
-    public schemaKey: string,
-    public prettyName?: string
+    public schemaKey: string
   ) { }
 }
 

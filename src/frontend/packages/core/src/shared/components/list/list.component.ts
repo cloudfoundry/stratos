@@ -51,7 +51,6 @@ import {
 } from '../../../../../store/src/actions/list.actions';
 import { SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -75,6 +74,7 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
+import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
 
 
 @Component({
@@ -114,6 +114,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   @Input() listConfig: ListConfig<T>;
   initialEntitySelection$: Observable<number>;
   pPaginator: MatPaginator;
+  private filterString: string;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
@@ -174,7 +175,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       direction: null,
       value: null
     };
-  private filterString = '';
   private sortColumns: ITableColumn<T>[];
 
   private paginationWidgetToStore: Subscription;
@@ -226,6 +226,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   constructor(
     private store: Store<AppState>,
+    private entityCatalogueService: EntityCatalogueService,
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
     private ngZone: NgZone
@@ -294,7 +295,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
-      const schema = entityFactory(this.dataSource.entityKey);
+      const catalogueEntity = this.entityCatalogueService.getEntity(this.dataSource.entityKey, this.dataSource.endpointType);
+      const schema = catalogueEntity.getSchema();
+      // geentityFactory(this.dataSource.entityKey);
       this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
     }
     this.multiFilterManagers = this.getMultiFilterManagers();

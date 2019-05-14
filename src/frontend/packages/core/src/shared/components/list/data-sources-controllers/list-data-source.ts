@@ -28,7 +28,7 @@ import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.a
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory, EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   PaginatedAction,
@@ -50,6 +50,7 @@ import {
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { LocalPaginationHelpers } from './local-list.helpers';
+import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -71,7 +72,11 @@ export function distinctPageUntilChanged(dataSource) {
     return oldPageKeys === newPageKeys;
   };
 }
-
+const services: {
+  entityCatalogue: EntityCatalogueService
+} = {
+  entityCatalogue: null
+}
 export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
 export abstract class ListDataSource<T, A = T> extends DataSource<T> implements IListDataSource<T> {
 
@@ -82,6 +87,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Store related
   public entityKey: string;
+  // TODO: this should not be default, all data sources should provide this.
+  public endpointType = 'cf';
 
   // Add item
   public addItem: T;
@@ -121,7 +128,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public isLocal = false;
   public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[] = [];
 
-  private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
   private metricsAction: MetricsAction;
@@ -130,10 +136,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public refresh: () => void;
 
   public isMultiAction$: Observable<boolean>;
+
+  static initializeServices(entityCatalogueService: EntityCatalogueService) {
+    // TODO: This isn't very nice, fix it - nj.
+    services.entityCatalogue = entityCatalogueService;
+  }
+
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
   constructor(
-    private config: IListDataSourceConfig<A, T>
+    private config: IListDataSourceConfig<A, T>,
   ) {
     super();
     this.init(config);
@@ -212,8 +224,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.store = config.store;
     this.action = config.action;
     this.refresh = this.getRefreshFunction(config);
-    this.sourceScheme = config.schema instanceof MultiActionConfig ?
-      entityFactory(config.schema.schemaConfigs[0].schemaKey) : config.schema;
+    this.sourceScheme = this.getSourceSchema(config.schema);
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
@@ -260,14 +271,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     if (!multiActionConfig.selectPlaceholder) {
       return null;
     }
-    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => ([
-      ...actionMap,
-      {
+    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => {
+      const catalogueEntity = services.entityCatalogue.getEntity(schemaConfig.paginationAction.entityKey, this.endpointType);
+      const idPage = {
         page: i + 1,
-        label: schemaConfig.prettyName,
+        label: catalogueEntity.entity.label || 'Unknown',
         schemaKey: schemaConfig.schemaKey
-      }
-    ]), [] as IEntitySelectItem[]);
+      };
+      actionMap.push(idPage);
+      return actionMap;
+    }, [] as IEntitySelectItem[]);
     if (Object.keys(pageToIdMap).length < 2) {
       return null;
     }
@@ -289,6 +302,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.store.dispatch(this.metricsAction || this.masterAction);
       }
     };
+  }
+
+  private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
+    if (schema instanceof MultiActionConfig) {
+      const { paginationAction, schemaKey } = schema.schemaConfigs[0];
+      const catalogueEntity = services.entityCatalogue.getEntity(paginationAction.entityKey, this.endpointType);
+      return catalogueEntity.getSchema(schemaKey);
+    }
+    return schema;
   }
 
   disconnect() {
@@ -355,7 +377,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           })
         ));
         return obs;
-      }, []));
+      }, [] as Observable<RowState>[]));
     }));
 
     updatedAllRows$.pipe(

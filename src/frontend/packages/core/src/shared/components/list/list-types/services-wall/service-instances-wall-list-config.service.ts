@@ -29,7 +29,7 @@ import {
  */
 @Injectable()
 export class ServiceInstancesWallListConfigService extends CfServiceInstancesListConfigBase {
-
+  endpointType = 'cf';
   text = {
     title: null,
     filter: 'Search by name',
@@ -45,10 +45,10 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
 
   constructor(store: Store<AppState>,
-              datePipe: DatePipe,
-              private cfOrgSpaceService: CfOrgSpaceDataService,
-              currentUserPermissionsService: CurrentUserPermissionsService,
-              serviceActionHelperService: ServiceActionHelperService
+    datePipe: DatePipe,
+    private cfOrgSpaceService: CfOrgSpaceDataService,
+    currentUserPermissionsService: CurrentUserPermissionsService,
+    serviceActionHelperService: ServiceActionHelperService
   ) {
     super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
     const multiFilterConfigs = [
