@@ -113,7 +113,9 @@ export function getAction(action): PaginatedAction {
 
 export function getActionPaginationEntityKey(action) {
   const apiAction = getAction(action);
-  return apiAction.proxyPaginationEntityKey || apiAction.entityKey || null;
+  const schema = Array.isArray(apiAction.entity) ? apiAction.entity[0] : apiAction.entity;
+  const keyFromAction = schema ? schema.key : null;
+  return apiAction.proxyPaginationEntityKey || keyFromAction || apiAction.entityKey || null;
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {
