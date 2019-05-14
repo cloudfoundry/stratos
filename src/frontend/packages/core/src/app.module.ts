@@ -108,7 +108,7 @@ export class CustomRouterStateSerializer
     DynamicExtensionRoutes,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
-    // { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
+    { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
   ],
   bootstrap: [AppComponent]
 })
