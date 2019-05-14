@@ -20,6 +20,7 @@ import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
+import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
 
 class MockedNgZone {
   run = fn => fn();
@@ -62,8 +63,10 @@ describe('ListComponent', () => {
           EndpointListHelper
         ]
       });
-      inject([Store, ChangeDetectorRef, NgZone], (iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone) => {
-        const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
+      inject([Store, ChangeDetectorRef, NgZone, EntityCatalogueService], (
+        iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone, entityCatalogueService: EntityCatalogueService
+      ) => {
+        const component = new ListComponent<APIResource>(iStore, entityCatalogueService, cd, config, ngZone as NgZone);
         test(component);
       })();
     }
