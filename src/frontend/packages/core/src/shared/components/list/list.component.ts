@@ -234,8 +234,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   ngOnInit() {
     // null list means we have list bound but no value available yet
-    debugger;
-    console.log('init start')
     if (this.listConfig === null) {
       // We will watch for changes to the list value
       return;
@@ -286,7 +284,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.multiActions = this.setupActionsDefaultObservables(
       this.config.getMultiActions()
     );
-    console.log('init')
     this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();

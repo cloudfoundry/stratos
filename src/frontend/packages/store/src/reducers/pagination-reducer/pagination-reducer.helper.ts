@@ -134,7 +134,6 @@ export const getPaginationObservables = <T = any>(
   const baseAction = Array.isArray(action) ? action[0] : action;
   const paginationKey = paginationMonitor.paginationKey;
   const entityKey = paginationMonitor.schema.key;
-  // console.log(paginationMonitor.schema.key)
 
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)

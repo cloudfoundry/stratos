@@ -155,7 +155,6 @@ function enterPaginationReducer(state: PaginationState, action, updatePagination
   const actionType = getActionType(action);
   const key = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);
-  // console.log(key)
   if (actionType && key && paginationKey) {
     const newState = { ...state };
     const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);

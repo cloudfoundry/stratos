@@ -150,7 +150,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   ) {
     super();
     this.init(config);
-    // console.log(this.action)
     const paginationMonitor = new PaginationMonitor(
       this.store,
       this.paginationKey,

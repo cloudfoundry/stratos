@@ -79,7 +79,7 @@ export class EntityTreeRelation {
     public path = '', // entity.space
     public childRelations: EntityTreeRelation[]
   ) {
-    this.entityKey = entity.key;
+    this.entityKey = entity.entityType;
   }
 }
 

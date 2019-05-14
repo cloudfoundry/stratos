@@ -19,7 +19,7 @@ export function fetchEntityTree(action: EntityInlineParentAction, fromCache = tr
   const entityOrArray = action.entity;
   const isArray = Array.isArray(entityOrArray);
   const entity: EntitySchema = isArray ? entityOrArray[0] : entityOrArray;
-  const entityKey = entity.key;
+  const entityKey = entity.entityType;
   const cacheKey = generateCacheKey(entityKey, action);
   const cachedTree = entityTreeCache[cacheKey];
   const entityTree = fromCache && cachedTree ? cachedTree : createEntityTree(entity as EntitySchema, isArray);
@@ -47,26 +47,25 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
   return entityTree;
 }
 
-function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
+function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?: EntitySchema, path: string = '') {
   const rootEntitySchema = schemaObj || entityRelation.entity.schema;
-
-  Object.keys(rootEntitySchema).forEach(key => {
-    let value = rootEntitySchema[key];
-    const isArray = value.length > 0;
-    value = isArray ? value[0] : value;
-    const newPath = path ? path + '.' + key : key;
-    if (value instanceof schema.Entity) {
+  Object.values(rootEntitySchema).forEach(schemaOrArray => {
+    const isArray = Array.isArray(schemaOrArray);
+    const entitySchema = isArray ? schemaOrArray[0] : schemaOrArray;
+    const { entityType } = entitySchema;
+    const newPath = path ? path + '.' + entityType : entityType;
+    if (entitySchema instanceof EntitySchema) {
       const newEntityRelation = new EntityTreeRelation(
-        value as EntitySchema,
+        entitySchema,
         isArray,
-        key,
+        entityType,
         newPath,
         new Array<EntityTreeRelation>()
       );
       entityRelation.childRelations.push(newEntityRelation);
       buildEntityTree(tree, newEntityRelation, null, '');
-    } else if (value instanceof Object) {
-      buildEntityTree(tree, entityRelation, value, newPath);
+    } else if (entitySchema instanceof Object) {
+      buildEntityTree(tree, entityRelation, entitySchema, newPath);
     }
   });
 }
