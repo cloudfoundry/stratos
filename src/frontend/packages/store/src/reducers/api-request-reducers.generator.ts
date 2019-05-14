@@ -46,6 +46,7 @@ import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -80,51 +81,58 @@ function chainReducers(baseReducer, extraReducers) {
   };
 }
 // Extensions can add to this list
-const entities = [
-  'application',
-  'stack',
-  'space',
-  organizationSchemaKey,
-  routeSchemaKey,
-  'event',
-  endpointStoreNames.type,
-  'domain',
-  'system',
-  'routerReducer',
-  'createApplication',
-  'uaaSetup',
-  'user',
-  cfInfoSchemaKey,
-  gitRepoSchemaKey,
-  gitBranchesSchemaKey,
-  gitCommitSchemaKey,
-  appEnvVarsSchemaKey,
-  appStatsSchemaKey,
-  appSummarySchemaKey,
-  quotaDefinitionSchemaKey,
-  buildpackSchemaKey,
-  securityGroupSchemaKey,
-  servicePlanSchemaKey,
-  serviceSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  featureFlagSchemaKey,
-  privateDomainsSchemaKey,
-  spaceQuotaSchemaKey,
-  metricSchemaKey,
+// TODO: These should all be put somewhere nice - NJ
+const baseStratosEntities = [
+  EntityCatalogueHelpers.endpointType,
   userProfileSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  serviceBrokerSchemaKey,
   userFavoritesSchemaKey,
-  userProvidedServiceInstanceSchemaKey
+  'user',
+  'system'
+  // 'application',
+  // 'stack',
+  // 'space',
+  // organizationSchemaKey,
+  // routeSchemaKey,
+  // 'event',
+  // endpointStoreNames.type,
+  // 'domain',
+  // 'system',
+  // 'routerReducer',
+  // 'createApplication',
+  // 'uaaSetup',
+  // 'user',
+  // cfInfoSchemaKey,
+  // gitRepoSchemaKey,
+  // gitBranchesSchemaKey,
+  // gitCommitSchemaKey,
+  // appEnvVarsSchemaKey,
+  // appStatsSchemaKey,
+  // appSummarySchemaKey,
+  // quotaDefinitionSchemaKey,
+  // buildpackSchemaKey,
+  // securityGroupSchemaKey,
+  // servicePlanSchemaKey,
+  // serviceSchemaKey,
+  // serviceBindingSchemaKey,
+  // serviceInstancesSchemaKey,
+  // featureFlagSchemaKey,
+  // privateDomainsSchemaKey,
+  // spaceQuotaSchemaKey,
+  // metricSchemaKey,
+  // userProfileSchemaKey,
+  // servicePlanVisibilitySchemaKey,
+  // serviceBrokerSchemaKey,
+  // userFavoritesSchemaKey,
+  // userProvidedServiceInstanceSchemaKey
 ];
 
 export function registerAPIRequestEntity(schemaKey: string) {
-  entities.push(schemaKey);
+  // TODO Can this be done via an action that the catalogue fires off? NJ
+  baseStratosEntities.push(schemaKey);
 }
 
 export function requestReducer(state: IRequestState, action: Action) {
-  const baseRequestReducer = requestReducerFactory(entities, requestActions);
+  const baseRequestReducer = requestReducerFactory(baseStratosEntities, requestActions);
   const extraReducers = {
     [appStatsSchemaKey]: [appStatsReducer]
   };
@@ -132,7 +140,7 @@ export function requestReducer(state: IRequestState, action: Action) {
 }
 
 export function requestDataReducer(state: IRequestDataState, action: Action) {
-  const baseDataReducer = requestDataReducerFactory(entities, requestActions);
+  const baseDataReducer = requestDataReducerFactory(baseStratosEntities, requestActions);
 
   const extraReducers = {
     [cfUserSchemaKey]: [userReducer, endpointDisconnectUserReducer],
