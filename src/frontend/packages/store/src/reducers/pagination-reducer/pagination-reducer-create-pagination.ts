@@ -10,10 +10,10 @@ import { spreadClientPagination } from './pagination-reducer.helper';
  */
 export function createNewPaginationSection(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState)
   : PaginationState {
-  if (state[action.entityKey][action.paginationKey] && !action.seed) {
+  if (state[action.entityType][action.paginationKey] && !action.seed) {
     return state;
   }
-  if (!state[action.entityKey][action.paginationKey] && !action.seed) {
+  if (!state[action.entityType][action.paginationKey] && !action.seed) {
     return createNew(state, action, defaultState);
   }
   return mergeWithSeed(state, action, defaultState);
@@ -22,8 +22,8 @@ export function createNewPaginationSection(state: PaginationState, action: Creat
 function createNew(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState): PaginationState {
   return {
     ...state,
-    [action.entityKey]: {
-      ...state[action.entityKey],
+    [action.entityType]: {
+      ...state[action.entityType],
       [action.paginationKey]: defaultState
     }
   };
@@ -31,11 +31,11 @@ function createNew(state: PaginationState, action: CreatePagination, defaultStat
 
 function mergeWithSeed(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState): PaginationState {
   const newState = { ...state };
-  const currentPagination = state[action.entityKey][action.paginationKey] || defaultState;
-  const seeded = action.seed && state[action.entityKey] && state[action.entityKey][action.seed];
-  const seedPagination = seeded ? state[action.entityKey][action.seed] : defaultState;
+  const currentPagination = state[action.entityType][action.paginationKey] || defaultState;
+  const seeded = action.seed && state[action.entityType] && state[action.entityType][action.seed];
+  const seedPagination = seeded ? state[action.entityType][action.seed] : defaultState;
   const entityState = {
-    ...newState[action.entityKey],
+    ...newState[action.entityType],
     [action.paginationKey]: {
       ...seedPagination,
       // If we already have a pagination section, retain these values.
@@ -47,7 +47,7 @@ function mergeWithSeed(state: PaginationState, action: CreatePagination, default
   };
   return {
     ...newState,
-    [action.entityKey]: entityState
+    [action.entityType]: entityState
   };
 }
 

@@ -73,7 +73,7 @@ export function distinctPageUntilChanged(dataSource) {
   };
 }
 const services: {
-   
+
 } = {
   entityCatalogue: null
 }
@@ -137,11 +137,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   public isMultiAction$: Observable<boolean>;
   entityType: string;
-
-  static initializeServices( ) {
-    // TODO: This isn't very nice, fix it - nj.
-    services.entityCatalogue = entityCatalogue;
-  }
 
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
@@ -258,7 +253,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.action = config.schema.schemaConfigs.map((multiActionConfig, i) => ({
           ...multiActionConfig.paginationAction,
           paginationKey: this.masterAction.paginationKey,
-          entityKey: this.masterAction.entityKey,
+          entityType: this.masterAction.entityType,
           entity: this.masterAction.entity,
           flattenPaginationMax: this.masterAction.flattenPaginationMax,
           flattenPagination: this.masterAction.flattenPagination,
@@ -275,7 +270,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => {
-      const catalogueEntity = services.entityCatalogue.getEntity(this.endpointType, schemaConfig.paginationAction.entityKey);
+      const catalogueEntity = entityCatalogue.getEntity(this.endpointType, schemaConfig.paginationAction.entityType);
       const idPage = {
         page: i + 1,
         label: catalogueEntity.entity.label || 'Unknown',
@@ -310,7 +305,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
     if (schema instanceof MultiActionConfig) {
       const { paginationAction, schemaKey } = schema.schemaConfigs[0];
-      const catalogueEntity = services.entityCatalogue.getEntity(this.endpointType, paginationAction.entityKey);
+      const catalogueEntity = entityCatalogue.getEntity(this.endpointType, paginationAction.entityType);
       return catalogueEntity.getSchema(schemaKey);
     }
     return schema;

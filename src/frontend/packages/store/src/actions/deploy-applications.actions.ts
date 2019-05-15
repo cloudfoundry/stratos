@@ -6,6 +6,7 @@ import { GitAppDetails, OverrideAppDetails, SourceType } from '../types/deploy-a
 import { GitBranch, GitCommit } from '../types/git.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
@@ -29,105 +30,107 @@ export const FETCH_BRANCH_SUCCESS = '[GitHub] Fetch branch succeeded';
 export const FETCH_BRANCH_FAILED = '[GitHub] Fetch branch failed';
 
 export class SetAppSourceDetails implements Action {
-    constructor(public sourceType: SourceType) { }
-    type = SET_APP_SOURCE_DETAILS;
+  constructor(public sourceType: SourceType) { }
+  type = SET_APP_SOURCE_DETAILS;
 }
 
 export class CheckProjectExists implements Action {
-    constructor(public scm: GitSCM, public projectName: any) { }
-    type = CHECK_PROJECT_EXISTS;
+  constructor(public scm: GitSCM, public projectName: any) { }
+  type = CHECK_PROJECT_EXISTS;
 }
 
 export class ProjectDoesntExist implements Action {
-    constructor(public projectName: string) { }
-    type = PROJECT_DOESNT_EXIST;
+  constructor(public projectName: string) { }
+  type = PROJECT_DOESNT_EXIST;
 }
 
 export class ProjectFetchFail implements Action {
-    constructor(public projectName: string, public error: string) { }
-    type = PROJECT_FETCH_FAILED;
+  constructor(public projectName: string, public error: string) { }
+  type = PROJECT_FETCH_FAILED;
 }
 
 export class ProjectExists implements Action {
-    constructor(public projectName: string, public projectData: any) { }
-    type = PROJECT_EXISTS;
+  constructor(public projectName: string, public projectData: any) { }
+  type = PROJECT_EXISTS;
 }
 
 export class FetchBranchesForProject implements PaginatedAction {
-    constructor(public scm: GitSCM, public projectName: string) { }
-    actions = [
-        FETCH_BRANCH_START,
-        FETCH_BRANCH_SUCCESS,
-        FETCH_BRANCH_FAILED
-    ];
-    type = FETCH_BRANCHES_FOR_PROJECT;
-    entityType = gitBranchesSchemaKey;
-    paginationKey: 'branches';
+  constructor(public scm: GitSCM, public projectName: string) { }
+  actions = [
+    FETCH_BRANCH_START,
+    FETCH_BRANCH_SUCCESS,
+    FETCH_BRANCH_FAILED
+  ];
+  public endpointType = CF_ENDPOINT_TYPE;
+  type = FETCH_BRANCHES_FOR_PROJECT;
+  entityType = gitBranchesSchemaKey;
+  paginationKey: 'branches';
 }
 
 export class SaveAppDetails implements Action {
-    constructor(public appDetails: GitAppDetails) { }
-    type = SAVE_APP_DETAILS;
+  constructor(public appDetails: GitAppDetails) { }
+  type = SAVE_APP_DETAILS;
 }
 
 export class SaveAppOverrides implements Action {
-    constructor(public appOverrideDetails: OverrideAppDetails) { }
-    type = SAVE_APP_OVERRIDE_DETAILS;
+  constructor(public appOverrideDetails: OverrideAppDetails) { }
+  type = SAVE_APP_OVERRIDE_DETAILS;
 }
 
 export class FetchCommit implements IRequestAction {
-    commit: GitCommit;
-
-    constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
-    type = FETCH_COMMIT;
-    entityType = gitCommitSchemaKey;
+  commit: GitCommit;
+  public endpointType = CF_ENDPOINT_TYPE;
+  constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
+  type = FETCH_COMMIT;
+  entityType = gitCommitSchemaKey;
 }
 
 export class FetchCommits implements PaginatedAction {
 
-    /**
-     * Creates an instance of FetchCommits.
-     * @param projectName For example `cloudfoundry-incubator/stratos`
-     * @param sha Branch name, tag, etc
-     */
-    constructor(public scm: GitSCM, public projectName: string, public sha: string) {
-        this.paginationKey = scm.getType() + projectName + sha;
-    }
-    actions = [
-        '[Deploy App] Fetch commits start',
-        '[Deploy App] Fetch commits success',
-        '[Deploy App] Fetch commits failed',
-    ];
-    type = FETCH_COMMITS;
-    entityType = gitCommitSchemaKey;
-    paginationKey: string;
-    initialParams = {
-        'order-direction': 'asc',
-        'order-direction-field': 'date',
-    };
+  /**
+   * Creates an instance of FetchCommits.
+   * @param projectName For example `cloudfoundry-incubator/stratos`
+   * @param sha Branch name, tag, etc
+   */
+  constructor(public scm: GitSCM, public projectName: string, public sha: string) {
+    this.paginationKey = scm.getType() + projectName + sha;
+  }
+  actions = [
+    '[Deploy App] Fetch commits start',
+    '[Deploy App] Fetch commits success',
+    '[Deploy App] Fetch commits failed',
+  ];
+  public endpointType = CF_ENDPOINT_TYPE;
+  type = FETCH_COMMITS;
+  entityType = gitCommitSchemaKey;
+  paginationKey: string;
+  initialParams = {
+    'order-direction': 'asc',
+    'order-direction-field': 'date',
+  };
 }
 
 export class StoreCFSettings implements Action {
-    constructor(public cloudFoundryDetails: any) { }
-    type = SET_DEPLOY_CF_SETTINGS;
+  constructor(public cloudFoundryDetails: any) { }
+  type = SET_DEPLOY_CF_SETTINGS;
 }
 
 export class DeleteDeployAppSection implements Action {
-    constructor() { }
-    type = DELETE_DEPLOY_APP_SECTION;
+  constructor() { }
+  type = DELETE_DEPLOY_APP_SECTION;
 }
 
 export class SetBranch implements Action {
-    constructor(private branch: GitBranch) { }
-    type = SET_BRANCH;
+  constructor(private branch: GitBranch) { }
+  type = SET_BRANCH;
 }
 
 export class SetDeployBranch implements Action {
-    constructor(private branch: string) { }
-    type = SET_DEPLOY_BRANCH;
+  constructor(private branch: string) { }
+  type = SET_DEPLOY_BRANCH;
 }
 
 export class SetDeployCommit implements Action {
-    constructor(private commit: string) { }
-    type = SET_DEPLOY_COMMIT;
+  constructor(private commit: string) { }
+  type = SET_DEPLOY_COMMIT;
 }

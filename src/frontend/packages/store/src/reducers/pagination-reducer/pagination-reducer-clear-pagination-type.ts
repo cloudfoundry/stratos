@@ -30,6 +30,7 @@ export function paginationClearAllTypes(state: PaginationState, entityKeys: stri
 }
 
 export function clearEndpointEntities(state: PaginationState, action: EndpointAction, defaultPaginationEntityState) {
+  // TODO This should come from the entity catalogue
   if (action.endpointType === 'cf') {
     return paginationClearAllTypes(
       state,

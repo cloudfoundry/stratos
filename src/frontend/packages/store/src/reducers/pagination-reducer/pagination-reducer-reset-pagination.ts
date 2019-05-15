@@ -30,15 +30,15 @@ export function getDefaultPaginationEntityState(): PaginationEntityState {
 }
 
 export function paginationResetPagination(state: PaginationState, action: ResetPagination): PaginationState {
-  if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
+  if (!state[action.entityType] || !state[action.entityType][action.paginationKey]) {
     return state;
   }
   const { ids, pageRequests, pageCount, currentPage, totalResults } = getDefaultPaginationEntityState();
   const newState = { ...state };
   const entityState = {
-    ...newState[action.entityKey],
+    ...newState[action.entityType],
     [action.paginationKey]: {
-      ...newState[action.entityKey][action.paginationKey],
+      ...newState[action.entityType][action.paginationKey],
       ids,
       pageRequests,
       pageCount,
@@ -48,6 +48,6 @@ export function paginationResetPagination(state: PaginationState, action: ResetP
   } as PaginationEntityTypeState;
   return {
     ...newState,
-    [action.entityKey]: entityState
+    [action.entityType]: entityState
   };
 }

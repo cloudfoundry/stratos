@@ -39,7 +39,8 @@ export class UsersEffects {
     switchMap(action => {
       const mockRequestType: ApiRequestTypes = 'fetch';
       const mockPaginationAction: PaginatedAction = {
-        entityKey: cfUserSchemaKey,
+        entityType: cfUserSchemaKey,
+        endpointType: '',
         type: action.type,
         paginationKey: action.paginationKey,
         actions: null,

@@ -38,7 +38,7 @@ export class ClearPaginationOfEntity implements Action {
 }
 
 export class ResetPagination implements BasePaginatedAction {
-  constructor(public entityKey: string, public paginationKey: string) {
+  constructor(public entityType: string, public paginationKey: string) {
   }
   type = RESET_PAGINATION;
 }
@@ -47,21 +47,21 @@ export class CreatePagination implements BasePaginatedAction {
   /**
    * @param seed The pagination key for the section we should use as a seed when creating the new pagination section.
    */
-  constructor(public entityKey: string, public paginationKey: string, public seed?: string) {
+  constructor(public entityType: string, public paginationKey: string, public seed?: string) {
   }
   type = CREATE_PAGINATION;
 }
 
 
 export class ClearPages implements BasePaginatedAction {
-  constructor(public entityKey: string, public paginationKey: string) {
+  constructor(public entityType: string, public paginationKey: string) {
   }
   type = CLEAR_PAGES;
 }
 
 export class SetPage implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public pageNumber: number,
     public keepPages = false,
@@ -76,7 +76,7 @@ export class SetPage implements BasePaginatedAction {
 
 export class SetResultCount implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public count: number
   ) {
@@ -86,7 +86,7 @@ export class SetResultCount implements BasePaginatedAction {
 
 export class SetClientPageSize implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public pageSize: number,
   ) {
@@ -96,7 +96,7 @@ export class SetClientPageSize implements BasePaginatedAction {
 
 export class SetClientPage implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public pageNumber: number,
   ) {
@@ -106,7 +106,7 @@ export class SetClientPage implements BasePaginatedAction {
 
 export class SetClientFilter implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public filter: PaginationClientFilter,
   ) {
@@ -116,7 +116,7 @@ export class SetClientFilter implements BasePaginatedAction {
 
 export class SetParams implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public params: PaginationParam,
     public keepPages = false,
@@ -128,7 +128,7 @@ export class SetParams implements BasePaginatedAction {
 
 export class SetInitialParams implements SetParams {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public params: PaginationParam,
     public keepPages = false,
@@ -140,7 +140,7 @@ export class SetInitialParams implements SetParams {
 
 export class AddParams implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public params: PaginationParam,
     public keepPages = false
@@ -151,7 +151,7 @@ export class AddParams implements BasePaginatedAction {
 
 export class RemoveParams implements BasePaginatedAction {
   constructor(
-    public entityKey: string,
+    public entityType: string,
     public paginationKey: string,
     public params: string[],
     public qs: string[],

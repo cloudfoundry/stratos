@@ -182,7 +182,7 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(fetchBranches);
 
     const paginationAction = {
-      entityKey: gitBranchesSchemaKey,
+      entityType: gitBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(

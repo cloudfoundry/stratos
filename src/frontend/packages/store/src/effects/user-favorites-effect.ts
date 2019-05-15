@@ -66,7 +66,7 @@ export class UserFavoritesEffect {
     ofType<GetUserFavoritesAction>(GetUserFavoritesAction.ACTION_TYPE),
     switchMap((action: GetUserFavoritesAction) => {
       const apiAction = {
-        entityKey: userFavoritesSchemaKey,
+        entityType: userFavoritesSchemaKey,
         type: action.type
       } as PaginatedAction;
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(

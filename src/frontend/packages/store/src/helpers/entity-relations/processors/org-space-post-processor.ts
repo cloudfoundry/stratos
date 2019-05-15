@@ -100,7 +100,7 @@ export function orgSpacePostProcess(
             endpointGuid: action.endpointGuid,
             entity: entityFactory(cfUserSchemaKey),
             entityLocation: RequestEntityLocation.ARRAY,
-            entityKey: cfUserSchemaKey,
+            entityType: cfUserSchemaKey,
             type: '[Entity] Post-process Org/Space Users',
             paginationKey: createEntityRelationPaginationKey(action.entityType, action.guid)
         };
@@ -108,7 +108,7 @@ export function orgSpacePostProcess(
         const successAction = new WrapperRequestActionSuccess(response, paginatedAction, 'fetch', 1, 1);
         return {
             action: successAction,
-            fetchingState$: store.select(selectPaginationState(paginatedAction.entityKey, paginatedAction.paginationKey)).pipe(
+            fetchingState$: store.select(selectPaginationState(paginatedAction.entityType, paginatedAction.paginationKey)).pipe(
                 map((state: PaginationEntityState) => {
                     const res: ValidateResultFetchingState = {
                         fetching: !state || !state.ids[1]

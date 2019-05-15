@@ -161,13 +161,13 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   }
 
   private initialiseMultiFilter(action: PaginatedAction) {
-    this.store.select(selectPaginationState(action.entityKey, action.paginationKey)).pipe(
+    this.store.select(selectPaginationState(action.entityType, action.paginationKey)).pipe(
       filter((pag) => !!pag),
       first(),
     ).subscribe(pag => {
       const currentFilter = pag.clientPagination.filter.items[userListUserVisibleKey];
       if (!currentFilter) {
-        this.store.dispatch(new SetClientFilter(action.entityKey, action.paginationKey, {
+        this.store.dispatch(new SetClientFilter(action.entityType, action.paginationKey, {
           string: '',
           items: {
             [userListUserVisibleKey]: UserListUsersVisible.WITH_ROLE

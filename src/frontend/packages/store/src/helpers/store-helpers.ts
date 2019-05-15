@@ -11,7 +11,7 @@ import { defaultCfEntitiesState } from '../types/entity.types';
 
 
 export const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePaginatedAction) =>
-  store.select(selectPaginationState(action.entityKey, action.paginationKey));
+  store.select(selectPaginationState(action.entityType, action.paginationKey));
 
 /**
  * Using the given action wait until the associated pagination section changes from busy to not busy

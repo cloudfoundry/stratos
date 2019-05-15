@@ -124,11 +124,11 @@ export const createCfOrSpaceMultipleFilterFn = (
 
         // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
         if (cfGuidChanged && !orgChanged && !spaceChanged) {
-            store.dispatch(new ResetPagination(action.entityKey, action.paginationKey));
+            store.dispatch(new ResetPagination(action.entityType, action.paginationKey));
         } else if (orgChanged || spaceChanged) {
             const newParams = spreadPaginationParams(params);
             newParams.q = qChanges;
-            store.dispatch(new SetParams(action.entityKey, action.paginationKey, newParams, true, true));
+            store.dispatch(new SetParams(action.entityType, action.paginationKey, newParams, true, true));
         }
     };
 };

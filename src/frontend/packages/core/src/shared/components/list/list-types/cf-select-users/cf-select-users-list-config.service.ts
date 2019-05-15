@@ -99,7 +99,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       this.paginationMonitorFactory,
       this.entityMonitorFactory,
       action.paginationKey,
-      action.entityKey,
+      action.entityType,
       this.cfUserRowStateSetUpManager.bind(this)
     );
     this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this, rowStateManager, () => {

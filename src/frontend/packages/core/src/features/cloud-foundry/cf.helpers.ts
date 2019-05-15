@@ -300,7 +300,7 @@ export function fetchTotalResults(
     action: newAction,
     paginationMonitor: paginationMonitorFactory.create(
       newAction.paginationKey,
-      entityFactory(newAction.entityKey)
+      entityFactory(newAction.entityType)
     )
   });
   // Ensure the request is made by sub'ing to the entities observable

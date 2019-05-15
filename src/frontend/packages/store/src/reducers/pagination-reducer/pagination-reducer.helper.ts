@@ -115,7 +115,7 @@ export function getActionPaginationEntityKey(action) {
   const apiAction = getAction(action);
   const schema = Array.isArray(apiAction.entity) ? apiAction.entity[0] : apiAction.entity;
   const keyFromAction = schema ? schema.key : null;
-  return apiAction.proxyPaginationEntityKey || keyFromAction || apiAction.entityKey || null;
+  return apiAction.proxyPaginationEntityKey || keyFromAction || apiAction.entityType || null;
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {

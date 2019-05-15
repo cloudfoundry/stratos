@@ -49,7 +49,6 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
         appService: ApplicationService,
         datePipe: DatePipe,
         currentUserPermissionService: CurrentUserPermissionsService,
-         ,
         private paginationMonitorFactory: PaginationMonitorFactory
     ) {
         super(store, appService, datePipe, currentUserPermissionService);

@@ -6,6 +6,7 @@ import { EntitySchema } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 export interface SingleEntityAction {
   entityType: string;
@@ -84,9 +85,15 @@ export interface IFailedRequestAction {
   requestType: ApiRequestTypes;
 }
 
-export abstract class CFStartAction implements Action {
+export abstract class StartAction implements Action {
   type = ApiActionTypes.API_REQUEST_START;
 }
+
+// TODO This needs to be moved.
+export abstract class CFStartAction extends StartAction implements Action {
+  public endpointType = CF_ENDPOINT_TYPE;
+}
+
 export abstract class RequestAction implements Action {
   type = RequestTypes.START;
 }

@@ -57,7 +57,6 @@ export class UserFavoriteManager {
     constructor(
         private store: Store<AppState>,
         private logger: LoggerService,
-         ,
         private favoritesConfigMapper: FavoritesConfigMapper
     ) { }
 

@@ -505,7 +505,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
                 const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
                 /* tslint:disable-next-line:no-string-literal  */
                 const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
-                if (arraySafeEntitySchema.key === action.entityKey) {
+                if (arraySafeEntitySchema.key === action.entityType) {
                     // Found it! Does the entity contain a value for the property name?
                     if (!entity.entity[paramName]) {
                         return;
@@ -523,7 +523,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
                         childEntities: entity.entity[paramName],
                         cfGuid: action.endpointGuid,
                         parentRelation: new EntityTreeRelation(parentEntitySchema, false, null, null, []),
-                        includeRelations: [createEntityRelationKey(parentEntitySchema.key, action.entityKey)],
+                        includeRelations: [createEntityRelationKey(parentEntitySchema.key, action.entityType)],
                         parentEntity: entity,
                         childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
                         childEntitiesUrl: '',

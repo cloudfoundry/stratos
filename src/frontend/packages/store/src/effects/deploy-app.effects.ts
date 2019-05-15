@@ -74,7 +74,7 @@ export class DeployAppEffects {
         mergeMap(action => {
             const actionType = 'fetch';
             const apiAction = {
-                entityKey: gitBranchesSchemaKey,
+                entityType: gitBranchesSchemaKey,
                 type: action.type,
                 paginationKey: 'branches'
             } as PaginatedAction;
@@ -138,7 +138,7 @@ export class DeployAppEffects {
         mergeMap(action => {
             const actionType = 'fetch';
             const apiAction = {
-                entityKey: gitCommitSchemaKey,
+                entityType: gitCommitSchemaKey,
                 type: action.type,
                 paginationKey: action.paginationKey
             } as PaginatedAction;

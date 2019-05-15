@@ -89,7 +89,7 @@ export class EntityTreeRelation {
  * @export
  */
 export interface EntityInlineChildAction {
-  entityKey: string;
+  entityType: string;
   parentGuid: string;
   parentEntitySchema: EntitySchema;
   child?: EntityTreeRelation; // Not required on base actions
@@ -166,7 +166,7 @@ export interface ValidateEntityResult {
 
 export function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
   Observable<ValidateResultFetchingState> {
-  return store.select(selectPaginationState(paramPaginationAction.entityKey, paramPaginationAction.paginationKey)).pipe(
+  return store.select(selectPaginationState(paramPaginationAction.entityType, paramPaginationAction.paginationKey)).pipe(
     map((paginationState: PaginationEntityState) => {
       const pageRequest: ActionState =
         paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
