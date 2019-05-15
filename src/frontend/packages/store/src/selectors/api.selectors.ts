@@ -1,6 +1,6 @@
 import { compose } from '@ngrx/store';
 
-import { AppState, IRequestEntityTypeState, IRequestTypeState } from '../app-state';
+import { AppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 
@@ -33,63 +33,63 @@ export const getUpdateSectionById = (guid: string) => (
 };
 
 export function selectUpdateInfo(
-  entityType: string,
+  entityKey: string,
   entityGuid: string,
   updatingKey: string
 ) {
   return compose(
     getUpdateSectionById(updatingKey),
     getEntityUpdateSections,
-    selectRequestInfo(entityType, entityGuid)
+    selectRequestInfo(entityKey, entityGuid)
   );
 }
-export function selectDeletionInfo(entityType: string, entityGuid: string) {
+export function selectDeletionInfo(entityKey: string, entityGuid: string) {
   return compose(
     getEntityDeleteSections,
-    selectRequestInfo(entityType, entityGuid)
+    selectRequestInfo(entityKey, entityGuid)
   );
 }
 
-export function selectRequestInfo(entityType: string, entityGuid: string) {
+export function selectRequestInfo(entityKeys: string, entityGuid: string) {
   return compose(
     getEntityById<RequestInfoState>(entityGuid),
-    getRequestEntityType<RequestInfoState>(entityType),
+    getRequestEntityKey<RequestInfoState>(entityKeys),
     getAPIRequestInfoState
   );
 }
 
-export function selectEntities<T = APIResource>(entityType: string) {
-  return compose(getRequestEntityType<T>(entityType), getAPIRequestDataState);
+export function selectEntities<T = APIResource>(entityKeys: string) {
+  return compose(getRequestEntityKey<T>(entityKeys), getAPIRequestDataState);
 }
 
 export function selectEntity<T = APIResource>(
-  entityType: string,
+  entityKey: string,
   guid: string
 ) {
   return compose(
     getEntityById<T>(guid),
-    getRequestEntityType<T>(entityType),
+    getRequestEntityKey<T>(entityKey),
     getAPIRequestDataState
   );
 }
 
 export function selectNestedEntity<T = APIResource[]>(
-  entityType: string,
+  entityKey: string,
   guid: string,
-  entityKeys: string[]
+  entityTypes: string[]
 ) {
   return compose(
-    getNestedEntityWithKeys<T>([guid, ...entityKeys]),
-    getRequestEntityType<T>(entityType),
+    getNestedEntityWithKeys<T>([guid, ...entityTypes]),
+    getRequestEntityKey<T>(entityKey),
     getAPIRequestDataState
   );
 }
 
 // Base selectors
 // T => APIResource || base entity (e.g. EndpointModel)
-export function getRequestEntityType<T>(entityType: string) {
-  return (state: IRequestTypeState): IRequestEntityTypeState<T> => {
-    return state[entityType] || {} as IRequestEntityTypeState<T>;
+export function getRequestEntityKey<T>(entityKey: string) {
+  return (state: IRequestTypeState): IRequestEntityKeyState<T> => {
+    return state[entityKey] || {} as IRequestEntityKeyState<T>;
   };
 }
 

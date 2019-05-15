@@ -38,13 +38,13 @@ export function succeedRequest(state: IRequestDataState, action: ISuccessRequest
     }
 
     const newState = mergeState(
-      createRequestStateFromResponse(successAction.response, state),
+      createRequestStateFromResponse(successAction.response, state, action.apiAction.endpointType),
       setEntityRequestState(state, requestSuccessState, action.apiAction)
     );
 
     return newState;
   } else if (action.response && action.response.entities) {
-    return createRequestStateFromResponse(action.response, state);
+    return createRequestStateFromResponse(action.response, state, action.apiAction.endpointType);
   }
   return state;
 }

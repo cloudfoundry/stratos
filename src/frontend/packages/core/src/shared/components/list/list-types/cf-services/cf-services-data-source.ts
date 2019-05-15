@@ -11,6 +11,8 @@ import { PaginationEntityState } from '../../../../../../../store/src/types/pagi
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
@@ -18,7 +20,7 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action: new GetAllServices(paginationKey),
-      schema: entityFactory(serviceSchemaKey),
+      schema: entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceSchemaKey).getSchema(),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,

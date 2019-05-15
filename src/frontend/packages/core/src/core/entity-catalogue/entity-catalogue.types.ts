@@ -114,7 +114,7 @@ export interface IStratosEntityStatusData<Y extends IEntityMetadata = IEntityMet
 }
 
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
-  public readonly id: string;
+  public readonly entityKey: string;
   public readonly entity: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition;
   public readonly isEndpoint: boolean;
   public readonly hasBuilder: boolean;
@@ -127,8 +127,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     const baseEntity = entity as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
     this.hasBuilder = !!builder;
-    this.id = this.isEndpoint ?
-      // 'endpoint' should be in the baseEntity somewhere - nj
+    this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildId(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildId(baseEntity.type, baseEntity.endpoint.type);
   }
@@ -156,7 +155,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     }
     const entityCatalogue = this.entity as IStratosEntityDefinition;
     const tempId = EntityCatalogueHelpers.buildId(entityCatalogue.endpoint.type, schemaKey);
-    if (!catalogueSchema[schemaKey] && tempId === this.id) {
+    if (!catalogueSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogueSchema.default;
     }

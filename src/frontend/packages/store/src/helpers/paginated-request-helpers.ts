@@ -120,16 +120,17 @@ export function flattenPagination<T, C>(
   firstRequest: Observable<C>,
   flattener: IPaginationFlattener<T, C>,
   maxCount?: number,
-  entityKey?: string,
+  entityType?: string,
+  endpointType?: string,
   paginationKey?: string,
-  forcedEntityKey?: string
+  forcedEntityType?: string
 ) {
   return firstRequest.pipe(
     first(),
     mergeMap(firstResData => {
       const allResults = flattener.getTotalResults(firstResData);
       if (maxCount) {
-        store.dispatch(new UpdatePaginationMaxedState(maxCount, allResults, entityKey, paginationKey, forcedEntityKey));
+        store.dispatch(new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityType));
         if (allResults > maxCount) {
           // If we have too many results only return basic first page information
           return forkJoin([flattener.clearResults(firstResData, allResults)]);

@@ -232,8 +232,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
-    this.entityType = this.sourceScheme.entityType;
-    this.endpointType = this.sourceScheme.endpointType;
+    this.entityType = this.action.entityType;
+    this.endpointType = this.action.endpointType;
     this.masterAction = this.action as PaginatedAction;
     this.setupAction(config);
     if (!this.isLocal && this.config.listConfig) {
@@ -270,7 +270,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => {
-      const catalogueEntity = entityCatalogue.getEntity(this.endpointType, schemaConfig.paginationAction.entityType);
+      const catalogueEntity = entityCatalogue.getEntity(
+        schemaConfig.paginationAction.endpointType,
+        schemaConfig.paginationAction.entityType
+      );
       const idPage = {
         page: i + 1,
         label: catalogueEntity.entity.label || 'Unknown',
@@ -305,7 +308,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
     if (schema instanceof MultiActionConfig) {
       const { paginationAction, schemaKey } = schema.schemaConfigs[0];
-      const catalogueEntity = entityCatalogue.getEntity(this.endpointType, paginationAction.entityType);
+      const catalogueEntity = entityCatalogue.getEntity(paginationAction.endpointType, paginationAction.entityType);
       return catalogueEntity.getSchema(schemaKey);
     }
     return schema;

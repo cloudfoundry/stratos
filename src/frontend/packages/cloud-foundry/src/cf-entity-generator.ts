@@ -37,7 +37,8 @@ import {
   serviceInstancesWithSpaceSchemaKey,
   serviceInstancesWithNoBindingsSchemaKey,
   appSummarySchemaKey,
-  appEnvVarsSchemaKey
+  appEnvVarsSchemaKey,
+  quotaDefinitionSchemaKey
 } from '../../store/src/helpers/entity-factory';
 import { APIResource } from '../../store/src/types/api.types';
 import {
@@ -108,7 +109,17 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     generateCFSpaceQuotaEntity(endpointDefinition),
     generateCFAppSummaryEntity(endpointDefinition),
     generateCFAppEnvVarEntity(endpointDefinition),
+    generateCFQuotaDefinitionEntity(endpointDefinition),
   ];
+}
+
+function generateCFQuotaDefinitionEntity(endpointDefinition: IStratosEndpointDefinition) {
+  const definition = {
+    type: quotaDefinitionSchemaKey,
+    schema: entityFactory(quotaDefinitionSchemaKey),
+    endpoint: endpointDefinition
+  };
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition);
 }
 
 function generateCFAppEnvVarEntity(endpointDefinition: IStratosEndpointDefinition) {

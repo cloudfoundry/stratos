@@ -100,7 +100,7 @@ export class ApplicationService {
   ) {
     const appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
     this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
-      applicationSchemaKey,
+      appCatalogueEntity.entityKey,
       appCatalogueEntity.getSchema(),
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
@@ -186,10 +186,10 @@ export class ApplicationService {
     this.appSpace$ = moreWaiting$.pipe(
       first(),
       switchMap(app => {
-        const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceWithOrgKey);
+        const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceSchemaKey);
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           spaceSchemaKey,
-          catalogueEntity.getSchema(),
+          catalogueEntity.getSchema(spaceWithOrgKey),
           app.space_guid,
           new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
         ).waitForEntity$.pipe(
@@ -251,7 +251,7 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$.pipe(
       combineLatest(this.store.select(endpointEntitiesSelector)),
-      filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
+      filter(([{ entity }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
       }),
       map(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]): ApplicationData => {

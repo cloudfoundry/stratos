@@ -21,19 +21,19 @@ export class EntityCatalogue {
   }
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
-    if (this.endpoints.has(endpoint.id)) {
-      console.warn(`Duplicate endpoint catalogue entity found. ID: ${endpoint.id} - Type: ${endpoint.entity.type}`);
+    if (this.endpoints.has(endpoint.entityKey)) {
+      console.warn(`Duplicate endpoint catalogue entity found. ID: ${endpoint.entityKey} - Type: ${endpoint.entity.type}`);
     } else {
-      this.endpoints.set(endpoint.id, endpoint);
+      this.endpoints.set(endpoint.entityKey, endpoint);
     }
   }
 
   private registerEntity(entity: StratosCatalogueEntity) {
-    if (this.entities.has(entity.id)) {
+    if (this.entities.has(entity.entityKey)) {
       const { type } = entity.entity;
-      console.warn(`Duplicate catalogue entity found. ID: ${entity.id} - Type: ${type} - Endpoint: ${entity.entity.endpoint.type}`);
+      console.warn(`Duplicate catalogue entity found. ID: ${entity.entityKey} - Type: ${type} - Endpoint: ${entity.entity.endpoint.type}`);
     } else {
-      this.entities.set(entity.id, entity);
+      this.entities.set(entity.entityKey, entity);
     }
   }
 

@@ -5,14 +5,14 @@ import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
 export function paginationMaxReached(state: PaginationState, action: UpdatePaginationMaxedState): PaginationState {
-  if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
+  if (!state[action.entityType] || !state[action.entityType][action.paginationKey]) {
     return state;
   }
   const requestSection = LocalPaginationHelpers.getEntityPageRequest(
-    state[action.entityKey][action.paginationKey],
-    action.forcedEntityKey || action.entityKey
+    state[action.entityType][action.paginationKey],
+    action.forcedEntityKey || action.entityType
   );
-  const { maxedMode: oldMaxedMode } = state[action.entityKey][action.paginationKey];
+  const { maxedMode: oldMaxedMode } = state[action.entityType][action.paginationKey];
   const { pageNumber, pageRequest } = requestSection;
   const { maxed: oldCurrentlyMaxed = false } = pageRequest;
   const newCurrentlyMaxed = action.allEntities >= action.max;
@@ -28,12 +28,12 @@ export function paginationMaxReached(state: PaginationState, action: UpdatePagin
   }
 
   const entityState: PaginationEntityTypeState = {
-    ...state[action.entityKey],
+    ...state[action.entityType],
     [action.paginationKey]: {
-      ...state[action.entityKey][action.paginationKey],
+      ...state[action.entityType][action.paginationKey],
       // currentlyMaxed: newCurrentlyMaxed,
       pageRequests: {
-        ...state[action.entityKey][action.paginationKey].pageRequests,
+        ...state[action.entityType][action.paginationKey].pageRequests,
         [pageNumber]: {
           ...pageRequest,
           maxed: newCurrentlyMaxed
@@ -45,6 +45,6 @@ export function paginationMaxReached(state: PaginationState, action: UpdatePagin
   };
   return {
     ...state,
-    [action.entityKey]: entityState
+    [action.entityType]: entityState
   };
 }

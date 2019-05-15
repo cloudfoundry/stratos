@@ -8,8 +8,8 @@ export function addExtensionEntities() {
   entityCatalogue.getAllEntitiesTypes().forEach(definition => {
 
 
-    defaultCfEntitiesState[definition.id] = {};
-    registerAPIRequestEntity(definition.id);
+    defaultCfEntitiesState[definition.entityKey] = {};
+    registerAPIRequestEntity(definition.entityKey);
   });
 
   setDefaultPaginationState({ ...defaultCfEntitiesState });

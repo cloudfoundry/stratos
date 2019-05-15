@@ -125,7 +125,8 @@ function paginate(action, state, updatePagination) {
   }
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-    const clearEntityType = action.entityKey || 'application';
+    // TODO we shouldn't be using a 
+    const clearEntityType = action.entityType || 'application';
     return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
   }
 

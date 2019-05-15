@@ -166,7 +166,9 @@ export class UpdatePaginationMaxedState implements Action {
   constructor(
     public max: number,
     public allEntities: number,
-    public entityKey: string,
+    public entity: string,
+    public entityType: string,
+    public endpointType: string,
     public paginationKey: string,
     public forcedEntityKey?: string
   ) { }

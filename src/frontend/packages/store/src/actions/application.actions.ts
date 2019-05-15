@@ -44,169 +44,169 @@ export const RESTAGE_FAILED = '[Application] Restage failed';
 const applicationEntitySchema = entityFactory(applicationSchemaKey);
 
 export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
-    private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
+  private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-    constructor(public paginationKey: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
-        super();
-        this.options = new RequestOptions();
-        this.options.url = 'apps';
-        this.options.method = 'get';
-    }
-    actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
-    entity = [applicationEntitySchema];
-    entityType = applicationSchemaKey;
-    options: RequestOptions;
-    initialParams: PaginationParam = {
-        'order-direction': 'asc',
-        'order-direction-field': GetAllApplications.sortField,
-        page: 1,
-        'results-per-page': 100,
-    };
-    flattenPagination = true;
-    flattenPaginationMax = 600;
+  constructor(public paginationKey: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = 'apps';
+    this.options.method = 'get';
+  }
+  actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
+  entity = [applicationEntitySchema];
+  entityType = applicationSchemaKey;
+  options: RequestOptions;
+  initialParams: PaginationParam = {
+    'order-direction': 'asc',
+    'order-direction-field': GetAllApplications.sortField,
+    page: 1,
+    'results-per-page': 100,
+  };
+  flattenPagination = true;
+  flattenPaginationMax = 600;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
-    constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
-        super();
-        this.options = new RequestOptions();
-        this.options.url = `apps/${guid}`;
-        this.options.method = 'get';
-    }
-    actions = [GET, GET_SUCCESS, GET_FAILED];
-    entity = [applicationEntitySchema];
-    entityType = applicationSchemaKey;
-    options: RequestOptions;
+  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}`;
+    this.options.method = 'get';
+  }
+  actions = [GET, GET_SUCCESS, GET_FAILED];
+  entity = [applicationEntitySchema];
+  entityType = applicationSchemaKey;
+  options: RequestOptions;
 }
 
 export class CreateNewApplication extends CFStartAction implements ICFAction {
-    constructor(
-        public guid: string,
-        public endpointGuid: string,
-        application: IApp
-    ) {
-        super();
-        this.options = new RequestOptions();
-        this.options.url = `apps`;
-        this.options.method = 'post';
-        this.options.body = {
-            name: application.name,
-            space_guid: application.space_guid
-        };
-    }
-    actions = [CREATE, CREATE_SUCCESS, CREATE_FAILED];
-    entity = [applicationEntitySchema];
-    entityType = applicationSchemaKey;
-    options: RequestOptions;
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    application: IApp
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps`;
+    this.options.method = 'post';
+    this.options.body = {
+      name: application.name,
+      space_guid: application.space_guid
+    };
+  }
+  actions = [CREATE, CREATE_SUCCESS, CREATE_FAILED];
+  entity = [applicationEntitySchema];
+  entityType = applicationSchemaKey;
+  options: RequestOptions;
 }
 
 export interface UpdateApplication {
-    name?: string;
-    instances?: number;
-    memory?: number;
-    enable_ssh?: boolean;
-    environment_json?: any;
-    state?: string;
+  name?: string;
+  instances?: number;
+  memory?: number;
+  enable_ssh?: boolean;
+  environment_json?: any;
+  state?: string;
 }
 
 export class UpdateExistingApplication extends CFStartAction implements ICFAction {
-    static updateKey = 'Updating-Existing-Application';
+  static updateKey = 'Updating-Existing-Application';
 
-    /**
-     * Creates an instance of UpdateExistingApplication.
-     * @param newApplication Sparsely populated application containing updated settings
-     * @param [existingApplication] Existing application. Used in a few specific cases
-     * @param [updateEntities] List of metadata calls to make if we successfully update the application
-     */
-    constructor(
-        public guid: string,
-        public endpointGuid: string,
-        public newApplication: UpdateApplication,
-        public existingApplication?: IApp,
-        public updateEntities?: AppMetadataTypes[]
-    ) {
-        super();
-        this.options = new RequestOptions();
-        this.options.url = `apps/${guid}`;
-        this.options.method = 'put';
-        this.options.body = newApplication;
-    }
-    actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
-    entity = [applicationEntitySchema];
-    entityType = applicationSchemaKey;
-    options: RequestOptions;
-    updatingKey = UpdateExistingApplication.updateKey;
-    entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
-        const keepFromOld = pick(
-            oldEntities[applicationSchemaKey][this.guid].entity,
-            Object.keys(applicationEntitySchema.schema)
-        );
-        newEntities[applicationSchemaKey][this.guid].entity = {
-            ...newEntities[applicationSchemaKey][this.guid].entity,
-            ...keepFromOld
-        };
-        return newEntities;
-    }
+  /**
+   * Creates an instance of UpdateExistingApplication.
+   * @param newApplication Sparsely populated application containing updated settings
+   * @param [existingApplication] Existing application. Used in a few specific cases
+   * @param [updateEntities] List of metadata calls to make if we successfully update the application
+   */
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public newApplication: UpdateApplication,
+    public existingApplication?: IApp,
+    public updateEntities?: AppMetadataTypes[]
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}`;
+    this.options.method = 'put';
+    this.options.body = newApplication;
+  }
+  actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
+  entity = [applicationEntitySchema];
+  entityType = applicationSchemaKey;
+  options: RequestOptions;
+  updatingKey = UpdateExistingApplication.updateKey;
+  entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
+    const keepFromOld = pick(
+      oldEntities[applicationSchemaKey][this.guid].entity,
+      Object.keys(applicationEntitySchema.schema)
+    );
+    newEntities[applicationSchemaKey][this.guid].entity = {
+      ...newEntities[applicationSchemaKey][this.guid].entity,
+      ...keepFromOld
+    };
+    return newEntities;
+  }
 }
 
 export class DeleteApplication extends CFStartAction implements ICFAction {
-    static updateKey = 'Deleting-Existing-Application';
+  static updateKey = 'Deleting-Existing-Application';
 
-    constructor(public guid: string, public endpointGuid: string) {
-        super();
-        this.options = new RequestOptions();
-        this.options.url = `apps/${guid}`;
-        this.options.method = 'delete';
-        this.options.headers = new Headers();
-        const endpointPassthroughHeader = 'x-cap-passthrough';
-        this.options.headers.set(endpointPassthroughHeader, 'true');
-        this.options.params = new URLSearchParams();
-        // Delete the service instance and route bindings, but not the service instance and route themselves
-        this.options.params.set('recursive', 'true');
-    }
-    actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
-    entity = [applicationEntitySchema];
-    entityType = applicationSchemaKey;
-    options: RequestOptions;
+  constructor(public guid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}`;
+    this.options.method = 'delete';
+    this.options.headers = new Headers();
+    const endpointPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(endpointPassthroughHeader, 'true');
+    this.options.params = new URLSearchParams();
+    // Delete the service instance and route bindings, but not the service instance and route themselves
+    this.options.params.set('recursive', 'true');
+  }
+  actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
+  entity = [applicationEntitySchema];
+  entityType = applicationSchemaKey;
+  options: RequestOptions;
 }
 
 export class DeleteApplicationInstance extends CFStartAction
-    implements ICFAction {
-    guid: string;
-    constructor(
-        public appGuid: string,
-        index: number,
-        public endpointGuid: string
-    ) {
-        super();
-        this.options = new RequestOptions();
-        this.options.url = `apps/${appGuid}/instances/${index}`;
-        this.options.method = 'delete';
-        this.options.headers = new Headers();
-        const endpointPassthroughHeader = 'x-cap-passthrough';
-        this.options.headers.set(endpointPassthroughHeader, 'true');
-        this.guid = `${appGuid}-${index}`;
-    }
-    actions = [DELETE_INSTANCE, DELETE_INSTANCE_SUCCESS, DELETE_INSTANCE_FAILED];
-    entity = [entityFactory(appStatsSchemaKey)];
-    entityType = appStatsSchemaKey;
-    removeEntityOnDelete = true;
-    options: RequestOptions;
+  implements ICFAction {
+  guid: string;
+  constructor(
+    public appGuid: string,
+    index: number,
+    public endpointGuid: string
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${appGuid}/instances/${index}`;
+    this.options.method = 'delete';
+    this.options.headers = new Headers();
+    const endpointPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(endpointPassthroughHeader, 'true');
+    this.guid = `${appGuid}-${index}`;
+  }
+  actions = [DELETE_INSTANCE, DELETE_INSTANCE_SUCCESS, DELETE_INSTANCE_FAILED];
+  entity = [entityFactory(appStatsSchemaKey)];
+  entityType = appStatsSchemaKey;
+  removeEntityOnDelete = true;
+  options: RequestOptions;
 }
 
 export class RestageApplication extends CFStartAction implements ICFAction {
-    constructor(public guid: string, public endpointGuid: string) {
-        super();
-        this.options = new RequestOptions();
-        this.options.url = `apps/${guid}/restage`;
-        this.options.method = 'post';
-        this.options.headers = new Headers();
-        const endpointPassthroughHeader = 'x-cap-passthrough';
-        this.options.headers.set(endpointPassthroughHeader, 'true');
-    }
-    actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
-    entity = [applicationEntitySchema];
-    entityType = applicationSchemaKey;
-    options: RequestOptions;
-    updatingKey = 'restaging';
+  constructor(public guid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}/restage`;
+    this.options.method = 'post';
+    this.options.headers = new Headers();
+    const endpointPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(endpointPassthroughHeader, 'true');
+  }
+  actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
+  entity = [applicationEntitySchema];
+  entityType = applicationSchemaKey;
+  options: RequestOptions;
+  updatingKey = 'restaging';
 }

@@ -19,6 +19,8 @@ import {
   ValidateResultFetchingState,
 } from '../entity-relations.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 /**
  * Add roles from (org|space)\[role\]\[user\] into user\[role\]
@@ -64,44 +66,48 @@ export function orgSpacePostProcess(
   apiResponse: APIResponse,
   allEntities: IRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
-  const orgOrSpace = entities[action.entityType][action.guid];
-  const users = entities[cfUserSchemaKey];
-  const existingUsers = allEntities[cfUserSchemaKey];
+  const orgOrSpaceCatalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
+  const { entityKey } = orgOrSpaceCatalogueEntity;
+  const orgOrSpace = entities[entityKey][action.guid];
+  const users = entities[entityKey];
+  const existingUsers = allEntities[entityKey];
 
   const newUsers = {};
-  if (action.entityType === organizationSchemaKey) {
+  if (entityKey === EntityCatalogueHelpers.buildId(CF_ENDPOINT_TYPE, organizationSchemaKey)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
-  } else if (action.entityType === spaceSchemaKey) {
+  } else if (entityKey === EntityCatalogueHelpers.buildId(CF_ENDPOINT_TYPE, spaceSchemaKey)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
-
+  const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserSchemaKey);
   if (!Object.keys(newUsers).length) {
     return;
   }
   if (apiResponse) {
     // The apiResponse will make it into the store, as this is an api.effect validation
-    apiResponse.response.entities = deepMergeState(apiResponse.response.entities, { [cfUserSchemaKey]: newUsers });
+    apiResponse.response.entities = deepMergeState(apiResponse.response.entities, { [userCatalogueEntity.entityKey]: newUsers });
     return;
   } else {
+
     // The apiResponse will NOT make it into the store, as this is a general validation. So create a mock event to push to store
     const response = {
       entities: {
-        [cfUserSchemaKey]: newUsers
+        [userCatalogueEntity.entityKey]: newUsers
       },
       result: Object.keys(newUsers)
     };
+
     const paginatedAction: PaginatedAction = {
       actions: [],
       endpointGuid: action.endpointGuid,
-      entity: entityFactory(cfUserSchemaKey),
+      entity: userCatalogueEntity.getSchema(),
       entityLocation: RequestEntityLocation.ARRAY,
-      entityType: cfUserSchemaKey,
+      entityType: userCatalogueEntity.entity.type,
       endpointType: CF_ENDPOINT_TYPE,
       type: '[Entity] Post-process Org/Space Users',
       paginationKey: createEntityRelationPaginationKey(action.entityType, action.guid)
@@ -110,7 +116,7 @@ export function orgSpacePostProcess(
     const successAction = new WrapperRequestActionSuccess(response, paginatedAction, 'fetch', 1, 1);
     return {
       action: successAction,
-      fetchingState$: store.select(selectPaginationState(paginatedAction.entityType, paginatedAction.paginationKey)).pipe(
+      fetchingState$: store.select(selectPaginationState(userCatalogueEntity.entityKey, paginatedAction.paginationKey)).pipe(
         map((state: PaginationEntityState) => {
           const res: ValidateResultFetchingState = {
             fetching: !state || !state.ids[1]

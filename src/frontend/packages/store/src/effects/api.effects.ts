@@ -77,8 +77,7 @@ export class APIEffect {
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options } as RequestOptions;
     const requestType = getRequestTypeFromMethod(apiAction);
-    const entity = Array.isArray(apiAction.entity) ? apiAction.entity[0] : apiAction.entity;
-    const catalogueEntity = entityCatalogue.getEntity(entity.endpointType, entity.entityType);
+    const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
     if (this.shouldRecursivelyDelete(requestType, apiAction)) {
       this.store.dispatch(
         new RecursiveDelete(apiAction.guid, catalogueEntity.getSchema()),
@@ -98,7 +97,7 @@ export class APIEffect {
 
       // Set params from store
       const paginationState = selectPaginationState(
-        catalogueEntity.id,
+        catalogueEntity.entityKey,
         paginatedAction.paginationKey,
       )(state);
       const paginationParams = this.getPaginationParams(paginationState);
@@ -146,7 +145,7 @@ export class APIEffect {
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
         paginatedAction.flattenPaginationMax,
-        catalogueEntity.id,
+        catalogueEntity.entityKey,
         paginatedAction.paginationKey,
         paginatedAction.__forcedPageSchemaKey__ ? entityFactory(paginatedAction.__forcedPageSchemaKey__).key : null
       );

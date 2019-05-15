@@ -39,7 +39,7 @@ fdescribe('EntityCatalogueService', () => {
     entityCatalogue.register(new StratosCatalogueEntity(definition));
 
     const catalogueEntity = entityCatalogue.getEntity(endpoint.type, definition.type);
-    expect(catalogueEntity.id).toBe(endpoint.type + 'Entity');
+    expect(catalogueEntity.entityKey).toBe(endpoint.type + 'Entity');
   });
 
   it('should get default schema from single schema', () => {

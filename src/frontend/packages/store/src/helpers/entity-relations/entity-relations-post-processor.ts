@@ -26,6 +26,7 @@ function apiAction(
   allEntities: IRequestDataState): ValidateEntityResult {
   const cfAction = action as ICFAction;
   const actions = cfAction.actions || [];
+  // TODO This need to be moved
   switch (actions[0]) {
     case GET_ORGANIZATION:
       return orgSpacePostProcess(store, action as GetOrganization, apiResponse, allEntities);

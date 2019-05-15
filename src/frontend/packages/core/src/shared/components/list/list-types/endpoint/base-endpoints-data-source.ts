@@ -17,131 +17,131 @@ import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
 
 export function syncPaginationSection(
-    store: Store<AppState>,
-    action: GetAllEndpoints,
-    paginationKey: string
+  store: Store<AppState>,
+  action: GetAllEndpoints,
+  paginationKey: string
 ) {
-    store.dispatch(new CreatePagination(
-        action.entityType,
-        paginationKey,
-        action.paginationKey
-    ));
+  store.dispatch(new CreatePagination(
+    action.entityType,
+    paginationKey,
+    action.paginationKey
+  ));
 }
 
 export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
-    store: Store<AppState>;
-    endpointType: string;
+  store: Store<AppState>;
+  endpointType: string;
 
-    constructor(
-        store: Store<AppState>,
-        listConfig: IListConfig<EndpointModel>,
-        action: GetAllEndpoints,
-        endpointType: string = null,
-        paginationMonitorFactory: PaginationMonitorFactory,
-        entityMonitorFactory: EntityMonitorFactory,
-        internalEventMonitorFactory: InternalEventMonitorFactory,
-        onlyConnected = true
-    ) {
-        const rowStateHelper = new ListRowSateHelper();
-        const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
-            paginationMonitorFactory,
-            entityMonitorFactory,
-            GetAllEndpoints.storeKey,
-            endpointSchemaKey,
-            EndpointRowStateSetUpManager
-        );
-        const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
-        const config = BaseEndpointsDataSource.getEndpointConfig(
-            store,
-            action,
-            listConfig,
-            rowStateManager.observable,
-            () => {
-                eventSub.unsubscribe();
-                sub.unsubscribe();
-            },
-            () => this.store.dispatch(action)
-        );
+  constructor(
+    store: Store<AppState>,
+    listConfig: IListConfig<EndpointModel>,
+    action: GetAllEndpoints,
+    endpointType: string = null,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    entityMonitorFactory: EntityMonitorFactory,
+    internalEventMonitorFactory: InternalEventMonitorFactory,
+    onlyConnected = true
+  ) {
+    const rowStateHelper = new ListRowSateHelper();
+    const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
+      paginationMonitorFactory,
+      entityMonitorFactory,
+      GetAllEndpoints.storeKey,
+      endpointSchemaKey,
+      EndpointRowStateSetUpManager
+    );
+    const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
+    const config = BaseEndpointsDataSource.getEndpointConfig(
+      store,
+      action,
+      listConfig,
+      rowStateManager.observable,
+      () => {
+        eventSub.unsubscribe();
+        sub.unsubscribe();
+      },
+      () => this.store.dispatch(action)
+    );
 
-        super({
-            ...config,
-            paginationKey: action.paginationKey,
-            transformEntities: [
-                (entities: EndpointModel[]) => {
-                    return endpointType || onlyConnected ? entities.filter(endpoint => {
-                        return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
-                            (!endpointType || endpoint.cnsi_type === endpointType);
-                    }) : entities;
-                },
-                {
-                    type: 'filter',
-                    field: 'name'
-                },
-            ],
-        });
-        this.endpointType = endpointType;
-    }
+    super({
+      ...config,
+      paginationKey: action.paginationKey,
+      transformEntities: [
+        (entities: EndpointModel[]) => {
+          return endpointType || onlyConnected ? entities.filter(endpoint => {
+            return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
+              (!endpointType || endpoint.cnsi_type === endpointType);
+          }) : entities;
+        },
+        {
+          type: 'filter',
+          field: 'name'
+        },
+      ],
+    });
+    this.endpointType = endpointType;
+  }
 
-    static getEndpointConfig(
-        store,
-        action,
-        listConfig,
-        rowsState,
-        destroy,
-        refresh
-    ) {
-        return {
-            store,
-            action,
-            schema: entityFactory(endpointSchemaKey),
-            getRowUniqueId: object => object.guid,
-            getEmptyType: () => ({
-                name: '',
-                system_shared_token: false,
-                metricsAvailable: false,
-                sso_allowed: false,
-            }),
-            paginationKey: GetAllEndpoints.storeKey,
-            isLocal: true,
-            transformEntities: [
-                {
-                    type: 'filter',
-                    field: 'name'
-                },
-            ] as DataFunctionDefinition[],
-            listConfig,
-            rowsState,
-            destroy,
-            refresh
-        };
-    }
-    static monitorEvents(
-        internalEventMonitorFactory: InternalEventMonitorFactory,
-        rowStateManager: TableRowStateManager,
-        store: Store<AppState>
-    ) {
-        const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
-        return eventMonitor.hasErroredOverTime().pipe(
-            withLatestFrom(store.select(endpointEntitiesSelector)),
-            tap(([errored, endpoints]) => errored.forEach(id => {
-                if (endpoints[id].connectionStatus === 'connected') {
-                    rowStateManager.updateRowState(id, {
-                        error: true,
-                        message: `We've been having trouble communicating with this endpoint`
-                    });
-                }
-            }
-            )),
-            map(([errored]) => errored),
-            pairwise(),
-            tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
-                if (!newErrored.find(newId => newId === oldId)) {
-                    rowStateManager.updateRowState(oldId, {
-                        error: false,
-                        message: ''
-                    });
-                }
-            })),
-        ).subscribe();
-    }
+  static getEndpointConfig(
+    store,
+    action,
+    listConfig,
+    rowsState,
+    destroy,
+    refresh
+  ) {
+    return {
+      store,
+      action,
+      schema: entityFactory(endpointSchemaKey),
+      getRowUniqueId: object => object.guid,
+      getEmptyType: () => ({
+        name: '',
+        system_shared_token: false,
+        metricsAvailable: false,
+        sso_allowed: false,
+      }),
+      paginationKey: GetAllEndpoints.storeKey,
+      isLocal: true,
+      transformEntities: [
+        {
+          type: 'filter',
+          field: 'name'
+        },
+      ] as DataFunctionDefinition[],
+      listConfig,
+      rowsState,
+      destroy,
+      refresh
+    };
+  }
+  static monitorEvents(
+    internalEventMonitorFactory: InternalEventMonitorFactory,
+    rowStateManager: TableRowStateManager,
+    store: Store<AppState>
+  ) {
+    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
+    return eventMonitor.hasErroredOverTime().pipe(
+      withLatestFrom(store.select(endpointEntitiesSelector)),
+      tap(([errored, endpoints]) => errored.forEach(id => {
+        if (endpoints[id].connectionStatus === 'connected') {
+          rowStateManager.updateRowState(id, {
+            error: true,
+            message: `We've been having trouble communicating with this endpoint`
+          });
+        }
+      }
+      )),
+      map(([errored]) => errored),
+      pairwise(),
+      tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
+        if (!newErrored.find(newId => newId === oldId)) {
+          rowStateManager.updateRowState(oldId, {
+            error: false,
+            message: ''
+          });
+        }
+      })),
+    ).subscribe();
+  }
 }

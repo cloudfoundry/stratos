@@ -10,6 +10,7 @@ import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 export interface SingleEntityAction {
   entityType: string;
+  endpointType: string;
   // For single entity requests
   guid?: string;
 }
