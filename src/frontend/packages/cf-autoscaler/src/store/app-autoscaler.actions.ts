@@ -12,7 +12,6 @@ import {
   appAutoscalerPolicySchemaKey,
   appAutoscalerPolicyTriggerSchemaKey,
   appAutoscalerScalingHistorySchemaKey,
-  appAutoscalerUpdatedPolicySchemaKey,
 } from './autoscaler.store.module';
 
 export const AppAutoscalerPolicyEvents = {
@@ -83,7 +82,7 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
     public policy: AppAutoscalerPolicyLocal,
   ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY;
-  entityKey = appAutoscalerUpdatedPolicySchemaKey;
+  entityKey = appAutoscalerPolicySchemaKey;
 }
 
 export class DetachAppAutoscalerPolicyAction implements IRequestAction {

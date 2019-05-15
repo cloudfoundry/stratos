@@ -150,7 +150,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('detach policy', err), action, actionType)
           ]));
     }));
 
@@ -307,14 +307,11 @@ export class AutoscalerEffects {
         }),
         catchError(err => {
           if (err.status === 404 && err._body === '{}') {
-            return [
-              new WrapperRequestActionFailed('No policy is defined for this application.', getPolicyAction, actionType)
-            ];
-          } else {
-            return [
-              new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType)
-            ];
+            err._body = 'No policy is defined for this application.';
           }
+          return [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType)
+          ];
         }));
   }
 

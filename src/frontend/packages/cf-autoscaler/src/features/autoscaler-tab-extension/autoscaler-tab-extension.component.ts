@@ -77,7 +77,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
   public appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
-  appAutoscalerEnablement$: Observable<boolean>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
 

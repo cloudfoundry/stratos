@@ -21,7 +21,7 @@ import {
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppSpecificDate } from '../../../store/app-autoscaler.types';
-import { appAutoscalerUpdatedPolicySchemaKey } from '../../../store/autoscaler.store.module';
+import { appAutoscalerPolicySchemaKey } from '../../../store/autoscaler.store.module';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
@@ -67,8 +67,8 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   ngOnInit() {
     super.ngOnInit();
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerUpdatedPolicySchemaKey,
-      entityFactory(appAutoscalerUpdatedPolicySchemaKey),
+      appAutoscalerPolicySchemaKey,
+      entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
       false
@@ -87,7 +87,14 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     );
     let waitForAppAutoscalerUpdateStatus$: Observable<any>;
     waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error || !!request.response),
+      filter(request => {
+        if (request.message && request.message.indexOf('fetch policy') >= 0) {
+          request.message = '';
+          return false;
+        } else {
+          return !!request.error || !!request.response;
+        }
+      }),
       map(request => {
         const msg = request.message;
         request.error = false;
@@ -110,9 +117,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       }
     }));
     return waitForAppAutoscalerUpdateStatus$.pipe(take(1), map(res => {
-      this.store.dispatch(
-        new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-      );
       return {
         ...res,
       };
