@@ -1,63 +1,26 @@
-.app-service-card {
-  &__title {
-    align-content: center;
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding-right: 20px;
-    width: 100%;
-  }
-  &__env-link {
-    cursor: pointer;
+mat-card-header {
+  .autoscaler-metric-subtitle {
+    color: rgba(0, 0, 0, .54);
+    font-size: .9em;
+    margin-top: .3em;
   }
 }
 
-app-tile-grid {
-  width: 100%;
-}
-
-.autoscaler-metric-page {
+mat-card-content {
   display: flex;
-  position: relative;
+  height: 250px;
   width: 100%;
-  &__actions {
-    bottom: 24px;
-    padding-top: 0;
-    position: absolute;
-    right: 24px;
-    text-align: right;
-  }
-}
 
-.app-metadata {
-  display: flex;
-  flex-direction: row;
-  &__two-cols {
-    flex: 1;
-    margin-right: 3em;
-    app-metadata-item:first-child {
-      margin-top: 0;
+  .autoscaler-chart-gauge {
+    height: 200px;
+    margin: 40px 20px 0 0;
+    width: 20%;
+    ngx-charts-gauge {
+      width: 100%;
     }
   }
-}
-
-.autoscaler-chart-gauge {
-  display: inline-block;
-  height: 250px;
-  margin-top: 1em;
-  width: 20%;
-}
-
-.autoscaler-chart-combo {
-  display: inline-block;
-  height: 250px;
-  margin-top: 1em;
-  width: 62.5%;
-}
-
-.autoscaler-metric-subtitle {
-  color: rgba(0, 0, 0, .54);
-  font-size: .9em;
-  margin-top: .3em;
+  .autoscaler-chart-combo {
+    margin-top: 1em;
+    width: 80%;
+  }
 }

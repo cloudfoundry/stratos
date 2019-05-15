@@ -83,17 +83,3 @@
     }
   }
 }
-
-ngx-charts-legend {
-  display: inline-block;
-  margin-left: 1.75em;
-  margin-top: 1em;
-  position: absolute;
-  right: 3em;
-  .legend-wrap {
-    width: unset;
-    .legend-labels {
-      width: unset;
-    }
-  }
-}

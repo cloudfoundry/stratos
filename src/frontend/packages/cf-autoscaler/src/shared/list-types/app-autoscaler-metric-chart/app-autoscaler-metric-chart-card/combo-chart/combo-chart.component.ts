@@ -21,117 +21,7 @@ import { curveLinear } from 'd3-shape';
 
 @Component({
   selector: 'app-autoscaler-combo-chart-component',
-  template: `
-    <ngx-charts-chart
-      [view]="[width + legendSpacing, height]"
-      [showLegend]="legend"
-      [legendOptions]="legendOptions"
-      [activeEntries]="activeEntries"
-      [animations]="animations"
-      (legendLabelClick)="onClick($event)"
-      (legendLabelActivate)="onActivate($event)"
-      (legendLabelDeactivate)="onDeactivate($event)">
-
-      <svg:g [attr.transform]="transform" class="bar-chart chart">
-          <svg:g ngx-charts-x-axis
-          *ngIf="xAxis"
-          [xScale]="xScale"
-          [dims]="dims"
-          [showLabel]="showXAxisLabel"
-          [labelText]="xAxisLabel"
-          [tickFormatting]="xAxisTickFormatting"
-          (dimensionsChanged)="updateXAxisHeight($event)">
-        </svg:g>
-        <svg:g ngx-charts-y-axis
-          *ngIf="yAxis"
-          [yScale]="yScale"
-          [dims]="dims"
-          [yOrient]="yOrientLeft"
-          [showGridLines]="showGridLines"
-          [showLabel]="showYAxisLabel"
-          [labelText]="yAxisLabel"
-          [tickFormatting]="yAxisTickFormatting"
-          (dimensionsChanged)="updateYAxisWidth($event)">
-        </svg:g>
-        <svg:g ngx-charts-y-axis
-          *ngIf="yAxis"
-          [yScale]="yScaleLine"
-          [dims]="dims"
-          [yOrient]="yOrientRight"
-          (dimensionsChanged)="updateYAxisWidth($event)">
-        </svg:g>
-        <svg:g ngx-combo-charts-series-vertical
-          [xScale]="xScale"
-          [yScale]="yScale"
-          [colors]="colors"
-          [series]="results"
-          [seriesLine]="lineChart"
-          [dims]="dims"
-          [gradient]="gradient"
-          tooltipDisabled="true"
-          [activeEntries]="activeEntries"
-          [animations]="animations"
-          (activate)="onActivate($event)"
-          (deactivate)="onDeactivate($event)"
-          (bandwidth)="updateLineWidth($event)"
-          (select)="onClick($event)">
-        </svg:g>
-      </svg:g>
-      <svg:g [attr.transform]="transform" class="line-chart chart">
-        <svg:g>
-          <svg:g *ngFor="let series of lineChart; trackBy:trackBy">
-            <svg:g ngx-charts-line-series
-              [xScale]="xScaleLine"
-              [yScale]="yScaleLine"
-              [colors]="colorsLine"
-              [data]="series"
-              [activeEntries]="activeEntries"
-              [scaleType]="scaleType"
-              [curve]="curve"
-              [rangeFillOpacity]="rangeFillOpacity"
-              [animations]="animations"
-            />
-          </svg:g>
-
-          <svg:g ngx-charts-tooltip-area
-            *ngIf="!tooltipDisabled"
-            [dims]="dims"
-            [xSet]="xSet"
-            [xScale]="xScaleLine"
-            [yScale]="yScaleLine"
-            [results]="combinedSeries"
-            [colors]="colorsLine"
-            [tooltipDisabled]="tooltipDisabled"
-            (hover)="updateHoveredVertical($event)"
-          />
-
-          <svg:g *ngFor="let series of lineChart">
-            <svg:g ngx-charts-circle-series
-              [xScale]="xScaleLine"
-              [yScale]="yScaleLine"
-              [colors]="colorsLine"
-              [data]="series"
-              [scaleType]="scaleType"
-              [visibleValue]="hoveredVertical"
-              [activeEntries]="activeEntries"
-              [tooltipDisabled]="tooltipDisabled"
-              (select)="onClick($event, series)"
-              (activate)="onActivate($event)"
-              (deactivate)="onDeactivate($event)"
-            />
-          </svg:g>
-        </svg:g>
-      </svg:g>
-    </ngx-charts-chart>
-    <ngx-charts-legend
-      class="chart-legend"
-      [data]="legendOptionsExtra.domain"
-      [title]="legendOptionsExtra.title"
-      [colors]="legendOptionsExtra.colors"
-      [height]="height"
-      [activeEntries]="activeEntries">
-    </ngx-charts-legend>
-  `,
+  templateUrl: './combo-chart.component.html',
   styleUrls: ['./combo-chart.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
@@ -210,8 +100,14 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
 
   update(): void {
     super.update();
+    if (!this.yAxis) {
+      this.legendSpacing = 0;
+    } else {
+      this.legendSpacing = 50;
+    }
+
     this.dims = calculateViewDimensions({
-      width: this.width,
+      width: this.legend ? this.width - this.legendSpacing : this.width,
       height: this.height,
       margins: this.margin,
       showXAxis: this.xAxis,
@@ -224,11 +120,6 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
       legendType: this.schemeType,
     });
 
-    if (!this.yAxis) {
-      this.legendSpacing = 0;
-    } else {
-      this.legendSpacing = 30;
-    }
     this.xScale = this.getXScale();
     this.yScale = this.getYScale();
 
@@ -495,7 +386,6 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
   updateLineWidth(width): void {
     this.bandwidth = width;
   }
-
   updateYAxisWidth({ width }): void {
     this.yAxisWidth = width + 20;
     this.update();
