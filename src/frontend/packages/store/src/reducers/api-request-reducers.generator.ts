@@ -1,34 +1,17 @@
 import { Action } from '@ngrx/store';
-
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import {
-  appEnvVarsSchemaKey,
   applicationSchemaKey,
   appStatsSchemaKey,
   appSummarySchemaKey,
-  buildpackSchemaKey,
-  cfInfoSchemaKey,
   cfUserSchemaKey,
-  featureFlagSchemaKey,
-  gitBranchesSchemaKey,
-  gitCommitSchemaKey,
-  gitRepoSchemaKey,
-  metricSchemaKey,
   organizationSchemaKey,
-  privateDomainsSchemaKey,
-  quotaDefinitionSchemaKey,
   routeSchemaKey,
-  securityGroupSchemaKey,
-  serviceBindingSchemaKey,
-  serviceBrokerSchemaKey,
   serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  serviceSchemaKey,
-  spaceQuotaSchemaKey,
   spaceSchemaKey,
   userFavoritesSchemaKey,
   userProfileSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
+  userProvidedServiceInstanceSchemaKey
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { IRequestDataState, IRequestState } from '../types/entity.types';
@@ -46,7 +29,7 @@ import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -88,42 +71,6 @@ const baseStratosEntities = [
   userFavoritesSchemaKey,
   'user',
   'system'
-  // 'application',
-  // 'stack',
-  // 'space',
-  // organizationSchemaKey,
-  // routeSchemaKey,
-  // 'event',
-  // endpointStoreNames.type,
-  // 'domain',
-  // 'system',
-  // 'routerReducer',
-  // 'createApplication',
-  // 'uaaSetup',
-  // 'user',
-  // cfInfoSchemaKey,
-  // gitRepoSchemaKey,
-  // gitBranchesSchemaKey,
-  // gitCommitSchemaKey,
-  // appEnvVarsSchemaKey,
-  // appStatsSchemaKey,
-  // appSummarySchemaKey,
-  // quotaDefinitionSchemaKey,
-  // buildpackSchemaKey,
-  // securityGroupSchemaKey,
-  // servicePlanSchemaKey,
-  // serviceSchemaKey,
-  // serviceBindingSchemaKey,
-  // serviceInstancesSchemaKey,
-  // featureFlagSchemaKey,
-  // privateDomainsSchemaKey,
-  // spaceQuotaSchemaKey,
-  // metricSchemaKey,
-  // userProfileSchemaKey,
-  // servicePlanVisibilitySchemaKey,
-  // serviceBrokerSchemaKey,
-  // userFavoritesSchemaKey,
-  // userProvidedServiceInstanceSchemaKey
 ];
 
 export function registerAPIRequestEntity(schemaKey: string) {

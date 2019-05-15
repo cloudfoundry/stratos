@@ -15,7 +15,7 @@ export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction
   }
   actions = getActions('Buildpacks', 'List all');
   entity = [entityFactory(buildpackSchemaKey)];
-  entityKey = buildpackSchemaKey;
+  entityType = buildpackSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,

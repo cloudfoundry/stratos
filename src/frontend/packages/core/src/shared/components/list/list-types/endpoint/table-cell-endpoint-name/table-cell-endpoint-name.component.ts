@@ -8,46 +8,46 @@ import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { TableCellCustom } from '../../../list.types';
-import { EntityCatalogueService } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 export interface RowWithEndpointId {
-  endpointId: string;
+    endpointId: string;
 }
 
 @Component({
-  selector: 'app-table-cell-endpoint-name',
-  templateUrl: './table-cell-endpoint-name.component.html',
-  styleUrls: ['./table-cell-endpoint-name.component.scss']
+    selector: 'app-table-cell-endpoint-name',
+    templateUrl: './table-cell-endpoint-name.component.html',
+    styleUrls: ['./table-cell-endpoint-name.component.scss']
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 
-  public endpoint$: Observable<any>;
+    public endpoint$: Observable<any>;
 
-  constructor(
-    private entityServiceFactory: EntityServiceFactory,
-    private entityCatalogueService: EntityCatalogueService
-  ) {
-    super();
-  }
+    constructor(
+        private entityServiceFactory: EntityServiceFactory,
 
-  @Input('row')
-  set row(row: EndpointModel | RowWithEndpointId) {
-    /* tslint:disable-next-line:no-string-literal */
-    const id = row['endpointId'] || row['guid'];
-    this.endpoint$ = this.entityServiceFactory.create(
-      endpointSchemaKey,
-      entityFactory(endpointSchemaKey),
-      id,
-      new GetAllEndpoints(),
-      false
-    ).waitForEntity$.pipe(
-      map(data => data.entity),
-      map((data: any) => {
-        const ep = this.entityCatalogueService.getEndpoint(data.cnsi_type, data.sub_type).entity;
-        data.canShowLink = data.connectionStatus === 'connected' || ep.unConnectable;
-        data.link = EndpointsService.getLinkForEndpoint(data, this.entityCatalogueService);
-        return data;
-      })
-    );
-  }
+    ) {
+        super();
+    }
+
+    @Input('row')
+    set row(row: EndpointModel | RowWithEndpointId) {
+        /* tslint:disable-next-line:no-string-literal */
+        const id = row['endpointId'] || row['guid'];
+        this.endpoint$ = this.entityServiceFactory.create(
+            endpointSchemaKey,
+            entityFactory(endpointSchemaKey),
+            id,
+            new GetAllEndpoints(),
+            false
+        ).waitForEntity$.pipe(
+            map(data => data.entity),
+            map((data: any) => {
+                const ep = entityCatalogue.getEndpoint(data.cnsi_type, data.sub_type).entity;
+                data.canShowLink = data.connectionStatus === 'connected' || ep.unConnectable;
+                data.link = EndpointsService.getLinkForEndpoint(data, entityCatalogue);
+                return data;
+            })
+        );
+    }
 }

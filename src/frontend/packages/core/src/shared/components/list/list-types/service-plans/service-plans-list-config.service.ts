@@ -21,7 +21,7 @@ import {
 import {
   TableCellAServicePlanPublicComponent,
 } from './table-cell-service-plan-public/table-cell-service-plan-public.component';
-import { EntityCatalogueService } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 
 /**
@@ -98,7 +98,6 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
 
   constructor(
     store: Store<AppState>,
-    entityCatalogueService: EntityCatalogueService,
     protected datePipe: DatePipe,
     servicesService: ServicesService
   ) {

@@ -22,7 +22,7 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
   }
   actions = getActions('Security Groups', 'Fetch all');
   entity = [entityFactory(securityGroupSchemaKey)];
-  entityKey = securityGroupSchemaKey;
+  entityType = securityGroupSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,

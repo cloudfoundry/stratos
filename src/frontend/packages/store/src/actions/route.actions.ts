@@ -46,9 +46,10 @@ export abstract class BaseRouteAction extends CFStartAction implements ICFAction
   constructor(public guid: string, public endpointGuid: string, public appGuid?: string) {
     super();
   }
+  endpointType = 'cf';
   actions: string[];
   entity = [entityFactory(routeSchemaKey)];
-  entityKey = routeSchemaKey;
+  entityType = routeSchemaKey;
   options: RequestOptions;
 }
 
@@ -111,6 +112,7 @@ export class UnmapRoute extends BaseRouteAction {
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
   }
+  endpointTYpe = 'cf';
   actions = [
     RouteEvents.UNMAP_ROUTE,
     RouteEvents.UNMAP_ROUTE_SUCCESS,
@@ -132,12 +134,13 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
   entity = [entityFactory(routeSchemaKey)];
-  entityKey = routeSchemaKey;
+  entityType = routeSchemaKey;
   options: RequestOptions;
 }
 
 export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {
   paginationKey: string;
+  endpointType = 'cf';
   constructor(
     public endpointGuid: string,
     public includeRelations = [
@@ -154,7 +157,7 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
     this.paginationKey = createEntityRelationPaginationKey('cf', this.endpointGuid);
   }
   entity = [entityFactory(routeSchemaKey)];
-  entityKey = routeSchemaKey;
+  entityType = routeSchemaKey;
   options: RequestOptions;
   actions = getActions('Routes', 'Fetch all');
   initialParams = {

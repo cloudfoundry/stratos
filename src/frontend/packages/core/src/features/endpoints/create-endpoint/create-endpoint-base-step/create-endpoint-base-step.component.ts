@@ -6,7 +6,7 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
-import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
@@ -39,8 +39,8 @@ export class CreateEndpointBaseStepComponent {
       }));
     }
   }
-  constructor(public store: Store<AppState>, entityCatalogueService: EntityCatalogueService) {
-    this.tileSelectorConfig = entityCatalogueService.getAllEndpointTypes().map(catalogueEndpoint => {
+  constructor(public store: Store<AppState>,  ) {
+    this.tileSelectorConfig = entityCatalogue.getAllEndpointTypes().map(catalogueEndpoint => {
       const endpoint = catalogueEndpoint.entity;
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
         endpoint.label,

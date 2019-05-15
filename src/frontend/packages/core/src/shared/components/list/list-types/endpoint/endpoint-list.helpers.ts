@@ -15,162 +15,162 @@ import { CurrentUserPermissions } from '../../../../../core/current-user-permiss
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import {
-  ConnectEndpointDialogComponent,
+    ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
-import { EntityCatalogueService } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 interface EndpointDetailsContainerRefs {
-  componentRef: ComponentRef<EndpointListDetailsComponent>;
-  component: EndpointListDetailsComponent;
-  endpointDetails: ViewContainerRef;
+    componentRef: ComponentRef<EndpointListDetailsComponent>;
+    component: EndpointListDetailsComponent;
+    endpointDetails: ViewContainerRef;
 }
 
 export abstract class EndpointListDetailsComponent extends TableCellCustom<EndpointModel> {
-  isEndpointListDetailsComponent = true;
-  isTable = true;
+    isEndpointListDetailsComponent = true;
+    isTable = true;
 }
 
 function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent {
-  return obj ? obj.isEndpointListDetailsComponent ? obj as EndpointListDetailsComponent : null : null;
+    return obj ? obj.isEndpointListDetailsComponent ? obj as EndpointListDetailsComponent : null : null;
 }
 
 @Injectable()
 export class EndpointListHelper {
 
-  constructor(
-    private store: Store<AppState>,
-    private dialog: MatDialog,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService,
-    private log: LoggerService,
-    private entityCatalogueService: EntityCatalogueService) { }
+    constructor(
+        private store: Store<AppState>,
+        private dialog: MatDialog,
+        private currentUserPermissionsService: CurrentUserPermissionsService,
+        private confirmDialog: ConfirmationDialogService,
+        private log: LoggerService,
+    ) { }
 
-  endpointActions(): IListAction<EndpointModel>[] {
-    return [
-      {
-        action: (item) => {
-          const confirmation = new ConfirmationDialogConfig(
-            'Disconnect Endpoint',
-            `Are you sure you want to disconnect endpoint '${item.name}'?`,
-            'Disconnect',
-            false
-          );
-          this.confirmDialog.open(confirmation, () => {
-            this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
-            this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-              this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
-              this.store.dispatch(new GetSystemInfo());
-            });
-          });
-        },
-        label: 'Disconnect',
-        description: ``, // Description depends on console user permission
-        createVisible: (row$: Observable<EndpointModel>) => combineLatest(
-          this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER),
-          row$
-        ).pipe(
-          map(([isAdmin, row]) => {
-            const isConnected = row.connectionStatus === 'connected';
-            return isConnected && (!row.system_shared_token || row.system_shared_token && isAdmin);
-          })
-        )
-      },
-      {
-        action: (item) => {
-          this.dialog.open(ConnectEndpointDialogComponent, {
-            data: {
-              name: item.name,
-              guid: item.guid,
-              type: item.cnsi_type,
-              subType: item.sub_type,
-              ssoAllowed: item.sso_allowed
+    endpointActions(): IListAction<EndpointModel>[] {
+        return [
+            {
+                action: (item) => {
+                    const confirmation = new ConfirmationDialogConfig(
+                        'Disconnect Endpoint',
+                        `Are you sure you want to disconnect endpoint '${item.name}'?`,
+                        'Disconnect',
+                        false
+                    );
+                    this.confirmDialog.open(confirmation, () => {
+                        this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
+                        this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
+                            this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
+                            this.store.dispatch(new GetSystemInfo());
+                        });
+                    });
+                },
+                label: 'Disconnect',
+                description: ``, // Description depends on console user permission
+                createVisible: (row$: Observable<EndpointModel>) => combineLatest(
+                    this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER),
+                    row$
+                ).pipe(
+                    map(([isAdmin, row]) => {
+                        const isConnected = row.connectionStatus === 'connected';
+                        return isConnected && (!row.system_shared_token || row.system_shared_token && isAdmin);
+                    })
+                )
             },
-            disableClose: true
-          });
-        },
-        label: 'Connect',
-        description: '',
-        createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
-          const ep = this.entityCatalogueService.getEndpoint(row.cnsi_type, row.sub_type).entity;
-          return !ep.unConnectable && row.connectionStatus === 'disconnected';
-        }))
-      },
-      {
-        action: (item) => {
-          const confirmation = new ConfirmationDialogConfig(
-            'Unregister Endpoint',
-            `Are you sure you want to unregister endpoint '${item.name}'?`,
-            'Unregister',
-            true
-          );
-          this.confirmDialog.open(confirmation, () => {
-            this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
-            this.handleDeleteAction(item, ([oldVal, newVal]) => {
-              this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+            {
+                action: (item) => {
+                    this.dialog.open(ConnectEndpointDialogComponent, {
+                        data: {
+                            name: item.name,
+                            guid: item.guid,
+                            type: item.cnsi_type,
+                            subType: item.sub_type,
+                            ssoAllowed: item.sso_allowed
+                        },
+                        disableClose: true
+                    });
+                },
+                label: 'Connect',
+                description: '',
+                createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
+                    const ep = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type).entity;
+                    return !ep.unConnectable && row.connectionStatus === 'disconnected';
+                }))
+            },
+            {
+                action: (item) => {
+                    const confirmation = new ConfirmationDialogConfig(
+                        'Unregister Endpoint',
+                        `Are you sure you want to unregister endpoint '${item.name}'?`,
+                        'Unregister',
+                        true
+                    );
+                    this.confirmDialog.open(confirmation, () => {
+                        this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
+                        this.handleDeleteAction(item, ([oldVal, newVal]) => {
+                            this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+                        });
+                    });
+                },
+                label: 'Unregister',
+                description: 'Remove the endpoint',
+                createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+            }
+        ];
+    }
+
+    private handleUpdateAction(item, effectKey, handleChange) {
+        this.handleAction(selectUpdateInfo(
+            endpointStoreNames.type,
+            item.guid,
+            effectKey,
+        ), handleChange);
+    }
+
+    private handleDeleteAction(item, handleChange) {
+        this.handleAction(selectDeletionInfo(
+            endpointStoreNames.type,
+            item.guid,
+        ), handleChange);
+    }
+
+    private handleAction(storeSelect, handleChange) {
+        const disSub = this.store.select(storeSelect).pipe(
+            pairwise())
+            .subscribe(([oldVal, newVal]) => {
+                // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
+                if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+                    handleChange([oldVal, newVal]);
+                    disSub.unsubscribe();
+                }
             });
-          });
-        },
-        label: 'Unregister',
-        description: 'Remove the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
-      }
-    ];
-  }
+    }
 
-  private handleUpdateAction(item, effectKey, handleChange) {
-    this.handleAction(selectUpdateInfo(
-      endpointStoreNames.type,
-      item.guid,
-      effectKey,
-    ), handleChange);
-  }
-
-  private handleDeleteAction(item, handleChange) {
-    this.handleAction(selectDeletionInfo(
-      endpointStoreNames.type,
-      item.guid,
-    ), handleChange);
-  }
-
-  private handleAction(storeSelect, handleChange) {
-    const disSub = this.store.select(storeSelect).pipe(
-      pairwise())
-      .subscribe(([oldVal, newVal]) => {
-        // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
-        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-          handleChange([oldVal, newVal]);
-          disSub.unsubscribe();
+    createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef, componentFactoryResolver: ComponentFactoryResolver):
+        EndpointDetailsContainerRefs {
+        const componentFactory = componentFactoryResolver.resolveComponentFactory<EndpointListDetailsComponent>(listDetailsComponent);
+        const componentRef = container.createComponent<EndpointListDetailsComponent>(componentFactory);
+        const component = isEndpointListDetailsComponent(componentRef.instance);
+        const refs = {
+            componentRef,
+            component,
+            endpointDetails: container
+        };
+        if (!component) {
+            this.log.warn(`Attempted to create a non-endpoint list details component "${listDetailsComponent}"`);
+            this.destroyEndpointDetails(refs);
         }
-      });
-  }
+        return refs;
+    }
 
-  createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef, componentFactoryResolver: ComponentFactoryResolver):
-    EndpointDetailsContainerRefs {
-    const componentFactory = componentFactoryResolver.resolveComponentFactory<EndpointListDetailsComponent>(listDetailsComponent);
-    const componentRef = container.createComponent<EndpointListDetailsComponent>(componentFactory);
-    const component = isEndpointListDetailsComponent(componentRef.instance);
-    const refs = {
-      componentRef,
-      component,
-      endpointDetails: container
-    };
-    if (!component) {
-      this.log.warn(`Attempted to create a non-endpoint list details component "${listDetailsComponent}"`);
-      this.destroyEndpointDetails(refs);
+    destroyEndpointDetails(refs: EndpointDetailsContainerRefs) {
+        if (refs.componentRef && refs.componentRef.destroy) {
+            refs.componentRef.destroy();
+        }
+        if (refs.endpointDetails && refs.endpointDetails.clear) {
+            refs.endpointDetails.clear();
+        }
     }
-    return refs;
-  }
-
-  destroyEndpointDetails(refs: EndpointDetailsContainerRefs) {
-    if (refs.componentRef && refs.componentRef.destroy) {
-      refs.componentRef.destroy();
-    }
-    if (refs.endpointDetails && refs.endpointDetails.clear) {
-      refs.endpointDetails.clear();
-    }
-  }
 }

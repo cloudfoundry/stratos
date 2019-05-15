@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { EntityCatalogueService } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   CloudFoundryComponentsModule
 } from './shared/components/components.module';
@@ -11,13 +11,11 @@ import { generateCFEntities } from './cf-entity-generator';
   ],
 })
 export class CloudFoundryPackageModule {
-  constructor(
-    private entityCatalogueService: EntityCatalogueService
-  ) {
+  constructor() {
     this.registerCfFavoriteEntities();
   }
   private registerCfFavoriteEntities() {
-    generateCFEntities().forEach(entity => this.entityCatalogueService.register(entity));
+    generateCFEntities().forEach(entity => entityCatalogue.register(entity));
   }
 
 }

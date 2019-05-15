@@ -8,7 +8,7 @@ import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
 
 export interface SingleEntityAction {
-  entityKey: string;
+  entityType: string;
   // For single entity requests
   guid?: string;
 }
@@ -31,7 +31,8 @@ export enum RequestEntityLocation {
 export type IRequestActionEntity = EntitySchema | EntitySchema[];
 export interface IRequestAction extends RequestAction {
   entity?: IRequestActionEntity;
-  entityKey: string;
+  entityType: string;
+  endpointType: string;
   /**
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section

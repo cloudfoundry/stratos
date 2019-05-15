@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEndpointEntity,
@@ -8,10 +7,7 @@ import {
 } from './entity-catalogue.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class EntityCatalogueService {
+export class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
   private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
 
@@ -119,3 +115,5 @@ export class EntityCatalogueService {
     }, [] as StratosCatalogueEndpointEntity[]);
   }
 }
+
+export const entityCatalogue = new EntityCatalogue();

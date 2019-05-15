@@ -19,7 +19,7 @@ import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
 import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
-import { EntityCatalogueService } from './core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -119,7 +119,7 @@ export class AppModule {
     eventService: GlobalEventService,
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
-    entityCatalogue: EntityCatalogueService
+     
   ) {
     ListDataSource.initializeServices(entityCatalogue);
     eventService.addEventConfig<boolean>(

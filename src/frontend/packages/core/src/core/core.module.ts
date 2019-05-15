@@ -31,7 +31,7 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { BaseEndpointAuth } from '../features/endpoints/endpoint-auth';
-import { EntityCatalogueService } from './entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { StratosCatalogueEndpointEntity } from './entity-catalogue/entity-catalogue.types';
 
 @NgModule({
@@ -99,10 +99,10 @@ import { StratosCatalogueEndpointEntity } from './entity-catalogue/entity-catalo
   ],
 })
 export class CoreModule {
-  constructor(entityCatalogueService: EntityCatalogueService) {
+  constructor() {
     // TODO(NJ): This gets called a few times do to lazy loaded modules that import this.
     // It's completely harmless but needs to be moved at some point.
-    entityCatalogueService.register(new StratosCatalogueEndpointEntity({
+    entityCatalogue.register(new StratosCatalogueEndpointEntity({
       type: 'metrics',
       label: 'Metrics',
       labelPlural: 'Metrics',

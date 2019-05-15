@@ -16,7 +16,7 @@ import {
 import { environment } from '../../../environments/environment.prod';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { FavoritesConfigMapper } from '../../../shared/components/favorites-meta-card/favorite-config-mapper';
 
 @Component({

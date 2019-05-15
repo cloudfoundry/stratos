@@ -25,7 +25,7 @@ export class GetStack extends CFStartAction implements ICFAction {
     GET_FAILED
   ];
   entity = [entityFactory(stackSchemaKey)];
-  entityKey = stackSchemaKey;
+  entityType = stackSchemaKey;
   options: RequestOptions;
 }
 export class GetAllStacks extends CFStartAction implements PaginatedAction {
@@ -39,7 +39,7 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
   paginationKey: string;
   actions = getActions('Stack', 'Fetch all');
   entity = [entityFactory(stackSchemaKey)];
-  entityKey = stackSchemaKey;
+  entityType = stackSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,

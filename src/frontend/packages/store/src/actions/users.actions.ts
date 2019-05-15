@@ -64,7 +64,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [entityFactory(cfUserSchemaKey)];
-  entityKey = cfUserSchemaKey;
+  entityType = cfUserSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -91,11 +91,12 @@ export class GetCFUser extends CFStartAction implements IRequestAction {
   }
   actions = [GET_CF_USER, GET_CF_USER_SUCCESS, GET_CF_USER_FAILED];
   entity = entityFactory(cfUserSchemaKey);
-  entityKey = cfUserSchemaKey;
+  entityType = cfUserSchemaKey;
   options: RequestOptions;
 }
 
 export class ChangeUserRole extends CFStartAction implements IRequestAction {
+  public endpointType = 'cf';
   constructor(
     public endpointGuid: string,
     public userGuid: string,
@@ -113,13 +114,13 @@ export class ChangeUserRole extends CFStartAction implements IRequestAction {
     this.options = new RequestOptions();
     this.options.url = `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`;
     this.options.method = method;
-    this.entityKey = isSpace ? spaceSchemaKey : organizationSchemaKey;
-    this.entity = entityFactory(this.entityKey);
+    this.entityType = isSpace ? spaceSchemaKey : organizationSchemaKey;
+    this.entity = entityFactory(this.entityType);
   }
 
   guid: string;
   entity: EntitySchema;
-  entityKey: string;
+  entityType: string;
   options: RequestOptions;
   updatingKey: string;
 

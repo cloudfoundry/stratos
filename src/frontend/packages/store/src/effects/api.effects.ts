@@ -31,6 +31,7 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -56,7 +57,10 @@ export class APIEffect {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
-  ) { }
+
+  ) {
+
+  }
 
   @Effect()
   apiRequest$ = this.actions$.pipe(
@@ -73,9 +77,11 @@ export class APIEffect {
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options } as RequestOptions;
     const requestType = getRequestTypeFromMethod(apiAction);
+    const entity = Array.isArray(apiAction.entity) ? apiAction.entity[0] : apiAction.entity;
+    const catalogueEntity = entityCatalogue.getEntity(entity.endpointType, entity.entityType);
     if (this.shouldRecursivelyDelete(requestType, apiAction)) {
       this.store.dispatch(
-        new RecursiveDelete(apiAction.guid, entityFactory(apiAction.entityKey)),
+        new RecursiveDelete(apiAction.guid, catalogueEntity.getSchema()),
       );
     }
 
@@ -92,7 +98,7 @@ export class APIEffect {
 
       // Set params from store
       const paginationState = selectPaginationState(
-        apiAction.entityKey,
+        catalogueEntity.id,
         paginatedAction.paginationKey,
       )(state);
       const paginationParams = this.getPaginationParams(paginationState);
@@ -140,7 +146,7 @@ export class APIEffect {
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
         paginatedAction.flattenPaginationMax,
-        paginatedAction.entityKey,
+        catalogueEntity.id,
         paginatedAction.paginationKey,
         paginatedAction.__forcedPageSchemaKey__ ? entityFactory(paginatedAction.__forcedPageSchemaKey__).key : null
       );
@@ -191,7 +197,7 @@ export class APIEffect {
               new RecursiveDeleteFailed(
                 apiAction.guid,
                 apiAction.endpointGuid,
-                entityFactory(apiAction.entityKey),
+                catalogueEntity.getSchema()
               ),
             );
           }
@@ -217,7 +223,7 @@ export class APIEffect {
             new RecursiveDeleteComplete(
               apiAction.guid,
               apiAction.endpointGuid,
-              entityFactory(apiAction.entityKey),
+              catalogueEntity.getSchema(),
             ),
           );
         }
@@ -257,7 +263,7 @@ export class APIEffect {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
             apiAction.endpointGuid,
-            entityFactory(apiAction.entityKey),
+            catalogueEntity.getSchema(),
           ));
         }
         return errorActions;
@@ -569,12 +575,13 @@ export class APIEffect {
 
   private getEntityRelations(action: any) {
     if (action.__forcedPageSchemaKey__) {
+      entityCatalogue.getEntity(action.entity.endpointType, action.__forcedPageSchemaKey__);
       const forcedSchema = entityFactory(action.__forcedPageSchemaKey__);
       return listEntityRelations(
         {
           ...action,
           entity: [forcedSchema],
-          entityKey: forcedSchema.key
+          entityType: forcedSchema.key
         }
       );
     }

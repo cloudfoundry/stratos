@@ -17,7 +17,7 @@ import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.t
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getFullEndpointApiUrl } from '../../endpoint-helpers';
-import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
@@ -54,7 +54,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogueEndpointEntity;
 
-  constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute, entityCatalogueService: EntityCatalogueService) {
+  constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute,  ) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
@@ -72,7 +72,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
-    this.endpoint = entityCatalogueService.getEndpoint(epType, epSubType);
+    this.endpoint = entityCatalogue.getEndpoint(epType, epSubType);
     this.setUrlValidation(this.endpoint);
 
     // Client Redirect URI for SSO

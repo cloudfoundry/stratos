@@ -50,7 +50,7 @@ import {
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { LocalPaginationHelpers } from './local-list.helpers';
-import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -73,7 +73,7 @@ export function distinctPageUntilChanged(dataSource) {
   };
 }
 const services: {
-  entityCatalogue: EntityCatalogueService
+   
 } = {
   entityCatalogue: null
 }
@@ -138,9 +138,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public isMultiAction$: Observable<boolean>;
   entityType: string;
 
-  static initializeServices(entityCatalogueService: EntityCatalogueService) {
+  static initializeServices( ) {
     // TODO: This isn't very nice, fix it - nj.
-    services.entityCatalogue = entityCatalogueService;
+    services.entityCatalogue = entityCatalogue;
   }
 
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});

@@ -8,7 +8,6 @@ import { PaginatedAction } from '../../../../../../store/src/types/pagination.ty
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
-import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 
 /**

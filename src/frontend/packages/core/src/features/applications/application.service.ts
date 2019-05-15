@@ -56,7 +56,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { EntityCatalogueService } from '../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-foundry.module';
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 
@@ -97,16 +97,16 @@ export class ApplicationService {
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityCatalogueService: EntityCatalogueService
+
   ) {
-    const appCatalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
+    const appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
     this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
       applicationSchemaKey,
       appCatalogueEntity.getSchema(),
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
     );
-    const summaryCatalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, appSummarySchemaKey);
+    const summaryCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummarySchemaKey);
 
     this.appSummaryEntityService = this.entityServiceFactory.create<APIResource<IAppSummary>>(
       appSummarySchemaKey,
@@ -154,13 +154,12 @@ export class ApplicationService {
    */
   static getApplicationState(
     store: Store<AppState>,
-    entityCatalogueService: EntityCatalogueService,
     appStateService: ApplicationStateService,
     app: IApp,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
     const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
-    const appStatsCatalogueEntity = entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, appStatsSchemaKey);
+    const appStatsCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsSchemaKey);
 
     const paginationMonitor = new PaginationMonitor(
       store,
@@ -188,7 +187,7 @@ export class ApplicationService {
     this.appSpace$ = moreWaiting$.pipe(
       first(),
       switchMap(app => {
-        const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, spaceWithOrgKey);
+        const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceWithOrgKey);
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           spaceSchemaKey,
           catalogueEntity.getSchema(),
@@ -225,7 +224,7 @@ export class ApplicationService {
 
   public getApplicationEnvVarsMonitor() {
     const factory = new EntityMonitorFactory(this.store);
-    const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, appEnvVarsSchemaKey);
+    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsSchemaKey);
     return factory.create<APIResource<IApp>>(
       this.appGuid,
       appEnvVarsSchemaKey,
@@ -236,7 +235,7 @@ export class ApplicationService {
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
     const action = new GetAppStatsAction(this.appGuid, this.cfGuid);
-    const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, appStatsSchemaKey);
+    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsSchemaKey);
     const appStats = getPaginationObservables<APIResource<AppStat>>({
       store: this.store,
       action,

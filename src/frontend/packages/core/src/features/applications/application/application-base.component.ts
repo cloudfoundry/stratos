@@ -10,7 +10,7 @@ import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../shared/entity.tokens
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 
@@ -23,7 +23,7 @@ export function applicationServiceFactory(
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
   paginationMonitorFactory: PaginationMonitorFactory,
-  entityCatalogueService: EntityCatalogueService
+   
 ) {
   return new ApplicationService(
     cfId,
@@ -33,7 +33,7 @@ export function applicationServiceFactory(
     appStateService,
     appEnvVarsService,
     paginationMonitorFactory,
-    entityCatalogueService
+    entityCatalogue
   );
 }
 
@@ -41,9 +41,9 @@ export function entityServiceFactory(
   cfId: string,
   id: string,
   esf: EntityServiceFactory,
-  entityCatalogueService: EntityCatalogueService
+   
 ) {
-  const catalogueEntity = entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
+  const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
   return esf.create(
     applicationSchemaKey,
     catalogueEntity.getSchema(),
@@ -90,13 +90,13 @@ export function getGuids(type?: string) {
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         PaginationMonitorFactory,
-        EntityCatalogueService
+        entityCatalogue
       ]
     },
     {
       provide: ENTITY_SERVICE,
       useFactory: entityServiceFactory,
-      deps: [CF_GUID, APP_GUID, EntityServiceFactory, EntityCatalogueService]
+      deps: [CF_GUID, APP_GUID, EntityServiceFactory, entityCatalogue]
     },
 
   ]

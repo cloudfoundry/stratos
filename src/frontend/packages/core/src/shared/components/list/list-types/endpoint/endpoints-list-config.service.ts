@@ -17,122 +17,122 @@ import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { EntityCatalogueService } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { FavoritesConfigMapper } from '../../../favorites-meta-card/favorite-config-mapper';
 
 
 
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
-  cardComponent = EndpointCardComponent;
+    cardComponent = EndpointCardComponent;
 
-  private singleActions: IListAction<EndpointModel>[];
+    private singleActions: IListAction<EndpointModel>[];
 
-  private globalActions = [];
+    private globalActions = [];
 
-  public readonly columns: ITableColumn<EndpointModel>[] = [
-    {
-      columnId: 'name',
-      headerCell: () => 'Name',
-      cellComponent: TableCellEndpointNameComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'name',
-        field: 'name'
-      },
-      cellFlex: '2'
-    },
-    {
-      columnId: 'connection',
-      headerCell: () => 'Status',
-      cellComponent: TableCellEndpointStatusComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'connection',
-        field: 'user'
-      },
-      cellFlex: '1',
-      cellConfig: {
-        showLabel: false
-      }
-    },
-    {
-      columnId: 'type',
-      headerCell: () => 'Type',
-      cellDefinition: {
-        getValue: this.getEndpointTypeString
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'type',
-        field: 'cnsi_type'
-      },
-      cellFlex: '2'
-    },
-    {
-      columnId: 'address',
-      headerCell: () => 'Address',
-      cellDefinition: {
-        getValue: getFullEndpointApiUrl
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'address',
-        field: 'api_endpoint.Host'
-      },
-      cellFlex: '5'
-    },
-    {
-      columnId: 'details',
-      headerCell: () => 'Details',
-      cellComponent: TableCellEndpointDetailsComponent,
-      cellFlex: '4'
+    public readonly columns: ITableColumn<EndpointModel>[] = [
+        {
+            columnId: 'name',
+            headerCell: () => 'Name',
+            cellComponent: TableCellEndpointNameComponent,
+            sort: {
+                type: 'sort',
+                orderKey: 'name',
+                field: 'name'
+            },
+            cellFlex: '2'
+        },
+        {
+            columnId: 'connection',
+            headerCell: () => 'Status',
+            cellComponent: TableCellEndpointStatusComponent,
+            sort: {
+                type: 'sort',
+                orderKey: 'connection',
+                field: 'user'
+            },
+            cellFlex: '1',
+            cellConfig: {
+                showLabel: false
+            }
+        },
+        {
+            columnId: 'type',
+            headerCell: () => 'Type',
+            cellDefinition: {
+                getValue: this.getEndpointTypeString
+            },
+            sort: {
+                type: 'sort',
+                orderKey: 'type',
+                field: 'cnsi_type'
+            },
+            cellFlex: '2'
+        },
+        {
+            columnId: 'address',
+            headerCell: () => 'Address',
+            cellDefinition: {
+                getValue: getFullEndpointApiUrl
+            },
+            sort: {
+                type: 'sort',
+                orderKey: 'address',
+                field: 'api_endpoint.Host'
+            },
+            cellFlex: '5'
+        },
+        {
+            columnId: 'details',
+            headerCell: () => 'Details',
+            cellComponent: TableCellEndpointDetailsComponent,
+            cellFlex: '4'
+        }
+    ];
+
+
+    isLocal = true;
+    dataSource: EndpointsDataSource;
+    viewType = ListViewTypes.BOTH;
+    defaultView = 'cards' as ListView;
+    text = {
+        title: '',
+        filter: 'Filter Endpoints'
+    };
+    enableTextFilter = true;
+    tableFixedRowHeight = true;
+
+    constructor(
+        private store: Store<AppState>,
+        paginationMonitorFactory: PaginationMonitorFactory,
+        entityMonitorFactory: EntityMonitorFactory,
+        internalEventMonitorFactory: InternalEventMonitorFactory,
+        endpointListHelper: EndpointListHelper,
+        favoritesConfigMapper: FavoritesConfigMapper,
+
+    ) {
+        this.singleActions = endpointListHelper.endpointActions();
+        const favoriteCell = createTableColumnFavorite(
+            (row: EndpointModel) => favoritesConfigMapper.getFavoriteEndpointFromEntity(row)
+        );
+        this.columns.push(favoriteCell);
+        this.dataSource = new EndpointsDataSource(
+            this.store,
+            this,
+            paginationMonitorFactory,
+            entityMonitorFactory,
+            internalEventMonitorFactory
+        );
     }
-  ];
 
+    public getGlobalActions = () => this.globalActions;
+    public getMultiActions = () => [];
+    public getSingleActions = () => this.singleActions;
+    public getColumns = () => this.columns;
+    public getDataSource = () => this.dataSource;
+    public getMultiFiltersConfigs = () => [];
 
-  isLocal = true;
-  dataSource: EndpointsDataSource;
-  viewType = ListViewTypes.BOTH;
-  defaultView = 'cards' as ListView;
-  text = {
-    title: '',
-    filter: 'Filter Endpoints'
-  };
-  enableTextFilter = true;
-  tableFixedRowHeight = true;
-
-  constructor(
-    private store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory,
-    entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory,
-    endpointListHelper: EndpointListHelper,
-    favoritesConfigMapper: FavoritesConfigMapper,
-    private entityCatalogueService: EntityCatalogueService
-  ) {
-    this.singleActions = endpointListHelper.endpointActions();
-    const favoriteCell = createTableColumnFavorite(
-      (row: EndpointModel) => favoritesConfigMapper.getFavoriteEndpointFromEntity(row)
-    );
-    this.columns.push(favoriteCell);
-    this.dataSource = new EndpointsDataSource(
-      this.store,
-      this,
-      paginationMonitorFactory,
-      entityMonitorFactory,
-      internalEventMonitorFactory
-    );
-  }
-
-  public getGlobalActions = () => this.globalActions;
-  public getMultiActions = () => [];
-  public getSingleActions = () => this.singleActions;
-  public getColumns = () => this.columns;
-  public getDataSource = () => this.dataSource;
-  public getMultiFiltersConfigs = () => [];
-
-  private getEndpointTypeString(endpoint: EndpointModel): string {
-    return this.entityCatalogueService.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity.label;
-  }
+    private getEndpointTypeString(endpoint: EndpointModel): string {
+        return entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity.label;
+    }
 }

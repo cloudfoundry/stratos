@@ -8,7 +8,7 @@ import { FetchAllServiceBindings } from '../../../../../../store/src/actions/ser
 import { AppState } from '../../../../../../store/src/app-state';
 import { serviceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
-  createEntityRelationPaginationKey,
+    createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -17,84 +17,84 @@ import { IServiceBinding } from '../../../../core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { RowState } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import {
-  AppServiceBindingListConfigService,
+    AppServiceBindingListConfigService,
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
-import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { CloudFoundryPackageModule } from '../../../../../../cloud-foundry/src/cloud-foundry.module';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
-  hideRefresh: boolean;
-  allowSelection: boolean;
-  obsCache: { [serviceGuid: string]: Observable<RowState> } = {};
+    hideRefresh: boolean;
+    allowSelection: boolean;
+    obsCache: { [serviceGuid: string]: Observable<RowState> } = {};
 
-  static createFetchServiceBinding = (cfGuid: string, serviceInstanceGuid: string): FetchAllServiceBindings => {
-    const action = new FetchAllServiceBindings(
-      cfGuid,
-      createEntityRelationPaginationKey(serviceSchemaKey, serviceInstanceGuid),
-    );
-    action.initialParams['results-per-page'] = 1;
-    action.initialParams.q = [
-      new QParam('service_instance_guid', serviceInstanceGuid),
-    ];
-    return action;
-  }
-
-  constructor(
-    store: Store<AppState>,
-    appService: ApplicationService,
-    datePipe: DatePipe,
-    currentUserPermissionService: CurrentUserPermissionsService,
-    private entityCatalogueService: EntityCatalogueService,
-    private paginationMonitorFactory: PaginationMonitorFactory
-  ) {
-    super(store, appService, datePipe, currentUserPermissionService);
-
-    this.getGlobalActions = () => null;
-    this.getMultiActions = () => null;
-
-    this.getSingleActions = () => null;
-    this.getSingleActions = () => null;
-    this.defaultView = 'table';
-    this.viewType = ListViewTypes.TABLE_ONLY;
-    this.allowSelection = true;
-
-
-    // Disable select if there is more than one service binding associated with a service instance
-    this.dataSource.getRowState = (serviceBinding: APIResource<IServiceBinding>): Observable<RowState> => {
-      if (!serviceBinding) {
-        return observableOf({});
-      }
-      if (!this.obsCache[serviceBinding.entity.service_instance_guid]) {
-        const action = AppDeleteServiceInstancesListConfigService.createFetchServiceBinding(
-          appService.cfGuid,
-          serviceBinding.entity.service_instance_guid
+    static createFetchServiceBinding = (cfGuid: string, serviceInstanceGuid: string): FetchAllServiceBindings => {
+        const action = new FetchAllServiceBindings(
+            cfGuid,
+            createEntityRelationPaginationKey(serviceSchemaKey, serviceInstanceGuid),
         );
-        const catalogueEntity = this.entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, action.entityKey);
-        const pagObs = getPaginationObservables({
-          store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            action.paginationKey,
-            catalogueEntity.getSchema()
-          )
-        });
-        this.obsCache[serviceBinding.entity.service_instance_guid] = pagObs.pagination$.pipe(
-          map(pag => ({
-            disabledReason: 'Service is attached to other applications',
-            disabled: pag.totalResults > 1
-          }))
-        );
-        // Ensure the request is made by sub'ing to the entities observable
-        pagObs.entities$.pipe(
-          first(),
-        ).subscribe();
-      }
-      return this.obsCache[serviceBinding.entity.service_instance_guid];
-    };
-  }
+        action.initialParams['results-per-page'] = 1;
+        action.initialParams.q = [
+            new QParam('service_instance_guid', serviceInstanceGuid),
+        ];
+        return action;
+    }
+
+    constructor(
+        store: Store<AppState>,
+        appService: ApplicationService,
+        datePipe: DatePipe,
+        currentUserPermissionService: CurrentUserPermissionsService,
+         ,
+        private paginationMonitorFactory: PaginationMonitorFactory
+    ) {
+        super(store, appService, datePipe, currentUserPermissionService);
+
+        this.getGlobalActions = () => null;
+        this.getMultiActions = () => null;
+
+        this.getSingleActions = () => null;
+        this.getSingleActions = () => null;
+        this.defaultView = 'table';
+        this.viewType = ListViewTypes.TABLE_ONLY;
+        this.allowSelection = true;
+
+
+        // Disable select if there is more than one service binding associated with a service instance
+        this.dataSource.getRowState = (serviceBinding: APIResource<IServiceBinding>): Observable<RowState> => {
+            if (!serviceBinding) {
+                return observableOf({});
+            }
+            if (!this.obsCache[serviceBinding.entity.service_instance_guid]) {
+                const action = AppDeleteServiceInstancesListConfigService.createFetchServiceBinding(
+                    appService.cfGuid,
+                    serviceBinding.entity.service_instance_guid
+                );
+                const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, action.entityType);
+                const pagObs = getPaginationObservables({
+                    store,
+                    action,
+                    paginationMonitor: this.paginationMonitorFactory.create(
+                        action.paginationKey,
+                        catalogueEntity.getSchema()
+                    )
+                });
+                this.obsCache[serviceBinding.entity.service_instance_guid] = pagObs.pagination$.pipe(
+                    map(pag => ({
+                        disabledReason: 'Service is attached to other applications',
+                        disabled: pag.totalResults > 1
+                    }))
+                );
+                // Ensure the request is made by sub'ing to the entities observable
+                pagObs.entities$.pipe(
+                    first(),
+                ).subscribe();
+            }
+            return this.obsCache[serviceBinding.entity.service_instance_guid];
+        };
+    }
 }

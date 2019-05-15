@@ -33,7 +33,7 @@ import { EndpointsService } from './../../../../core/endpoints.service';
 import { getFavoriteFromCfEntity } from '../../../../core/user-favorite-helpers';
 import { FavoritesConfigMapper } from '../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { EntityCatalogueService } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
@@ -63,9 +63,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService,
     private favoritesConfigMapper: FavoritesConfigMapper,
-    entityCatalogueService: EntityCatalogueService
+     
   ) {
-    const catalogueEntity = entityCatalogueService.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
+    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
     this.schema = catalogueEntity.getSchema();
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(

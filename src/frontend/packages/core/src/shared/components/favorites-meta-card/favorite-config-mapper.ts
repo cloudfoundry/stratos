@@ -9,7 +9,7 @@ import {
 } from '../../../../../store/src/types/user-favorites.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { Injectable } from '@angular/core';
-import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import {
   IEntityMetadata,
   StratosBaseCatalogueEntity,
@@ -79,7 +79,7 @@ export interface IFavoriteActionGenerators {
 export class FavoritesConfigMapper {
   private mapperKeySeparator = '-';
   // private mappers: IFavoriteMappers = {};
-  constructor(private entityCatalogueService: EntityCatalogueService) { }
+  constructor() { }
   public getMapperKeyFromFavoriteInfo(favoriteInfo: IFavoriteTypeInfo) {
     const { endpointType, entityType } = favoriteInfo;
     return [endpointType, entityType].join(this.mapperKeySeparator);
@@ -89,7 +89,7 @@ export class FavoritesConfigMapper {
    * For a given favorite, return the corresponding favorite meta card mapper
    */
   public getMapperFunction<T extends IEntityMetadata = IEntityMetadata>(favorite: IFavoriteTypeInfo) {
-    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.endpointType, favorite.entityType);
+    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
     return (entity: T) => {
       if (!entity) {
         return {
@@ -121,7 +121,7 @@ export class FavoritesConfigMapper {
    * For a given favorite, return the corresponding human readable type name
    */
   public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
-    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.endpointType, favorite.entityType);
+    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
     return catalogueEntity ? catalogueEntity.entity.label : null;
   }
 
@@ -129,7 +129,7 @@ export class FavoritesConfigMapper {
    * For a given favorite, return the corresponding hydration action
    */
   public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
-    const catalogueEntity = this.entityCatalogueService.getEntity(favorite.endpointType, favorite.entityType);
+    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
     return catalogueEntity ? catalogueEntity.builder.getMetadata(entity) : null;
   }
 
@@ -137,7 +137,7 @@ export class FavoritesConfigMapper {
    * For a given endpoint type, return the list of possible favorite types
    */
   public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
-    return this.entityCatalogueService.getAllEntitiesForEndpointType(endpointType).map(catalogueEntity => ({
+    return entityCatalogue.getAllEntitiesForEndpointType(endpointType).map(catalogueEntity => ({
       type: catalogueEntity.entity.type,
       prettyName: catalogueEntity.entity.label
     }));
@@ -169,7 +169,7 @@ export class FavoritesConfigMapper {
     endpointId: string,
     entity: Y
   ) {
-    const catalogueEntity = this.entityCatalogueService.getEntity<T, Y>(endpointType, entityType) as StratosBaseCatalogueEntity<T, Y>;
+    const catalogueEntity = entityCatalogue.getEntity<T, Y>(endpointType, entityType) as StratosBaseCatalogueEntity<T, Y>;
     return this.buildFavoriteFromCatalogueEntity<T, Y>(catalogueEntity, entity, endpointId);
   }
 

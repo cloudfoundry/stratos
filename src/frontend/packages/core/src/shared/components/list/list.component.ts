@@ -74,7 +74,7 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
-import { EntityCatalogueService } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 
 
 @Component({
@@ -226,7 +226,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   constructor(
     private store: Store<AppState>,
-    private entityCatalogueService: EntityCatalogueService,
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
     private ngZone: NgZone
@@ -295,7 +294,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
-      const catalogueEntity = this.entityCatalogueService.getEntity(this.dataSource.endpointType, this.dataSource.entityType);
+      const catalogueEntity = entityCatalogue.getEntity(this.dataSource.endpointType, this.dataSource.entityType);
       const schema = catalogueEntity.getSchema();
       this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
     }

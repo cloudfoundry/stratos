@@ -8,11 +8,11 @@ import { GetAllApplications } from '../../../../../../../store/src/actions/appli
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import {
-  applicationSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
+    applicationSchemaKey,
+    entityFactory,
+    organizationSchemaKey,
+    routeSchemaKey,
+    spaceSchemaKey,
 } from '../../../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
@@ -26,100 +26,100 @@ import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/
 import { IListConfig } from '../../list.component.types';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
-  return new GetAllApplications(paginationKey, null, [
-    createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-    createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-    createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
-  ]);
+    return new GetAllApplications(paginationKey, null, [
+        createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+        createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+    ]);
 }
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
-  public static paginationKey = 'applicationWall';
-  private subs: Subscription[];
-  public action: GetAllApplications;
+    public static paginationKey = 'applicationWall';
+    private subs: Subscription[];
+    public action: GetAllApplications;
 
 
-  constructor(
-    store: Store<AppState>,
-    listConfig?: IListConfig<APIResource>,
-    transformEntities?: any[],
-    paginationKey = CfAppsDataSource.paginationKey,
-    seedPaginationKey = CfAppsDataSource.paginationKey,
-    startingCfGuid?: string
-  ) {
-    const syncNeeded = paginationKey !== seedPaginationKey;
-    const action = createGetAllAppAction(paginationKey);
-    action.endpointGuid = startingCfGuid;
+    constructor(
+        store: Store<AppState>,
+        listConfig?: IListConfig<APIResource>,
+        transformEntities?: any[],
+        paginationKey = CfAppsDataSource.paginationKey,
+        seedPaginationKey = CfAppsDataSource.paginationKey,
+        startingCfGuid?: string
+    ) {
+        const syncNeeded = paginationKey !== seedPaginationKey;
+        const action = createGetAllAppAction(paginationKey);
+        action.endpointGuid = startingCfGuid;
 
-    const dispatchSequencer = new DispatchSequencer(store);
+        const dispatchSequencer = new DispatchSequencer(store);
 
-    if (syncNeeded) {
-      // We do this here to ensure we sync up with main endpoint table data.
-      store.dispatch(new CreatePagination(
-        action.entityKey,
-        paginationKey,
-        seedPaginationKey
-      ));
-    }
-
-    if (!transformEntities) {
-      transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
-    }
-
-    super({
-      store,
-      action,
-      schema: entityFactory(applicationSchemaKey),
-      getRowUniqueId: getRowMetadata,
-      paginationKey,
-      isLocal: true,
-      transformEntities,
-      listConfig,
-      destroy: () => this.subs.forEach(sub => sub.unsubscribe())
-    });
-
-    this.action = action;
-
-    const statsSub = this.page$.pipe(
-      // The page observable will fire often, here we're only interested in updating the stats on actual page changes
-      distinctUntilChanged(distinctPageUntilChanged(this)),
-      // Ensure we keep pagination smooth
-      debounceTime(250),
-      // Allow maxedResults time to settle - see #3359
-      delay(100),
-      withLatestFrom(this.maxedResults$),
-      map(([page, maxedResults]) => {
-        if (!page || maxedResults) {
-          return [];
+        if (syncNeeded) {
+            // We do this here to ensure we sync up with main endpoint table data.
+            store.dispatch(new CreatePagination(
+                action.entityType,
+                paginationKey,
+                seedPaginationKey
+            ));
         }
-        const actions = new Array<DispatchSequencerAction>();
-        page.forEach(app => {
-          if (app instanceof MultiActionListEntity) {
-            app = app.entity;
-          }
-          const appState = app.entity.state;
-          const appGuid = app.metadata.guid;
-          const cfGuid = app.entity.cfGuid;
-          if (appState === 'STARTED') {
-            actions.push({
-              id: appGuid,
-              action: new GetAppStatsAction(appGuid, cfGuid)
-            });
-          }
+
+        if (!transformEntities) {
+            transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
+        }
+
+        super({
+            store,
+            action,
+            schema: entityFactory(applicationSchemaKey),
+            getRowUniqueId: getRowMetadata,
+            paginationKey,
+            isLocal: true,
+            transformEntities,
+            listConfig,
+            destroy: () => this.subs.forEach(sub => sub.unsubscribe())
         });
-        return actions;
-      }),
-      dispatchSequencer.sequence.bind(dispatchSequencer),
-      tag('stat-obs')
-    ).subscribe();
 
-    this.subs = [statsSub];
-  }
+        this.action = action;
 
-  public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
-    return createCfOrSpaceMultipleFilterFn(this.store, this.action, this.setQParam)
-      (changes, params);
-  }
+        const statsSub = this.page$.pipe(
+            // The page observable will fire often, here we're only interested in updating the stats on actual page changes
+            distinctUntilChanged(distinctPageUntilChanged(this)),
+            // Ensure we keep pagination smooth
+            debounceTime(250),
+            // Allow maxedResults time to settle - see #3359
+            delay(100),
+            withLatestFrom(this.maxedResults$),
+            map(([page, maxedResults]) => {
+                if (!page || maxedResults) {
+                    return [];
+                }
+                const actions = new Array<DispatchSequencerAction>();
+                page.forEach(app => {
+                    if (app instanceof MultiActionListEntity) {
+                        app = app.entity;
+                    }
+                    const appState = app.entity.state;
+                    const appGuid = app.metadata.guid;
+                    const cfGuid = app.entity.cfGuid;
+                    if (appState === 'STARTED') {
+                        actions.push({
+                            id: appGuid,
+                            action: new GetAppStatsAction(appGuid, cfGuid)
+                        });
+                    }
+                });
+                return actions;
+            }),
+            dispatchSequencer.sequence.bind(dispatchSequencer),
+            tag('stat-obs')
+        ).subscribe();
+
+        this.subs = [statsSub];
+    }
+
+    public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
+        return createCfOrSpaceMultipleFilterFn(this.store, this.action, this.setQParam)
+            (changes, params);
+    }
 
 }
