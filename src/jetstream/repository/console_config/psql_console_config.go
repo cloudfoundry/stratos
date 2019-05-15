@@ -14,11 +14,11 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
-var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso
+var getConsoleConfig = `SELECT uaa_endpoint, auth_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso
 							FROM console_config`
 
-var saveConsoleConfig = `INSERT INTO console_config (uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, is_setup_complete, use_sso)
-						VALUES ($1, $2, $3, $4, $5, $6, $7)`
+var saveConsoleConfig = `INSERT INTO console_config (uaa_endpoint, auth_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, is_setup_complete, use_sso)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
 var updateConsoleConfig = `UPDATE console_config SET console_admin_scope = $1, is_setup_complete = '1'`
 
@@ -63,6 +63,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	var consoleConfig *interfaces.ConsoleConfig
 	for rows.Next() {
 		var (
+			uaaEndpoint  string
 			authEndpoint string
 		)
 		rowCount++
@@ -71,14 +72,17 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 		}
 
 		consoleConfig = new(interfaces.ConsoleConfig)
-		err := rows.Scan(&authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
+		err := rows.Scan(&uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
 			&consoleConfig.ConsoleClientSecret, &consoleConfig.SkipSSLValidation, &consoleConfig.UseSSO)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan config record: %v", err)
 		}
 
-		if consoleConfig.UAAEndpoint, err = url.Parse(authEndpoint); err != nil {
+		if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 			return nil, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
+		}
+		if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint); err != nil {
+			return nil, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
 		}
 	}
 
@@ -96,7 +100,7 @@ func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleCo
 	}
 	isComplete := config.ConsoleAdminScope != ""
 
-	if _, err := c.db.Exec(saveConsoleConfig, fmt.Sprintf("%s", config.UAAEndpoint),
+	if _, err := c.db.Exec(saveConsoleConfig, fmt.Sprintf("%s", config.UAAEndpoint), fmt.Sprintf("%s", config.AuthorizationEndpoint),
 		config.ConsoleAdminScope, config.ConsoleClient, config.ConsoleClientSecret, config.SkipSSLValidation, isComplete, config.UseSSO); err != nil {
 		return fmt.Errorf("Unable to Save Console Config record: %v", err)
 	}
