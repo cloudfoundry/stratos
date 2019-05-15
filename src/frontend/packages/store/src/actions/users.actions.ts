@@ -188,9 +188,12 @@ export class GetUser extends CFStartAction {
     this.options.url = 'users/' + userGuid;
     this.options.method = 'get';
   }
+  // TODO: Stratos internal entity types don't need a endpoint type.
+  // Should we create internal entity catalogue entries with a "fake" endpoint type?
+  endpointType = '';
   actions = getActions('Users', 'Fetch User');
   entity = [entityFactory(cfUserSchemaKey)];
-  entityKey = cfUserSchemaKey;
+  entityType = cfUserSchemaKey;
   options: RequestOptions;
 }
 

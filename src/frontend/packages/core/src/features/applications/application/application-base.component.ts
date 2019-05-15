@@ -23,7 +23,6 @@ export function applicationServiceFactory(
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
   paginationMonitorFactory: PaginationMonitorFactory,
-   
 ) {
   return new ApplicationService(
     cfId,
@@ -32,16 +31,14 @@ export function applicationServiceFactory(
     entityServiceFactoryInstance,
     appStateService,
     appEnvVarsService,
-    paginationMonitorFactory,
-    entityCatalogue
+    paginationMonitorFactory
   );
 }
 
 export function entityServiceFactory(
   cfId: string,
   id: string,
-  esf: EntityServiceFactory,
-   
+  esf: EntityServiceFactory
 ) {
   const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
   return esf.create(
@@ -89,14 +86,13 @@ export function getGuids(type?: string) {
         EntityServiceFactory,
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        PaginationMonitorFactory,
-        entityCatalogue
+        PaginationMonitorFactory
       ]
     },
     {
       provide: ENTITY_SERVICE,
       useFactory: entityServiceFactory,
-      deps: [CF_GUID, APP_GUID, EntityServiceFactory, entityCatalogue]
+      deps: [CF_GUID, APP_GUID, EntityServiceFactory]
     },
 
   ]

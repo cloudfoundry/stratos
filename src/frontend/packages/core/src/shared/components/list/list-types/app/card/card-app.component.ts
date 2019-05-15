@@ -19,55 +19,54 @@ import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-me
 import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
-    selector: 'app-card-app',
-    templateUrl: './card-app.component.html',
-    styleUrls: ['./card-app.component.scss']
+  selector: 'app-card-app',
+  templateUrl: './card-app.component.html',
+  styleUrls: ['./card-app.component.scss']
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
 
-    @Input() row: APIResource<IApp>;
-    applicationState$: Observable<ApplicationStateData>;
+  @Input() row: APIResource<IApp>;
+  applicationState$: Observable<ApplicationStateData>;
 
-    appStatus$: Observable<StratosStatus>;
-    entityConfig: ComponentEntityMonitorConfig;
-    cfOrgSpace: CfOrgSpaceLabelService;
+  appStatus$: Observable<StratosStatus>;
+  entityConfig: ComponentEntityMonitorConfig;
+  cfOrgSpace: CfOrgSpaceLabelService;
 
-    public favorite: UserFavorite<IAppFavMetadata>;
+  public favorite: UserFavorite<IAppFavMetadata>;
 
-    constructor(
-        private store: Store<AppState>,
-        private appStateService: ApplicationStateService,
-        private favoritesConfigMapper: FavoritesConfigMapper,
+  constructor(
+    private store: Store<AppState>,
+    private appStateService: ApplicationStateService,
+    private favoritesConfigMapper: FavoritesConfigMapper,
 
 
-    ) {
-        super();
-    }
+  ) {
+    super();
+  }
 
-    ngOnInit() {
-        this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(applicationSchemaKey));
-        this.cfOrgSpace = new CfOrgSpaceLabelService(
-            this.store,
-            this.row.entity.cfGuid,
-            (this.row.entity.space as APIResource<ISpace>).entity.organization_guid,
-            this.row.entity.space_guid
-        );
+  ngOnInit() {
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(applicationSchemaKey));
+    this.cfOrgSpace = new CfOrgSpaceLabelService(
+      this.store,
+      this.row.entity.cfGuid,
+      (this.row.entity.space as APIResource<ISpace>).entity.organization_guid,
+      this.row.entity.space_guid
+    );
 
-        this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey, this.favoritesConfigMapper);
+    this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey, this.favoritesConfigMapper);
 
-        const initState = this.appStateService.get(this.row.entity, null);
-        this.applicationState$ = ApplicationService.getApplicationState(
-            this.store,
-            entityCatalogue,
-            this.appStateService,
-            this.row.entity,
-            this.row.metadata.guid,
-            this.row.entity.cfGuid
-        ).pipe(
-            startWith(initState)
-        );
-        this.appStatus$ = this.applicationState$.pipe(
-            map(state => state.indicator),
-        );
-    }
+    const initState = this.appStateService.get(this.row.entity, null);
+    this.applicationState$ = ApplicationService.getApplicationState(
+      this.store,
+      this.appStateService,
+      this.row.entity,
+      this.row.metadata.guid,
+      this.row.entity.cfGuid
+    ).pipe(
+      startWith(initState)
+    );
+    this.appStatus$ = this.applicationState$.pipe(
+      map(state => state.indicator),
+    );
+  }
 }

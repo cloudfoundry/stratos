@@ -18,7 +18,6 @@ import {
   PermissionConfigType,
   PermissionTypes,
 } from './current-user-permissions.config';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 
 interface ICheckCombiner {
   checks: Observable<boolean>[];
@@ -30,9 +29,9 @@ export class CurrentUserPermissionsService {
   private checker: CurrentUserPermissionsChecker;
   constructor(
     store: Store<AppState>,
-     
+
   ) {
-    this.checker = new CurrentUserPermissionsChecker(store, entityCatalogue);
+    this.checker = new CurrentUserPermissionsChecker(store);
   }
   /**
    * @param action The action we're going to check the user's access to.

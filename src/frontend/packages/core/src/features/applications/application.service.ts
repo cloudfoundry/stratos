@@ -97,7 +97,6 @@ export class ApplicationService {
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
-
   ) {
     const appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
     this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(

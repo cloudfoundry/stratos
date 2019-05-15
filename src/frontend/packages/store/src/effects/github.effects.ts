@@ -12,6 +12,7 @@ import { gitRepoSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 
 @Injectable()
@@ -29,7 +30,8 @@ export class GithubEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityKey: gitRepoSchemaKey,
+        entityType: gitRepoSchemaKey,
+        endpointType: CF_ENDPOINT_TYPE,
         type: action.type,
         guid: action.stProject.deploySource.project
       };

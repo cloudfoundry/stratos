@@ -40,7 +40,6 @@ import { GlobalEventData, GlobalEventService } from './shared/global-events.serv
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
 import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
-import { ListDataSource } from './shared/components/list/data-sources-controllers/list-data-source';
 
 
 // Create action for router navigation. See
@@ -119,9 +118,7 @@ export class AppModule {
     eventService: GlobalEventService,
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
-     
   ) {
-    ListDataSource.initializeServices(entityCatalogue);
     eventService.addEventConfig<boolean>(
       {
         eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),
