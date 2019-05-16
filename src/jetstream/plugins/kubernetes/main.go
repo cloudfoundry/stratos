@@ -2,13 +2,14 @@ package kubernetes
 
 import (
 	"net/url"
-	"strings"
 
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
 )
 
 type KubernetesSpecification struct {
@@ -76,73 +77,30 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 
 	connectType := ec.FormValue("connect_type")
 
-	// OIDC ?
-	if strings.EqualFold(connectType, AuthConnectTypeKubeConfig) {
-		tokenRecord, _, err := c.FetchKubeConfigTokenOIDC(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
+	var authProvider = c.FindAuthProvider(connectType)
+	if authProvider == nil {
+		return nil, false, errors.New("Unsupported Auth connection type for Kubernetes endpoint")
 	}
 
-	// AKS ?
-	if strings.EqualFold(connectType, AuthConnectTypeKubeConfigAz) {
-		tokenRecord, _, err := c.FetchKubeConfigTokenAKS(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
+	tokenRecord, _, err := authProvider.FetchToken(cnsiRecord, ec)
+	if err != nil {
+		return nil, false, err
 	}
 
-	// IAM Creds?
-	if strings.EqualFold(connectType, AuthConnectTypeAWSIAM) {
-		tokenRecord, _, err := c.FetchIAMToken(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
-	}
-
-	// Cert Auth?
-	if strings.EqualFold(connectType, AuthConnectTypeCertAuth) {
-		tokenRecord, _, err := c.FetchCertAuth(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
-	}
-
-	// GKE ?
-	if strings.EqualFold(connectType, AuthConnectTypeGKE) {
-		tokenRecord, _, err := c.FetchGKEToken(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
-	}
-
-	return nil, false, errors.New("Unsupported Auth connection type for Kubernetes endpoint")
+	return tokenRecord, false, nil
 }
 
 // Init the Kubernetes Jetstream plugin
 func (c *KubernetesSpecification) Init() error {
-	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, interfaces.AuthProvider{
-		Handler:  c.doAWSIAMFlowRequest,
-		UserInfo: c.GetCNSIUserFromIAMToken,
-	})
-	c.portalProxy.AddAuthProvider(AuthConnectTypeCertAuth, interfaces.AuthProvider{
-		Handler:  c.doCertAuthFlowRequest,
-		UserInfo: c.GetCNSIUserFromCertAuth,
-	})
-	c.portalProxy.AddAuthProvider(AuthConnectTypeKubeConfigAz, interfaces.AuthProvider{
-		Handler:  c.doCertAuthFlowRequest,
-		UserInfo: c.GetCNSIUserFromCertAuth,
-	})
-	c.portalProxy.AddAuthProvider(AuthConnectTypeGKE, interfaces.AuthProvider{
-		Handler:  c.doGKEFlowRequest,
-		UserInfo: c.GetGKEUserFromToken,
-	})
 
+	// Register all of the providers
+	c.AddAuthProvider(auth.InitGKEKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitAWSKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitCertKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitAzureKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitOIDCKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitKubeConfigAuth(c.portalProxy))
+	
 	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = "false"
 
 	return nil

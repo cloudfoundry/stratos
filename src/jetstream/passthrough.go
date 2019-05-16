@@ -403,7 +403,7 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	if authHandler.Handler != nil {
 		res, err = authHandler.Handler(cnsiRequest, req)
 	} else {
-		res, err = p.doOauthFlowRequest(cnsiRequest, req)
+		res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {

@@ -1,4 +1,4 @@
-module github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetetes
+module github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes
 
 go 1.12
 

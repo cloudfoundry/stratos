@@ -1,4 +1,4 @@
-package kubernetes
+package auth
 
 import (
 	"encoding/json"
@@ -13,6 +13,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"github.com/SermoDigital/jose/jws"
 )
@@ -31,9 +32,36 @@ type GKEConfig struct {
 	Email        string `json:"email"`
 }
 
-// FetchGKEToken will create a token for the GKE Authentication using the POSTed data
-func (c *KubernetesSpecification) FetchGKEToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
-	log.Debug("FetchGKEToken")
+// GKEKubeAuth is GKE Authentication for Kubernetes
+type GKEKubeAuth struct {
+	portalProxy interfaces.PortalProxy
+}
+
+const AuthConnectTypeGKE = "gke-auth"
+
+// InitGKEKubeAuth creates a GKEKubeAuth
+func InitGKEKubeAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
+	return &GKEKubeAuth{portalProxy: portalProxy}
+}
+
+func (c *GKEKubeAuth) GetName() string {
+	return AuthConnectTypeGKE
+}
+
+func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+	gkeInfo := &GKEConfig{}
+	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &gkeInfo)
+	if err != nil {
+		return err
+	}
+
+	info.Token = tokenRec.AuthToken
+	return nil
+}
+
+// FetchToken will create a token for the GKE Authentication using the POSTed data
+func (c *GKEKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+	log.Debug("FetchToken (GKE)")
 
 	// We should already have the refresh token in the body sent to us
 	req := ec.Request()
@@ -83,9 +111,9 @@ func (c *KubernetesSpecification) FetchGKEToken(cnsiRecord interfaces.CNSIRecord
 	return &tokenRecord, &cnsiRecord, nil
 }
 
-// GetGKEUserFromToken gets the username from the GKE Token
-func (c *KubernetesSpecification) GetGKEUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
-	log.Debug("GetGKEUserFromToken")
+// GetUserFromToken gets the username from the GKE Token
+func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+	log.Debug("GetUserFromToken (GKE)")
 
 	gkeInfo := &GKEConfig{}
 	err := json.Unmarshal([]byte(tokenRecord.RefreshToken), &gkeInfo)
@@ -99,7 +127,7 @@ func (c *KubernetesSpecification) GetGKEUserFromToken(cnsiGUID string, tokenReco
 	}, true
 }
 
-func (c *KubernetesSpecification) doGKEFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doGKEFlowRequest")
 
 	authHandler := c.portalProxy.OAuthHandlerFunc(cnsiRequest, req, c.RefreshGKEToken)
@@ -107,7 +135,7 @@ func (c *KubernetesSpecification) doGKEFlowRequest(cnsiRequest *interfaces.CNSIR
 }
 
 // RefreshGKEToken will refresh a GKE token
-func (c *KubernetesSpecification) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
 	log.Debug("RefreshGKEToken")
 	now := time.Now()
 
@@ -137,7 +165,7 @@ func (c *KubernetesSpecification) RefreshGKEToken(skipSSLValidation bool, cnsiGU
 	return userToken, nil
 }
 
-func (c *KubernetesSpecification) refreshGKEToken(skipSSLValidation bool, clientID, clientSecret, refreshToken string) (u interfaces.UAAResponse, err error) {
+func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSecret, refreshToken string) (u interfaces.UAAResponse, err error) {
 	log.Debug("refreshGKEToken")
 	tokenInfo := interfaces.UAAResponse{}
 

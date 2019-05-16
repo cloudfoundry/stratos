@@ -56,26 +56,6 @@ func (k *KubernetesSpecification) getConfig(cnsiRecord *interfaces.CNSIRecord, t
 	return k.GetConfigForEndpoint(masterURL, *tokenRecord)
 }
 
-// Get the config for the certificate authentication
-func __getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
-
-	config := rest.Config{}
-	config.Host = cnsiRecord.APIEndpoint.String()
-
-	// Only support certs for now
-	kubeAuthToken := &KubeCertAuth{}
-	err := json.NewDecoder(strings.NewReader(tokenRecord.AuthToken)).Decode(kubeAuthToken)
-	if err != nil {
-		return nil, err
-	}
-
-	config.TLSClientConfig = rest.TLSClientConfig{}
-	config.TLSClientConfig.CertData = []byte(kubeAuthToken.Certificate)
-	config.TLSClientConfig.KeyData = []byte(kubeAuthToken.CertificateKey)
-	config.TLSClientConfig.Insecure = true
-	return &config, nil
-}
-
 // makeUpgradeTransport creates a transport that explicitly bypasses HTTP2 support
 // for proxy connections that must upgrade.
 func makeUpgradeTransport(config *rest.Config, keepalive time.Duration) (proxy.UpgradeRequestRoundTripper, error) {

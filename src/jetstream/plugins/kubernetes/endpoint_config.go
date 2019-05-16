@@ -1,10 +1,7 @@
 package kubernetes
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -19,7 +16,7 @@ import (
 func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*restclient.Config, error) {
 	return clientcmd.BuildConfigFromKubeconfigGetter(masterURL, func() (*clientcmdapi.Config, error) {
 
-		log.Debug("GetConfigForEndpoint")
+		log.Info("GetConfigForEndpoint")
 
 		name := "cluster-0"
 
@@ -55,61 +52,10 @@ func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.Auth
 	log.Debug("addAuthInfoForEndpoint")
 	log.Warn(tokenRec.AuthType)
 
-	switch {
-	case tokenRec.AuthType == "gke-auth":
-		log.Warn("GKE AUTH")
-		return c.addGKEAuth(info, tokenRec)
-	case tokenRec.AuthType == AuthConnectTypeCertAuth, tokenRec.AuthType == AuthConnectTypeKubeConfigAz:
-		return c.addCertAuth(info, tokenRec)
-	case tokenRec.AuthType == AuthConnectTypeAWSIAM:
-		return c.addAWSAuth(info, tokenRec)
-	default:
-		log.Error("Unsupported auth type")
-	}
-	return errors.New("Unsupported auth type")
-}
-
-func (c *KubernetesSpecification) addCertAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
-	kubeAuthToken := &KubeCertAuth{}
-	err := json.NewDecoder(strings.NewReader(tokenRec.AuthToken)).Decode(kubeAuthToken)
-	if err != nil {
-		return err
+	var authProvider = c.GetAuthProvider(tokenRec.AuthType)
+	if authProvider == nil {
+		return errors.New("Unsupported auth type")
 	}
 
-	info.ClientCertificateData = []byte(kubeAuthToken.Certificate)
-	info.ClientKeyData = []byte(kubeAuthToken.CertificateKey)
-	info.Token = kubeAuthToken.Token
-
-	return nil
-}
-
-func (c *KubernetesSpecification) addGKEAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
-	gkeInfo := &GKEConfig{}
-	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &gkeInfo)
-	if err != nil {
-		return err
-	}
-
-	info.Token = tokenRec.AuthToken
-	return nil
-}
-
-func (c *KubernetesSpecification) addAWSAuth(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
-
-	awsInfo := &AWSIAMUserInfo{}
-	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &awsInfo)
-	if err != nil {
-		return err
-	}
-
-	// NOTE: We really should check first to see if the token has expired before we try and get another
-
-	// Get an access token
-	token, err := c.getTokenIAM(*awsInfo)
-	if err != nil {
-		return fmt.Errorf("Could not get new token using the IAM info: %v+", err)
-	}
-
-	info.Token = token
-	return nil
+	return authProvider.AddAuthInfo(info, tokenRec)
 }

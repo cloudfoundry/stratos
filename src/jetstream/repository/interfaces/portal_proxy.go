@@ -56,7 +56,7 @@ type PortalProxy interface {
 	RefreshUAALogin(username, password string, store bool) error
 	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
 	GetUAAUser(userGUID string) (*ConnectedUser, error)
-
+	
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
@@ -65,10 +65,13 @@ type PortalProxy interface {
 
 	// Database Connection
 	GetDatabaseConnection() *sql.DB
+
 	AddAuthProvider(name string, provider AuthProvider)
 	GetAuthProvider(name string) AuthProvider
 	DoAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error)
 	OAuthHandlerFunc(cnsiRequest *CNSIRequest, req *http.Request, refreshOAuthTokenFunc RefreshOAuthTokenFunc) AuthHandlerFunc
+	DoOAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error)
+	GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *TokenRecord) (*ConnectedUser, bool)
 
 	// Tokens - lower-level access
 	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
