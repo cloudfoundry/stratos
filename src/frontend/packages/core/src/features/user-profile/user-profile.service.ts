@@ -17,6 +17,8 @@ import {
 } from '../../../../store/src/actions/user-profile.actions';
 import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { userProfileEntitySchema } from '../../base-entity-types';
 
 
 @Injectable()
@@ -32,8 +34,10 @@ export class UserProfileService {
     private store: Store<AppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) {
-    this.entityMonitor = this.entityMonitorFactory.create<UserProfileInfo>(UserProfileEffect.guid,
-      userProfileSchemaKey, entityFactory(userProfileSchemaKey));
+    this.entityMonitor = this.entityMonitorFactory.create<UserProfileInfo>(
+      UserProfileEffect.guid,
+      userProfileEntitySchema
+    );
 
     this.userProfile$ = this.entityMonitor.entity$.pipe(
       filter(data => data && !!data.id)

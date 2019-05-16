@@ -20,7 +20,7 @@ export class SetClientFilterEffect {
     ofType<SetClientFilter>(SET_CLIENT_FILTER),
     map(action => {
       // We reset the page when a param is changed.
-      this.store.dispatch(new SetClientPage(action.entityType, action.paginationKey, 1));
+      this.store.dispatch(new SetClientPage(action.entityConfig, action.paginationKey, 1));
     }));
 }
 

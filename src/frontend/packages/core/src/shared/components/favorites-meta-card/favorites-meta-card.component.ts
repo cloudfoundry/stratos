@@ -7,7 +7,6 @@ import {
   RemoveUserFavoriteAction,
 } from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory, userFavoritesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
@@ -16,6 +15,7 @@ import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
+import { userFavoritesEntitySchema } from '../../../base-entity-types';
 
 
 @Component({
@@ -78,7 +78,7 @@ export class FavoritesMetaCardComponent {
       this.favorite = favorite;
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
       this.prettyName = prettyName || 'Unknown';
-      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
+      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, userFavoritesEntitySchema);
 
       this.setConfirmation(this.prettyName, favorite);
 

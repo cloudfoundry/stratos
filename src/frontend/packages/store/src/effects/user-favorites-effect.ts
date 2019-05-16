@@ -26,12 +26,11 @@ import {
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { AppState } from '../app-state';
-import { userFavoritesSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
-import { LoggerService } from '../../../core/src/core/logger.service';
+import { userFavoritesEntitySchema } from '../../../core/src/base-entity-types';
 
 const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
@@ -66,7 +65,8 @@ export class UserFavoritesEffect {
     ofType<GetUserFavoritesAction>(GetUserFavoritesAction.ACTION_TYPE),
     switchMap((action: GetUserFavoritesAction) => {
       const apiAction = {
-        entityType: userFavoritesSchemaKey,
+        entityType: userFavoritesEntitySchema.entityType,
+        endpointType: userFavoritesEntitySchema.endpointType,
         type: action.type
       } as PaginatedAction;
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
@@ -74,11 +74,11 @@ export class UserFavoritesEffect {
           const mappedData = favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((data, favorite) => {
             const { guid } = favorite;
             if (guid) {
-              data.entities[userFavoritesSchemaKey][guid] = favorite;
+              data.entities[userFavoritesEntitySchema.entityType][guid] = favorite;
               data.result.push(guid);
             }
             return data;
-          }, { entities: { [userFavoritesSchemaKey]: {} }, result: [] });
+          }, { entities: { [userFavoritesEntitySchema.entityType]: {} }, result: [] });
           this.store.dispatch(new WrapperRequestActionSuccess(mappedData, apiAction));
           this.store.dispatch(new GetUserFavoritesSuccessAction(favorites));
         }),
@@ -111,7 +111,7 @@ export class UserFavoritesEffect {
     switchMap((action: RemoveUserFavoriteAction) => {
       const { guid } = action.favorite;
       this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.favorite));
-      this.store.dispatch(new ClearPaginationOfEntity(userFavoritesSchemaKey, guid, userFavoritesPaginationKey));
+      this.store.dispatch(new ClearPaginationOfEntity(userFavoritesEntitySchema, guid, userFavoritesPaginationKey));
       return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${guid}`);
     })
   );

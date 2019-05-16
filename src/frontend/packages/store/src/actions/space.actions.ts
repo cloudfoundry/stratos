@@ -24,6 +24,7 @@ import { getActions } from './action.helper';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
+import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -120,7 +121,7 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
   entity = entityFactory(routeSchemaKey);
   entityType = routeSchemaKey;
   options: RequestOptions;
-  parentEntitySchema = entityFactory(spaceSchemaKey);
+  parentEntityConfig = new CFEntityConfig(spaceSchemaKey);
 }
 
 export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -149,8 +150,9 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
     'order-direction-field': 'creation',
   };
   parentGuid: string;
-  parentEntitySchema = entityFactory(spaceSchemaKey);
+  parentEntityConfig = new CFEntityConfig(spaceSchemaKey);
 }
+
 
 export abstract class BaseSpaceAction extends CFStartAction implements ICFAction {
   constructor(public guid: string, public orgGuid: string, public endpointGuid: string) {
@@ -285,5 +287,5 @@ export class GetServiceInstancesForSpace
     q: []
   };
   parentGuid: string;
-  parentEntitySchema = entityFactory(spaceSchemaKey);
+  parentEntityConfig = new CFEntityConfig(spaceSchemaKey);
 }

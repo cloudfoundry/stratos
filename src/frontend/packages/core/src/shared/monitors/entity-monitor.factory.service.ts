@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { EntityMonitor } from './entity-monitor';
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
+import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 
 @Injectable()
 export class EntityMonitorFactory {
@@ -15,19 +16,18 @@ export class EntityMonitorFactory {
 
   public create<T>(
     id: string,
-    entityKey: string,
-    schema: normalizrSchema.Entity,
+    entityConfig: EntityCatalogueEntityConfig,
     startWithNull = true
   ): EntityMonitor<T> {
-    const cacheKey = id + entityKey;
+    const { endpointType, entityType } = entityConfig;
+    const cacheKey = id + endpointType + entityType;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {
       const monitor = new EntityMonitor<T>(
         this.store,
         id,
-        entityKey,
-        schema,
+        entityConfig,
         startWithNull
       );
       this.monitorCache[cacheKey] = monitor;

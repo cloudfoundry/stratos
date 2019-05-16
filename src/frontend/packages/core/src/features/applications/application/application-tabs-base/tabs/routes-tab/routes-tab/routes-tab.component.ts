@@ -18,6 +18,7 @@ import { FetchAllDomains } from '../../../../../../../../../store/src/actions/do
 import { getPaginationObservables } from '../../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { entityFactory, domainSchemaKey } from '../../../../../../../../../store/src/helpers/entity-factory';
 import { CfOrgSpaceDataService } from '../../../../../../../shared/data-services/cf-org-space-service.service';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-routes-tab',
@@ -58,7 +59,7 @@ export class RoutesTabComponent implements OnInit {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(domainSchemaKey)
+          new CFEntityConfig(domainSchemaKey)
         )
       },
       true

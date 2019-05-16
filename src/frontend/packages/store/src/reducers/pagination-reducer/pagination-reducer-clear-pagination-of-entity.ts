@@ -1,14 +1,17 @@
 import { ClearPaginationOfEntity } from '../../actions/pagination.actions';
 import { PaginationState, PaginationEntityState } from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';
+import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 
 export function paginationClearOfEntity(state: PaginationState, action: ClearPaginationOfEntity) {
   // Remove entities from a pagination list. Used for quickly showing the result of a delete
-  if (state[action.entityKey]) {
+  const { entityType, endpointType } = action.entityConfig;
+  const entityKey = EntityCatalogueHelpers.buildEntityKey(entityType, endpointType);
+  if (state[entityKey]) {
     const guid = action.entityGuid;
 
     const newState = { ...state };
-    const entityState = newState[action.entityKey];
+    const entityState = newState[entityKey];
 
     const newEntityState = { ...entityState };
 
@@ -22,7 +25,7 @@ export function paginationClearOfEntity(state: PaginationState, action: ClearPag
         newEntityState[key] = clearPaginationOfEntity(newEntityState[key], guid);
       });
     }
-    newState[action.entityKey] = newEntityState;
+    newState[entityKey] = newEntityState;
     return newState;
   }
   return state;

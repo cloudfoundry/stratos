@@ -49,6 +49,7 @@ import {
   waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 
 @Injectable()
 export class CfUserService {
@@ -92,8 +93,6 @@ export class CfUserService {
         }
         if (!this.users[userGuid]) {
           this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
-            cfUserSchemaKey,
-            entityFactory(cfUserSchemaKey),
             userGuid,
             new GetUser(endpointGuid, userGuid),
             true
@@ -107,9 +106,9 @@ export class CfUserService {
   }
 
   private parseOrgRole(user: CfUser,
-                       processedOrgs: Set<string>,
-                       orgsToProcess: APIResource<IOrganization>[],
-                       result: IUserPermissionInOrg[]) {
+    processedOrgs: Set<string>,
+    orgsToProcess: APIResource<IOrganization>[],
+    result: IUserPermissionInOrg[]) {
     orgsToProcess.forEach(org => {
       const orgGuid = org.entity.guid;
       if (processedOrgs.has(orgGuid)) {
@@ -146,9 +145,9 @@ export class CfUserService {
   }
 
   private parseSpaceRole(user: CfUser,
-                         processedSpaces: Set<string>,
-                         spacesToProcess: APIResource<ISpace>[],
-                         result: IUserPermissionInSpace[]) {
+    processedSpaces: Set<string>,
+    spacesToProcess: APIResource<ISpace>[],
+    result: IUserPermissionInSpace[]) {
     spacesToProcess.forEach(space => {
       const spaceGuid = space.entity.guid;
       if (processedSpaces.has(spaceGuid)) {

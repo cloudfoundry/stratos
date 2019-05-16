@@ -221,8 +221,6 @@ export class CfRolesService {
 
   fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
     return this.entityServiceFactory.create<APIResource<IOrganization>>(
-      organizationSchemaKey,
-      entityFactory(organizationSchemaKey),
       orgGuid,
       new GetOrganization(orgGuid, cfGuid, [
         createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)

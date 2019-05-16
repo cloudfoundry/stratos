@@ -25,6 +25,7 @@ import {
 } from '../../../../../../../../store/src/helpers/entity-factory';
 import { FetchGitHubRepoInfo } from '../../../../../../../../store/src/actions/github.actions';
 import { FetchCommit, FetchBranchesForProject } from '../../../../../../../../store/src/actions/deploy-applications.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -93,30 +94,25 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const scm = this.scmService.getSCM(scmType as GitSCMType);
 
         // Ensure the SCM type is included in the key
-        const repoEntityKey = `${scmType}-${projectName}`;
-        const commitEntityKey = `${repoEntityKey}-${commitId}`;
+        // TODO Are we
+        const repoEntityID = `${scmType}-${projectName}`;
+        const commitEntityID = `${repoEntityID}-${commitId}`;
 
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
-          gitRepoSchemaKey,
-          entityFactory(gitRepoSchemaKey),
-          repoEntityKey,
+          repoEntityID,
           new FetchGitHubRepoInfo(stProject),
           false
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
-          gitCommitSchemaKey,
-          entityFactory(gitCommitSchemaKey),
-          commitEntityKey,
+          commitEntityID,
           new FetchCommit(scm, commitId, projectName),
           false
         );
 
-        const branchKey = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
+        const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
         this.gitBranchEntityService = this.entityServiceFactory.create(
-          gitBranchesSchemaKey,
-          entityFactory(gitBranchesSchemaKey),
-          branchKey,
+          branchID,
           new FetchBranchesForProject(scm, projectName),
           false
         );

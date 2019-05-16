@@ -1,7 +1,5 @@
 import { endpointSchemaKey } from '../helpers/entity-factory';
-import { EndpointModel } from './endpoint.types';
 import { LoggerService } from '../../../core/src/core/logger.service';
-import { FavoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IEntityMetadata } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 export const userFavoritesPaginationKey = 'userFavorites';

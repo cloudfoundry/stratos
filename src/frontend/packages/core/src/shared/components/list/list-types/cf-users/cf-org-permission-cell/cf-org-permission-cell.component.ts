@@ -18,6 +18,7 @@ import { AppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
 import { organizationSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-org-user-permission-cell',
@@ -68,8 +69,10 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         busy: new EntityMonitor(
           this.store,
           orgPerms.orgGuid,
-          organizationSchemaKey,
-          entityFactory(organizationSchemaKey)
+          {
+            entityType: organizationSchemaKey,
+            endpointType: CF_ENDPOINT_TYPE
+          }
         ).getUpdatingSection(updatingKey).pipe(
           map(update => update.busy)
         ),

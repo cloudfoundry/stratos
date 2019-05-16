@@ -261,7 +261,7 @@ export class EndpointsEffect {
         }
 
         if (apiActionType === 'delete') {
-          actions.push(new ClearPaginationOfEntity(apiAction.entityType, apiAction.guid));
+          actions.push(new ClearPaginationOfEntity(apiAction, apiAction.guid));
           actions.push(new GetUserFavoritesAction());
         }
 

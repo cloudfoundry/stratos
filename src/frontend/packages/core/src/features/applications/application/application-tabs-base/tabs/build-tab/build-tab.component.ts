@@ -21,6 +21,7 @@ import { GetAppStatsAction, AppMetadataTypes } from '../../../../../../../../sto
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
 import { appStatsSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { RestageApplication } from '../../../../../../../../store/src/actions/application.actions';
+import { CFEntityConfig } from '../../../../../../../../cloud-foundry/cf-types';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -223,7 +224,8 @@ export class BuildTabComponent implements OnInit {
     this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
       // On app reaching the 'STOPPED' state clear the app's stats pagination section
       const { cfGuid, appGuid } = this.applicationService;
-      this.store.dispatch(new ResetPagination(appStatsSchemaKey, new GetAppStatsAction(appGuid, cfGuid).paginationKey));
+      const action = new GetAppStatsAction(appGuid, cfGuid);
+      this.store.dispatch(new ResetPagination(action, action.paginationKey));
     });
   }
 

@@ -13,80 +13,79 @@ import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/ty
 import { AppState } from '../../../../../../../store/src/app-state';
 import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import {
-    applicationSchemaKey,
-    entityFactory,
-    organizationSchemaKey,
-    spaceSchemaKey,
+  applicationSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  spaceSchemaKey,
 } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export interface CfCellApp {
-    metric: IMetricApplication;
-    appGuid: string;
-    appEntityService: Observable<APIResource<IApp>>;
+  metric: IMetricApplication;
+  appGuid: string;
+  appEntityService: Observable<APIResource<IApp>>;
 }
 
 export class CfCellAppsDataSource
-    extends ListDataSource<CfCellApp, IMetrics<IMetricVectorResult<IMetricApplication>>> {
+  extends ListDataSource<CfCellApp, IMetrics<IMetricVectorResult<IMetricApplication>>> {
 
-    static appIdPath = 'metric.application_id';
-    private appEntityServices: { [appGuid: string]: Observable<APIResource<IApp>> };
+  static appIdPath = 'metric.application_id';
+  private appEntityServices: { [appGuid: string]: Observable<APIResource<IApp>> };
 
-    constructor(
-        store: Store<AppState>,
-        cfGuid: string,
-        cellId: string,
-        listConfig: IListConfig<CfCellApp>,
-        entityServiceFactory: EntityServiceFactory
-    ) {
-        const action = new FetchCFMetricsPaginatedAction(
-            cellId,
-            cfGuid,
-            new MetricQueryConfig(`firehose_container_metric_cpu_percentage{bosh_job_id="${cellId}"}`),
-            MetricQueryType.QUERY
-        );
+  constructor(
+    store: Store<AppState>,
+    cfGuid: string,
+    cellId: string,
+    listConfig: IListConfig<CfCellApp>,
+    entityServiceFactory: EntityServiceFactory
+  ) {
+    const action = new FetchCFMetricsPaginatedAction(
+      cellId,
+      cfGuid,
+      new MetricQueryConfig(`firehose_container_metric_cpu_percentage{bosh_job_id="${cellId}"}`),
+      MetricQueryType.QUERY
+    );
 
-        super({
-            store,
-            action,
-            schema: entityFactory(action.entityType),
-            getRowUniqueId: (row: CfCellApp) => row.appGuid,
-            paginationKey: action.paginationKey,
-            isLocal: true,
-            transformEntity: map((response) => {
-                if (!response || response.length === 0) {
-                    return [];
-                }
-                return response[0].data.result.map(res => ({
-                    metric: res.metric,
-                    appGuid: res.metric.application_id,
-                    appEntityService: this.createAppEntityService(res.metric.application_id, cfGuid, entityServiceFactory)
-                }));
-            }),
-            listConfig
-        });
-        this.appEntityServices = {};
-    }
-
-    private createAppEntityService(
-        appGuid: string,
-        cfGuid: string,
-        entityServiceFactory: EntityServiceFactory): Observable<APIResource<IApp>> {
-        if (!this.appEntityServices[appGuid]) {
-            this.appEntityServices[appGuid] = entityServiceFactory.create<APIResource<IApp>>(
-                applicationSchemaKey,
-                entityFactory(applicationSchemaKey),
-                appGuid,
-                new GetApplication(appGuid, cfGuid, [
-                    createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-                    createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)
-                ]),
-                true
-            ).waitForEntity$.pipe(
-                map(entityInfo => entityInfo.entity)
-            );
+    super({
+      store,
+      action,
+      schema: entityFactory(action.entityType),
+      getRowUniqueId: (row: CfCellApp) => row.appGuid,
+      paginationKey: action.paginationKey,
+      isLocal: true,
+      transformEntity: map((response) => {
+        if (!response || response.length === 0) {
+          return [];
         }
-        return this.appEntityServices[appGuid];
+        return response[0].data.result.map(res => ({
+          metric: res.metric,
+          appGuid: res.metric.application_id,
+          appEntityService: this.createAppEntityService(res.metric.application_id, cfGuid, entityServiceFactory)
+        }));
+      }),
+      listConfig
+    });
+    this.appEntityServices = {};
+  }
+
+  private createAppEntityService(
+    appGuid: string,
+    cfGuid: string,
+    entityServiceFactory: EntityServiceFactory): Observable<APIResource<IApp>> {
+    if (!this.appEntityServices[appGuid]) {
+      this.appEntityServices[appGuid] = entityServiceFactory.create<APIResource<IApp>>(
+        appGuid,
+        new GetApplication(appGuid, cfGuid, [
+          createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+          createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)
+        ]),
+        true
+      ).waitForEntity$.pipe(
+        map(entityInfo => entityInfo.entity)
+      );
     }
+    return this.appEntityServices[appGuid];
+  }
 }

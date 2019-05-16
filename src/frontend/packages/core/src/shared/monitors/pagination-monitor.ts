@@ -22,6 +22,8 @@ import { selectPaginationState } from '../../../../store/src/selectors/paginatio
 import { IRequestDataState } from '../../../../store/src/types/entity.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 
 export class MultiActionListEntity {
   static getEntity(entity: MultiActionListEntity | any) {
@@ -59,14 +61,17 @@ export class PaginationMonitor<T = any> {
 
   public currentPageIds$: Observable<string[]>;
   public isMultiAction$: Observable<boolean>;
+  public schema: EntitySchema;
 
   constructor(
     private store: Store<AppState>,
     public paginationKey: string,
-    public schema: EntitySchema,
+    public entityConfig: EntityCatalogueEntityConfig,
     public isLocal = false
   ) {
-    this.init(store, paginationKey, schema);
+    const { endpointType, entityType, schemaKey } = entityConfig;
+    this.schema = entityCatalogue.getEntity(endpointType, entityType).getSchema(schemaKey);
+    this.init(store, paginationKey, this.schema);
   }
 
   /**

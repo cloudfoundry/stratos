@@ -33,6 +33,7 @@ import { getPaginationObservables } from '../../../../store/src/reducers/paginat
 import { GetServicePlanVisibilities } from '../../../../store/src/actions/service-plan-visibility.actions';
 import { GetServiceBrokers } from '../../../../store/src/actions/service-broker.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -215,8 +216,6 @@ export class ServicesService {
         } else {
 
           const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
-            spaceSchemaKey,
-            entityFactory(spaceSchemaKey),
             spaceGuid,
             new GetSpace(spaceGuid, this.cfGuid),
             true

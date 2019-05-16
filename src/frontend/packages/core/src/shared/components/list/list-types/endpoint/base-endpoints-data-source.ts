@@ -22,7 +22,7 @@ export function syncPaginationSection(
   paginationKey: string
 ) {
   store.dispatch(new CreatePagination(
-    action.entityType,
+    action,
     paginationKey,
     action.paginationKey
   ));
@@ -47,7 +47,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       paginationMonitorFactory,
       entityMonitorFactory,
       GetAllEndpoints.storeKey,
-      endpointSchemaKey,
+      action,
       EndpointRowStateSetUpManager
     );
     const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);

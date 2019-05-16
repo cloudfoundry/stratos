@@ -5,6 +5,7 @@ import { EntityMonitor } from '../../monitors/entity-monitor';
 import { Observable } from 'rxjs';
 import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom, tap } from 'rxjs/operators';
 import { rootUpdatingKey, RequestInfoState, ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { EntitySchema } from '../../../../../store/src/helpers/entity-factory';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',
@@ -33,7 +34,7 @@ export class AppActionMonitorIconComponent implements OnInit {
   public id: string;
 
   @Input()
-  public schema: schema.Entity;
+  public schema: EntitySchema;
 
   @Input()
   public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
@@ -47,7 +48,7 @@ export class AppActionMonitorIconComponent implements OnInit {
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
   ngOnInit() {
-    const entityMonitor = this.entityMonitorFactory.create(this.id, this.entityKey, this.schema);
+    const entityMonitor = this.entityMonitorFactory.create(this.id, this.schema);
     this.currentState = this.getStateObservable(entityMonitor, this.monitorState);
   }
 

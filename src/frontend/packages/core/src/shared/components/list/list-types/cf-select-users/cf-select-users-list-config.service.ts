@@ -18,6 +18,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { ListRowSateHelper, ListRowStateSetUpManager } from '../../list.helper';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
+import { EntityCatalogueEntityConfig } from '../../../../../core/entity-catalogue/entity-catalogue.types';
 
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
@@ -79,8 +80,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   private cfUserRowStateSetUpManager: ListRowStateSetUpManager = (
     paginationMonitor: PaginationMonitor<APIResource<CfUser>>,
     entityMonitorFactory: EntityMonitorFactory,
-    rowStateManager: TableRowStateManager,
-    schemaKey: string
+    rowStateManager: TableRowStateManager
   ) => {
     return paginationMonitor.currentPage$.pipe(
       distinctUntilChanged(),
@@ -99,7 +99,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       this.paginationMonitorFactory,
       this.entityMonitorFactory,
       action.paginationKey,
-      action.entityType,
+      action,
       this.cfUserRowStateSetUpManager.bind(this)
     );
     this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this, rowStateManager, () => {

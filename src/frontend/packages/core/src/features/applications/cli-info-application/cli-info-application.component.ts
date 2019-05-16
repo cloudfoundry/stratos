@@ -43,8 +43,6 @@ export class CliInfoApplicationComponent implements OnInit {
 
   private setupObservables(cfGuid: string) {
     this.cfEndpointEntityService = this.entityServiceFactory.create<EndpointModel>(
-      endpointSchemaKey,
-      entityFactory(endpointSchemaKey),
       cfGuid,
       new GetAllEndpoints(),
       false

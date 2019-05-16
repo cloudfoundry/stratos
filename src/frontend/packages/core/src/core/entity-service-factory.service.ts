@@ -6,6 +6,7 @@ import { EntityService } from './entity-service';
 import { IRequestAction } from '../../../store/src/types/request.types';
 import { TRequestTypeKeys, RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 
 @Injectable()
 export class EntityServiceFactory {
@@ -16,8 +17,7 @@ export class EntityServiceFactory {
   ) { }
 
   create<T>(
-    entityKey: string,
-    schema: normalizrSchema.Entity,
+    // TODO Can we reliably get the ID from the action? NJ
     entityId: string,
     action: IRequestAction,
     validateRelations = true,
@@ -25,8 +25,7 @@ export class EntityServiceFactory {
   ) {
     const entityMonitor = this.entityMonitorFactory.create<T>(
       entityId,
-      entityKey,
-      schema
+      action
     );
     return new EntityService<T>(this.store, entityMonitor, action, validateRelations, entitySection);
   }

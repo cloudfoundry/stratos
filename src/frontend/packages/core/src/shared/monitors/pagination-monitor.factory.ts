@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { PaginationMonitor } from './pagination-monitor';
 import { Store } from '@ngrx/store';
-import { schema as normalizrSchema } from 'normalizr';
 import { AppState } from '../../../../store/src/app-state';
-import { EntitySchema } from '../../../../store/src/helpers/entity-factory';
+import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class PaginationMonitorFactory {
@@ -16,16 +16,17 @@ export class PaginationMonitorFactory {
 
   public create<T = any>(
     paginationKey: string,
-    schema: EntitySchema,
+    entityConfig: EntityCatalogueEntityConfig
   ) {
-    const cacheKey = paginationKey + schema.key;
+    const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);
+    const cacheKey = paginationKey + catalogueEntity.entityKey;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey] as PaginationMonitor<T>;
     } else {
       const monitor = new PaginationMonitor<T>(
         this.store,
         paginationKey,
-        schema
+        entityConfig
       );
       this.monitorCache[cacheKey] = monitor;
       return monitor;

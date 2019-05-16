@@ -9,6 +9,7 @@ import { StratosStatus } from '../../../shared/shared.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../cloud-foundry/cf-types';
 
 
 export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
@@ -21,9 +22,9 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
   ) {
     this.orgOrSpace$ = emf.create<APIResource<T>>(
       orgOrSpaceGuid,
-      orgOrSpaceSchemaKey,
-      entityFactory(orgOrSpaceSchemaKey),
-      false).entity$.pipe(filter(orgOrSpace => !!orgOrSpace));
+      new CFEntityConfig(orgOrSpaceSchemaKey),
+      false
+    ).entity$.pipe(filter(orgOrSpace => !!orgOrSpace));
   }
 
   protected orgOrSpace$: Observable<APIResource<T>>;

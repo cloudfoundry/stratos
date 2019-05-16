@@ -6,8 +6,6 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 // Allow extenstions to add entities to the entity cache
 export function addExtensionEntities() {
   entityCatalogue.getAllEntitiesTypes().forEach(definition => {
-
-
     defaultCfEntitiesState[definition.entityKey] = {};
     registerAPIRequestEntity(definition.entityKey);
   });

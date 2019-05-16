@@ -119,6 +119,7 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
+
     eventService.addEventConfig<boolean>(
       {
         eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),

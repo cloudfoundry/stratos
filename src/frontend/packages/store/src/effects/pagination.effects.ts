@@ -27,7 +27,7 @@ export class PaginationEffects {
     map(action => {
       const addAction = action as AddParams;
       if (!addAction.keepPages) {
-        this.store.dispatch(new ResetPagination(action.entityType, action.paginationKey));
+        this.store.dispatch(new ResetPagination(action.entityConfig, action.paginationKey));
       }
     }));
 }

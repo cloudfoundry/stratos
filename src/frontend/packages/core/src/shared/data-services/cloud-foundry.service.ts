@@ -8,6 +8,7 @@ import { endpointSchemaKey, entityFactory } from '../../../../store/src/helpers/
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { endpointListKey, EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginationMonitor } from '../monitors/pagination-monitor';
+import { endpointEntitySchema } from '../../base-entity-types';
 
 @Injectable()
 export class CloudFoundryService {
@@ -22,7 +23,7 @@ export class CloudFoundryService {
     store: Store<AppState>
   ) {
 
-    this.cfEndpointsMonitor = new PaginationMonitor(store, endpointListKey, entityFactory(endpointSchemaKey));
+    this.cfEndpointsMonitor = new PaginationMonitor(store, endpointListKey, endpointEntitySchema);
 
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
       map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))

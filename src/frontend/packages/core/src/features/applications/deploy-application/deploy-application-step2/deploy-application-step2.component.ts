@@ -41,6 +41,7 @@ import { GitSCM } from '../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes, getAutoSelectedDeployType } from '../deploy-application-steps.types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -170,7 +171,7 @@ export class DeployApplicationStep2Component
               action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
                 fetchBranchesAction.paginationKey,
-                entityFactory(gitBranchesSchemaKey)
+                new CFEntityConfig(gitBranchesSchemaKey)
               )
             },
             true
@@ -200,7 +201,7 @@ export class DeployApplicationStep2Component
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
       paginationAction.paginationKey,
-      entityFactory(gitBranchesSchemaKey)
+      new CFEntityConfig(gitBranchesSchemaKey)
     );
 
     this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(
@@ -226,11 +227,9 @@ export class DeployApplicationStep2Component
         if (branch && !!projectInfo && branch.projectId === projectInfo.full_name) {
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
-          const entityKey = projectInfo.full_name + '-' + commitSha;
+          const entityID = projectInfo.full_name + '-' + commitSha;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
-            gitCommitSchemaKey,
-            entityFactory(gitCommitSchemaKey),
-            entityKey,
+            entityID,
             new FetchCommit(this.scm, commitSha, projectInfo.full_name),
           );
 

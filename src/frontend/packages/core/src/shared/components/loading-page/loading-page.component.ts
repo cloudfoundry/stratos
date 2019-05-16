@@ -6,6 +6,7 @@ import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { EntitySchema } from '../../../../../store/src/helpers/entity-factory';
 
 
 @Component({
@@ -43,7 +44,7 @@ export class LoadingPageComponent implements OnInit {
   private entityId: string;
 
   @Input()
-  private entitySchema: schema.Entity;
+  private entitySchema: EntitySchema;
 
   public isDeleting: Observable<boolean>;
 
@@ -58,7 +59,7 @@ export class LoadingPageComponent implements OnInit {
         );
       this.isDeleting = observableOf(false);
     } else if (this.entityId && this.entitySchema) {
-      this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema.key, this.entitySchema));
+      this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema));
     } else {
       this.isLoading = this.isDeleting = observableOf(false);
     }

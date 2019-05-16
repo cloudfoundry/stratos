@@ -7,6 +7,7 @@ import { IRequestDataState } from '../../types/entity.types';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { IRequestArray } from '../api-request-reducer/types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
@@ -17,7 +18,8 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
       case successAction:
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
-          return deleteEntity(state, success.apiAction.entityType, success.apiAction.guid);
+          const entityKey = entityCatalogue.getEntity(success.apiAction.endpointType, success.apiAction.entityType).entityKey;
+          return deleteEntity(state, entityKey, success.apiAction.guid);
         } else if (success.response) {
           return deepMergeState(state, success.response.entities);
         }

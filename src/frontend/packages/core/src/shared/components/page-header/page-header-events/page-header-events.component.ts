@@ -7,10 +7,11 @@ import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { endpointEntitySchema } from '../../../../base-entity-types';
 
 
 @Component({
@@ -62,7 +63,9 @@ export class PageHeaderEventsComponent implements OnInit {
     }
     if (this.endpointIds$) {
       const endpointMonitor = new PaginationMonitor<EndpointModel>(
-        this.store, endpointListKey, entityFactory(endpointSchemaKey)
+        this.store,
+        endpointListKey,
+        endpointEntitySchema
       );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
       this.errorMessage$ = combineLatest(

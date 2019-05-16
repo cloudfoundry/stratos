@@ -11,6 +11,7 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { spaceSchemaKey, entityFactory, spaceWithOrgKey } from '../../../../../../store/src/helpers/entity-factory';
 import { GetSpace } from '../../../../../../store/src/actions/space.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-service-broker-card',
@@ -36,11 +37,10 @@ export class ServiceBrokerCardComponent {
       filter(o => !!o),
       // Broker is space scoped
       switchMap(spaceGuid => {
-        const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
-          entityFactory(spaceWithOrgKey),
+        const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
           spaceGuid,
           new GetSpace(spaceGuid, this.servicesService.cfGuid),
-          true
+          true,
         );
         return spaceService.waitForEntity$;
       }),

@@ -5,6 +5,7 @@ import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
@@ -35,7 +36,6 @@ export const metricSchemaKey = 'metrics';
 export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
-export const userFavoritesSchemaKey = 'userFavorites';
 export const userProvidedServiceInstanceSchemaKey = 'userProvidedServiceInstance';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
@@ -53,7 +53,7 @@ export const entityCache: {
  * @export
  * @extends {schema.Entity}
  */
-export class EntitySchema extends schema.Entity {
+export class EntitySchema extends schema.Entity implements EntityCatalogueEntityConfig {
   schema: Schema;
   public getId: (input, parent?, key?) => string;
   /**
@@ -65,12 +65,12 @@ export class EntitySchema extends schema.Entity {
    */
   constructor(
     public entityType: string,
-    public endpointType?: string,
+    public endpointType: string,
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string
   ) {
-    super(endpointType ? EntityCatalogueHelpers.buildId(entityType, endpointType) : entityType, definition, options);
+    super(endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
     this.schema = definition || {};
   }
   public withEmptyDefinition() {
@@ -332,9 +332,6 @@ const ServicePlanVisibilitySchema = new CFEntitySchema(servicePlanVisibilitySche
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
-
-const UserFavoritesSchemaKey = new CFEntitySchema(userFavoritesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[userFavoritesSchemaKey] = UserFavoritesSchemaKey;
 
 const ApplicationEntitySchema = new CFEntitySchema(
   applicationSchemaKey,

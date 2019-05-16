@@ -35,11 +35,12 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { StratosStatus } from '../../shared/shared.types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
-                                   serviceBroker: APIResource<IServiceBroker>,
-                                   allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
+  serviceBroker: APIResource<IServiceBroker>,
+  allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
   const svcAvailability = {
     isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
   };
@@ -201,8 +202,6 @@ export const getServiceBroker = (
   cfGuid: string,
   entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IServiceBroker>> => {
   return entityServiceFactory.create<APIResource<IServiceBroker>>(
-    serviceBrokerSchemaKey,
-    entityFactory(serviceBrokerSchemaKey),
     serviceBrokerGuid,
     new GetServiceBroker(serviceBrokerGuid, cfGuid),
     false
@@ -214,8 +213,6 @@ export const getCfService = (
   cfGuid: string,
   entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IService>> => {
   return entityServiceFactory.create<APIResource<IService>>(
-    serviceSchemaKey,
-    entityFactory(serviceSchemaKey),
     serviceGuid,
     new GetService(serviceGuid, cfGuid),
     true

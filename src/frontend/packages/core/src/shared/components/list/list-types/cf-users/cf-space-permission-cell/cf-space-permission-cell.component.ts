@@ -22,6 +22,8 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { EntityCatalogueHelpers } from '../../../../../../core/entity-catalogue/entity-catalogue.helper';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -78,8 +80,9 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
+    const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
     const orgNames$ = orgGuids.length ? combineLatest(
-      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, orgGuid)).pipe(first()))
+      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(orgEntityKey, orgGuid)).pipe(first()))
     ).pipe(
       filter(org => !!org),
       first(),
@@ -128,8 +131,10 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         busy: new EntityMonitor(
           this.store,
           spacePerms.spaceGuid,
-          spaceSchemaKey,
-          entityFactory(spaceSchemaKey)
+          {
+            entityType: spaceSchemaKey,
+            endpointType: CF_ENDPOINT_TYPE
+          }
         ).getUpdatingSection(updatingKey).pipe(
           map(update => update.busy)
         ),

@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 
 import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
-import { endpointSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
@@ -35,8 +34,6 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     /* tslint:disable-next-line:no-string-literal */
     const id = row['endpointId'] || row['guid'];
     this.endpoint$ = this.entityServiceFactory.create(
-      endpointSchemaKey,
-      entityFactory(endpointSchemaKey),
       id,
       new GetAllEndpoints(),
       false

@@ -33,6 +33,7 @@ import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-pe
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
 import { userHasRole, UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
+import { EntityCatalogueHelpers } from '../../../../../core/entity-catalogue/entity-catalogue.helper';
 
 const defaultUserHasRoles: (user: CfUser) => boolean = (user: CfUser): boolean => {
   return userHasRole(user, 'organizations') ||
@@ -161,13 +162,14 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   }
 
   private initialiseMultiFilter(action: PaginatedAction) {
-    this.store.select(selectPaginationState(action.entityType, action.paginationKey)).pipe(
+    const entityKey = EntityCatalogueHelpers.buildEntityKey(action.entityType, action.endpointType);
+    this.store.select(selectPaginationState(entityKey, action.paginationKey)).pipe(
       filter((pag) => !!pag),
       first(),
     ).subscribe(pag => {
       const currentFilter = pag.clientPagination.filter.items[userListUserVisibleKey];
       if (!currentFilter) {
-        this.store.dispatch(new SetClientFilter(action.entityType, action.paginationKey, {
+        this.store.dispatch(new SetClientFilter(action, action.paginationKey, {
           string: '',
           items: {
             [userListUserVisibleKey]: UserListUsersVisible.WITH_ROLE

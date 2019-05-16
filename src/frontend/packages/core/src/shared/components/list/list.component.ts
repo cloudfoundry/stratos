@@ -75,6 +75,7 @@ import {
   MultiFilterManager,
 } from './list.component.types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { EntitySchema } from '../../../../../store/src/helpers/entity-factory';
 
 
 @Component({
@@ -638,7 +639,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   public setEntityPage(page: number) {
     this.pPaginator.firstPage();
     this.store.dispatch(new SetPage(
-      this.dataSource.entityKey,
+      this.dataSource,
       this.dataSource.paginationKey,
       page,
       true,
@@ -661,12 +662,16 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return actions;
   }
 
-  private getRowStateGeneratorFromEntityMonitor(entitySchema: normalizrSchema.Entity, dataSource: IListDataSource<T>) {
+  private getRowStateGeneratorFromEntityMonitor(entitySchema: EntitySchema, dataSource: IListDataSource<T>) {
     return (row) => {
       if (!entitySchema || !row) {
         return observableOf(getDefaultRowState());
       }
-      const entityMonitor = new EntityMonitor(this.store, dataSource.getRowUniqueId(row), dataSource.entityKey, entitySchema);
+      const entityMonitor = new EntityMonitor(
+        this.store,
+        dataSource.getRowUniqueId(row),
+        entitySchema
+      );
       return entityMonitor.entityRequest$.pipe(
         distinctUntilChanged(),
         map(requestInfo => ({

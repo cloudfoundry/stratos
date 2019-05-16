@@ -11,6 +11,7 @@ import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction } from '../../types/request.types';
 import { EntitySchema } from '../entity-factory';
+import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 export class ValidateEntityRelationsConfig {
   /**
@@ -91,16 +92,18 @@ export class EntityTreeRelation {
 export interface EntityInlineChildAction {
   entityType: string;
   parentGuid: string;
-  parentEntitySchema: EntitySchema;
+  parentEntityConfig: EntityCatalogueEntityConfig;
   child?: EntityTreeRelation; // Not required on base actions
   endpointGuid: string;
 }
 
+// TODO Work
 export function isEntityInlineChildAction(anything): EntityInlineChildAction {
-  return anything &&
-    !!anything.parentGuid &&
-    !!anything.parentEntitySchema
-    ? anything as EntityInlineChildAction : null;
+  const inlineChildAction = anything as EntityInlineChildAction;
+  return inlineChildAction &&
+    !!inlineChildAction.parentGuid &&
+    !!inlineChildAction.parentEntityConfig
+    ? inlineChildAction : null;
 }
 
 /**
@@ -118,6 +121,7 @@ export function isEntityInlineParentAction(anything: any): boolean {
   return anything && !!anything.includeRelations && anything.populateMissing !== undefined;
 }
 
+// TODO Does this need the entity key or type?
 export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
 
 export function createEntityRelationPaginationKey(parentSchemaKey: string, parentGuid = 'all', childSchemaRelation?: string) {

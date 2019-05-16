@@ -180,7 +180,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       if (
         paginationEntity.ids[paginationEntity.currentPage] &&
         (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
-        this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));
+        this.store.dispatch(new SetResultCount(this, this.paginationKey, newLength));
       }
     };
 

@@ -33,6 +33,7 @@ import { pathGet } from '../../../../core/utils.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
@@ -121,7 +122,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         action: fetchAllDomainsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           fetchAllDomainsAction.paginationKey,
-          entityFactory(domainSchemaKey)
+          new CFEntityConfig(domainSchemaKey)
         )
       },
       true
@@ -133,8 +134,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         .pipe(
           switchMap(app => {
             this.spaceGuid = app.entity.entity.space_guid;
-            const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
-              entityFactory(spaceSchemaKey),
+            const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
               this.spaceGuid,
               new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
               true

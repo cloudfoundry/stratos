@@ -10,6 +10,7 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/
 import { EndpointsService } from '../../../core/endpoints.service';
 import { LoggerService } from '../../../core/logger.service';
 import { UserFavoriteManager } from '../../../core/user-favorite-manager';
+import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
 
 @Component({
   selector: 'app-home-page',
@@ -52,7 +53,7 @@ export class HomePageComponent {
     this.showFilterToggle$ = userFavoriteManager.getAllFavorites().pipe(
       map(([, favEntities]: [IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite>]) => {
         for (const favEntity of Object.values(favEntities)) {
-          if (favEntity.entityType !== 'endpoint') {
+          if (favEntity.entityType !== EntityCatalogueHelpers.endpointType) {
             return true;
           }
         }

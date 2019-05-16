@@ -19,6 +19,7 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
+import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
 
 @Component({
   selector: 'app-page-header',
@@ -79,7 +80,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       const prettyType = this.favoritesConfigMapper.getPrettyTypeName(favorite);
       const prettyEndpointType = this.favoritesConfigMapper.getPrettyTypeName({
         endpointType: favorite.endpointType,
-        entityType: 'endpoint'
+        entityType: EntityCatalogueHelpers.endpointType
       });
       if (mapperFunction) {
         const { name, routerLink } = mapperFunction(favorite.metadata);

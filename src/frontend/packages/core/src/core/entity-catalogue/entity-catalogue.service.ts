@@ -3,11 +3,12 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
   IEntityMetadata,
-  IStratosEndpointDefinition
+  IStratosEndpointDefinition,
+  STRATOS_ENDPOINT_TYPE
 } from './entity-catalogue.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 
-export class EntityCatalogue {
+class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
   private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
 
@@ -37,12 +38,13 @@ export class EntityCatalogue {
     }
   }
 
-  private getEntityOfType<
-    T extends IEntityMetadata = IEntityMetadata,
-    Y = any
-  >(entityType: string, endpointType: string): StratosBaseCatalogueEntity {
-    const id = EntityCatalogueHelpers.buildId(entityType, endpointType);
-    if (entityType === EntityCatalogueHelpers.endpointType) {
+  private getEntityOfType<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    entityType: string,
+    endpointType?: string
+  ): StratosBaseCatalogueEntity {
+    const id = endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType;
+    // STRATOS_ENDPOINT_TYPE is a special case for internal entities.
+    if (endpointType !== STRATOS_ENDPOINT_TYPE && entityType === EntityCatalogueHelpers.endpointType) {
       return this.endpoints.get(id);
     }
     return this.entities.get(id) as StratosCatalogueEntity<T, Y>;

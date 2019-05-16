@@ -8,6 +8,7 @@ import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -55,6 +56,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationSchemaKey;
+  endpointType = CF_ENDPOINT_TYPE;
   options: RequestOptions;
   initialParams: PaginationParam = {
     'order-direction': 'asc',

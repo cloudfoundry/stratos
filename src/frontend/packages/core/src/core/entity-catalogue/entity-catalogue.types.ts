@@ -6,7 +6,7 @@ import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
-
+export const STRATOS_ENDPOINT_TYPE = 'stratos';
 export interface EntityCatalogueEntityConfig {
   entityType: string;
   endpointType: string;
@@ -44,6 +44,8 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
 }
+
+
 
 /**
  * Static information describing a stratos endpoint.
@@ -117,6 +119,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   public readonly entityKey: string;
   public readonly entity: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition;
   public readonly isEndpoint: boolean;
+  // TODO we should do some typing magic to hide this from extensions - nj
+  public readonly isStratosType: boolean;
   public readonly hasBuilder: boolean;
 
   constructor(
@@ -125,18 +129,21 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   ) {
     this.entity = this.populateEntity(entity);
     const baseEntity = entity as IStratosEntityDefinition;
-    this.isEndpoint = !baseEntity.endpoint;
+    this.isEndpoint = !this.isStratosType && !baseEntity.endpoint;
     this.hasBuilder = !!builder;
     this.entityKey = this.isEndpoint ?
-      EntityCatalogueHelpers.buildId(EntityCatalogueHelpers.endpointType, baseEntity.type) :
-      EntityCatalogueHelpers.buildId(baseEntity.type, baseEntity.endpoint.type);
+      EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
+      EntityCatalogueHelpers.buildEntityKey(baseEntity.type, this.isStratosType ? '' : baseEntity.endpoint.type);
   }
+
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition) {
     const schema = entity.schema instanceof EntitySchema ? {
       default: entity.schema
     } : entity.schema;
+
     return {
       ...entity,
+      type: entity.type || schema.default.entityType,
       label: entity.label || 'Unknown',
       labelPlural: entity.labelPlural || entity.label || 'Unknown',
       schema
@@ -154,7 +161,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       return catalogueSchema.default;
     }
     const entityCatalogue = this.entity as IStratosEntityDefinition;
-    const tempId = EntityCatalogueHelpers.buildId(entityCatalogue.endpoint.type, schemaKey);
+    const tempId = EntityCatalogueHelpers.buildEntityKey(entityCatalogue.endpoint.type, schemaKey);
     if (!catalogueSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogueSchema.default;
@@ -218,4 +225,5 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     });
   }
 }
+
 

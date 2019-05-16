@@ -54,6 +54,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -186,8 +187,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     this.appId = appId;
     this.bindAppStepperText = 'Binding Params (Optional)';
     const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
-      applicationSchemaKey,
-      entityFactory(applicationSchemaKey),
       appId,
       new GetApplication(appId, cfId, [createEntityRelationKey(applicationSchemaKey, spaceSchemaKey)]),
       true
@@ -251,20 +250,18 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   }
 
   private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {
+    const action = new GetServiceInstance(serviceInstanceId, cfId);
     return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesSchemaKey,
-      entityFactory(serviceInstancesSchemaKey),
-      serviceInstanceId,
-      new GetServiceInstance(serviceInstanceId,
-        cfId),
-      true);
+      action,
+      true
+    );
   }
 
   private getSpaceEntityService(spaceGuid: string, cfGuid: string) {
+    const action = new GetSpace(spaceGuid, cfGuid);
     return this.entityServiceFactory.create<APIResource<ISpace>>(
       spaceSchemaKey,
-      entityFactory(spaceSchemaKey),
-      spaceGuid,
       new GetSpace(spaceGuid, cfGuid),
       true);
   }

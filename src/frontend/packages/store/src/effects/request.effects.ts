@@ -155,16 +155,15 @@ export class RequestEffect {
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
           const entityType = apiAction.proxyPaginationEntityKey || apiAction.entityType;
-          const entityKey = entityCatalogue.getEntity(apiAction.endpointType, entityType).entityKey;
           if (apiAction.removeEntityOnDelete) {
-            actions.unshift(new ClearPaginationOfEntity(entityKey, apiAction.guid));
+            actions.unshift(new ClearPaginationOfEntity(apiAction, apiAction.guid));
           } else {
-            actions.unshift(new ClearPaginationOfType(entityKey));
+            actions.unshift(new ClearPaginationOfType(apiAction));
           }
 
           if (Array.isArray(apiAction.clearPaginationEntityKeys)) {
             // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
-            actions.push(...apiAction.clearPaginationEntityKeys.map(key => new ClearPaginationOfType(key)));
+            actions.push(...apiAction.clearPaginationEntityKeys.map(key => new ClearPaginationOfType(apiAction)));
           }
         }
       }

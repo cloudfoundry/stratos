@@ -16,6 +16,8 @@ import { CfAppsDataSource } from '../../../shared/components/list/list-types/app
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { getApplicationDeploySourceTypes, getAutoSelectedDeployType } from './deploy-application-steps.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
 
 @Component({
   selector: 'app-deploy-application',
@@ -35,11 +37,16 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   isRedeploy: boolean;
   sourceTypes: SourceType[] = getApplicationDeploySourceTypes();
   selectedSourceType: SourceType;
+  entityKey: string;
   constructor(
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
   ) {
+    this.entityKey = EntityCatalogueHelpers.buildEntityKey(
+      applicationSchemaKey,
+      CF_ENDPOINT_TYPE
+    );
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 
@@ -88,7 +95,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
         })
       ).subscribe());
     } else {
-      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey)).pipe(
+      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(this.entityKey, CfAppsDataSource.paginationKey)).pipe(
         filter((pag) => !!pag),
         tap(pag => {
           const { cf, org, space } = pag.clientPagination.filter.items;

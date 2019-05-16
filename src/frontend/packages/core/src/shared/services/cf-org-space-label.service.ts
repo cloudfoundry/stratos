@@ -9,6 +9,9 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { haveMultiConnectedCfs } from '../../features/cloud-foundry/cf.helpers';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { STRATOS_ENDPOINT_TYPE } from '../../core/entity-catalogue/entity-catalogue.types';
 
 export class CfOrgSpaceLabelService {
 
@@ -28,9 +31,15 @@ export class CfOrgSpaceLabelService {
     private orgGuid?: string,
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
-    this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointSchemaKey, this.cfGuid));
-    this.org$ = this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, this.orgGuid));
-    this.space$ = this.store.select<APIResource<ISpace>>(selectEntity(spaceSchemaKey, this.spaceGuid));
+    const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
+    const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
+    // TODO We shouldn't have to expose STRATOS_ENDPOINT_TYPE
+    const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
+
+    this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
+
+    this.org$ = this.store.select<APIResource<IOrganization>>(selectEntity(orgEntityKey, this.orgGuid));
+    this.space$ = this.store.select<APIResource<ISpace>>(selectEntity(spaceEntityKey, this.spaceGuid));
   }
 
   getLabel(): Observable<string> {

@@ -40,10 +40,7 @@ export function entityServiceFactory(
   id: string,
   esf: EntityServiceFactory
 ) {
-  const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
   return esf.create(
-    applicationSchemaKey,
-    catalogueEntity.getSchema(),
     id,
     createGetApplicationAction(id, cfId),
     true

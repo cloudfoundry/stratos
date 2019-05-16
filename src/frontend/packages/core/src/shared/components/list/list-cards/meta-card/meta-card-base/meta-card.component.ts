@@ -56,7 +56,6 @@ export class MetaCardComponent {
     if (entityConfig) {
       const entityMonitor = this.entityMonitorFactory.create(
         entityConfig.guid,
-        entityConfig.schema.key,
         entityConfig.schema
       );
       this.isDeleting$ = entityMonitor.isDeletingEntity$;

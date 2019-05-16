@@ -16,8 +16,6 @@ export function generateTestEntityServiceProvider(
     entityServiceFactory: EntityServiceFactory
   ) {
     return entityServiceFactory.create(
-      schema.key,
-      schema,
       guid,
       action,
       false,

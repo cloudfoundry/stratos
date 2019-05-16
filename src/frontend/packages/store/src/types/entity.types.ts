@@ -20,36 +20,6 @@ import {
   IAppSummary,
 } from '../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState, AppState } from '../app-state';
-import {
-  appEnvVarsSchemaKey,
-  appEventSchemaKey,
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  appSummarySchemaKey,
-  buildpackSchemaKey,
-  cfUserSchemaKey,
-  domainSchemaKey,
-  endpointSchemaKey,
-  featureFlagSchemaKey,
-  gitBranchesSchemaKey,
-  gitCommitSchemaKey,
-  metricSchemaKey,
-  organizationSchemaKey,
-  privateDomainsSchemaKey,
-  routeSchemaKey,
-  securityGroupSchemaKey,
-  serviceBindingSchemaKey,
-  serviceBrokerSchemaKey,
-  serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  serviceSchemaKey,
-  spaceQuotaSchemaKey,
-  spaceSchemaKey,
-  stackSchemaKey,
-  userFavoritesSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { IMetrics } from './base-metric.types';
@@ -172,6 +142,6 @@ export const defaultCfEntitiesState = {
   // [metricSchemaKey]: {},
   // [servicePlanVisibilitySchemaKey]: {},
   // [serviceBrokerSchemaKey]: {},
-  // [userFavoritesSchemaKey]: {},
+  // [userFavoritesSchemaKey]: {},s
   // [userProvidedServiceInstanceSchemaKey]: []
 };

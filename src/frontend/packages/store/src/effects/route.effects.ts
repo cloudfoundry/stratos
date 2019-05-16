@@ -24,7 +24,7 @@ export class RouteEffect {
       const unmapAction: UnmapRoute = action.apiAction as UnmapRoute;
       if (unmapAction.clearPaginationKey) {
         // Remove the route from the specified pagination list
-        this.store.dispatch(new ClearPaginationOfEntity(routeSchemaKey, action.apiAction.guid, unmapAction.clearPaginationKey));
+        this.store.dispatch(new ClearPaginationOfEntity(action.apiAction, action.apiAction.guid, unmapAction.clearPaginationKey));
       }
     })
   );

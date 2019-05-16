@@ -13,6 +13,7 @@ import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organiza
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { entityFactory, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 
 export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;
@@ -39,7 +40,7 @@ export class AddEditSpaceStepBase {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(spaceSchemaKey)
+          new CFEntityConfig(spaceSchemaKey)
         )
       },
       true

@@ -39,6 +39,7 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -129,16 +130,12 @@ export class CloudFoundryEndpointService {
     this.getAllAppsAction = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
-      endpointSchemaKey,
-      entityFactory(endpointSchemaKey),
       this.cfGuid,
       new GetAllEndpoints(),
       false
     );
 
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
-      cfInfoSchemaKey,
-      entityFactory(cfInfoSchemaKey),
       this.cfGuid,
       new GetCFInfo(this.cfGuid),
       false
@@ -169,7 +166,7 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObs() {
-    const appPaginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityType));
+    const appPaginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, this.getAllAppsAction);
     this.appsPagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,

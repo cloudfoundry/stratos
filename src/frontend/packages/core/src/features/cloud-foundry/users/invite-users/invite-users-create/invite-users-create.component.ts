@@ -28,6 +28,7 @@ import {
 import { StepOnNextFunction } from '../../../../../shared/components/stepper/step/step.component';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invites/user-invite.service';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-invite-users-create',
@@ -75,16 +76,12 @@ export class InviteUsersCreateComponent implements OnInit {
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
     this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
-      organizationSchemaKey,
-      entityFactory(organizationSchemaKey),
       this.activeRouteCfOrgSpace.orgGuid,
       new GetOrganization(this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.cfGuid, [], false)
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     );
     this.space$ = this.isSpace ? this.entityServiceFactory.create<APIResource<ISpace>>(
-      spaceSchemaKey,
-      entityFactory(spaceSchemaKey),
       this.activeRouteCfOrgSpace.spaceGuid,
       new GetSpace(this.activeRouteCfOrgSpace.spaceGuid, this.activeRouteCfOrgSpace.cfGuid, [], false)
     ).waitForEntity$.pipe(
@@ -114,7 +111,7 @@ export class InviteUsersCreateComponent implements OnInit {
         map(res => {
           if (!res.error && res.failed_invites.length === 0) {
             // Success! Clear all paginations of type users such that lists can be refetched with new user.s
-            this.store.dispatch(new ClearPaginationOfType(cfUserSchemaKey));
+            this.store.dispatch(new ClearPaginationOfType(new CFEntityConfig(cfUserSchemaKey)));
           } else if (res.failed_invites.length > 0) {
             // One or more failed. Push failures back into components
             const newState: StackedInputActionsState[] = [];

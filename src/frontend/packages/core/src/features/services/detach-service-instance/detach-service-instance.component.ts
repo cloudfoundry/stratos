@@ -13,10 +13,11 @@ import {
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { serviceBindingSchemaKey, serviceInstancesSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { AppState } from '../../../../../store/src/app-state';
 import { GetServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-detach-service-instance',
@@ -64,8 +65,6 @@ export class DetachServiceInstanceComponent {
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
 
     const serviceBindingEntityService = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      serviceInstancesSchemaKey,
-      entityFactory(serviceInstancesSchemaKey),
       serviceInstanceId,
       new GetServiceInstance(serviceInstanceId, this.cfGuid),
       true

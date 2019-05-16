@@ -29,6 +29,7 @@ import { selectNewAppState } from '../../../../../../store/src/effects/create-ap
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { GetOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -163,8 +164,6 @@ export class CreateApplicationStep3Component implements OnInit {
         this.hostControl().markAsDirty();
         this.newAppData = state;
         const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
-          organizationSchemaKey,
-          entityFactory(organizationSchemaKey),
           state.cloudFoundryDetails.org,
           new GetOrganization(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
             createEntityRelationKey(organizationSchemaKey, domainSchemaKey)

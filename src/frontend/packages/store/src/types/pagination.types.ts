@@ -62,6 +62,7 @@ export function isPaginatedAction(obj: any): PaginatedAction {
 
 export interface BasePaginatedAction extends Action {
   entityType: string;
+  endpointType: string;
   paginationKey: string;
 }
 

@@ -34,6 +34,8 @@ import { extractActualListEntity } from '../../shared/components/list/data-sourc
 import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 
 
 export interface IUserRole<T> {
@@ -217,7 +219,8 @@ export const getActiveRouteCfCellProvider = {
 
 export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
   const appWallPagKey = 'applicationWall';
-  store.dispatch(new SetClientFilter(applicationSchemaKey, appWallPagKey,
+  const entityKey = EntityCatalogueHelpers.buildEntityKey(applicationSchemaKey, CF_ENDPOINT_TYPE);
+  store.dispatch(new SetClientFilter(new CFEntityConfig(applicationSchemaKey), appWallPagKey,
     {
       string: '',
       items: {
@@ -227,7 +230,7 @@ export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: st
       }
     }
   ));
-  store.select(selectPaginationState(applicationSchemaKey, appWallPagKey)).pipe(
+  store.select(selectPaginationState(entityKey, appWallPagKey)).pipe(
     filter((state: PaginationEntityState) => {
       const items = pathGet('clientPagination.filter.items', state);
       return items ? items.cf === cfGuid && items.org === orgGuid && items.space === spaceGuid : false;

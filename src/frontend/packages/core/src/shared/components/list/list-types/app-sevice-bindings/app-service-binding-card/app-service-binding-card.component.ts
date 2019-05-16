@@ -32,6 +32,7 @@ import { AppChip } from '../../../../chips/chips.component';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../list.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 interface EnvVarData {
   key: string;
@@ -114,8 +115,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   private setupAsServiceInstance() {
     const serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      serviceInstancesSchemaKey,
-      entityFactory(serviceInstancesSchemaKey),
       this.row.entity.service_instance_guid,
       new GetServiceInstance(this.row.entity.service_instance_guid, this.appService.cfGuid),
       true
@@ -150,8 +149,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   private setupAsUserProvidedServiceInstance() {
     const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
-      userProvidedServiceInstanceSchemaKey,
-      entityFactory(userProvidedServiceInstanceSchemaKey),
       this.row.entity.service_instance_guid,
       new GetUserProvidedService(this.row.entity.service_instance_guid, this.appService.cfGuid),
       true

@@ -57,8 +57,8 @@ import {
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-foundry.module';
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 
 
 
@@ -98,18 +98,11 @@ export class ApplicationService {
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
-    const appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
     this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
-      appCatalogueEntity.entityKey,
-      appCatalogueEntity.getSchema(),
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
     );
-    const summaryCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummarySchemaKey);
-
     this.appSummaryEntityService = this.entityServiceFactory.create<APIResource<IAppSummary>>(
-      appSummarySchemaKey,
-      summaryCatalogueEntity.getSchema(),
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
       false
@@ -158,12 +151,10 @@ export class ApplicationService {
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
     const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
-    const appStatsCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsSchemaKey);
-
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      appStatsCatalogueEntity.getSchema()
+      new CFEntityConfig(appStatsSchemaKey)
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
@@ -186,10 +177,7 @@ export class ApplicationService {
     this.appSpace$ = moreWaiting$.pipe(
       first(),
       switchMap(app => {
-        const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceSchemaKey);
         return this.entityServiceFactory.create<APIResource<ISpace>>(
-          spaceSchemaKey,
-          catalogueEntity.getSchema(spaceWithOrgKey),
           app.space_guid,
           new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
         ).waitForEntity$.pipe(
@@ -202,7 +190,8 @@ export class ApplicationService {
       switchMap(app => this.appSpace$.pipe(
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
-          return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
+          const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
+          return this.store.select(selectEntity(orgEntityKey, orgGuid));
         }),
         filter(org => !!org)
       ))
@@ -223,24 +212,21 @@ export class ApplicationService {
 
   public getApplicationEnvVarsMonitor() {
     const factory = new EntityMonitorFactory(this.store);
-    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsSchemaKey);
     return factory.create<APIResource<IApp>>(
       this.appGuid,
-      appEnvVarsSchemaKey,
-      catalogueEntity.getSchema()
+      new CFEntityConfig(appEnvVarsSchemaKey)
     );
   }
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
     const action = new GetAppStatsAction(this.appGuid, this.cfGuid);
-    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsSchemaKey);
     const appStats = getPaginationObservables<APIResource<AppStat>>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        catalogueEntity.getSchema()
+        new CFEntityConfig(appStatsSchemaKey)
       )
     }, true);
     // This will fail to fetch the app stats if the current app is not running but we're

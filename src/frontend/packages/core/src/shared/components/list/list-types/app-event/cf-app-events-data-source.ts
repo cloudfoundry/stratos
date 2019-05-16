@@ -7,6 +7,7 @@ import { appEventSchemaKey, entityFactory } from '../../../../../../../store/src
 import { EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 
@@ -20,14 +21,15 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
     }
   }
   public setFilterParam(filterString: string, pag: PaginationEntityState) {
+    const config = { entityType: this.entityKey, endpointType: CF_ENDPOINT_TYPE };
     if (filterString && filterString.length) {
-      this.store.dispatch(new AddParams(this.entityKey, this.paginationKey, {
+      this.store.dispatch(new AddParams(config, this.paginationKey, {
         q: [
           new QParam('type', filterString, ' IN '),
         ]
       }));
     } else if (pag.params.q.find((q: QParam) => q.key === 'type')) {
-      this.store.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['type']));
+      this.store.dispatch(new RemoveParams(config, this.paginationKey, [], ['type']));
     }
   }
 

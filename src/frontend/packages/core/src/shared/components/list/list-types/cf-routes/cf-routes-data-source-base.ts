@@ -17,6 +17,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { ListPaginationMultiFilterChange, RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export interface ListCfRoute extends IRoute {
   url: string;
@@ -127,7 +128,10 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
     const paginationMonitor = new PaginationMonitor(
       store,
       paginationKey,
-      entityFactory(routeSchemaKey)
+      {
+        entityType: routeSchemaKey,
+        endpointType: CF_ENDPOINT_TYPE
+      }
     );
 
     const sub = this.setUpManager(
@@ -150,7 +154,14 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
     return paginationMonitor.currentPage$.pipe(
       map(routes => {
         return routes.map(route => {
-          const entityMonitor = new EntityMonitor(store, route.metadata.guid, routeSchemaKey, entityFactory(routeSchemaKey));
+          const entityMonitor = new EntityMonitor(
+            store,
+            route.metadata.guid,
+            {
+              entityType: routeSchemaKey,
+              endpointType: CF_ENDPOINT_TYPE
+            }
+          );
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const unmapping = request.updating.unmapping || { busy: false };

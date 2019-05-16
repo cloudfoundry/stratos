@@ -11,6 +11,7 @@ import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-trave
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { IRequestDataState } from '../types/entity.types';
 import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';
@@ -91,7 +92,7 @@ export class RecursiveDeleteEffect {
         if (this.deleteSuccessApiActionGenerators[key]) {
           keyActions.push(this.deleteSuccessApiActionGenerators[key](action.guid, action.endpointGuid));
         }
-        keyActions.push(new ClearPaginationOfType(key));
+        keyActions.push(new ClearPaginationOfType(action.schema));
         return keyActions;
       }));
       actions.unshift(new SetTreeDeleted(action.guid, tree));

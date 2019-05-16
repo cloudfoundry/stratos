@@ -12,6 +12,7 @@ import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { metricSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 
 export const enum CellMetrics {
@@ -108,9 +109,8 @@ export class CloudFoundryCellService {
     if (metric === CellMetrics.HEALTHY) {
       this.healthyMetricId = action.guid;
     }
+    // TODO: Metrics entityType type??
     return this.entityServiceFactory.create<IMetrics<IMetricVectorResult<IMetricCell>>>(
-      metricSchemaKey,
-      entityFactory(metricSchemaKey),
       action.guid,
       action,
       false

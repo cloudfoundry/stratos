@@ -16,6 +16,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 
 @Injectable()
@@ -105,8 +106,10 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     return new EntityMonitor(
       this.store,
       this.envVarsDataSource.appGuid,
-      applicationSchemaKey,
-      entityFactory(applicationSchemaKey)
+      {
+        entityType: applicationSchemaKey,
+        endpointType: CF_ENDPOINT_TYPE
+      }
     ).entityRequest$.pipe(
       map(request => request.updating[UpdateExistingApplication.updateKey]),
       filter(req => !!req)

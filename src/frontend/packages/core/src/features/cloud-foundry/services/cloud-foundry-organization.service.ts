@@ -106,8 +106,6 @@ export class CloudFoundryOrganizationService {
           );
         }
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(
-          organizationSchemaKey,
-          entityFactory(organizationSchemaKey),
           this.orgGuid,
           new GetOrganization(this.orgGuid, this.cfGuid, relations),
           true

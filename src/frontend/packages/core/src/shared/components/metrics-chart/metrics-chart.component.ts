@@ -91,8 +91,10 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     this.committedAction = this.metricsConfig.metricsAction;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.guid,
-      metricSchemaKey,
-      entityFactory(metricSchemaKey)
+      {
+        entityType: metricSchemaKey,
+        endpointType: ''
+      }
     );
 
     const baseResults$ = this.metricsMonitor.entity$.pipe(

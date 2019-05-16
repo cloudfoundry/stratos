@@ -9,7 +9,6 @@ import {
   routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
-  userFavoritesSchemaKey,
   userProfileSchemaKey,
   userProvidedServiceInstanceSchemaKey
 } from '../helpers/entity-factory';
@@ -29,6 +28,7 @@ import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
+import { userFavoritesEntitySchema } from '../../../core/src/base-entity-types';
 
 
 /**
@@ -68,7 +68,7 @@ function chainReducers(baseReducer, extraReducers) {
 const baseStratosEntities = [
   EntityCatalogueHelpers.endpointType,
   userProfileSchemaKey,
-  userFavoritesSchemaKey,
+  userFavoritesEntitySchema.entityType,
   'user',
   'system'
 ];
@@ -110,7 +110,7 @@ export function requestDataReducer(state: IRequestDataState, action: Action) {
       endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)
     ],
-    [userFavoritesSchemaKey]: [
+    [userFavoritesEntitySchema.entityType]: [
       addOrUpdateUserFavoriteMetadataReducer,
       deleteUserFavoriteMetadataReducer
     ]

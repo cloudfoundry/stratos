@@ -15,6 +15,7 @@ import { ApplicationService } from '../../application.service';
 import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { entityFactory, domainSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-map-routes',
@@ -60,7 +61,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(domainSchemaKey)
+          new CFEntityConfig(domainSchemaKey)
         )
       },
       true

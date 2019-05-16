@@ -24,18 +24,25 @@ import {
 } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
 import { IRequestDataState } from '../../../../store/src/types/entity.types';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { EntitySchema } from '../../../../store/src/helpers/entity-factory';
+import { StratosBaseCatalogueEntity, EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 
 
-export class EntityMonitor<T = any> {
+export class EntityMonitor<T = any, Y extends StratosBaseCatalogueEntity = StratosBaseCatalogueEntity> {
+  public schema: EntitySchema;
+  public catalogueEntity: Y;
   constructor(
     private store: Store<AppState>,
     public id: string,
-    public entityKey: string,
-    public schema: normalizrSchema.Entity,
+    public entityConfig: EntityCatalogueEntityConfig,
     startWithNull = true
   ) {
+    const { endpointType, entityType, schemaKey } = entityConfig;
+    this.catalogueEntity = entityCatalogue.getEntity(endpointType, entityType) as Y;
+    this.schema = this.catalogueEntity.getSchema(schemaKey);
     const defaultRequestState = getDefaultRequestState();
-    this.entityRequest$ = store.select(selectRequestInfo(entityKey, id)).pipe(
+    this.entityRequest$ = store.select(selectRequestInfo(this.catalogueEntity.entityKey, id)).pipe(
       map(request => request ? request : defaultRequestState),
       distinctUntilChanged(),
       startWith(defaultRequestState),
@@ -54,8 +61,8 @@ export class EntityMonitor<T = any> {
     this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount());
 
     const entity$ = this.getEntityObservable(
-      schema,
-      store.select(selectEntity<T>(entityKey, id)),
+      this.schema,
+      store.select(selectEntity<T>(this.catalogueEntity.entityKey, id)),
       this.entityRequest$,
       store.select(getAPIRequestDataState),
     );

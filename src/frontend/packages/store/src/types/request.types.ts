@@ -7,6 +7,7 @@ import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 export interface SingleEntityAction {
   entityType: string;
@@ -31,10 +32,8 @@ export enum RequestEntityLocation {
 }
 
 export type IRequestActionEntity = EntitySchema | EntitySchema[];
-export interface IRequestAction extends RequestAction {
+export interface IRequestAction extends EntityCatalogueEntityConfig, RequestAction {
   entity?: IRequestActionEntity;
-  entityType: string;
-  endpointType: string;
   /**
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section

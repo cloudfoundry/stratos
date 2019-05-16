@@ -28,6 +28,7 @@ import { selectEntity } from '../../../../../../../store/src/selectors/api.selec
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
@@ -134,8 +135,6 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
       const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
       const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
-        gitBranchesSchemaKey,
-        entityFactory(gitBranchesSchemaKey),
         branchKey,
         new FetchBranchesForProject(this.scm, this.projectName),
         false

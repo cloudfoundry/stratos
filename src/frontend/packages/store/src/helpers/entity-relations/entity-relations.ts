@@ -36,6 +36,7 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 interface ValidateResultFetchingState {
   fetching: boolean;
@@ -148,7 +149,7 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
  * Create actions required to fetch missing relations
  */
 function createActionsForMissingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
-  const { store, childRelation, childEntitiesUrl, cfGuid, parentRelation } = config;
+  const { store, childRelation, childEntitiesUrl } = config;
 
   if (!childEntitiesUrl) {
     // There might genuinely be no entity. In those cases the url will be blank
@@ -165,7 +166,7 @@ function createActionsForMissingEntities(config: HandleRelationsConfig): Validat
     // about will be in the parent entity.
     paramPaginationAction.paginationKey += '-relation';
     results = [].concat(results, [{
-      action: new SetInitialParams(paramAction.entityType, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
+      action: new SetInitialParams(paramAction, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
     },
     {
       action: paramAction,
@@ -305,15 +306,19 @@ function associateChildWithParent(store: Store<AppState>, action: EntityInlineCh
       if (!value) {
         return true;
       }
-
+      const catalogueEntity = entityCatalogue.getEntity(
+        action.parentEntityConfig.endpointType,
+        action.parentEntityConfig.entityType,
+        action.parentEntityConfig.subType
+      );
       if (apiResponse) {
         // Part of an api call. Assign to apiResponse which is added to store later
-        apiResponse.response.entities[action.parentEntitySchema.key][action.parentGuid].entity[action.child.paramName] = value;
+        apiResponse.response.entities[catalogueEntity.entityKey][action.parentGuid].entity[action.child.paramName] = value;
       } else {
         // Not part of an api call. We already have the entity in the store, so fire off event to link child with parent
         const response = {
           entities: {
-            [action.parentEntitySchema.key]: {
+            [catalogueEntity.entityKey]: {
               [action.parentGuid]: {
                 entity: {
                   [action.child.paramName]: value
@@ -325,11 +330,11 @@ function associateChildWithParent(store: Store<AppState>, action: EntityInlineCh
         };
         const parentAction: IRequestAction = {
           endpointGuid: action.endpointGuid,
-          entity: action.parentEntitySchema,
+          entity: catalogueEntity.getSchema(action.parentEntityConfig.schemaKey),
           entityLocation: RequestEntityLocation.OBJECT,
           guid: action.parentGuid,
-          entityType: action.parentEntitySchema.key,
-          endpointType: action.parentEntitySchema.endpointType,
+          entityType: action.parentEntityConfig.entityType,
+          endpointType: action.parentEntityConfig.endpointType,
           type: '[Entity] Associate with parent',
         };
         if (!environment.production) {
@@ -472,7 +477,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
   if (!eicAction || !action.flattenPagination) {
     return observableOf(action);
   }
-  const parentEntitySchema = eicAction.parentEntitySchema as EntitySchema;
+  const parentEntitySchema = eicAction.parentEntityConfig as EntitySchema;
   const parentGuid = eicAction.parentGuid;
 
   // What the hell is going on here hey? Well I'll tell you...

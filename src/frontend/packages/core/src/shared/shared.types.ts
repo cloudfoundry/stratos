@@ -1,7 +1,8 @@
-import { schema as normalizrSchema } from 'normalizr';
+
 import { AppState } from '../../../store/src/app-state';
+import { EntitySchema } from '../../../store/src/helpers/entity-factory';
 export class ComponentEntityMonitorConfig {
-  constructor(public guid: string, public schema: normalizrSchema.Entity) { }
+  constructor(public guid: string, public schema: EntitySchema) { }
 }
 
 export enum StratosStatus {

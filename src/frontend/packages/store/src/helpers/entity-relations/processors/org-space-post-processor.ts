@@ -73,13 +73,13 @@ export function orgSpacePostProcess(
   const existingUsers = allEntities[entityKey];
 
   const newUsers = {};
-  if (entityKey === EntityCatalogueHelpers.buildId(CF_ENDPOINT_TYPE, organizationSchemaKey)) {
+  if (entityKey === EntityCatalogueHelpers.buildEntityKey(CF_ENDPOINT_TYPE, organizationSchemaKey)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
-  } else if (entityKey === EntityCatalogueHelpers.buildId(CF_ENDPOINT_TYPE, spaceSchemaKey)) {
+  } else if (entityKey === EntityCatalogueHelpers.buildEntityKey(CF_ENDPOINT_TYPE, spaceSchemaKey)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
