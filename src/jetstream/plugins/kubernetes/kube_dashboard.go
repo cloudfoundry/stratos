@@ -51,9 +51,9 @@ func (r *responder) Error(w http.ResponseWriter, req *http.Request, err error) {
 }
 
 // Get the config for the certificate authentication
-func getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
+func (k *KubernetesSpecification) getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
 	masterURL := cnsiRecord.APIEndpoint.String()
-	return GetConfigForEndpoint(masterURL, *tokenRecord)
+	return k.GetConfigForEndpoint(masterURL, *tokenRecord)
 }
 
 // Get the config for the certificate authentication
@@ -159,7 +159,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 	targetURL, _ := url.Parse(target)
 	targetURL = normalizeLocation(targetURL)
 
-	config, err := getConfig(&cnsiRecord, &tokenRec)
+	config, err := k.getConfig(&cnsiRecord, &tokenRec)
 	if err != nil {
 		return errors.New("Could not get config for this auth type")
 	}
