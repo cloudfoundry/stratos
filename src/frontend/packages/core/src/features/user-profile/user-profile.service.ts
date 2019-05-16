@@ -17,8 +17,7 @@ import {
 } from '../../../../store/src/actions/user-profile.actions';
 import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { userProfileEntitySchema } from '../../base-entity-types';
+import { userProfileEntitySchema } from '../../base-entity-schemas';
 
 
 @Injectable()

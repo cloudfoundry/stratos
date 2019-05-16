@@ -11,7 +11,7 @@ import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-fa
 import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { endpointEntitySchema } from '../../../../base-entity-types';
+import { endpointEntitySchema } from '../../../../base-entity-schemas';
 
 
 @Component({

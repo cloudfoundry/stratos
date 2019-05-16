@@ -10,7 +10,6 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/a
 import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
-import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.types';
@@ -20,6 +19,7 @@ import { getFullEndpointApiUrl } from '../../endpoint-helpers';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { endpointEntitySchema } from '../../../../base-entity-schemas';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -54,7 +54,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogueEndpointEntity;
 
-  constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute,  ) {
+  constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute, ) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
@@ -62,7 +62,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         map(([pagination, entities]) => {
           const pages = Object.values(pagination.ids);
           const page = [].concat.apply([], pages);
-          const endpoints = page.length ? denormalize(page, [entityFactory(endpointSchemaKey)], entities) : [];
+          const endpoints = page.length ? denormalize(page, [endpointEntitySchema], entities) : [];
           return {
             names: endpoints.map(ep => ep.name),
             urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),

@@ -47,11 +47,11 @@ import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction
 
 // Initialized when all entity types have been registered
 export let defaultPaginationState = {
-  endpoint: {},
-  system: {},
-  userProfile: {},
-  metrics: {},
-  userFavorites: {}
+  // endpoint: {},
+  // system: {},
+  // userProfile: {},
+  // metrics: {},
+  // userFavorites: {}
 };
 
 export function setDefaultPaginationState(state: any) {

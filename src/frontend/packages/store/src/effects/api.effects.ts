@@ -32,6 +32,8 @@ import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../typ
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -114,14 +116,14 @@ export class APIEffect {
     }
 
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
-
+    const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointEntitySchema.entityType, endpointEntitySchema.endpointType);
     const availableEndpoints =
-      apiAction.endpointGuid || state.requestData.endpoint;
+      apiAction.endpointGuid || state.requestData[endpointEntityKey];
     if (typeof availableEndpoints !== 'string') {
       // Filter out endpoints that are currently being disconnected
       const disconnectedEndpoints = Object.keys(availableEndpoints).filter(
         endpointGuid => {
-          const updating = state.request.endpoint[endpointGuid].updating;
+          const updating = state.request[endpointEntityKey][endpointGuid].updating;
           return !!updating.disconnecting && updating.disconnecting.busy;
         },
       );
@@ -571,16 +573,16 @@ export class APIEffect {
       }
     }
   }
-
+  // TODO We need to be able to pass schema keys here
   private getEntityRelations(action: any) {
     if (action.__forcedPageSchemaKey__) {
-      entityCatalogue.getEntity(action.entity.endpointType, action.__forcedPageSchemaKey__);
-      const forcedSchema = entityFactory(action.__forcedPageSchemaKey__);
+      const catalogueEntity = entityCatalogue.getEntity(action.entity.endpointType, action.__forcedPageSchemaKey__);
+      const forcedSchema = catalogueEntity.getSchema();
       return listEntityRelations(
         {
           ...action,
           entity: [forcedSchema],
-          entityType: forcedSchema.key
+          entityType: forcedSchema.entityType
         }
       );
     }

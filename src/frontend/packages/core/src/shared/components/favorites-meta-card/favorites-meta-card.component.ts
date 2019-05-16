@@ -15,7 +15,7 @@ import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
-import { userFavoritesEntitySchema } from '../../../base-entity-types';
+import { userFavoritesEntitySchema } from '../../../base-entity-schemas';
 
 
 @Component({

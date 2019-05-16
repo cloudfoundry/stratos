@@ -29,6 +29,7 @@ import {
   QParam,
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
+import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -114,9 +115,8 @@ export function getAction(action): PaginatedAction {
 export function getActionPaginationEntityKey(action) {
   // TODO this need to come from entityCatalogue
   const apiAction = getAction(action);
-  const schema = Array.isArray(apiAction.entity) ? apiAction.entity[0] : apiAction.entity;
-  const keyFromAction = schema ? schema.key : null;
-  return apiAction.proxyPaginationEntityKey || keyFromAction || apiAction.entityType || null;
+  const entityKey = apiAction.proxyPaginationEntityKey || apiAction.entityType;
+  return EntityCatalogueHelpers.buildEntityKey(entityKey, apiAction.endpointType);
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {

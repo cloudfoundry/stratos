@@ -28,7 +28,8 @@ import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
-import { userFavoritesEntitySchema } from '../../../core/src/base-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { userFavoritesEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 
 
 /**
@@ -86,31 +87,41 @@ export function requestReducer(state: IRequestState, action: Action) {
   return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
+function getCFEntityKey(type: string) {
+  return EntityCatalogueHelpers.buildEntityKey(type, CF_ENDPOINT_TYPE);
+}
+
+function getInternalEntityKey(type: string) {
+  return EntityCatalogueHelpers.buildEntityKey(type, STRATOS_ENDPOINT_TYPE);
+}
+
+
+// TODO Add these reducers to the catalogue
 export function requestDataReducer(state: IRequestDataState, action: Action) {
   const baseDataReducer = requestDataReducerFactory(baseStratosEntities, requestActions);
 
   const extraReducers = {
-    [cfUserSchemaKey]: [userReducer, endpointDisconnectUserReducer],
-    [routeSchemaKey]: [routeReducer],
-    [serviceInstancesSchemaKey]: [serviceInstanceReducer],
-    [userProvidedServiceInstanceSchemaKey]: [serviceInstanceReducer],
-    [endpointStoreNames.type]: [systemEndpointsReducer],
-    [appSummarySchemaKey]: [updateAppSummaryRoutesReducer],
-    [applicationSchemaKey]: [
+    [getCFEntityKey(cfUserSchemaKey)]: [userReducer, endpointDisconnectUserReducer],
+    [getCFEntityKey(routeSchemaKey)]: [routeReducer],
+    [getCFEntityKey(serviceInstancesSchemaKey)]: [serviceInstanceReducer],
+    [getCFEntityKey(userProvidedServiceInstanceSchemaKey)]: [serviceInstanceReducer],
+    [getInternalEntityKey(endpointStoreNames.type)]: [systemEndpointsReducer],
+    [getCFEntityKey(appSummarySchemaKey)]: [updateAppSummaryRoutesReducer],
+    [getCFEntityKey(applicationSchemaKey)]: [
       updateApplicationRoutesReducer(),
       endpointDisconnectApplicationReducer()
     ],
-    [spaceSchemaKey]: [
+    [getCFEntityKey(spaceSchemaKey)]: [
       endpointDisconnectApplicationReducer(),
       applicationAddRemoveReducer(),
       userSpaceOrgReducer(true)
     ],
-    [organizationSchemaKey]: [
+    [getCFEntityKey(organizationSchemaKey)]: [
       updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)
     ],
-    [userFavoritesEntitySchema.entityType]: [
+    [getInternalEntityKey(userFavoritesEntitySchema.entityType)]: [
       addOrUpdateUserFavoriteMetadataReducer,
       deleteUserFavoriteMetadataReducer
     ]

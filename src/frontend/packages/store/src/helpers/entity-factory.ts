@@ -43,6 +43,9 @@ export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsSchemaKey = 'serviceInstanceWithNoBindings';
 export const serviceBindingNoBindingsSchemaKey = 'serviceBindingNoBindings';
 
+
+// TODO This need to be split into two files, one with the CF types and another with the base stratos types.
+
 export const entityCache: {
   [key: string]: EntitySchema
 } = {};

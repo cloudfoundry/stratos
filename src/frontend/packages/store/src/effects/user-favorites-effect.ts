@@ -30,7 +30,7 @@ import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
-import { userFavoritesEntitySchema } from '../../../core/src/base-entity-types';
+import { userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
 
 const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;

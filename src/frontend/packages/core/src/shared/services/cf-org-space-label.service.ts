@@ -11,7 +11,7 @@ import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { haveMultiConnectedCfs } from '../../features/cloud-foundry/cf.helpers';
 import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { STRATOS_ENDPOINT_TYPE } from '../../core/entity-catalogue/entity-catalogue.types';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 
 export class CfOrgSpaceLabelService {
 

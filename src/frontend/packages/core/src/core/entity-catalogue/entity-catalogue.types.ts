@@ -1,12 +1,14 @@
 import { Observable } from 'rxjs';
 import { StratosStatus } from '../../shared/shared.types';
-import { EntitySchema, entityFactory, endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { EntitySchema } from '../../../../store/src/helpers/entity-factory';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
-export const STRATOS_ENDPOINT_TYPE = 'stratos';
+import { endpointEntitySchema } from '../../base-entity-schemas';
+
+
 export interface EntityCatalogueEntityConfig {
   entityType: string;
   endpointType: string;
@@ -216,7 +218,7 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     const fullEntity = {
       ...entity,
       schema: {
-        default: entityFactory(endpointSchemaKey)
+        default: endpointEntitySchema
       }
     } as IStratosEndpointDefinition;
     super(fullEntity, {

@@ -15,6 +15,7 @@ import { TableRowStateManager } from '../../list-table/table-row/table-row-state
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
+import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 
 export function syncPaginationSection(
   store: Store<AppState>,
@@ -81,7 +82,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     });
     this.endpointType = endpointType;
   }
-
+  // TODO Fix the typing
   static getEndpointConfig(
     store,
     action,
@@ -93,7 +94,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     return {
       store,
       action,
-      schema: entityFactory(endpointSchemaKey),
+      schema: endpointEntitySchema,
       getRowUniqueId: object => object.guid,
       getEmptyType: () => ({
         name: '',

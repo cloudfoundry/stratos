@@ -4,11 +4,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { endpointListKey, EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginationMonitor } from '../monitors/pagination-monitor';
-import { endpointEntitySchema } from '../../base-entity-types';
+import { endpointEntitySchema } from '../../base-entity-schemas';
 
 @Injectable()
 export class CloudFoundryService {

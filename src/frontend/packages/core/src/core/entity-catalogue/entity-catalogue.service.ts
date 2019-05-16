@@ -4,9 +4,9 @@ import {
   StratosCatalogueEntity,
   IEntityMetadata,
   IStratosEndpointDefinition,
-  STRATOS_ENDPOINT_TYPE
 } from './entity-catalogue.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();

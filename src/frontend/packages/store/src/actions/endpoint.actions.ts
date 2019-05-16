@@ -6,6 +6,7 @@ import { NormalizedResponse } from '../types/api.types';
 import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -58,9 +59,9 @@ export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 
 export class GetAllEndpoints implements PaginatedAction {
   public static storeKey = endpointListKey;
-  public endpointType = '';
   constructor(public login = false) { }
   entityType = endpointSchemaKey;
+  endpointType = STRATOS_ENDPOINT_TYPE;
   paginationKey = GetAllEndpoints.storeKey;
   type = GET_ENDPOINTS;
   actions = [
