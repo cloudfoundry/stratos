@@ -1,8 +1,12 @@
-<app-page-header [logoutOnly]="true">
+<app-page-header [logoutOnly]="true" [showHistory]="false">
   Stratos
 </app-page-header>
 
+<div *ngIf="tabNavService.pageHeader$ | async as portal">
+  <ng-container [cdkPortalOutlet]="portal"></ng-container>
+</div>
+
 <app-no-content-message class="full-screen-centered" [icon]="'device_hub'"
   [firstLine]="'There are no registered endpoints'" [secondLine]="{
-  text: 'In order to use Stratos, you must connect to a registered service endpoint. Registered service endpoints are provided by your system administrator. Please contact your administrator about registering endpoints.'
+  text: 'In order to use Stratos, you must connect to a registered endpoint. Registered endpoints are provided by your system administrator. Please contact your administrator about registering endpoints.'
 }"></app-no-content-message>
