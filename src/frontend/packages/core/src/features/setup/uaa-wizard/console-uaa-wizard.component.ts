@@ -10,6 +10,7 @@ import { SetUAAScope, SetupUAA } from '../../../../../store/src/actions/setup.ac
 import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
+import { TabNavService } from '../../../../tab-nav.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 @Component({
@@ -22,7 +23,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
 
   private clientRedirectURI: string;
 
-  constructor(private store: Store<AppState>, private router: Router) {
+  constructor(private store: Store<AppState>, private router: Router, public tabNavService: TabNavService) {
     // Client Redirect URI for SSO
     this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
