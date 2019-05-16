@@ -5,7 +5,7 @@ import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundr
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PageSideNavComponent } from './page-side-nav.component';
 
-fdescribe('PageSideNavComponent', () => {
+describe('PageSideNavComponent', () => {
   let component: PageSideNavComponent;
   let fixture: ComponentFixture<PageSideNavComponent>;
 
