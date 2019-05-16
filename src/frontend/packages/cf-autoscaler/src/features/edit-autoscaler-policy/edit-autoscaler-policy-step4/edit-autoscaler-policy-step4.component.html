@@ -19,7 +19,7 @@
             <div *ngIf="editIndex==index">
               <form [formGroup]="editSpecificDateForm" validate class="autoscaler-policy-edit-specific">
                 <div class="app-metadata">
-                  <div class="app-metadata__two-cols">
+                  <div class="app-metadata__two-cols autoscaler-policy-edit-specific-left">
                     <app-metadata-item label="Effective Date Time">
                       <mat-form-field class="form-field-left">
                         <input matInput placeholder="Start" type="datetime-local" formControlName="start_date_time"
