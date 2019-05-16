@@ -2,9 +2,7 @@
   Stratos
 </app-page-header>
 
-<div *ngIf="tabNavService.pageHeader$ | async as portal">
-  <ng-container [cdkPortalOutlet]="portal"></ng-container>
-</div>
+<app-show-page-header></app-show-page-header>
 
 <app-no-content-message class="full-screen-centered" [icon]="'device_hub'"
   [firstLine]="'There are no registered endpoints'" [secondLine]="{

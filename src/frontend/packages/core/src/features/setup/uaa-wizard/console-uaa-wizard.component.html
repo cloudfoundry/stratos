@@ -2,9 +2,7 @@
   <app-page-header hideMenu="true" [showHistory]="false">
     <h1>Stratos Setup</h1>
   </app-page-header>
-  <div *ngIf="tabNavService.pageHeader$ | async as portal">
-    <ng-container [cdkPortalOutlet]="portal"></ng-container>
-  </div>
+  <app-show-page-header></app-show-page-header>
   <div class="uaa-wizard">
     <app-steppers>
       <app-step title="Introduction">
