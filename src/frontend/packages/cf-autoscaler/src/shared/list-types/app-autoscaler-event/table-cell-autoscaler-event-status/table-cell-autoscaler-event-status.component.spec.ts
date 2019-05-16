@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIcon } from '@angular/material';
 
 import { EntityInfo } from '../../../../../../store/src/types/api.types';
+import { TableCellAutoscalerEventStatusIconPipe } from './table-cell-autoscaler-event-status-icon.pipe';
 import { TableCellAutoscalerEventStatusComponent } from './table-cell-autoscaler-event-status.component';
 
 describe('TableCellAutoscalerEventStatusComponent', () => {
@@ -10,7 +11,7 @@ describe('TableCellAutoscalerEventStatusComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellAutoscalerEventStatusComponent, MatIcon]
+      declarations: [TableCellAutoscalerEventStatusComponent, MatIcon, TableCellAutoscalerEventStatusIconPipe]
     })
       .compileComponents();
   }));

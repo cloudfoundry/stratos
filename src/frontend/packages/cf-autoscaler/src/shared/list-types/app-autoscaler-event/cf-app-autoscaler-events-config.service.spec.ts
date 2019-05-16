@@ -14,6 +14,7 @@ import { createBasicStoreModule, getInitialTestStoreState } from '../../../../..
 import { GetApplication } from '../../../../../store/src/actions/application.actions';
 import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
+import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
 
 describe('CfAppAutoscalerEventsConfigService', () => {
@@ -41,7 +42,8 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         SharedModule,
         ApplicationsModule,
         createBasicStoreModule(),
-        RouterTestingModule
+        RouterTestingModule,
+        CfAutoscalerTestingModule
       ]
     });
   });

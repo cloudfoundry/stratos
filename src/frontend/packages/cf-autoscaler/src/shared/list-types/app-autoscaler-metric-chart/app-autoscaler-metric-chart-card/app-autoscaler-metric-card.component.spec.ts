@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import {
   ApplicationEnvVarsHelper,
@@ -13,8 +14,9 @@ import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
+import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
+import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
 describe('AppServiceBindingCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;
@@ -22,9 +24,14 @@ describe('AppServiceBindingCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        AppAutoscalerMetricChartCardComponent,
+        AppAutoscalerComboChartComponent,
+        AppAutoscalerComboSeriesVerticalComponent
+      ],
       imports: [
         ...BaseTestModules,
-        createBasicStoreModule(),
+        NgxChartsModule
       ],
       providers: [
         EntityMonitorFactory,
@@ -45,14 +52,6 @@ describe('AppServiceBindingCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        app_guid: '',
-        service_instance_guid: '',
-        credentials: {},
-        binding_options: {},
-        gateway_name: '',
-        volume_mounts: [],
-        app_url: '',
-        service_instance_url: '',
       },
       metadata: {
         guid: '',

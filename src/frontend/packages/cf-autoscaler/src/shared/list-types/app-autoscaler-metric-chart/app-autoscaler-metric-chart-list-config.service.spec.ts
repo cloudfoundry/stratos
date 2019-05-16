@@ -6,6 +6,7 @@ import {
 } from '../../../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartListConfigService } from './app-autoscaler-metric-chart-list-config.service';
 
 describe('AppAutoscalerMetricChartListConfigService', () => {
@@ -17,7 +18,7 @@ describe('AppAutoscalerMetricChartListConfigService', () => {
         ApplicationEnvVarsHelper,
         DatePipe
       ],
-      imports: [...BaseTestModules]
+      imports: [...BaseTestModules, CfAutoscalerTestingModule]
     });
   });
 

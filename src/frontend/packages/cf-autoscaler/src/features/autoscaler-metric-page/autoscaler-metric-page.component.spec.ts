@@ -9,8 +9,8 @@ import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
 import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { AutoscalerMetricPageComponent } from './autoscaler-metric-page.component';
-
 
 describe('AutoscalerMetricPageComponent', () => {
   let component: AutoscalerMetricPageComponent;
@@ -25,6 +25,7 @@ describe('AutoscalerMetricPageComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
+        CfAutoscalerTestingModule
       ],
       providers: [
         DatePipe,
