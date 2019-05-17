@@ -88,16 +88,20 @@ run:
       # Need to create the Helm chart
       # Download the Helm chart from the last RC/Beta/Alpha - we'll modify it
       # Note: Use helper to ensure this works with a private GitHub repository
+
+      mkdir tmp
+      cd tmp
+
       echo "Downloaing Helm Chart for Release Candidate"
       downloadReleaseFile ${GITHUB_TOKEN} ${HELM_REPOSITORY} ${LAST_TAG} console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
       echo "Downloaded Helm Chart"
       ls -al console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
-
-      mkdir tmp
-      cd tmp
-      wget -O console.tar.gz ${HELM_CHART_URL}
-      tar -xvf console.tar.gz
+      # Unpack the Helm Chart from the release candidate
+      tar -xvf console-helm-chart-${LAST_TAG}-${LAST_TAG_COMMIT}.tgz
+      echo "Unpacked Helm Chart for Release Candidate"
       cat console/Chart.yaml
+      # List all of the files and folders in the Chart
+      ls -alR ./console
       
       # Just need to change the version in the Chart.yaml file
       sed -i -e 's/version: '"${LAST_TAG}"'/version: '"${VERSION}"'/g' console/Chart.yaml  
@@ -106,7 +110,7 @@ run:
       # Package modified Helm chart
       HELM_FILE=console-helm-chart-${VERSION}-${COMMIT}.tgz
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/${HELM_FILE}
+      cp console-${VERSION}.tgz ${ROOT_DIR}/helm-chart/${HELM_FILE}
       
       # Temp folder for helm-chart
       mkdir -p ${ROOT_DIR}/helm-chart
@@ -166,7 +170,7 @@ run:
       fi
 
       # Create the PR for the Helm Chart changes if configured
-      if [ ! -z "${HELM_RELEASE_GITCLONE}" ]; then
+      if [ "${HELM_RELEASE_GITCLONE}" != "null" ]; then
         echo "Creating PR for Helm Chart Changes for this release"
 
         NEW_BRANCH="stratos-${VERSION}"

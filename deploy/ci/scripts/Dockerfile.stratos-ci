@@ -16,7 +16,7 @@ RUN export GOPATH=/home/stratos/go && \
 FROM opensuse/leap:latest
 
 # Base tools
-RUN zypper in -y curl tar git openssh wget gzip which
+RUN zypper in -y curl tar git openssh wget gzip which jq
 
 # Helm
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get > get_helm.sh && \
