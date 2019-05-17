@@ -18,4 +18,4 @@ This is the file that you should use when connecting in the endpoint connection 
 
 > Note: You may need to copy this file to a non-hidden folder in order to be able to browse to it in the UI (or enable hidden files in your OS's file browser)
 
-> Note: For more information on obtaining Application Default Credentails, refer to https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login
+> Note: For more information on obtaining Application Default Credentials, refer to https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login

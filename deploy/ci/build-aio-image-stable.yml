@@ -1,7 +1,7 @@
 # Stable image build pipeline
 # This pipeline builds the stable Docker image for the AIO when the stable tag is updated
 # It also tags this stable image with the tag of the release version - e.g. 2.3.0
-# The latest tag is also updated as this tracks 'stable'
+# The latest tag is also updated as this track 'stable'
 ---
 resource_types:
 - name: docker-image
@@ -45,7 +45,7 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-organization))/stratos
-    tag: "stable"
+    tag: stable
 
 jobs:
 - name: generate-tag-files
@@ -70,7 +70,6 @@ jobs:
     passed: [generate-tag-files] 
     params:
      unpack: true
-  - get: aio-docker-image
   - do:
     - task: build
       privileged: true
@@ -81,7 +80,7 @@ jobs:
         DOCKER_ORG: ((docker-organization))
         DOCKER_USERNAME: ((docker-username))
         DOCKER_PASSWORD: ((docker-password))
-        IMAGE_NAME: stratos
+        IMAGE_NAME: ((aio-docker-image-name))
         TAG_NAME: stable
 - name: build-aio-image
   public: true
