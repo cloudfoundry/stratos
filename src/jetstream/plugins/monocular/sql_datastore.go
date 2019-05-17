@@ -322,6 +322,17 @@ func (s *SQLDBCMonocularDatastore) GetChartVersionReadme(chartID, version string
 	return content, nil
 }
 
+func (s *SQLDBCMonocularDatastore) GetChartVersionValuesYaml(chartID, version string) ([]byte, error) {
+	var content []byte
+	fileID := fmt.Sprintf("%s-%s", chartID, version)
+	err := s.db.QueryRow(getChartFileByID, fileID, "values").Scan(&content)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to scan chart file record: %v", err)
+	}
+
+	return content, nil
+}
+
 // ListRepositories gets all repository names
 func (s *SQLDBCMonocularDatastore) ListRepositories() ([]string, error) {
 	rows, err := s.db.Query(getRepositories)
