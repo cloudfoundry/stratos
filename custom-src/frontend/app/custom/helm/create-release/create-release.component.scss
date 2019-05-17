@@ -3,7 +3,18 @@
 }
 
 .helm-create-release {
-  font-size: 14px;
+  &__heading {
+    align-items: center;
+    display: flex;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 14px;
+  }
+  &__button {
+    height: 36px;
+  }
 }
 
 form {
@@ -14,5 +25,20 @@ form {
   &__yaml {
     background-color: rgba(0, 0, 0, .1);
     font-family: 'Source Code Pro', monospace;
+    height: 400px;
   }
+
+  &_form {
+    max-width: 100%;
+  }
+
+  &_form-field {
+    flex: 1;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+form.overrides_form {
+  max-width: 100%;
 }
