@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/SermoDigital/jose/jws"
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"github.com/SermoDigital/jose/jws"	
 )
 
 type KubeConfigAuthProviderOIDC struct {
@@ -26,7 +26,7 @@ type KubeConfigAuthProviderOIDC struct {
 	Expiry       time.Time
 }
 
-const AuthConnectTypeOIDC   = "OIDC"
+const authConnectTypeOIDC = "OIDC"
 
 // OIDCKubeAuth
 type OIDCKubeAuth struct {
@@ -38,8 +38,9 @@ func InitOIDCKubeAuth(portalProxy interfaces.PortalProxy) *OIDCKubeAuth {
 	return &OIDCKubeAuth{portalProxy: portalProxy}
 }
 
+// GetName returns the provider name
 func (c *OIDCKubeAuth) GetName() string {
-	return AuthConnectTypeOIDC
+	return authConnectTypeOIDC
 }
 
 func (c *OIDCKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {

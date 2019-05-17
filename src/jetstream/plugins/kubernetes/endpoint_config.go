@@ -16,8 +16,6 @@ import (
 func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*restclient.Config, error) {
 	return clientcmd.BuildConfigFromKubeconfigGetter(masterURL, func() (*clientcmdapi.Config, error) {
 
-		log.Info("GetConfigForEndpoint")
-
 		name := "cluster-0"
 
 		// Create a config
@@ -50,8 +48,6 @@ func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token i
 func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
 
 	log.Debug("addAuthInfoForEndpoint")
-	log.Warn(tokenRec.AuthType)
-
 	var authProvider = c.GetAuthProvider(tokenRec.AuthType)
 	if authProvider == nil {
 		return errors.New("Unsupported auth type")

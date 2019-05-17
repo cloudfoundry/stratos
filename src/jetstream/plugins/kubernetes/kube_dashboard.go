@@ -149,7 +149,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 	log.Info("Making request")
 	req := c.Request()
 	w := c.Response().Writer
-	log.Info("%v+", req)
+	log.Infof("%v+", req)
 
 	// if h.tryUpgrade(w, req) {
 	// 	return
@@ -220,7 +220,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 		log.Debugf("%v+", response.Header)
 		response.Header.Del("X-FRAME-OPTIONS")
 		response.Header.Set("X-FRAME-OPTIONS", "sameorigin")
-		log.Debug("%v+", response)
+		log.Debugf("%v+", response)
 		return nil
 	}
 

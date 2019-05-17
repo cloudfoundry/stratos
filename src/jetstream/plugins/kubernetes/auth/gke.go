@@ -37,15 +37,16 @@ type GKEKubeAuth struct {
 	portalProxy interfaces.PortalProxy
 }
 
-const AuthConnectTypeGKE = "gke-auth"
+const authConnectTypeGKE = "gke-auth"
 
 // InitGKEKubeAuth creates a GKEKubeAuth
 func InitGKEKubeAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
 	return &GKEKubeAuth{portalProxy: portalProxy}
 }
 
+// GetName returns the provider name
 func (c *GKEKubeAuth) GetName() string {
-	return AuthConnectTypeGKE
+	return authConnectTypeGKE
 }
 
 func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
@@ -107,7 +108,7 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Conte
 
 	// Create a new token record - we need to store the client ID and secret as well, so cheekily use the refresh token for this
 	tokenRecord := c.portalProxy.InitEndpointTokenRecord(0, oauthToken.AccessToken, string(tokenInfo), false)
-	tokenRecord.AuthType = AuthConnectTypeGKE
+	tokenRecord.AuthType = authConnectTypeGKE
 	return &tokenRecord, &cnsiRecord, nil
 }
 

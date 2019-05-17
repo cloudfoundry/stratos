@@ -21,9 +21,6 @@ type KubeAuthProvider interface {
 	GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool)
 }
 
-
-// -------------------------------
-
 // KubeCertificate represents certificate infor for Kube Authentication
 type KubeCertificate struct {
 	Certificate    string `json:"cert"`

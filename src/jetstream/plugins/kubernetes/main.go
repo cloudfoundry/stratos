@@ -12,26 +12,22 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
 )
 
+// KubernetesSpecification is the endpoint that adds Kubernetes support to the backend
 type KubernetesSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
 }
 
-// KubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
-const KubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
-
 const (
-	EndpointType                = "k8s"
-	CLIENT_ID_KEY               = "K8S_CLIENT"
-	AuthConnectTypeKubeConfig   = "KubeConfig"
-	AuthConnectTypeKubeConfigAz = "kubeconfig-az"
-	AuthConnectTypeAWSIAM       = "aws-iam"
-	AuthConnectTypeCertAuth     = "kube-cert-auth"
-	AuthConnectTypeGKE          = "gke-auth"
+	kubeEndpointType    = "k8s"
+	defaultKubeClientID = "K8S_CLIENT"
+
+	// kubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
+	kubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
+	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType}, nil
 }
 
 func (c *KubernetesSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
@@ -47,11 +43,11 @@ func (c *KubernetesSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePl
 }
 
 func (c *KubernetesSpecification) GetType() string {
-	return EndpointType
+	return kubeEndpointType
 }
 
 func (c *KubernetesSpecification) GetClientId() string {
-	return c.portalProxy.Env().String(CLIENT_ID_KEY, "k8s")
+	return c.portalProxy.Env().String(defaultKubeClientID, "k8s")
 }
 
 func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
@@ -72,7 +68,7 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 	return nil
 }
 
-func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
+func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userID string) (*interfaces.TokenRecord, bool, error) {
 	log.Debug("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
@@ -100,8 +96,8 @@ func (c *KubernetesSpecification) Init() error {
 	c.AddAuthProvider(auth.InitAzureKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitOIDCKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitKubeConfigAuth(c.portalProxy))
-	
-	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = "false"
+
+	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = "false"
 
 	return nil
 }
@@ -129,7 +125,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
 
-	newCNSI.CNSIType = EndpointType
+	newCNSI.CNSIType = kubeEndpointType
 
 	_, err := url.Parse(apiEndpoint)
 	if err != nil {

@@ -7,8 +7,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
-// Interface for Kubernetes Authentication Providers
-
 var kubeAuthProviders map[string]auth.KubeAuthProvider
 
 // AddAuthProvider adds a Kubernetes auth provider

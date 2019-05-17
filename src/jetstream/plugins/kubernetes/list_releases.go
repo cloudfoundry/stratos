@@ -52,30 +52,30 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 		Result:   nil,
 	}
 
-	log.Warnf("listReleases: START: %s", ep.GUID)
+	log.Debugf("listReleases: START: %s", ep.GUID)
 	client, _, tiller, err := c.GetHelmClient(ep.GUID, ep.Account)
 	if err != nil {
-		log.Warnf("listReleases: CLIENT_ERROR: %s", ep.GUID)
+		log.Debugf("listReleases: CLIENT_ERROR: %s", ep.GUID)
 		done <- response
 		return
 	}
 
 	defer tiller.Close()
 
-	log.Warnf("listReleases: REQUEST: %s", ep.GUID)
+	log.Debugf("listReleases: REQUEST: %s", ep.GUID)
 
 	res, err := client.ListReleases(
 		helm.ReleaseListStatuses(nil),
 	)
 	if err != nil {
-		log.Warnf("listReleases: ERROR: %s", ep.GUID)
+		log.Debugf("listReleases: ERROR: %s", ep.GUID)
 		log.Error(err)
 
 		done <- response
 		return
 	}
 
-	log.Warnf("listReleases: OK: %s", ep.GUID)
+	log.Debugf("listReleases: OK: %s", ep.GUID)
 	response.Result = res
 	done <- response
 }

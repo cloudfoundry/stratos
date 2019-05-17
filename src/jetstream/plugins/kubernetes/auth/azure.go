@@ -6,14 +6,13 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 
 	"github.com/labstack/echo"
 )
 
-const AuthConnectTypeKubeConfigAz = "kubeconfig-az"
-
+const authConnectTypeKubeConfigAz = "kubeconfig-az"
 
 // AzureKubeAuth is Azure Authentication with Certificates
 type AzureKubeAuth struct {
@@ -27,7 +26,7 @@ func InitAzureKubeAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
 
 // GetName returns the provider name
 func (c *AzureKubeAuth) GetName() string {
-	return AuthConnectTypeKubeConfigAz
+	return authConnectTypeKubeConfigAz
 }
 
 func (p *AzureKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
@@ -64,11 +63,10 @@ func (p *AzureKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Con
 	expiry := time.Now().Local().Add(time.Hour * time.Duration(100000))
 
 	tokenRecord := p.portalProxy.InitEndpointTokenRecord(expiry.Unix(), accessToken, refreshToken, false)
-	tokenRecord.AuthType = AuthConnectTypeKubeConfigAz
+	tokenRecord.AuthType = authConnectTypeKubeConfigAz
 
 	return &tokenRecord, &cnsiRecord, nil
 }
-
 
 func (p *AzureKubeAuth) getAKSAuthConfig(k *config.KubeConfigUser) (*KubeCertificate, error) {
 

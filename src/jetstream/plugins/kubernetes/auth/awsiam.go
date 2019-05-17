@@ -20,6 +20,7 @@ import (
 	"github.com/kubernetes-sigs/aws-iam-authenticator/pkg/token"
 )
 
+// AWSIAMUserInfo is the user info needed to connect to AWS Kubernetes
 type AWSIAMUserInfo struct {
 	Cluster   string `json:"cluster"`
 	AccessKey string `json:"accessKey"`
@@ -31,15 +32,16 @@ type AWSKubeAuth struct {
 	portalProxy interfaces.PortalProxy
 }
 
-const AuthConnectTypeAWSIAM = "aws-iam"
+const authConnectTypeAWSIAM = "aws-iam"
 
 // InitAWSKubeAuth creates a GKEKubeAuth
 func InitAWSKubeAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
 	return &AWSKubeAuth{portalProxy: portalProxy}
 }
 
+// GetName returns the Auth Provider name
 func (c *AWSKubeAuth) GetName() string {
-	return AuthConnectTypeAWSIAM
+	return authConnectTypeAWSIAM
 }
 
 func (c *AWSKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
@@ -105,7 +107,7 @@ func (c *AWSKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Conte
 	expiry := time.Now().Local().Add(time.Minute * time.Duration(15))
 
 	tokenRecord := c.portalProxy.InitEndpointTokenRecord(expiry.Unix(), accessToken, refreshToken, false)
-	tokenRecord.AuthType = AuthConnectTypeAWSIAM
+	tokenRecord.AuthType = authConnectTypeAWSIAM
 	return &tokenRecord, &cnsiRecord, nil
 }
 

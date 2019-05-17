@@ -19,8 +19,7 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-const AuthConnectTypeCertAuth = "kube-cert-auth"
-
+const authConnectTypeCertAuth = "kube-cert-auth"
 
 // CertKubeAuth is GKE Authentication with Certificates
 type CertKubeAuth struct {
@@ -32,8 +31,9 @@ func InitCertKubeAuth(portalProxy interfaces.PortalProxy) *CertKubeAuth {
 	return &CertKubeAuth{portalProxy: portalProxy}
 }
 
+// GetName returns the provider name
 func (c *CertKubeAuth) GetName() string {
-	return AuthConnectTypeCertAuth
+	return authConnectTypeCertAuth
 }
 
 func (c *CertKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
@@ -98,7 +98,7 @@ func (c *CertKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Cont
 	expiry := time.Now().Local().Add(time.Hour * time.Duration(100000))
 	disconnected := false
 	tokenRecord := c.portalProxy.InitEndpointTokenRecord(expiry.Unix(), accessToken, refreshToken, disconnected)
-	tokenRecord.AuthType = AuthConnectTypeCertAuth
+	tokenRecord.AuthType = authConnectTypeCertAuth
 	return &tokenRecord, &cnsiRecord, nil
 }
 
