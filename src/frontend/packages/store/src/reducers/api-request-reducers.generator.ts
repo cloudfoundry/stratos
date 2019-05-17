@@ -30,6 +30,7 @@ import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import { userFavoritesEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 
 /**
@@ -92,7 +93,7 @@ function getCFEntityKey(type: string) {
 }
 
 function getInternalEntityKey(type: string) {
-  return EntityCatalogueHelpers.buildEntityKey(type, STRATOS_ENDPOINT_TYPE);
+  return entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, type);
 }
 
 

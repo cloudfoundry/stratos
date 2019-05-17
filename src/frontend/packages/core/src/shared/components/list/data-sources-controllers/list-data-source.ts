@@ -258,7 +258,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           flattenPaginationMax: this.masterAction.flattenPaginationMax,
           flattenPagination: this.masterAction.flattenPagination,
           __forcedPageNumber__: i + 1,
-          __forcedPageSchemaKey__: multiActionConfig.schemaKey
+          __forcedPageEntityConfig__: multiActionConfig.paginationAction
         }) as PaginatedAction);
       }
       this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
@@ -274,10 +274,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         schemaConfig.paginationAction.endpointType,
         schemaConfig.paginationAction.entityType
       );
+      const entityKey = entityCatalogue.getEntityKey(schemaConfig.paginationAction);
       const idPage = {
         page: i + 1,
         label: catalogueEntity.entity.label || 'Unknown',
-        schemaKey: schemaConfig.schemaKey
+        entityKey
       };
       actionMap.push(idPage);
       return actionMap;
@@ -307,9 +308,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
     if (schema instanceof MultiActionConfig) {
-      const { paginationAction, schemaKey } = schema.schemaConfigs[0];
+      const { paginationAction } = schema.schemaConfigs[0];
       const catalogueEntity = entityCatalogue.getEntity(paginationAction.endpointType, paginationAction.entityType);
-      return catalogueEntity.getSchema(schemaKey);
+      return catalogueEntity.getSchema(paginationAction.schemaKey);
     }
     return schema;
   }

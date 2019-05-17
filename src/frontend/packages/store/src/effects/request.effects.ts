@@ -24,7 +24,6 @@ import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
 import { UpdateCfAction } from '../types/request.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -107,6 +106,9 @@ export class RequestEffect {
           }));
         }),
         mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
+          if (apiAction.entityType === 'application') {
+            console.log('validating application done');
+          }
           return [new EntitiesPipelineCompleted(
             apiAction,
             validatedApiResponse,
@@ -133,12 +135,17 @@ export class RequestEffect {
     mergeMap(action => {
       const completeAction: EntitiesPipelineCompleted = action;
       const actions = [];
+      if (completeAction.apiAction.entityType === 'application') {
+        console.log(completeAction);
+      }
       if (!completeAction.validateAction.apiRequestStarted && completeAction.validationResult.started) {
         if (completeAction.independentUpdates) {
+          if (completeAction.apiAction.entityType === 'application') {
+            console.log('complete application');
+          }
           this.update(completeAction.apiAction, false, null);
         }
       } else if (completeAction.validateAction.apiRequestStarted) {
-
         const apiAction = completeAction.apiAction;
         const requestType = getRequestTypeFromMethod(apiAction);
         const apiResponse: APIResponse = completeAction.apiResponse || {
@@ -154,6 +161,7 @@ export class RequestEffect {
           (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
+          // TODO Do we need to clear the proxy pagination?
           const entityType = apiAction.proxyPaginationEntityKey || apiAction.entityType;
           if (apiAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(apiAction, apiAction.guid));
@@ -184,6 +192,9 @@ export class RequestEffect {
         ...apiAction,
       };
       if (busy) {
+        if (apiAction.entityType === 'application') {
+          console.log('updating', busy);
+        }
         newAction.updatingKey = rootUpdatingKey;
       }
       this.store.dispatch(new UpdateCfAction(newAction, busy, error));

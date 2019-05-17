@@ -9,7 +9,6 @@ import {
   entityFactory,
   spaceSchemaKey,
   organizationSchemaKey,
-  endpointSchemaKey,
   featureFlagSchemaKey,
   stackSchemaKey,
   routeSchemaKey,

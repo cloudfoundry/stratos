@@ -12,6 +12,7 @@ import { PaginatedAction, PaginationEntityState } from '../../types/pagination.t
 import { IRequestAction } from '../../types/request.types';
 import { EntitySchema } from '../entity-factory';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export class ValidateEntityRelationsConfig {
   /**
@@ -65,7 +66,8 @@ export class EntityTree {
  * @export
  */
 export class EntityTreeRelation {
-  entityKey: string;
+  public entityKey: string;
+  public entityType: string;
 
   /**
    * Creates an instance of EntityTreeRelation.
@@ -80,7 +82,8 @@ export class EntityTreeRelation {
     public path = '', // entity.space
     public childRelations: EntityTreeRelation[]
   ) {
-    this.entityKey = entity.entityType;
+    this.entityKey = entityCatalogue.getEntityKey(entity);
+    this.entityType = entity.entityType;
   }
 }
 

@@ -4,6 +4,7 @@ import {
   StratosCatalogueEntity,
   IEntityMetadata,
   IStratosEndpointDefinition,
+  EntityCatalogueEntityConfig,
 } from './entity-catalogue.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
@@ -42,7 +43,7 @@ class EntityCatalogue {
     entityType: string,
     endpointType?: string
   ): StratosBaseCatalogueEntity {
-    const id = endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType;
+    const id = endpointType ? this.getEntityKey(endpointType, entityType) : entityType;
     // STRATOS_ENDPOINT_TYPE is a special case for internal entities.
     if (endpointType !== STRATOS_ENDPOINT_TYPE && entityType === EntityCatalogueHelpers.endpointType) {
       return this.endpoints.get(id);
@@ -58,8 +59,7 @@ class EntityCatalogue {
     return subTypes.find(subType => subType.type === subtype);
   }
 
-
-
+  // TODO this should take a EntityCatalogueEntityConfig
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     endpointType: string,
     entityType: string,
@@ -76,6 +76,14 @@ class EntityCatalogue {
       }, entityOfType.builder.getLink);
     }
     return entityOfType;
+  }
+
+  public getEntityKey(endpointType: string | EntityCatalogueEntityConfig, entityType?: string) {
+    const config = endpointType as EntityCatalogueEntityConfig;
+    if (config.entityType) {
+      return EntityCatalogueHelpers.buildEntityKey(config.entityType, config.endpointType);
+    }
+    return EntityCatalogueHelpers.buildEntityKey(entityType, endpointType as string);
   }
 
   public getEndpoint(endpointType: string, subType?: string) {

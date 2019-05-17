@@ -1,10 +1,11 @@
-import { entityFactory } from '../../helpers/entity-factory';
 import { PaginationEntityState } from '../../types/pagination.types';
+import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export function paginationStart(state, action): PaginationEntityState {
   const page = action.apiAction.__forcedPageNumber__ || action.apiAction.pageNumber || state.currentPage;
-  const schemaKey = action.apiAction.__forcedPageSchemaKey__;
-  const entityKey = schemaKey ? entityFactory(schemaKey).key : action.apiAction.entityKey;
+  const entityConfig = action.apiAction.__forcedPageEntityConfig__ as EntityCatalogueEntityConfig;
+
   return {
     ...state,
     pageRequests: {
@@ -13,8 +14,11 @@ export function paginationStart(state, action): PaginationEntityState {
         busy: true,
         error: false,
         message: '',
-        schemaKey,
-        entityKey,
+        baseEntityConfig: {
+          entityType: action.apiAction.entityType,
+          endpointType: action.apiAction.endpointType,
+        },
+        entityConfig,
         maxed: false
       }
     }

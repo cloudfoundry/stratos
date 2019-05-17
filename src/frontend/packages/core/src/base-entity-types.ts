@@ -19,7 +19,7 @@ const stratosType = {
  * DefaultEndpointEntityType is used to represent a general endpoint
  * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the 
  */
-class DefaultEndpointEntityType extends StratosCatalogueEntity {
+class DefaultEndpointCatalogueEntity extends StratosCatalogueEntity {
   constructor() {
     super({
       schema: endpointEntitySchema,
@@ -50,7 +50,7 @@ class UserProfileCatalogueEntity extends StratosCatalogueEntity {
 }
 
 export function registerBaseStratosTypes() {
-  entityCatalogue.register(new DefaultEndpointEntityType());
+  entityCatalogue.register(new DefaultEndpointCatalogueEntity());
   entityCatalogue.register(new UserFavoriteCatalogueEntity());
   entityCatalogue.register(new UserProfileCatalogueEntity());
 }

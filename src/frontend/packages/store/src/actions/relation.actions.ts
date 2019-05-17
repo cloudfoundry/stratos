@@ -23,7 +23,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     public url: string,
   ) {
     super();
-    this.entityType = child.entityKey;
+    this.entityType = child.entityType;
     this.options = new RequestOptions();
     this.options.url = url.startsWith('/v2/') ? url.substring(4, url.length) : url;
     this.options.method = 'get';

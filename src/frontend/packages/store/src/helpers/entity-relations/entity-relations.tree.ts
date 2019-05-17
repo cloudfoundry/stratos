@@ -49,16 +49,16 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
 
 function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?: EntitySchema, path: string = '') {
   const rootEntitySchema = schemaObj || entityRelation.entity.schema;
-  Object.values(rootEntitySchema).forEach(schemaOrArray => {
+  Object.keys(rootEntitySchema).forEach(key => {
+    const schemaOrArray = rootEntitySchema[key];
     const isArray = Array.isArray(schemaOrArray);
     const entitySchema = isArray ? schemaOrArray[0] : schemaOrArray;
-    const { entityType } = entitySchema;
-    const newPath = path ? path + '.' + entityType : entityType;
+    const newPath = path ? path + '.' + key : key;
     if (entitySchema instanceof EntitySchema) {
       const newEntityRelation = new EntityTreeRelation(
         entitySchema,
         isArray,
-        entityType,
+        key,
         newPath,
         new Array<EntityTreeRelation>()
       );
@@ -74,7 +74,7 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
   : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
   entityRelation.childRelations.forEach((relation: EntityTreeRelation) => {
-    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entity.relationKey || relation.entityKey);
+    const parentChildKey = createEntityRelationKey(entityRelation.entityType, relation.entity.relationKey || relation.entityType);
     if (includeRelations.indexOf(parentChildKey) >= 0) {
       // Ensure we maintain type by creating new instance, rather than spreading old
       const clone = new EntityTreeRelation(relation.entity, relation.isArray, relation.paramName, relation.path, relation.childRelations);

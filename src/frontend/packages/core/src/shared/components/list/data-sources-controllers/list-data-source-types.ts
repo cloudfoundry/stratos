@@ -11,7 +11,7 @@ import { EntityCatalogueEntityConfig } from '../../../../core/entity-catalogue/e
 export interface IEntitySelectItem {
   page: number;
   label: string;
-  schemaKey: string;
+  entityKey: string;
 }
 
 /**

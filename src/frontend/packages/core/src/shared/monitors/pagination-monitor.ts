@@ -227,12 +227,13 @@ export class PaginationMonitor<T = any> {
     ).pipe(
       filter(([pagination, fetching]) => !fetching),
       map(([pagination]) => {
-        return Object.values(pagination.pageRequests).reduce((schemaKeys, pageRequest) => {
-          const { schemaKey } = pageRequest;
-          if (schemaKey && !schemaKeys.includes(schemaKey)) {
-            schemaKeys.push(schemaKey);
+        return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
+          const { entityConfig } = pageRequest;
+          const key = entityCatalogue.getEntityKey(entityConfig);
+          if (key && !entityKeys.includes(key)) {
+            entityKeys.push(key);
           }
-          return schemaKeys;
+          return entityKeys;
         }, []).length > 1;
       })
     );
@@ -278,7 +279,10 @@ export class PaginationMonitor<T = any> {
   private getPageInfo(pagination: PaginationEntityState, pageId: number | string, defaultSchema: normalizrSchema.Entity) {
     const page = pagination.ids[pageId] || [];
     const pageState = pagination.pageRequests[pageId] || {} as ListActionState;
-    const pageSchema = pageState.schemaKey ? entityFactory(pageState.schemaKey) : defaultSchema;
+    const pageSchema = pageState.entityConfig ? entityCatalogue.getEntity(
+      pageState.entityConfig.endpointType,
+      pageState.entityConfig.entityType
+    ).getSchema(pageState.entityConfig.schemaKey) : defaultSchema;
     return {
       page,
       pageSchema

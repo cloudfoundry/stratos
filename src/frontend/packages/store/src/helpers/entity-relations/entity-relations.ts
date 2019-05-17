@@ -37,7 +37,7 @@ import {
   ValidationResult,
 } from './entity-relations.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-
+// TODO This 1 needs a tidy up and 2 only works with CF entities.
 interface ValidateResultFetchingState {
   fetching: boolean;
 }
@@ -229,6 +229,9 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   let results: ValidateEntityResult[] = [];
   parentRelation.childRelations.forEach(childRelation => {
     entities.forEach(entity => {
+      if (config.action.entityType === 'application') {
+        console.log('childRelation', childRelation);
+      }
       let childEntities = pathGet(childRelation.path, entity);
       if (childEntities) {
         childEntities = childRelation.isArray ? childEntities : [childEntities];
@@ -362,6 +365,9 @@ function handleValidationLoopResults(
   results.forEach(request => {
     // Fetch any missing data
     if (!request.abortDispatch) {
+      if (request.action.entityType === 'application') {
+        console.log('handleValidationLoopResults', request.action);
+      }
       store.dispatch(request.action);
     }
     // Wait for the action to be completed
@@ -410,12 +416,17 @@ function handleValidationLoopResults(
  */
 export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
   const pAction = isPaginatedAction(config.action);
-  if (!!pAction && pAction.__forcedPageSchemaKey__) {
-    const forcedSchema = entityFactory(pAction.__forcedPageSchemaKey__);
+  if (config.action.entityType === 'application') {
+    console.log('validating application', config);
+  }
+  if (!!pAction && pAction.__forcedPageEntityConfig__) {
+    const entityConfig = pAction.__forcedPageEntityConfig__;
+    const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);
+    const forcedSchema = catalogueEntity.getSchema(entityConfig.schemaKey);
     config.action = {
       ...config.action,
       entity: [forcedSchema],
-      entityType: forcedSchema.key
+      entityType: entityConfig.endpointType
     };
   }
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
@@ -442,12 +453,13 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
 
 function getRelationAction(action: IRequestAction): EntityInlineParentAction {
   const pagAction = action as PaginatedAction;
-  if (pagAction.__forcedPageSchemaKey__) {
-    const entityKey = pagAction.__forcedPageSchemaKey__;
+  if (pagAction.__forcedPageEntityConfig__) {
+    const entityConfig = pagAction.__forcedPageEntityConfig__;
+    const entity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType).getSchema(entityConfig.schemaKey);
     return {
       ...action,
-      entityType: entityKey,
-      entity: entityFactory(entityKey)
+      entityType: entityConfig.entityType,
+      entity
     } as EntityInlineParentAction;
   }
   return {

@@ -23,6 +23,9 @@ import { EndpointModel, endpointStoreNames } from '../../../../store/src/types/e
 import { EndpointsService } from '../../core/endpoints.service';
 import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 
 export interface ConnectEndpointConfig {
   name: string;
@@ -55,6 +58,8 @@ export class ConnectEndpointService {
 
   private hasAttemptedConnect: boolean;
   private pData: ConnectEndpointData;
+
+  private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
@@ -140,7 +145,7 @@ export class ConnectEndpointService {
 
   private getUpdateSelector() {
     return selectUpdateInfo(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       this.config.guid,
       EndpointsEffect.connectingKey
     );
@@ -148,14 +153,14 @@ export class ConnectEndpointService {
 
   private getRequestSelector() {
     return selectRequestInfo(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       SystemEffects.guid
     );
   }
 
   private getEntitySelector() {
     return selectEntity<EndpointModel>(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       this.config.guid,
     );
   }

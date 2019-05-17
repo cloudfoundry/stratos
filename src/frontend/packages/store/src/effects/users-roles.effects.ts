@@ -37,7 +37,6 @@ export class UsersRolesEffects {
           options: null,
           actions: []
         } as ICFAction;
-
         actions.push(new UpdateCfAction(apiAction, false, ''));
       });
       return actions;

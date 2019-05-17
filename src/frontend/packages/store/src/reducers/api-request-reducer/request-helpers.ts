@@ -27,9 +27,12 @@ function getEntityKey(entityType: string, endpointType: string) {
   return catalogueEntity ? catalogueEntity.entityKey : entityType;
 }
 
-export function getEntityRequestState(state: IRequestDataState, action: SingleEntityAction): RequestInfoState {
-  const { entityType, endpointType, guid } = action;
-  const entityKey = getEntityKey(entityType, endpointType);
+export function getEntityRequestState(
+  state: IRequestDataState,
+  actionOrKey: SingleEntityAction | string,
+  guid: string = (actionOrKey as SingleEntityAction).guid
+): RequestInfoState {
+  const entityKey = getKeyFromActionOrKey(actionOrKey);
   const requestState = { ...state[entityKey][guid] };
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
     return requestState;
@@ -37,8 +40,13 @@ export function getEntityRequestState(state: IRequestDataState, action: SingleEn
   return getDefaultRequestState();
 }
 
-export function setEntityRequestState(state: IRequestDataState, requestState, { entityType, endpointType, guid }: IRequestAction) {
-  const entityKey = getEntityKey(entityType, endpointType);
+export function setEntityRequestState(
+  state: IRequestDataState,
+  requestState,
+  actionOrKey: SingleEntityAction | string,
+  guid: string = (actionOrKey as SingleEntityAction).guid
+) {
+  const entityKey = getKeyFromActionOrKey(actionOrKey);
   const newState = {
     [entityKey]: {
       [guid]: {
@@ -49,21 +57,28 @@ export function setEntityRequestState(state: IRequestDataState, requestState, { 
   return mergeState(state, newState);
 }
 
+function getKeyFromActionOrKey(actionOrKey: SingleEntityAction | string) {
+  if (typeof actionOrKey === 'string') {
+    return actionOrKey;
+  }
+  const { entityType, endpointType } = actionOrKey;
+  return getEntityKey(entityType, endpointType);
+}
 
-export function createRequestStateFromResponse(response: NormalizedResponse, state: IRequestDataState, endpointType: string) {
+export function createRequestStateFromResponse(response: NormalizedResponse, state: IRequestDataState) {
   if (!response || !response.entities) {
     return state;
   }
   const { entities } = response;
   let newState = { ...state };
-  Object.keys(entities).forEach(entityType => {
-    Object.keys(entities[entityType]).forEach(guid => {
-      const entState = getEntityRequestState(state, { entityType, guid, endpointType } as SingleEntityAction);
+  Object.keys(entities).forEach(entityKey => {
+    Object.keys(entities[entityKey]).forEach(guid => {
+      const entState = getEntityRequestState(state, entityKey, guid);
       entState.fetching = entState.fetching || false;
       entState.error = entState.error || false;
       const busy = entState.deleting ? entState.deleting.busy : false;
       entState.deleting = { ...defaultDeletingActionState, busy };
-      newState = setEntityRequestState(newState, entState, { entityType, guid, endpointType } as IRequestAction);
+      newState = setEntityRequestState(newState, entState, entityKey, guid);
     });
   });
   return newState;

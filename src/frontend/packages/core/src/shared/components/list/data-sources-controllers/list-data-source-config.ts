@@ -8,6 +8,7 @@ import { PaginatedAction } from '../../../../../../store/src/types/pagination.ty
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
+import { EntityCatalogueEntityConfig } from '../../../../core/entity-catalogue/entity-catalogue.types';
 
 
 /**
@@ -38,7 +39,6 @@ export class MultiActionConfig {
 export class ActionSchemaConfig {
   constructor(
     public paginationAction: PaginatedAction,
-    public schemaKey: string
   ) { }
 }
 

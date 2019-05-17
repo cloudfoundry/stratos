@@ -1,14 +1,17 @@
-import { register } from 'ts-node/dist';
 import { createSelector } from '@ngrx/store';
 import { AppState, IRequestEntityTypeState } from '../app-state';
-import { EndpointModel, EndpointState, endpointStoreNames } from '../types/endpoint.types';
+import { EndpointModel, EndpointState, } from '../types/endpoint.types';
 import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 
 // The custom status section
 export const endpointStatusSelector = (state: AppState): EndpointState => state.endpoints;
 
 // All endpoint request data
-export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointStoreNames.type);
+const endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
 export const cfEndpointEntitiesSelector = (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
   const cf = {};
@@ -47,6 +50,6 @@ export const endpointsRegisteredCFEntitiesSelector = createSelector(
 );
 
 // Single endpoint request information
-export const endpointsEntityRequestSelector = (guid) => selectRequestInfo(endpointStoreNames.type, guid);
+export const endpointsEntityRequestSelector = (guid) => selectRequestInfo(endpointEntityKey, guid);
 // Single endpoint request data
-export const endpointsEntityRequestDataSelector = (guid) => selectEntity<EndpointModel>(endpointStoreNames.type, guid);
+export const endpointsEntityRequestDataSelector = (guid) => selectEntity<EndpointModel>(endpointEntityKey, guid);

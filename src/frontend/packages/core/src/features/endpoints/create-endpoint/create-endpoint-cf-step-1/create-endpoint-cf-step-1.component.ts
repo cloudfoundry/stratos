@@ -19,7 +19,8 @@ import { getFullEndpointApiUrl } from '../../endpoint-helpers';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { endpointEntitySchema } from '../../../../base-entity-schemas';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -54,9 +55,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogueEndpointEntity;
 
+  private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+
   constructor(private store: Store<AppState>, activatedRoute: ActivatedRoute, ) {
 
-    this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
+    this.existingEndpoints = store.select(selectPaginationState(this.endpointEntityKey, GetAllEndpoints.storeKey))
       .pipe(
         withLatestFrom(store.select(getAPIRequestDataState)),
         map(([pagination, entities]) => {
@@ -125,7 +128,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   private getUpdateSelector(guid) {
     return selectUpdateInfo(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       guid,
       EndpointsEffect.registeringKey,
     );

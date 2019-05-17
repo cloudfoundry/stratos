@@ -34,6 +34,7 @@ import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from 
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -142,6 +143,9 @@ export class APIEffect {
 
     // Should we flatten all pages into the first, thus fetching all entities?
     if (paginatedAction.flattenPagination) {
+      const forcedEntityKey = paginatedAction.__forcedPageEntityConfig__ ?
+        entityCatalogue.getEntityKey(paginatedAction.__forcedPageEntityConfig__) :
+        null;
       request = flattenPagination(
         this.store,
         request,
@@ -149,7 +153,7 @@ export class APIEffect {
         paginatedAction.flattenPaginationMax,
         catalogueEntity.entityKey,
         paginatedAction.paginationKey,
-        paginatedAction.__forcedPageSchemaKey__ ? entityFactory(paginatedAction.__forcedPageSchemaKey__).key : null
+        forcedEntityKey
       );
     }
 
@@ -445,11 +449,15 @@ export class APIEffect {
       });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
+    // TODO This need tidying up.
     let entityArray;
     const pagAction = apiAction as PaginatedAction;
-    if (pagAction.__forcedPageSchemaKey__) {
-      entityArray = [entityFactory(pagAction.__forcedPageSchemaKey__)];
+    if (pagAction.__forcedPageEntityConfig__) {
+      const entityConfig = pagAction.__forcedPageEntityConfig__;
+      const schema = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType).getSchema(entityConfig.schemaKey);
+      entityArray = [schema];
     } else {
+      // No need to do this, use Array.isArray - nj
       /* tslint:disable-next-line:no-string-literal  */
       if (apiAction.entity['length'] > 0) {
         entityArray = apiAction.entity;
@@ -575,9 +583,10 @@ export class APIEffect {
   }
   // TODO We need to be able to pass schema keys here
   private getEntityRelations(action: any) {
-    if (action.__forcedPageSchemaKey__) {
-      const catalogueEntity = entityCatalogue.getEntity(action.entity.endpointType, action.__forcedPageSchemaKey__);
-      const forcedSchema = catalogueEntity.getSchema();
+    if (action.__forcedPageEntityConfig__) {
+      const entityConfig = action.__forcedPageEntityConfig__ as EntityCatalogueEntityConfig;
+      const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);
+      const forcedSchema = catalogueEntity.getSchema(entityConfig.schemaKey);
       return listEntityRelations(
         {
           ...action,
