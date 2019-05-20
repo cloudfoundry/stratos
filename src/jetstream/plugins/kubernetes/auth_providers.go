@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
 var kubeAuthProviders map[string]auth.KubeAuthProvider
@@ -22,12 +21,8 @@ func (c *KubernetesSpecification) AddAuthProvider(provider auth.KubeAuthProvider
 
 	kubeAuthProviders[name] = provider
 
-	// Register auth type with Jetstream
-	c.portalProxy.AddAuthProvider(name, interfaces.AuthProvider{
-		Handler:  provider.DoFlowRequest,
-		UserInfo: provider.GetUserFromToken,
-	})
-
+	// Get the auth provider to register itself with Stratos, if needed
+	provider.RegisterJetstreamAuthType(c.portalProxy)
 }
 
 // GetAuthProvider gets a Kubernetes auth provider by key

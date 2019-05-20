@@ -586,7 +586,7 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
-		Handler: pp.doOidcFlowRequest,
+		Handler: pp.DoOidcFlowRequest,
 	})
 
 	return pp

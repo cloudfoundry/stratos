@@ -151,5 +151,19 @@ func (c *OIDCKubeAuth) GetOIDCConfig(k *config.KubeConfigUser) (*KubeConfigAuthP
 
 func (c *OIDCKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("DoFlowRequest (OIDC)")
-	return c.portalProxy.DoOAuthFlowRequest(cnsiRequest, req)
+	return c.portalProxy.DoOidcFlowRequest(cnsiRequest, req)
+}
+
+func (c *OIDCKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+	// No need to register OIDC, as its already built in
+	existing := c.portalProxy.HasAuthProvider(c.GetName())
+	if existing {
+		log.Errorf("Auth Provider: %s already registered", c.GetName())
+	} else {
+		// Register auth type with Jetstream
+		c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+			Handler:  c.portalProxy.DoOidcFlowRequest,
+			UserInfo: nil,
+		})
+	}
 }
