@@ -38,6 +38,7 @@ import { GlobalEventData, GlobalEventService } from './shared/global-events.serv
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
 import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
+import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 
 
 // Create action for router navigation. See
@@ -177,8 +178,9 @@ export class AppModule {
       ([entities, recents]) => {
         Object.values(recents.entities).forEach(recentEntity => {
           const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
-          if (entities[recentEntity.entityType] && entities[recentEntity.entityType][recentEntity.entityId]) {
-            const entity = entities[recentEntity.entityType][recentEntity.entityId];
+          const entityKey = entityCatalogue.getEntityKey(recentEntity);
+          if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
+            const entity = entities[entityKey][recentEntity.entityId];
             const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
             const name = mapper(entityToMetadata).name;
             if (name && name !== recentEntity.name) {
@@ -195,7 +197,8 @@ export class AppModule {
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: IRequestDataState) {
     if (favorite) {
-      const entity = entities[favorite.entityType][favorite.entityId || favorite.endpointId];
+      const entityKey = entityCatalogue.getEntityKey(favorite);
+      const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
         const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
