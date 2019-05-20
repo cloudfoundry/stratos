@@ -157,9 +157,7 @@ func (c *OIDCKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *h
 func (c *OIDCKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
 	// No need to register OIDC, as its already built in
 	existing := c.portalProxy.HasAuthProvider(c.GetName())
-	if existing {
-		log.Errorf("Auth Provider: %s already registered", c.GetName())
-	} else {
+	if !existing {
 		// Register auth type with Jetstream
 		c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
 			Handler:  c.portalProxy.DoOidcFlowRequest,
