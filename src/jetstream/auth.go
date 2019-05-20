@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -259,6 +260,79 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 	}
 
 	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
+	resp := &interfaces.LoginRes{
+		Account:     u.UserName,
+		TokenExpiry: u.TokenExpiry,
+		APIEndpoint: nil,
+		Admin:       uaaAdmin,
+	}
+	return resp, nil
+}
+
+func (p *portalProxy) localLogin(c echo.Context) error {
+	log.Debug("localLogin")
+	resp, err := p.doLocalLogin(c)
+	if err != nil {
+		return err
+	}
+
+	jsonString, err := json.Marshal(resp)
+	if err != nil {
+		return err
+	}
+
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+
+	return nil
+}
+
+func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error) {
+	log.Debug("doLocalLogin")
+	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	res, u, err := 
+	if err != nil {
+		// Check the Error
+		errMessage := "Access Denied"
+		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
+			// Try and parse the Response into UAA error structure
+			authError := &interfaces.UAAErrorResponse{}
+			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
+				errMessage = authError.ErrorDescription
+			}
+		}
+
+		err = interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			errMessage,
+			"Login failed: %s: %v", errMessage, err)
+		return nil, err
+	}
+
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = u.UserGUID
+
+	// Ensure that login disregards cookies from the request
+	req := c.Request()
+	req.Header.Set("Cookie", "")
+	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return nil, err
+	}
+
+	err = p.handleSessionExpiryHeader(c)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
+
 	resp := &interfaces.LoginRes{
 		Account:     u.UserName,
 		TokenExpiry: u.TokenExpiry,
