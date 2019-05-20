@@ -3,6 +3,7 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { isEntityBlocked } from '../../../../core/src/core/entity-service';
 import { pathGet } from '../../../../core/src/core/utils.service';
 import { environment } from '../../../../core/src/environments/environment';
@@ -21,7 +22,7 @@ import { APIResource, NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
-import { entityFactory, EntitySchema } from '../entity-factory';
+import { EntitySchema } from '../entity-factory';
 import { pick } from '../reducer.helper';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
@@ -36,7 +37,7 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+
 // TODO This 1 needs a tidy up and 2 only works with CF entities.
 interface ValidateResultFetchingState {
   fetching: boolean;
@@ -108,7 +109,7 @@ function createPaginationAction(config: HandleRelationsConfig) {
 }
 
 function createEntityWatcher(store, paramAction, guid: string): Observable<ValidateResultFetchingState> {
-  return store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
+  return store.select(selectRequestInfo(entityCatalogue.getEntityKey(paramAction), guid)).pipe(
     map((requestInfo: RequestInfoState) => {
       return { fetching: requestInfo ? requestInfo.fetching : true };
     })
@@ -295,7 +296,7 @@ function associateChildWithParent(store: Store<AppState>, action: EntityInlineCh
   // Fetch the child value to associate with parent. Will either be a guid or a list of guids
   if (action.child.isArray) {
     const { paginationKey } = action as FetchRelationPaginatedAction;
-    childValue = store.select(selectPaginationState(action.entityType, paginationKey)).pipe(
+    childValue = store.select(selectPaginationState(entityCatalogue.getEntityKey(action), paginationKey)).pipe(
       first(),
       map((paginationSate: PaginationEntityState) => paginationSate.ids[1] || [])
     );
@@ -494,13 +495,14 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
 
   // What the hell is going on here hey? Well I'll tell you...
   // Ensure that the parent is not blocked (fetching, updating, etc) before we check if it has the child param that we need
-  return store.select(selectEntity(parentEntitySchema.key, parentGuid)).pipe(
+  const entityKey = entityCatalogue.getEntityKey(action);
+  return store.select(selectEntity(entityKey, parentGuid)).pipe(
     first(),
     mergeMap(entity => {
       if (!entity) {
         return observableOf(null);
       }
-      return store.select(selectRequestInfo(parentEntitySchema.key, parentGuid));
+      return store.select(selectRequestInfo(entityKey, parentGuid));
     }),
     filter((entityInfo: RequestInfoState) => {
       return !isEntityBlocked(entityInfo);
@@ -508,7 +510,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     first(),
     // At this point we should know that the parent entity is ready to be checked
     withLatestFrom(
-      store.select(selectEntity<any>(parentEntitySchema.key, parentGuid)),
+      store.select(selectEntity<any>(entityKey, parentGuid)),
       store.select(getAPIRequestDataState),
     ),
     map(([entityInfo, entity, allEntities]: [RequestInfoState, any, IRequestDataState]) => {
@@ -523,7 +525,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
         const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
         /* tslint:disable-next-line:no-string-literal  */
         const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
-        if (arraySafeEntitySchema.key === action.entityType) {
+        if (arraySafeEntitySchema.entityType === action.entityType) {
           // Found it! Does the entity contain a value for the property name?
           if (!entity.entity[paramName]) {
             return;
@@ -541,7 +543,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
             childEntities: entity.entity[paramName],
             cfGuid: action.endpointGuid,
             parentRelation: new EntityTreeRelation(parentEntitySchema, false, null, null, []),
-            includeRelations: [createEntityRelationKey(parentEntitySchema.key, action.entityType)],
+            includeRelations: [createEntityRelationKey(parentEntitySchema.entityType, action.entityType)],
             parentEntity: entity,
             childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
             childEntitiesUrl: '',

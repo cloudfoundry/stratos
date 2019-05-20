@@ -2,6 +2,8 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { getPaginationKey } from '../../actions/pagination.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { AppState, IRequestTypeState } from '../../app-state';
@@ -11,8 +13,6 @@ import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction } from '../../types/request.types';
 import { EntitySchema } from '../entity-factory';
-import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export class ValidateEntityRelationsConfig {
   /**
@@ -94,6 +94,7 @@ export class EntityTreeRelation {
  */
 export interface EntityInlineChildAction {
   entityType: string;
+  endpointType: string;
   parentGuid: string;
   parentEntityConfig: EntityCatalogueEntityConfig;
   child?: EntityTreeRelation; // Not required on base actions
@@ -173,7 +174,7 @@ export interface ValidateEntityResult {
 
 export function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
   Observable<ValidateResultFetchingState> {
-  return store.select(selectPaginationState(paramPaginationAction.entityType, paramPaginationAction.paginationKey)).pipe(
+  return store.select(selectPaginationState(entityCatalogue.getEntityKey(paramPaginationAction), paramPaginationAction.paginationKey)).pipe(
     map((paginationState: PaginationEntityState) => {
       const pageRequest: ActionState =
         paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
