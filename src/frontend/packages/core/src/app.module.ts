@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
-import { debounceTime, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, withLatestFrom, filter } from 'rxjs/operators';
 import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { UpdateUserFavoriteMetadataAction } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
@@ -18,8 +18,6 @@ import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
-import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
-import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -150,7 +148,9 @@ export class AppModule {
     // Init Auth Types and Endpoint Types provided by extensions
     // Once the CF modules become an extension point, these should be moved to a CF specific module
 
-    const allFavs$ = this.userFavoriteManager.getAllFavorites();
+    const allFavs$ = this.userFavoriteManager.getAllFavorites().pipe(
+      filter(([groups, favoriteEntities]) => !!groups && !!favoriteEntities)
+    );
     const recents$ = this.store.select(recentlyVisitedSelector);
     const debouncedApiRequestData$ = this.store.select(getAPIRequestDataState).pipe(debounceTime(2000));
     debouncedApiRequestData$.pipe(

@@ -52,9 +52,11 @@ export class HomePageComponent {
 
     this.showFilterToggle$ = userFavoriteManager.getAllFavorites().pipe(
       map(([, favEntities]: [IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite>]) => {
-        for (const favEntity of Object.values(favEntities)) {
-          if (favEntity.entityType !== EntityCatalogueHelpers.endpointType) {
-            return true;
+        if (favEntities) {
+          for (const favEntity of Object.values(favEntities)) {
+            if (favEntity.entityType !== EntityCatalogueHelpers.endpointType) {
+              return true;
+            }
           }
         }
         return false;

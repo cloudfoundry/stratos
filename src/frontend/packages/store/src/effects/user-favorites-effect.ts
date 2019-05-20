@@ -31,6 +31,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
 import { userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
@@ -38,7 +39,6 @@ const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 
 @Injectable()
 export class UserFavoritesEffect {
-
 
   constructor(
     private http: HttpClient,
@@ -69,16 +69,17 @@ export class UserFavoritesEffect {
         endpointType: userFavoritesEntitySchema.endpointType,
         type: action.type
       } as PaginatedAction;
+      const favEntityKey = entityCatalogue.getEntityKey(apiAction);
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
         map(favorites => {
           const mappedData = favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((data, favorite) => {
             const { guid } = favorite;
             if (guid) {
-              data.entities[userFavoritesEntitySchema.entityType][guid] = favorite;
+              data.entities[favEntityKey][guid] = favorite;
               data.result.push(guid);
             }
             return data;
-          }, { entities: { [userFavoritesEntitySchema.entityType]: {} }, result: [] });
+          }, { entities: { [favEntityKey]: {} }, result: [] });
           this.store.dispatch(new WrapperRequestActionSuccess(mappedData, apiAction));
           this.store.dispatch(new GetUserFavoritesSuccessAction(favorites));
         }),

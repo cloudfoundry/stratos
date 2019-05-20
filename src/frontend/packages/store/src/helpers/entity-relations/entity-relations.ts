@@ -230,7 +230,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   parentRelation.childRelations.forEach(childRelation => {
     entities.forEach(entity => {
       if (config.action.entityType === 'application') {
-        console.log('childRelation', childRelation);
+        debugger;
       }
       let childEntities = pathGet(childRelation.path, entity);
       if (childEntities) {
