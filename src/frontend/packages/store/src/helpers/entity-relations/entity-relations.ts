@@ -230,9 +230,6 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   let results: ValidateEntityResult[] = [];
   parentRelation.childRelations.forEach(childRelation => {
     entities.forEach(entity => {
-      if (config.action.entityType === 'application') {
-        debugger;
-      }
       let childEntities = pathGet(childRelation.path, entity);
       if (childEntities) {
         childEntities = childRelation.isArray ? childEntities : [childEntities];
@@ -366,9 +363,6 @@ function handleValidationLoopResults(
   results.forEach(request => {
     // Fetch any missing data
     if (!request.abortDispatch) {
-      if (request.action.entityType === 'application') {
-        console.log('handleValidationLoopResults', request.action);
-      }
       store.dispatch(request.action);
     }
     // Wait for the action to be completed
@@ -417,9 +411,6 @@ function handleValidationLoopResults(
  */
 export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
   const pAction = isPaginatedAction(config.action);
-  if (config.action.entityType === 'application') {
-    console.log('validating application', config);
-  }
   if (!!pAction && pAction.__forcedPageEntityConfig__) {
     const entityConfig = pAction.__forcedPageEntityConfig__;
     const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);

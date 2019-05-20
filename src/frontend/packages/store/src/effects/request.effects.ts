@@ -106,9 +106,6 @@ export class RequestEffect {
           }));
         }),
         mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
-          if (apiAction.entityType === 'application') {
-            console.log('validating application done');
-          }
           return [new EntitiesPipelineCompleted(
             apiAction,
             validatedApiResponse,
@@ -135,14 +132,8 @@ export class RequestEffect {
     mergeMap(action => {
       const completeAction: EntitiesPipelineCompleted = action;
       const actions = [];
-      if (completeAction.apiAction.entityType === 'application') {
-        console.log(completeAction);
-      }
       if (!completeAction.validateAction.apiRequestStarted && completeAction.validationResult.started) {
         if (completeAction.independentUpdates) {
-          if (completeAction.apiAction.entityType === 'application') {
-            console.log('complete application');
-          }
           this.update(completeAction.apiAction, false, null);
         }
       } else if (completeAction.validateAction.apiRequestStarted) {
@@ -192,9 +183,6 @@ export class RequestEffect {
         ...apiAction,
       };
       if (busy) {
-        if (apiAction.entityType === 'application') {
-          console.log('updating', busy);
-        }
         newAction.updatingKey = rootUpdatingKey;
       }
       this.store.dispatch(new UpdateCfAction(newAction, busy, error));
