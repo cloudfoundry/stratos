@@ -154,15 +154,15 @@ function isEndpointAction(action) {
 
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
   const actionType = getActionType(action);
-  const key = getActionPaginationEntityKey(action);
+  const entityKey = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);
-  if (actionType && key && paginationKey) {
+  if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
-    const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
-    if (state[key][paginationKey] === updatedPaginationState) {
+    const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
+    if (state[entityKey][paginationKey] === updatedPaginationState) {
       return state;
     }
-    newState[key] = mergeState(newState[key], {
+    newState[entityKey] = mergeState(newState[entityKey], {
       [paginationKey]: updatedPaginationState
     });
     return newState;

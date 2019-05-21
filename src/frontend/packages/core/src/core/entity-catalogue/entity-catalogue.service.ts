@@ -80,7 +80,7 @@ class EntityCatalogue {
 
   public getEntityKey(endpointType: string | EntityCatalogueEntityConfig, entityType?: string) {
     const config = endpointType as EntityCatalogueEntityConfig;
-    if (config.entityType) {
+    if (config && config.entityType) {
       return EntityCatalogueHelpers.buildEntityKey(config.entityType, config.endpointType);
     }
     return EntityCatalogueHelpers.buildEntityKey(entityType, endpointType as string);

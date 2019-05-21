@@ -29,7 +29,7 @@ import {
   QParam,
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -104,19 +104,22 @@ export function removeEmptyParams(params: PaginationParam) {
 export function getActionType(action) {
   return action.type;
 }
-
+// TODO We need types here. This might lead us to tidy up all of our actions.
 export function getAction(action): PaginatedAction {
   if (!action) {
     return null;
   }
+  if (action.entityConfig) {
+    return action.entityConfig;
+  }
   return action.apiAction ? action.apiAction : action;
 }
 
+// TODO We need types here. This might lead us to tidy up all of our actions.
 export function getActionPaginationEntityKey(action) {
-  // TODO this need to come from entityCatalogue
   const apiAction = getAction(action);
-  const entityKey = apiAction.proxyPaginationEntityKey || apiAction.entityType;
-  return EntityCatalogueHelpers.buildEntityKey(entityKey, apiAction.endpointType);
+  const entityType = apiAction.proxyPaginationEntityKey || apiAction.entityType;
+  return entityCatalogue.getEntityKey(apiAction.endpointType, entityType);
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {
