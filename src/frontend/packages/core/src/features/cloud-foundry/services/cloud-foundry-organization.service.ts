@@ -46,6 +46,7 @@ export const createQuotaDefinition = (orgGuid: string): IQuotaDefinition => ({
 export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;
+  quotaLink$: Observable<string[]>;
   userOrgRole$: Observable<string>;
   quotaDefinition$: Observable<IQuotaDefinition>;
   totalMem$: Observable<number>;
@@ -132,7 +133,6 @@ export class CloudFoundryOrganizationService {
     this.serviceInstancesCount$ = fetchServiceInstancesCount(this.cfGuid, this.orgGuid, null, this.store, this.paginationMonitorFactory);
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid);
-
   }
 
   private initialiseSpaceObservables() {
@@ -178,6 +178,16 @@ export class CloudFoundryOrganizationService {
     this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
+    this.quotaLink$ = this.org$.pipe(map(o => {
+      const quotaDefinition = o.entity.entity.quota_definition;
+
+      return quotaDefinition && [
+        '/cloud-foundry',
+        this.cfGuid,
+        'quota-definitions',
+        quotaDefinition.metadata.guid
+      ];
+    }));
   }
 
   private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {

@@ -242,15 +242,20 @@ export interface IPrivateDomain {
 }
 
 export interface IQuotaDefinition {
-  memory_limit: number;
-  app_instance_limit: number;
-  instance_memory_limit: number;
+  guid?: string;
   name: string;
   organization_guid?: string;
-  total_services?: number;
-  total_routes?: number;
-  total_private_domains?: number;
+  app_instance_limit: number;
+  app_task_limit?: number;
+  memory_limit: number;
+  instance_memory_limit: number;
+  total_services: number;
+  total_service_keys?: number;
   non_basic_services_allowed?: boolean;
+  trial_db_allowed?: boolean;
+  total_routes: number;
+  total_reserved_route_ports?: number;
+  total_private_domains?: number;
 }
 
 export interface IUpdateSpace {
