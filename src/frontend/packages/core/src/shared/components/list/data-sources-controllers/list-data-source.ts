@@ -28,7 +28,6 @@ import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.a
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   PaginatedAction,
@@ -51,6 +50,7 @@ import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { LocalPaginationHelpers } from './local-list.helpers';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';

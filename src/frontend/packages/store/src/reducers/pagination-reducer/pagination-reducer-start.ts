@@ -1,6 +1,5 @@
 import { PaginationEntityState } from '../../types/pagination.types';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export function paginationStart(state, action): PaginationEntityState {
   const page = action.apiAction.__forcedPageNumber__ || action.apiAction.pageNumber || state.currentPage;
@@ -18,7 +17,10 @@ export function paginationStart(state, action): PaginationEntityState {
           entityType: action.apiAction.entityType,
           endpointType: action.apiAction.endpointType,
         },
-        entityConfig,
+        entityConfig: entityConfig ? {
+          entityType: entityConfig.entityType,
+          endpointType: entityConfig.endpointType,
+        } : null,
         maxed: false
       }
     }

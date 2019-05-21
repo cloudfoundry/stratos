@@ -1,6 +1,6 @@
 
 import { AppState } from '../../../store/src/app-state';
-import { EntitySchema } from '../../../store/src/helpers/entity-factory';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 export class ComponentEntityMonitorConfig {
   constructor(public guid: string, public schema: EntitySchema) { }
 }

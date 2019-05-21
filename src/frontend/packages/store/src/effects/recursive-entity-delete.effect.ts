@@ -6,12 +6,11 @@ import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { DELETE_SUCCESS, DeleteApplication } from '../actions/application.actions';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
-import { EntitySchema } from '../helpers/entity-factory';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { IRequestDataState } from '../types/entity.types';
 import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntitySchema } from '../helpers/entity-schema';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';

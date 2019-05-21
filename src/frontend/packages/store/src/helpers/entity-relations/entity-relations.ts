@@ -22,7 +22,6 @@ import { APIResource, NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
-import { EntitySchema } from '../entity-factory';
 import { pick } from '../reducer.helper';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
@@ -37,6 +36,7 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
+import { EntitySchema } from '../entity-schema';
 
 // TODO This 1 needs a tidy up and 2 only works with CF entities.
 interface ValidateResultFetchingState {

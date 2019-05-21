@@ -12,11 +12,11 @@ import { Injectable } from '@angular/core';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import {
   IEntityMetadata,
-  StratosBaseCatalogueEntity,
   IStratosEntityDefinition
 } from '../../../core/entity-catalogue/entity-catalogue.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
+import { StratosBaseCatalogueEntity } from '../../../core/entity-catalogue/entity-catalogue-entity';
 
 
 export interface IFavoriteTypes {

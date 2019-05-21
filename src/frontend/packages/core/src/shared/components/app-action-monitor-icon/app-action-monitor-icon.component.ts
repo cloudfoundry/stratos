@@ -1,11 +1,10 @@
 import { Component, OnInit, Input, Output } from '@angular/core';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { schema } from 'normalizr';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { Observable } from 'rxjs';
 import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom, tap } from 'rxjs/operators';
 import { rootUpdatingKey, RequestInfoState, ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { EntitySchema } from '../../../../../store/src/helpers/entity-factory';
+import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',

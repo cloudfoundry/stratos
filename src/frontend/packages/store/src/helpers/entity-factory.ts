@@ -4,8 +4,7 @@ import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntitySchema } from './entity-schema';
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
@@ -50,42 +49,7 @@ export const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
-/**
- * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
- *
- * @export
- * @extends {schema.Entity}
- */
-export class EntitySchema extends schema.Entity implements EntityCatalogueEntityConfig {
-  schema: Schema;
-  public getId: (input, parent?, key?) => string;
-  /**
-   * @param entityKey As per schema.Entity ctor
-   * @param [definition] As per schema.Entity ctor
-   * @param [options] As per schema.Entity ctor
-   * @param [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
-   * spaces, manager spaces, auditor space, etc
-   */
-  constructor(
-    public entityType: string,
-    public endpointType: string,
-    public definition?: Schema,
-    private options?: schema.EntityOptions,
-    public relationKey?: string
-  ) {
-    super(endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
-    this.schema = definition || {};
-  }
-  public withEmptyDefinition() {
-    return new EntitySchema(
-      this.entityType,
-      this.endpointType,
-      {},
-      this.options,
-      this.relationKey
-    );
-  }
-}
+
 
 export class CFEntitySchema extends EntitySchema {
   /**

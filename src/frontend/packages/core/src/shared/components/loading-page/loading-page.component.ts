@@ -6,7 +6,7 @@ import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { EntitySchema } from '../../../../../store/src/helpers/entity-factory';
+import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 
 
 @Component({

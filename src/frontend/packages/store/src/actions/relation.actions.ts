@@ -1,6 +1,5 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { EntitySchema } from '../helpers/entity-factory';
 import {
   EntityInlineChildAction,
   EntityInlineParentAction,

@@ -6,7 +6,7 @@ import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'r
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { applicationSchemaKey, EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
+import { applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -35,6 +35,7 @@ import { FavoritesConfigMapper } from '../../../../shared/components/favorites-m
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -63,7 +64,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService,
     private favoritesConfigMapper: FavoritesConfigMapper,
-     
+
   ) {
     const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
     this.schema = catalogueEntity.getSchema();

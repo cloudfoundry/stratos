@@ -2,12 +2,12 @@ import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
-import { EntitySchema } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntitySchema } from '../helpers/entity-schema';
 
 export interface SingleEntityAction {
   entityType: string;

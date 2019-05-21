@@ -1,8 +1,5 @@
 import {
   IStratosEndpointDefinition,
-  StratosCatalogueEndpointEntity,
-  StratosCatalogueEntity,
-  StratosBaseCatalogueEntity
 } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import {
   applicationSchemaKey,
@@ -67,6 +64,11 @@ import {
 } from '../../core/src/core/cf-api-svc.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
+import {
+  StratosCatalogueEntity,
+  StratosCatalogueEndpointEntity,
+  StratosBaseCatalogueEntity
+} from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition = {

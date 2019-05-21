@@ -75,8 +75,7 @@ import {
   MultiFilterManager,
 } from './list.component.types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { EntitySchema } from '../../../../../store/src/helpers/entity-factory';
-
+import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 
 @Component({
   selector: 'app-list',

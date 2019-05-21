@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { entityFactory, EntitySchema, organizationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { entityFactory, organizationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import {
   getActionsFromExtensions,
@@ -21,6 +21,7 @@ import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-end
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { FavoritesConfigMapper } from '../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { IOrgFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
+import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',

@@ -1,6 +1,6 @@
-import { StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue.types';
 import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { endpointEntitySchema, userFavoritesEntitySchema, userProfileEntitySchema, STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
+import { StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
 //
 // These types are used to represent the base stratos types.
 //

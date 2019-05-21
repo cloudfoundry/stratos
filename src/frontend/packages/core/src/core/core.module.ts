@@ -32,7 +32,7 @@ import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { BaseEndpointAuth } from '../features/endpoints/endpoint-auth';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { StratosCatalogueEndpointEntity } from './entity-catalogue/entity-catalogue.types';
+import { StratosCatalogueEndpointEntity } from './entity-catalogue/entity-catalogue-entity';
 
 @NgModule({
   imports: [

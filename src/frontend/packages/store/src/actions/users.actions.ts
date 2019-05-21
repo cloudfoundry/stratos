@@ -4,7 +4,6 @@ import {
   cfUserSchemaKey,
   endpointSchemaKey,
   entityFactory,
-  EntitySchema,
   organizationSchemaKey,
   spaceSchemaKey,
 } from '../helpers/entity-factory';
@@ -17,6 +16,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction } from '../types/request.types';
 import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 import { getActions } from './action.helper';
+import { EntitySchema } from '../helpers/entity-schema';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';

@@ -12,7 +12,7 @@ import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction } from '../../types/request.types';
-import { EntitySchema } from '../entity-factory';
+import { EntitySchema } from '../entity-schema';
 
 export class ValidateEntityRelationsConfig {
   /**

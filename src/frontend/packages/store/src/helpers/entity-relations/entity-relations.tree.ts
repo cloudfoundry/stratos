@@ -1,18 +1,16 @@
-import { schema } from 'normalizr';
-
-import { EntitySchema } from '../entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction, EntityTree, EntityTreeRelation } from './entity-relations.types';
+import { EntitySchema } from '../entity-schema';
 
 const entityTreeCache: {
   [entityKey: string]: EntityTree
 } = {};
 
 function generateCacheKey(entityKey: string, action: EntityInlineParentAction): string {
-  let includeRelations = action.includeRelations || [];
-  includeRelations = includeRelations.sort((a, b) => {
+  const includeRelations = action.includeRelations || [];
+  const relationKey = [...includeRelations].sort((a, b) => {
     return a.localeCompare(b);
-  });
-  return entityKey + '+' + includeRelations.join(',');
+  }).join(',');
+  return entityKey + '+' + relationKey;
 }
 
 export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {

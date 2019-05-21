@@ -1,14 +1,12 @@
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { Observable, OperatorFunction } from 'rxjs';
 
 import { AppState } from '../../../../../../store/src/app-state';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
-import { EntityCatalogueEntityConfig } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 
 /**

@@ -12,15 +12,14 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
-import { endpointStoreNames } from '../../../../../../store/src/types/endpoint.types';
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getFullEndpointApiUrl } from '../../endpoint-helpers';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({

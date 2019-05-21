@@ -7,7 +7,6 @@ import {
   appStatsSchemaKey,
   cfUserSchemaKey,
   domainSchemaKey,
-  EntitySchema,
   organizationSchemaKey,
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
@@ -21,6 +20,7 @@ import {
   userProvidedServiceInstanceSchemaKey,
 } from './entity-factory';
 import { IRequestTypeState } from '../app-state';
+import { EntitySchema } from './entity-schema';
 
 export interface IFlatTree {
   [entityKey: string]: Set<string>;
