@@ -13,6 +13,8 @@ import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-f
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
+import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
+import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
   CloudFoundryCellAppsComponent,
@@ -142,6 +144,14 @@ const cloudFoundry: Routes = [{
       // Root for attaching CF wide actions (i.e assignments, tabs)
       component: CloudFoundryBaseComponent,
       children: [
+        {
+          path: 'quota-definitions/:quotaId',
+          component: QuotaDefinitionComponent
+        },
+        {
+          path: 'organizations/:orgId/space-quota-definitions/:quotaId',
+          component: SpaceQuotaDefinitionComponent
+        },
         {
           path: 'organizations/:orgId/edit-org',
           component: EditOrganizationComponent
@@ -278,6 +288,10 @@ const cloudFoundry: Routes = [{
                   component: CloudFoundryOrganizationUsersComponent
                 },
                 {
+                  path: 'quota',
+                  component: QuotaDefinitionComponent
+                },
+                {
                   path: '**',
                   component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtensionRoutes],
@@ -322,6 +336,14 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundrySpaceUsersComponent
+                },
+                {
+                  path: 'quota',
+                  component: QuotaDefinitionComponent
+                },
+                {
+                  path: 'space-quota',
+                  component: SpaceQuotaDefinitionComponent
                 },
                 {
                   path: '**',

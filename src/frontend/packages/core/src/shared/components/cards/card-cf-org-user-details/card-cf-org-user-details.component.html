@@ -9,8 +9,10 @@
           <app-metadata-item label="User Org Role">
             {{ (cfOrgService.userOrgRole$ | async) }}
           </app-metadata-item>
-          <app-metadata-item label="Quota Definition Name">
-            {{ (cfOrgService.quotaDefinition$ | async)?.name }}
+          <app-metadata-item label="Quota Definition">
+            <a routerLink="../quota">
+              {{ (cfOrgService.quotaDefinition$ | async)?.name }}
+            </a>
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
             <app-boolean-indicator [isTrue]="(cfOrgService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no">

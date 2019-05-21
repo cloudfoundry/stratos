@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetSpace } from '../../../../../store/src/actions/space.actions';
@@ -59,6 +59,7 @@ export class CloudFoundrySpaceService {
   loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   usersCount$: Observable<number | null>;
+  quotaLink$: Observable<string[]>;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -154,6 +155,28 @@ export class CloudFoundrySpaceService {
         } :
         createQuotaDefinition(this.orgGuid)
       )
+    );
+    this.quotaLink$ = combineLatest(this.quotaDefinition$, this.spaceQuotaDefinition$).pipe(
+      map(([quota, spaceQuota])  => {
+        if (!spaceQuota) {
+          return [
+            '/cloud-foundry',
+            this.cfGuid,
+            'quota-definitions',
+            quota.guid
+          ];
+        }
+
+        return quota && [
+          '/cloud-foundry',
+          this.cfGuid,
+          'organizations',
+          this.orgGuid,
+          'space-quota-definitions',
+          quota.guid
+        ];
+      }
+    )
     );
   }
 

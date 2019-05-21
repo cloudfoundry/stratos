@@ -27,8 +27,10 @@ import { EditOrganizationStepComponent } from './edit-organization/edit-organiza
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
+import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
+import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
 import { CfAdminAddUserWarningComponent } from './tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
@@ -99,7 +101,6 @@ import {
 import { UserInviteService } from './user-invites/user-invite.service';
 import { InviteUsersCreateComponent } from './users/invite-users/invite-users-create/invite-users-create.component';
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
-import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 import { CfRolesService } from './users/manage-users/cf-roles.service';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
 import { UsersRolesModifyComponent } from './users/manage-users/manage-users-modify/manage-users-modify.component';
@@ -108,6 +109,7 @@ import {
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
 @NgModule({
   imports: [
@@ -167,6 +169,8 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     CloudFoundryInviteUserLinkComponent,
     CfAdminAddUserWarningComponent,
     RemoveUserComponent,
+    QuotaDefinitionComponent,
+    SpaceQuotaDefinitionComponent,
   ],
   providers: [
     EndpointListHelper,

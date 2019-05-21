@@ -1,0 +1,101 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" *ngIf="quotaGuid">
+  <h1>{{ (quotaDefinition$ | async)?.entity?.name }}</h1>
+</app-page-header>
+
+<div class="quota-definition-page">
+  <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+    <app-tile-grid fit="true">
+      <app-tile-group>
+        <app-tile>
+          <h4>Organization</h4>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric icon="memory" label="Memory Limit" units="mb"
+            value="{{ (quotaDefinition$ | async)?.entity?.memory_limit }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-boolean-metric icon="apps" label="Trial DB Allowed"
+            value="{{ (quotaDefinition$ | async)?.entity?.trial_db_allowed }}">
+          </app-card-boolean-metric>
+        </app-tile>
+        <app-tile></app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <h4>Applications</h4>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric icon="apps" label="App Instances Limit" labelSingular="App Instance Limit"
+            value="{{ (quotaDefinition$ | async)?.entity?.app_instance_limit }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric icon="apps" label="App Tasks Limit" labelSingular="App Task Limit"
+            value="{{ (quotaDefinition$ | async)?.entity?.app_task_limit }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric icon="memory" label="App Instance Memory Limit"
+            value="{{ (quotaDefinition$ | async)?.entity?.instance_memory_limit }}">
+          </app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <h4>Services</h4>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric icon="service" iconFont="stratos-icons" label="Total Services" labelSingular="Total Service"
+            value="{{ (quotaDefinition$ | async)?.entity?.total_services }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric icon="service" iconFont="stratos-icons" label="Total Service Keys" labelSingular="Total Service Key"
+            value="{{ (quotaDefinition$ | async)?.entity?.total_service_keys }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-boolean-metric icon="service" iconFont="stratos-icons" label="Non Basic Services Allowed"
+            value="{{ (quotaDefinition$ | async)?.entity?.non_basic_services_allowed }}">
+          </app-card-boolean-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <h4>Routes</h4>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric icon="network_route" iconFont="stratos-icons" label="Total Routes" labelSingular="Total Route"
+            value="{{ (quotaDefinition$ | async)?.entity?.total_routes }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric icon="network_route" iconFont="stratos-icons" label="Total Reserved Route Ports" labelSingular="Total Reserved Route Ports"
+            value="{{ (quotaDefinition$ | async)?.entity?.total_reserved_route_ports }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric icon="domain" label="Private Domains" labelSingular="Private Domain"
+            value="{{ (quotaDefinition$ | async)?.entity?.total_private_domains }}">
+          </app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+    </app-tile-grid>
+  </app-loading-page>
+</div>

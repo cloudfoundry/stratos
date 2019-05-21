@@ -42,6 +42,7 @@ import { CardAppInstancesComponent } from './components/cards/card-app-instances
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
+import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import {
   CardCfOrgUserDetailsComponent,
@@ -230,6 +231,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     BooleanIndicatorComponent,
     CardCfSpaceDetailsComponent,
     AppChipsComponent,
+    CardBooleanMetricComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
@@ -345,6 +347,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardCfSpaceDetailsComponent,
     RingChartComponent,
     AppChipsComponent,
+    CardBooleanMetricComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
     CompactAppCardComponent,

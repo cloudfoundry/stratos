@@ -56,7 +56,12 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   handleValue() {
-    this.formattedValue = this.formatForUnits(this.value);
+    const value = parseInt(this.value, 10);
+    if (value === -1) {
+      this.formattedValue = '∞';
+    } else {
+      this.formattedValue = this.formatForUnits(this.value);
+    }
 
     if (!this.limit) {
       return;
@@ -70,7 +75,6 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       this.formattedLimit = '∞';
       this.usage = '';
     } else {
-      const value = parseInt(this.value, 10);
       this.formattedLimit = this.formatForUnits(this.limit);
       this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
     }
