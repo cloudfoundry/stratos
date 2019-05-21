@@ -2,12 +2,11 @@ import { Type } from '@angular/core';
 import { first, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
-import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ?
@@ -38,7 +37,7 @@ export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponen
 
 
 export function endpointHasMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
-  return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
+  return store.select(endpointEntitiesSelector).pipe(
     first(),
     map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
   );

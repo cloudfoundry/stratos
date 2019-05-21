@@ -32,8 +32,8 @@ export class CfOrgSpaceLabelService {
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
     const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
-    const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
-    // TODO We shouldn't have to expose STRATOS_ENDPOINT_TYPE
+    const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(spaceSchemaKey, CF_ENDPOINT_TYPE);
+    // TODO We shouldn't have to expose STRATOS_ENDPOINT_TYPE - I'm not sure about that anymore, that's up to the extension.
     const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
 
     this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
@@ -55,7 +55,7 @@ export class CfOrgSpaceLabelService {
       this.space$,
       this.multipleConnectedEndpoints$
     ).pipe(
-      filter(([cf, org, space, multipleConnectedEndpoints]) => !!cf && !!org && !!space),
+      filter(([cf, org, space]) => !!cf && !!org && !!space),
       first(),
       map(([cf, org, space, multipleConnectedEndpoints]) =>
         multipleConnectedEndpoints ? `${cf.name}/${org.entity.name}/${space.entity.name}` : `${org.entity.name}/${space.entity.name}`

@@ -36,6 +36,8 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
 import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 
 
 export interface IUserRole<T> {
@@ -265,7 +267,7 @@ export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Ob
 }
 
 export function selectConnectedCfs(store: Store<AppState>): Observable<EndpointModel[]> {
-  return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
+  return store.select(endpointEntitiesSelector).pipe(
     map(endpoints => Object.values(endpoints)),
     map(endpoints => endpoints.filter(endpoint => endpoint.cnsi_type === 'cf' && endpoint.connectionStatus === 'connected')),
   );
