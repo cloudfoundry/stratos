@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	RegisterMigration(20170818120003, "LocalUsers", func(txn *sql.Tx, conf *goose.DBConf) error {
+	RegisterMigration(20190522121200, "LocalUsers", func(txn *sql.Tx, conf *goose.DBConf) error {
 		binaryDataType := "BYTEA"
 		if strings.Contains(conf.Driver.Name, "mysql") {
 			binaryDataType = "BLOB"
@@ -19,6 +19,7 @@ func init() {
 		createLocalUsers += "password_hash " + binaryDataType + "       NOT NULL, "
 		createLocalUsers += "user_name     VARCHAR(36)  NOT NULL, "
 		createLocalUsers += "user_email    VARCHAR(36), "
+		createLocalUsers += "last_login  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP), "
 		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)"
 
 		if strings.Contains(conf.Driver.Name, "postgres") {
