@@ -19,7 +19,7 @@ func init() {
 		createLocalUsers += "password_hash " + binaryDataType + "       NOT NULL, "
 		createLocalUsers += "user_name     VARCHAR(36)  NOT NULL, "
 		createLocalUsers += "user_email    VARCHAR(36), "
-		createLocalUsers += "last_login  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP), "
+		createLocalUsers += "last_login  TIMESTAMP DEFAULT CURRENT_TIMESTAMP), "
 		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)"
 
 		if strings.Contains(conf.Driver.Name, "postgres") {
