@@ -1,8 +1,8 @@
 package main
 
 import (
+	"crypto/bcrypt"
 	"crypto/rand"
-	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -292,14 +292,30 @@ func (p *portalProxy) localLogin(c echo.Context) error {
 
 func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error) {
 	log.Debug("doLocalLogin")
-	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
-	res, u, err := 
+
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	if len(username) == 0 || len(password) == 0 {
+		//TODO return an appropriate response here
+		return uaaRes, errors.New("Needs username and password")
+	}
+
+	//TODO: o the login here using bcrypt.
+	//TODO Fetch the hash via the local users repository interface
+	//Check the password hash
+	hash, err = CheckPasswordHash(password, hash)
+
+
 	if err != nil {
 		// Check the Error
 		errMessage := "Access Denied"
+		//I doubt we can parse this as it hasn't come from the UAA
+		//TODO: Probably don't need to parse into local auth response as only the message is used in the http error response
+	    // So either delete the local auth response definition I made or move it into a better file
 		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
 			// Try and parse the Response into UAA error structure
-			authError := &interfaces.UAAErrorResponse{}
+			authError := &interfaces.LocalAuthResponse{}
 			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
 				errMessage = authError.ErrorDescription
 			}
@@ -312,6 +328,13 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
+	//TODO: Dont think we need this
+	u, err = p.GetUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return uaaRes, u, err
+	}
+
+	//TODO: Generate a userguid at setup time or from config - possibly on jetstream startup if via config.
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = u.UserGUID
 
@@ -322,17 +345,23 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
+	//Makes sure the client gets the right session expiry time - keep this in
 	err = p.handleSessionExpiryHeader(c)
 	if err != nil {
 		return nil, err
 	}
 
+	//TODO: Don't need a token, perhaps add/update last login time instead?
 	_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
+
+	//TODO: Ensure the local user has some kind of admin role configured and we check for it here.
 	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
 
+	//Can we re-use this login response struct?
+	//We may need to add a token expiry value here (and to the localusers table, as we check it elsewhere (though we don't seem to use the value)
 	resp := &interfaces.LoginRes{
 		Account:     u.UserName,
 		TokenExpiry: u.TokenExpiry,
@@ -340,6 +369,16 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		Admin:       uaaAdmin,
 	}
 	return resp, nil
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 // Start SSO flow for an Endpoint
