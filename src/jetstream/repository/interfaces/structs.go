@@ -133,6 +133,10 @@ type LoginRes struct {
 	User        *ConnectedUser `json:"user"`
 }
 
+type LocalLoginRes struct {
+	User        *ConnectedUser `json:"user"`
+}
+
 type LoginHookFunc func(c echo.Context) error
 type LoginHook struct {
 	Priority int
