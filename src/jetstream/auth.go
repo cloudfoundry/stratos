@@ -301,7 +301,6 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return uaaRes, errors.New("Needs username and password")
 	}
 
-	//TODO: o the login here using bcrypt.
 	//TODO Fetch the hash via the local users repository interface
 	//Check the password hash
 	hash, err = CheckPasswordHash(password, hash)
