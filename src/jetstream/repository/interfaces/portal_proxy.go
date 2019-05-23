@@ -57,6 +57,10 @@ type PortalProxy interface {
 	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
 	GetUAAUser(userGUID string) (*ConnectedUser, error)
 
+	// Local Password
+	HashPassword(password string) ([]byte, error)
+	CheckPasswordHash(password string, hash []byte) bool
+
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
@@ -76,8 +80,7 @@ type PortalProxy interface {
 
 	AddLoginHook(priority int, function LoginHookFunc) error
 	ExecuteLoginHooks(c echo.Context) error
-	
+
 	// Plugins
 	GetPlugin(name string) interface{}
-	
 }

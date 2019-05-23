@@ -321,7 +321,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	success := CheckPasswordHash(password, passwordHash)
+	success := p.CheckPasswordHash(password, passwordHash)
 
 	if !success {
 		// Check the Error
@@ -371,13 +371,13 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 	return resp, nil
 }
 
-func HashPassword(password string) (string, error) {
+func (p *portalProxy) HashPassword(password string) ([]byte, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+	return bytes, err
 }
 
-func CheckPasswordHash(password string, hash []byte) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func (p *portalProxy) CheckPasswordHash(password string, hash []byte) bool {
+	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
 	return err == nil
 }
 

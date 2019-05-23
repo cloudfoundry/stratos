@@ -40,6 +40,8 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
+
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -172,6 +174,7 @@ func main() {
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
+	local_users.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
@@ -242,6 +245,11 @@ func main() {
 	addSetupMiddleware, err := initialiseConsoleConfiguration(portalProxy)
 	if err != nil {
 		log.Infof("Failed to initialise console config due to: %s", err)
+		return
+	}
+	err = initialiseLocalUsersConfiguration(portalProxy)
+	if err != nil {
+		log.Infof("Failed to initialise local users config due to: %s", err)
 		return
 	}
 
@@ -329,6 +337,30 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 	}
 
 	return addSetupMiddleware, nil
+}
+
+func initialiseLocalUsersConfiguration(portalProxy *portalProxy) (error) {
+
+	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(portalProxy.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
+		return err
+	}
+   
+	if err == nil {
+		userGUID := uuid.NewV4().String()
+		password := portalProxy.Config.ConsoleConfig.LocalUserPassword
+		passwordHash, err := portalProxy.HashPassword(password)
+		if err != nil {
+			log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
+			return err
+		}
+		username := portalProxy.Config.ConsoleConfig.LocalUser
+		scope    := portalProxy.Config.ConsoleConfig.LocalUserAdminScope
+		email    := ""
+		localUsersRepo.AddLocalUser(userGUID, passwordHash, username, email, scope)
+	}
+	return nil
 }
 
 func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.ConsoleConfig) {
@@ -772,6 +804,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// SSO Routes will only respond if SSO is enabled
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
+
+	// Local User login/logout
+	pp.GET("/v1/auth/local_login", p.localLogin)
+	pp.GET("/v1/auth/local_logout", p.logout)
 
 	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)

@@ -16,6 +16,8 @@ var findUserGUID = `SELECT user_guid FROM local_users WHERE user_name = $1`
 var findUserScope = `SELECT user_scope FROM local_users WHERE user_guid = $1`
 var insertLocalUser = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, last_login, last_updated) VALUES ($1, $2, $3, $4, $5, $6)`
 
+var getTableCount = `SELECT count(user_guid) FROM local_users`
+
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
 type PgsqlLocalUsersRepository struct {
 	db *sql.DB
