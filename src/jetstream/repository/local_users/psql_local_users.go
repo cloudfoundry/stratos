@@ -6,15 +6,14 @@ import (
 	"fmt"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )
 
 var findPasswordHash = `SELECT password_hash
 									FROM local_users
 									WHERE user_guid = $1`
+var findUserGUID = `SELECT user_guid FROM local_users WHERE user_name = $1`
+var findUserScope = `SELECT user_scope FROM local_users WHERE user_guid = $1`
 var insertLocalUser = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, last_login, last_updated) VALUES ($1, $2, $3, $4, $5, $6)`
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
@@ -35,7 +34,7 @@ func InitRepositoryProvider(databaseProvider string) {
 }
 
 // FindPasswordHash - return the password hash from the datastore
-func (p *PgsqlTokenRepository) FindPasswordHash(userGUID string) (hash []byte, error) {
+func (p *PgsqlLocalUsersRepository) FindPasswordHash(userGUID string) ([]byte, error) {
 	log.Debug("FindPasswordHash")
 	if userGUID == "" {
 		msg := "Unable to find password hash without a valid User GUID."
@@ -45,7 +44,7 @@ func (p *PgsqlTokenRepository) FindPasswordHash(userGUID string) (hash []byte, e
 
 	// temp vars to retrieve db data
 	var (
-		passwordHash              []byte
+		passwordHash []byte
 	)
 
 	// Get the password hash from the db
@@ -59,8 +58,57 @@ func (p *PgsqlTokenRepository) FindPasswordHash(userGUID string) (hash []byte, e
 	return passwordHash, nil
 }
 
+// FindUserGUID - return the user GUID from the datastore
+func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error) {
+	log.Debug("FinduserGUID")
+	if username == "" {
+		msg := "Unable to find user GUID without a valid username."
+		log.Debug(msg)
+		return "", errors.New(msg)
+	}
+
+	// temp vars to retrieve db data
+	var (
+		userGUID string
+	)
+
+	// Get the password hash from the db
+	err := p.db.QueryRow(findUserGUID, username).Scan(&userGUID)
+	if err != nil {
+		msg := "Unable to Find user GUID: %v"
+		log.Debugf(msg, err)
+		return "", fmt.Errorf(msg, err)
+	}
+
+	return userGUID, nil
+}
+
+func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, error) {
+	log.Debug("FindUserScope")
+	if userGUID == "" {
+		msg := "Unable to find user scope without a valid user GUID."
+		log.Debug(msg)
+		return "", errors.New(msg)
+	}
+
+	// temp vars to retrieve db data
+	var (
+		userScope string
+	)
+
+	// Get the password hash from the db
+	err := p.db.QueryRow(findUserScope, userGUID).Scan(&userScope)
+	if err != nil {
+		msg := "Unable to Find user scope: %v"
+		log.Debugf(msg, err)
+		return "", fmt.Errorf(msg, err)
+	}
+
+	return userScope, nil
+}
+
 // AddLocalUser - Add a new local user to the datastore
-func (p *PgsqlTokenRepository) AddLocalUser(userGUID string, passwordHash []byte, string, name string, email string) error {
+func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash []byte, username string, email string, scope string) error {
 
 	log.Debug("AddLocalUser")
 
@@ -76,15 +124,15 @@ func (p *PgsqlTokenRepository) AddLocalUser(userGUID string, passwordHash []byte
 		return errors.New(msg)
 	}
 
-	if name == "" {
+	if username == "" {
 		msg := "Unable to add new local user without a valid User name."
 		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	// Add the new local user to the DB
-	var lastLogin, lastUpdated = nil
-	result, err := p.db.Exec(insertLocalUser, userGUID, passwordHash, name, email, lastLogin, lastUpdated)
+	var lastLogin, lastUpdated string = "", ""
+	result, err := p.db.Exec(insertLocalUser, userGUID, passwordHash, username, email, scope, lastLogin, lastUpdated)
 	if err != nil {
 		msg := "Unable to INSERT local user: %v"
 		log.Debugf(msg, err)

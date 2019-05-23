@@ -346,6 +346,7 @@ func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("... Setup Complete      : %t", config.IsSetupComplete)
 	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
 	log.Infof("... Use SSO Login       : %t", config.UseSSO)
+	log.Infof("... Local User          : %s", config.LocalUser)
 }
 
 func showSSOConfig(portalProxy *portalProxy) {

@@ -179,9 +179,17 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
 	}
 
+	localUser, found := p.Env().Lookup("LOCAL_USER")
+	localUserPassword, found := p.Env().Lookup("LOCAL_USER_PASSWORD")
+	localUserScope, found := p.Env().Lookup("LOCAL_USER_SCOPE")
+
 	if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
 	}
+
+	consoleConfig.LocalUserAdminScope = localUserScope
+	consoleConfig.LocalUser = localUser
+	consoleConfig.LocalUserPassword = localUserPassword
 
 	consoleConfig.ConsoleAdminScope = consoleAdminScope
 	consoleConfig.ConsoleClient = consoleClient

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/bcrypt"
+
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -21,6 +21,9 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // LoginHookFunc - function that can be hooked into a successful user login
@@ -298,44 +301,41 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 	if len(username) == 0 || len(password) == 0 {
 		//TODO return an appropriate response here
-		return uaaRes, errors.New("Needs username and password")
+		return nil, errors.New("Needs username and password")
+	}
+	
+	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for UAA token: %v", err)
+		return nil, err
 	}
 
-	//TODO Fetch the hash via the local users repository interface
 	//Check the password hash
-	hash, err = CheckPasswordHash(password, hash)
-
-
+	userGUID, err := localUsersRepo.FindUserGUID(username)
 	if err != nil {
+		return nil, err
+	}
+
+	passwordHash, err := localUsersRepo.FindPasswordHash(userGUID)
+	if err != nil {
+		return nil, err
+	}
+
+	success := CheckPasswordHash(password, passwordHash)
+
+	if !success {
 		// Check the Error
 		errMessage := "Access Denied"
-		//I doubt we can parse this as it hasn't come from the UAA
-		//TODO: Probably don't need to parse into local auth response as only the message is used in the http error response
-	    // So either delete the local auth response definition I made or move it into a better file
-		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
-			// Try and parse the Response into UAA error structure
-			authError := &interfaces.LocalAuthResponse{}
-			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
-				errMessage = authError.ErrorDescription
-			}
-		}
-
-		err = interfaces.NewHTTPShadowError(
+		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			errMessage,
 			"Login failed: %s: %v", errMessage, err)
 		return nil, err
 	}
 
-	//TODO: Dont think we need this
-	u, err = p.GetUserTokenInfo(uaaRes.AccessToken)
-	if err != nil {
-		return uaaRes, u, err
-	}
-
 	//TODO: Generate a userguid at setup time or from config - possibly on jetstream startup if via config.
 	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = u.UserGUID
+	sessionValues["user_id"] = userGUID
 
 	// Ensure that login disregards cookies from the request
 	req := c.Request()
@@ -350,22 +350,23 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	//TODO: Don't need a token, perhaps add/update last login time instead?
-	_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	//TODO: Perhaps add/update last login time here?
+
+
+	//TODO: Ensure the local user has some kind of admin role configured and we check for it here.
+	localUserScope, err := localUsersRepo.FindUserScope(userGUID)
 	if err != nil {
 		return nil, err
 	}
-
-	//TODO: Ensure the local user has some kind of admin role configured and we check for it here.
-	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
+	admin := strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserAdminScope)
 
 	//Can we re-use this login response struct?
 	//We may need to add a token expiry value here (and to the localusers table, as we check it elsewhere (though we don't seem to use the value)
 	resp := &interfaces.LoginRes{
-		Account:     u.UserName,
-		TokenExpiry: u.TokenExpiry,
+		Account:     username,
+		TokenExpiry: 0,
 		APIEndpoint: nil,
-		Admin:       uaaAdmin,
+		Admin:       admin,
 	}
 	return resp, nil
 }
@@ -375,7 +376,7 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func CheckPasswordHash(password, hash string) bool {
+func CheckPasswordHash(password string, hash []byte) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
@@ -714,7 +715,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 		if !user.Admin {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Can not disconnect System Shared endpoint - user is not an administrator")
 		}
-		userGUID = tokens.SystemSharedUserGuid
+		userGUID = tokens.SystemSharedUserGuid	
 	}
 
 	// Clear the token
