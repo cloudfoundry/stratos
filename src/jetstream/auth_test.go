@@ -64,6 +64,48 @@ func TestLoginToUAA(t *testing.T) {
 	})
 }
 
+func TestLocalLogin(t *testing.T) {
+	t.Parallel()
+
+	Convey("UAA tests", t, func() {
+		req := setupMockReq("POST", "", map[string]string{
+			"username": "localuser",
+			"password": "localuserpass",
+		})
+
+		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+
+		mockUAA := setupMockServer(t,
+			msRoute("/oauth/token"),
+			msMethod("POST"),
+			msStatus(http.StatusOK),
+			msBody(jsonMust(mockUAAResponse)))
+
+		defer mockUAA.Close()
+		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+		uaaUrl, _ := url.Parse(mockUAA.URL)
+		pp.Config.ConsoleConfig.UAAEndpoint = uaaUrl
+		pp.Config.ConsoleConfig.SkipSSLValidation = true
+
+		mock.ExpectQuery(selectAnyFromTokens).
+			WillReturnRows(expectNoRows())
+
+		mock.ExpectExec(insertIntoTokens).
+			// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		Convey("Should not fail to login", func() {
+			So(pp.loginToUAA(ctx), ShouldBeNil)
+		})
+		//
+		//Convey("Expectations should be met", func() {
+		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
+		//})
+
+	})
+}
+
 func TestLoginToUAAWithBadCreds(t *testing.T) {
 	t.Parallel()
 

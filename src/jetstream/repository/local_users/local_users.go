@@ -1,6 +1,6 @@
 package local_users
 
-// Repository is an application of the repository pattern for storing tokens
+// Repository is an application of the repository pattern for storing local users
 type Repository interface {
 	AddLocalUser(userGUID string, passwordHash []byte, username string, email string, role string) error
 	FindPasswordHash(userGUID string) ([]byte, error)
