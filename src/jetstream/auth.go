@@ -298,32 +298,34 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 	username := c.FormValue("username")
 	password := c.FormValue("password")
+	guid     := c.FormValue("guid")
 
-	if len(username) == 0 || len(password) == 0 {
+	if len(username) == 0 || len(password) == 0 || len(guid) == 0 {
 		//TODO return an appropriate response here
-		return nil, errors.New("Needs username and password")
+		return nil, errors.New("Needs username, password and guid")
 	}
 	
 	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Database error getting repo for UAA token: %v", err)
+		log.Errorf("Database error getting repo for Local users: %v", err)
 		return nil, err
 	}
 
 	//Check the password hash
-	userGUID, err := localUsersRepo.FindUserGUID(username)
+	//guid, err := localUsersRepo.FindUserGUID(username)
+	//if err != nil {
+	//	return nil, err
+	//}
+    log.Infof("Finding hash for GUID: %s", guid)
+	hash, err := localUsersRepo.FindPasswordHash(guid)
 	if err != nil {
 		return nil, err
 	}
 
-	passwordHash, err := localUsersRepo.FindPasswordHash(userGUID)
+	log.Infof("Checking hash for password and hash: %s, %s", password, hash)
+	err = p.CheckPasswordHash(password, hash)
+
 	if err != nil {
-		return nil, err
-	}
-
-	success := p.CheckPasswordHash(password, passwordHash)
-
-	if !success {
 		// Check the Error
 		errMessage := "Access Denied"
 		err := interfaces.NewHTTPShadowError(
@@ -335,7 +337,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 	//TODO: Generate a userguid at setup time or from config - possibly on jetstream startup if via config.
 	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = userGUID
+	sessionValues["user_id"] = guid
 
 	// Ensure that login disregards cookies from the request
 	req := c.Request()
@@ -354,7 +356,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 
 	//TODO: Ensure the local user has some kind of admin role configured and we check for it here.
-	localUserScope, err := localUsersRepo.FindUserScope(userGUID)
+	localUserScope, err := localUsersRepo.FindUserScope(guid)
 	if err != nil {
 		return nil, err
 	}
@@ -376,9 +378,9 @@ func (p *portalProxy) HashPassword(password string) ([]byte, error) {
 	return bytes, err
 }
 
-func (p *portalProxy) CheckPasswordHash(password string, hash []byte) bool {
+func (p *portalProxy) CheckPasswordHash(password string, hash []byte) error {
 	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
-	return err == nil
+	return err
 }
 
 // Start SSO flow for an Endpoint

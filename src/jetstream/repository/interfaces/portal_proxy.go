@@ -59,7 +59,7 @@ type PortalProxy interface {
 
 	// Local Password
 	HashPassword(password string) ([]byte, error)
-	CheckPasswordHash(password string, hash []byte) bool
+	CheckPasswordHash(password string, hash []byte) error
 
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)

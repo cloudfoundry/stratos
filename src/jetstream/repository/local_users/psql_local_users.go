@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	log "github.com/sirupsen/logrus"
@@ -15,11 +14,11 @@ var findPasswordHash = `SELECT password_hash
 									WHERE user_guid = $1`
 var findUserGUID = `SELECT user_guid FROM local_users WHERE user_name = $1`
 var findUserScope = `SELECT user_scope FROM local_users WHERE user_guid = $1`
-var insertLocalUser = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, user_scope, last_login, last_updated) VALUES ($1, $2, $3, $4, $5, $6)`
+var insertLocalUser = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, user_scope) VALUES ($1, $2, $3, $4, $5)`
 
 var getTableCount = `SELECT count(user_guid) FROM local_users`
 
-// PgsqlTokenRepository is a PostgreSQL-backed token repository
+// PgsqlLocalUsersRepository is a PostgreSQL-backed local users repository
 type PgsqlLocalUsersRepository struct {
 	db *sql.DB
 }
@@ -34,6 +33,10 @@ func NewPgsqlLocalUsersRepository(dcp *sql.DB) (Repository, error) {
 func InitRepositoryProvider(databaseProvider string) {
 	// Modify the database statements if needed, for the given database type
 	findPasswordHash = datastore.ModifySQLStatement(findPasswordHash, databaseProvider)
+	findUserGUID = datastore.ModifySQLStatement(findUserGUID, databaseProvider)
+	findUserScope = datastore.ModifySQLStatement(findUserScope, databaseProvider)
+	insertLocalUser = datastore.ModifySQLStatement(insertLocalUser, databaseProvider)
+	getTableCount = datastore.ModifySQLStatement(getTableCount, databaseProvider)
 }
 
 // FindPasswordHash - return the password hash from the datastore
@@ -50,14 +53,16 @@ func (p *PgsqlLocalUsersRepository) FindPasswordHash(userGUID string) ([]byte, e
 		passwordHash []byte
 	)
 
+	log.Infof("Querying hash for user GUID: %s", userGUID)
 	// Get the password hash from the db
-	err := p.db.QueryRow(findPasswordHash, userGUID).Scan(&passwordHash)
+	row := p.db.QueryRow(findPasswordHash, userGUID)
+	err := row.Scan(&passwordHash)
+	log.Infof("Found password hash: %s", string(passwordHash))
 	if err != nil {
-		msg := "Unable to Find password hash: %v"
-		log.Debugf(msg, err)
+		msg := "Unable to Find password hash: %s"
+		log.Infof(msg, err)
 		return nil, fmt.Errorf(msg, err)
 	}
-
 	return passwordHash, nil
 }
 
@@ -72,7 +77,7 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 
 	// temp vars to retrieve db data
 	var (
-		userGUID string
+		userGUID sql.NullString
 	)
 
 	// Get the password hash from the db
@@ -83,11 +88,12 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 		return "", fmt.Errorf(msg, err)
 	}
 
-	return userGUID, nil
+	return userGUID.String, nil
 }
 
 func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, error) {
 	log.Debug("FindUserScope")
+	log.Errorf("Finding user scope for GUID: %s", userGUID)
 	if userGUID == "" {
 		msg := "Unable to find user scope without a valid user GUID."
 		log.Debug(msg)
@@ -99,7 +105,7 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 		userScope string
 	)
 
-	// Get the password hash from the db
+	// Get the user scope from the db
 	err := p.db.QueryRow(findUserScope, userGUID).Scan(&userScope)
 	if err != nil {
 		msg := "Unable to Find user scope: %v"
@@ -134,15 +140,15 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash [
 	}
 
 	// Add the new local user to the DB
-	var lastLogin, lastUpdated int64 = 0, time.Now().Unix()
-
-	result, err := p.db.Exec(insertLocalUser, userGUID, passwordHash, username, email, scope, lastLogin, lastUpdated)
+	log.Infof("Adding user: %s  %s  %s  %s  %s ", userGUID, passwordHash, username, email, scope)
+	result, err := p.db.Exec(insertLocalUser, userGUID, passwordHash, username, email, scope)
 	if err != nil {
 		msg := "Unable to INSERT local user: %v"
 		log.Debugf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
-
+	id, _ := result.LastInsertId()
+	log.Infof("Inserted id: %s", id)
 	rowsUpdates, err := result.RowsAffected()
 	if err != nil {
 		return errors.New("Unable to INSERT local user: could not determine number of rows that were updated")

@@ -76,27 +76,15 @@ func TestLocalLogin(t *testing.T) {
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
-		mockUAA := setupMockServer(t,
-			msRoute("/oauth/token"),
-			msMethod("POST"),
-			msStatus(http.StatusOK),
-			msBody(jsonMust(mockUAAResponse)))
+		pp.logout(ctx)
 
-		defer mockUAA.Close()
-		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
-		uaaUrl, _ := url.Parse(mockUAA.URL)
-		pp.Config.ConsoleConfig.UAAEndpoint = uaaUrl
-		pp.Config.ConsoleConfig.SkipSSLValidation = true
+		//pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
 
-		mock.ExpectQuery(selectAnyFromTokens).
-			WillReturnRows(expectNoRows())
-
-		mock.ExpectExec(insertIntoTokens).
-			// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
-			WillReturnResult(sqlmock.NewResult(1, 1))
+		mock.ExpectQuery(findUserGUID).
+		WillReturnRows(1)
 
 		Convey("Should not fail to login", func() {
-			So(pp.loginToUAA(ctx), ShouldBeNil)
+			So(pp.localLogin(ctx), ShouldBeNil)
 		})
 		//
 		//Convey("Expectations should be met", func() {

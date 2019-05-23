@@ -806,8 +806,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 
 	// Local User login/logout
-	pp.GET("/v1/auth/local_login", p.localLogin)
-	pp.GET("/v1/auth/local_logout", p.logout)
+	pp.POST("/v1/auth/local_login", p.localLogin)
+	pp.POST("/v1/auth/local_logout", p.logout)
 
 	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
