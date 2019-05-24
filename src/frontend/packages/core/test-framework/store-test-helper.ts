@@ -21779,7 +21779,6 @@ function getDefaultInitialTestStoreState(): AppState {
           connectionStatus: 'connected',
           registered: true,
           system_shared_token: false,
-          metricsAvailable: false
         },
       },
       metrics: {},

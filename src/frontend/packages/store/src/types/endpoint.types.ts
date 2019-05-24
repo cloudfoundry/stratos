@@ -35,7 +35,7 @@ export interface IApiEndpointInfo {
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
 // export type endpointMetricsTypes = 'metrics' | 'metrics-kube' | 'kubeMetrics-cf';
 export enum EndpointRelationTypes {
-  METRICS_CF = 'metrics',
+  METRICS_CF = 'metrics-cf',
   METRICS_KUBE = 'metrics-kube',
   KUBEMETRICS_CF = 'kubeMetrics-cf'
 }
@@ -70,7 +70,6 @@ export interface EndpointModel {
   // These are generated client side when we login
   registered?: boolean;
   connectionStatus?: endpointConnectionStatus;
-  metricsAvailable: boolean;
 }
 
 // Metadata for the user connected to an endpoint

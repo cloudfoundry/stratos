@@ -1,16 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
-import { CurrentUserPermissionsService } from './current-user-permissions.service';
+import { first, tap } from 'rxjs/operators';
+
+import { appReducers } from '../../../store/src/reducers.module';
+import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
   CurrentUserPermissions,
   PermissionConfig,
-  PermissionTypes,
   PermissionStrings,
-  ScopeStrings
+  PermissionTypes,
+  ScopeStrings,
 } from './current-user-permissions.config';
-import { tap, first } from 'rxjs/operators';
-import { appReducers } from '../../../store/src/reducers.module';
-import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
+import { CurrentUserPermissionsService } from './current-user-permissions.service';
+
 const initialState = {
   pagination: {
     application: {},
@@ -190,7 +192,6 @@ const initialState = {
             'uaa.user'
           ]
         },
-        metricsAvailable: false,
         connectionStatus: 'connected',
         registered: true
       },
@@ -230,7 +231,6 @@ const initialState = {
             'scim.write'
           ]
         },
-        metricsAvailable: false,
         connectionStatus: 'connected',
         registered: true
       }

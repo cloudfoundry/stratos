@@ -2,12 +2,11 @@ import { Type } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { endpointHasCfMetrics } from '../../../../store/src/reducers/system-endpoints.reducer';
-import { selectEntities } from '../../../../store/src/selectors/api.selectors';
+import { endpointsEntityRequestDataSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { ExtensionService } from '../../core/extension/extension-service';
 import {
@@ -188,9 +187,9 @@ export function getIconForEndpoint(type: string, subType: string): EndpointIcon 
 }
 
 export function getEndpointHasCfMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
-  return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
+  return store.select(endpointsEntityRequestDataSelector(endpointGuid)).pipe(
+    filter(endpoint => !!endpoint),
     first(),
-    map(state => state[endpointGuid]),
     map(endpointHasCfMetrics)
   );
 }
