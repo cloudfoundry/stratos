@@ -443,7 +443,7 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 	return tr, true
 }
 
-func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
+func (p *portalProxy) ListEndpointsByUser(userGUID string, includeShared bool) ([]*interfaces.ConnectedEndpoint, error) {
 	log.Debug("ListCEndpointsByUser")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -453,8 +453,18 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.Connec
 
 	cnsiList, err := cnsiRepo.ListByUser(userGUID)
 	if err != nil {
-		log.Debugf("Error was: %+v", err)
+		log.Debugf("Error during list by user was: %+v", err)
 		return nil, err
+	}
+
+	if includeShared {
+		// Get Endpoints that are shared in the system
+		systemSharedCNSiList, err := cnsiRepo.ListByUser(tokens.SystemSharedUserGuid)
+		if err != nil {
+			log.Debugf("Error during list by shared user was: %+v", err)
+			return nil, err
+		}
+		cnsiList = append(cnsiList, systemSharedCNSiList...)
 	}
 
 	return cnsiList, nil

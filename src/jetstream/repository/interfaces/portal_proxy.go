@@ -44,7 +44,7 @@ type PortalProxy interface {
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
 	Env() *env.VarSet
-	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
+	ListEndpointsByUser(userGUID string, includeShared bool) ([]*ConnectedEndpoint, error)
 	ListEndpoints() ([]*CNSIRecord, error)
 	UpdateEndpointMetadata(guid string, metadata string) error
 

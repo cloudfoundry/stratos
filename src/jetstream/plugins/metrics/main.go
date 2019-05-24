@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -391,29 +390,13 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	results := make(map[string]EndpointMetricsRelation)
 
 	// Get Endpoints the user is connected to
-	userEndpoints, err := m.portalProxy.ListEndpointsByUser(userGUID)
+	userEndpoints, err := m.portalProxy.ListEndpointsByUser(userGUID, true)
 
 	if err != nil {
 		return nil, err
 	}
 
-	allUserAccessibleEndpoints := userEndpoints
-
-	// Get Endpoints that are shared in the system
-	systemSharedEndpoints, err := m.portalProxy.ListEndpointsByUser(tokens.SystemSharedUserGuid)
-
-	if err != nil {
-		return nil, err
-	}
-	for _, endpoint := range systemSharedEndpoints {
-		allUserAccessibleEndpoints = append(allUserAccessibleEndpoints, endpoint)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, endpoint := range allUserAccessibleEndpoints {
+	for _, endpoint := range userEndpoints {
 		if stringInSlice(endpoint.GUID, cnsiList) {
 			// Found the Endpoint, so add it to our list
 			endpointsMap[endpoint.GUID] = endpoint
@@ -490,7 +473,7 @@ func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIR
 		return
 	}
 
-	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID)
+	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID, true)
 	if err != nil {
 		// TODO: RC handle error
 		return
@@ -542,7 +525,7 @@ func metadataToMap(metadata MetricsRelationMetadata) map[string]interface{} {
 
 func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpointUrl string, consoleUserID string) {
 	// Find all metrics endpoints
-	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID)
+	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID, true)
 	if err != nil {
 		// TODO: RC handle error
 		return
@@ -554,7 +537,7 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpoi
 	// Try to match up endpoint to metric
 	for _, metricEndpoint := range metricsEndpoints {
 		tokenRecord, found := m.portalProxy.GetCNSITokenRecord(metricEndpoint.GUID, consoleUserID)
-		if !found {
+		if found == false {
 			// Console user has not connected to endpoint
 			continue
 		}
@@ -576,6 +559,7 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpoi
 			}
 			_, err := m.portalProxy.SaveRelation(relation)
 			if err != nil {
+				log.Warnf("!!!!!linkEndpointToMetrics: err2: %v", err)
 				// TODO: RC handle error
 			}
 		}
