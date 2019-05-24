@@ -319,39 +319,6 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 }
 
 func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
-
-	// Add a set of endpoint relations to each endpoint via the relations table
-	relations, err := m.portalProxy.ListRelations()
-	if err != nil {
-		// TODO: RC handle
-	}
-	for _, endpointsOfType := range info.Endpoints {
-		for _, endpoint := range endpointsOfType {
-			for _, relation := range relations {
-				// TODO: nicer way to do
-				if (relation.Provider == endpoint.GUID || relation.Target == endpoint.GUID) && endpoint.Relations == nil {
-					endpoint.Relations = &interfaces.EndpointRelations{
-						Provides: []interfaces.EndpointRelation{},
-						Receives: []interfaces.EndpointRelation{},
-					}
-				}
-				// Add relation to appropriate Provider/Target collection
-				if relation.Provider == endpoint.GUID {
-					endpoint.Relations.Provides = append(endpoint.Relations.Provides, interfaces.EndpointRelation{
-						Guid:         relation.Target,
-						RelationType: relation.RelationType,
-						Metadata:     relation.Metadata,
-					})
-				} else if relation.Target == endpoint.GUID {
-					endpoint.Relations.Receives = append(endpoint.Relations.Receives, interfaces.EndpointRelation{
-						Guid:         relation.Provider,
-						RelationType: relation.RelationType,
-						Metadata:     relation.Metadata,
-					})
-				}
-			}
-		}
-	}
 }
 
 func createMetricsMetadataFromTokenMetadata(tokenMetadata string, endpointGuid string) ([]MetricsMetadata, error) {
@@ -390,7 +357,7 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	results := make(map[string]EndpointMetricsRelation)
 
 	// Get Endpoints the user is connected to
-	userEndpoints, err := m.portalProxy.ListEndpointsByUser(userGUID, true)
+	userEndpoints, err := m.portalProxy.ListEndpointsByUserAndShared(userGUID)
 
 	if err != nil {
 		return nil, err
@@ -461,9 +428,6 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func (m *MetricsSpecification) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
-}
-
 func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string, user *interfaces.ConnectedUser) {
 	// Metrics has been connected. Determine if it provides metrics to any existing endpoint
 	metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenRecord.Metadata, endpoint.GUID)
@@ -473,7 +437,7 @@ func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIR
 		return
 	}
 
-	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID, true)
+	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
 	if err != nil {
 		// TODO: RC handle error
 		return
@@ -525,7 +489,7 @@ func metadataToMap(metadata MetricsRelationMetadata) map[string]interface{} {
 
 func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpointUrl string, consoleUserID string) {
 	// Find all metrics endpoints
-	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID, true)
+	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
 	if err != nil {
 		// TODO: RC handle error
 		return
@@ -577,7 +541,7 @@ func filterEndpoints(vs []*interfaces.ConnectedEndpoint, f func(*interfaces.Conn
 	return vsf
 }
 
-func (m *MetricsSpecification) OnTokenNotification(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string, user *interfaces.ConnectedUser) {
+func (m *MetricsSpecification) OnConnect(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string, user *interfaces.ConnectedUser) {
 	switch endpointType := endpoint.CNSIType; endpointType {
 	case EndpointType:
 		m.linkMetricsToEndpoints(endpoint, tokenRecord, consoleUserID, user)

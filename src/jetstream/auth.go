@@ -453,11 +453,10 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 				}
 			}
 
-			// TODO: RC Test with shared endpoints/systemSharedToken
 			// Notify plugins if they support the notification interface
 			for _, plugin := range p.Plugins {
 				if notifier, ok := plugin.(interfaces.TokenNotificationPlugin); ok {
-					notifier.OnTokenNotification(&cnsiRecord, tokenRecord, consoleUserID, cnsiUser)
+					notifier.OnConnect(&cnsiRecord, tokenRecord, consoleUserID, cnsiUser)
 				}
 			}
 
@@ -700,6 +699,14 @@ func (p *portalProxy) logout(c echo.Context) error {
 	err := p.clearSession(c)
 	if err != nil {
 		log.Errorf("Unable to clear session: %v", err)
+	}
+
+	// Notify plugins if they support the notification interface
+	for _, plugin := range p.Plugins {
+		if notifier, ok := plugin.(interfaces.TokenNotificationPlugin); ok {
+			// TODO: RC check if there's anything i can actually grab
+			notifier.OnDisconnect()
+		}
 	}
 
 	// Send JSON document

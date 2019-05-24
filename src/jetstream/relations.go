@@ -15,11 +15,10 @@ import (
 func (p *portalProxy) SaveRelation(relation interfaces.RelationsRecord) (*interfaces.RelationsRecord, error) {
 	store, err := relations.NewRelationsDBStore(p.DatabaseConnectionPool)
 	if err != nil {
-		// TODO: RC handle error
+		return nil, err
 	}
 	return store.Save(relation)
 }
-
 
 func (p *portalProxy) ListRelations() ([]*interfaces.RelationsRecord, error) {
 	store, err := relations.NewRelationsDBStore(p.DatabaseConnectionPool)
@@ -62,8 +61,6 @@ func (p *portalProxy) listRelations(c echo.Context) error {
 	return nil
 }
 
-
-
 func (p *portalProxy) createRelation(c echo.Context) error {
 	req := c.Request()
 	body, _ := ioutil.ReadAll(req.Body)
@@ -84,9 +81,6 @@ func (p *portalProxy) createRelation(c echo.Context) error {
 			"Invalid request - must provide provider, type and target")
 	}
 
-
-
-	// updatedRelation, err := store.Save(relation)
 	updatedRelation, err := p.SaveRelation(relation)
 
 	if err != nil {

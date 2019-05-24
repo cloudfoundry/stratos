@@ -280,8 +280,8 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 	return jsonString, nil
 }
 
-func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error {
-	log.Debug("UpdateEndpointMetadata")
+func (p *portalProxy) UpdateEndointMetadata(guid string, metadata string) error {
+	log.Debug("UpdateEndointMetadata")
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -442,9 +442,19 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 
 	return tr, true
 }
-
-func (p *portalProxy) ListEndpointsByUser(userGUID string, includeShared bool) ([]*interfaces.ConnectedEndpoint, error) {
+func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
 	log.Debug("ListCEndpointsByUser")
+	return p.listEndpointsByUserAndShared(userGUID, false)
+}
+
+
+func (p *portalProxy) ListEndpointsByUserAndShared(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
+	log.Debug("ListEndpointsByUserAndShared")
+	return p.listEndpointsByUserAndShared(userGUID, true)
+}
+
+func (p *portalProxy) listEndpointsByUserAndShared(userGUID string, includeShared bool) ([]*interfaces.ConnectedEndpoint, error) {
+	log.Debug("listEndpointsByUserAndShared")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
@@ -470,7 +480,7 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string, includeShared bool) (
 	return cnsiList, nil
 }
 
-// Uopdate the Access Token, Refresh Token and Token Expiry for a token
+// Update the Access Token, Refresh Token and Token Expiry for a token
 func (p *portalProxy) updateTokenAuth(userGUID string, t interfaces.TokenRecord) error {
 	log.Debug("updateTokenAuth")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
