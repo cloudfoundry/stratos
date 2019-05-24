@@ -334,7 +334,7 @@ func createMetricsMetadataFromTokenMetadata(tokenMetadata string, endpointGuid s
 			info.URL = item.URL
 			info.Job = item.Job
 			info.Environment = item.Environment
-			log.Infof("Metrics provider: %+v", info) // TODO: RC revert to debug
+			log.Debugf("Metrics provider: %+v", info)
 			metricsProviders = append(metricsProviders, info)
 		}
 	}
@@ -433,13 +433,13 @@ func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIR
 	metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenRecord.Metadata, endpoint.GUID)
 
 	if err != nil {
-		// TODO: RC handle error
+		log.Warnf("Failed to link metric endpoint to other endpoints (creating providers from token): %v", err)
 		return
 	}
 
 	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
 	if err != nil {
-		// TODO: RC handle error
+		log.Warnf("Failed to link metric endpoint to other endpoints (listing connected endpoints): %v", err)
 		return
 	}
 	for _, endpoint := range endpoints {
@@ -457,7 +457,7 @@ func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIR
 			}
 			_, err := m.portalProxy.SaveRelation(relation)
 			if err != nil {
-				// TODO: RC handle error
+				log.Warnf("Failed to link metric endpoint to other endpoints (could not save relation): %v", err)
 			}
 		}
 		// For K8S
@@ -474,7 +474,7 @@ func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIR
 			}
 			_, err := m.portalProxy.SaveRelation(relation)
 			if err != nil {
-				// TODO: RC handle error
+				log.Warnf("Failed to link metric endpoint to other endpoints (could not save relation): %v", err)
 			}
 		}
 	}
@@ -491,7 +491,7 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpoi
 	// Find all metrics endpoints
 	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
 	if err != nil {
-		// TODO: RC handle error
+		log.Warnf("Failed to link endpoint to metric endpoints (listing connected endpoints): %v", err)
 		return
 	}
 	metricsEndpoints := filterEndpoints(endpoints, func(v *interfaces.ConnectedEndpoint) bool {
@@ -507,7 +507,7 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpoi
 		}
 		metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenRecord.Metadata, endpointGuid)
 		if err != nil {
-			// TODO: RC handle error
+			log.Warnf("Failed to link endpoint to metric endpoints (creating providers from token): %v", err)
 			continue
 		}
 		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpointUrl); ok {
@@ -519,18 +519,16 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpoi
 				Metadata: metadataToMap(MetricsRelationMetadata{
 					Job:         provider.Job,
 					Environment: provider.Environment,
-				}), //TODO: This will wipe out metadata on save
+				}),
 			}
 			_, err := m.portalProxy.SaveRelation(relation)
 			if err != nil {
-				log.Warnf("!!!!!linkEndpointToMetrics: err2: %v", err)
-				// TODO: RC handle error
+				log.Warnf("Failed to link endpoint to metric endpoints (could not save relation): %v", err)
 			}
 		}
 	}
 }
 
-// TODO: RC Gotta be a generic way to do this??
 func filterEndpoints(vs []*interfaces.ConnectedEndpoint, f func(*interfaces.ConnectedEndpoint) bool) []*interfaces.ConnectedEndpoint {
 	vsf := make([]*interfaces.ConnectedEndpoint, 0)
 	for _, v := range vs {

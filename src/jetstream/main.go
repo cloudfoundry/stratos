@@ -813,10 +813,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// Relations operations
 	sessionGroup.GET("/relations", p.listRelations)
 	sessionGroup.POST("/relations", p.createRelation)
-	// TODO: RC remove
-	// echoGroup.DELETE("/relations/:provider/:target", uf.delete)
-	// echoGroup.DELETE("/relations/:providerOrTarget", uf.deleteAll)
-	// echoGroup.POST("/relations/:provider/:target", r.setMetadata)
 
 	// Info
 	sessionGroup.GET("/info", p.info)
