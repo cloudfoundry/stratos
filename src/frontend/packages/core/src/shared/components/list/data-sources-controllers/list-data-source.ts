@@ -277,7 +277,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       const entityKey = entityCatalogue.getEntityKey(schemaConfig.paginationAction);
       const idPage = {
         page: i + 1,
-        label: catalogueEntity.entity.label || 'Unknown',
+        label: catalogueEntity.definition.label || 'Unknown',
         entityKey
       };
       actionMap.push(idPage);

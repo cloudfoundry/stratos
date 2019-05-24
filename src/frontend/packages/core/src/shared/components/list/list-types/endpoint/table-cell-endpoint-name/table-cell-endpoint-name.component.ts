@@ -40,7 +40,7 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     ).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => {
-        const ep = entityCatalogue.getEndpoint(data.cnsi_type, data.sub_type).entity;
+        const ep = entityCatalogue.getEndpoint(data.cnsi_type, data.sub_type).definition;
         data.canShowLink = data.connectionStatus === 'connected' || ep.unConnectable;
         data.link = EndpointsService.getLinkForEndpoint(data);
         return data;

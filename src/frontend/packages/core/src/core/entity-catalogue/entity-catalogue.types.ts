@@ -68,6 +68,7 @@ export interface IStratosEndpointWithoutSchemaDefinition extends Omit<IStratosEn
  */
 export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSchemas> extends IStratosBaseEntityDefinition<T> {
   readonly endpoint: IStratosEndpointDefinition;
+  readonly subTypes?: Omit<IStratosEntityDefinition, 'schema' | 'subTypes' | 'endpoint'>[];
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {

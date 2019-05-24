@@ -87,14 +87,14 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
         // Remove SSO if not allowed on this endpoint
         if (config.ssoAllowed) {
-            this.authTypesForEndpoint = endpoint.entity.authTypes;
+            this.authTypesForEndpoint = endpoint.definition.authTypes;
         } else {
-            this.authTypesForEndpoint = endpoint.entity.authTypes.filter(authType => authType.value !== BaseEndpointAuth.SSO.value);
+            this.authTypesForEndpoint = endpoint.definition.authTypes.filter(authType => authType.value !== BaseEndpointAuth.SSO.value);
         }
 
 
         // Not all endpoint types might allow token sharing - typically types like metrics do
-        this.canShareEndpointToken = endpoint.entity.tokenSharing;
+        this.canShareEndpointToken = endpoint.definition.tokenSharing;
 
         // Create the endpoint form
         this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : { form: null } as EndpointAuthTypeConfig;

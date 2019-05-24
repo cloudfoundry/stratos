@@ -74,7 +74,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.rowObs.next(row);
     if (this.endpointConfig) {
       const metadata = this.endpointConfig.builder.getMetadata(row);
-      this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.entity.unConnectable ?
+      this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.definition.unConnectable ?
         this.endpointConfig.builder.getLink(metadata) : null;
     }
     this.updateInnerComponent();
@@ -119,7 +119,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (favorite) {
       this.favorite = this.favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     }
-    const e = this.endpointConfig.entity;
+    const e = this.endpointConfig.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
@@ -136,7 +136,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = this.endpointConfig.entity;
+    const e = this.endpointConfig.definition;
     if (!e || !e.listDetailsComponent) {
       return;
     }

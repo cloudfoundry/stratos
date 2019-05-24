@@ -26,7 +26,7 @@ export class EndpointHealthChecks {
     }
 
     public checkEndpoint(endpoint: EndpointModel) {
-        const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity;
+        const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
         if (endpoint.connectionStatus === 'connected' || epType.unConnectable) {
             const healthCheck = this.healthChecks.find(check => {
                 return check.endpointType === endpoint.cnsi_type;

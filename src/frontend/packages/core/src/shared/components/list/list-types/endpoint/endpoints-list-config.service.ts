@@ -133,6 +133,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     public getMultiFiltersConfigs = () => [];
 
     private getEndpointTypeString(endpoint: EndpointModel): string {
-        return entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity.label;
+        return entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
     }
 }

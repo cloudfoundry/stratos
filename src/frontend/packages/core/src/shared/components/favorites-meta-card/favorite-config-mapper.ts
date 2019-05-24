@@ -102,7 +102,7 @@ export class FavoritesConfigMapper {
       }
       return {
         lines: catalogueEntity.builder.getLines ? catalogueEntity.builder.getLines(entity) : null,
-        type: catalogueEntity.entity.type,
+        type: catalogueEntity.definition.type,
         routerLink: catalogueEntity.builder.getLink(entity),
         name: entity.name,
         menuItems: catalogueEntity.builder.getActions ? catalogueEntity.builder.getActions(entity) : null
@@ -122,7 +122,7 @@ export class FavoritesConfigMapper {
    */
   public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
     const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
-    return catalogueEntity ? catalogueEntity.entity.label : null;
+    return catalogueEntity ? catalogueEntity.definition.label : null;
   }
 
   /**
@@ -138,8 +138,8 @@ export class FavoritesConfigMapper {
    */
   public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
     return entityCatalogue.getAllEntitiesForEndpointType(endpointType).map(catalogueEntity => ({
-      type: catalogueEntity.entity.type,
-      prettyName: catalogueEntity.entity.label
+      type: catalogueEntity.definition.type,
+      prettyName: catalogueEntity.definition.label
     }));
   }
 
@@ -149,7 +149,7 @@ export class FavoritesConfigMapper {
     endpointId: string
   ) {
     const isEndpoint = catalogueEntity.isEndpoint;
-    const entityDefinition = catalogueEntity.entity as IStratosEntityDefinition;
+    const entityDefinition = catalogueEntity.definition as IStratosEntityDefinition;
     const endpointType = isEndpoint ? catalogueEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
     const entityType = isEndpoint ? EntityCatalogueHelpers.endpointType : entityDefinition.type;
     const metadata = catalogueEntity.builder.getMetadata(entity);

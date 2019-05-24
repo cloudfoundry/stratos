@@ -107,7 +107,7 @@ export function orgSpacePostProcess(
       endpointGuid: action.endpointGuid,
       entity: userCatalogueEntity.getSchema(),
       entityLocation: RequestEntityLocation.ARRAY,
-      entityType: userCatalogueEntity.entity.type,
+      entityType: userCatalogueEntity.definition.type,
       endpointType: CF_ENDPOINT_TYPE,
       type: '[Entity] Post-process Org/Space Users',
       paginationKey: createEntityRelationPaginationKey(action.entityType, action.guid)

@@ -18,14 +18,14 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
     showLabel: true
   };
 
-  constructor( ) {
+  constructor() {
     super();
   }
 
   ngOnInit() {
     const ep = entityCatalogue.getEndpoint(this.row.cnsi_type, this.row.sub_type);
     if (!!ep) {
-      this.connectable = !ep.entity.unConnectable;
+      this.connectable = !ep.definition.unConnectable;
     }
   }
 }

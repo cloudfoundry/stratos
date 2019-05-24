@@ -141,15 +141,15 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   }
 
   setUrlValidation(endpoint: StratosCatalogueEndpointEntity) {
-    this.urlValidation = endpoint ? endpoint.entity.urlValidationRegexString : '';
+    this.urlValidation = endpoint ? endpoint.definition.urlValidationRegexString : '';
     this.setAdvancedFields(endpoint);
   }
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
   setAdvancedFields(endpoint: StratosCatalogueEndpointEntity) {
-    this.showAdvancedFields = endpoint.entity.type === 'cf';
+    this.showAdvancedFields = endpoint.definition.type === 'cf';
 
     // Only allow SSL if the endpoint type is Cloud Foundry
-    this.endpointTypeSupportsSSO = endpoint.entity.type === 'cf';
+    this.endpointTypeSupportsSSO = endpoint.definition.type === 'cf';
   }
 }

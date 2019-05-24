@@ -39,9 +39,9 @@ export class CreateEndpointBaseStepComponent {
       }));
     }
   }
-  constructor(public store: Store<AppState>,  ) {
+  constructor(public store: Store<AppState>, ) {
     this.tileSelectorConfig = entityCatalogue.getAllEndpointTypes().map(catalogueEndpoint => {
-      const endpoint = catalogueEndpoint.entity;
+      const endpoint = catalogueEndpoint.definition;
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
         endpoint.label,
         endpoint.logoUrl ? {

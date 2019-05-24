@@ -97,7 +97,7 @@ export class EndpointListHelper {
         label: 'Connect',
         description: '',
         createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
-          const ep = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type).entity;
+          const ep = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type).definition;
           return !ep.unConnectable && row.connectionStatus === 'disconnected';
         }))
       },

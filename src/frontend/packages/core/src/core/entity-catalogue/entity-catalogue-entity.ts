@@ -19,7 +19,7 @@ import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   public readonly entityKey: string;
-  public readonly entity: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition;
+  public readonly definition: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition;
   public readonly isEndpoint: boolean;
   // TODO we should do some typing magic to hide this from extensions - nj
   // I don't think this is needed.
@@ -29,7 +29,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     entity: IStratosEntityDefinition | IStratosEndpointDefinition,
     public builder?: IStratosEntityBuilder<T, Y>
   ) {
-    this.entity = this.populateEntity(entity);
+    this.definition = this.populateEntity(entity);
     const baseEntity = entity as IStratosEntityDefinition;
     this.isEndpoint = !this.isStratosType && !baseEntity.endpoint;
     this.hasBuilder = !!builder;
@@ -58,11 +58,11 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   public getSchema(schemaKey?: string) {
     // TODO(NJ) We should do a better job at typeing schemax
     // schema always gets changed to a EntityCatalogueSchamas.
-    const catalogueSchema = (this.entity.schema as EntityCatalogueSchemas);
+    const catalogueSchema = (this.definition.schema as EntityCatalogueSchemas);
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }
-    const entityCatalogue = this.entity as IStratosEntityDefinition;
+    const entityCatalogue = this.definition as IStratosEntityDefinition;
     const tempId = EntityCatalogueHelpers.buildEntityKey(entityCatalogue.endpoint.type, schemaKey);
     if (!catalogueSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
@@ -83,8 +83,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   }
 
   public getTypeAndSubtype() {
-    const type = this.entity.parentType || this.entity.type;
-    const subType = this.entity.parentType ? this.entity.type : null;
+    const type = this.definition.parentType || this.definition.type;
+    const subType = this.definition.parentType ? this.definition.type : null;
     return {
       type,
       subType
@@ -93,7 +93,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
 }
 
 export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {
-  public entity: IStratosEntityDefinition<EntityCatalogueSchemas>;
+  public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
   constructor(
     entity: IStratosEntityDefinition,
     builder?: IStratosEntityBuilder<T, Y>
@@ -121,7 +121,7 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     ]
   } as IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel>;
   // This is needed here for typing
-  public entity: IStratosEndpointDefinition;
+  public definition: IStratosEndpointDefinition;
   constructor(
     entity: IStratosEndpointWithoutSchemaDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string

@@ -142,9 +142,9 @@ export class UserFavoriteManager {
     const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
 
     return {
-      type: catalogueEntity.entity.type,
+      type: catalogueEntity.definition.type,
       cardMapper: this.favoritesConfigMapper.getMapperFunction(favorite),
-      prettyName: catalogueEntity.entity.label,
+      prettyName: catalogueEntity.definition.label,
       favorite
     };
   }

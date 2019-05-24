@@ -50,10 +50,10 @@ export class EndpointsService implements CanActivate {
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
         const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-        if (!epType.entity) {
+        if (!epType.definition) {
           return false;
         }
-        const epEntity = epType.entity;
+        const epEntity = epType.definition;
         return epEntity.unConnectable ||
           endpoint.connectionStatus === 'connected' ||
           endpoint.connectionStatus === 'checking';
@@ -146,7 +146,7 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
-            const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).entity;
+            const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
             return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
           });
       })

@@ -63,8 +63,8 @@ export class MetricsComponent {
                 ep.endpoints.forEach(endpoint => {
                     const catalogueEndpoint = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
                     metadata[endpoint.guid] = {
-                        type: catalogueEndpoint.entity.type,
-                        icon: catalogueEndpoint.entity.icon
+                        type: catalogueEndpoint.definition.type,
+                        icon: catalogueEndpoint.definition.icon
                     };
                 });
                 return {

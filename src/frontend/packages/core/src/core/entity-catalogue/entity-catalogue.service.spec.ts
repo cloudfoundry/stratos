@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EntitySchema } from '../../../../store/src/helpers/entity-factory';
 import { BaseEndpointAuth } from '../../features/endpoints/endpoint-auth';
-import {
-  CfEndpointDetailsComponent
-} from '../../../../cloud-foundry/src/shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import { IStratosEndpointDefinition, StratosCatalogueEntity } from './entity-catalogue.types';
-import { entityCatalogue } from './entity-catalogue.service';
-
+import { IStratosEndpointDefinition } from './entity-catalogue.types';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from './entity-catalogue-entity';
+import { TestEntityCatalogue } from './entity-catalogue.service';
+import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { endpointEntitySchema } from '../../base-entity-schemas';
 fdescribe('EntityCatalogueService', () => {
+  let entityCatalogue: TestEntityCatalogue;
   function getEndpointDefinition() {
     return {
       type: 'endpointType',
@@ -18,16 +18,16 @@ fdescribe('EntityCatalogueService', () => {
       iconFont: 'stratos-icons',
       logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
       authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
-      listDetailsComponent: CfEndpointDetailsComponent,
+      listDetailsComponent: EndpointListDetailsComponent,
     } as IStratosEndpointDefinition;
   }
   function getDefaultSchema() {
-    return new EntitySchema('entitySchema1');
+    return new EntitySchema('entitySchema1', 'endpoint1');
   }
   function getSchema(modifier: string) {
-    return new EntitySchema('entitySchema1' + modifier);
+    return new EntitySchema('entitySchema1' + modifier, 'endpoint1');
   }
-  beforeEach(() => TestBed.configureTestingModule({}));
+  beforeEach(() => entityCatalogue = new TestEntityCatalogue());
 
   it('should create correct id', () => {
     const endpoint = getEndpointDefinition();
@@ -93,5 +93,90 @@ fdescribe('EntityCatalogueService', () => {
     const schema = catalogueEntity.getSchema('nonDefaultSchema');
     expect(schema).not.toBeUndefined();
     expect(schema).toEqual(nonDefaultSchema);
+  });
+
+  it('should get endpoint', () => {
+    const endpoint = getEndpointDefinition();
+    entityCatalogue.register(new StratosCatalogueEndpointEntity(endpoint));
+    const catalogueEntity = entityCatalogue.getEndpoint(endpoint.type);
+    expect(catalogueEntity).not.toBeUndefined();
+    expect(catalogueEntity.definition).toEqual({
+      ...endpoint,
+      schema: {
+        default: endpointEntitySchema
+      }
+    });
+  });
+
+  it('should get endpoint subtype', () => {
+    const endpoint = getEndpointDefinition();
+    const SUBTYPE_TYPE = 'entity3SubType';
+    const subtypeDefinition = {
+      label: 'SubType',
+      labelPlural: 'SubTypes',
+      type: SUBTYPE_TYPE,
+      logoUrl: 'image/url',
+      tokenSharing: true,
+      urlValidation: false,
+      unConnectable: true,
+      urlValidationRegexString: 'redjecks',
+      authTypes: [
+        BaseEndpointAuth.SSO
+      ]
+    };
+    const definition = {
+      ...endpoint,
+      subTypes: [
+        subtypeDefinition
+      ]
+    };
+    entityCatalogue.register(new StratosCatalogueEndpointEntity(definition));
+    const expected = {
+      ...subtypeDefinition,
+      icon: 'cloud_foundry',
+      iconFont: 'stratos-icons',
+      listDetailsComponent: EndpointListDetailsComponent,
+      schema: {
+        default: endpointEntitySchema
+      },
+    };
+    const catalogueEntity = entityCatalogue.getEndpoint(endpoint.type, SUBTYPE_TYPE);
+    expect(catalogueEntity).not.toBeUndefined();
+    expect(catalogueEntity.definition).toEqual(expected);
+  });
+
+  it('should get entity subtype', () => {
+    const endpoint = getEndpointDefinition();
+    const schema = getDefaultSchema();
+
+    const SUBTYPE_TYPE = 'entity3SubType';
+    const TYPE = 'entity3';
+    const subtypeDefinition = {
+      label: 'SubType',
+      labelPlural: 'SubTypes',
+      type: SUBTYPE_TYPE,
+    };
+
+    const definition = {
+      type: TYPE,
+      schema: {
+        default: schema,
+      },
+      endpoint,
+      subTypes: [
+        subtypeDefinition
+      ]
+    };
+    entityCatalogue.register(new StratosCatalogueEntity(definition));
+    const expected = {
+      ...subtypeDefinition,
+      endpoint,
+      schema: {
+        default: schema,
+      }
+    };
+    const catalogueEntity = entityCatalogue.getEntity(endpoint.type, TYPE, SUBTYPE_TYPE);
+    expect(catalogueEntity).not.toBeUndefined();
+    expect(catalogueEntity.definition).toEqual(expected);
   });
 });
