@@ -24,6 +24,7 @@ import { ConfirmationDialogService } from '../../../../confirmation-dialog.servi
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { EntityCatalogueHelpers } from '../../../../../../core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -122,22 +123,23 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         perm.key,
         row.metadata.guid
       );
+      const catalogueEntity = entityCatalogue.getEntity({
+        entityType: spaceSchemaKey,
+        endpointType: CF_ENDPOINT_TYPE
+      });
       return {
         ...perm,
         name: isOrgLevel ? spacePerms.name : '',
         guid: spacePerms.spaceGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,
-        busy: new EntityMonitor(
+        busy: catalogueEntity.getEntityMonitor(
           this.store,
-          spacePerms.spaceGuid,
-          {
-            entityType: spaceSchemaKey,
-            endpointType: CF_ENDPOINT_TYPE
-          }
-        ).getUpdatingSection(updatingKey).pipe(
-          map(update => update.busy)
-        ),
+          spacePerms.spaceGuid
+        )
+          .getUpdatingSection(updatingKey).pipe(
+            map(update => update.busy)
+          ),
         cfGuid: row.entity.cfGuid,
         orgGuid: spacePerms.orgGuid,
         spaceGuid: spacePerms.spaceGuid

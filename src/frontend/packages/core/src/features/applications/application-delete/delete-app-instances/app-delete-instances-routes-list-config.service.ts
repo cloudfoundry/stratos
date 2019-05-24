@@ -23,7 +23,6 @@ import { ListViewTypes } from '../../../../shared/components/list/list.component
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { CloudFoundryPackageModule } from '../../../../../../cloud-foundry/src/cloud-foundry.module';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Injectable()

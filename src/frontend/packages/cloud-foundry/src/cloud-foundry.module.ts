@@ -4,7 +4,6 @@ import {
   CloudFoundryComponentsModule
 } from './shared/components/components.module';
 import { generateCFEntities } from './cf-entity-generator';
-
 @NgModule({
   imports: [
     CloudFoundryComponentsModule

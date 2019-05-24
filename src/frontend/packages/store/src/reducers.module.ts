@@ -1,6 +1,6 @@
 import { localStorageSync } from 'ngrx-store-localstorage';
 import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule, ActionReducer } from '@ngrx/store';
+import { ActionReducerMap, StoreModule, ActionReducer, Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
 
@@ -23,6 +23,7 @@ import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 import { getDashboardStateSessionId } from './helpers/store-helpers';
+import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -85,17 +86,13 @@ if (!environment.production) {
   //   metaReducers.push(logger);
   // }
 }
-
-const store = StoreModule.forRoot(
-  appReducers,
-  {
-    metaReducers
-  }
+const storeModule = StoreModule.forRoot(
+  appReducers
 );
 const imports = environment.production ? [
-  store
+  storeModule
 ] : [
-    store,
+    storeModule,
     StoreDevtoolsModule.instrument({
       maxAge: 100,
       logOnly: !environment.production
@@ -105,4 +102,4 @@ const imports = environment.production ? [
 @NgModule({
   imports
 })
-export class AppReducersModule { }
+export class AppReducersModule {}

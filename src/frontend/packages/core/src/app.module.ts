@@ -1,3 +1,4 @@
+import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -37,7 +38,6 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 
 
@@ -69,7 +69,6 @@ export class CustomRouterStateSerializer
   }
 }
 
-
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -80,8 +79,9 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
-    CloudFoundryPackageModule,
+    // This need to be first to initialize the entityCatalogue
     AppStoreExtensionsModule,
+    CloudFoundryPackageModule,
     AppStoreModule,
     BrowserModule,
     BrowserAnimationsModule,
@@ -118,7 +118,6 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
-
     eventService.addEventConfig<boolean>(
       {
         eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),

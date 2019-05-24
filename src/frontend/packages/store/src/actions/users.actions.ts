@@ -8,15 +8,15 @@ import {
   spaceSchemaKey,
 } from '../helpers/entity-factory';
 import {
-  createEntityRelationKey,
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
 } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction } from '../types/request.types';
-import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 import { getActions } from './action.helper';
 import { EntitySchema } from '../helpers/entity-schema';
+import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -30,17 +30,6 @@ export const ADD_ROLE = '[Users] Add role';
 export const ADD_ROLE_SUCCESS = '[Users]  Add role success';
 export const ADD_ROLE_FAILED = '[Users]  Add role failed';
 
-export function createDefaultUserRelations() {
-  return [
-    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.ORGANIZATIONS),
-    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_ORGS),
-    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_ORGS),
-    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.BILLING_MANAGER_ORGS),
-    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.SPACES),
-    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.MANAGED_SPACES),
-    createEntityRelationKey(cfUserSchemaKey, CfUserRoleParams.AUDITED_SPACES)
-  ];
-}
 export const GET_CF_USER = '[Users] Get cf user ';
 export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
 export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
@@ -190,7 +179,6 @@ export class GetUser extends CFStartAction {
   }
   // TODO: Stratos internal entity types don't need a endpoint type.
   // Should we create internal entity catalogue entries with a "fake" endpoint type?
-  endpointType = '';
   actions = getActions('Users', 'Fetch User');
   entity = [entityFactory(cfUserSchemaKey)];
   entityType = cfUserSchemaKey;

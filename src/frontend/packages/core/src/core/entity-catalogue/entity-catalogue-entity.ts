@@ -22,9 +22,9 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   public readonly entity: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition;
   public readonly isEndpoint: boolean;
   // TODO we should do some typing magic to hide this from extensions - nj
+  // I don't think this is needed.
   public readonly isStratosType: boolean;
   public readonly hasBuilder: boolean;
-  private store: Store<AppState>;
   constructor(
     entity: IStratosEntityDefinition | IStratosEndpointDefinition,
     public builder?: IStratosEntityBuilder<T, Y>
@@ -36,12 +36,6 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, this.isStratosType ? '' : baseEntity.endpoint.type);
-  }
-
-  public _assignStore(store: Store<AppState>) {
-    if (store) {
-      this.store = store;
-    }
   }
 
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition) {
@@ -78,25 +72,15 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   }
 
   public getEntityMonitor(
+    store: Store<AppState>,
     entityId: string,
     {
       schemaKey = '',
       startWithNull = false
-    }
+    } = {}
   ) {
-    return new EntityMonitor(this.store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
+    return new EntityMonitor(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
   }
-
-  public getPaginationMonitor(
-    paginationKey: string,
-    {
-      schemaKey = '',
-      isLocal = false
-    }
-  ) {
-    return new PaginationMonitor(this.store, paginationKey, this.getSchema(schemaKey), isLocal);
-  }
-
 
   public getTypeAndSubtype() {
     const type = this.entity.parentType || this.entity.type;

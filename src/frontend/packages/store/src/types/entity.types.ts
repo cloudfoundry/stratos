@@ -89,8 +89,7 @@ interface EntityValues {
 }
 export type ExtendedRequestState<T extends string | number | symbol, Y> = Record<T, Y>;
 
-export type ExtendedRequestDataState<
-  E extends Record<keyof E, any>,
+export type ExtendedRequestDataState<E extends Record<keyof E, any>,
   > = {
     [P in keyof E]: IRequestEntityTypeState<E[keyof E]>
   };

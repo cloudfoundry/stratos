@@ -5,14 +5,14 @@ import { deepMergeState } from '../../helpers/reducer.helper';
 import { IFlatTree } from '../../helpers/schema-tree-traverse';
 import { IRequestDataState } from '../../types/entity.types';
 import { ISuccessRequestAction } from '../../types/request.types';
-import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { IRequestArray } from '../api-request-reducer/types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 
 
-export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
+export function requestDataReducerFactory(actions: IRequestArray) {
   const successAction = actions[1];
-  const defaultState = generateDefaultState(entityList);
+  const defaultState = getDefaultStateFromEntityCatalogue<IRequestDataState>();
   return function entitiesReducer(state = defaultState, action: Action): IRequestDataState {
     switch (action.type) {
       case successAction:

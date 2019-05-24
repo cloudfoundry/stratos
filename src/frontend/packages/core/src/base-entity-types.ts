@@ -1,6 +1,7 @@
 import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { endpointEntitySchema, userFavoritesEntitySchema, userProfileEntitySchema, STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
-import { StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
+import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from './core/entity-catalogue/entity-catalogue-entity';
+import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
 //
 // These types are used to represent the base stratos types.
 //
@@ -53,5 +54,16 @@ export function registerBaseStratosTypes() {
   entityCatalogue.register(new DefaultEndpointCatalogueEntity());
   entityCatalogue.register(new UserFavoriteCatalogueEntity());
   entityCatalogue.register(new UserProfileCatalogueEntity());
+  // TODO(NJ): This gets called a few times do to lazy loaded modules that import this.
+  entityCatalogue.register(new StratosCatalogueEndpointEntity({
+    type: 'metrics',
+    label: 'Metrics',
+    labelPlural: 'Metrics',
+    tokenSharing: true,
+    logoUrl: '/core/assets/endpoint-icons/metrics.svg',
+    authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
+  },
+    metadata => `/endpoints/metrics/${metadata.guid}`
+  ));
 }
 

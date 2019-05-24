@@ -3,6 +3,7 @@ import { PaginationEntityState, PaginationState } from '../../types/pagination.t
 import { spreadClientPagination } from './pagination-reducer.helper';
 import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { RegisterEntitiesAction } from '../../../../core/src/core/entity-catalogue/entity-catalogue.actions';
 function getPaginationKey(entityConfig: EntityCatalogueEntityConfig) {
   return EntityCatalogueHelpers.buildEntityKey(entityConfig.endpointType, entityConfig.entityType);
 }

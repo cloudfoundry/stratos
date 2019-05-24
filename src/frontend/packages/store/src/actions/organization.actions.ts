@@ -6,8 +6,8 @@ import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/en
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { createDefaultUserRelations } from './users.actions';
 import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
+import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
@@ -30,7 +30,8 @@ export const GET_ORGANIZATION_USERS_SUCCESS = '[Organization] Get all org users 
 export const GET_ORGANIZATION_USERS_FAILED = '[Organization] Get all org users failed';
 
 export class GetOrganization extends CFStartAction implements ICFAction, EntityInlineParentAction {
-  constructor(public guid: string,
+  constructor(
+    public guid: string,
     public endpointGuid: string,
     public includeRelations: string[] = [],
     public populateMissing = true) {

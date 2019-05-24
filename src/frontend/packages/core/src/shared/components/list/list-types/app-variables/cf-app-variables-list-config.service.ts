@@ -17,6 +17,7 @@ import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../..
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -103,17 +104,19 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   }
 
   private getEntityMonitor() {
-    return new EntityMonitor(
-      this.store,
-      this.envVarsDataSource.appGuid,
-      {
-        entityType: applicationSchemaKey,
-        endpointType: CF_ENDPOINT_TYPE
-      }
-    ).entityRequest$.pipe(
-      map(request => request.updating[UpdateExistingApplication.updateKey]),
-      filter(req => !!req)
-    );
+    const catalogueEntity = entityCatalogue.getEntity({
+      entityType: applicationSchemaKey,
+      endpointType: CF_ENDPOINT_TYPE
+    });
+    return catalogueEntity
+      .getEntityMonitor(
+        this.store,
+        this.envVarsDataSource.appGuid
+      )
+      .entityRequest$.pipe(
+        map(request => request.updating[UpdateExistingApplication.updateKey]),
+        filter(req => !!req)
+      );
   }
 
   private getConfirmationModal(newValues: ListAppEnvVar[]) {

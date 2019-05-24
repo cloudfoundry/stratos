@@ -1,26 +1,17 @@
 import {
-  StratosBaseCatalogueEntity,
-  StratosCatalogueEndpointEntity,
-  StratosCatalogueEntity,
   IEntityMetadata,
   IStratosEndpointDefinition,
   EntityCatalogueEntityConfig,
 } from './entity-catalogue.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { AppState } from '../../../../store/src/app-state';
+import { Store } from '@ngrx/store';
+import { StratosCatalogueEntity, StratosCatalogueEndpointEntity, StratosBaseCatalogueEntity } from './entity-catalogue-entity';
 
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
   private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
-
-  public register(entity: StratosBaseCatalogueEntity) {
-    if (entity.isEndpoint) {
-      this.registerEndpoint(entity as StratosCatalogueEndpointEntity);
-    } else {
-      // We could auto register endpoints found in entities
-      this.registerEntity(entity as StratosCatalogueEntity);
-    }
-  }
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
     if (this.endpoints.has(endpoint.entityKey)) {
@@ -59,13 +50,53 @@ class EntityCatalogue {
     return subTypes.find(subType => subType.type === subtype);
   }
 
-  // TODO this should take a EntityCatalogueEntityConfig
+  private getConfig(
+    endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
+    entityType?: string,
+    subType?: string
+  ): EntityCatalogueEntityConfig {
+    const config = endpointTypeOrConfig as EntityCatalogueEntityConfig;
+    if (!config) {
+      return {
+        endpointType: null,
+        entityType: null,
+        subType: null
+      };
+    }
+    if (config && config.entityType) {
+      return config;
+    }
+    return {
+      endpointType: endpointTypeOrConfig as string,
+      entityType,
+      subType
+    };
+  }
+
+  public register(entity: StratosBaseCatalogueEntity) {
+    if (entity.isEndpoint) {
+      this.registerEndpoint(entity as StratosCatalogueEndpointEntity);
+    } else {
+      // We could auto register endpoints found in entities
+      this.registerEntity(entity as StratosCatalogueEntity);
+    }
+  }
+
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    entityConfig: EntityCatalogueEntityConfig
+  ): StratosBaseCatalogueEntity;
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     endpointType: string,
     entityType: string,
     subType?: string
+  ): StratosBaseCatalogueEntity;
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
+    entityType?: string,
+    subType?: string
   ): StratosBaseCatalogueEntity {
-    const entityOfType = this.getEntityOfType<T, Y>(entityType, endpointType);
+    const config = this.getConfig(endpointTypeOrConfig, entityType, subType);
+    const entityOfType = this.getEntityOfType<T, Y>(config.entityType, config.endpointType);
     if (entityType === EntityCatalogueHelpers.endpointType && subType) {
       const subtype = this.getEndpointSubtype(entityOfType as StratosCatalogueEndpointEntity, subType);
       const endpoint = entityOfType.entity as IStratosEndpointDefinition;
@@ -78,12 +109,14 @@ class EntityCatalogue {
     return entityOfType;
   }
 
-  public getEntityKey(endpointType: string | EntityCatalogueEntityConfig, entityType?: string) {
-    const config = endpointType as EntityCatalogueEntityConfig;
+  public getEntityKey(endpointType: string, entityType: string): string;
+  public getEntityKey(entityConfig: EntityCatalogueEntityConfig): string;
+  public getEntityKey(endpointTypeOrConfig: string | EntityCatalogueEntityConfig, entityType?: string) {
+    const config = this.getConfig(endpointTypeOrConfig, entityType);
     if (config && config.entityType) {
       return EntityCatalogueHelpers.buildEntityKey(config.entityType, config.endpointType);
     }
-    return EntityCatalogueHelpers.buildEntityKey(entityType, endpointType as string);
+    return EntityCatalogueHelpers.buildEntityKey(entityType, endpointTypeOrConfig as string);
   }
 
   public getEndpoint(endpointType: string, subType?: string) {

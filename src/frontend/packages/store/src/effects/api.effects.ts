@@ -10,9 +10,9 @@ import { LoggerService } from '../../../core/src/core/logger.service';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { isJetStreamError } from '../../../core/src/jetstream.helpers';
 import { SendEventAction } from '../actions/internal-events.actions';
-import { endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
-import { EntityInlineParentAction, isEntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
+import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
 import {
   getFailApiRequestActions,
@@ -35,6 +35,7 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { isEntityInlineParentAction } from '../helpers/entity-relations/entity-relation-tree.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';

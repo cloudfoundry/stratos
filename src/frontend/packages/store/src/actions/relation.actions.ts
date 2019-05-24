@@ -3,11 +3,11 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import {
   EntityInlineChildAction,
   EntityInlineParentAction,
-  EntityTreeRelation,
 } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../types/request.types';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityTreeRelation } from '../helpers/entity-relations/entity-relation-tree';
 
 const relationActionId = 'FetchRelationAction';
 

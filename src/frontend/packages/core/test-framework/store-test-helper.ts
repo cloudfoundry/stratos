@@ -2,11 +2,9 @@ import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
 import { AppState } from '../../store/src/app-state';
-import { addEntityToCache, EntitySchema, userProvidedServiceInstanceSchemaKey } from '../../store/src/helpers/entity-factory';
+import { userProvidedServiceInstanceSchemaKey } from '../../store/src/helpers/entity-factory';
 import { appReducers } from '../../store/src/reducers.module';
-import { registerAPIRequestEntity } from '../../store/src/reducers/api-request-reducers.generator';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
-import { defaultCfEntitiesState } from '../../store/src/types/entity.types';
 import { createUserRoleInOrg } from '../../store/src/types/user.types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
@@ -21891,13 +21889,4 @@ export function createBasicStoreModule(initialState: Partial<AppState> = getInit
       initialState
     }
   );
-}
-
-export function registerEntitiesForTesting(entities) {
-  entities.forEach(entity => {
-    const entitySchema = new EntitySchema(entity.entityKey, entity.definition, entity.options, entity.relationKey);
-    addEntityToCache(entitySchema);
-    defaultCfEntitiesState[entity.entityKey] = {};
-    registerAPIRequestEntity(entity.entityKey);
-  });
 }

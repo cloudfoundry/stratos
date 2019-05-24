@@ -9,7 +9,6 @@ import {
   routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
-  userProfileSchemaKey,
   userProvidedServiceInstanceSchemaKey
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
@@ -31,7 +30,6 @@ import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from 
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import { userFavoritesEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -65,23 +63,9 @@ function chainReducers(baseReducer, extraReducers) {
     return newState;
   };
 }
-// Extensions can add to this list
-// TODO: These should all be put somewhere nice - NJ
-const baseStratosEntities = [
-  EntityCatalogueHelpers.endpointType,
-  userProfileSchemaKey,
-  userFavoritesEntitySchema.entityType,
-  'user',
-  'system'
-];
-
-export function registerAPIRequestEntity(schemaKey: string) {
-  // TODO Can this be done via an action that the catalogue fires off? NJ
-  baseStratosEntities.push(schemaKey);
-}
 
 export function requestReducer(state: IRequestState, action: Action) {
-  const baseRequestReducer = requestReducerFactory(baseStratosEntities, requestActions);
+  const baseRequestReducer = requestReducerFactory(requestActions);
   const extraReducers = {
     [appStatsSchemaKey]: [appStatsReducer]
   };
@@ -99,7 +83,7 @@ function getInternalEntityKey(type: string) {
 
 // TODO Add these reducers to the catalogue
 export function requestDataReducer(state: IRequestDataState, action: Action) {
-  const baseDataReducer = requestDataReducerFactory(baseStratosEntities, requestActions);
+  const baseDataReducer = requestDataReducerFactory(requestActions);
 
   const extraReducers = {
     [getCFEntityKey(cfUserSchemaKey)]: [userReducer, endpointDisconnectUserReducer],

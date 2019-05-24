@@ -1,5 +1,6 @@
-import { createEntityRelationKey, EntityInlineParentAction, EntityTree, EntityTreeRelation } from './entity-relations.types';
+import { createEntityRelationKey, EntityInlineParentAction, EntityTree } from './entity-relations.types';
 import { EntitySchema } from '../entity-schema';
+import { EntityTreeRelation } from './entity-relation-tree';
 
 const entityTreeCache: {
   [entityKey: string]: EntityTree

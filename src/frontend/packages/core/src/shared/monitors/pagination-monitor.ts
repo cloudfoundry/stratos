@@ -15,13 +15,15 @@ import {
 } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
-import { entityFactory, EntitySchema } from '../../../../store/src/helpers/entity-factory';
 import { ActionState, ListActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { IRequestDataState } from '../../../../store/src/types/entity.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
+import { StratosBaseCatalogueEntity } from '../../core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 
@@ -41,6 +43,7 @@ export class MultiActionListEntity {
   constructor(public entity: any, public entityKey: string) { }
 }
 export class PaginationMonitor<T = any> {
+
   /**
    * Emits the current page of entities.
    */
@@ -58,10 +61,29 @@ export class PaginationMonitor<T = any> {
    */
   public pagination$: Observable<PaginationEntityState>;
 
-
   public currentPageIds$: Observable<string[]>;
   public isMultiAction$: Observable<boolean>;
   public schema: EntitySchema;
+
+
+
+  /**
+   * Returns a pagination monitor for a given catalogue entity and pagination key.
+   */
+  static getMonitorFromCatalogueEntity(
+    store: Store<AppState>,
+    catalogueEntity: StratosBaseCatalogueEntity,
+    paginationKey: string,
+    {
+      isLocal = false,
+      schemaKey = ''
+    }: any
+  ) {
+    // This is a static on the pagintion monitor rather than a member of StratosBaseCatalogueEntity due to 
+    // a circular dependency on entityFactory from the getPageInfo function below.
+    const schema = catalogueEntity.getSchema(schemaKey);
+    return new PaginationMonitor(store, paginationKey, schema, isLocal);
+  }
 
   constructor(
     private store: Store<AppState>,
@@ -229,7 +251,7 @@ export class PaginationMonitor<T = any> {
       map(([pagination]) => {
         return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
           const { entityConfig } = pageRequest;
-          const key = entityCatalogue.getEntityKey(entityConfig);
+          const key = EntityCatalogueHelpers.buildEntityKey(entityConfig.endpointType, entityConfig.entityType);
           if (key && !entityKeys.includes(key)) {
             entityKeys.push(key);
           }
@@ -253,6 +275,7 @@ export class PaginationMonitor<T = any> {
     if (pages.length > 1) {
       if (pagination.forcedLocalPage) {
         const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, defaultSchema);
+
         return this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key));
       }
       return pages.reduce((allPageEntities, pageNumber) => {

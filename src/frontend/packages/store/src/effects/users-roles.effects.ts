@@ -8,13 +8,14 @@ import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor'
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../actions/users-roles.actions';
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../actions/users.actions';
 import { AppState } from '../app-state';
-import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
+import { organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';
 import { ICFAction, UpdateCfAction } from '../types/request.types';
 import { OrgUserRoleNames } from '../types/user.types';
 import { CfRoleChange } from '../types/users-roles.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -119,15 +120,15 @@ export class UsersRolesEffects {
   }
 
   private createActionObs(action: ChangeUserRole): Observable<boolean> {
-    return new EntityMonitor(
-      this.store,
-      action.guid,
-      action
-    ).getUpdatingSection(action.updatingKey).pipe(
-      map(update => update.busy),
-      pairwise(),
-      filter(([oldBusy, newBusy]) => !!oldBusy && !newBusy),
-      map(([oldBusy, newBusy]) => newBusy)
-    );
+    return entityCatalogue.getEntity(action)
+      .getEntityMonitor(
+        this.store,
+        action.guid
+      ).getUpdatingSection(action.updatingKey).pipe(
+        map(update => update.busy),
+        pairwise(),
+        filter(([oldBusy, newBusy]) => !!oldBusy && !newBusy),
+        map(([oldBusy, newBusy]) => newBusy)
+      );
   }
 }

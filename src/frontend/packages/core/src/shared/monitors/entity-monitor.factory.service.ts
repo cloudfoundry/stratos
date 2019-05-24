@@ -4,6 +4,7 @@ import { EntityMonitor } from './entity-monitor';
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class EntityMonitorFactory {
@@ -24,11 +25,14 @@ export class EntityMonitorFactory {
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {
-      const monitor = new EntityMonitor<T>(
+      const catalogueEntity = entityCatalogue.getEntity(entityConfig);
+      const monitor = catalogueEntity.getEntityMonitor(
         this.store,
         id,
-        entityConfig,
-        startWithNull
+        {
+          startWithNull,
+          schemaKey: entityConfig.schemaKey
+        }
       );
       this.monitorCache[cacheKey] = monitor;
       return monitor;

@@ -1,18 +1,13 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { getPaginationKey } from '../../actions/pagination.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { AppState, IRequestTypeState } from '../../app-state';
-import { ActionState } from '../../reducers/api-request-reducer/types';
-import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { IRequestDataState } from '../../types/entity.types';
-import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction } from '../../types/request.types';
-import { EntitySchema } from '../entity-schema';
+import { EntityTreeRelation } from './entity-relation-tree';
+import { getPaginationKey } from '../../actions/pagination.actions';
 
 export class ValidateEntityRelationsConfig {
   /**
@@ -60,33 +55,21 @@ export class EntityTree {
   maxDepth?: number;
 }
 
-/**
- * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
- *
- * @export
- */
-export class EntityTreeRelation {
-  public entityKey: string;
-  public entityType: string;
-
-  /**
-   * Creates an instance of EntityTreeRelation.
-   * @param [isArray=false] is this a collection of entities (should be paginationed) or not
-   * @param paramName parameter name of the entity within the schema. For example `space` may be `spaces` (entity.spaces)
-   * @param [path=''] location of the entity within the parent. For example `space` entity maybe be `entity.spaces`
-   */
-  constructor(
-    public entity: EntitySchema,
-    public isArray = false,
-    public paramName: string, // space/spaces
-    public path = '', // entity.space
-    public childRelations: EntityTreeRelation[]
-  ) {
-    this.entityKey = entityCatalogue.getEntityKey(entity);
-    this.entityType = entity.entityType;
-  }
+export function createEntityRelationPaginationKey(parentSchemaKey: string, parentGuid = 'all', childSchemaRelation?: string) {
+  let key = getPaginationKey(parentSchemaKey, parentGuid);
+  // Usually, the above is enough to be unique, however in situations where there is more than one child with the same type we need to
+  // expand this to include this child relation text
+  // For instance
+  // Fine - Space with a collection of routes (stored in pagination 'route' section as 'space-<guid>)
+  // Fine - User with a collection of organizations (i.e is an org user of) (stored in pagination 'organization' section as 'user-<guid>')
+  // Needs additional childSchemaRelation - User with a collection of organizations that they're billing manager of (stored in pagination
+  // 'organization' section as 'user-<guid>-billing_managed_organizations')
+  key += childSchemaRelation ? `-${childSchemaRelation}` : '';
+  return key;
 }
 
+// TODO Does this need the entity key or type?
+export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
 /**
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
  *
@@ -121,25 +104,6 @@ export interface EntityInlineParentAction extends IRequestAction {
   populateMissing: boolean;
 }
 
-export function isEntityInlineParentAction(anything: any): boolean {
-  return anything && !!anything.includeRelations && anything.populateMissing !== undefined;
-}
-
-// TODO Does this need the entity key or type?
-export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
-
-export function createEntityRelationPaginationKey(parentSchemaKey: string, parentGuid = 'all', childSchemaRelation?: string) {
-  let key = getPaginationKey(parentSchemaKey, parentGuid);
-  // Usually, the above is enough to be unique, however in situations where there is more than one child with the same type we need to
-  // expand this to include this child relation text
-  // For instance
-  // Fine - Space with a collection of routes (stored in pagination 'route' section as 'space-<guid>)
-  // Fine - User with a collection of organizations (i.e is an org user of) (stored in pagination 'organization' section as 'user-<guid>')
-  // Needs additional childSchemaRelation - User with a collection of organizations that they're billing manager of (stored in pagination
-  // 'organization' section as 'user-<guid>-billing_managed_organizations')
-  key += childSchemaRelation ? `-${childSchemaRelation}` : '';
-  return key;
-}
 
 /**
  * The result of a validation run. Indicates if any separate api requests have been started and a promise firing when they have completed
@@ -172,13 +136,3 @@ export interface ValidateEntityResult {
   abortDispatch?: boolean;
 }
 
-export function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
-  Observable<ValidateResultFetchingState> {
-  return store.select(selectPaginationState(entityCatalogue.getEntityKey(paramPaginationAction), paramPaginationAction.paginationKey)).pipe(
-    map((paginationState: PaginationEntityState) => {
-      const pageRequest: ActionState =
-        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-      return { fetching: pageRequest ? pageRequest.busy : true };
-    })
-  );
-}

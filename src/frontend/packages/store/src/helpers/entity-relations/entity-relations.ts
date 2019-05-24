@@ -28,15 +28,15 @@ import { fetchEntityTree } from './entity-relations.tree';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-  createValidationPaginationWatcher,
   EntityInlineChildAction,
   EntityInlineParentAction,
-  EntityTreeRelation,
   isEntityInlineChildAction,
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
 import { EntitySchema } from '../entity-schema';
+import { EntityTreeRelation } from './entity-relation-tree';
+import { createValidationPaginationWatcher } from './entity-relation-tree.helpers';
 
 // TODO This 1 needs a tidy up and 2 only works with CF entities.
 interface ValidateResultFetchingState {

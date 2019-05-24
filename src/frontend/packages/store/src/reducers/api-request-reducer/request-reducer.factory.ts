@@ -6,15 +6,16 @@ import {
 import { StartRequestAction } from '../../types/request.types';
 import { resetChildEntities, setChildEntitiesAsDeleted, setChildEntitiesAsDeleting } from './deleting-child-entities';
 import { failRequest } from './fail-request';
-import { generateDefaultState } from './request-helpers';
 import { startRequest } from './start-request';
 import { succeedRequest } from './succeed-request';
 import { IRequestArray } from './types';
 import { updateRequest } from './update-request';
+import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
+import { IRequestDataState } from '../../types/entity.types';
 
-export function requestReducerFactory(entityList = [], actions: IRequestArray) {
+export function requestReducerFactory(actions: IRequestArray) {
   const [startAction, successAction, failedAction, updateAction] = actions;
-  const defaultState = generateDefaultState(entityList);
+  const defaultState = getDefaultStateFromEntityCatalogue<IRequestDataState>();
   return function apiRequestReducer(state = defaultState, action) {
     switch (action.type) {
       case startAction:

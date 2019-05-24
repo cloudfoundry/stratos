@@ -3,12 +3,12 @@ import { combineLatest } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../store/src/app-state';
-import { entityFactory, routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { EntityMonitor } from '../../../../monitors/entity-monitor';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 export class SpaceRouteDataSourceHelper {
   static getRowStateManager(
@@ -44,13 +44,13 @@ export class SpaceRouteDataSourceHelper {
     return paginationMonitor.currentPage$.pipe(
       map(routes => {
         return routes.map(route => {
-          const entityMonitor = new EntityMonitor(
+          const catalogueEntity = entityCatalogue.getEntity({
+            entityType: routeSchemaKey,
+            endpointType: CF_ENDPOINT_TYPE
+          });
+          const entityMonitor = catalogueEntity.getEntityMonitor(
             store,
-            route.metadata.guid,
-            {
-              entityType: routeSchemaKey,
-              endpointType: CF_ENDPOINT_TYPE
-            }
+            route.metadata.guid
           );
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {

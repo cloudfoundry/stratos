@@ -32,6 +32,7 @@ import { fetchTotalResults } from '../../features/cloud-foundry/cf.helpers';
 import { EntityMonitor } from '../monitors/entity-monitor';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -117,14 +118,14 @@ export class CloudFoundryUserProvidedServicesService {
       data,
       serviceSchemaKey
     );
+    const catalogueEntity = entityCatalogue.getEntity({
+      entityType: userProvidedServiceInstanceSchemaKey,
+      endpointType: CF_ENDPOINT_TYPE
+    });
     this.store.dispatch(updateAction);
-    return new EntityMonitor(
+    return catalogueEntity.getEntityMonitor(
       this.store,
-      guid,
-      {
-        entityType: userProvidedServiceInstanceSchemaKey,
-        endpointType: CF_ENDPOINT_TYPE
-      }
+      guid
     ).entityRequest$.pipe(
       filter(
         er => er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance] &&

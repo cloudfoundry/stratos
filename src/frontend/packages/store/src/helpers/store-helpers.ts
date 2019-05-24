@@ -6,8 +6,6 @@ import { AppState } from '../app-state';
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { BasePaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { setDefaultPaginationState } from '../reducers/pagination-reducer/pagination.reducer';
-import { defaultCfEntitiesState } from '../types/entity.types';
 
 
 export const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePaginatedAction) =>
@@ -30,10 +28,6 @@ export const createPaginationCompleteWatcher = (store: Store<AppState>, action: 
     skipWhile(completed => !completed),
     first(),
   );
-
-export function initStore() {
-  setDefaultPaginationState({ ...defaultCfEntitiesState });
-}
 
 
 export function getDashboardStateSessionId(username?: string) {

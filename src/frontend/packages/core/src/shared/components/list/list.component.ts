@@ -76,6 +76,7 @@ import {
 } from './list.component.types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
+import { EntityCatalogueEntityConfig } from '../../../core/entity-catalogue/entity-catalogue.types';
 
 @Component({
   selector: 'app-list',
@@ -661,15 +662,15 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return actions;
   }
 
-  private getRowStateGeneratorFromEntityMonitor(entitySchema: EntitySchema, dataSource: IListDataSource<T>) {
+  private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogueEntityConfig, dataSource: IListDataSource<T>) {
     return (row) => {
-      if (!entitySchema || !row) {
+      if (!entityConfig || !row) {
         return observableOf(getDefaultRowState());
       }
-      const entityMonitor = new EntityMonitor(
+      const catalogueEntity = entityCatalogue.getEntity(entityConfig);
+      const entityMonitor = catalogueEntity.getEntityMonitor(
         this.store,
-        dataSource.getRowUniqueId(row),
-        entitySchema
+        dataSource.getRowUniqueId(row)
       );
       return entityMonitor.entityRequest$.pipe(
         distinctUntilChanged(),

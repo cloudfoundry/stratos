@@ -17,8 +17,9 @@ import { OrgUserRoleNames, CfUser, IUserPermissionInOrg } from '../../../../../.
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
-import { organizationSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
+import { organizationSchemaKey, } from '../../../../../../../../store/src/helpers/entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-org-user-permission-cell',
@@ -60,22 +61,23 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         perm.key,
         row.metadata.guid
       );
+      const catalogueEntity = entityCatalogue.getEntity({
+        entityType: organizationSchemaKey,
+        endpointType: CF_ENDPOINT_TYPE
+      });
       return {
         ...perm,
         name: showName ? orgPerms.name : null,
         guid: orgPerms.orgGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,
-        busy: new EntityMonitor(
+        busy: catalogueEntity.getEntityMonitor(
           this.store,
-          orgPerms.orgGuid,
-          {
-            entityType: organizationSchemaKey,
-            endpointType: CF_ENDPOINT_TYPE
-          }
-        ).getUpdatingSection(updatingKey).pipe(
-          map(update => update.busy)
-        ),
+          orgPerms.orgGuid
+        )
+          .getUpdatingSection(updatingKey).pipe(
+            map(update => update.busy)
+          ),
         cfGuid: row.entity.cfGuid,
         orgGuid: orgPerms.orgGuid
       };

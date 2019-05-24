@@ -44,26 +44,12 @@ import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
-
-// Initialized when all entity types have been registered
-export let defaultPaginationState = {
-  // endpoint: {},
-  // system: {},
-  // userProfile: {},
-  // metrics: {},
-  // userFavorites: {}
-};
-
-export function setDefaultPaginationState(state: any) {
-  defaultPaginationState = {
-    ...state,
-    ...defaultPaginationState
-  };
-}
+import { REGISTER_ENTITY_ACTION } from '../../../../core/src/core/entity-catalogue/entity-catalogue.actions';
+import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 
 const getPaginationUpdater = (types: [string, string, string]) => {
   const [requestType, successType, failureType] = types;
-  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState => {
+  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action): PaginationEntityState => {
     switch (action.type) {
       case requestType:
         return paginationStart(state, action);
@@ -102,12 +88,11 @@ export function createPaginationReducer(types: [string, string, string]) {
 
 function paginationReducer(updatePagination) {
   return (state, action) => {
-    state = state || defaultPaginationState;
     return paginate(action, state, updatePagination);
   };
 }
 
-function paginate(action, state, updatePagination) {
+function paginate(action, state = getDefaultStateFromEntityCatalogue(), updatePagination) {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     return state;
   }

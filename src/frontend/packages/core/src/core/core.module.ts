@@ -99,20 +99,7 @@ import { StratosCatalogueEndpointEntity } from './entity-catalogue/entity-catalo
   ],
 })
 export class CoreModule {
-  constructor() {
-    // TODO(NJ): This gets called a few times do to lazy loaded modules that import this.
-    // It's completely harmless but needs to be moved at some point.
-    entityCatalogue.register(new StratosCatalogueEndpointEntity({
-      type: 'metrics',
-      label: 'Metrics',
-      labelPlural: 'Metrics',
-      tokenSharing: true,
-      logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
-    },
-      metadata => `/endpoints/metrics/${metadata.guid}`
-    ));
-  }
+  constructor() { }
 
 }
 
