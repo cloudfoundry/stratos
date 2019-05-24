@@ -166,6 +166,8 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 	ufe := userfavoritesendpoints.Constructor(p, cnsiGUID)
 	ufe.RemoveFavorites()
 
+	p.RemoveRelations(cnsiGUID)
+
 	return nil
 }
 
@@ -181,7 +183,7 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
+		return cnsiList, fmt.Errorf("ListEndpoints: %s", err)
 	}
 
 	cnsiList, err = cnsiRepo.List(p.Config.EncryptionKeyInBytes)
@@ -278,8 +280,8 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 	return jsonString, nil
 }
 
-func (p *portalProxy) UpdateEndointMetadata(guid string, metadata string) error {
-	log.Debug("UpdateEndointMetadata")
+func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error {
+	log.Debug("UpdateEndpointMetadata")
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {

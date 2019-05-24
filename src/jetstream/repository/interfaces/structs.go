@@ -200,14 +200,26 @@ type Info struct {
 	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
 }
 
+type EndpointRelation struct {
+	Guid         string                 `json:"guid"`
+	RelationType string                 `json:"type"`
+	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+}
+
+type EndpointRelations struct {
+	Provides []EndpointRelation `json:"provides"`
+	Receives []EndpointRelation `json:"receives"`
+}
+
 // Extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
-	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
-	User              *ConnectedUser    `json:"user"`
-	Metadata          map[string]string `json:"metadata,omitempty"`
-	TokenMetadata     string            `json:"-"`
-	SystemSharedToken bool              `json:"system_shared_token"`
+	EndpointMetadata  interface{}        `json:"endpoint_metadata,omitempty"`
+	Relations         *EndpointRelations `json:"relations,omitempty"`
+	User              *ConnectedUser     `json:"user"`
+	Metadata          map[string]string  `json:"metadata,omitempty"`
+	TokenMetadata     string             `json:"-"`
+	SystemSharedToken bool               `json:"system_shared_token"`
 }
 
 // Versions - response returned to caller from a getVersions action
@@ -242,6 +254,13 @@ type CNSIRequest struct {
 	Response     []byte `json:"-"`
 	Error        error  `json:"-"`
 	ResponseGUID string `json:"-"`
+}
+
+type RelationsRecord struct {
+	Provider     string                 `json:"provider"`
+	RelationType string                 `json:"type"`
+	Target       string                 `json:"target"`
+	Metadata     map[string]interface{} `json:"metadata"`
 }
 
 type PortalConfig struct {

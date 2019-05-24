@@ -35,18 +35,21 @@ export class MetricsService {
 
   private setupObservables() {
     this.metricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
-      map((endpoints: any) => {
+      map((endpoints: EndpointModel[]) => {
         const result: MetricsEndpointProvider[] = [];
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         metrics.forEach(ep => {
           const provider: MetricsEndpointProvider = {
             provider: ep,
-            endpoints: [],
+            endpoints: [] as EndpointModel[],
           };
-          endpoints.forEach(e => {
-            if (e.metadata && e.metadata.metrics && e.metadata.metrics === ep.guid) {
-              provider.endpoints.push(e);
-              e.url = getFullEndpointApiUrl(e);
+          const endpointProviders = ep.relations ? ep.relations.provides : [];
+          endpointProviders.forEach(providerRelation => {
+            const targetEndpoint = endpoints.find(e => e.guid === providerRelation.guid);
+            if (targetEndpoint) {
+              provider.endpoints.push(targetEndpoint);
+              targetEndpoint.metadata = targetEndpoint.metadata || {};
+              targetEndpoint.metadata.fullApiEndpoint = getFullEndpointApiUrl(targetEndpoint);
             }
           });
           result.push(provider);

@@ -9,7 +9,7 @@ import {
 } from '../actions/endpoint.actions';
 import { METRIC_API_SUCCESS, MetricAPIQueryTypes, MetricsAPIActionSuccess } from '../actions/metrics-api.actions';
 import { IRequestEntityTypeState } from '../app-state';
-import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
+import { endpointConnectionStatus, EndpointModel, EndpointRelationTypes } from '../types/endpoint.types';
 import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
@@ -61,23 +61,21 @@ function succeedEndpointInfo(state, action) {
       newState[guid] = {
         ...newState[guid],
         ...endpointInfo,
-        metricsAvailable: endpointHasMetrics(endpointInfo)
+        metricsAvailable: endpointHasCfMetrics(endpointInfo)
       };
     });
   });
   return newState;
 }
 
-function endpointHasMetrics(endpoint: EndpointModel) {
-  if (!endpoint || !endpoint.metadata) {
-    return false;
-  }
-  return !!endpoint.metadata.metrics;
+export function endpointHasCfMetrics(endpoint: EndpointModel): boolean {
+  return endpoint && endpoint.relations ?
+    !!endpoint.relations.receives.find(relation => relation.type === EndpointRelationTypes.METRICS_CF) : false;
 }
 
 function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
   guid: string
-},                                      connectionStatus: endpointConnectionStatus) {
+}, connectionStatus: endpointConnectionStatus) {
   if (!action.guid) {
     return state;
   }
@@ -103,7 +101,7 @@ function updateMetricsInfo(state: IRequestEntityTypeState<EndpointModel>, action
         ...existingEndpoint,
         metadata: {
           ...existingEndpoint.metadata,
-          metrics_targets: action.data.data
+          cfMetricsTargets: action.data.data
         }
       },
     };

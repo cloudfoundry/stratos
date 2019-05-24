@@ -27,3 +27,7 @@ func RegisterJetstreamConfigPlugin(plugin JetstreamConfigInit) {
 type EndpointNotificationPlugin interface {
 	OnEndpointNotification(EndpointAction, *CNSIRecord)
 }
+
+type TokenNotificationPlugin interface {
+	OnTokenNotification(*CNSIRecord, *TokenRecord, string, *ConnectedUser)
+}

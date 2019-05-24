@@ -12,6 +12,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 )
@@ -23,9 +24,17 @@ type MetricsSpecification struct {
 }
 
 const (
-	EndpointType  = "metrics"
-	CLIENT_ID_KEY = "METRICS_CLIENT"
+	EndpointType          = "metrics"
+	CLIENT_ID_KEY         = "METRICS_CLIENT"
+	MetricsCfRelation     = "metrics-cf"
+	MetricsKubeRelation   = "metrics-kube"
+	MetricsCfKubeRelation = "kubeMetrics-cf"
 )
+
+type MetricsRelationMetadata struct {
+	Job         string `json:"job,omitempty"`
+	Environment string `json:"environment,omitempty"`
+}
 
 type MetricsProviderMetadata struct {
 	Type        string `json:"type"`
@@ -312,48 +321,58 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 
 func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
 
-	metricsProviders := make([]MetricsMetadata, 0)
-	// Go through the metrics endpoints and get the corresponding services from the token metadata
-	if metrics, ok := info.Endpoints[EndpointType]; ok {
-		for _, endpoint := range metrics {
-			// Parse out the metadata
-			var m []MetricsProviderMetadata
-			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
-			if err == nil {
-				for _, item := range m {
-					info := MetricsMetadata{}
-					info.EndpointGUID = endpoint.GUID
-					info.Type = item.Type
-					info.URL = item.URL
-					info.Job = item.Job
-					info.Environment = item.Environment
-					log.Debugf("Metrics provider: %+v", info)
-					metricsProviders = append(metricsProviders, info)
+	// Add a set of endpoint relations to each endpoint via the relations table
+	relations, err := m.portalProxy.ListRelations()
+	if err != nil {
+		// TODO: RC handle
+	}
+	for _, endpointsOfType := range info.Endpoints {
+		for _, endpoint := range endpointsOfType {
+			for _, relation := range relations {
+				// TODO: nicer way to do
+				if (relation.Provider == endpoint.GUID || relation.Target == endpoint.GUID) && endpoint.Relations == nil {
+					endpoint.Relations = &interfaces.EndpointRelations{
+						Provides: []interfaces.EndpointRelation{},
+						Receives: []interfaces.EndpointRelation{},
+					}
+				}
+				// Add relation to appropriate Provider/Target collection
+				if relation.Provider == endpoint.GUID {
+					endpoint.Relations.Provides = append(endpoint.Relations.Provides, interfaces.EndpointRelation{
+						Guid:         relation.Target,
+						RelationType: relation.RelationType,
+						Metadata:     relation.Metadata,
+					})
+				} else if relation.Target == endpoint.GUID {
+					endpoint.Relations.Receives = append(endpoint.Relations.Receives, interfaces.EndpointRelation{
+						Guid:         relation.Provider,
+						RelationType: relation.RelationType,
+						Metadata:     relation.Metadata,
+					})
 				}
 			}
 		}
 	}
+}
 
-	// Go through again, annotate this time with which have metrics
-	for _, values := range info.Endpoints {
-		for _, endpoint := range values {
-			// Look to see if we can find the metrics provider for this URL
-			log.Debugf("Processing endpoint: %+v", endpoint)
-			log.Debugf("Processing endpoint: %+v", endpoint.CNSIRecord)
-
-			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
-				endpoint.Metadata["metrics"] = provider.EndpointGUID
-				endpoint.Metadata["metrics_job"] = provider.Job
-				endpoint.Metadata["metrics_environment"] = provider.Environment
-			}
-			// For K8S
-			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.APIEndpoint.String()); ok {
-				endpoint.Metadata["metrics"] = provider.EndpointGUID
-				endpoint.Metadata["metrics_job"] = provider.Job
-				endpoint.Metadata["metrics_environment"] = ""
-			}
+func createMetricsMetadataFromTokenMetadata(tokenMetadata string, endpointGuid string) ([]MetricsMetadata, error) {
+	metricsProviders := make([]MetricsMetadata, 0)
+	// Parse out the metadata
+	var m []MetricsProviderMetadata
+	err := json.Unmarshal([]byte(tokenMetadata), &m)
+	if err == nil {
+		for _, item := range m {
+			info := MetricsMetadata{}
+			info.EndpointGUID = endpointGuid
+			info.Type = item.Type
+			info.URL = item.URL
+			info.Job = item.Job
+			info.Environment = item.Environment
+			log.Infof("Metrics provider: %+v", info) // TODO: RC revert to debug
+			metricsProviders = append(metricsProviders, info)
 		}
 	}
+	return metricsProviders, err
 }
 
 func hasMetricsProvider(providers []MetricsMetadata, url string) (*MetricsMetadata, bool) {
@@ -457,4 +476,130 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func (m *MetricsSpecification) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
+}
+
+func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string, user *interfaces.ConnectedUser) {
+	// Metrics has been connected. Determine if it provides metrics to any existing endpoint
+	metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenRecord.Metadata, endpoint.GUID)
+
+	if err != nil {
+		// TODO: RC handle error
+		return
+	}
+
+	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID)
+	if err != nil {
+		// TODO: RC handle error
+		return
+	}
+	for _, endpoint := range endpoints {
+		// Look to see if we can find the metrics provider for this URL
+		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpoint.DopplerLoggingEndpoint); ok {
+			// log.Infof("found cf. provider: %v", provider)
+			relation := interfaces.RelationsRecord{
+				Provider:     provider.EndpointGUID,
+				RelationType: MetricsCfRelation,
+				Target:       endpoint.GUID,
+				Metadata: metadataToMap(MetricsRelationMetadata{
+					Job:         provider.Job,
+					Environment: provider.Environment,
+				}),
+			}
+			_, err := m.portalProxy.SaveRelation(relation)
+			if err != nil {
+				// TODO: RC handle error
+			}
+		}
+		// For K8S
+		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpoint.APIEndpoint.String()); ok {
+			// log.Infof("found kb. provider: %v", provider)
+			relation := interfaces.RelationsRecord{
+				Provider:     provider.EndpointGUID,
+				RelationType: MetricsKubeRelation,
+				Target:       endpoint.GUID,
+				Metadata: metadataToMap(MetricsRelationMetadata{
+					Job:         provider.Job,
+					Environment: "",
+				}),
+			}
+			_, err := m.portalProxy.SaveRelation(relation)
+			if err != nil {
+				// TODO: RC handle error
+			}
+		}
+	}
+}
+
+func metadataToMap(metadata MetricsRelationMetadata) map[string]interface{} {
+	var mapMetadata map[string]interface{}
+	inrec, _ := json.Marshal(metadata)
+	json.Unmarshal(inrec, &mapMetadata)
+	return mapMetadata
+}
+
+func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpointUrl string, consoleUserID string) {
+	// Find all metrics endpoints
+	endpoints, err := m.portalProxy.ListEndpointsByUser(consoleUserID)
+	if err != nil {
+		// TODO: RC handle error
+		return
+	}
+	metricsEndpoints := filterEndpoints(endpoints, func(v *interfaces.ConnectedEndpoint) bool {
+		return v.CNSIType == EndpointType
+	})
+
+	// Try to match up endpoint to metric
+	for _, metricEndpoint := range metricsEndpoints {
+		tokenRecord, found := m.portalProxy.GetCNSITokenRecord(metricEndpoint.GUID, consoleUserID)
+		if !found {
+			// Console user has not connected to endpoint
+			continue
+		}
+		metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenRecord.Metadata, endpointGuid)
+		if err != nil {
+			// TODO: RC handle error
+			continue
+		}
+		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpointUrl); ok {
+			// log.Infof("found cf2. provider: %v", provider)
+			relation := interfaces.RelationsRecord{
+				Provider:     metricEndpoint.GUID,
+				RelationType: MetricsCfRelation,
+				Target:       endpointGuid,
+				Metadata: metadataToMap(MetricsRelationMetadata{
+					Job:         provider.Job,
+					Environment: provider.Environment,
+				}), //TODO: This will wipe out metadata on save
+			}
+			_, err := m.portalProxy.SaveRelation(relation)
+			if err != nil {
+				// TODO: RC handle error
+			}
+		}
+	}
+}
+
+// TODO: RC Gotta be a generic way to do this??
+func filterEndpoints(vs []*interfaces.ConnectedEndpoint, f func(*interfaces.ConnectedEndpoint) bool) []*interfaces.ConnectedEndpoint {
+	vsf := make([]*interfaces.ConnectedEndpoint, 0)
+	for _, v := range vs {
+		if f(v) {
+			vsf = append(vsf, v)
+		}
+	}
+	return vsf
+}
+
+func (m *MetricsSpecification) OnTokenNotification(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string, user *interfaces.ConnectedUser) {
+	switch endpointType := endpoint.CNSIType; endpointType {
+	case EndpointType:
+		m.linkMetricsToEndpoints(endpoint, tokenRecord, consoleUserID, user)
+	case "cf":
+		m.linkEndpointToMetrics(endpoint.GUID, endpoint.DopplerLoggingEndpoint, consoleUserID)
+	case "k8s":
+		m.linkEndpointToMetrics(endpoint.GUID, endpoint.APIEndpoint.String(), consoleUserID)
+	}
 }

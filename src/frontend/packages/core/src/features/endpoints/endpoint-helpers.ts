@@ -6,6 +6,7 @@ import { first, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { endpointHasCfMetrics } from '../../../../store/src/reducers/system-endpoints.reducer';
 import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { ExtensionService } from '../../core/extension/extension-service';
@@ -186,10 +187,11 @@ export function getIconForEndpoint(type: string, subType: string): EndpointIcon 
   return icon;
 }
 
-export function endpointHasMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
+export function getEndpointHasCfMetrics(endpointGuid: string, store: Store<AppState>): Observable<boolean> {
   return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
     first(),
-    map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
+    map(state => state[endpointGuid]),
+    map(endpointHasCfMetrics)
   );
 }
 

@@ -40,6 +40,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/relations"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -172,6 +173,7 @@ func main() {
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
+	relations.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
@@ -807,6 +809,14 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)
 	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
+
+	// Relations operations
+	sessionGroup.GET("/relations", p.listRelations)
+	sessionGroup.POST("/relations", p.createRelation)
+	// TODO: RC remove
+	// echoGroup.DELETE("/relations/:provider/:target", uf.delete)
+	// echoGroup.DELETE("/relations/:providerOrTarget", uf.deleteAll)
+	// echoGroup.POST("/relations/:provider/:target", r.setMetadata)
 
 	// Info
 	sessionGroup.GET("/info", p.info)

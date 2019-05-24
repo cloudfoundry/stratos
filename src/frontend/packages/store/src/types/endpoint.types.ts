@@ -33,6 +33,17 @@ export interface IApiEndpointInfo {
   User: object;
 }
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
+// export type endpointMetricsTypes = 'metrics' | 'metrics-kube' | 'kubeMetrics-cf';
+export enum EndpointRelationTypes {
+  METRICS_CF = 'metrics',
+  METRICS_KUBE = 'metrics-kube',
+  KUBEMETRICS_CF = 'kubeMetrics-cf'
+}
+export interface EndpointsRelation {
+  guid: string;
+  metadata: { [key: string]: any };
+  type: EndpointRelationTypes;
+}
 export interface EndpointModel {
   api_endpoint?: IApiEndpointInfo;
   authorization_endpoint?: string;
@@ -46,11 +57,13 @@ export interface EndpointModel {
   token_endpoint?: string;
   user?: EndpointUser;
   metadata?: {
-    metrics?: string;
-    metrics_job?: string;
-    metrics_environment?: string;
-    metrics_targets?: MetricsAPITargets;
+    cfMetricsTargets?: MetricsAPITargets;
     userInviteAllowed?: 'true' | any;
+    fullApiEndpoint?: string;
+  };
+  relations?: {
+    provides: EndpointsRelation[]
+    receives: EndpointsRelation[];
   };
   system_shared_token: boolean;
   sso_allowed: boolean;

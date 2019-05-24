@@ -362,7 +362,6 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 }
 
 func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*interfaces.LoginRes, error) {
-
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
 		return nil, interfaces.NewHTTPShadowError(
@@ -371,8 +370,9 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 			"No Endpoint registered with GUID %s: %s", cnsiGUID, err)
 	}
 
-	// Get ther User ID since we save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
+	// Get the User ID since we save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
 	userID, err := p.GetSessionStringValue(c, "user_id")
+	consoleUserID := userID
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
@@ -450,6 +450,14 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 					Name:   "Unknown",
 					Scopes: []string{"read"},
 					Admin:  true,
+				}
+			}
+
+			// TODO: RC Test with shared endpoints/systemSharedToken
+			// Notify plugins if they support the notification interface
+			for _, plugin := range p.Plugins {
+				if notifier, ok := plugin.(interfaces.TokenNotificationPlugin); ok {
+					notifier.OnTokenNotification(&cnsiRecord, tokenRecord, consoleUserID, cnsiUser)
 				}
 			}
 

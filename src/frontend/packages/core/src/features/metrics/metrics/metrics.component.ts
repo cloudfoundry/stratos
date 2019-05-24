@@ -57,13 +57,14 @@ export class MetricsComponent {
     this.store.dispatch(metricsAction);
 
     this.metricsEndpoint$ = this.metricsService.metricsEndpoints$.pipe(
-      map((ep) => ep.find((item) => item.provider.guid === metricsGuid)),
-      map((ep) => {
+      map(eps => eps.find((item) => item.provider.guid === metricsGuid)),
+      map(ep => {
         const metadata = {};
         ep.endpoints.forEach(endpoint => {
           metadata[endpoint.guid] = {
             type: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
-            icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type)
+            icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type),
+            relation: ep.provider.relations.provides.find(provider => provider.guid === endpoint.guid)
           };
         });
         return {
@@ -88,8 +89,8 @@ export class MetricsComponent {
     );
 
     this.jobDetails$ = this.metricsEndpoint$.pipe(
-      filter(mi => !!mi && !!mi.entity.provider && !!mi.entity.provider.metadata && !!mi.entity.provider.metadata.metrics_targets),
-      map(mi => mi.entity.provider.metadata.metrics_targets),
+      filter(mi => !!mi && !!mi.entity.provider && !!mi.entity.provider.metadata && !!mi.entity.provider.metadata.cfMetricsTargets),
+      map(mi => mi.entity.provider.metadata.cfMetricsTargets),
       map((targetsData: MetricsAPITargets) => targetsData.activeTargets.reduce((mapped, t) => {
         if (t.labels && t.labels.job) {
           mapped[t.labels.job] = t;
