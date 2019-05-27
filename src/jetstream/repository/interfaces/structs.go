@@ -217,13 +217,21 @@ type Versions struct {
 }
 
 type ConsoleConfig struct {
-	UAAEndpoint         *url.URL `json:"uaa_endpoint"`
-	ConsoleAdminScope   string   `json:"console_admin_scope"`
-	ConsoleClient       string   `json:"console_client"`
-	ConsoleClientSecret string   `json:"console_client_secret"`
-	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
-	IsSetupComplete     bool     `json:"is_setup_complete"`
-	UseSSO              bool     `json:"use_sso"`
+	UAAEndpoint         *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
+	ConsoleAdminScope   string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
+	ConsoleClient       string   `json:"console_client" configName:"CONSOLE_CLIENT"`
+	ConsoleClientSecret string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`
+	SkipSSLValidation   bool     `json:"skip_ssl_validation" configName:"SKIP_SSL_VALIDATION"`
+	UseSSO              bool     `json:"use_sso" configName:"SSO_LOGIN"`
+}
+
+// IsSetupComplete indicates if we have enough config
+func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+	if consoleConfig.UAAEndpoint == nil {
+		return false
+	}
+
+	return len(consoleConfig.UAAEndpoint.String()) > 0 && len(consoleConfig.ConsoleAdminScope) > 0
 }
 
 // CNSIRequest

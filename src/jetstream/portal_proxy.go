@@ -31,3 +31,19 @@ type HttpSessionStore interface {
 	StopCleanup(quit chan<- struct{}, done <-chan struct{})
 	Cleanup(interval time.Duration) (chan<- struct{}, <-chan struct{})
 }
+
+// canPerformMigrations indicates if we can safely perform migrations
+// This depends on the deployment mechanism and the database config
+// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
+// can perform migrations
+var canPerformMigrations = true
+
+// SetCanPerformMigrations updates the state that records if we can perform Database migrations
+func (p *portalProxy) SetCanPerformMigrations(value bool) {
+	canPerformMigrations = canPerformMigrations && value
+}
+
+// CanPerformMigrations returns if we can perform Database migrations
+func (p *portalProxy) CanPerformMigrations() bool {
+	return canPerformMigrations
+}
