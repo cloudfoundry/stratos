@@ -89,6 +89,13 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       true
     ).entities$.pipe(
       filter(o => !!o),
+      tap(quotas => {
+        if (quotas.length === 1) {
+          this.addOrg.patchValue({
+            quotaDefinition: quotas[0].metadata.guid
+          });
+        }
+      })
     );
 
     this.orgSubscription = this.orgs$.subscribe();

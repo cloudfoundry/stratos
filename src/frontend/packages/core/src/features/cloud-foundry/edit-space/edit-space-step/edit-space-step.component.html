@@ -7,8 +7,9 @@
         A space with this name already exists. Please enter a different one.
       </mat-error>
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field *ngIf="hasSpaceQuotas$ | async">
       <mat-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
+        <mat-option [value]="0" *ngIf="hasSpaceQuotas$ | async">None (defaults to organization's quota)</mat-option>
         <mat-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">{{ quota.entity.name }}
         </mat-option>
       </mat-select>

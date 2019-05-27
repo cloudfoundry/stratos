@@ -30,6 +30,7 @@ export class AddEditSpaceStepBase {
   allSpacesInOrg$: Observable<string[]>;
   validate: (spaceName: string) => boolean;
   quotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+  hasSpaceQuotas$: Observable<boolean>;
 
   constructor(
     protected store: Store<AppState>,
@@ -73,6 +74,10 @@ export class AddEditSpaceStepBase {
       true
     ).entities$.pipe(
       filter(o => !!o),
+    );
+
+    this.hasSpaceQuotas$ = this.quotaDefinitions$.pipe(
+      map(q => q && q.length > 0)
     );
   }
 

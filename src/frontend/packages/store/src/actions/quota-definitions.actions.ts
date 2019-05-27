@@ -22,6 +22,10 @@ export const ASSOCIATE_SPACE_QUOTA_DEFINITION = '[QuotaDefinitions] Associate sp
 export const ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinitions] Associate space quota definition success';
 export const ASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED = '[QuotaDefinitions] Associate space quota definition failed';
 
+export const DISASSOCIATE_SPACE_QUOTA_DEFINITION = '[QuotaDefinitions] Disassociate space quota definition';
+export const DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinitions] Disassociate space quota definition success';
+export const DISASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED = '[QuotaDefinitions] Disassociate space quota definition failed';
+
 export class GetQuotaDefinitions extends CFStartAction implements PaginatedAction {
   constructor(
     public paginationKey: string,
@@ -96,6 +100,28 @@ export class AssociateSpaceQuota extends CFStartAction implements ICFAction {
     ASSOCIATE_SPACE_QUOTA_DEFINITION,
     ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
     ASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED
+  ];
+  entity = [entityFactory(spaceQuotaSchemaKey)];
+  entityKey = spaceQuotaSchemaKey;
+  options: RequestOptions;
+  updatingKey = AssociateSpaceQuota.UpdateExistingSpaceQuota;
+  guid: string;
+}
+
+export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
+  public static UpdateExistingSpaceQuota = 'Updating-Existing-Space-Quota';
+
+  constructor(public spaceGuid: string, public endpointGuid: string, spaceQuotaGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `space_quota_definitions/${spaceQuotaGuid}/spaces/${spaceGuid}`;
+    this.options.method = RequestMethod.Delete;
+    this.guid = spaceQuotaGuid;
+  }
+  actions = [
+    DISASSOCIATE_SPACE_QUOTA_DEFINITION,
+    DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
+    DISASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED
   ];
   entity = [entityFactory(spaceQuotaSchemaKey)];
   entityKey = spaceQuotaSchemaKey;

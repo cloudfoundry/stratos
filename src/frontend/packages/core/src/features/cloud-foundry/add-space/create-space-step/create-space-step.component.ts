@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
@@ -24,11 +25,20 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   cfUrl: string;
   createSpaceForm: FormGroup;
-  quotaDefinitions$: any;
+  quotaSubscription: Subscription;
 
   get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }; }
 
-  get quotaDefinition(): any { return this.createSpaceForm ? this.createSpaceForm.get('quotaDefinition') : { value: '' }; }
+  get quotaDefinition(): any {
+    const control = this.createSpaceForm.get('quotaDefinition');
+    const nil = { value: null };
+
+    if (this.createSpaceForm) {
+      return (control.value === 0) ? nil : control;
+    } else {
+      return nil;
+    }
+  }
 
   constructor(
     store: Store<AppState>,
@@ -38,7 +48,6 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     private entityServiceFactory: EntityServiceFactory
   ) {
     super(store, activatedRoute, paginationMonitorFactory, activeRouteCfOrgSpace);
-    console.log(this.entityServiceFactory);
   }
 
   ngOnInit() {
@@ -46,6 +55,14 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       spaceName: new FormControl('', [Validators.required as any, this.spaceNameTakenValidator()]),
       quotaDefinition: new FormControl(),
     });
+
+    this.quotaSubscription = this.quotaDefinitions$.subscribe((quotas => {
+      if (quotas.length > 0) {
+        this.createSpaceForm.patchValue({
+          quotaDefinition: 0
+        });
+      }
+    }));
   }
 
   validateNameTaken = (spaceName: string = null) =>
@@ -73,6 +90,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   ngOnDestroy() {
+    this.quotaSubscription.unsubscribe();
     this.destroy();
   }
 }

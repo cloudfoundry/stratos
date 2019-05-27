@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { AssociateSpaceQuota } from '../../../../../../store/src/actions/quota-definitions.actions';
+import { AssociateSpaceQuota, DisassociateSpaceQuota } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { UpdateSpace } from '../../../../../../store/src/actions/space.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { spaceQuotaSchemaKey, spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
@@ -55,10 +55,11 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
         this.originalName = n.name;
         this.originalSpaceQuotaGuid = n.space_quota_definition_guid;
 
+        const spaceQuotaGuid = n.space_quota_definition_guid ? n.space_quota_definition_guid : 0;
         this.editSpaceForm.patchValue({
           spaceName: n.name,
           toggleSsh: n.allow_ssh,
-          quotaDefinition: n.space_quota_definition_guid,
+          quotaDefinition: spaceQuotaGuid,
         });
       })
     );
@@ -92,11 +93,11 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
           });
         }
 
-        if (!spaceQuotaGuid) {
+        if (this.originalSpaceQuotaGuid === spaceQuotaGuid ||
+            (!this.originalSpaceQuotaGuid && !spaceQuotaGuid)) {
           return of({ success: true, redirect: true });
         }
 
-        this.store.dispatch(new AssociateSpaceQuota(this.spaceGuid, this.cfGuid, spaceQuotaGuid));
         return this.updateSpaceQuota$();
       }),
     );
@@ -116,8 +117,17 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
 
   updateSpaceQuota$() {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
+    let spaceQuotaQueryGuid;
 
-    return this.store.select(selectRequestInfo(spaceQuotaSchemaKey, spaceQuotaGuid)).pipe(
+    if (spaceQuotaGuid) {
+      spaceQuotaQueryGuid = spaceQuotaGuid;
+      this.store.dispatch(new AssociateSpaceQuota(this.spaceGuid, this.cfGuid, spaceQuotaGuid));
+    } else {
+      spaceQuotaQueryGuid = this.originalSpaceQuotaGuid;
+      this.store.dispatch(new DisassociateSpaceQuota(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid));
+    }
+
+    return this.store.select(selectRequestInfo(spaceQuotaSchemaKey, spaceQuotaQueryGuid)).pipe(
       filter(o => {
         return !!o &&
           o.updating[AssociateSpaceQuota.UpdateExistingSpaceQuota] &&
@@ -127,7 +137,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
       map(stateAction => ({
         success: !stateAction.error,
         redirect: !stateAction.error,
-        message: !stateAction.error ? '' : `Failed to update space: ${stateAction.message}`
+        message: !stateAction.error ? '' : `Failed to update space quota: ${stateAction.message}`
       }))
     );
   }
