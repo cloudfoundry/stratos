@@ -101,7 +101,7 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 	// Delete the migration marker
 	err = configStore.DeleteValue(systemGroupName, configSetupNeededMarker)
 	if err != nil {
-		log.Warn("Unable to delete setup config migration marker: %+v", err)
+		log.Warnf("Unable to delete setup config migration marker: %+v", err)
 		return err
 	}
 

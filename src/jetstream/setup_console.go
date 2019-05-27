@@ -256,7 +256,7 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
 	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env(), consoleRepo)
 	if err != nil {
-		log.Error("Unable to load console config; %+v", err)
+		log.Errorf("Unable to load console config; %+v", err)
 		return false
 	}
 

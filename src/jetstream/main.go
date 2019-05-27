@@ -322,7 +322,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env(), consoleRepo)
 	if err != nil {
 		// Could not read config - this should not happen - so abort if it does
-		log.Fatal("Unable to load console config; %+v", err)
+		log.Fatalf("Unable to load console config; %+v", err)
 	}
 
 	// We dynamically determine if we need to enter setup mode based on the configuration
