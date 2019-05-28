@@ -5,7 +5,7 @@ import { SpaceFormStepper } from './space-form-stepper.po';
 export class SpaceFormPage extends CFPage {
   public stepper: SpaceFormStepper;
 
-  constructor(url) {
+  constructor(url?: string) {
     super(url);
     this.stepper = new SpaceFormStepper();
   }

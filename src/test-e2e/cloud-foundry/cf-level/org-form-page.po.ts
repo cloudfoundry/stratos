@@ -5,7 +5,7 @@ import { OrgFormStepper } from './org-form-stepper.po';
 export class OrgFormPage extends CFPage {
   public stepper: OrgFormStepper;
 
-  constructor(url) {
+  constructor(url?: string) {
     super(url);
     this.stepper = new OrgFormStepper();
   }
