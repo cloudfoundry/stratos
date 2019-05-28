@@ -48,6 +48,7 @@ export interface SessionData {
     demo: boolean,
     [pluginName: string]: boolean
   };
+  configuration?: { [key: string]: string }; ///////////
 }
 export interface Diagnostics {
   deploymentType?: string;

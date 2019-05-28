@@ -92,6 +92,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		Endpoints:    make(map[string]map[string]*interfaces.EndpointDetail),
 		CloudFoundry: p.Config.CloudFoundryInfo,
 		PluginConfig: p.Config.PluginConfig,
+		Configuration: make(map[string]string),
 	}
 
 	// Only add diagnostics information if the user is an admin
@@ -148,6 +149,8 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	}
 
 	s.Plugins = p.PluginsStatus
+
+	s.Configuration["eirini"] = "true"
 
 	return s, nil
 }

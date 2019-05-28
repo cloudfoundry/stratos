@@ -2,6 +2,8 @@ import { Type } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Schema, schema } from 'normalizr';
 
+import { IListAction } from '../../shared/components/list/list.component.types';
+
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
 
@@ -36,6 +38,10 @@ interface BaseEndpointTypeConfig {
    */
   doesNotSupportConnect?: boolean;
 
+  /**
+   * // TODO: RC
+   */
+  getActions?: <T>() => IListAction<T>[];
 }
 
 /**

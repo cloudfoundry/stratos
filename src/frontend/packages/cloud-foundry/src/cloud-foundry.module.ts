@@ -18,7 +18,16 @@ export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
   homeLink: (guid) => ['/cloud-foundry', guid],
   listDetailsComponent: CfEndpointDetailsComponent,
   order: 0,
-  authTypes: [EndpointAuthTypeNames.CREDS, EndpointAuthTypeNames.SSO]
+  authTypes: [EndpointAuthTypeNames.CREDS, EndpointAuthTypeNames.SSO],
+  // getActions: <EndpointModel>() => {
+  //   return [
+  //     {
+  //       action: new Routera,
+  //       icon: '',
+  //       label: ''
+  //     }
+  //   ];
+  // }
 }];
 
 @StratosExtension({

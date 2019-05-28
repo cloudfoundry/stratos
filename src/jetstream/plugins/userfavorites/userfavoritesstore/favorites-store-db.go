@@ -24,6 +24,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	getFavorites = datastore.ModifySQLStatement(getFavorites, databaseProvider)
 	deleteFavorite = datastore.ModifySQLStatement(deleteFavorite, databaseProvider)
 	saveFavorite = datastore.ModifySQLStatement(saveFavorite, databaseProvider)
+	// TODO: RC is setMetadata and deleteEndpointFavorite needed here?
 }
 
 // FavoritesDBStore is a DB-backed User Favorites repository
