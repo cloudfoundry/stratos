@@ -28,7 +28,6 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 		return "", err
 	}
 
-
 	//Hash the password
 	passwordHash, err := p.HashPassword(password)
 	if err != nil {

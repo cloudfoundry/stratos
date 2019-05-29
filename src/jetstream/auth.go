@@ -312,10 +312,6 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 	}
 
 	//Check the password hash
-	//guid, err := localUsersRepo.FindUserGUID(username)
-	//if err != nil {
-	//	return nil, err
-	//}
     log.Infof("Finding hash for GUID: %s", guid)
 	hash, err := localUsersRepo.FindPasswordHash(guid)
 	if err != nil {
@@ -327,7 +323,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 	if err != nil {
 		// Check the Error
-		errMessage := "Access Denied"
+		errMessage := "Access Denied - Invalid username/password credentials"
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			errMessage,
@@ -335,7 +331,6 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	//TODO: Generate a userguid at setup time or from config - possibly on jetstream startup if via config.
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = guid
 
@@ -346,7 +341,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	//Makes sure the client gets the right session expiry time - keep this in
+	//Makes sure the client gets the right session expiry time
 	err = p.handleSessionExpiryHeader(c)
 	if err != nil {
 		return nil, err
@@ -354,14 +349,24 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 	//TODO: Perhaps add/update last login time here?
 
+	//Ensure the local user has some kind of admin role configured and we check for it here.
+	p.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+    p.Config.ConsoleConfig.LocalUserAdminScope = "stratos.admin"
 
-	//TODO: Ensure the local user has some kind of admin role configured and we check for it here.
 	localUserScope, err := localUsersRepo.FindUserScope(guid)
 	if err != nil {
 		return nil, err
 	}
 	admin := strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserAdminScope)
 
+	if admin == false {
+		errMessage := "Access Denied - User does not have admin scope."
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			errMessage,
+			"Login failed: %s: %v", errMessage, err)
+		return nil, err
+	}
 	//Can we re-use this login response struct?
 	//We may need to add a token expiry value here (and to the localusers table, as we check it elsewhere (though we don't seem to use the value)
 	resp := &interfaces.LoginRes{

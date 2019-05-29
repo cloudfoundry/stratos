@@ -74,7 +74,7 @@ func TestLocalLogin(t *testing.T) {
 
 	Convey("Local Login tests", t, func() {
 
-		username := "localuser1"
+		username := "localuser"
 		password := "localuserpass"
 		email        := ""
 		scope        := "stratos.admin"
@@ -99,16 +99,16 @@ func TestLocalLogin(t *testing.T) {
 		userGUID := uuid.NewV4().String()
 		
 		req = setupMockReq("POST", "", map[string]string{
-			"username": "localuser2",
+			"username": "localuser",
 			"password": password,
 			"email"   : email,
 			"scope"   : scope,
 			"guid"    : userGUID,
 		})
 
-		db.Close()
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
+
 		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
@@ -119,6 +119,124 @@ func TestLocalLogin(t *testing.T) {
 
 		Convey("Should not fail to login", func() {
 			So(loginErr, ShouldBeNil)
+		})
+
+		Convey("Expectations should be met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+	})
+}
+
+func TestLocalLoginWithBadCredentials(t *testing.T) {
+	t.Parallel()
+
+	Convey("Local Login tests", t, func() {
+
+		username := "localuser"
+		password := "localuserpass"
+		email        := ""
+		scope        := "stratos.admin"
+
+		req := setupMockReq("POST", "", map[string]string{
+			"username": username,
+			"password": password,
+			"email"   : email,
+			"scope"   : scope,
+		})
+
+		_, _, _, pp, db, _ := setupHTTPTest(req)
+		defer db.Close()
+
+		//Hash the password
+		passwordHash, err := pp.HashPassword(password)
+		if err != nil {
+			panic(err)
+		}
+		log.Infof("Generated password hash: %s", passwordHash)
+		//generate a user GUID
+		userGUID := uuid.NewV4().String()
+		
+		req = setupMockReq("POST", "", map[string]string{
+			"username": "localuser",
+			"password": "localuserpass",
+			"email"   : email,
+			"scope"   : scope,
+			"guid"    : userGUID,
+		})
+
+		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+
+		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
+		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
+
+		loginErr := pp.localLogin(ctx)
+
+		Convey("Should fail to login", func() {
+			So(loginErr, ShouldNotBeNil)
+		})
+
+		Convey("Expectations should be met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+	})
+}
+
+func TestLocalLoginWithNoAdminScope(t *testing.T) {
+	t.Parallel()
+
+	Convey("Local Login tests", t, func() {
+
+		username := "localuser"
+		password := "localuserpass"
+		email        := ""
+
+		req := setupMockReq("POST", "", map[string]string{
+			"username": username,
+			"password": password,
+			"email"   : email,
+			"scope"   : "wrongscope",
+		})
+
+		_, _, _, pp, db, _ := setupHTTPTest(req)
+		defer db.Close()
+
+		//Hash the password
+		passwordHash, err := pp.HashPassword(password)
+		if err != nil {
+			panic(err)
+		}
+		log.Infof("Generated password hash: %s", passwordHash)
+		//generate a user GUID
+		userGUID := uuid.NewV4().String()
+		
+		wrongScope := "not admin scope"
+		req = setupMockReq("POST", "", map[string]string{
+			"username": "localuser",
+			"password": "localuserpass",
+			//"email"   : email,
+			//"scope"   : wrongScope,
+			"guid"    : userGUID,
+		})
+
+		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+
+		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
+		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
+
+		//Configure the admin scope we expect the user to have
+		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+		pp.Config.ConsoleConfig.LocalUserAdminScope = "stratos.admin"
+
+		//The user trying to log in has a non-admin scope
+		rows = sqlmock.NewRows([]string{"scope"}).AddRow(wrongScope)
+		mock.ExpectQuery(findUserScope).WithArgs(userGUID).WillReturnRows(rows)
+
+		loginErr := pp.localLogin(ctx)
+
+		Convey("Should fail to login", func() {
+			So(loginErr, ShouldNotBeNil)
 		})
 
 		Convey("Expectations should be met", func() {
