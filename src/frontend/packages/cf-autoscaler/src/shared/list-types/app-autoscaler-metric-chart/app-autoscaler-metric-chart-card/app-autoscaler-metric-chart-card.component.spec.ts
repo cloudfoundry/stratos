@@ -18,7 +18,7 @@ import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-c
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
-describe('AppServiceBindingCardComponent', () => {
+describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;
   let fixture: ComponentFixture<AppAutoscalerMetricChartCardComponent>;
 

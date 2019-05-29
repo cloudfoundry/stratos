@@ -40,8 +40,8 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   };
 
   showCustomTime = true;
-  customTimePollingInterval = 6000000;
-  customTimeInitialValue = '1:minute';
+  customTimePollingInterval = 60000;
+  customTimeInitialValue = '30:minute';
   customTimeWindows: ITimeRange[] = [
     {
       value: '30:minute',
