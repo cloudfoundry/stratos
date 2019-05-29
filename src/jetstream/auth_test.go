@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
+
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	log "github.com/sirupsen/logrus"
@@ -16,6 +18,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
+	
 )
 
 const (
@@ -53,13 +56,15 @@ func TestLoginToUAA(t *testing.T) {
 			// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
+		loginErr := pp.loginToUAA(ctx)
+
 		Convey("Should not fail to login", func() {
-			So(pp.loginToUAA(ctx), ShouldBeNil)
+			So(loginErr, ShouldBeNil)
 		})
-		//
-		//Convey("Expectations should be met", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
+		
+		Convey("Expectations should be met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
 
 	})
 }
@@ -67,30 +72,58 @@ func TestLoginToUAA(t *testing.T) {
 func TestLocalLogin(t *testing.T) {
 	t.Parallel()
 
-	Convey("UAA tests", t, func() {
+	Convey("Local Login tests", t, func() {
+
+		username := "localuser1"
+		password := "localuserpass"
+		email        := ""
+		scope        := "stratos.admin"
+
 		req := setupMockReq("POST", "", map[string]string{
-			"username": "localuser",
-			"password": "localuserpass",
+			"username": username,
+			"password": password,
+			"email"   : email,
+			"scope"   : scope,
 		})
 
-		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		_, _, _, pp, db, _ := setupHTTPTest(req)
 		defer db.Close()
 
-		pp.logout(ctx)
+		//Hash the password
+		passwordHash, err := pp.HashPassword(password)
+		if err != nil {
+			panic(err)
+		}
+		log.Infof("Generated password hash: %s", passwordHash)
+		//generate a user GUID
+		userGUID := uuid.NewV4().String()
+		
+		req = setupMockReq("POST", "", map[string]string{
+			"username": "localuser2",
+			"password": password,
+			"email"   : email,
+			"scope"   : scope,
+			"guid"    : userGUID,
+		})
 
-		//pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+		db.Close()
+		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
+		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
-		mock.ExpectQuery(findUserGUID).
-		WillReturnRows(1)
+		rows = sqlmock.NewRows([]string{"scope"}).AddRow(scope)
+		mock.ExpectQuery(findUserScope).WithArgs(userGUID).WillReturnRows(rows)
+
+		loginErr := pp.localLogin(ctx)
 
 		Convey("Should not fail to login", func() {
-			So(pp.localLogin(ctx), ShouldBeNil)
+			So(loginErr, ShouldBeNil)
 		})
-		//
-		//Convey("Expectations should be met", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
 
+		Convey("Expectations should be met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
 	})
 }
 
@@ -167,12 +200,14 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 
+		loginErr :=	pp.loginToUAA(ctx)
 		Convey("Should not fail to login", func() {
-			So(pp.loginToUAA(ctx), ShouldNotBeNil)
+			So(loginErr, ShouldNotBeNil)
 		})
-		//Convey("Expectations should be met", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
+
+		Convey("Expectations should be met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
 
 	})
 
@@ -240,14 +275,15 @@ func TestLoginToCNSI(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		// do the call
+		loginErr := pp.loginToCNSI(ctx)
 
 		Convey("Login should not return an error", func() {
-			So(pp.loginToCNSI(ctx), ShouldBeNil)
+			So(loginErr, ShouldBeNil)
 		})
 
-		//Convey("Should meet expectations", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
+		Convey("Should meet expectations", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
 	})
 
 }
@@ -265,9 +301,10 @@ func TestLoginToCNSIWithoutCNSIGuid(t *testing.T) {
 		_, _, ctx, pp, db, _ := setupHTTPTest(req)
 		defer db.Close()
 
+		loginErr := pp.loginToCNSI(ctx)
 		// do the call - expect an error
 		Convey("Login should fail", func() {
-			So(pp.loginToCNSI(ctx), ShouldNotBeNil)
+			So(loginErr, ShouldNotBeNil)
 		})
 	})
 
@@ -292,14 +329,15 @@ func TestLoginToCNSIWithMissingCNSIRecord(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnError(errors.New("No match for that GUID"))
 
+		loginErr :=	pp.loginToCNSI(ctx)
 		// do the call
 		Convey("Should fail to login", func() {
-			So(pp.loginToCNSI(ctx), ShouldNotBeNil)
+			So(loginErr, ShouldNotBeNil)
 		})
 
-		//Convey("Should meet expectations", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
+		Convey("Should meet expectations", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
 
 	})
 
@@ -331,13 +369,14 @@ func TestLoginToCNSIWithMissingCreds(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRow)
 
+		loginErr := pp.loginToCNSI(ctx)
 		Convey("Should fail to login", func() {
-			So(pp.loginToCNSI(ctx), ShouldNotBeNil)
+			So(loginErr, ShouldNotBeNil)
 		})
 
-		//Convey("Should meet expectations", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
+		Convey("Should meet expectations", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
 	})
 
 }
@@ -387,17 +426,19 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		// sessionValues["user_id"] = mockUserGUID
 		sessionValues["exp"] = time.Now().AddDate(0, 0, 1).Unix()
 
+		
 		Convey("Should mock/stub user in session object", func() {
 			So(pp.setSessionValues(ctx, sessionValues), ShouldBeNil)
 		})
 
+		loginErr := pp.loginToCNSI(ctx)
 		Convey("Should fail to login", func() {
-			So(pp.loginToCNSI(ctx), ShouldNotBeNil)
+			So(loginErr, ShouldNotBeNil)
 		})
-		//
-		//Convey("Should meet expectations", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
+		
+		Convey("Should meet expectations", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
 	})
 
 }
@@ -462,7 +503,6 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 		//Convey("Should meet expectations", func() {
 		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
 		//})
-
 	})
 
 }
