@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -64,8 +65,8 @@ const (
 	// SQLiteSchemaFile - SQLite schema file
 	SQLiteSchemaFile = "./deploy/db/sqlite_schema.sql"
 	// SQLiteDatabaseFile - SQLite database file
-	SQLiteDatabaseFile = "./console-database.db"
-	// Default database provider when not specified
+	SQLiteDatabaseFile = "console-database.db"
+	// DefaultDatabaseProvider is the efault database provider when not specified
 	DefaultDatabaseProvider = MYSQL
 )
 
@@ -147,16 +148,18 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	}
 
 	// SQL Lite
-	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"))
+	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"), env.String("SQLITE_DB_DIR", "."))
 }
 
 // GetSQLLiteConnection returns an SQLite DB Connection
-func GetSQLLiteConnection(sqliteKeepDB bool) (*sql.DB, error) {
+func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
 	if !sqliteKeepDB {
 		os.Remove(SQLiteDatabaseFile)
 	}
 
-	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
+	dbFilePath := path.Join(sqlDbDir, SQLiteDatabaseFile)
+	log.Infof("SQLite Database file: %s", dbFilePath)
+	db, err := sql.Open("sqlite3", dbFilePath)
 	if err != nil {
 		return nil, err
 	}
