@@ -55,6 +55,20 @@ export class CfTopLevelPage extends CFPage {
     });
   }
 
+  deleteQuota(quotaName: string, waitUntilNotShown = true) {
+    const cardView = new ListComponent();
+    cardView.cards.waitUntilShown();
+    cardView.cards.findCardByTitle(quotaName, MetaCardTitleType.CUSTOM, true).then(card => {
+      card.openActionMenu().then(menu => {
+        menu.clickItem('Delete');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Quota', quotaName);
+        if (waitUntilNotShown) {
+          card.waitUntilNotShown();
+        }
+      });
+    });
+  }
+
   isSummaryView(): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
       return url.startsWith(browser.baseUrl + this.navLink) && url.endsWith('/summary');
@@ -97,6 +111,10 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Organizations', 'organizations');
   }
 
+  goToQuotasTab() {
+    return this.goToTab('Quotas', 'quota-definitions');
+  }
+
   goToRoutesTab() {
     return this.goToTab('Routes', 'routes');
   }
@@ -129,7 +147,7 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Security Groups', 'security-groups');
   }
 
-  clickOnOrg(orgName: string) {
+  clickOnCard(orgName: string) {
     const list = new ListComponent();
     list.cards.findCardByTitle(orgName).then((card) => {
       expect(card).toBeDefined();

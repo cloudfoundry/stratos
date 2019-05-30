@@ -1,0 +1,32 @@
+<div class="edit-quota">
+  <div>Specify the parameters of the quota</div>
+  <form [formGroup]="quotaForm" class="stepper-form">
+    <mat-form-field>
+      <input matInput formControlName="name" placeholder="Quota Name" required [appFocus]="true">
+      <mat-error *ngIf="quotaForm.controls.name?.hasError('nameTaken')">
+        A quota with this name already exists. Please enter a different one.
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="number" matInput formControlName="appInstanceLimit" placeholder="Total number of application instances">
+    </mat-form-field>
+    <mat-form-field>
+      <input type="number" matInput formControlName="instanceMemoryLimit" placeholder="Max amount of memory an app instance can have" required>
+      <span matSuffix>MB</span>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="number" matInput formControlName="totalServices" placeholder="Total number of service instances" required>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="number" matInput formControlName="memoryLimit" placeholder="Total amount of memory an organization can have" required>
+      <span matSuffix>MB</span>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="number" matInput formControlName="totalRoutes" placeholder="Total number of routes" required>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="number" matInput formControlName="totalReservedRoutePorts" placeholder="Max number of routes with reserved ports">
+    </mat-form-field>
+    <mat-checkbox matInput formControlName="nonBasicServicesAllowed">Can provision instances of paid service plans</mat-checkbox>
+  </form>
+</div>

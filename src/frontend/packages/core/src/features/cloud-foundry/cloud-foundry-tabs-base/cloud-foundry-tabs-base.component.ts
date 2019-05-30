@@ -94,6 +94,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       { link: 'build-packs', label: 'Build Packs', matIcon: 'build' },
       { link: 'stacks', label: 'Stacks', matIcon: 'code' },
       { link: 'security-groups', label: 'Security Groups', matIcon: 'security' },
+      { link: 'quota-definitions', label: 'Quotas', matIcon: 'data_usage' },
       ...getTabsFromExtensions(StratosTabType.CloudFoundry)
     ];
   }

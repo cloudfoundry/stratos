@@ -37,13 +37,17 @@ export class CfOrgLevelPage extends CFPage {
     return this.goToTab('Spaces', 'spaces');
   }
 
+  goToSpaceQuotasTab() {
+    return this.goToTab('Space Quotas', 'space-quota-definitions');
+  }
+
   goToUsersTab() {
     return this.goToTab('Users', 'users');
   }
 
-  clickOnSpace(spaceName: string) {
+  clickOnCard(cardName: string) {
     const list = new ListComponent();
-    list.cards.findCardByTitle(spaceName).then((card) => {
+    list.cards.findCardByTitle(cardName).then((card) => {
       expect(card).toBeDefined();
       card.click();
     });
@@ -58,6 +62,21 @@ export class CfOrgLevelPage extends CFPage {
         menu.clickItem('Delete');
         ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', spaceName);
         card.waitUntilNotShown();
+      });
+    });
+  }
+
+  deleteSpaceQuota(quotaName: string, waitUntilNotShown = true) {
+    const cardView = new ListComponent();
+    cardView.cards.waitUntilShown();
+
+    cardView.cards.findCardByTitle(quotaName).then((card: MetaCard) => {
+      card.openActionMenu().then(menu => {
+        menu.clickItem('Delete');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space Quota', quotaName);
+        if (waitUntilNotShown) {
+          card.waitUntilNotShown();
+        }
       });
     });
   }

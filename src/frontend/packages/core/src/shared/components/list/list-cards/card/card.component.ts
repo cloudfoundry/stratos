@@ -8,10 +8,14 @@ import {
 import { CardAppComponent } from '../../list-types/app/card/card-app.component';
 import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
 import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import { CfQuotaCardComponent } from '../../list-types/cf-quotas/cf-quota-card/cf-quota-card.component';
 import {
   CfSecurityGroupsCardComponent,
 } from '../../list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
 import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
+import {
+  CfSpaceQuotaCardComponent,
+} from '../../list-types/cf-space-quotas/cf-space-quota-card/cf-space-quota-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
@@ -28,6 +32,8 @@ import { CardDynamicComponent, CardMultiActionComponents } from '../card.compone
 export const listCards = [
   CardAppComponent,
   CfOrgCardComponent,
+  CfQuotaCardComponent,
+  CfSpaceQuotaCardComponent,
   CfSpaceCardComponent,
   CfBuildpackCardComponent,
   CfSecurityGroupsCardComponent,

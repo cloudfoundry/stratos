@@ -1,5 +1,10 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" *ngIf="quotaGuid">
   <h1>{{ (spaceQuotaDefinition$ | async)?.entity?.name }}</h1>
+  <div class="page-header-right">
+    <button mat-icon-button name="edit" [routerLink]="editLink" matTooltip="Edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
 </app-page-header>
 
 <div class="space-quota-definition-page">

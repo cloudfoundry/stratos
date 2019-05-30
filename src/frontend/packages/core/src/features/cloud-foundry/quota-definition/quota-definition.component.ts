@@ -43,6 +43,7 @@ export class QuotaDefinitionComponent implements OnDestroy {
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
+  editLink: string[];
   detailsLoading$: Observable<boolean>;
   orgSubscriber: Subscription;
 
@@ -55,6 +56,13 @@ export class QuotaDefinitionComponent implements OnDestroy {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid || activatedRoute.snapshot.queryParams.orgGuid;
     this.quotaGuid = activatedRoute.snapshot.params.quotaId;
+    this.editLink = [
+      '/cloud-foundry',
+      this.cfGuid,
+      'quota-definitions',
+      this.quotaGuid,
+      'edit-quota'
+    ];
 
     this.setupBreadcrumbs();
     this.fetchQuotaDefinition();

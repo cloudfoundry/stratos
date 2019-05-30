@@ -68,7 +68,7 @@ describe('Manage Space', () => {
       spaceFormPage.stepper.setSpaceName(spaceName);
       spaceFormPage.submit();
 
-      cfOrgLevelPage.clickOnSpace(spaceName);
+      cfOrgLevelPage.clickOnCard(spaceName);
     });
 
     it('- should go to spaces when canceled', () => {
@@ -91,7 +91,7 @@ describe('Manage Space', () => {
       spaceFormPage.stepper.setQuotaDefinition(spaceQuotaName);
       spaceFormPage.submit();
 
-      cfOrgLevelPage.clickOnSpace(secondSpaceName);
+      cfOrgLevelPage.clickOnCard(secondSpaceName);
       expect(element(by.tagName('app-card-cf-space-details')).getText()).toContain(spaceQuotaName);
     });
   });
@@ -117,7 +117,7 @@ describe('Manage Space', () => {
       cfOrgLevelPage = CfOrgLevelPage.forEndpoint(cfGuid, orgGuid);
       cfOrgLevelPage.navigateTo();
       cfOrgLevelPage.goToSpacesTab();
-      cfOrgLevelPage.clickOnSpace(spaceName);
+      cfOrgLevelPage.clickOnCard(spaceName);
 
       cfSpaceLevelPage = new CfSpaceLevelPage();
       cfSpaceLevelPage.subHeader.clickIconButton('edit');
