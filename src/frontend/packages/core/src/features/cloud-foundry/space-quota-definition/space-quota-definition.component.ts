@@ -31,6 +31,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
+  editLink: string[];
   detailsLoading$: Observable<boolean>;
   spaceSubscriber: Subscription;
 
@@ -42,6 +43,15 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   ) {
     super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
+    this.editLink = [
+      '/cloud-foundry',
+      this.cfGuid,
+      'organizations',
+      this.orgGuid,
+      'space-quota-definitions',
+      this.quotaGuid,
+      'edit-space-quota'
+    ];
   }
 
   setupQuotaDefinitionObservable() {
@@ -73,17 +83,28 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   ) {
     const baseCFUrl = `/cloud-foundry/${this.cfGuid}`;
     const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
-    const baseSpaceUrl = `${baseOrgUrl}/spaces/${space.metadata.guid}`;
 
     const breadcrumbs: IHeaderBreadcrumb[] = [
       {
         breadcrumbs: [
           { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-          { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` },
-          { value: space.entity.name, routerLink: `${baseSpaceUrl}/summary` },
+          { value: org.entity.name, routerLink: `${baseOrgUrl}/space-quota-definitions` },
         ],
       },
     ];
+
+    if (space) {
+      const baseSpaceUrl = `${baseCFUrl}/organizations/${org.metadata.guid}/spaces/${space.metadata.guid}`;
+
+      breadcrumbs.push({
+        key: 'space',
+        breadcrumbs: [
+          { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
+          { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` },
+          { value: space.entity.name, routerLink: `${baseSpaceUrl}/summary` },
+        ]
+      });
+    }
 
     return breadcrumbs;
   }

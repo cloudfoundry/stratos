@@ -15,6 +15,10 @@ import { AddOrganizationComponent } from './add-organization/add-organization.co
 import {
   CreateOrganizationStepComponent,
 } from './add-organization/create-organization-step/create-organization-step.component';
+import { AddQuotaComponent } from './add-quota/add-quota.component';
+import { CreateQuotaStepComponent } from './add-quota/create-quota-step/create-quota-step.component';
+import { AddSpaceQuotaComponent } from './add-space-quota/add-space-quota.component';
+import { CreateSpaceQuotaStepComponent } from './add-space-quota/create-space-quota-step/create-space-quota-step.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
@@ -25,6 +29,10 @@ import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
+import { EditQuotaStepComponent } from './edit-quota/edit-quota-step/edit-quota-step.component';
+import { EditQuotaComponent } from './edit-quota/edit-quota.component';
+import { EditSpaceQuotaStepComponent } from './edit-space-quota/edit-space-quota-step/edit-space-quota-step.component';
+import { EditSpaceQuotaComponent } from './edit-space-quota/edit-space-quota.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
@@ -55,6 +63,9 @@ import {
 import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
+import {
+  CloudFoundryOrganizationSpaceQuotasComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
 import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
@@ -88,6 +99,7 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryQuotasComponent } from './tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
@@ -137,7 +149,15 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
     CloudFoundrySecurityGroupsComponent,
+    CloudFoundryQuotasComponent,
+    CloudFoundryOrganizationSpaceQuotasComponent,
     AddOrganizationComponent,
+    AddQuotaComponent,
+    EditQuotaComponent,
+    EditQuotaStepComponent,
+    EditSpaceQuotaComponent,
+    EditSpaceQuotaStepComponent,
+    AddSpaceQuotaComponent,
     UsersRolesComponent,
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,
@@ -155,6 +175,8 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     EditSpaceStepComponent,
     CreateSpaceStepComponent,
     CreateOrganizationStepComponent,
+    CreateQuotaStepComponent,
+    CreateSpaceQuotaStepComponent,
     EditOrganizationComponent,
     EditOrganizationStepComponent,
     CliInfoCloudFoundryComponent,

@@ -33,6 +33,7 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
+  editLink: string[];
   detailsLoading$: Observable<boolean>;
   orgSubscriber: Subscription;
 
@@ -44,6 +45,13 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   ) {
     super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
+    this.editLink = [
+      '/cloud-foundry',
+      this.cfGuid,
+      'quota-definitions',
+      this.quotaGuid,
+      'edit-quota'
+    ];
   }
 
   setupQuotaDefinitionObservable() {
