@@ -1,5 +1,4 @@
 <div class="edit-space">
-  <div>Specify the new name for the space</div>
   <form [formGroup]="editSpaceForm" class="stepper-form">
     <mat-form-field>
       <input matInput formControlName="spaceName" [(ngModel)]="spaceName" placeholder="Space Name" [appFocus]="true">
@@ -9,7 +8,7 @@
     </mat-form-field>
     <mat-form-field *ngIf="hasSpaceQuotas$ | async">
       <mat-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
-        <mat-option [value]="0" *ngIf="hasSpaceQuotas$ | async">None (defaults to organization's quota)</mat-option>
+        <mat-option [value]="0" *ngIf="hasSpaceQuotas$ | async">None</mat-option>
         <mat-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">{{ quota.entity.name }}
         </mat-option>
       </mat-select>
