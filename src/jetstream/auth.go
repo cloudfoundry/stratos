@@ -349,10 +349,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 	//TODO: Perhaps add/update last login time here?
 
-	//Ensure the local user has some kind of admin role configured and we check for it here.
-	p.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
-    p.Config.ConsoleConfig.LocalUserAdminScope = "stratos.admin"
-
+	//Ensure the local user has some kind of admin role configured and we check for it here
 	localUserScope, err := localUsersRepo.FindUserScope(guid)
 	if err != nil {
 		return nil, err

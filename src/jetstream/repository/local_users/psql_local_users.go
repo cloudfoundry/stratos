@@ -147,8 +147,6 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash [
 		log.Debugf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
-	id, _ := result.LastInsertId()
-	log.Infof("Inserted id: %s", id)
 	rowsUpdates, err := result.RowsAffected()
 	if err != nil {
 		return errors.New("Unable to INSERT local user: could not determine number of rows that were updated")

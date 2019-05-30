@@ -10,6 +10,28 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
 )
 
+func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
+	username := c.FormValue("username")
+
+	if len(username) == 0 {
+		return "", errors.New("Needs username")
+	}
+
+	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for local users: %v", err)
+		return "", err
+	}
+
+	guid, err := localUsersRepo.FindUserGUID(username)
+	if err != nil {
+		log.Errorf("Error finding user GUID %v", err)
+		return "", err
+	}
+
+	return guid, nil
+}
+
 func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 	log.Debug("AddLocalUser")
 

@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	findUAATokenSql = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data FROM tokens .*`
+	findUAATokenSQL = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data FROM tokens .*`
 )
 
 func TestLoginToUAA(t *testing.T) {
@@ -752,7 +752,7 @@ func TestVerifySession(t *testing.T) {
 
 		rs := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data"}).
 			AddRow(mockTokenGUID, encryptedUAAToken, encryptedUAAToken, mockTokenExpiry, "oauth", "")
-		mock.ExpectQuery(findUAATokenSql).
+		mock.ExpectQuery(findUAATokenSQL).
 			WillReturnRows(rs)
 
 		if err := pp.verifySession(ctx); err != nil {
