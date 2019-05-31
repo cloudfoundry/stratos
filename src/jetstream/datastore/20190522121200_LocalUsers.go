@@ -15,14 +15,13 @@ func init() {
 		}
 
 		createLocalUsers := "CREATE TABLE IF NOT EXISTS local_users ("
-		createLocalUsers += "user_guid     VARCHAR(36) NOT NULL, "
+		createLocalUsers += "user_guid     VARCHAR(36) UNIQUE NOT NULL, "
 		createLocalUsers += "password_hash " + binaryDataType + "       NOT NULL, "
 		createLocalUsers += "user_name     VARCHAR(36)  UNIQUE NOT NULL, "
 		createLocalUsers += "user_email    VARCHAR(36), "
 		createLocalUsers += "user_scope    VARCHAR(36), "
 		createLocalUsers += "last_login  TIMESTAMP, "
-		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)"
-		createLocalUsers += "PRIMARY KEY (user_guid);"
+		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);"
 
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			createLocalUsers += " WITH (OIDS=FALSE);"

@@ -347,8 +347,6 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	//TODO: Perhaps add/update last login time here?
-
 	//Ensure the local user has some kind of admin role configured and we check for it here
 	localUserScope, err := localUsersRepo.FindUserScope(guid)
 	if err != nil {
@@ -364,6 +362,15 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 			"Login failed: %s: %v", errMessage, err)
 		return nil, err
 	}
+
+	//Update the last login time here if login was successful
+	loginTime := time.Now()
+	log.Infof("Updating last login time for GUID: %s  to: %s", guid, loginTime)
+	err = localUsersRepo.UpdateLastLoginTime(guid, loginTime)
+	if err != nil {
+		return nil, err
+	}
+
 	//Can we re-use this login response struct?
 	//We may need to add a token expiry value here (and to the localusers table, as we check it elsewhere (though we don't seem to use the value)
 	resp := &interfaces.LoginRes{

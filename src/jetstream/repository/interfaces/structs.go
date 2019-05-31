@@ -220,7 +220,7 @@ type Versions struct {
 	DatabaseVersion int64  `json:"database_version"`
 }
 
-//AuthEndpointType - Restrict the possible values of the configured AUTH_ENDPOINT_TYPE
+//AuthEndpointType - Restrict the possible values of the configured
 type AuthEndpointType string
 
 const (

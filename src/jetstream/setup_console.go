@@ -179,22 +179,33 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
 	}
 
-	authType, found := p.Env().Lookup("AUTH_TYPE")
-	if !found {
-		return consoleConfig, errors.New("AUTH_TYPE not found")
+	authEndpointTypeVal, found := p.Env().Lookup("AUTH_ENDPOINT_TYPE")
+	if val, found := interfaces.AuthEndpointTypes[authEndpointTypeVal]; found {
+		if val == interfaces.Local {
+			localUser, found := p.Env().Lookup("LOCAL_USER")
+			if !found {
+				return consoleConfig, errors.New("LOCAL_USER not found")
+			}
+			localUserPassword, found := p.Env().Lookup("LOCAL_USER_PASSWORD")
+			if !found {
+				return consoleConfig, errors.New("LOCAL_USER_PASSWORD not found")
+			}
+			localUserScope, found := p.Env().Lookup("LOCAL_USER_SCOPE")
+			if !found {
+				return consoleConfig, errors.New("LOCAL_USER_SCOPE not found")
+			}
+			consoleConfig.LocalUserAdminScope = localUserScope
+			consoleConfig.LocalUser = localUser
+			consoleConfig.LocalUserPassword = localUserPassword
+			consoleConfig.AuthEndpointType = string(val)
+		}
+	} else {
+		return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
 	}
-
-	localUser, found := p.Env().Lookup("LOCAL_USER")
-	localUserPassword, found := p.Env().Lookup("LOCAL_USER_PASSWORD")
-	localUserScope, found := p.Env().Lookup("LOCAL_USER_SCOPE")
 
 	if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
 	}
-
-	consoleConfig.LocalUserAdminScope = localUserScope
-	consoleConfig.LocalUser = localUser
-	consoleConfig.LocalUserPassword = localUserPassword
 
 	consoleConfig.ConsoleAdminScope = consoleAdminScope
 	consoleConfig.ConsoleClient = consoleClient
@@ -203,8 +214,6 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 	if err != nil {
 		return consoleConfig, fmt.Errorf("Invalid value for Skip SSL Validation property %v", err)
 	}
-
-	consoleConfig.AuthEndpointType = authType
 
 	err = p.SaveConsoleConfig(consoleConfig, consoleRepo)
 	if err != nil {

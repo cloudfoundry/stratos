@@ -115,7 +115,31 @@ func TestLocalLogin(t *testing.T) {
 		rows = sqlmock.NewRows([]string{"scope"}).AddRow(scope)
 		mock.ExpectQuery(findUserScope).WithArgs(userGUID).WillReturnRows(rows)
 
+		//Expect exec to update local login time
+		mock.ExpectExec(updateLastLoginTime).WillReturnResult(sqlmock.NewResult(1, 1))
+		
 		loginErr := pp.localLogin(ctx)
+
+		//Expect exec to fetch local login time
+		rows = sqlmock.NewRows([]string{"login_time"})
+		mock.ExpectQuery(findLastLoginTime).WillReturnRows(rows)
+
+		//Check local login time has updated and is now non-empty
+		result, err := db.Query(findLastLoginTime)
+		if err != nil {
+			panic(err)
+		}
+
+		log.Infof("Last login time %v", result)
+
+		defer result.Close()
+		var newLoginTime int64
+		result.Scan(&newLoginTime)
+
+		Convey("Last login time should not be empty", func() {
+			So(newLoginTime, ShouldNotEqual, nil)
+			So(newLoginTime, ShouldNotEqual, 0)
+		})
 
 		Convey("Should not fail to login", func() {
 			So(loginErr, ShouldBeNil)

@@ -12,10 +12,13 @@ import (
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	//log "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+
+	uuid "github.com/satori/go.uuid"
 
 	// "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	//"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
 	//"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
 	
@@ -167,15 +170,47 @@ func TestFindPasswordHash(t *testing.T) {
 	t.Parallel()
 
 	Convey("Local User tests", t, func() {
-		db, mock, dberr := sqlmock.New()
+		db, mock, _ := sqlmock.New()
 
 		defer db.Close()
 
-		guid, err := db.AddLocalUser(ctx)
+		pp := setupPortalProxy(db)
+		pp.DatabaseConnectionPool = db
 
-		Convey("Should fail to login", func() {
-			So(err, ShouldNotBeNil)
-			So(guid, ShouldEqual, "")
+		localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(db)
+		if err != nil {
+			log.Errorf("Database error getting repo for Local users: %v", err)
+			panic(err)
+		}
+
+		username := "testuser"
+		password := "changeme"
+		email    := "test.person@somedomain.com"
+		scope    := "stratos.admin"
+		
+		//Hash the password
+		generatedPasswordHash, err := pp.HashPassword(password)
+		if err != nil {
+			log.Errorf("Error hashing user password: %v", err)
+			panic(err)
+		}
+		log.Infof("Generated password hash: %s", generatedPasswordHash)
+		//generate a user GUID
+		userGUID := uuid.NewV4().String()
+
+		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
+		err = localUsersRepo.AddLocalUser(userGUID, generatedPasswordHash, username, email, scope)
+		if err != nil {
+			log.Errorf("Error hashing user password: %v", err)
+			panic(err)
+		}
+
+		expectedHashRow := sqlmock.NewRows([]string{"password_hash"}).AddRow(generatedPasswordHash)
+		mock.ExpectQuery(findPasswordHash).WillReturnRows(expectedHashRow)
+		fetchedPasswordHash, err := localUsersRepo.FindPasswordHash(userGUID)
+
+		Convey("Password hashes should match", func() {
+			So(fetchedPasswordHash, ShouldResemble, generatedPasswordHash)
 		})
 		
 		Convey("Expectations should be met", func() {

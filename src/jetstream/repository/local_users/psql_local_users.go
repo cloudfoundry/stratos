@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	log "github.com/sirupsen/logrus"
@@ -15,7 +16,8 @@ var findPasswordHash = `SELECT password_hash
 var findUserGUID = `SELECT user_guid FROM local_users WHERE user_name = $1`
 var findUserScope = `SELECT user_scope FROM local_users WHERE user_guid = $1`
 var insertLocalUser = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, user_scope) VALUES ($1, $2, $3, $4, $5)`
-
+var updateLastLoginTime = `UPDATE local_users (last_login) VALUES ($1) WHERE user_guid = $2`
+var findLastLoginTime = `SELECT last_login FROM local_users WHERE user_guid = $1`
 var getTableCount = `SELECT count(user_guid) FROM local_users`
 
 // PgsqlLocalUsersRepository is a PostgreSQL-backed local users repository
@@ -37,6 +39,8 @@ func InitRepositoryProvider(databaseProvider string) {
 	findUserScope = datastore.ModifySQLStatement(findUserScope, databaseProvider)
 	insertLocalUser = datastore.ModifySQLStatement(insertLocalUser, databaseProvider)
 	getTableCount = datastore.ModifySQLStatement(getTableCount, databaseProvider)
+	updateLastLoginTime = `UPDATE local_users (last_login) VALUES ($1) WHERE user_guid = $2`
+	findLastLoginTime = `SELECT last_login FROM local_users WHERE user_guid = $1`
 }
 
 // FindPasswordHash - return the password hash from the datastore
@@ -93,7 +97,7 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 
 func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, error) {
 	log.Debug("FindUserScope")
-	log.Errorf("Finding user scope for GUID: %s", userGUID)
+	log.Debug("Finding user scope for GUID: %s", userGUID)
 	if userGUID == "" {
 		msg := "Unable to find user scope without a valid user GUID."
 		log.Debug(msg)
@@ -114,6 +118,47 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 	}
 
 	return userScope, nil
+}
+
+func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTime time.Time) error {
+	log.Debug("UpdateLastLoginTime")
+
+	if loginTime.IsZero() {
+		msg := "Unable to update last local user login time without a valid time."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	if userGUID == "" {
+		msg := "Unable to update last local user login time without a user GUID."
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	log.Infof("Updating last login time for GUID: %s  to: %s", userGUID, loginTime.Unix())
+	result, err := p.db.Exec(updateLastLoginTime, userGUID, loginTime.Unix())
+
+	if err != nil {
+		msg := "Unable to update last local user login time: %v"
+		log.Debugf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+	rowsUpdates, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("unable to update last local user login time: could not determine the number of rows updated")
+	}
+
+	if rowsUpdates < 1 {
+		return errors.New("unable to update last local user login time: no rows were updated")
+	}
+
+	if rowsUpdates > 1 {
+		log.Warn("unable to update last local user login time: More than 1 row was updated (expected only 1)")
+	}
+
+	log.Debug("Local user last login time UPDATE complete")
+
+	return nil
 }
 
 // AddLocalUser - Add a new local user to the datastore
