@@ -106,7 +106,7 @@ func (c *ConsoleConfigRepository) SetValue(group, name, value string) error {
 func (c *ConsoleConfigRepository) DeleteValue(group, key string) error {
 	log.Debug("Config Delete")
 	if _, err := c.db.Exec(deleteConfigValue, group, key); err != nil {
-		return fmt.Errorf("Unable to delete cofnig value: %v", err)
+		return fmt.Errorf("Unable to delete config value: %v", err)
 	}
 
 	return nil

@@ -62,7 +62,6 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 	consoleConfig.UseSSO = ssoLogin
 
 	if err != nil {
-		return fmt.Errorf("Unable to intialise console backend config due to: %+v", err)
 		return interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Failed to store Console configuration data",
@@ -164,7 +163,7 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 	consoleConfig.ConsoleAdminScope = c.FormValue("console_admin_scope")
 
 	if err != nil {
-		return fmt.Errorf("Unable to intialise console backend config due to: %+v", err)
+		return fmt.Errorf("Unable to initialise console backend config due to: %+v", err)
 		return interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Failed to store Console configuration data",
@@ -235,7 +234,7 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 				return h(c)
 			}
 
-			// Request was a backend request other than a setup or version request 
+			// Request was a backend request other than a setup or version request
 			c.Response().Header().Add("Stratos-Setup-Required", "true")
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
@@ -250,7 +249,7 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 		return false
 	}
 
-	// This will reload the env config 
+	// This will reload the env config
 	console_config.InitializeConfEnvProvider(consoleRepo)
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values

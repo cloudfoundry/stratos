@@ -112,7 +112,7 @@ func migrateConfigSetting(envLookup *env.VarSet, configStore Repository, envVarN
 
 	var shouldStore = true
 
-	// Get the current value from the enfironment
+	// Get the current value from the environment
 	if currentValue, ok := envLookup.Lookup(envVarName); ok {
 		shouldStore = currentValue != value
 	}

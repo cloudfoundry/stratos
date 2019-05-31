@@ -151,7 +151,7 @@ func main() {
 	portalConfig.ConsoleVersion = appVersion
 	log.Infof("Stratos Version: %s", portalConfig.ConsoleVersion)
 
-	// Initialize an empty config for the console - initiallly not setup
+	// Initialize an empty config for the console - initially not setup
 	portalConfig.ConsoleConfig = new(interfaces.ConsoleConfig)
 
 	// Initialize the HTTP client
@@ -300,16 +300,16 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 	addSetupMiddleware := false
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Unable to intialise Stratos backend config due to: %+v", err)
+		log.Errorf("Unable to initialize Stratos backend config due to: %+v", err)
 		return addSetupMiddleware, err
 	}
 
-	// Do this BEFORE we load the config from the database, so env var lookup at thie stage
+	// Do this BEFORE we load the config from the database, so env var lookup at this stage
 	// looks at environment variables etc but NOT the database
-	// Migarte data from old setup table to new config table (if needed)
+	// Migrate data from old setup table to new config table (if needed)
 	err = console_config.MigrateSetupData(portalProxy, consoleRepo)
 	if err != nil {
-		log.Warnf("Unable to intialize config environment provider: %+v", err)
+		log.Warnf("Unable to initialize config environment provider: %+v", err)
 	}
 
 	// Load config stored in the database
@@ -340,7 +340,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 }
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
-	log.Infof("Stratos is intialised with the following setup:")
+	log.Infof("Stratos is initialized with the following setup:")
 	log.Infof("... UAA Endpoint        : %s", config.UAAEndpoint)
 	log.Infof("... Console Client      : %s", config.ConsoleClient)
 	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
