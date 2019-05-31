@@ -262,14 +262,17 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		url = fmt.Sprintf("wss://%s", environment)
 	}
 
+	// Array for case that metrics are provided for multiple endpoints
+	var metricsMetadata []*MetricsProviderMetadata
 	storeMetadata := &MetricsProviderMetadata{
 		Type:        "cf",
 		URL:         url,
 		Job:         job,
 		Environment: environment,
 	}
+	metricsMetadata = append(metricsMetadata, storeMetadata)
 
-	jsonMsg, err := json.Marshal(storeMetadata)
+	jsonMsg, err := json.Marshal(metricsMetadata)
 	if err != nil {
 		return "", interfaces.LogHTTPError(res, err)
 	}
