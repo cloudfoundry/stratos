@@ -67,7 +67,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   private twoHours = 1000 * 60 * 60 * 2;
   customTimeValidation = (start: moment.Moment, end: moment.Moment) => {
     if (!end || !start) {
-      return null;
+      return ' ';
     }
     if (!start.isBefore(end)) {
       return 'Start date must be before end date.';

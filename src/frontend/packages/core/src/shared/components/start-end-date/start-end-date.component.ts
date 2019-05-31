@@ -25,14 +25,12 @@ export class StartEndDateComponent {
       return;
     }
     if (start.isValid()) {
+      const clone = moment(start);
+      this.startValue = clone;
       if (!this.pValidate(start, this.end)) {
         this.valid = false;
-        return;
-      }
-      if (this.isDifferentDate(this.startValue, start)) {
-        const clone = moment(start);
-        this.startValue = clone;
-        this.startChange.emit(clone);
+      } else {
+        this.emitChanges();
       }
     }
   }
@@ -49,14 +47,12 @@ export class StartEndDateComponent {
       return;
     }
     if (end && end.isValid()) {
+      const clone = moment(end);
+      this.endValue = clone;
       if (!this.pValidate(this.start, end)) {
         this.valid = false;
-        return;
-      }
-      if (this.isDifferentDate(this.endValue, end)) {
-        const clone = moment(end);
-        this.endValue = clone;
-        this.endChange.emit(clone);
+      } else {
+        this.emitChanges();
       }
     }
   }
@@ -77,6 +73,20 @@ export class StartEndDateComponent {
 
   private startValue: moment.Moment;
   private endValue: moment.Moment;
+
+  private lastValidStartValue: moment.Moment;
+  private lastValidEndValue: moment.Moment;
+
+  private emitChanges() {
+    if (this.isDifferentDate(this.lastValidStartValue, this.startValue)) {
+      this.lastValidStartValue = this.startValue;
+      this.startChange.emit(this.startValue);
+    }
+    if (this.isDifferentDate(this.lastValidEndValue, this.endValue)) {
+      this.lastValidEndValue = this.endValue;
+      this.endChange.emit(this.endValue);
+    }
+  }
 
   @Input()
   public validate: (start: moment.Moment, end: moment.Moment) => string = (start: moment.Moment, end: moment.Moment): string => {
