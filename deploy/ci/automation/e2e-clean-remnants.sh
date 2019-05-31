@@ -84,4 +84,9 @@ echo "Cleaning old Service Instances in e2e org/space"
 SERVICES="$(cf services)"
 clean "$SERVICES" "acceptance\.e2e\." "delete-service"
 
+cf target -o e2e
+echo "Cleaning old Spaces in e2e org"
+SPACES="$(cf spaces)"
+clean "$SPACES" "acceptance\.e2e\." "delete-space"
+
 echo "Done"
