@@ -93,7 +93,7 @@ export class StartEndDateComponent {
     if (!end || !start) {
       return null;
     }
-    return start.isBefore(end) ? 'Start date must be before end date.' : null;
+    return end.isBefore(start) ? 'Start date must be before end date.' : null;
   }
 
   private pValidate(start: moment.Moment, end: moment.Moment): boolean {
