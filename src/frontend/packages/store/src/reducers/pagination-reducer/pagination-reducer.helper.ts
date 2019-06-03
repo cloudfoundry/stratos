@@ -17,7 +17,7 @@ import { sortStringify } from '../../../../core/src/core/utils.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
-import { CFAppState, GeneralEntityAppState } from '../../app-state';
+import { GeneralEntityAppState, AppState } from '../../app-state';
 import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
@@ -30,6 +30,7 @@ import {
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { _YAxis } from '@angular/cdk/scrolling';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -127,9 +128,9 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-export const getPaginationObservables = <T = any>(
+export const getPaginationObservables = <T = any, Y extends AppState = AppState>(
   { store, action, paginationMonitor }: {
-    store: Store<CFAppState>,
+    store: Store<Y>,
     action: PaginatedAction | PaginatedAction[],
     paginationMonitor: PaginationMonitor
   },

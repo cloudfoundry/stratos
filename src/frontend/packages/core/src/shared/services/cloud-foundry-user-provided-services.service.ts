@@ -13,7 +13,7 @@ import {
 } from '../../../../store/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../store/src/app-state';
 import {
-  entityFactory,
+
   organizationSchemaKey,
   serviceInstancesSchemaKey,
   serviceSchemaKey,

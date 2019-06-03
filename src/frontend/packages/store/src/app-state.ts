@@ -27,7 +27,7 @@ export interface IRequestEntityTypeState<T> {
 
 
 export abstract class AppState<
-  T extends Record<string, any>
+  T extends Record<string, any> = any
   > {
   actionHistory: ActionHistoryState;
   auth: AuthState;

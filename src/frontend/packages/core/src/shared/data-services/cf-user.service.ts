@@ -295,7 +295,7 @@ export class CfUserService {
               this.activeRouteCfOrgSpace.orgGuid,
               this.activeRouteCfOrgSpace.spaceGuid
             ).pipe(
-              map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
+              map(allUsersAction => getPaginationObservables({
                 store: this.store,
                 action: allUsersAction,
                 paginationMonitor: this.paginationMonitorFactory.create(

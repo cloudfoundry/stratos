@@ -14,7 +14,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../store/src/app-state';
+import { GeneralEntityAppState, GeneralRequestDataState, AppState } from '../../../../store/src/app-state';
 import {
   ActionState,
   getDefaultActionState,
@@ -23,14 +23,13 @@ import {
   UpdatingSection,
 } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
-import { BaseRequestDataState } from '../../../../store/src/types/entity.types';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 
 
-export class EntityMonitor<T = any> {
+export class EntityMonitor<T = any, Y extends AppState = AppState> {
 
   constructor(
-    private store: Store<CFAppState>,
+    store: Store<Y>,
     public id: string,
     public entityKey: string,
     public schema: EntitySchema,
@@ -53,8 +52,6 @@ export class EntityMonitor<T = any> {
       distinctUntilChanged()
     );
 
-    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount());
-
     const entity$ = this.getEntityObservable(
       this.schema,
       store.select(selectEntity<T>(this.entityKey, id)),
@@ -70,7 +67,6 @@ export class EntityMonitor<T = any> {
   private updatingSectionObservableCache: {
     [key: string]: Observable<ActionState>
   } = {};
-  private apiRequestData$: Observable<BaseRequestDataState>;
   public updatingSection$: Observable<UpdatingSection>;
   /**
    * An observable that emit the entity from the store.
@@ -111,7 +107,7 @@ export class EntityMonitor<T = any> {
     schema: normalizrSchema.Entity,
     entitySelect$: Observable<T>,
     entityRequestSelect$: Observable<RequestInfoState>,
-    entities$: Observable<BaseRequestDataState>
+    entities$: Observable<GeneralRequestDataState>
   ): Observable<T> => {
     return combineLatest(
       entitySelect$,

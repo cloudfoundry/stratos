@@ -140,7 +140,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       switchMap(csi => {
         this.appsEmitted.next(false);
         const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, csi.spaceGuid);
-        return getPaginationObservables<APIResource<IApp>>({
+        return getPaginationObservables({
           store: this.store,
           action: new GetAllAppsInSpace(csi.cfGuid, csi.spaceGuid, paginationKey),
           paginationMonitor: this.paginationMonitorFactory.create(

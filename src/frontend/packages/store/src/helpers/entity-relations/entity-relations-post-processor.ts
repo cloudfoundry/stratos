@@ -3,14 +3,14 @@ import { Store } from '@ngrx/store';
 import { GET_ORGANIZATION, GetOrganization } from '../../actions/organization.actions';
 import { ApiActionTypes, APIResponse } from '../../actions/request.actions';
 import { GET_SPACE, GetSpace } from '../../actions/space.actions';
-import { CFAppState } from '../../app-state';
+import { GeneralEntityAppState } from '../../app-state';
 import { BaseRequestDataState } from '../../types/entity.types';
 import { ICFAction, IRequestAction } from '../../types/request.types';
 import { ValidateEntityResult } from './entity-relations.types';
 import { orgSpacePostProcess } from './processors/org-space-post-processor';
 
 export function validationPostProcessor(
-  store: Store<CFAppState>,
+  store: Store<GeneralEntityAppState>,
   action: IRequestAction,
   apiResponse: APIResponse,
   allEntities: BaseRequestDataState): ValidateEntityResult {
@@ -20,7 +20,7 @@ export function validationPostProcessor(
 }
 
 function apiAction(
-  store: Store<CFAppState>,
+  store: Store<GeneralEntityAppState>,
   action: IRequestAction,
   apiResponse: APIResponse,
   allEntities: BaseRequestDataState): ValidateEntityResult {

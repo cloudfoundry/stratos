@@ -3,18 +3,18 @@ import { Observable } from 'rxjs';
 
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { APIResponse } from '../../actions/request.actions';
-import { IRequestTypeState, GeneralEntityAppState } from '../../app-state';
+import { IRequestTypeState, GeneralEntityAppState, AppState } from '../../app-state';
 import { BaseRequestDataState } from '../../types/entity.types';
 import { IRequestAction } from '../../types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { getPaginationKey } from '../../actions/pagination.actions';
 
-export class ValidateEntityRelationsConfig {
+export class ValidateEntityRelationsConfig<T extends AppState = AppState> {
   /**
    * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
    */
   cfGuid: string;
-  store: Store<GeneralEntityAppState>;
+  store: Store<T>;
   /**
    * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
    */

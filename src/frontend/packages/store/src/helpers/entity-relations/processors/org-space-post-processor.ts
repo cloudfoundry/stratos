@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { GetOrganization } from '../../../actions/organization.actions';
 import { APIResponse } from '../../../actions/request.actions';
 import { GetSpace } from '../../../actions/space.actions';
-import { CFAppState, IRequestEntityTypeState } from '../../../app-state';
+import { GeneralEntityAppState, IRequestEntityTypeState } from '../../../app-state';
 import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
 import { BaseRequestDataState } from '../../../types/entity.types';
@@ -61,7 +61,7 @@ function updateUser(
  * the role array is missing. It's for those cases that we then bring across the role from the org to the user.
  */
 export function orgSpacePostProcess(
-  store: Store<CFAppState>,
+  store: Store<GeneralEntityAppState>,
   action: GetOrganization | GetSpace,
   apiResponse: APIResponse,
   allEntities: BaseRequestDataState): ValidateEntityResult {

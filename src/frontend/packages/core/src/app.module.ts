@@ -9,11 +9,10 @@ import { debounceTime, withLatestFrom, filter } from 'rxjs/operators';
 import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { UpdateUserFavoriteMetadataAction } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { CFAppState } from '../../store/src/app-state';
+import { CFAppState, GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
-import { BaseRequestDataState } from '../../store/src/types/entity.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
@@ -113,14 +112,14 @@ export class CustomRouterStateSerializer
 export class AppModule {
   constructor(
     ext: ExtensionService,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     eventService: GlobalEventService,
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
     eventService.addEventConfig<boolean>(
       {
-        eventTriggered: (state: CFAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
+        eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
         message: 'Timeout session is disabled - this is considered a security risk.',
         key: 'timeoutSessionWarning',
         link: '/user-profile'
@@ -194,7 +193,7 @@ export class AppModule {
     );
   }
 
-  private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: BaseRequestDataState) {
+  private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
     if (favorite) {
       const entityKey = entityCatalogue.getEntityKey(favorite);
       const entity = entities[entityKey][favorite.entityId || favorite.endpointId];

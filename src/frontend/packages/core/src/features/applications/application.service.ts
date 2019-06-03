@@ -221,7 +221,7 @@ export class ApplicationService {
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
     const action = new GetAppStatsAction(this.appGuid, this.cfGuid);
-    const appStats = getPaginationObservables<APIResource<AppStat>>({
+    const appStats = getPaginationObservables({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(

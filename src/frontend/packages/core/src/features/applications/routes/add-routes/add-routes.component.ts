@@ -116,7 +116,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     }));
 
     const fetchAllDomainsAction = new FetchAllDomains(this.cfGuid);
-    const sharedDomains$ = getPaginationObservables<APIResource>(
+    const sharedDomains$ = getPaginationObservables(
       {
         store: this.store,
         action: fetchAllDomainsAction,

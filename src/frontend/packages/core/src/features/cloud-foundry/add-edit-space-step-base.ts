@@ -34,7 +34,7 @@ export class AddEditSpaceStepBase {
 
     const action = new GetAllOrganizationSpaces(paginationKey, this.orgGuid, this.cfGuid);
 
-    this.allSpacesInOrg$ = getPaginationObservables<APIResource>(
+    this.allSpacesInOrg$ = getPaginationObservables<APIResource, CFAppState>(
       {
         store: this.store,
         action,

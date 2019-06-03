@@ -55,7 +55,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
       .subscribe();
 
     const action = new FetchAllDomains(this.appService.cfGuid);
-    this.paginationSubscription = getPaginationObservables<APIResource>(
+    this.paginationSubscription = getPaginationObservables<APIResource, CFAppState>(
       {
         store: this.store,
         action,
