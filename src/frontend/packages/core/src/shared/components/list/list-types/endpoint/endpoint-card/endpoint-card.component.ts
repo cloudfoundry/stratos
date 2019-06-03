@@ -13,7 +13,7 @@ import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, startWith } from 'rxjs/operators';
 
 import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
@@ -104,7 +104,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private favoritesConfigMapper: FavoritesConfigMapper,

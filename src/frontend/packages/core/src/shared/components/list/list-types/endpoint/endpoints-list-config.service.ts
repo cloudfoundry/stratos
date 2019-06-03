@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
@@ -103,7 +103,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     tableFixedRowHeight = true;
 
     constructor(
-        private store: Store<AppState>,
+        private store: Store<CFAppState>,
         paginationMonitorFactory: PaginationMonitorFactory,
         entityMonitorFactory: EntityMonitorFactory,
         internalEventMonitorFactory: InternalEventMonitorFactory,

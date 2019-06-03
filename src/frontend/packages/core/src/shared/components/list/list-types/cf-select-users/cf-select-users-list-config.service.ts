@@ -3,7 +3,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { CfUser, CfUserMissingRoles } from '../../../../../../../store/src/types/user.types';
@@ -49,7 +49,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   private initialised: Observable<boolean>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cfGuid: string,
     private cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

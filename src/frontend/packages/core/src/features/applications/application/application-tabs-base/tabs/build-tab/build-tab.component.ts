@@ -16,7 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { GetAppStatsAction, AppMetadataTypes } from '../../../../../../../../store/src/actions/app-metadata.actions';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
 import { appStatsSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
@@ -61,7 +61,7 @@ export class BuildTabComponent implements OnInit {
   constructor(
     public applicationService: ApplicationService,
     private scmService: GitSCMService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
     private route: ActivatedRoute,
     private router: Router,

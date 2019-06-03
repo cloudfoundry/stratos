@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { SET_CLIENT_FILTER, SetClientFilter, SetClientPage } from '../actions/pagination.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 
 
 
@@ -13,7 +13,7 @@ export class SetClientFilterEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) { }
 
   @Effect({ dispatch: false }) clearPageNumber$ = this.actions$.pipe(

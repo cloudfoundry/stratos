@@ -6,7 +6,7 @@ import { IServiceInstance, IServicePlan } from '../../../core/cf-api-svc.types';
 import { ServicesService } from '../services.service';
 import { map } from 'rxjs/operators';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 
 @Component({
@@ -21,7 +21,7 @@ export class ServiceSummaryComponent {
   instances$: Observable<APIResource<IServiceInstance>[]>;
   constructor(
     private servicesService: ServicesService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) {
 
     this.instances$ = servicesService.serviceInstances$;

@@ -11,11 +11,11 @@ import { succeedRequest } from './succeed-request';
 import { IRequestArray } from './types';
 import { updateRequest } from './update-request';
 import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
-import { IRequestDataState } from '../../types/entity.types';
+import { BaseRequestDataState } from '../../types/entity.types';
 
 export function requestReducerFactory(actions: IRequestArray) {
   const [startAction, successAction, failedAction, updateAction] = actions;
-  const defaultState = getDefaultStateFromEntityCatalogue<IRequestDataState>();
+  const defaultState = getDefaultStateFromEntityCatalogue<BaseRequestDataState>();
   return function apiRequestReducer(state = defaultState, action) {
     switch (action.type) {
       case startAction:

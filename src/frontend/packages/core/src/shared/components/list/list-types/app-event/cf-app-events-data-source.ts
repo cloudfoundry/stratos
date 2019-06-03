@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { GetAllAppEvents } from '../../../../../../../store/src/actions/app-event.actions';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { appEventSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
@@ -34,7 +34,7 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
   }
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     cfGuid: string,
     appGuid: string,
   ) {

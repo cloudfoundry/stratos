@@ -6,7 +6,7 @@ import { asapScheduler, Observable, of as observableOf } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { SetCFDetails } from '../../../../../../store/src/actions/create-applications-page.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   getSpacesFromOrgWithRole,
 } from '../../../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
@@ -25,7 +25,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @Input()
   isMarketplaceMode: boolean;
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     public route: ActivatedRoute
   ) { }

@@ -18,7 +18,7 @@ import {
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { DeleteDeployAppSection } from '../../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -47,7 +47,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private validSub: Subscription;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService
   ) {

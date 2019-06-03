@@ -14,7 +14,7 @@ import { ITableColumn } from '../../../shared/components/list/list-table/table.t
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { GetServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
@@ -55,7 +55,7 @@ export class DetachServiceInstanceComponent {
   public selectedBindings$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private datePipe: DatePipe,
     private serviceActionHelperService: ServiceActionHelperService,
     private activatedRoute: ActivatedRoute,

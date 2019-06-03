@@ -7,7 +7,7 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 import { GetAllOrgUsers } from '../../../../store/src/actions/organization.actions';
 import { GetAllSpaceUsers } from '../../../../store/src/actions/space.actions';
 import { GetAllUsersAsAdmin, GetUser } from '../../../../store/src/actions/users.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import {
   cfUserSchemaKey,
   entityFactory,
@@ -58,7 +58,7 @@ export class CfUserService {
   users: { [guid: string]: Observable<APIResource<CfUser>> } = {};
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private entityServiceFactory: EntityServiceFactory,

@@ -1,8 +1,8 @@
 import { RequestMethod } from '@angular/http';
-import { AppState } from '../../app-state';
+import { CFAppState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
-import { IRequestDataState } from '../../types/entity.types';
+import { BaseRequestDataState } from '../../types/entity.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
   ICFAction,
@@ -28,7 +28,7 @@ function getEntityKey(entityType: string, endpointType: string) {
 }
 
 export function getEntityRequestState(
-  state: IRequestDataState,
+  state: BaseRequestDataState,
   actionOrKey: SingleEntityAction | string,
   guid: string = (actionOrKey as SingleEntityAction).guid
 ): RequestInfoState {
@@ -41,7 +41,7 @@ export function getEntityRequestState(
 }
 
 export function setEntityRequestState(
-  state: IRequestDataState,
+  state: BaseRequestDataState,
   requestState,
   actionOrKey: SingleEntityAction | string,
   guid: string = (actionOrKey as SingleEntityAction).guid
@@ -65,7 +65,7 @@ function getKeyFromActionOrKey(actionOrKey: SingleEntityAction | string) {
   return getEntityKey(entityType, endpointType);
 }
 
-export function createRequestStateFromResponse(response: NormalizedResponse, state: IRequestDataState) {
+export function createRequestStateFromResponse(response: NormalizedResponse, state: BaseRequestDataState) {
   if (!response || !response.entities) {
     return state;
   }
@@ -153,7 +153,7 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
 export function generateDefaultState(keys: Array<string>, initialSections?: {
   [key: string]: string[];
 }) {
-  const defaultState = {} as IRequestDataState;
+  const defaultState = {} as BaseRequestDataState;
 
   keys.forEach(key => {
     defaultState[key] = {};
@@ -168,7 +168,7 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
 
 
 export function startApiRequest(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   apiAction: ICFAction | PaginatedAction,
   requestType: ApiRequestTypes = 'fetch'
 ) {
@@ -177,7 +177,7 @@ export function startApiRequest(
 }
 
 export function completeApiRequest(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   apiAction: ICFAction | PaginatedAction,
   apiResponse: APIResponse,
   requestType: ApiRequestTypes = 'fetch',
@@ -193,7 +193,7 @@ export function completeApiRequest(
 }
 
 export function failApiRequest(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   apiAction: ICFAction | PaginatedAction,
   error,
   requestType: ApiRequestTypes = 'fetch',

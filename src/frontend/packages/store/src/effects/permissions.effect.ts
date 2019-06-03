@@ -24,7 +24,7 @@ import {
   GetUserRelations,
   UserRelationTypes,
 } from '../actions/permissions.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { BaseHttpClientFetcher, flattenPagination, IPaginationFlattener } from '../helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
@@ -65,7 +65,7 @@ interface IEndpointConnectionInfo {
 const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
 
-function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
+function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
   const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
   const params = {
     headers: {
@@ -96,7 +96,7 @@ export class PermissionsEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private logService: LoggerService
   ) { }
 
@@ -217,7 +217,7 @@ export class PermissionEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(

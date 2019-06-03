@@ -10,7 +10,7 @@ import {
   ApplicationStateService,
 } from '../../../application-state/application-state.service';
 import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { StratosStatus } from '../../../../shared.types';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
@@ -32,7 +32,7 @@ export class CompactAppCardComponent implements OnInit {
 
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appStateService: ApplicationStateService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
 

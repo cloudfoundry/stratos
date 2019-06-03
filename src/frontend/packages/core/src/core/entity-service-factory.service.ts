@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/src/app-state';
+import { CFAppState } from '../../../store/src/app-state';
 import { schema as normalizrSchema } from 'normalizr';
 import { EntityService } from './entity-service';
 import { IRequestAction } from '../../../store/src/types/request.types';
@@ -12,7 +12,7 @@ import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue
 export class EntityServiceFactory {
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
 

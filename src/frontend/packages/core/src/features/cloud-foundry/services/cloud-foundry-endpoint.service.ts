@@ -8,7 +8,7 @@ import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.action
 import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { DeleteOrganization, GetAllOrganizations } from '../../../../../store/src/actions/organization.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import {
   cfInfoSchemaKey,
   domainSchemaKey,
@@ -101,7 +101,7 @@ export class CloudFoundryEndpointService {
       ]);
   }
 
-  public static fetchAppCount(store: Store<AppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
+  public static fetchAppCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
     : Observable<number> {
     const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
@@ -120,7 +120,7 @@ export class CloudFoundryEndpointService {
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory

@@ -6,7 +6,7 @@ import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
 import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
 import { GetAllUsersAsAdmin } from '../../../../../../../store/src/actions/users.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
@@ -120,7 +120,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cfUserService: CfUserService,
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

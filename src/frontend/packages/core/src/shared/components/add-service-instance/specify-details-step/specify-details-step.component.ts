@@ -37,7 +37,7 @@ import {
   GetServiceInstance,
   UpdateServiceInstance,
 } from '../../../../../../store/src/actions/service-instances.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { selectRequestInfo, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
@@ -114,7 +114,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private csiGuidsService: CsiGuidsService,
     public modeService: CsiModeService

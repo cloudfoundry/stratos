@@ -3,7 +3,7 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { ToggleUserFavoriteAction } from '../../../store/src/actions/user-favourites-actions/toggle-user-favorite-action';
-import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { CFAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
@@ -55,7 +55,7 @@ export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetada
 })
 export class UserFavoriteManager {
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private logger: LoggerService,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) { }

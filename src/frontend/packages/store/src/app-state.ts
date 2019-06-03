@@ -7,7 +7,7 @@ import { CreateServiceInstanceState } from './types/create-service-instance.type
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
-import { ExtendedRequestState, CFRequestDataState } from './types/entity.types';
+import { ExtendedRequestState, CFRequestDataState, BaseRequestDataState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import { InternalEventsState } from './types/internal-events.types';
 import { PaginationEntityTypeState } from './types/pagination.types';
@@ -23,8 +23,11 @@ export interface IRequestTypeState {
 export interface IRequestEntityTypeState<T> {
   [guid: string]: T;
 }
+
+
+
 export abstract class AppState<
-  T extends Record<string, any> = CFRequestDataState
+  T extends Record<string, any>
   > {
   actionHistory: ActionHistoryState;
   auth: AuthState;
@@ -45,3 +48,27 @@ export abstract class AppState<
   userFavoritesGroups: IUserFavoritesGroupsState;
   recentlyVisited: IRecentlyVisitedState;
 }
+export interface GeneralRequestDataState {
+  [name: string]: IRequestEntityTypeState<any>;
+}
+
+export interface GeneralAppRequestDataState extends BaseRequestDataState, GeneralRequestDataState { }
+
+// One stop shop for all of your app state needs
+
+// Care about the catalogue entities? Use this one.
+// This should only be used by internal stratos code
+export abstract class GeneralEntityAppState extends AppState<GeneralRequestDataState> { }
+
+// Only care about internal entities? Use this one.
+// This should only be used by internal stratos code
+export abstract class InternalAppState extends AppState<BaseRequestDataState> { }
+
+// Care about internal entities and catalogue entities? Use this one.
+// This should only be used by internal stratos code
+export abstract class GeneralAppState extends AppState<GeneralAppRequestDataState> { }
+
+// Care about CF entities? Use this one.
+// This should be moved into the cf module
+export abstract class CFAppState extends AppState<CFRequestDataState> { }
+

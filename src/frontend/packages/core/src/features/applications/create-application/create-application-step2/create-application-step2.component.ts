@@ -8,7 +8,7 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { Store } from '@ngrx/store';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { SetNewAppName } from '../../../../../../store/src/actions/create-applications-page.actions';
 import { AppNameUniqueChecking } from '../../../../shared/app-name-unique.directive/app-name-unique.directive';
 
@@ -22,7 +22,7 @@ import { AppNameUniqueChecking } from '../../../../shared/app-name-unique.direct
 })
 export class CreateApplicationStep2Component implements OnInit {
 
-  constructor(private store: Store<AppState>, private fb: FormBuilder) { }
+  constructor(private store: Store<CFAppState>, private fb: FormBuilder) { }
 
   form: FormGroup;
 

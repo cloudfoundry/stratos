@@ -4,7 +4,7 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
@@ -57,7 +57,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   constructor(
     private cfUserService: CfUserService,
     public cfEndpointService: CloudFoundryEndpointService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,

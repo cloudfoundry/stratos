@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
@@ -30,7 +30,7 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 export class EndpointsPageComponent implements OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
-  constructor(public endpointsService: EndpointsService, public store: Store<AppState>, private ngZone: NgZone) {
+  constructor(public endpointsService: EndpointsService, public store: Store<CFAppState>, private ngZone: NgZone) {
     // Redirect to /applications if not enabled.
     endpointsService.disablePersistenceFeatures$.pipe(
       map(off => {

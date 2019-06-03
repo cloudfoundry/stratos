@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { GetAppServiceBindings } from '../../../../../../../store/src/actions/application-service-routes.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
@@ -33,7 +33,7 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource<ISer
       ]);
   }
 
-  constructor(store: Store<AppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource<IServiceBinding>>) {
+  constructor(store: Store<CFAppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource<IServiceBinding>>) {
     const action = AppServiceBindingDataSource.createGetAllServiceBindings(appService.appGuid, appService.cfGuid);
     super({
       store,

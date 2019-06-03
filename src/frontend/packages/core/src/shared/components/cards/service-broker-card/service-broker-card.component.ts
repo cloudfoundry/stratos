@@ -8,7 +8,7 @@ import { ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { spaceSchemaKey, entityFactory, spaceWithOrgKey } from '../../../../../../store/src/helpers/entity-factory';
 import { GetSpace } from '../../../../../../store/src/actions/space.actions';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
@@ -25,7 +25,7 @@ export class ServiceBrokerCardComponent {
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
   constructor(
     private servicesService: ServicesService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory
   ) {
     this.serviceBroker$ = this.servicesService.serviceBroker$;

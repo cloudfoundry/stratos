@@ -5,7 +5,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { FetchAllServiceBindings } from '../../../../../../store/src/actions/service-bindings.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { serviceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
@@ -44,7 +44,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   }
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     datePipe: DatePipe,
     currentUserPermissionService: CurrentUserPermissionsService,

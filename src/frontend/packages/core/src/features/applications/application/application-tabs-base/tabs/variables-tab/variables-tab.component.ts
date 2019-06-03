@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { LoggerService } from '../../../../../../core/logger.service';
 import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
@@ -34,7 +34,7 @@ export interface VariableTabAllEnvVarType {
 export class VariablesTabComponent implements OnInit {
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     private listConfig: ListConfig<ListAppEnvVar>,
     private loggerService: LoggerService

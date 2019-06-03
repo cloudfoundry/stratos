@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -18,7 +18,7 @@ import { ListConfig } from './../../../../shared/components/list/list.component.
   providers: [{
     provide: ListConfig,
     useFactory: (
-      store: Store<AppState>,
+      store: Store<CFAppState>,
       cfUserService: CfUserService,
       router: Router,
       activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

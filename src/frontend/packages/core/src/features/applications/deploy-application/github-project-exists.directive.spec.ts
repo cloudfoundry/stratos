@@ -4,7 +4,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../core/github.helpers';
@@ -28,7 +28,7 @@ describe('GithubProjectExistsDirective', () => {
       ]
     });
   });
-  it('should create an instance', inject([Store, GitSCMService], (store: Store<AppState>, scmService: GitSCMService) => {
+  it('should create an instance', inject([Store, GitSCMService], (store: Store<CFAppState>, scmService: GitSCMService) => {
     const directive = new GithubProjectExistsDirective(store, scmService);
     expect(directive).toBeTruthy();
   }));

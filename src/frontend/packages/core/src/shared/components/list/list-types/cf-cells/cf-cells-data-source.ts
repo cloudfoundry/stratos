@@ -6,7 +6,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { IMetricVectorResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { MetricQueryConfig, FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
 import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
@@ -18,7 +18,7 @@ export class CfCellsDataSource
     static cellHealthyPath = 'value.1';
     static cellDeploymentPath = 'metric.bosh_deployment';
 
-    constructor(store: Store<AppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricCell>>) {
+    constructor(store: Store<CFAppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricCell>>) {
         const action = new FetchCFCellMetricsPaginatedAction(
             cfGuid,
             cfGuid,

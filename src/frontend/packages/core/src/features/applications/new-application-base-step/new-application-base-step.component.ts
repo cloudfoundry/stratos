@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
 import { getApplicationDeploySourceTypes, AUTO_SELECT_DEPLOY_TYPE_URL_PARAM } from '../deploy-application/deploy-application-steps.types';
 interface IAppTileData extends ITileData {
@@ -50,5 +50,5 @@ export class NewApplicationBaseStepComponent {
     }
   }
 
-  constructor(public store: Store<AppState>) { }
+  constructor(public store: Store<CFAppState>) { }
 }

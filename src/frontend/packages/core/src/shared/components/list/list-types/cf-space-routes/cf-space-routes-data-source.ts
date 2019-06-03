@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { IListConfig } from '../../list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,
   createEntityRelationKey
@@ -22,7 +22,7 @@ import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base'
 export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     listConfig: IListConfig<APIResource>,
     spaceGuid: string,
     cfGuid: string

@@ -5,10 +5,10 @@ import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { DELETE_SUCCESS, DeleteApplication } from '../actions/application.actions';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { IRequestDataState } from '../types/entity.types';
+import { BaseRequestDataState } from '../types/entity.types';
 import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
 import { EntitySchema } from '../helpers/entity-schema';
 
@@ -61,7 +61,7 @@ export class RecursiveDeleteEffect {
   private entityTreeCache: { [guid: string]: IFlatTree } = {};
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   private deleteSuccessApiActionGenerators = {
@@ -109,7 +109,7 @@ export class RecursiveDeleteEffect {
     })
   );
 
-  private getTree(action: IRecursiveDelete, state: IRequestDataState) {
+  private getTree(action: IRecursiveDelete, state: BaseRequestDataState) {
     const tree = this.entityTreeCache[action.guid] ?
       this.entityTreeCache[action.guid] :
       new EntitySchemaTreeBuilder().getFlatTree(action, state);

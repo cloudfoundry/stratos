@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
 import { deriveEndpointFavoriteFromFavorite } from '../../../core/src/core/user-favorite-helpers';
-import { AppState, IRequestEntityTypeState } from '../app-state';
+import { CFAppState, IRequestEntityTypeState } from '../app-state';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -9,11 +9,11 @@ import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/
 
 const favoritesEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema.entityType);
 
-export const favoriteEntitiesSelector = (state: AppState):
+export const favoriteEntitiesSelector = (state: CFAppState):
   IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey];
 
 
-export const favoriteGroupsStateSelector = (state: AppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
+export const favoriteGroupsStateSelector = (state: CFAppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
 
 export const favoriteGroupsFetchingSelector = (state: IUserFavoritesGroupsState): boolean => state.busy;
 

@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../../core/cf-api.types';
 import { CfOrgSpaceLabelService } from '../../../../services/cf-org-space-label.service';
@@ -11,7 +11,7 @@ export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp
 
   public cfOrgSpace: CfOrgSpaceLabelService;
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<CFAppState>) {
     super();
   }
 

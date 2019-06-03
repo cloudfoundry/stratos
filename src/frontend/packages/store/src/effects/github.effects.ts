@@ -7,12 +7,13 @@ import { catchError, mergeMap } from 'rxjs/operators';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { GitSCMService, GitSCMType } from '../../../core/src/shared/data-services/scm/scm.service';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../actions/github.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { gitRepoSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 
 
 @Injectable()
@@ -20,7 +21,7 @@ export class GithubEffects {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private scmService: GitSCMService,
     private logger: LoggerService
   ) { }

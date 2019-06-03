@@ -5,7 +5,7 @@ import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { CFResponse } from '../types/api.types';
 
 
@@ -116,7 +116,7 @@ export class CfAPIFlattener extends BaseHttpFetcher implements IPaginationFlatte
 
 
 export function flattenPagination<T, C>(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   firstRequest: Observable<C>,
   flattener: IPaginationFlattener<T, C>,
   maxCount?: number,

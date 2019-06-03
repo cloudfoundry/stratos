@@ -6,7 +6,7 @@ import { GithubCommitsListConfigServiceBase } from './github-commits-list-config
 import { first, filter, map } from 'rxjs/operators';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { DeployApplicationSource } from '../../../../../../../store/src/types/deploy-application.types';
 import { selectApplicationSource } from '../../../../../../../store/src/selectors/deploy-application.selector';
 import { GitSCMType, GitSCMService } from '../../../../data-services/scm/scm.service';
@@ -14,7 +14,7 @@ import { GitSCMType, GitSCMService } from '../../../../data-services/scm/scm.ser
 @Injectable()
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     datePipe: DatePipe,
     scmService: GitSCMService
   ) {

@@ -4,7 +4,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import {
   entityFactory,
   organizationSchemaKey,
@@ -37,7 +37,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   missingRoles$: Observable<boolean>;
 
   constructor(
-    public store: Store<AppState>,
+    public store: Store<CFAppState>,
     cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService

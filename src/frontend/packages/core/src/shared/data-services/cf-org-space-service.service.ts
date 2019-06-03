@@ -15,7 +15,7 @@ import {
 
 import { GetAllOrganizations } from '../../../../store/src/actions/organization.actions';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
@@ -66,7 +66,7 @@ export const enum CfOrgSpaceSelectMode {
 }
 
 
-export const initCfOrgSpaceService = (store: Store<AppState>,
+export const initCfOrgSpaceService = (store: Store<CFAppState>,
   cfOrgSpaceService: CfOrgSpaceDataService,
   schemaKey: string,
   paginationKey: string): Observable<any> => {
@@ -89,7 +89,7 @@ export const initCfOrgSpaceService = (store: Store<AppState>,
 };
 
 export const createCfOrSpaceMultipleFilterFn = (
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   action: PaginatedAction,
   setQParam: (setQ: QParam, qs: QParam[]) => boolean) => {
   return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
@@ -167,7 +167,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.createCf();

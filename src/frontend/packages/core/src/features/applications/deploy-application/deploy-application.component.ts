@@ -7,7 +7,7 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { selectApplicationSource, selectCfDetails } from '../../../../../store/src/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
@@ -39,7 +39,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   selectedSourceType: SourceType;
   entityKey: string;
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
   ) {

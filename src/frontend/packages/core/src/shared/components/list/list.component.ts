@@ -50,7 +50,7 @@ import {
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
 import { SetPage } from '../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -226,7 +226,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
     private ngZone: NgZone

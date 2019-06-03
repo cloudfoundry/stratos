@@ -5,9 +5,9 @@ import { GetOrganization } from '../../actions/organization.actions';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../actions/relation.actions';
 import { APIResponse } from '../../actions/request.actions';
-import { AppState, IRequestTypeState } from '../../app-state';
+import { CFAppState, IRequestTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
-import { IRequestDataState } from '../../types/entity.types';
+import { BaseRequestDataState } from '../../types/entity.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import {
   entityFactory,
@@ -36,12 +36,12 @@ describe('Entity Relations - validate', () => {
   const orgGuid = 'validateEntityRelations-org';
   const spaceGuid = 'validateEntityRelations-space';
 
-  let store: AppState;
-  let allEntities: IRequestDataState;
+  let store: CFAppState;
+  let allEntities: BaseRequestDataState;
   let apiResponse: APIResponse;
   let newEntities: IRequestTypeState;
 
-  function noOp(iStore: Store<AppState>, includeRelations: string[], done: () => void) {
+  function noOp(iStore: Store<CFAppState>, includeRelations: string[], done: () => void) {
     const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
     const res = validateEntityRelations({
       cfGuid,
@@ -71,7 +71,7 @@ describe('Entity Relations - validate', () => {
   }
 
   function testEverythingMissingNothingRequired(done: () => void) {
-    inject([Store], (iStore: Store<AppState>) => {
+    inject([Store], (iStore: Store<CFAppState>) => {
       noOp(iStore, [], done);
     })();
   }
@@ -103,7 +103,7 @@ describe('Entity Relations - validate', () => {
     );
 
 
-    inject([Store], (iStore: Store<AppState>) => {
+    inject([Store], (iStore: Store<CFAppState>) => {
       const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
       const res = validateEntityRelations({
@@ -128,13 +128,13 @@ describe('Entity Relations - validate', () => {
   }
 
   function testListExistsListRequired(done: () => void) {
-    inject([Store], (iStore: Store<AppState>) => {
+    inject([Store], (iStore: Store<CFAppState>) => {
       noOp(iStore, [createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)], done);
     })();
   }
 
   function testListExistsListNotRequired(done: () => void) {
-    inject([Store], (iStore: Store<AppState>) => {
+    inject([Store], (iStore: Store<CFAppState>) => {
       noOp(iStore, [], done);
     })();
   }
@@ -165,7 +165,7 @@ describe('Entity Relations - validate', () => {
       entityRelationMissingQuotaUrl
     );
 
-    inject([Store], (iStore: Store<AppState>) => {
+    inject([Store], (iStore: Store<CFAppState>) => {
       const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
       const res = validateEntityRelations({
@@ -275,7 +275,7 @@ describe('Entity Relations - validate', () => {
         true
       );
 
-      inject([Store], (iStore: Store<AppState>) => {
+      inject([Store], (iStore: Store<CFAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
         const res = validateEntityRelations({
@@ -308,7 +308,7 @@ describe('Entity Relations - validate', () => {
         [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
         populateMissing);
 
-      inject([Store], (iStore: Store<AppState>) => {
+      inject([Store], (iStore: Store<CFAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
         const res = validateEntityRelations({
@@ -342,7 +342,7 @@ describe('Entity Relations - validate', () => {
         [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
         true);
 
-      inject([Store], (iStore: Store<AppState>) => {
+      inject([Store], (iStore: Store<CFAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
         const res = validateEntityRelations({
@@ -402,7 +402,7 @@ describe('Entity Relations - validate', () => {
         endpointType: 'cf'
       } as IRequestAction, 'fetch', 1, 1);
 
-      inject([Store], (iStore: Store<AppState>) => {
+      inject([Store], (iStore: Store<CFAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
         const res = validateEntityRelations({

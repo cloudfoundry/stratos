@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelper } from './create-service-instance-helper.service';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 
 @Injectable()
 export class CreateServiceInstanceHelperServiceFactory {
@@ -14,7 +14,7 @@ export class CreateServiceInstanceHelperServiceFactory {
     [key: string]: CreateServiceInstanceHelper
   } = {};
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory

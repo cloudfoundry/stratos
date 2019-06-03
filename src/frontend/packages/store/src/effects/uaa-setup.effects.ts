@@ -4,7 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import {
   SetUAAScope,
   SETUP_UAA,
@@ -21,7 +21,7 @@ export class UAASetupEffect {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   baseUrl = '/pp/v1/setup';

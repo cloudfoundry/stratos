@@ -27,7 +27,7 @@ import {
 } from 'rxjs/operators';
 
 import { UsersRolesSetOrg } from '../../../../../../../store/src/actions/users-roles.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   selectUsersRolesOrgGuid,
   selectUsersRolesPicked,
@@ -123,7 +123,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   entered = new Subject<boolean>();
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private componentFactoryResolver: ComponentFactoryResolver,
     private cfRolesService: CfRolesService,

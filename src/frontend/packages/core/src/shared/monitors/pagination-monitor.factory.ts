@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { PaginationMonitor } from './pagination-monitor';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class PaginationMonitorFactory {
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<CFAppState>) { }
 
   private monitorCache: {
     [key: string]: PaginationMonitor

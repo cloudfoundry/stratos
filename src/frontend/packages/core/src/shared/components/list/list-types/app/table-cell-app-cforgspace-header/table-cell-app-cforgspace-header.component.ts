@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
-import { AppState } from './../../../../../../../../store/src/app-state';
+import { CFAppState } from './../../../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-table-cell-app-cforgspace-header',
@@ -11,7 +11,7 @@ import { AppState } from './../../../../../../../../store/src/app-state';
 })
 export class TableCellAppCfOrgSpaceHeaderComponent extends TableCellAppCfOrgSpaceBase {
 
-  constructor(store: Store<AppState>) {
+  constructor(store: Store<CFAppState>) {
     super(store);
     this.init();
   }

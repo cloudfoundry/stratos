@@ -8,7 +8,7 @@ import {
   IStratosBaseEntityDefinition
 } from './entity-catalogue.types';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -72,7 +72,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   }
 
   public getEntityMonitor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     entityId: string,
     {
       schemaKey = '',

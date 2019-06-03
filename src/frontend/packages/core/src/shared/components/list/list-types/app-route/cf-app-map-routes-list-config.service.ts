@@ -8,7 +8,7 @@ import { ApplicationService } from '../../../../../features/applications/applica
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
 import {
   createEntityRelationPaginationKey
@@ -25,7 +25,7 @@ import { IListConfig } from '../../list.component.types';
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,

@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
@@ -30,7 +30,7 @@ describe('CfUserListConfigService', () => {
         {
           provide: CfUserListConfigService,
           useFactory: (
-            store: Store<AppState>,
+            store: Store<CFAppState>,
             cfUserService: CfUserService,
             router: Router,
             activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

@@ -5,7 +5,7 @@ import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators
 
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectEntities } from '../../../../store/src/selectors/api.selectors';
@@ -219,7 +219,7 @@ export const getActiveRouteCfCellProvider = {
   ]
 };
 
-export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
+export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
   const appWallPagKey = 'applicationWall';
   const entityKey = EntityCatalogueHelpers.buildEntityKey(applicationSchemaKey, CF_ENDPOINT_TYPE);
   store.dispatch(new SetClientFilter(new CFEntityConfig(applicationSchemaKey), appWallPagKey,
@@ -257,7 +257,7 @@ export function canUpdateOrgSpaceRoles(
   );
 }
 
-export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
+export function waitForCFPermissions(store: Store<CFAppState>, cfGuid: string): Observable<ICfRolesState> {
   return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
     filter(cf => cf && cf.state.initialised),
     first(),
@@ -266,14 +266,14 @@ export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Ob
   );
 }
 
-export function selectConnectedCfs(store: Store<AppState>): Observable<EndpointModel[]> {
+export function selectConnectedCfs(store: Store<CFAppState>): Observable<EndpointModel[]> {
   return store.select(endpointEntitiesSelector).pipe(
     map(endpoints => Object.values(endpoints)),
     map(endpoints => endpoints.filter(endpoint => endpoint.cnsi_type === 'cf' && endpoint.connectionStatus === 'connected')),
   );
 }
 
-export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolean> {
+export function haveMultiConnectedCfs(store: Store<CFAppState>): Observable<boolean> {
   return selectConnectedCfs(store).pipe(
     map(connectedCfs => connectedCfs.length > 1)
   );
@@ -289,7 +289,7 @@ export function createFetchTotalResultsPagKey(standardActionKey: string): string
 
 export function fetchTotalResults(
   action: PaginatedAction,
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<number> {
   const newAction = {

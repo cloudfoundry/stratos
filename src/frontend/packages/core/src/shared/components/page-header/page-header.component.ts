@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators';
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
@@ -136,7 +136,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private route: ActivatedRoute,
     private tabNavService: TabNavService,
     private router: Router,

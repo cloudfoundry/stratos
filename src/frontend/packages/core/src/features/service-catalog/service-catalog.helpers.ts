@@ -5,10 +5,10 @@ import { EntityServiceFactory } from '../../core/entity-service-factory.service'
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ServicesService } from './services.service';
 import { Provider } from '@angular/core';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 
 export function servicesServiceFactory(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   paginationMonitorFactory: PaginationMonitorFactory

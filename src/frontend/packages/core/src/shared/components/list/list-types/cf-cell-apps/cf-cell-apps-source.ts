@@ -10,7 +10,7 @@ import { IListConfig } from '../../list.component.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import {
   applicationSchemaKey,
@@ -35,7 +35,7 @@ export class CfCellAppsDataSource
   private appEntityServices: { [appGuid: string]: Observable<APIResource<IApp>> };
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     cfGuid: string,
     cellId: string,
     listConfig: IListConfig<CfCellApp>,

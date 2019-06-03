@@ -5,17 +5,17 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { entityFactory, cfUserSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string,
-              store: Store<AppState>,
-              getAllUsersAction: PaginatedAction,
-              listConfig: IListConfig<APIResource>,
-              rowStateManager: TableRowStateManager,
-              destroy: () => void
+    store: Store<CFAppState>,
+    getAllUsersAction: PaginatedAction,
+    listConfig: IListConfig<APIResource>,
+    rowStateManager: TableRowStateManager,
+    destroy: () => void
   ) {
     super({
       store,

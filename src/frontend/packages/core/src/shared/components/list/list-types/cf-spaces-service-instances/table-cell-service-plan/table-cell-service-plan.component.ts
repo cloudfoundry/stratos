@@ -5,7 +5,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { IServicePlan } from '../../../../../../core/cf-api-svc.types';
 import { TableCellCustom } from '../../../list.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { userProvidedServiceInstanceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
@@ -21,7 +21,7 @@ export class TableCellServicePlanComponent<T> extends TableCellCustom<T> impleme
   @Input() entityKey: string;
   servicePlanName$: Observable<string>;
 
-  constructor(private store: Store<AppState>) { super(); }
+  constructor(private store: Store<CFAppState>) { super(); }
   ngOnInit() {
     if (this.entityKey === userProvidedServiceInstanceSchemaKey) {
       this.servicePlanName$ = of('-');

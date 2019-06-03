@@ -8,7 +8,7 @@ import { filter, map, take } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../../store/src/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { ApplicationService } from '../application.service';
 import { AppNameUniqueDirective, AppNameUniqueChecking } from '../../../shared/app-name-unique.directive/app-name-unique.directive';
@@ -32,7 +32,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   constructor(
     public applicationService: ApplicationService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private fb: FormBuilder,
     private http: HttpClient,
   ) {

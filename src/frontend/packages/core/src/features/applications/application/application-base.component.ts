@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
@@ -18,7 +18,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 export function applicationServiceFactory(
   cfId: string,
   id: string,
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,

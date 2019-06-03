@@ -13,7 +13,7 @@ import {
   EntitiesPipelineCompleted,
   ValidateEntitiesStart,
 } from '../actions/request.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { validateEntityRelations } from '../helpers/entity-relations/entity-relations';
 import {
   completeApiRequest,
@@ -30,7 +30,7 @@ import { UpdateCfAction } from '../types/request.types';
 export class RequestEffect {
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private utils: UtilsService,
     private logger: LoggerService,
   ) { }

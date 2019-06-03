@@ -1,7 +1,7 @@
 import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
-import { AppState } from '../../store/src/app-state';
+import { CFAppState } from '../../store/src/app-state';
 import { userProvidedServiceInstanceSchemaKey } from '../../store/src/helpers/entity-factory';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
@@ -10,7 +10,7 @@ import { createUserRoleInOrg } from '../../store/src/types/user.types';
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
 /* tslint:disable */
-export function getInitialTestStoreState(): AppState {
+export function getInitialTestStoreState(): CFAppState {
   // const entities = getEntitiesFromExtensions();
   const state = getDefaultInitialTestStoreState();
   // entities.forEach(entity => {
@@ -22,7 +22,7 @@ export function getInitialTestStoreState(): AppState {
   return state;
 }
 
-function getDefaultInitialTestStoreState(): AppState {
+function getDefaultInitialTestStoreState(): CFAppState {
 
   return {
     recentlyVisited: {
@@ -21882,7 +21882,7 @@ function getDefaultInitialTestStoreState(): AppState {
 }
 
 /* tslint:enable */
-export function createBasicStoreModule(initialState: Partial<AppState> = getInitialTestStoreState()): ModuleWithProviders {
+export function createBasicStoreModule(initialState: Partial<CFAppState> = getInitialTestStoreState()): ModuleWithProviders {
   return StoreModule.forRoot(
     appReducers,
     {

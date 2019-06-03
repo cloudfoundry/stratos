@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
@@ -20,7 +20,7 @@ export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase 
     }
   }
 
-  constructor(store: Store<AppState>) {
+  constructor(store: Store<CFAppState>) {
     super(store);
   }
 

@@ -4,7 +4,7 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,
   createEntityRelationKey
@@ -22,7 +22,7 @@ import {
 import { GetServiceInstancesForSpace } from '../../../../../../../store/src/actions/space.actions';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
-  constructor(cfGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
+  constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
     const action = new GetServiceInstancesForSpace(spaceGuid, cfGuid, paginationKey, null, [
       createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),

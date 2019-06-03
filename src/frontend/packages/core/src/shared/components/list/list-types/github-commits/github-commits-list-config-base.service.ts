@@ -8,7 +8,7 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 
 @Injectable()
@@ -83,7 +83,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
   protected initialised = new BehaviorSubject<boolean>(false);
 
   constructor(
-    protected store: Store<AppState>,
+    protected store: Store<CFAppState>,
     private datePipe: DatePipe,
   ) { }
 

@@ -7,7 +7,7 @@ import { filter, map, tap } from 'rxjs/operators';
 import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organization.actions';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -23,7 +23,7 @@ export class AddEditSpaceStepBase {
   allSpacesInOrg$: Observable<string[]>;
   validate: (spaceName: string) => boolean;
   constructor(
-    protected store: Store<AppState>,
+    protected store: Store<CFAppState>,
     protected activatedRoute: ActivatedRoute,
     protected paginationMonitorFactory: PaginationMonitorFactory,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace

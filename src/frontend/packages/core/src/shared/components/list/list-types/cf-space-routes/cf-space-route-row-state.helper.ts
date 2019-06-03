@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
@@ -12,7 +12,7 @@ import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-cat
 
 export class SpaceRouteDataSourceHelper {
   static getRowStateManager(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     paginationKey: string
   ) {
     const rowStateManager = new TableRowStateManager();
@@ -37,7 +37,7 @@ export class SpaceRouteDataSourceHelper {
   }
   // This pattern might be worth pulling out into a more general helper if we use it again.
   static setUpManager(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     paginationMonitor: PaginationMonitor<APIResource>,
     rowStateManager: TableRowStateManager
   ) {

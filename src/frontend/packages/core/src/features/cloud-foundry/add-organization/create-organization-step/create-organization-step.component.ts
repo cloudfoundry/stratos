@@ -6,7 +6,7 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { CreateOrganization } from '../../../../../../store/src/actions/organization.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
@@ -35,7 +35,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   get orgName(): any { return this.addOrg ? this.addOrg.get('orgName') : { value: '' }; }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {

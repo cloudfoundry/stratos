@@ -21,7 +21,7 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { getServiceInstancesInCf, getServicePlans } from './services-helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import {
   entityFactory,
   servicePlanVisibilitySchemaKey,
@@ -66,7 +66,7 @@ export class ServicesService {
   initialised$ = new BehaviorSubject(false);
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     public activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory

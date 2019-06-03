@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../core/cf-api.types';
 import {
@@ -44,7 +44,7 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
   }];
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     cfOrgService: CloudFoundryOrganizationService,
   ) {
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);

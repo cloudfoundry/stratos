@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import {
   errorFetchingFavoritesSelector,
   fetchingFavoritesSelector,
@@ -26,7 +26,7 @@ export class FavoritesGlobalListComponent implements OnInit {
   public favInfo$: Observable<IFavoritesInfo>;
   public favoriteGroups$: Observable<IGroupedFavorites[]>;
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private userFavoriteManager: UserFavoriteManager
   ) { }
 

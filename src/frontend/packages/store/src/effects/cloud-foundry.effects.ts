@@ -12,7 +12,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { AppState } from './../app-state';
+import { CFAppState } from './../app-state';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class CloudFoundryEffects {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
   // TODO(nj): do we need this?
   @Effect()

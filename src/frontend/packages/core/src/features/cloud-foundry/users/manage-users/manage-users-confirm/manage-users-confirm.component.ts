@@ -30,7 +30,7 @@ import {
   spaceSchemaKey,
 } from '../../../../../../../store/src/helpers/entity-factory';
 import { ChangeUserRole } from '../../../../../../../store/src/actions/users.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { selectUsersRoles, selectUsersRolesChangedRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { UsersRolesClearUpdateState } from '../../../../../../../store/src/actions/users-roles.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
@@ -105,7 +105,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     };
   }
 
-  constructor(private store: Store<AppState>, private cfRolesService: CfRolesService, private cfUserService: CfUserService) { }
+  constructor(private store: Store<CFAppState>, private cfRolesService: CfRolesService, private cfUserService: CfUserService) { }
 
   ngOnInit() {
     this.createCfAndOrgObs();

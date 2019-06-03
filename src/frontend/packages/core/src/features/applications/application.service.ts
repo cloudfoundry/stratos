@@ -14,7 +14,7 @@ import {
   UpdateExistingApplication,
 } from '../../../../store/src/actions/application.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
@@ -92,7 +92,7 @@ export class ApplicationService {
   constructor(
     @Inject(CF_GUID) public cfGuid: string,
     @Inject(APP_GUID) public appGuid: string,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
@@ -145,7 +145,7 @@ export class ApplicationService {
    * Fetch the current state of the app (given it's instances) as an object ready
    */
   static getApplicationState(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appStateService: ApplicationStateService,
     app: IApp,
     appGuid: string,

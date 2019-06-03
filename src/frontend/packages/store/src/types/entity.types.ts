@@ -19,7 +19,7 @@ import {
   IBuildpack,
   IAppSummary,
 } from '../../../core/src/core/cf-api.types';
-import { IRequestEntityTypeState, IRequestTypeState, AppState } from '../app-state';
+import { IRequestEntityTypeState, IRequestTypeState, CFAppState } from '../app-state';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { IMetrics } from './base-metric.types';
@@ -31,7 +31,7 @@ import { CfUser } from './user.types';
 import { AppStats } from './app-metadata.types';
 import { UserProfileInfo } from './user-profile.types';
 
-export interface IRequestDataState {
+export interface BaseRequestDataState {
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   // featureFlag: IRequestEntityTypeState<IFeatureFlag>;
@@ -58,7 +58,9 @@ export interface IRequestDataState {
   // Extensibility
   // [name: string]: IRequestEntityTypeState<any>;
 }
-interface EntityValues {
+
+
+interface CFEntityValues {
   featureFlag: IRequestEntityTypeState<IFeatureFlag>;
   application: IRequestEntityTypeState<APIResource<IApp>>;
   stack: IRequestEntityTypeState<APIResource<IStack>>;
@@ -94,7 +96,7 @@ export type ExtendedRequestDataState<E extends Record<keyof E, any>,
     [P in keyof E]: IRequestEntityTypeState<E[keyof E]>
   };
 
-export interface CFRequestDataState extends EntityValues, IRequestDataState { }
+export interface CFRequestDataState extends CFEntityValues, BaseRequestDataState { }
 
 // class temp<T> {
 //   data: T;

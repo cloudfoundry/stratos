@@ -15,7 +15,7 @@ import {
 
 import { GetAllOrganizations, GetOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { UsersRolesSetChanges } from '../../../../../../store/src/actions/users-roles.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   endpointSchemaKey,
   entityFactory,
@@ -96,7 +96,7 @@ export class CfRolesService {
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cfUserService: CfUserService,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,

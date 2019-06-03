@@ -3,7 +3,7 @@ import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
@@ -18,7 +18,7 @@ import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.h
 import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 
 export function syncPaginationSection(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   action: GetAllEndpoints,
   paginationKey: string
 ) {
@@ -30,11 +30,11 @@ export function syncPaginationSection(
 }
 
 export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
-  store: Store<AppState>;
+  store: Store<CFAppState>;
   endpointType: string;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     listConfig: IListConfig<EndpointModel>,
     action: GetAllEndpoints,
     endpointType: string = null,
@@ -119,7 +119,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   static monitorEvents(
     internalEventMonitorFactory: InternalEventMonitorFactory,
     rowStateManager: TableRowStateManager,
-    store: Store<AppState>
+    store: Store<CFAppState>
   ) {
     const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
     return eventMonitor.hasErroredOverTime().pipe(

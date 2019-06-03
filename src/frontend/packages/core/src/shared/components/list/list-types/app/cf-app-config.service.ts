@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
@@ -33,7 +33,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
 
   constructor(
     private datePipe: DatePipe,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private utilsService: UtilsService,
     private cfOrgSpaceService: CfOrgSpaceDataService,
   ) {

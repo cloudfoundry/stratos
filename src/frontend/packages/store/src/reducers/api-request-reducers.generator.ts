@@ -12,7 +12,7 @@ import {
   userProvidedServiceInstanceSchemaKey
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
-import { IRequestDataState, IRequestState } from '../types/entity.types';
+import { BaseRequestDataState, IRequestState } from '../types/entity.types';
 import { RequestTypes } from './../actions/request.actions';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
@@ -82,7 +82,7 @@ function getInternalEntityKey(type: string) {
 
 
 // TODO Add these reducers to the catalogue
-export function requestDataReducer(state: IRequestDataState, action: Action) {
+export function requestDataReducer(state: BaseRequestDataState, action: Action) {
   const baseDataReducer = requestDataReducerFactory(requestActions);
 
   const extraReducers = {

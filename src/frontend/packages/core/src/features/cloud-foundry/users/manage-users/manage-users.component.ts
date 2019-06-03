@@ -9,7 +9,7 @@ import {
   UsersRolesExecuteChanges,
   UsersRolesSetUsers,
 } from '../../../../../../store/src/actions/users-roles.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { selectUsersRoles, selectUsersRolesPicked } from '../../../../../../store/src/selectors/users-roles.selector';
 import { CfUser } from '../../../../../../store/src/types/user.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -36,7 +36,7 @@ export class UsersRolesComponent implements OnDestroy {
   applyStarted = false;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfUserService: CfUserService,
     private route: ActivatedRoute

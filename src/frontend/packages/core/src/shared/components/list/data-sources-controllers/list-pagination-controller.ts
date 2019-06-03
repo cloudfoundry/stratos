@@ -12,7 +12,7 @@ import {
   SetClientPageSize,
   SetPage,
 } from '../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   defaultClientPaginationPageSize,
 } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
@@ -44,7 +44,7 @@ function onPaginationEntityState(
 
 export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public dataSource: IListDataSource<T>,
     private ngZone: NgZone
   ) {

@@ -1,10 +1,10 @@
 import { compose } from '@ngrx/store';
 
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { UsersRolesState } from '../types/users-roles.types';
 import { IUserPermissionInOrg } from '../types/user.types';
 
-export const selectUsersRoles = (state: AppState): UsersRolesState => state.manageUsersRoles;
+export const selectUsersRoles = (state: CFAppState): UsersRolesState => state.manageUsersRoles;
 
 const selectUsers = (usersRoles: UsersRolesState) => usersRoles.users;
 export const selectUsersRolesPicked = compose(

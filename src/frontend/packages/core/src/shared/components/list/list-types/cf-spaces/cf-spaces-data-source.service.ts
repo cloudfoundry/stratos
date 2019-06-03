@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   entityFactory,
   organizationSchemaKey,
@@ -19,7 +19,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
-  constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
+  constructor(cfGuid: string, orgGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid);
     const action = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [
       createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),

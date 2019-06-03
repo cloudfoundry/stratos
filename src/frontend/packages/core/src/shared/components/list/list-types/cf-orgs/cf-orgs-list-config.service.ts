@@ -8,7 +8,7 @@ import { IOrganization } from '../../../../../core/cf-api.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { ITableColumn } from '../../list-table/table.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfOrgsListConfigService extends BaseCfListConfig<APIResource<IOrganization>> {
@@ -38,7 +38,7 @@ export class CfOrgsListConfigService extends BaseCfListConfig<APIResource<IOrgan
     },
   }];
 
-  constructor(private store: Store<AppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor(private store: Store<CFAppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfOrgsDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }

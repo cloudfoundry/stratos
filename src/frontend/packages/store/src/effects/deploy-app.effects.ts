@@ -30,7 +30,7 @@ import {
     WrapperRequestActionFailed,
     WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { AppState } from './../app-state';
+import { CFAppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
 
 export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {
@@ -46,7 +46,7 @@ export class DeployAppEffects {
     constructor(
         private http: Http,
         private actions$: Actions,
-        private store: Store<AppState>,
+        private store: Store<CFAppState>,
         private logger: LoggerService,
     ) { }
 

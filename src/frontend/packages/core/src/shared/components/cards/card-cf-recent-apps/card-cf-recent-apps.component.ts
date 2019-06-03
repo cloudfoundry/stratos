@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../../store/src/actions/app-metadata.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../core/cf-api.types';
 import {
@@ -27,7 +27,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   @Output() refresh = new EventEmitter<any>();
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public cfEndpointService: CloudFoundryEndpointService,
   ) { }
 

@@ -7,7 +7,7 @@ import { GetServiceInstances } from '../../../../../store/src/actions/service-in
 import { GetServicePlanVisibilities } from '../../../../../store/src/actions/service-plan-visibility.actions';
 import { GetServicePlanServiceInstances } from '../../../../../store/src/actions/service-plan.actions';
 import { GetServiceInstancesForSpace } from '../../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import {
   entityFactory,
   serviceInstancesSchemaKey,
@@ -37,7 +37,7 @@ export class CreateServiceInstanceHelper {
   public marketPlaceMode = false;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public serviceGuid: string,
     @Inject(CF_GUID) public cfGuid: string,
     private entityServiceFactory: EntityServiceFactory,

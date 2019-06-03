@@ -21,7 +21,7 @@ import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.com
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { DeleteApplicationInstance } from '../../../../../../../store/src/actions/application.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { metricSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
@@ -184,7 +184,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   ];
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     private utilsService: UtilsService,
     private router: Router,

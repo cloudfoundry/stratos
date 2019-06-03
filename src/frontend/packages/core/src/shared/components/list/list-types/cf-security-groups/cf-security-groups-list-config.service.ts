@@ -9,7 +9,7 @@ import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfSecurityGroupsDataSource } from './cf-security-groups-data-source';
 import { ITableColumn } from '../../list-table/table.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResource> {
@@ -39,7 +39,7 @@ export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResou
     },
   }];
 
-  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor(private store: Store<CFAppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfSecurityGroupsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }

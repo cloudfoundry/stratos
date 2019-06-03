@@ -9,14 +9,14 @@ import {
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { CfUser } from '../../../../../../../store/src/types/user.types';
 
 @Injectable()
 export class CfOrgUsersListConfigService extends CfUserListConfigService {
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     cfOrgService: CloudFoundryOrganizationService,
     cfUserService: CfUserService,
     router: Router,

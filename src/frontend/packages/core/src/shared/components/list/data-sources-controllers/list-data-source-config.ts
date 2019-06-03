@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
@@ -41,7 +41,7 @@ export class ActionSchemaConfig {
 }
 
 export interface IListDataSourceConfig<A, T> {
-  store: Store<AppState>;
+  store: Store<CFAppState>;
   /**
    * An action that, when called, will populate the entries required to show the current state of the list. For example, this action will
    * be dispatched when the page number changes in a non-local list.

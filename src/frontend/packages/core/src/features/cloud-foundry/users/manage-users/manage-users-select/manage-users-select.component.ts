@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser } from '../../../../../../../store/src/types/user.types';
 import {
@@ -25,7 +25,7 @@ import { CfRolesService } from '../cf-roles.service';
     {
       provide: ListConfig,
       useFactory: (
-        store: Store<AppState>,
+        store: Store<CFAppState>,
         activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
         cfUserService: CfUserService,
         paginationMonitorFactory: PaginationMonitorFactory,
@@ -48,7 +48,7 @@ export class UsersRolesSelectComponent {
   valid$ = new BehaviorSubject<boolean>(false);
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private listConfig: ListConfig<APIResource<CfUser>>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     public cfRolesService: CfRolesService

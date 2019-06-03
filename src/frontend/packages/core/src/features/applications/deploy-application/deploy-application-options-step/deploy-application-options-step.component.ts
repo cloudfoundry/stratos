@@ -9,7 +9,7 @@ import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators'
 import { SaveAppOverrides } from '../../../../../../store/src/actions/deploy-applications.actions';
 import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
 import { GetAllStacks } from '../../../../../../store/src/actions/stack.action';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCfDetails } from '../../../../../../store/src/selectors/deploy-application.selector';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -43,7 +43,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
   constructor(
     private fb: FormBuilder,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private activatedRoute: ActivatedRoute

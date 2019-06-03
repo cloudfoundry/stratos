@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
 
 import { CreateServiceBinding } from '../../../../../store/src/actions/service-bindings.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { serviceBindingSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../../store/src/selectors/api.selectors';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
@@ -53,7 +53,7 @@ export class CsiModeService {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) {
     const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
     const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');

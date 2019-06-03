@@ -10,7 +10,7 @@ import {
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { serviceInstancesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 
 @Component({
@@ -34,8 +34,8 @@ export class ServicesWallComponent implements OnDestroy {
   cfIds$: Observable<string[]>;
 
   constructor(public cloudFoundryService: CloudFoundryService,
-              public store: Store<AppState>,
-              private cfOrgSpaceService: CfOrgSpaceDataService) {
+    public store: Store<CFAppState>,
+    private cfOrgSpaceService: CfOrgSpaceDataService) {
 
     this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(

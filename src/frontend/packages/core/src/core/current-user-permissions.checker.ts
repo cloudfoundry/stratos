@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../store/src/app-state';
+import { CFAppState } from '../../../store/src/app-state';
 import { featureFlagSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   getCurrentUserCFEndpointHasScope,
@@ -41,7 +41,7 @@ export enum CHECKER_GROUPS {
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
-  constructor(private store: Store<AppState>, ) { }
+  constructor(private store: Store<CFAppState>, ) { }
   public check(
     type: PermissionTypes,
     permission: PermissionValues,

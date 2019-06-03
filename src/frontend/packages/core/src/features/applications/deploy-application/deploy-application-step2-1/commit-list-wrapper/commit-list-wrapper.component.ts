@@ -8,7 +8,7 @@ import {
   GithubCommitsListConfigServiceDeploy,
 } from '../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-deploy.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 import { GitSCMService } from '../../../../../shared/data-services/scm/scm.service';
@@ -21,7 +21,7 @@ import { GitSCMService } from '../../../../../shared/data-services/scm/scm.servi
     {
       provide: ListConfig,
       useFactory: (
-        store: Store<AppState>,
+        store: Store<CFAppState>,
         datePipe: DatePipe,
         scmService: GitSCMService) => {
         return new GithubCommitsListConfigServiceDeploy(store, datePipe, scmService);

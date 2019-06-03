@@ -20,7 +20,7 @@ import {
   SetBranch,
   SetDeployBranch,
 } from '../../../../../../store/src/actions/deploy-applications.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
@@ -106,7 +106,7 @@ export class DeployApplicationStep2Component
 
   constructor(
     private entityServiceFactory: EntityServiceFactory,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     route: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private scmService: GitSCMService

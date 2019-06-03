@@ -4,7 +4,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { combineLatest, filter, first } from 'rxjs/operators';
 
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../store/src/actions/users-roles.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
 import {
   CfUser,
@@ -223,7 +223,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
   constructor(
     private cfRolesService: CfRolesService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private userPerms: CurrentUserPermissionsService
   ) { }
 

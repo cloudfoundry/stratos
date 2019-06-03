@@ -9,7 +9,7 @@ import {
 } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
 import { ISpace, IApp, IAppSummary } from '../src/core/cf-api.types';
-import { AppState } from '../../store/src/app-state';
+import { CFAppState } from '../../store/src/app-state';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { Observable, of as observableOf } from 'rxjs';
@@ -83,7 +83,7 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
   return {
     provide: ApplicationService,
     useFactory: (
-      store: Store<AppState>,
+      store: Store<CFAppState>,
       entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,

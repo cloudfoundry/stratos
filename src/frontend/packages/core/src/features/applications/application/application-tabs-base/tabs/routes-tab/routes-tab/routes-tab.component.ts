@@ -11,7 +11,7 @@ import {
 import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../../../../shared/monitors/pagination-monitor.factory';
 import { first } from 'rxjs/operators';
-import { AppState } from '../../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../../store/src/app-state';
 import { ApplicationService } from '../../../../../application.service';
 import { APIResource } from '../../../../../../../../../store/src/types/api.types';
 import { FetchAllDomains } from '../../../../../../../../../store/src/actions/domains.actions';
@@ -28,7 +28,7 @@ import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../../../../clo
     {
       provide: ListConfig,
       useFactory: (
-        store: Store<AppState>,
+        store: Store<CFAppState>,
         appService: ApplicationService,
         confirmDialog: ConfirmationDialogService,
         datePipe: DatePipe,
@@ -45,7 +45,7 @@ export class RoutesTabComponent implements OnInit {
 
   paginationSubscription: Subscription;
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {

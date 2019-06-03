@@ -6,7 +6,7 @@ import { filter, first, map } from 'rxjs/operators';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../../store/src/types/user-profile.types';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../../store/src/effects/user-profile.effects';
 import { userProfileSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { AuthState } from '../../../../store/src/reducers/auth.reducer';
@@ -30,7 +30,7 @@ export class UserProfileService {
   userProfile$: Observable<UserProfileInfo>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) {
     this.entityMonitor = this.entityMonitorFactory.create<UserProfileInfo>(

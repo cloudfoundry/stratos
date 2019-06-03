@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { SetCreateServiceInstanceApp } from '../../../../../../store/src/actions/create-service-instance.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../core/cf-api-svc.types';
 import { IApp } from '../../../../core/cf-api.types';
@@ -36,7 +36,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   schemaFormConfig: SchemaFormConfig;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.stepperForm = new FormGroup({

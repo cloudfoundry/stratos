@@ -13,7 +13,7 @@ import {
 import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { AppState } from './../app-state';
+import { CFAppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class MetricsEffect {
   constructor(
     private actions$: Actions,
     private httpClient: HttpClient,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   @Effect() metrics$ = this.actions$.pipe(

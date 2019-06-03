@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { AppState } from '../../../store/src/app-state';
+import { CFAppState } from '../../../store/src/app-state';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 
 export function queryParamMap(): { [key: string]: string } {
@@ -26,7 +26,7 @@ export function queryParamMap(): { [key: string]: string } {
 export class AuthGuardService implements CanActivate {
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private router: Router,
     private route: ActivatedRoute
   ) { }

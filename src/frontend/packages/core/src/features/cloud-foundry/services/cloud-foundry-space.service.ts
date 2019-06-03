@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetSpace } from '../../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
@@ -54,7 +54,7 @@ export class CloudFoundrySpaceService {
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,

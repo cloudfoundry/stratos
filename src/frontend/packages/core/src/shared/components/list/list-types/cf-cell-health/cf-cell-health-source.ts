@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IMetrics, IMetricMatrixResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { IListConfig } from '../../list.component.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
 import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
@@ -26,7 +26,7 @@ export class CfCellHealthDataSource extends ListDataSource<CfCellHealthEntry, IM
     static appIdPath = 'metric.application_id';
 
     constructor(
-        store: Store<AppState>,
+        store: Store<CFAppState>,
         listConfig: IListConfig<CfCellHealthEntry>,
         action: FetchCFCellMetricsPaginatedAction,
     ) {

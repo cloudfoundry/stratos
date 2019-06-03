@@ -25,7 +25,7 @@ import {
   UpdateUserFavoriteMetadataAction,
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { WrapperRequestActionSuccess } from '../types/request.types';
@@ -43,7 +43,7 @@ export class UserFavoritesEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private userFavoriteManager: UserFavoriteManager
   ) {
   }

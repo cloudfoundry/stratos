@@ -4,7 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { IRequestAction } from '../types/request.types';
 import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from './../actions/system.actions';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
@@ -15,7 +15,7 @@ export class SystemEffects {
     constructor(
         private httpClient: HttpClient,
         private actions$: Actions,
-        private store: Store<AppState>
+        private store: Store<CFAppState>
     ) { }
 
     static guid = 'info';

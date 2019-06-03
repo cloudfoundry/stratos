@@ -27,7 +27,7 @@ import {
   VerifySession,
 } from './../actions/auth.actions';
 import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 
@@ -42,7 +42,7 @@ export class AuthEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   @Effect() loginRequest$ = this.actions$.pipe(
@@ -151,7 +151,7 @@ export class AuthEffect {
     return false;
   }
 
-  private rehydrateDashboardState(store: Store<AppState>, sessionData: SessionData) {
+  private rehydrateDashboardState(store: Store<CFAppState>, sessionData: SessionData) {
     const storage = localStorage || window.localStorage;
     // We use the username to key the session storage. We could replace this with the users id?
     if (storage && sessionData.user) {

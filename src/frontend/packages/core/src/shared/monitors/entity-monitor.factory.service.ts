@@ -1,4 +1,4 @@
-import { AppState } from './../../../../store/src/app-state';
+import { CFAppState } from './../../../../store/src/app-state';
 import { Injectable } from '@angular/core';
 import { EntityMonitor } from './entity-monitor';
 import { Store } from '@ngrx/store';
@@ -9,7 +9,7 @@ import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.se
 @Injectable()
 export class EntityMonitorFactory {
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<CFAppState>) { }
 
   private monitorCache: {
     [key: string]: EntityMonitor

@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
+import { CFAppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
 import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { SessionData } from '../../../../../store/src/types/auth.types';
@@ -45,7 +45,7 @@ export class CfAuthService {
   // WIP: Async/Sync calls. Need to review once store stuff done
   session: SessionData;
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<CFAppState>) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.sessionData$ = store.select<SessionData>(selectSessionData());
   }

@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { SendEventAction } from '../actions/internal-events.actions';
 import { RequestTypes } from '../actions/request.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { WrapperRequestActionFailed } from '../types/request.types';
@@ -21,7 +21,7 @@ export class EndpointApiError {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) { }
 
   @Effect({ dispatch: false }) endpointApiError$ = this.actions$.pipe(

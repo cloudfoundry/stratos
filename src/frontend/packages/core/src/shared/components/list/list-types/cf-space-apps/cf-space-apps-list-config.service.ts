@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
@@ -77,7 +77,7 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   ]
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private datePipe: DatePipe,
     private cfSpaceService: CloudFoundrySpaceService
   ) {

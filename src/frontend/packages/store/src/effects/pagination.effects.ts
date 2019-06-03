@@ -12,14 +12,14 @@ import {
   SET_PARAMS,
   SetParams,
 } from '../actions/pagination.actions';
-import { AppState } from './../app-state';
+import { CFAppState } from './../app-state';
 
 @Injectable()
 export class PaginationEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   @Effect({ dispatch: false }) clearPaginationOnParamChange$ = this.actions$.pipe(

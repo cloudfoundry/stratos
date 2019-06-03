@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { map, filter } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-deploy-application-step-source-upload',
@@ -20,7 +20,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 
   public valid$: Observable<boolean>;
 
-  constructor(store: Store<AppState>,
+  constructor(store: Store<CFAppState>,
               public cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);

@@ -14,12 +14,12 @@ import {
   FetchRelationSingleAction,
 } from '../../actions/relation.actions';
 import { APIResponse } from '../../actions/request.actions';
-import { AppState } from '../../app-state';
+import { GeneralEntityAppState } from '../../app-state';
 import { RequestInfoState } from '../../reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../../types/api.types';
-import { IRequestDataState } from '../../types/entity.types';
+import { BaseRequestDataState } from '../../types/entity.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import { pick } from '../reducer.helper';
@@ -288,7 +288,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   return results;
 }
 
-function associateChildWithParent(store: Store<AppState>, action: EntityInlineChildAction, apiResponse: APIResponse): Observable<boolean> {
+function associateChildWithParent(store: Store<GeneralEntityAppState>, action: EntityInlineChildAction, apiResponse: APIResponse): Observable<boolean> {
   let childValue;
   // Fetch the child value to associate with parent. Will either be a guid or a list of guids
   if (action.child.isArray) {
@@ -354,11 +354,11 @@ function associateChildWithParent(store: Store<AppState>, action: EntityInlineCh
 }
 
 function handleValidationLoopResults(
-  store: Store<AppState>,
+  store: Store<GeneralEntityAppState>,
   results: ValidateEntityResult[],
   apiResponse: APIResponse,
   action: IRequestAction,
-  allEntities: IRequestDataState): ValidationResult {
+  allEntities: BaseRequestDataState): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
   results.forEach(request => {
     // Fetch any missing data
@@ -476,7 +476,7 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
  * create an action that can be used to populate the pagination section with the list from the parent
  * @export
  */
-export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+export function populatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
   const eicAction = isEntityInlineChildAction(action);
   if (!eicAction || !action.flattenPagination) {
     return observableOf(action);
@@ -504,7 +504,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
       store.select(selectEntity<any>(entityKey, parentGuid)),
       store.select(getAPIRequestDataState),
     ),
-    map(([entityInfo, entity, allEntities]: [RequestInfoState, any, IRequestDataState]) => {
+    map(([entityInfo, entity, allEntities]: [RequestInfoState, any, BaseRequestDataState]) => {
       if (!entity) {
         return;
       }

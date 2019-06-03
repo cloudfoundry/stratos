@@ -14,7 +14,7 @@ import { first, map, tap } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { SetDeployCommit } from '../../../../../../store/src/actions/deploy-applications.actions';
 import { GitCommit } from '../../../../../../store/src/types/git.types';
 
@@ -37,7 +37,7 @@ export class DeployApplicationStep21Component {
   wrapperRef: ComponentRef<CommitListWrapperComponent>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private componentFactoryResolver: ComponentFactoryResolver,
     private injector: Injector
   ) {

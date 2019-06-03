@@ -6,7 +6,7 @@ import { CfStacksCardComponent } from './cf-stacks-card/cf-stacks-card.component
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfStacksListConfigService extends BaseCfListConfig<APIResource> {
@@ -36,7 +36,7 @@ export class CfStacksListConfigService extends BaseCfListConfig<APIResource> {
     },
   }];
 
-  constructor(private store: Store<AppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor(private store: Store<CFAppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfStacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }

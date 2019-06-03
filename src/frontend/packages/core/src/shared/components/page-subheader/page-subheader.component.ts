@@ -7,7 +7,7 @@ import { ISubHeaderTabs } from './page-subheader.types';
 
 import { getScrollBarWidth } from '../../../core/helper-classes/dom-helpers';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { selectSideNavState } from '../../../../../store/src/selectors/dashboard.selectors';
 
 @Component({
@@ -65,7 +65,7 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
 
   // ***
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<CFAppState>) {
     // We use this to hide the navbar.
     this.scrollBarWidth = getScrollBarWidth();
     this.className = this.nested ? 'nested-tab' : 'page-subheader';

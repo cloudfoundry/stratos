@@ -4,10 +4,10 @@ import { map } from 'rxjs/operators';
 import { GetOrganization } from '../../../actions/organization.actions';
 import { APIResponse } from '../../../actions/request.actions';
 import { GetSpace } from '../../../actions/space.actions';
-import { AppState, IRequestEntityTypeState } from '../../../app-state';
+import { CFAppState, IRequestEntityTypeState } from '../../../app-state';
 import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
-import { IRequestDataState } from '../../../types/entity.types';
+import { BaseRequestDataState } from '../../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
@@ -61,10 +61,10 @@ function updateUser(
  * the role array is missing. It's for those cases that we then bring across the role from the org to the user.
  */
 export function orgSpacePostProcess(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   action: GetOrganization | GetSpace,
   apiResponse: APIResponse,
-  allEntities: IRequestDataState): ValidateEntityResult {
+  allEntities: BaseRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
   const orgOrSpaceCatalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
   const { entityKey } = orgOrSpaceCatalogueEntity;

@@ -5,7 +5,7 @@ import { switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
@@ -99,7 +99,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
 
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     private datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,

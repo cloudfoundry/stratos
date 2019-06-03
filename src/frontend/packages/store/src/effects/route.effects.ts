@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { RouteEvents, UnmapRoute } from '../actions/route.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { routeSchemaKey } from '../helpers/entity-factory';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
@@ -14,7 +14,7 @@ export class RouteEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   @Effect({ dispatch: false })

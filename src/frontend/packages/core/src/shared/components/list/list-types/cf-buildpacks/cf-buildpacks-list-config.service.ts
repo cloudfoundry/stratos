@@ -8,7 +8,7 @@ import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfBuildpackCardComponent } from './cf-buildpack-card/cf-buildpack-card.component';
 import { CfBuildpacksDataSource } from './cf-buildpacks-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<IBuildpack>> {
@@ -46,7 +46,7 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
       field: 'metadata.created_at'
     },
   }];
-  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor(private store: Store<CFAppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfBuildpacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }

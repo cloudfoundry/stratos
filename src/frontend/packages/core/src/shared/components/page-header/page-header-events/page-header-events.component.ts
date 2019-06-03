@@ -6,7 +6,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
@@ -45,7 +45,7 @@ export class PageHeaderEventsComponent implements OnInit {
   constructor(
     private internalEventMonitorFactory: InternalEventMonitorFactory,
     private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) {
     this.eventMinimized$ = this.store.select('dashboard').pipe(
       map(dashboardState => dashboardState.headerEventMinimized),

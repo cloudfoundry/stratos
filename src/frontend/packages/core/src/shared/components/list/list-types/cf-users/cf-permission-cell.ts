@@ -11,7 +11,7 @@ import { ConfirmationDialogService } from '../../../confirmation-dialog.service'
 import { TableCellCustom } from '../../list.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser } from '../../../../../../../store/src/types/user.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
 import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 
@@ -52,7 +52,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
   );
 
   constructor(
-    public store: Store<AppState>,
+    public store: Store<CFAppState>,
     private confirmDialog: ConfirmationDialogService,
     public cfUserService: CfUserService
   ) {

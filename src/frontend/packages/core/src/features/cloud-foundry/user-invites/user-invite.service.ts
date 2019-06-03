@@ -6,7 +6,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { environment } from '../../../environments/environment';
@@ -61,7 +61,7 @@ export class UserInviteService {
   canConfigure$: Observable<boolean>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private http: HttpClient,
     private snackBar: MatSnackBar,
     cfEndpointService: CloudFoundryEndpointService,

@@ -7,7 +7,7 @@ import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { GetApplication } from '../../../store/src/actions/application.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
-import { AppState } from '../../../store/src/app-state';
+import { CFAppState } from '../../../store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../store/src/helpers/entity-factory';
 import {
   completeApiRequest,
@@ -32,7 +32,7 @@ const cfId = 'cf123';
 
 describe('EntityServiceService', () => {
   function createTestService(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     guid: string,
     schema: EntitySchema,
     action: IRequestAction,
@@ -41,7 +41,7 @@ describe('EntityServiceService', () => {
     return new EntityService(store, entityMonitor, action, false, RequestSectionKeys.CF);
   }
 
-  function getAllTheThings(store: Store<AppState>, guid: string, schemaKey: string) {
+  function getAllTheThings(store: Store<CFAppState>, guid: string, schemaKey: string) {
     const entities = {
       [applicationSchemaKey]: {
         [guid]: {
@@ -117,7 +117,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should get application', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const guid = 'GUID123456789x';
       const {
         action,
@@ -142,7 +142,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should fail new entity', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const guid = '1234567890';
       const {
         action,
@@ -163,7 +163,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should fail previously fetched entity', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const guid = '1234567890';
       const {
         action,
@@ -185,7 +185,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should set busy new entity', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const updatingKey = 'upd8ing';
       const guid = `${updatingKey}-1234567890`;
       const {
@@ -215,7 +215,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should set busy', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const updatingKey = 'upd8ing';
       const guid = `${updatingKey}-1234567890`;
       const {
@@ -247,7 +247,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should set deleted new entity', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const updatingKey = 'upd8ing';
       const guid = `${updatingKey}-1234567890`;
       const {
@@ -277,7 +277,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should set deleted', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const guid = `1-delete123`;
       const {
         action,
@@ -308,7 +308,7 @@ describe('EntityServiceService', () => {
   });
 
   it('should set deleted failed', (done) => {
-    inject([Store], (store: Store<AppState>) => {
+    inject([Store], (store: Store<CFAppState>) => {
       const guid = `1234567890123124hjvgh`;
       const {
         action,

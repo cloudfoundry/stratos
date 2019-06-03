@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
@@ -84,7 +84,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {

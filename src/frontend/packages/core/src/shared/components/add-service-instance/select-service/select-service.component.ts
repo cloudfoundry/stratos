@@ -10,7 +10,7 @@ import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.f
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   selectCreateServiceInstanceCfGuid,
   selectCreateServiceInstanceSpaceGuid
@@ -36,7 +36,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   selectedService$: Observable<APIResource<IService>>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private csiGuidService: CsiGuidsService,
     private servicesWallService: ServicesWallService

@@ -17,7 +17,7 @@ import { sortStringify } from '../../../../core/src/core/utils.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
-import { AppState } from '../../app-state';
+import { CFAppState, GeneralEntityAppState } from '../../app-state';
 import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
@@ -129,7 +129,7 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
 
 export const getPaginationObservables = <T = any>(
   { store, action, paginationMonitor }: {
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     action: PaginatedAction | PaginatedAction[],
     paginationMonitor: PaginationMonitor
   },
@@ -213,14 +213,14 @@ function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
   return !hasError(pagination) && !hasValidOrGettingPage(pagination);
 }
 
-function safePopulatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
   return populatePaginationFromParent(store, action).pipe(
     map(newAction => newAction || action)
   );
 }
 
 function getObservables<T = any>(
-  store: Store<AppState>,
+  store: Store<GeneralEntityAppState>,
   entityKey: string,
   paginationKey: string,
   paginationAction: PaginatedAction | PaginatedAction[],

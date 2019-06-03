@@ -4,7 +4,7 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser } from '../../../../../../../store/src/types/user.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { PaginatedAction, PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { ListConfig } from '../../list.component.types';
 import { entityFactory, cfUserSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
@@ -33,7 +33,7 @@ function createUserVisibilityFilter(userHasRoles: (user: CfUser) => boolean):
 
 export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>> {
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     action: PaginatedAction,
     listConfigService: ListConfig<APIResource<CfUser>>,
     userHasRoles: (user: CfUser) => boolean

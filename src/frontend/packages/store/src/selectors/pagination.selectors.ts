@@ -1,5 +1,5 @@
 import { compose } from '@ngrx/store';
-import { AppState } from '../app-state';
+import { GeneralEntityAppState, } from '../app-state';
 import { PaginationEntityTypeState } from '../types/pagination.types';
 import { PaginationEntityState, PaginationState } from './../types/pagination.types';
 
@@ -50,7 +50,7 @@ export function getPaginationEntityState(entityKey: string) {
   };
 }
 
-export function getPaginationState(state: AppState) {
+export function getPaginationState<T extends GeneralEntityAppState = GeneralEntityAppState>(state: T) {
   return state.pagination;
 }
 

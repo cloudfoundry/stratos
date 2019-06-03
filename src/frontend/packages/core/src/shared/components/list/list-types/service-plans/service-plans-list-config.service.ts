@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../core/cf-api-svc.types';
 import { getServicePlanName } from '../../../../../features/service-catalog/services-helper';
@@ -97,7 +97,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
 
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     protected datePipe: DatePipe,
     servicesService: ServicesService
   ) {

@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { GetServiceInstances } from '../../../../../../../store/src/actions/service-instances.actions';
 import { GetAllUserProvidedServices } from '../../../../../../../store/src/actions/user-provided-service.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   serviceInstancesSchemaKey,
   serviceInstancesWithSpaceSchemaKey,
@@ -19,7 +19,7 @@ import { IListConfig } from '../../list.component.types';
 
 export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> {
 
-  constructor(store: Store<AppState>, transformEntities: any[], listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<CFAppState>, transformEntities: any[], listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey);
     const marketplaceAction = new GetServiceInstances(null, paginationKey);
     const userProvidedAction = new GetAllUserProvidedServices();

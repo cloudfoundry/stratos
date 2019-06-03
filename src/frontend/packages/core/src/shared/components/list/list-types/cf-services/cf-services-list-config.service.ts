@@ -12,7 +12,7 @@ import { CfServicesDataSource } from './cf-services-data-source';
 import { ITableColumn } from '../../list-table/table.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointsRegisteredEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 
@@ -58,7 +58,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   }];
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private endpointsService: EndpointsService
   ) {

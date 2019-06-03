@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
@@ -166,7 +166,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   }
 
   constructor(
-    protected store: Store<AppState>,
+    protected store: Store<CFAppState>,
     protected datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService

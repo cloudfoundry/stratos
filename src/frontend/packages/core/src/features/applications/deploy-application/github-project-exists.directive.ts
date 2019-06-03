@@ -3,7 +3,7 @@ import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms'
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
 import { CheckProjectExists } from '../../../../../store/src/actions/deploy-applications.actions';
 import { GitSCMService, GitSCMType } from '../../../shared/data-services/scm/scm.service';
@@ -31,7 +31,7 @@ export class GithubProjectExistsDirective implements Validator {
 
   private lastValue = '';
 
-  constructor(private store: Store<AppState>, private scmService: GitSCMService) { }
+  constructor(private store: Store<CFAppState>, private scmService: GitSCMService) { }
 
   // Reduce API calls trying to validate until we have a valid name
   // Must be of the form USER/NAME - where NAME must be at least 2 charts in length

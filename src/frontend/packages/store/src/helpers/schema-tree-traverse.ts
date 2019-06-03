@@ -1,7 +1,7 @@
 import { denormalize } from 'normalizr';
 
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
-import { IRequestDataState } from '../types/entity.types';
+import { BaseRequestDataState } from '../types/entity.types';
 import {
   applicationSchemaKey,
   appStatsSchemaKey,

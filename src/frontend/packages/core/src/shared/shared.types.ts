@@ -1,5 +1,5 @@
 
-import { AppState } from '../../../store/src/app-state';
+import { CFAppState } from '../../../store/src/app-state';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 export class ComponentEntityMonitorConfig {
   constructor(public guid: string, public schema: EntitySchema) { }
@@ -15,7 +15,7 @@ export enum StratosStatus {
   BUSY = 'busy'
 }
 
-export type PartialAppState = Partial<AppState>;
+export type PartialAppState = Partial<CFAppState>;
 
-export type PickAppState = keyof AppState;
+export type PickAppState = keyof CFAppState;
 

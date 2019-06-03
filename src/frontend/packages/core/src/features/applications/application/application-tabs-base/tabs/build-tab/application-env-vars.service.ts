@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { OverrideAppDetails } from '../../../../../../../../store/src/types/deploy-application.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 import {
     PaginationObservables,
@@ -33,7 +33,7 @@ export interface EnvVarStratosProjectSource {
 export class ApplicationEnvVarsHelper {
 
     constructor(
-        private store: Store<AppState>,
+        private store: Store<CFAppState>,
         private paginationMonitorFactory: PaginationMonitorFactory,
 
     ) { }

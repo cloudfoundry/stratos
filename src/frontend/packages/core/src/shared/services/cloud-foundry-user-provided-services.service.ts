@@ -11,7 +11,7 @@ import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../store/src/actions/user-provided-service.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import {
   entityFactory,
   organizationSchemaKey,
@@ -40,7 +40,7 @@ export class CloudFoundryUserProvidedServicesService {
 
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {

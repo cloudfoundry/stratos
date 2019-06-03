@@ -6,7 +6,7 @@ import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, filter, share } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
 import { ApplicationService } from '../../../../application.service';
@@ -38,7 +38,7 @@ export class LogStreamTabComponent implements OnInit {
 
   constructor(
     private applicationService: ApplicationService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private logService: LoggerService
   ) {
     this.filter = this.jsonFilter.bind(this);

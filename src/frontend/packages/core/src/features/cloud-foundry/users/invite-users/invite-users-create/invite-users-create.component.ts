@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { GetOrganization } from '../../../../../../../store/src/actions/organization.actions';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { GetSpace } from '../../../../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   cfUserSchemaKey,
   entityFactory,
@@ -49,7 +49,7 @@ export class InviteUsersCreateComponent implements OnInit {
   private users: StackedInputActionsUpdate;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private entityServiceFactory: EntityServiceFactory,
     private userInviteService: UserInviteService

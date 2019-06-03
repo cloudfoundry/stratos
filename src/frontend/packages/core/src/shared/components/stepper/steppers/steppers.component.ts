@@ -14,7 +14,7 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
 import { IRouterNavPayload, RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
 import { LoggerService } from '../../../../core/logger.service';
 import { SteppersService } from '../steppers.service';
@@ -61,7 +61,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }>;
   constructor(
     private steppersService: SteppersService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private snackBar: MatSnackBar,
     private logger: LoggerService,
     private route: ActivatedRoute

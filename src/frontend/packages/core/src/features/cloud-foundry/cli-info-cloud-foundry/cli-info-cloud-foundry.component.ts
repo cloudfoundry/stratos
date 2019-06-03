@@ -4,7 +4,7 @@ import { BehaviorSubject, combineLatest, Observable, of as observableOf } from '
 import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
@@ -57,7 +57,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   ]>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfEndpointService: CloudFoundryEndpointService,
     @Optional() private cfOrgService: CloudFoundryOrganizationService,

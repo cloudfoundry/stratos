@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { GetAllUserProvidedServices } from '../../../../../../../store/src/actions/user-provided-service.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
@@ -21,7 +21,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { defaultPaginationPageSizeOptionsTable, IListConfig } from '../../list.component.types';
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
-  constructor(cfGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
+  constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
     const action = new GetAllUserProvidedServices(paginationKey, cfGuid, [
       createEntityRelationKey(userProvidedServiceInstanceSchemaKey, spaceWithOrgKey),

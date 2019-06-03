@@ -4,7 +4,7 @@ import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import {
@@ -97,7 +97,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     public cfEndpointService: CloudFoundryEndpointService,
     public cfSpaceService: CloudFoundrySpaceService,
     public cfOrgService: CloudFoundryOrganizationService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private confirmDialog: ConfirmationDialogService,
     favoritesConfigMapper: FavoritesConfigMapper
   ) {

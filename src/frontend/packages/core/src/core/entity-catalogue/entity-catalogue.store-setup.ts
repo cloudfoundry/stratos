@@ -10,7 +10,6 @@ const baseEntities = [
 
 export function getAllEntityStoreKeys() {
   const entities = entityCatalogue.getAllEntitiesTypes();
-  console.log('getting ', entities)
   return [
     ...entities.map(entity => entity.entityKey),
     ...baseEntities

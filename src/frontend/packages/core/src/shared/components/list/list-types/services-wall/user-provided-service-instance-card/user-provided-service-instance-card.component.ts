@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import {
   entityFactory,
   userProvidedServiceInstanceSchemaKey,
@@ -91,7 +91,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {

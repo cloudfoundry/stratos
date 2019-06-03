@@ -7,7 +7,7 @@ import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 
 export interface ServiceTag {
@@ -46,7 +46,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
 
   extraInfo: IServiceExtra;
   tags: AppChip<ServiceTag>[] = [];
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<CFAppState>) {
     super();
   }
 

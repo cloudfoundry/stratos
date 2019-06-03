@@ -9,7 +9,7 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
 import { RowState } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ApplicationService } from '../../application.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   CfAppRoutesListConfigServiceBase
 } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
@@ -18,7 +18,7 @@ import { IListConfig } from '../../../../shared/components/list/list.component.t
 @Injectable()
 export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,

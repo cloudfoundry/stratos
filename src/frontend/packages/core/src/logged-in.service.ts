@@ -7,7 +7,7 @@ import { fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
 import { VerifySession } from '../../store/src/actions/auth.actions';
-import { AppState } from '../../store/src/app-state';
+import { CFAppState } from '../../store/src/app-state';
 import { AuthState } from '../../store/src/reducers/auth.reducer';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
@@ -17,7 +17,7 @@ import { selectDashboardState } from '../../store/src/selectors/dashboard.select
 export class LoggedInService {
   constructor(
     @Inject(DOCUMENT) private document: Document,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private dialog: MatDialog,
     private ngZone: NgZone
   ) {

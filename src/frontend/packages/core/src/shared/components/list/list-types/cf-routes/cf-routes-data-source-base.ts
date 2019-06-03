@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, routeSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
@@ -44,7 +44,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
    * Use the generic route state which enables the route busy ux
    */
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     listConfig: IListConfig<APIResource>,
     cfGuid: string,
     action: PaginatedAction,
@@ -121,7 +121,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
     }
   }
 
-  private static getRowStateManager(store: Store<AppState>, paginationKey: string): {
+  private static getRowStateManager(store: Store<CFAppState>, paginationKey: string): {
     rowStateManager: TableRowStateManager,
     sub: Subscription
   } {
@@ -148,7 +148,7 @@ export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<
 
   // This pattern might be worth pulling out into a more general helper if we use it again.
   private static setUpManager(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     paginationMonitor: PaginationMonitor<APIResource>,
     rowStateManager: TableRowStateManager
   ) {

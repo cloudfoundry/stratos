@@ -1,2 +1,2 @@
-import { AppState } from './../app-state';
-export const recentlyVisitedSelector = (state: AppState) => state.recentlyVisited;
+import { CFAppState } from './../app-state';
+export const recentlyVisitedSelector = (state: CFAppState) => state.recentlyVisited;

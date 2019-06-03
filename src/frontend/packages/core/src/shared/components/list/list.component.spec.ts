@@ -6,7 +6,7 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
@@ -50,7 +50,7 @@ describe('ListComponent', () => {
       };
     }
 
-    function setup(store: AppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
+    function setup(store: CFAppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -63,7 +63,7 @@ describe('ListComponent', () => {
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (
-        iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
+        iStore: Store<CFAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
       ) => {
         const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);

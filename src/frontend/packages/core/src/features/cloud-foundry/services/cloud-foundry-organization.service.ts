@@ -6,7 +6,7 @@ import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators'
 
 import { GetOrganization } from '../../../../../store/src/actions/organization.actions';
 import { DeleteSpace } from '../../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import {
   domainSchemaKey,
   entityFactory,
@@ -63,7 +63,7 @@ export class CloudFoundryOrganizationService {
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,

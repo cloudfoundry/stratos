@@ -2,19 +2,19 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map, pairwise, skipWhile } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { BasePaginatedAction, PaginationEntityState } from '../types/pagination.types';
 
 
-export const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePaginatedAction) =>
+export const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) =>
   store.select(selectPaginationState(action.entityType, action.paginationKey));
 
 /**
  * Using the given action wait until the associated pagination section changes from busy to not busy
  */
-export const createPaginationCompleteWatcher = (store: Store<AppState>, action: BasePaginatedAction): Observable<boolean> =>
+export const createPaginationCompleteWatcher = (store: Store<CFAppState>, action: BasePaginatedAction): Observable<boolean> =>
   fetchPaginationStateFromAction(store, action).pipe(
     map((paginationState: PaginationEntityState) => {
       const pageRequest: ActionState =

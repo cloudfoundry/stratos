@@ -27,7 +27,7 @@ import { AppNameUniqueChecking } from '../../../app-name-unique.directive/app-na
 import { isValidJsonValidator } from '../../../form-validators';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { StepOnNextResult } from '../../stepper/step/step.component';
-import { AppState } from './../../../../../../store/src/app-state';
+import { CFAppState } from './../../../../../../store/src/app-state';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 
@@ -43,7 +43,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     route: ActivatedRoute,
     private upsService: CloudFoundryUserProvidedServicesService,
     public modeService: CsiModeService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) {
     const { endpointId, serviceInstanceId } =
       route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };

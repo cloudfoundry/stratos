@@ -1,5 +1,5 @@
 import { createSelector } from '@ngrx/store';
-import { AppState, IRequestEntityTypeState } from '../app-state';
+import { CFAppState, IRequestEntityTypeState } from '../app-state';
 import { EndpointModel, EndpointState, } from '../types/endpoint.types';
 import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors';
 import { endpointSchemaKey } from '../helpers/entity-factory';
@@ -7,7 +7,7 @@ import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 
 // The custom status section
-export const endpointStatusSelector = (state: AppState): EndpointState => state.endpoints;
+export const endpointStatusSelector = (state: CFAppState): EndpointState => state.endpoints;
 
 // All endpoint request data
 const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);

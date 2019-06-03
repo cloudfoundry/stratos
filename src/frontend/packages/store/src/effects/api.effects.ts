@@ -27,7 +27,7 @@ import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
-import { AppState, IRequestEntityTypeState } from './../app-state';
+import { CFAppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
@@ -60,7 +60,7 @@ export class APIEffect {
     private logger: LoggerService,
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
 
   ) {
 
@@ -75,7 +75,7 @@ export class APIEffect {
     }),
   );
 
-  private doApiRequest(action: ICFAction | PaginatedAction, state: AppState) {
+  private doApiRequest(action: ICFAction | PaginatedAction, state: CFAppState) {
     const actionClone = { ...action };
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;

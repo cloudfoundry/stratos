@@ -14,7 +14,7 @@ import { SharedModule } from '../shared.module';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { ExtensionService } from '../../core/extension/extension-service';
 import { GITHUB_API_URL, getGitHubAPIURL } from '../../core/github.helpers';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -41,7 +41,7 @@ describe('AppNameUniqueDirective', () => {
       ]
     });
   });
-  it('should create an instance', inject([Store, HttpClient], (store: Store<AppState>, http: HttpClient) => {
+  it('should create an instance', inject([Store, HttpClient], (store: Store<CFAppState>, http: HttpClient) => {
     const directive = new AppNameUniqueDirective(store, http);
     expect(directive).toBeTruthy();
   }));

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
 import { DeleteServiceInstance } from '../../../../store/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../store/src/actions/user-provided-service.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { serviceInstancesSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../core/cf-api-svc.types';
@@ -21,7 +21,7 @@ export class ServiceActionHelperService {
 
   constructor(
     private confirmDialog: ConfirmationDialogService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
 
   ) { }
 

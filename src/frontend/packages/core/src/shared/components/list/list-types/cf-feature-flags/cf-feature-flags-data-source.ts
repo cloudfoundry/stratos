@@ -7,7 +7,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, featureFlagSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export const FeatureFlagDescriptions = {
@@ -28,7 +28,7 @@ export const FeatureFlagDescriptions = {
   service_instance_sharing: 'Org and Space Managers can allow service instances to be shared across different spaces.'
 };
 export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatureFlag>> {
-  constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
+  constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
     const action = createCfFeatureFlagFetchAction(cfGuid);
     super({
       store,

@@ -14,7 +14,7 @@ import { AppChip } from '../../../../chips/chips.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 import { OrgUserRoleNames, CfUser, IUserPermissionInOrg } from '../../../../../../../../store/src/types/user.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
 import { organizationSchemaKey, } from '../../../../../../../../store/src/helpers/entity-factory';
@@ -30,7 +30,7 @@ import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-
 export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNames> {
 
   constructor(
-    public store: Store<AppState>,
+    public store: Store<CFAppState>,
     cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService

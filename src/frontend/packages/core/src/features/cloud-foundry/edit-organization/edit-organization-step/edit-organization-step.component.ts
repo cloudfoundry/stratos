@@ -11,7 +11,7 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { entityFactory, organizationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
@@ -47,7 +47,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   cfGuid: string;
   orgGuid: string;
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfOrgService: CloudFoundryOrganizationService
   ) {

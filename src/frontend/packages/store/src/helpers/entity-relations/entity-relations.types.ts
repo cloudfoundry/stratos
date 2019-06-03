@@ -3,8 +3,8 @@ import { Observable } from 'rxjs';
 
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { APIResponse } from '../../actions/request.actions';
-import { AppState, IRequestTypeState } from '../../app-state';
-import { IRequestDataState } from '../../types/entity.types';
+import { IRequestTypeState, GeneralEntityAppState } from '../../app-state';
+import { BaseRequestDataState } from '../../types/entity.types';
 import { IRequestAction } from '../../types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { getPaginationKey } from '../../actions/pagination.actions';
@@ -14,11 +14,11 @@ export class ValidateEntityRelationsConfig {
    * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
    */
   cfGuid: string;
-  store: Store<AppState>;
+  store: Store<GeneralEntityAppState>;
   /**
    * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
    */
-  allEntities: IRequestDataState;
+  allEntities: BaseRequestDataState;
   /**
    * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
    * and quicker

@@ -13,7 +13,7 @@ import { FetchAllDomains } from '../../../../../../store/src/actions/domains.act
 import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GetSpace } from '../../../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   domainSchemaKey,
@@ -69,7 +69,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private applicationService: ApplicationService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {

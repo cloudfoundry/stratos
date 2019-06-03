@@ -4,7 +4,7 @@ import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetAppRoutes } from '../../../../../../../store/src/actions/application-service-routes.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
@@ -30,7 +30,7 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
    * Use the generic route state which enables the route busy ux
    */
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,
@@ -54,7 +54,7 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
   }
 
   private setupBaseList(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     getRoutesAction: GetAppRoutes | PaginatedAction,
     genericRouteState: boolean) {

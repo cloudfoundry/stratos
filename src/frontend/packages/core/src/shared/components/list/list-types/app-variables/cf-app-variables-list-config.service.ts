@@ -5,7 +5,7 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { AppVariablesDelete } from '../../../../../../../store/src/actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../../../../../store/src/actions/application.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { EntityMonitor } from '../../../../monitors/entity-monitor';
@@ -139,7 +139,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   getMultiFiltersConfigs = () => [];
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     private confirmDialog: ConfirmationDialogService
   ) {

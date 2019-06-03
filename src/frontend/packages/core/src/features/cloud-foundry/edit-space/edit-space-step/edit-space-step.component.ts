@@ -10,7 +10,7 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { UpdateSpace } from '../../../../../../store/src/actions/space.actions';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
@@ -34,7 +34,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   spaceName: string;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

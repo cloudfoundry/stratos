@@ -9,7 +9,7 @@ import { IListConfig } from '../../list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { cfUserSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
@@ -17,7 +17,7 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
     cfGuid: string,
     orgGuid: string,
     spaceGuid: string,
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     userPerms: CurrentUserPermissionsService,
     listConfig?: IListConfig<APIResource>) {
     const paginationKey = cfUserSchemaKey + '-' + orgGuid;

@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../store/src/app-state';
+import { CFAppState } from '../../store/src/app-state';
 import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
@@ -86,7 +86,7 @@ export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
   return {
     provide: CfUserService,
     useFactory: (
-      store: Store<AppState>,
+      store: Store<CFAppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
       entityServiceFactory: EntityServiceFactory,
       http: Http
@@ -106,7 +106,7 @@ export function generateTestCfServiceProvider() {
   return {
     provide: CloudFoundryService,
     useFactory: (
-      store: Store<AppState>,
+      store: Store<CFAppState>,
     ) => {
       const appService = new CloudFoundryService(store);
       return appService;

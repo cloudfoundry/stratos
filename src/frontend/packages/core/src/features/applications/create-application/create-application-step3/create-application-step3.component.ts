@@ -10,7 +10,7 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 import { createGetApplicationAction } from '../../application.service';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { CreateNewApplicationState } from '../../../../../../store/src/types/create-application.types';
 import { RequestInfoState, getDefaultRequestState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -44,7 +44,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   setDomainHost: FormGroup;
 
-  constructor(private store: Store<AppState>, private entityServiceFactory: EntityServiceFactory) {
+  constructor(private store: Store<CFAppState>, private entityServiceFactory: EntityServiceFactory) {
     this.setDomainHost = new FormGroup({
       domain: new FormControl('', [Validators.required]),
       host: new FormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),

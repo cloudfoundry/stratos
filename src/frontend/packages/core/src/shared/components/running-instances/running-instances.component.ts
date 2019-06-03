@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { GetAppStatsAction } from '../../../../../store/src/actions/app-metadata.actions';
 import { entityFactory, appStatsSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 
@@ -23,7 +23,7 @@ export class RunningInstancesComponent implements OnInit {
   public runningInstances$: Observable<number>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) { }
 

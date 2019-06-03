@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { GetAllServices } from '../../../../../../../store/src/actions/service.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey, entityFactory, serviceSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
@@ -15,7 +15,7 @@ import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-cat
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
-  constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<CFAppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey);
     super({
       store,

@@ -9,7 +9,7 @@ import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
     noEntries: 'There are no applications'
   };
 
-  constructor(store: Store<AppState>, private activeRouteCfCell: ActiveRouteCfCell, entityServiceFactory: EntityServiceFactory) {
+  constructor(store: Store<CFAppState>, private activeRouteCfCell: ActiveRouteCfCell, entityServiceFactory: EntityServiceFactory) {
     super();
     this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this, entityServiceFactory);
   }

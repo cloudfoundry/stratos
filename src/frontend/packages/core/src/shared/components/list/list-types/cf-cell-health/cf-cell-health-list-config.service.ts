@@ -10,7 +10,7 @@ import {
   TableCellBooleanIndicatorComponent
 } from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   CloudFoundryCellService
 } from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
@@ -38,7 +38,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     showText: true
   };
 
-  constructor(store: Store<AppState>, cloudFoundryCellService: CloudFoundryCellService, private datePipe: DatePipe) {
+  constructor(store: Store<CFAppState>, cloudFoundryCellService: CloudFoundryCellService, private datePipe: DatePipe) {
     super();
     const action = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId);
     this.dataSource = new CfCellHealthDataSource(store, this, action);

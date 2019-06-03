@@ -1,6 +1,6 @@
 import { compose } from '@ngrx/store';
 
-import { AppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
+import { IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState, GeneralEntityAppState } from '../app-state';
 import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 
@@ -93,11 +93,11 @@ export function getRequestEntityKey<T>(entityKey: string) {
   };
 }
 
-export function getAPIRequestInfoState<T>(state: AppState<T>) {
+export function getAPIRequestInfoState<T>(state: GeneralEntityAppState) {
   return state.request;
 }
 
-export function getAPIRequestDataState<T>(state: AppState<T>) {
+export function getAPIRequestDataState<T>(state: GeneralEntityAppState) {
   return state.requestData;
 }
 

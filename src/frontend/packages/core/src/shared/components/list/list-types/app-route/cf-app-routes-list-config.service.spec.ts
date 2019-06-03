@@ -9,7 +9,7 @@ import { ApplicationService } from '../../../../../features/applications/applica
 import { SharedModule } from '../../../../shared.module';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { appReducers } from '../../../../../../../store/src/reducers.module';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
@@ -25,7 +25,7 @@ describe('CfAppRoutesListConfigService', () => {
         {
           provide: CfAppRoutesListConfigService,
           useFactory: (
-            store: Store<AppState>,
+            store: Store<CFAppState>,
             appService: ApplicationService,
             confirmDialog: ConfirmationDialogService,
             datePipe: DatePipe,

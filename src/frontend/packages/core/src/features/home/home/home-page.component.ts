@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
+import { CFAppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
 import { IUserFavoritesGroups } from '../../../../../store/src/types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -26,7 +26,7 @@ export class HomePageComponent {
 
   constructor(
     endpointsService: EndpointsService,
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     logger: LoggerService,
     public userFavoriteManager: UserFavoriteManager
   ) {

@@ -5,14 +5,14 @@ import { debounceTime, distinctUntilChanged, publishReplay, refCount, tap } from
 import { InternalEventMonitor } from './internal-event.monitor';
 import { Injectable, NgZone } from '@angular/core';
 import { InternalEventsState } from '../../../../store/src/types/internal-events.types';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { internalEventStateSelector } from '../../../../store/src/selectors/internal-events.selectors';
 @Injectable()
 export class InternalEventMonitorFactory {
 
   private events$: Observable<InternalEventsState>;
 
-  constructor(private store: Store<AppState>, private ngZone: NgZone) {
+  constructor(private store: Store<CFAppState>, private ngZone: NgZone) {
 
     this.events$ = store.select(internalEventStateSelector).pipe(
       distinctUntilChanged(),

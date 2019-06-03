@@ -5,7 +5,7 @@ import { buffer, debounceTime, filter, map } from 'rxjs/operators';
 
 import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 
@@ -36,7 +36,7 @@ export interface SideNavItem extends ISubHeaderTabs {
 export class SideNavComponent implements OnInit {
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     @Inject(Customizations) public customizations: CustomizationsMetadata
   ) { }
   @Input() set iconMode(isIconMode: boolean) {

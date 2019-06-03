@@ -10,7 +10,7 @@ import {
 import { GetAppSummaryAction } from '../actions/app-metadata.actions';
 import { ASSIGN_ROUTE_SUCCESS } from '../actions/application-service-routes.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../actions/application.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
 
@@ -19,7 +19,7 @@ export class AppEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) { }
 
   @Effect({ dispatch: false }) updateSummary$ = this.actions$.pipe(

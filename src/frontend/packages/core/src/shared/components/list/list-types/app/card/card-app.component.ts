@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
@@ -35,7 +35,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   public favorite: UserFavorite<IAppFavMetadata>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appStateService: ApplicationStateService,
     private favoritesConfigMapper: FavoritesConfigMapper,
 

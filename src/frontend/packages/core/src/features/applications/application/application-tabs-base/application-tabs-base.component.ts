@@ -5,7 +5,7 @@ import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'r
 
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
@@ -58,7 +58,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   constructor(
     public applicationService: ApplicationService,
     @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private endpointsService: EndpointsService,
     private ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,

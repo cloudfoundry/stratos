@@ -12,7 +12,7 @@ import {
   GetAppStatsAction,
   GetAppSummaryAction,
 } from './../actions/app-metadata.actions';
-import { AppState } from './../app-state';
+import { CFAppState } from './../app-state';
 
 
 
@@ -22,7 +22,7 @@ export class UpdateAppEffects {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) {
   }
 

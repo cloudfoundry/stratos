@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 
 import { GetAppEnvVarsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../../../store/src/actions/app-variables.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
@@ -29,7 +29,7 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   public appGuid: string;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     listConfig: IListConfig<ListAppEnvVar>
   ) {

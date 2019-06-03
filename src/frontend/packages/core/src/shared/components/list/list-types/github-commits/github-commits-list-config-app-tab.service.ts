@@ -22,7 +22,7 @@ import {
   FetchBranchesForProject
 } from '../../../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
@@ -101,7 +101,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private scm: GitSCM;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     datePipe: DatePipe,
     private scmService: GitSCMService,
     private applicationService: ApplicationService,

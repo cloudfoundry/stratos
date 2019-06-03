@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   appStatsSchemaKey,
@@ -20,7 +20,7 @@ import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     cfGuid: string,
     appGuid: string,
     listConfig: IListConfig<ListAppInstance>

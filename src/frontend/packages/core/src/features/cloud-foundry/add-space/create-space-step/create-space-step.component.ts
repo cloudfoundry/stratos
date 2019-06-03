@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
 import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -26,7 +26,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }; }
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace

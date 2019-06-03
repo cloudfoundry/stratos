@@ -4,7 +4,7 @@ import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { UsersRolesSetOrg } from '../../../../../../../../store/src/actions/users-roles.actions';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { selectUsersRolesOrgGuid } from '../../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../core/cf-api.types';
@@ -28,7 +28,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
   orgGuidChangedSub: Subscription;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfRolesService: CfRolesService,
   ) { super(); }

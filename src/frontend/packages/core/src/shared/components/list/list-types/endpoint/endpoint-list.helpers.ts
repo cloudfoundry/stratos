@@ -7,7 +7,7 @@ import { map, pairwise } from 'rxjs/operators';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
@@ -44,7 +44,7 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
 export class EndpointListHelper {
   private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private dialog: MatDialog,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { map, take } from 'rxjs/operators';
 
 import { ActionHistoryActions, ActionHistoryDump } from '../actions/action-history.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 
 
 
@@ -13,7 +13,7 @@ export class ActionHistoryEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) { }
 
   @Effect({ dispatch: false }) dumpActionHistory$ = this.actions$.pipe(

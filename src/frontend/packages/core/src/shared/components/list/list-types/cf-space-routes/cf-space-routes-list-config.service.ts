@@ -11,7 +11,7 @@ import { DatePipe } from '@angular/common';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
   getDataSource: () => CfSpaceRoutesDataSource;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     confirmDialog: ConfirmationDialogService,
     cfSpaceService: CloudFoundrySpaceService,
     datePipe: DatePipe,
@@ -41,7 +41,7 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
   }
 
   private setupList(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     cfSpaceService: CloudFoundrySpaceService, ) {
     this.dataSource = new CfSpaceRoutesDataSource(
       store,

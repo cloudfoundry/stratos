@@ -15,7 +15,7 @@ import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.se
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { GitRepo, GitCommit } from '../../../../../../../../store/src/types/git.types';
 import {
   gitRepoSchemaKey,
@@ -36,7 +36,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types
     {
       provide: ListConfig,
       useFactory: (
-        store: Store<AppState>,
+        store: Store<CFAppState>,
         datePipe: DatePipe,
         scmService: GitSCMService,
         applicationService: ApplicationService,
@@ -76,7 +76,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
   constructor(
     private applicationService: ApplicationService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private snackBar: MatSnackBar,
     private scmService: GitSCMService

@@ -32,7 +32,7 @@ import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
@@ -59,7 +59,7 @@ export class EndpointsEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) { }
 
   @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(

@@ -14,7 +14,7 @@ import {
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../store/src/effects/system.effects';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -67,7 +67,7 @@ export class ConnectEndpointService {
   private connectDelay = 1000;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private endpointsService: EndpointsService,
     public config: ConnectEndpointConfig,
   ) {

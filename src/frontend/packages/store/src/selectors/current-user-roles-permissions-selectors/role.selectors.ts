@@ -1,6 +1,6 @@
 import { compose } from '@ngrx/store';
 
-import { AppState } from '../../app-state';
+import { CFAppState } from '../../app-state';
 import {
   IAllCfRolesState,
   ICfRolesState,
@@ -17,7 +17,7 @@ import { PermissionValues, PermissionStrings, ScopeStrings } from '../../../../c
 
 
 
-export const selectCurrentUserRolesState = (state: AppState) => state.currentUserRoles;
+export const selectCurrentUserRolesState = (state: CFAppState) => state.currentUserRoles;
 
 export const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => state.internal;
 export const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: IStratosRolesState) => state[role] || false;

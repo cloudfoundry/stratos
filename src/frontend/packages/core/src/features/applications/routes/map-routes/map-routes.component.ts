@@ -10,7 +10,7 @@ import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-t
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { ApplicationService } from '../../application.service';
 import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -34,7 +34,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   @Input() selectedRoute$: BehaviorSubject<APIResource>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     listConfig: ListConfig<APIResource>,
     private paginationMonitorFactory: PaginationMonitorFactory

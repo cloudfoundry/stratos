@@ -4,12 +4,12 @@ import { Store } from '@ngrx/store';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ServicesService } from '../services.service';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 
 
 
 export function servicesServiceFactory(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   paginationMonitorFactory: PaginationMonitorFactory
@@ -32,7 +32,7 @@ export function servicesServiceFactory(
 })
 export class ServiceBaseComponent {
 
-  constructor(private servicesService: ServicesService, private store: Store<AppState>) {
+  constructor(private servicesService: ServicesService, private store: Store<CFAppState>) {
   }
 
 

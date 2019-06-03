@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
 import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { gitCommitSchemaKey, CFEntitySchema } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
@@ -12,7 +12,7 @@ import { IListConfig } from '../../list.component.types';
 
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {
-  store: Store<AppState>;
+  store: Store<CFAppState>;
 
   /**
    * Creates an instance of GithubCommitsDataSource.
@@ -20,7 +20,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
    * @param sha Branch name, tag, etc
    */
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     listConfig: IListConfig<APIResource<GitCommit>>,
     scm: GitSCM,
     projectName: string,

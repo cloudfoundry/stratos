@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { GetAllUsersAsAdmin } from '../../../../../../store/src/actions/users.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { waitForCFPermissions } from '../../cf.helpers';
@@ -20,7 +20,7 @@ export class CfAdminAddUserWarningComponent {
   show$: Observable<boolean>;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     cfUserService: CfUserService
   ) {

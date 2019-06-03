@@ -28,7 +28,7 @@ import {
 } from '../../../../../../store/src/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../../../store/src/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../../../store/src/actions/space.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
@@ -95,7 +95,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private csiGuidsService: CsiGuidsService,
     private entityServiceFactory: EntityServiceFactory,

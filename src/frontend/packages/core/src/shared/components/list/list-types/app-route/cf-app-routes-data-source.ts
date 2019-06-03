@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { IRoute } from '../../../../../core/cf-api.types';
@@ -17,7 +17,7 @@ export class CfAppRoutesDataSource extends CfRoutesDataSourceBase implements ILi
    * Use the generic route state which enables the route busy ux
    */
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     action: PaginatedAction,
     listConfig: IListConfig<APIResource>,

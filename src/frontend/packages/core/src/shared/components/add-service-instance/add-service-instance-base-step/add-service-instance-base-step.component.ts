@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { TileConfigManager } from '../../tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from './../../tile/tile-selector.types';
 import { SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
@@ -53,7 +53,7 @@ export class AddServiceInstanceBaseStepComponent {
       }));
     }
   }
-  constructor(private route: ActivatedRoute, private router: Router, public store: Store<AppState>) {
+  constructor(private route: ActivatedRoute, private router: Router, public store: Store<CFAppState>) {
     this.bindApp = !!this.route.snapshot.data.bind;
   }
 }

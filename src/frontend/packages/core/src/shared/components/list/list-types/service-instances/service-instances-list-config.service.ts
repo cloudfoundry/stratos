@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
@@ -19,7 +19,7 @@ import { ServiceInstancesDataSource } from './service-instances-data-source';
 export class ServiceInstancesListConfigService extends CfServiceInstancesListConfigBase {
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     servicesService: ServicesService,
     datePipe: DatePipe,
     currentUserPermissionsService: CurrentUserPermissionsService,

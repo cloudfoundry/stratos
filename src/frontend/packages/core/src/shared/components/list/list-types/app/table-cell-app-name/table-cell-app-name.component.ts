@@ -4,7 +4,7 @@ import { BREADCRUMB_URL_PARAM } from '../../../../page-header/page-header.types'
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../store/src/types/routing.type';
 
 @Component({
@@ -15,7 +15,7 @@ import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../st
 export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
   public appLinkUrlParam$: Observable<any>;
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<CFAppState>) {
     super();
   }
 

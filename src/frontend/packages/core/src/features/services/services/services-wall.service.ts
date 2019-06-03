@@ -6,7 +6,7 @@ import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 import { IService } from '../../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { serviceSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -18,7 +18,7 @@ export class ServicesWallService {
   services$: Observable<APIResource<IService>[]>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.services$ = this.initServicesObservable();

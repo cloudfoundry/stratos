@@ -27,7 +27,7 @@ import {
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   PaginatedAction,
@@ -117,7 +117,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // ------------- Private
   private externalDestroy: () => void;
 
-  protected store: Store<AppState>;
+  protected store: Store<CFAppState>;
   public action: PaginatedAction | PaginatedAction[];
   public masterAction: PaginatedAction;
   protected sourceScheme: EntitySchema;

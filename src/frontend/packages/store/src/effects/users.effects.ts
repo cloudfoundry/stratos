@@ -9,7 +9,7 @@ import { EntityServiceFactory } from '../../../core/src/core/entity-service-fact
 import { PaginationMonitorFactory } from '../../../core/src/shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
 import { GET_CF_USERS_AS_NON_ADMIN, GetAllUsersAsNonAdmin } from '../actions/users.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { cfUserSchemaKey, endpointSchemaKey, entityFactory, organizationSchemaKey } from '../helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
 import { createPaginationCompleteWatcher, fetchPaginationStateFromAction } from '../helpers/store-helpers';
@@ -26,7 +26,7 @@ export class UsersEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityServiceFactory: EntityServiceFactory,
   ) { }

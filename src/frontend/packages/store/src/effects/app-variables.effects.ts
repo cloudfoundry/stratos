@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { AppVariables, AppVariablesUpdate } from '../actions/app-variables.actions';
 import { UpdateExistingApplication } from '../actions/application.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 
 
 
@@ -15,7 +15,7 @@ export class AppVariablesEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) { }
 
   @Effect() apiRequestStart$ = this.actions$.pipe(

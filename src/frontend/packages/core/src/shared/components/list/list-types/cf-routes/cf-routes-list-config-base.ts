@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { DeleteRoute, UnmapRoute } from '../../../../../../../store/src/actions/route.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -212,7 +212,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
    * @param [removeEntityOnUnmap=false] On unmap remove the entity from the list
    */
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private confirmDialog: ConfirmationDialogService,
     private cfGuid: string,
     private datePipe: DatePipe,

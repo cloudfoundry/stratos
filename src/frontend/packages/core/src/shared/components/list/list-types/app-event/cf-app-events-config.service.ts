@@ -10,7 +10,7 @@ import { TableCellEventDetailComponent } from './table-cell-event-detail/table-c
 import { TableCellEventTimestampComponent } from './table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { TableCellEventTypeComponent } from './table-cell-event-type/table-cell-event-type.component';
 import { EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
@@ -36,7 +36,7 @@ export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements 
     noEntries: 'There are no events'
   };
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService) {
+  constructor(private store: Store<CFAppState>, private appService: ApplicationService) {
     super();
     this.eventSource = new CfAppEventsDataSource(
       this.store,

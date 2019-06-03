@@ -28,7 +28,7 @@ import {
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServicePlan,
 } from '../../../../../../store/src/actions/create-service-instance.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../core/cf-api-svc.types';
@@ -68,7 +68,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     activatedRoute: ActivatedRoute,
     private componentFactoryResolver: ComponentFactoryResolver,

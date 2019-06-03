@@ -6,7 +6,7 @@ import { populateServicePlanExtraTyped } from '../../../../../features/service-c
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey, createEntityRelationKey
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -23,7 +23,7 @@ export class ServicePlansDataSource extends ListDataSource<APIResource<IServiceP
   constructor(
     cfGuid: string,
     serviceGuid: string,
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     listConfig: IListConfig<APIResource>
   ) {
 

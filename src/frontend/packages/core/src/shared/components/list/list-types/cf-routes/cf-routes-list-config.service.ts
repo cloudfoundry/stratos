@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
@@ -29,7 +29,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     confirmDialog: ConfirmationDialogService,
     cfService: CloudFoundryEndpointService,
     datePipe: DatePipe,
@@ -53,7 +53,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
   }
 
   private setupList(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     cfService: CloudFoundryEndpointService,
     cfOrgSpaceService: CfOrgSpaceDataService) {
     this.dataSource = new CfRoutesDataSource(

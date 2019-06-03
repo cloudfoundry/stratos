@@ -6,7 +6,7 @@ import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from '
 import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../../../store/src/actions/application.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
@@ -41,7 +41,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,

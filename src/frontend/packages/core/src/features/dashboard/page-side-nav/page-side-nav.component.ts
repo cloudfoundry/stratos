@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 import { TabNavService } from '../../../../tab-nav.service';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 
 export interface IPageSideNavTab {
@@ -33,7 +33,7 @@ export class PageSideNavComponent implements OnInit {
 
   constructor(
     public tabNavService: TabNavService,
-    private store: Store<Pick<AppState, 'dashboard'>>
+    private store: Store<Pick<CFAppState, 'dashboard'>>
   ) { }
 
   ngOnInit() {

@@ -6,7 +6,7 @@ import {
   CfAppRoutesListConfigServiceBase
 } from './cf-app-routes-list-config-base';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -19,7 +19,7 @@ export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBa
 
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     appService: ApplicationService,
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,
@@ -30,7 +30,7 @@ export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBa
     this.setupList(store, appService);
   }
 
-  private setupList(store: Store<AppState>, appService: ApplicationService) {
+  private setupList(store: Store<CFAppState>, appService: ApplicationService) {
     const listActionAddRoute: IGlobalListAction<APIResource> = {
       action: () => {
         appService.application$.pipe(

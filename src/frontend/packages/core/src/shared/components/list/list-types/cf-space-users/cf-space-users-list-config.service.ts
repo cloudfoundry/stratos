@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { CfUser } from '../../../../../../../store/src/types/user.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
@@ -16,7 +16,7 @@ import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service
 @Injectable()
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     cfSpaceService: CloudFoundrySpaceService,
     cfOrgService: CloudFoundryOrganizationService,
     cfUserService: CfUserService,

@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription 
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../../store/src/selectors/api.selectors';
 import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
@@ -77,7 +77,7 @@ export class DeployApplicationDeployer {
   private currentFileTransfer;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
   ) { }
 

@@ -7,7 +7,7 @@ import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/ope
 import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../actions/users-roles.actions';
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../actions/users.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
@@ -23,7 +23,7 @@ export class UsersRolesEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
   ) { }
 
   @Effect() clearEntityUpdates$ = this.actions$.pipe(

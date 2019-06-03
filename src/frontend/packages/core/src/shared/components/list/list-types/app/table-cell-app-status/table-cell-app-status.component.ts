@@ -1,4 +1,4 @@
-import { AppState } from './../../../../../../../../store/src/app-state';
+import { CFAppState } from './../../../../../../../../store/src/app-state';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -33,7 +33,7 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   public initialStateOnly = false
     ;
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appStateService: ApplicationStateService,
 
 

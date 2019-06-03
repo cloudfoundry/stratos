@@ -13,7 +13,7 @@ import {
     UpdateUserPasswordAction,
     UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo, userProfileStoreNames } from '../types/user-profile.types';
 import {
@@ -36,7 +36,7 @@ export class UserProfileEffect {
 
     constructor(
         private actions$: Actions,
-        private store: Store<AppState>,
+        private store: Store<CFAppState>,
         private httpClient: HttpClient,
     ) { }
 

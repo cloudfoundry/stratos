@@ -1,6 +1,6 @@
 import { IRequestEntityTypeState } from '../app-state';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { IRequestDataState } from './entity.types';
+import { BaseRequestDataState } from './entity.types';
 
 export interface EntityInfo<T = any> {
   entityRequestInfo: RequestInfoState;
@@ -35,7 +35,7 @@ export interface NormalizedResponse<T = any> {
   result: string[];
 }
 
-export type ActionMergeFunction = (oldEntities: IRequestDataState, newEntities: NormalizedResponseEntities)
+export type ActionMergeFunction = (oldEntities: BaseRequestDataState, newEntities: NormalizedResponseEntities)
   => NormalizedResponseEntities;
 export interface NormalizedResponseEntities {
   [key: string]: string;

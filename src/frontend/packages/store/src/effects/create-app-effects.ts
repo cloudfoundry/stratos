@@ -9,7 +9,7 @@ import { environment } from '../../../core/src/environments/environment.prod';
 import { AppNameFree, AppNameTaken, CHECK_NAME, IsNewAppNameFree } from '../actions/create-applications-page.actions';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
-import { AppState } from './../app-state';
+import { CFAppState } from './../app-state';
 
 
 
@@ -19,7 +19,7 @@ export class CreateAppPageEffects {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) {
     this.proxyAPIVersion = environment.proxyAPIVersion;
     this.cfAPIVersion = environment.cfAPIVersion;
@@ -54,4 +54,4 @@ export class CreateAppPageEffects {
     }));
 }
 
-export const selectNewAppState = (state: AppState): CreateNewApplicationState => state.createApplication;
+export const selectNewAppState = (state: CFAppState): CreateNewApplicationState => state.createApplication;

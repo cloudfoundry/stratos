@@ -3,7 +3,7 @@ import { Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -38,7 +38,7 @@ export interface StratosActionMetadata {
   link: string;
   icon: string;
   iconFont?: string;
-  visible?: (store: Store<AppState>) => Observable<boolean>;
+  visible?: (store: Store<CFAppState>) => Observable<boolean>;
   visible$?: Observable<boolean>;
 }
 

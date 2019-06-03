@@ -1,4 +1,4 @@
-import { AppState } from '../app-state';
+import { CFAppState } from '../app-state';
 import { Action } from '@ngrx/store';
 import { LoggerAction, LoggerDebugAction } from '../actions/log.actions';
 

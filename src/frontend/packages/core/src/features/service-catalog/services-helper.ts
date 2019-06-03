@@ -6,7 +6,7 @@ import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operat
 import { GetServiceBroker } from '../../../../store/src/actions/service-broker.actions';
 import { GetServiceInstances } from '../../../../store/src/actions/service-instances.actions';
 import { GetService, GetServicePlansForService } from '../../../../store/src/actions/service.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../store/src/app-state';
 import {
   entityFactory,
   organizationSchemaKey,
@@ -80,7 +80,7 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
   return !!cfId && !!serviceInstanceId;
 };
 
-export const getServiceInstancesInCf = (cfGuid: string, store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
+export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
   const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
   return getPaginationObservables<APIResource<IServiceInstance>>({
     store,
@@ -93,7 +93,7 @@ export const fetchServiceInstancesCount = (
   cfGuid: string,
   orgGuid: string = null,
   spaceGuid: string = null,
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   paginationMonitorFactory: PaginationMonitorFactory): Observable<number> => {
   const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
   const uniqueKey = spaceGuid || orgGuid || cfGuid;
@@ -111,7 +111,7 @@ export const fetchServiceInstancesCount = (
 export const getServicePlans = (
   service$: Observable<APIResource<IService>>,
   cfGuid: string,
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<APIResource<IServicePlan>[]> => {
   return service$.pipe(

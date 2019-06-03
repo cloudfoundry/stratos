@@ -10,7 +10,7 @@ import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types
 import { MetricsChartManager } from './metrics.component.manager';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { ChartSeries, IMetrics, MetricResultTypes, MetricsFilterSeries } from '../../../../../store/src/types/base-metric.types';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 
 
@@ -60,7 +60,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   public isFetching$: Observable<boolean>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
   private sort(metricsArray: ChartSeries[]) {

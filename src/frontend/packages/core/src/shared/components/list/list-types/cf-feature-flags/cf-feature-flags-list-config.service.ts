@@ -10,7 +10,7 @@ import { CfFeatureFlagsDataSource, FeatureFlagDescriptions } from './cf-feature-
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResource<IFeatureFlag>> {
@@ -61,7 +61,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
       cellFlex: '1'
     }
   ];
-  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor(private store: Store<CFAppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfFeatureFlagsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }

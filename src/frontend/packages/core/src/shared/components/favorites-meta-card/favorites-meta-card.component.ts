@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import {
   RemoveUserFavoriteAction,
 } from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
@@ -97,7 +97,7 @@ export class FavoritesMetaCardComponent {
     }
   }
 
-  constructor(private store: Store<AppState>, private confirmDialog: ConfirmationDialogService) { }
+  constructor(private store: Store<CFAppState>, private confirmDialog: ConfirmationDialogService) { }
 
   public setConfirmation(prettyName: string, favorite: UserFavorite<IFavoriteMetadata>) {
     this.confirmation = new ConfirmationDialogConfig(

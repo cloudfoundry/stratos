@@ -6,7 +6,7 @@ import { UserProfileService } from '../user-profile.service';
 import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
 import { map, first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
@@ -48,7 +48,7 @@ export class ProfileInfoComponent implements OnInit {
 
   constructor(
     private userProfileService: UserProfileService,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private confirmDialog: ConfirmationDialogService,
   ) {
     this.userProfile$ = userProfileService.userProfile$;

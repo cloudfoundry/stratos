@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../store/src/app-state';
 import { UtilsService } from '../../../../core/utils.service';
 import { StratosStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';
@@ -32,7 +32,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
 
-  constructor(private utils: UtilsService, private store: Store<AppState>) { }
+  constructor(private utils: UtilsService, private store: Store<CFAppState>) { }
 
   ngOnInit() {
     this.format();

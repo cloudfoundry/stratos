@@ -11,7 +11,7 @@ import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/tabl
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { selectUsersRolesRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
 
 
@@ -71,7 +71,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   }];
   initialised = new BehaviorSubject<boolean>(false);
 
-  constructor(private store: Store<AppState>, cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
+  constructor(private store: Store<CFAppState>, cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
     this.store.select(selectUsersRolesRoles).pipe(
       first()
     ).subscribe(newRoles => {

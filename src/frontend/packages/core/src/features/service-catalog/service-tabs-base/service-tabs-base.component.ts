@@ -6,7 +6,7 @@ import { map, publishReplay, refCount } from 'rxjs/operators';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ServicesService } from '../services.service';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { AppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
@@ -46,7 +46,7 @@ export class ServiceTabsBaseComponent {
     }
   ];
 
-  constructor(private servicesService: ServicesService, private store: Store<AppState>) {
+  constructor(private servicesService: ServicesService, private store: Store<CFAppState>) {
     this.hasVisiblePlans$ = this.servicesService.servicePlans$.pipe(
       map(p => p.length > 0));
     this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;

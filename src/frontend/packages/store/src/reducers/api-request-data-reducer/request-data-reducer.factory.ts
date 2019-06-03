@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
 import { deepMergeState } from '../../helpers/reducer.helper';
 import { IFlatTree } from '../../helpers/schema-tree-traverse';
-import { IRequestDataState } from '../../types/entity.types';
+import { BaseRequestDataState } from '../../types/entity.types';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { IRequestArray } from '../api-request-reducer/types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -12,8 +12,8 @@ import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/en
 
 export function requestDataReducerFactory(actions: IRequestArray) {
   const successAction = actions[1];
-  const defaultState = getDefaultStateFromEntityCatalogue<IRequestDataState>();
-  return function entitiesReducer(state = defaultState, action: Action): IRequestDataState {
+  const defaultState = getDefaultStateFromEntityCatalogue<BaseRequestDataState>();
+  return function entitiesReducer(state = defaultState, action: Action): BaseRequestDataState {
     switch (action.type) {
       case successAction:
         const success = action as ISuccessRequestAction;
@@ -32,20 +32,20 @@ export function requestDataReducerFactory(actions: IRequestArray) {
   };
 }
 
-function cleanStateFromFlatTree(state: IRequestDataState, action: SetTreeDeleted): IRequestDataState {
+function cleanStateFromFlatTree(state: BaseRequestDataState, action: SetTreeDeleted): BaseRequestDataState {
   const { tree } = action;
   return Object.keys(tree).reduce(reduceTreeToState(tree), { ...state });
 }
 
 function reduceTreeToState(tree: IFlatTree) {
-  return (state: IRequestDataState, entityKey: string) => {
+  return (state: BaseRequestDataState, entityKey: string) => {
     const ids = tree[entityKey];
     return Array.from(ids).reduce(reduceIdsToState(entityKey), state);
   };
 }
 
 function reduceIdsToState(entityKey: string) {
-  return (state: IRequestDataState, id: string) => {
+  return (state: BaseRequestDataState, id: string) => {
     const {
       [id]: omit,
       ...newState
@@ -59,7 +59,7 @@ function reduceIdsToState(entityKey: string) {
 }
 
 function deleteEntity(state, entityKey, guid) {
-  const newState = {} as IRequestDataState;
+  const newState = {} as BaseRequestDataState;
   for (const entityTypeKey in state) {
     if (entityTypeKey === entityKey) {
       newState[entityTypeKey] = {};
