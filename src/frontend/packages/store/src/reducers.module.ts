@@ -23,7 +23,6 @@ import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 import { getDashboardStateSessionId } from './helpers/store-helpers';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -102,4 +101,4 @@ const imports = environment.production ? [
 @NgModule({
   imports
 })
-export class AppReducersModule {}
+export class AppReducersModule { }

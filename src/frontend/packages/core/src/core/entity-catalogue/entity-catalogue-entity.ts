@@ -4,7 +4,8 @@ import {
   EntityCatalogueSchemas,
   IStratosEndpointDefinition,
   IStratosEntityBuilder,
-  IStratosEndpointWithoutSchemaDefinition
+  IStratosEndpointWithoutSchemaDefinition,
+  IStratosBaseEntityDefinition
 } from './entity-catalogue.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/src/app-state';
@@ -15,22 +16,21 @@ import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers
 import { endpointEntitySchema } from '../../base-entity-schemas';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
-import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   public readonly entityKey: string;
-  public readonly definition: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition;
+  public readonly definition: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition | IStratosBaseEntityDefinition;
   public readonly isEndpoint: boolean;
   // TODO we should do some typing magic to hide this from extensions - nj
-  // I don't think this is needed.
+  // I don't think this is needed, worth checking.
   public readonly isStratosType: boolean;
   public readonly hasBuilder: boolean;
   constructor(
-    entity: IStratosEntityDefinition | IStratosEndpointDefinition,
+    definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
     public builder?: IStratosEntityBuilder<T, Y>
   ) {
-    this.definition = this.populateEntity(entity);
-    const baseEntity = entity as IStratosEntityDefinition;
+    this.definition = this.populateEntity(definition);
+    const baseEntity = definition as IStratosEntityDefinition;
     this.isEndpoint = !this.isStratosType && !baseEntity.endpoint;
     this.hasBuilder = !!builder;
     this.entityKey = this.isEndpoint ?
@@ -38,7 +38,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, this.isStratosType ? '' : baseEntity.endpoint.type);
   }
 
-  private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition) {
+  private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition) {
     const schema = entity.schema instanceof EntitySchema ? {
       default: entity.schema
     } : entity.schema;

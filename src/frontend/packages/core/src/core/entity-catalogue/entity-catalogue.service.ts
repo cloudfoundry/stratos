@@ -1,7 +1,8 @@
 import {
   IEntityMetadata,
-  IStratosEndpointDefinition,
   EntityCatalogueEntityConfig,
+  EntityCatalogueSchemas,
+  IStratosBaseEntityDefinition,
 } from './entity-catalogue.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
@@ -42,7 +43,7 @@ class EntityCatalogue {
   }
 
   private getEntitySubType(entity: StratosBaseCatalogueEntity, subtypeType: string) {
-    const { subTypes } = entity.definition;
+    const subTypes = entity.definition.subTypes as IStratosBaseEntityDefinition[];
     if (!subTypes) {
       return null;
     }
@@ -60,8 +61,6 @@ class EntityCatalogue {
       ...parent,
       ...subtype
     }, entity.builder);
-
-
   }
 
   private getConfig(
