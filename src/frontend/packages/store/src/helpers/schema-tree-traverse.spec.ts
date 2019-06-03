@@ -1,5 +1,5 @@
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
-import { EntitySchema } from './entity-factory';
+import { CFEntitySchema } from './entity-factory';
 import { EntitySchemaTreeBuilder } from './schema-tree-traverse';
 
 
@@ -18,9 +18,9 @@ describe('SchemaTreeTraversal', () => {
     const parentId = '1';
     const childId = '2';
     const grandchildId = '3';
-    const schema = new EntitySchema(parentKey, {
-      [child1Key]: new EntitySchema(child1Key, {
-        [grandChild1]: new EntitySchema(grandChild1)
+    const schema = new CFEntitySchema(parentKey, {
+      [child1Key]: new CFEntitySchema(child1Key, {
+        [grandChild1]: new CFEntitySchema(grandChild1)
       })
     });
     const state = {
@@ -58,9 +58,9 @@ describe('SchemaTreeTraversal', () => {
     const childId = '2';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const schema = new EntitySchema(parentKey, {
-      [child1Key]: new EntitySchema(child1Key, {
-        [grandChild1]: [new EntitySchema(grandChild1)]
+    const schema = new CFEntitySchema(parentKey, {
+      [child1Key]: new CFEntitySchema(child1Key, {
+        [grandChild1]: [new CFEntitySchema(grandChild1)]
       })
     });
     const state = {
@@ -104,10 +104,10 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const schema = new EntitySchema(parentKey, {
-      [child1Key]: new EntitySchema(child1Key, {
-        [grandChild1]: [new EntitySchema(grandChild1, {
-          [child1Key]: [new EntitySchema(child1Key)]
+    const schema = new CFEntitySchema(parentKey, {
+      [child1Key]: new CFEntitySchema(child1Key, {
+        [grandChild1]: [new CFEntitySchema(grandChild1, {
+          [child1Key]: [new CFEntitySchema(child1Key)]
         })]
       })
     });
@@ -159,11 +159,11 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const schema = new EntitySchema(parentKey, {
-      [child1Key]: new EntitySchema(child1Key, {
+    const schema = new CFEntitySchema(parentKey, {
+      [child1Key]: new CFEntitySchema(child1Key, {
         entity: {
-          [grandChild1]: [new EntitySchema(grandChild1, {
-            [child1Key]: [new EntitySchema(child1Key)]
+          [grandChild1]: [new CFEntitySchema(grandChild1, {
+            [child1Key]: [new CFEntitySchema(child1Key)]
           })]
         }
       })
@@ -224,11 +224,11 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const schema = new EntitySchema(parentKey, {
-      [child1Key]: new EntitySchema(child1Key, {
+    const schema = new CFEntitySchema(parentKey, {
+      [child1Key]: new CFEntitySchema(child1Key, {
         entity: {
-          [grandChild1]: [new EntitySchema(grandChild1, {
-            [child1Key]: [new EntitySchema(child1Key)]
+          [grandChild1]: [new CFEntitySchema(grandChild1, {
+            [child1Key]: [new CFEntitySchema(child1Key)]
           })]
         }
       })

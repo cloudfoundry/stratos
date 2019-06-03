@@ -4,15 +4,19 @@ import { createNewPaginationSection } from './pagination-reducer-create-paginati
 import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
 describe('CreatePaginationActionReducer', () => {
-  const entityKey = 'entityKey';
+  const entityType = 'entityType';
+  const endpointType = 'endpointType';
   it('should return exact state', () => {
     const paginationState: PaginationState = {
-      [entityKey]: {
+      [entityType]: {
         paginationKey: getDefaultPaginationEntityState()
       }
     };
     const action = new CreatePagination(
-      entityKey,
+      {
+        entityType,
+        endpointType
+      },
       'paginationKey'
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
@@ -23,16 +27,19 @@ describe('CreatePaginationActionReducer', () => {
     const paginationKey = 'newPaginationKey';
     const defaultState = getDefaultPaginationEntityState();
     const paginationState = {
-      [entityKey]: {
+      [entityType]: {
         paginationKey: getDefaultPaginationEntityState()
       }
     };
     const action = new CreatePagination(
-      entityKey,
+      {
+        entityType,
+        endpointType
+      },
       paginationKey
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
-    expect(defaultState).toEqual(state[entityKey][paginationKey]);
+    expect(defaultState).toEqual(state[entityType][paginationKey]);
   });
 
   it('should correctly merge ids from seeded state', () => {
@@ -52,7 +59,7 @@ describe('CreatePaginationActionReducer', () => {
       }
     };
     const paginationState: PaginationState = {
-      [entityKey]: {
+      [entityType]: {
         paginationKey: {
           ...getDefaultPaginationEntityState(),
           ids,
@@ -61,13 +68,16 @@ describe('CreatePaginationActionReducer', () => {
       }
     };
     const action = new CreatePagination(
-      entityKey,
+      {
+        entityType,
+        endpointType
+      },
       paginationKey,
       'paginationKey'
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
-    expect(paginationState[entityKey].paginationKey.ids).toEqual(state[entityKey][paginationKey].ids);
-    expect(paginationState[entityKey].paginationKey.pageRequests).toEqual(state[entityKey][paginationKey].pageRequests);
+    expect(paginationState[entityType].paginationKey.ids).toEqual(state[entityType][paginationKey].ids);
+    expect(paginationState[entityType].paginationKey.pageRequests).toEqual(state[entityType][paginationKey].pageRequests);
   });
 
 });
