@@ -30,8 +30,6 @@ type PortalProxy interface {
 	GetSessionStringValue(c echo.Context, key string) (string, error)
 	SaveSession(c echo.Context, session *sessions.Session) error
 
-	SaveConsoleConfig(consoleConfig *ConsoleConfig, consoleRepoInterface interface{}) error
-
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 	DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)
 	DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIrecord CNSIRecord) error
@@ -85,4 +83,10 @@ type PortalProxy interface {
 	SaveRelation(relation RelationsRecord) (*RelationsRecord, error)
 	ListRelations() ([]*RelationsRecord, error)
 	RemoveRelations(providerOrTarget string) error
+
+	// SetCanPerformMigrations updates the state that records if we can perform Database migrations
+	SetCanPerformMigrations(bool)
+
+	// CanPerformMigrations returns if we can perform Database migrations
+	CanPerformMigrations() bool
 }
