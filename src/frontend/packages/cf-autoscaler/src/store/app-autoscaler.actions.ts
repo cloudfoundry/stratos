@@ -71,6 +71,7 @@ export class GetAppAutoscalerPolicyAction implements IRequestAction {
     public endpointGuid: string,
   ) { }
   type = APP_AUTOSCALER_POLICY;
+  entity = entityFactory(appAutoscalerPolicySchemaKey);
   entityKey = appAutoscalerPolicySchemaKey;
 }
 

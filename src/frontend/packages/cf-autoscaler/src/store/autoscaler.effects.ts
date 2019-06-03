@@ -42,12 +42,14 @@ import {
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
-import { AppAutoscalerMetricDataLocal, AppScalingTrigger } from './app-autoscaler.types';
+import {
+  AppAutoscalerFetchPolicyFailedResponse,
+  AppAutoscalerMetricDataLocal,
+  AppScalingTrigger,
+} from './app-autoscaler.types';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
-// const commonPrefix = `/pp/${proxyAPIVersion}/proxy/${autoscalerAPIVersion}`;
-// const healthPrefix = `/pp/${proxyAPIVersion}/proxy`;
 
 function createAutoscalerRequestMessage(requestType: string, error: { status: string, _body: string }) {
   return `Unable to ${requestType}: ${error.status} ${error._body}`;
@@ -306,11 +308,16 @@ export class AutoscalerEffects {
           return res;
         }),
         catchError(err => {
-          if (err.status === 404 && err._body === '{}') {
+          const noPolicy = err.status === 404 && err._body === '{}';
+          if (noPolicy) {
             err._body = 'No policy is defined for this application.';
           }
+          const response: AppAutoscalerFetchPolicyFailedResponse = { status: err.status, noPolicy };
+
+          // const notFound = err.status === 404 && err._body === '{}';
+          // err._body = notFound ? 'No policy is defined for this application.' : err._body;
           return [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType)
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType, null, response)
           ];
         }));
   }

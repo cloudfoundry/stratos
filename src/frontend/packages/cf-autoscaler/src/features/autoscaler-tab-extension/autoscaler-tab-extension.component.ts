@@ -8,8 +8,9 @@ import { distinctUntilChanged, filter, first, map, publishReplay, refCount, star
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
+import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ApplicationMonitorService } from '../../../../core/src/features/applications/application-monitor.service';
+import { ApplicationService } from '../../../../core/src/features/applications/application.service';
 import { getGuids } from '../../../../core/src/features/applications/application/application-base.component';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
@@ -27,13 +28,14 @@ import {
   AutoscalerPaginationParams,
   DetachAppAutoscalerPolicyAction,
   GetAppAutoscalerAppMetricAction,
-  GetAppAutoscalerHealthAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerScalingHistoryAction,
   UpdateAppAutoscalerPolicyAction,
 } from '../../store/app-autoscaler.actions';
 import {
+  AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
+  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppAutoscalerScalingHistory,
 } from '../../store/app-autoscaler.types';
@@ -42,6 +44,25 @@ import {
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
 } from '../../store/autoscaler.store.module';
+
+const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
+  // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
+  const action = new GetAppAutoscalerPolicyAction(appGuid, endpointGuid);
+  const entityService = esf.create<AppAutoscalerPolicy>(action.entityKey, action.entity, action.guid, action);
+  return entityService.entityObs$.pipe(
+    filter(entityInfo =>
+      !!entityInfo && !!entityInfo.entityRequestInfo && !!entityInfo.entityRequestInfo.response &&
+      !entityInfo.entityRequestInfo.fetching),
+    map(entityInfo => {
+      // Autoscaler feature should be enabled if either ..
+      // 1) There's an autoscaler policy
+      // 2) There's a 404 no policy error (as opposed to a 404 url not found error)
+      const noPolicySet = (entityInfo.entityRequestInfo.response as AppAutoscalerFetchPolicyFailedResponse).noPolicy;
+      return !!entityInfo.entity || noPolicySet;
+    }),
+    startWith(true)
+  );
+};
 
 @StratosTab({
   type: StratosTabType.Application,
@@ -52,11 +73,7 @@ import {
   hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
-    const action = new GetAppAutoscalerHealthAction(appGuid, endpointGuid);
-    return esf.create<{ uptime: number }>(action.entityKey, action.entity, action.guid, action).waitForEntity$.pipe(
-      map(health => health.entity.uptime > 0),
-      startWith(true)
-    );
+    return enableAutoscaler(appGuid, endpointGuid, esf).pipe(map(enabled => !enabled));
   }
 })
 @Component({
@@ -113,12 +130,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     if (this.appAutoscalerScalingHistorySnackBarRef) {
       this.appAutoscalerScalingHistorySnackBarRef.dismiss();
     }
-    if (this.appAutoscalerPolicyErrorSub) {
-      this.appAutoscalerPolicyErrorSub.unsubscribe();
-    }
-    if (this.appAutoscalerScalingHistoryErrorSub) {
-      this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
-    }
+    safeUnsubscribe(this.appAutoscalerPolicyErrorSub, this.appAutoscalerScalingHistoryErrorSub);
   }
 
   constructor(

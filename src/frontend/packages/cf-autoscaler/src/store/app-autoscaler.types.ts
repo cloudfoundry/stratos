@@ -132,3 +132,8 @@ export interface AppAutoscalerMetricBasicInfo {
   chartMaxValue: number;
 }
 
+export interface AppAutoscalerFetchPolicyFailedResponse {
+  status: number;
+  noPolicy: boolean;
+}
+
