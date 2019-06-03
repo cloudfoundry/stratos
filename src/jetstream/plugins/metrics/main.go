@@ -23,11 +23,13 @@ type MetricsSpecification struct {
 }
 
 const (
-	EndpointType          = "metrics"
-	CLIENT_ID_KEY         = "METRICS_CLIENT"
-	MetricsCfRelation     = "metrics-cf"
-	MetricsKubeRelation   = "metrics-kube"
-	MetricsCfKubeRelation = "kubeMetrics-cf"
+	EndpointType               = "metrics"
+	CLIENT_ID_KEY              = "METRICS_CLIENT"
+	MetricsCfRelation          = "metrics-cf"
+	MetricsKubeRelation        = "metrics-kube"
+	MetricsCfKubeRelation      = "kubeMetrics-cf"
+	relationsSetupNeededMarker = "__RELATIONS_MIGRATION_NEEDED"
+	systemGroupName            = "system"
 )
 
 type MetricsRelationMetadata struct {
@@ -286,6 +288,13 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 
 // Init performs plugin initialization
 func (m *MetricsSpecification) Init() error {
+	setupNeeded, err := m.portalProxy.GetConfigValue(systemGroupName, relationsSetupNeededMarker)
+	if err != nil {
+		log.Warnf("Unable to determine if relations setup is required: %+v", err)
+	}
+	if setupNeeded == "true" {
+		m.CreateInitialRelations()
+	}
 	return nil
 }
 
@@ -428,9 +437,9 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func (m *MetricsSpecification) linkMetricsToEndpoints(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string, user *interfaces.ConnectedUser) {
+func (m *MetricsSpecification) linkMetricsToEndpoints(endpointGuid string, tokenMetadata string, consoleUserID string) {
 	// Metrics has been connected. Determine if it provides metrics to any existing endpoint
-	metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenRecord.Metadata, endpoint.GUID)
+	metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenMetadata, endpointGuid)
 
 	if err != nil {
 		log.Warnf("Failed to link metric endpoint to other endpoints (creating providers from token): %v", err)
@@ -487,7 +496,7 @@ func metadataToMap(metadata MetricsRelationMetadata) map[string]interface{} {
 	return mapMetadata
 }
 
-func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpointUrl string, consoleUserID string) {
+func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, consoleUserID string, endpointUrl string) {
 	// Find all metrics endpoints
 	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
 	if err != nil {
@@ -500,7 +509,7 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, endpoi
 
 	// Try to match up endpoint to metric
 	for _, metricEndpoint := range metricsEndpoints {
-		tokenRecord, found := m.portalProxy.GetCNSITokenRecord(metricEndpoint.GUID, consoleUserID)
+		tokenRecord, found := m.portalProxy.GetCNSITokenRecord(endpointGuid, consoleUserID)
 		if found == false {
 			// Console user has not connected to endpoint
 			continue
@@ -539,13 +548,51 @@ func filterEndpoints(vs []*interfaces.ConnectedEndpoint, f func(*interfaces.Conn
 	return vsf
 }
 
-func (m *MetricsSpecification) OnConnect(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string, user *interfaces.ConnectedUser) {
+// , user *interfaces.ConnectedUser
+func (m *MetricsSpecification) OnConnect(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string) {
+	log.Warnf("Metrics OnConnect")
 	switch endpointType := endpoint.CNSIType; endpointType {
 	case EndpointType:
-		m.linkMetricsToEndpoints(endpoint, tokenRecord, consoleUserID, user)
+		m.linkMetricsToEndpoints(endpoint.GUID, tokenRecord.Metadata, consoleUserID)
 	case "cf":
-		m.linkEndpointToMetrics(endpoint.GUID, endpoint.DopplerLoggingEndpoint, consoleUserID)
+		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.DopplerLoggingEndpoint)
 	case "k8s":
-		m.linkEndpointToMetrics(endpoint.GUID, endpoint.APIEndpoint.String(), consoleUserID)
+		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.APIEndpoint.String())
+	}
+}
+
+func (m *MetricsSpecification) OnDisconnect() {
+	// Empty method required such that TokenNotificationPlugin interface is met
+}
+
+func (m *MetricsSpecification) CreateInitialRelations() {
+	log.Info("Creating initial set of relations")
+
+	// For each user, find the endpoints that they're connected to and thus their token metadata
+	users, err := m.portalProxy.GetCNSIUsers()
+	if err != nil {
+		log.Errorf("Unable to setup relations, failed to list users: %+v", err)
+		return
+	}
+
+	for _, userGuid := range users {
+		connectedEndpoints, err := m.portalProxy.ListEndpointsByUserAndShared(userGuid)
+		if err != nil {
+			log.Warnf("Unable to fetch connected endpoints for a user, they might not see the correct relations: %+v", err)
+			continue
+		}
+		for _, connectedEndpoint := range connectedEndpoints {
+			if connectedEndpoint.CNSIType != EndpointType {
+				// Skip anything that's not a metrics endpoint
+				continue
+			}
+			m.linkMetricsToEndpoints(connectedEndpoint.GUID, connectedEndpoint.TokenMetadata, userGuid)
+		}
+	}
+
+	// Delete the setup marker
+	err = m.portalProxy.DeleteConfigValue(systemGroupName, relationsSetupNeededMarker)
+	if err != nil {
+		log.Warnf("Unable to delete setup config relations marker: %+v", err)
 	}
 }

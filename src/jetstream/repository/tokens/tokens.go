@@ -24,4 +24,6 @@ type Repository interface {
 
 	// Update a token's auth data
 	UpdateTokenAuth(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error
+
+	ListUsers() ([]string, error)
 }

@@ -456,7 +456,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 			// Notify plugins if they support the notification interface
 			for _, plugin := range p.Plugins {
 				if notifier, ok := plugin.(interfaces.TokenNotificationPlugin); ok {
-					notifier.OnConnect(&cnsiRecord, tokenRecord, consoleUserID, cnsiUser)
+					notifier.OnConnect(&cnsiRecord, tokenRecord, consoleUserID)
 				}
 			}
 
@@ -704,7 +704,6 @@ func (p *portalProxy) logout(c echo.Context) error {
 	// Notify plugins if they support the notification interface
 	for _, plugin := range p.Plugins {
 		if notifier, ok := plugin.(interfaces.TokenNotificationPlugin); ok {
-			// TODO: RC check if there's anything i can actually grab
 			notifier.OnDisconnect()
 		}
 	}
@@ -1045,6 +1044,21 @@ func (p *portalProxy) GetUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {
 	user, _, ok := p.GetCNSIUserAndToken(cnsiGUID, userGUID)
 	return user, ok
+}
+
+func (p *portalProxy) GetCNSIUsers() ([]string, error) {
+	log.Debug("GetCNSIUsers")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := tokenRepo.ListUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, *interfaces.TokenRecord, bool) {

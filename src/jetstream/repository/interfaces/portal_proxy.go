@@ -40,6 +40,7 @@ type PortalProxy interface {
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
+	GetCNSIUsers() ([]string, error)
 	GetConfig() *PortalConfig
 	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
@@ -89,4 +90,8 @@ type PortalProxy interface {
 
 	// CanPerformMigrations returns if we can perform Database migrations
 	CanPerformMigrations() bool
+
+	// Config Table
+	GetConfigValue(group, name string) (string, error)
+	DeleteConfigValue(group, name string) error
 }

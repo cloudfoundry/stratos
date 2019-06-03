@@ -91,7 +91,7 @@ type EndpointTokenRecord struct {
 	LoggingEndpoint string
 }
 
-// TokenRecord repsrents and endpoint or uaa token
+// TokenRecord represents an endpoint or uaa token
 type TokenRecord struct {
 	TokenGUID      string
 	AuthToken      string

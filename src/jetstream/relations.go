@@ -11,7 +11,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
-// TODO: RC how to add jsdoc style comments?
 func (p *portalProxy) SaveRelation(relation interfaces.RelationsRecord) (*interfaces.RelationsRecord, error) {
 	store, err := relations.NewRelationsDBStore(p.DatabaseConnectionPool)
 	if err != nil {

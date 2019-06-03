@@ -29,6 +29,6 @@ type EndpointNotificationPlugin interface {
 }
 
 type TokenNotificationPlugin interface {
-	OnConnect(*CNSIRecord, *TokenRecord, string, *ConnectedUser)
+	OnConnect(*CNSIRecord, *TokenRecord, string)
 	OnDisconnect()
 }

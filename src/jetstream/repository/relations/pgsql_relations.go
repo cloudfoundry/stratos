@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,10 +23,12 @@ var (
 // InitRepositoryProvider - One time init for the given DB Provider
 func InitRepositoryProvider(databaseProvider string) {
 	// Modify the database statements if needed, for the given database type
-	// TODO: RC which statements need this, anyone with $?
-	// getRelations = datastore.ModifySQLStatement(getRelations, databaseProvider)
-	// deleteFavorite = datastore.ModifySQLStatement(deleteFavorite, databaseProvider)
-	// saveRelation = datastore.ModifySQLStatement(saveRelation, databaseProvider)
+	getRelationsByType = datastore.ModifySQLStatement(getRelationsByType, databaseProvider)
+	getRelation = datastore.ModifySQLStatement(getRelation, databaseProvider)
+	deleteRelation = datastore.ModifySQLStatement(deleteRelation, databaseProvider)
+	deleteRelations = datastore.ModifySQLStatement(deleteRelations, databaseProvider)
+	insertRelation = datastore.ModifySQLStatement(insertRelation, databaseProvider)
+	updateRelation = datastore.ModifySQLStatement(updateRelation, databaseProvider)
 }
 
 // RelationsDBStore is a DB-backed Relations repository
