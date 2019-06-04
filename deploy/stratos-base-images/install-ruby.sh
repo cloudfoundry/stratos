@@ -31,9 +31,4 @@ cd ruby-2.3.8
 make
 make install
 
-# else
-#   zypper in -y ruby2.3 ruby2.3-devel gcc-c++ jq curl make
-#   cp /usr/bin/ruby.ruby2.3 /usr/bin/ruby
-# fi
-
 ruby --version
