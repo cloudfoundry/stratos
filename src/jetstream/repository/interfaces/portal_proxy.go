@@ -84,6 +84,7 @@ type PortalProxy interface {
 	SaveRelation(relation RelationsRecord) (*RelationsRecord, error)
 	ListRelations() ([]*RelationsRecord, error)
 	RemoveRelations(providerOrTarget string) error
+	RemoveRelation(relation RelationsRecord) error
 
 	// SetCanPerformMigrations updates the state that records if we can perform Database migrations
 	SetCanPerformMigrations(bool)

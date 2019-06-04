@@ -1,0 +1,21 @@
+<form validate [formGroup]="form" class="stepper-form scheduler">
+  <span>Select the runtime scheduler used by Cloud Foundry</span>
+  <mat-radio-group formControlName="scheduler" class="">
+    <mat-radio-button [value]="schedulers.DIEGO" class="">{{schedulers.DIEGO}}</mat-radio-button>
+    <mat-radio-button [value]="schedulers.EIRINI" class="">{{schedulers.EIRINI}}</mat-radio-button>
+  </mat-radio-group>
+  <div [ngClass]="{'scheduler__eirini-disabled': form.controls.scheduler.value !== schedulers.EIRINI}">
+    <span>Metrics endpoint that provides Eirini information from Kubernetes</span>
+    <mat-form-field>
+      <mat-select class="" formControlName="eiriniMetrics" placeholder="Endpoint" required>
+        <mat-option *ngFor="let metricsEndpoint of metricsEndpoints$ | async" [value]="metricsEndpoint.guid">
+          {{ metricsEndpoint.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <span>Kubernetes namespace used for Eirini pods</span>
+    <mat-form-field>
+      <input matInput placeholder="Namespace" formControlName="eiriniNamespace" type="text" required>
+    </mat-form-field>
+  </div>
+</form>

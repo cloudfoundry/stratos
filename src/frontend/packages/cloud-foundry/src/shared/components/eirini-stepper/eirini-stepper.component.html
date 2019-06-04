@@ -1,0 +1,13 @@
+<app-page-header>
+  <h1>Configure {{cfName$ | async}}</h1>
+</app-page-header>
+
+<app-steppers cancel="/endpoints">
+  <!-- <app-step [title]="'Register'" [valid]="step1.validate | async" [onNext]="step1.onNext" [nextButtonText]="'Register'">
+    <app-create-endpoint-cf-step-1 #step1></app-create-endpoint-cf-step-1>
+  </app-step> -->
+  <app-step [title]="'Configure Container Scheduler'" [valid]="scheduler.validate | async"
+    [blocked]="scheduler.blocked | async" [onNext]="scheduler.onNext">
+    <app-cf-scheduler-step #scheduler></app-cf-scheduler-step>
+  </app-step>
+</app-steppers>

@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
@@ -11,6 +12,10 @@ import {
   CONNECT_ENDPOINTS_FAILED,
   CONNECT_ENDPOINTS_SUCCESS,
   ConnectEndpoint,
+  DELETE_ENDPOINT_RELATION,
+  DELETE_ENDPOINT_RELATION_FAILED,
+  DELETE_ENDPOINT_RELATION_SUCCESS,
+  DeleteEndpointRelation,
   DISCONNECT_ENDPOINTS,
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
@@ -23,10 +28,14 @@ import {
   REGISTER_ENDPOINTS_FAILED,
   REGISTER_ENDPOINTS_SUCCESS,
   RegisterEndpoint,
+  SaveEndpointRelation,
   UNREGISTER_ENDPOINTS,
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
+  UPDATE_ENDPOINT_RELATION,
+  UPDATE_ENDPOINT_RELATION_FAILED,
+  UPDATE_ENDPOINT_RELATION_SUCCESS,
 } from '../actions/endpoint.actions';
 import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
@@ -52,11 +61,13 @@ export class EndpointsEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static registeringKey = 'registering';
+  static updateRelationKey = 'relations_update';
+  static deleteRelationKey = 'relations_delete';
 
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<AppState>,
   ) { }
 
   @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
@@ -210,6 +221,62 @@ export class EndpointsEffect {
       );
     }));
 
+  @Effect() updateRelation$ = this.actions$.pipe(
+    ofType<SaveEndpointRelation>(UPDATE_ENDPOINT_RELATION),
+    mergeMap(action => {
+      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.updateRelationKey);
+      // Endpoint is _target_ of relation's _provider_
+      const relation = {
+        provider: action.relation.guid,
+        type: action.relation.type,
+        target: action.guid,
+        metadata: action.relation.metadata,
+      };
+      const params: HttpParams = new HttpParams({
+        encoder: new BrowserStandardEncoder()
+      });
+
+      return this.doRelationAction(
+        apiAction,
+        '/pp/v1/relation',
+        params,
+        'update',
+        [UPDATE_ENDPOINT_RELATION_SUCCESS, UPDATE_ENDPOINT_RELATION_FAILED],
+        JSON.stringify(relation),
+        response =>
+          response && response.error && response.error.error ? response.error.error : 'Could not update relation, please try again'
+      );
+    })
+  );
+
+  @Effect() deleteRelation$ = this.actions$.pipe(
+    ofType<DeleteEndpointRelation>(DELETE_ENDPOINT_RELATION),
+    mergeMap(action => {
+      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.deleteRelationKey);
+      // Endpoint is _target_ of relation's _provider_
+      const relation = {
+        provider: action.relation.guid,
+        type: action.relation.type,
+        target: action.guid,
+        metadata: action.relation.metadata,
+      };
+      const params: HttpParams = new HttpParams({
+        encoder: new BrowserStandardEncoder()
+      });
+
+      return this.doRelationAction(
+        apiAction,
+        '/pp/v1/relation',
+        params,
+        'delete',
+        [DELETE_ENDPOINT_RELATION_SUCCESS, DELETE_ENDPOINT_RELATION_FAILED],
+        JSON.stringify(relation),
+        response =>
+          response && response.error && response.error.error ? response.error.error : 'Could not delete relation, please try again'
+      );
+    })
+  );
+
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
       `Please ensure the endpoint address is correct and try again` +
@@ -234,6 +301,55 @@ export class EndpointsEffect {
       guid,
       type,
     } as IRequestAction;
+  }
+
+  private doRelationAction(
+    apiAction: IRequestAction,
+    url: string,
+    params: HttpParams,
+    apiActionType: ApiRequestTypes = 'update',
+    actionStrings: [string, string] = [null, null],
+    body?: string,
+    errorMessageHandler?: (e: any) => string,
+  ) {
+    const headers = new HttpHeaders();
+    headers.set('Content-Type', 'application/x-www-form-urlencoded');
+    this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
+
+    const request: Observable<object> = apiActionType === 'delete' ? this.http.request('delete', url, {
+      headers,
+      params,
+      body: body || {}
+    }) : this.http.post(url, body || {}, {
+      headers,
+      params
+    });
+    return request.pipe(
+      mergeMap(() => {
+        const actions = [];
+        const response: NormalizedResponse<EndpointModel> = {
+          entities: {},
+          result: []
+        };
+        if (actionStrings[0]) {
+          actions.push({ type: actionStrings[0], guid: apiAction.guid });
+        }
+
+        actions.push(new GetSystemInfo());
+
+        actions.push(new WrapperRequestActionSuccess(response, apiAction, apiActionType, null, null, apiAction.guid));
+        return actions;
+      }
+      ),
+      catchError(e => {
+        const actions = [];
+        if (actionStrings[1]) {
+          actions.push({ type: actionStrings[1], guid: apiAction.guid });
+        }
+        const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
+        actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
+        return actions;
+      }));
   }
 
   private doEndpointAction(
@@ -265,7 +381,7 @@ export class EndpointsEffect {
           actions.push(new GetUserFavoritesAction());
         }
 
-        if (apiActionType === 'create') {
+        if (apiActionType === 'create' || apiActionType === 'update') {
           actions.push(new GetSystemInfo());
           response = {
             entities: {
@@ -277,7 +393,10 @@ export class EndpointsEffect {
           };
         }
 
-        if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
+        if (apiAction.updatingKey === EndpointsEffect.disconnectingKey ||
+          apiActionType === 'create' ||
+          apiActionType === 'update' ||
+          apiActionType === 'delete') {
           actions.push(this.clearEndpointInternalEvents(apiAction.guid));
         }
 

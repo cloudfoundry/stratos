@@ -1,8 +1,8 @@
-import { register } from 'ts-node/dist';
 import { createSelector } from '@ngrx/store';
+
 import { AppState, IRequestEntityTypeState } from '../app-state';
 import { EndpointModel, EndpointState, endpointStoreNames } from '../types/endpoint.types';
-import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors';
+import { selectEntities, selectEntity, selectRequestInfo } from './api.selectors';
 
 // The custom status section
 export const endpointStatusSelector = (state: AppState): EndpointState => state.endpoints;
@@ -10,9 +10,20 @@ export const endpointStatusSelector = (state: AppState): EndpointState => state.
 // All endpoint request data
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointStoreNames.type);
 
+export const metricsEndpointEntitiesSelector =
+  (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
+    const metrics = {};
+    Object.values(endpoints).forEach(endpoint => {
+      if (endpoint.cnsi_type === 'metrics') {
+        metrics[endpoint.guid] = endpoint;
+      }
+    });
+    return metrics;
+  };
+
 export const cfEndpointEntitiesSelector = (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
   const cf = {};
-  Object.values(endpoints).map(endpoint => {
+  Object.values(endpoints).forEach(endpoint => {
     if (endpoint.cnsi_type === 'cf') {
       cf[endpoint.guid] = endpoint;
     }
@@ -22,11 +33,10 @@ export const cfEndpointEntitiesSelector = (endpoints: IRequestEntityTypeState<En
 
 export const getRegisteredEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) => {
   const registered = {} as IRequestEntityTypeState<EndpointModel>;
-  Object.values(endpoints).map(endpoint => {
+  Object.values(endpoints).forEach(endpoint => {
     if (endpoint.registered) {
       registered[endpoint.guid] = endpoint;
     }
-    return registered;
   });
   return registered;
 };
@@ -41,8 +51,18 @@ export const endpointsCFEntitiesSelector = createSelector(
   cfEndpointEntitiesSelector
 );
 
+export const endpointsMetricsEntitiesSelector = createSelector(
+  endpointEntitiesSelector,
+  metricsEndpointEntitiesSelector
+);
+
 export const endpointsRegisteredCFEntitiesSelector = createSelector(
   endpointsCFEntitiesSelector,
+  getRegisteredEndpoints
+);
+
+export const endpointsRegisteredMetricsEntitiesSelector = createSelector(
+  endpointsMetricsEntitiesSelector,
   getRegisteredEndpoints
 );
 

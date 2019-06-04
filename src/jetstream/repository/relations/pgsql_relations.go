@@ -3,7 +3,9 @@ package relations
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -17,7 +19,7 @@ var (
 	deleteRelation     = `DELETE FROM relations WHERE provider = $1 AND target = $2`
 	deleteRelations    = `DELETE FROM relations WHERE provider = $1 OR target = $1`
 	insertRelation     = `INSERT INTO relations (provider, type, target, metadata) VALUES ($1, $2, $3, $4)`
-	updateRelation     = `UPDATE relations SET provider = $1, type = $2, target = $3, metadata = $4 WHERE provider = $1 AND target = $3`
+	updateRelation     = `UPDATE relations SET provider = $1, type = $2, target = $3, metadata = $4 WHERE provider = $5 AND target = $6`
 )
 
 // InitRepositoryProvider - One time init for the given DB Provider
@@ -131,6 +133,42 @@ func (p *RelationsDBStore) DeleteRelations(providerOrTarget string) error {
 	return nil
 }
 
+func (p *RelationsDBStore) GetRelation(provider string, target string) (*interfaces.RelationsRecord, error) {
+	var (
+		// pCNSIType              string
+		// pURL                   string
+		// cipherTextClientSecret []byte
+		// subType                sql.NullString
+		metadata sql.NullString
+	)
+
+	relation := new(interfaces.RelationsRecord)
+
+	// &relation.AuthorizationEndpoint, &relation.TokenEndpoint, &relation.DopplerLoggingEndpoint, &relation.SkipSSLValidation, &relation.ClientId, &cipherTextClientSecret, &relation.SSOAllowed, &subType, &metadata)
+	err := p.db.QueryRow(getRelation, provider, target).Scan(&relation.Provider, &relation.RelationType, &relation.Target, &metadata)
+
+	switch {
+	case err == sql.ErrNoRows:
+		return new(interfaces.RelationsRecord), errors.New("No match for that Relation")
+	case err != nil:
+		return new(interfaces.RelationsRecord), fmt.Errorf("Error trying to Find CNSI record: %v", err)
+	default:
+		if metadata.Valid {
+			relation.Metadata = marshalRelationMetadata(metadata.String)
+		}
+	}
+
+	return relation, nil
+}
+
+func marshalRelationMetadata(metadata string) map[string]interface{} {
+	var anyJSON map[string]interface{}
+	if len(metadata) > 2 && strings.Index(metadata, "{") == 0 {
+		json.Unmarshal([]byte(metadata), &anyJSON)
+	}
+	return anyJSON
+}
+
 // Save will persist a Relation to a datastore, whether it's new or existing
 func (p *RelationsDBStore) Save(relationsRecord interfaces.RelationsRecord) (*interfaces.RelationsRecord, error) {
 
@@ -139,17 +177,22 @@ func (p *RelationsDBStore) Save(relationsRecord interfaces.RelationsRecord) (*in
 		return nil, fmt.Errorf("Unable to marshal Relations metadata: %v", err)
 	}
 
-	existingRelation, err := p.db.Exec(getRelation, relationsRecord.Provider, relationsRecord.Target)
-	if err != nil {
-		return nil, fmt.Errorf("Unable to determine existing relation: %v", err)
-	}
-	if existingRelation != nil {
-		if _, err := p.db.Exec(insertRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString); err != nil {
-			return nil, fmt.Errorf("Unable to insert Relations record: %v", err)
+	existingRelation, err := p.GetRelation(relationsRecord.Provider, relationsRecord.Target)
+
+	log.Warnf("Save: %v", existingRelation)
+	log.Warnf("Save: %v", relationsRecord.Provider)
+	log.Warnf("Save: %v", relationsRecord.Target)
+	log.Warnf("Save: %v", err)
+
+	if err == nil && existingRelation != nil {
+		log.Warnf("updateRelation: %v", existingRelation)
+		if _, err := p.db.Exec(updateRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString, relationsRecord.Provider, relationsRecord.Target); err != nil {
+			return nil, fmt.Errorf("Unable to update Relations record: %v", err)
 		}
 	} else {
-		if _, err := p.db.Exec(updateRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString); err != nil {
-			return nil, fmt.Errorf("Unable to update Relations record: %v", err)
+		log.Warn("insertRelation")
+		if _, err := p.db.Exec(insertRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString); err != nil {
+			return nil, fmt.Errorf("Unable to insert Relations record: %v", err)
 		}
 	}
 

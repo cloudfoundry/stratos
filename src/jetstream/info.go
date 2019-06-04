@@ -39,13 +39,13 @@ func (p *portalProxy) updateRelations(endpoints map[string]map[string]*interface
 	}
 	for _, endpointsOfType := range endpoints {
 		for _, endpoint := range endpointsOfType {
-			for _, relation := range relations {
-				if (relation.Provider == endpoint.GUID || relation.Target == endpoint.GUID) && endpoint.Relations == nil {
-					endpoint.Relations = &interfaces.EndpointRelations{
-						Provides: []interfaces.EndpointRelation{},
-						Receives: []interfaces.EndpointRelation{},
-					}
+			if (endpoint.Relations == nil) {
+				endpoint.Relations = &interfaces.EndpointRelations{
+					Provides: []interfaces.EndpointRelation{},
+					Receives: []interfaces.EndpointRelation{},
 				}
+			}
+			for _, relation := range relations {
 				// Add relation to appropriate Provider/Target collection
 				if relation.Provider == endpoint.GUID {
 					endpoint.Relations.Provides = append(endpoint.Relations.Provides, interfaces.EndpointRelation{

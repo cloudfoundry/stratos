@@ -17,7 +17,7 @@ import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { getEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
+import { getEndpointType, getEndpointTypes } from '../../../../../features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
@@ -38,6 +38,8 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
   return obj ? obj.isEndpointListDetailsComponent ? obj as EndpointListDetailsComponent : null : null;
 }
 
+type HandleChange = ([oldVal, newVal]: [any, any]) => void;
+
 @Injectable()
 export class EndpointListHelper {
 
@@ -51,6 +53,10 @@ export class EndpointListHelper {
   }
 
   endpointActions(): IListAction<EndpointModel>[] {
+    const endpointTypeActions = getEndpointTypes().reduce((res, endpointType) => {
+      res.push(...(endpointType.createActions ? endpointType.createActions(this.store) : []));
+      return res;
+    }, []);
     return [
       {
         action: (item) => {
@@ -62,7 +68,7 @@ export class EndpointListHelper {
           );
           this.confirmDialog.open(confirmation, () => {
             this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
-            this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
+            this.handleUpdateAction(item.guid, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
               this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
               this.store.dispatch(new GetSystemInfo());
             });
@@ -110,7 +116,7 @@ export class EndpointListHelper {
           );
           this.confirmDialog.open(confirmation, () => {
             this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
-            this.handleDeleteAction(item, ([oldVal, newVal]) => {
+            this.handleDeleteAction(item.guid, ([oldVal, newVal]) => {
               this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
             });
           });
@@ -118,26 +124,27 @@ export class EndpointListHelper {
         label: 'Unregister',
         description: 'Remove the endpoint',
         createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
-      }
+      },
+      ...endpointTypeActions
     ];
   }
 
-  private handleUpdateAction(item, effectKey, handleChange) {
+  handleUpdateAction(guid: string, effectKey: string, handleChange: HandleChange) {
     this.handleAction(selectUpdateInfo(
       endpointStoreNames.type,
-      item.guid,
+      guid,
       effectKey,
     ), handleChange);
   }
 
-  private handleDeleteAction(item, handleChange) {
+  private handleDeleteAction(guid: string, handleChange: HandleChange) {
     this.handleAction(selectDeletionInfo(
       endpointStoreNames.type,
-      item.guid,
+      guid,
     ), handleChange);
   }
 
-  private handleAction(storeSelect, handleChange) {
+  private handleAction(storeSelect, handleChange: HandleChange) {
     const disSub = this.store.select(storeSelect).pipe(
       pairwise())
       .subscribe(([oldVal, newVal]) => {

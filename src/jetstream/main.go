@@ -812,7 +812,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// Relations operations
 	sessionGroup.GET("/relations", p.listRelations)
-	sessionGroup.POST("/relations", p.createRelation)
+	// sessionGroup.GET("/relation", p.getRelation)
+	sessionGroup.POST("/relation", p.saveRelation)
+	sessionGroup.DELETE("/relation", p.removeRelation)
 
 	// Info
 	sessionGroup.GET("/info", p.info)

@@ -33,11 +33,19 @@ export interface IApiEndpointInfo {
   User: object;
 }
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
-// export type endpointMetricsTypes = 'metrics' | 'metrics-kube' | 'kubeMetrics-cf';
 export enum EndpointRelationTypes {
+  /**
+   * Metrics provided to a cloud foundry
+   */
   METRICS_CF = 'metrics-cf',
+  /**
+   * Metrics provided to a kubernetes
+   */
   METRICS_KUBE = 'metrics-kube',
-  KUBEMETRICS_CF = 'kubeMetrics-cf'
+  /**
+   * Kube Metrics provided to a cloud foundry
+   */
+  KUBEMETRICS_CF = 'kubeMetrics-cf' // TODO: RC change to METRICS_EIRINI
 }
 export interface EndpointsRelation {
   guid: string;

@@ -1,7 +1,10 @@
 import { Type } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { Store } from '@ngrx/store';
 import { Schema, schema } from 'normalizr';
 
+import { AppState } from '../../../../store/src/app-state';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { IListAction } from '../../shared/components/list/list.component.types';
 
 // Allowable endpoint types
@@ -41,7 +44,7 @@ interface BaseEndpointTypeConfig {
   /**
    * // TODO: RC
    */
-  getActions?: <T>() => IListAction<T>[];
+  createActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
 }
 
 /**

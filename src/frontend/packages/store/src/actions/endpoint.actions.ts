@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import { endpointListKey, EndpointModel, EndpointsRelation, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
@@ -27,6 +27,14 @@ export const REGISTER_ENDPOINTS_FAILED = '[Endpoints] Register failed';
 export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
+
+export const UPDATE_ENDPOINT_RELATION = '[Endpoints] Update relation';
+export const UPDATE_ENDPOINT_RELATION_SUCCESS = '[Endpoints] Update relation success';
+export const UPDATE_ENDPOINT_RELATION_FAILED = '[Endpoints] Update relation failed';
+
+export const DELETE_ENDPOINT_RELATION = '[Endpoints] Delete relation';
+export const DELETE_ENDPOINT_RELATION_SUCCESS = '[Endpoints] Delete relation success';
+export const DELETE_ENDPOINT_RELATION_FAILED = '[Endpoints] Delete relation failed';
 
 export class EndpointActionComplete implements Action {
   constructor(
@@ -135,5 +143,27 @@ export class RegisterEndpoint extends EndpointAction {
 
   public guid(): string {
     return '<New Endpoint>' + this.name;
+  }
+}
+
+export class SaveEndpointRelation extends EndpointAction {
+  type = UPDATE_ENDPOINT_RELATION;
+  constructor(
+    public guid: string,
+    public relation: EndpointsRelation,
+    public endpointType = 'cf'
+  ) {
+    super();
+  }
+}
+
+export class DeleteEndpointRelation extends EndpointAction {
+  type = DELETE_ENDPOINT_RELATION;
+  constructor(
+    public guid: string,
+    public relation: EndpointsRelation,
+    public endpointType = 'cf'
+  ) {
+    super();
   }
 }
