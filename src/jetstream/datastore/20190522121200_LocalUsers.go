@@ -21,7 +21,8 @@ func init() {
 		createLocalUsers += "user_email    VARCHAR(36), "
 		createLocalUsers += "user_scope    VARCHAR(36), "
 		createLocalUsers += "last_login  TIMESTAMP, "
-		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);"
+		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);"
+		createLocalUsers += "CREATE TRIGGER update_last_updated AFTER UPDATE ON local_users BEGIN UPDATE local_users SET last_updated = DATETIME('now') WHERE _rowid_ = new._rowid_; END;"
 
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			createLocalUsers += " WITH (OIDS=FALSE);"

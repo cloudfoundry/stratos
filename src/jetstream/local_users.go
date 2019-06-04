@@ -56,10 +56,9 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 		log.Errorf("Error hashing user password: %v", err)
 		return "", err
 	}
-	log.Infof("Generated password hash: %s", passwordHash)
+
 	//generate a user GUID
 	userGUID := uuid.NewV4().String()
-
 
 	err = localUsersRepo.AddLocalUser(userGUID, passwordHash, username, email, scope)
 	if err != nil {

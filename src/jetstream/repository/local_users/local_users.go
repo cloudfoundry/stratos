@@ -9,4 +9,5 @@ type Repository interface {
 	FindUserGUID(username string) (string, error)
 	FindUserScope(userGUID string) (string, error)
 	UpdateLastLoginTime(userGUID string, loginTime time.Time) error
+	FindLastLoginTime(userGUID string) (time.Time, error)
 }

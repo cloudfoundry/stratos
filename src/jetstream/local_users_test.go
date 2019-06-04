@@ -6,7 +6,7 @@ import (
 	// "net/url"
 	"fmt"
 	"testing"
-	// "time"
+	"time"
 
 	// uuid "github.com/satori/go.uuid"
 
@@ -45,11 +45,11 @@ func TestAddLocalUser(t *testing.T) {
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 
 		guid, err := pp.AddLocalUser(ctx)
-
+		
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
 
-		mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
-		
+        mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
+
 		fetchedGUID, err := pp.FindUserGUID(ctx)
 
 		Convey("Should not fail to login", func() {
@@ -194,7 +194,7 @@ func TestFindPasswordHash(t *testing.T) {
 			log.Errorf("Error hashing user password: %v", err)
 			panic(err)
 		}
-		log.Infof("Generated password hash: %s", generatedPasswordHash)
+
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
 
@@ -211,6 +211,69 @@ func TestFindPasswordHash(t *testing.T) {
 
 		Convey("Password hashes should match", func() {
 			So(fetchedPasswordHash, ShouldResemble, generatedPasswordHash)
+		})
+		
+		Convey("Expectations should be met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+	})
+}
+
+func TestUpdateLastLoginTime(t *testing.T) {
+	t.Parallel()
+
+	Convey("Local User tests", t, func() {
+		db, mock, _ := sqlmock.New()
+
+		defer db.Close()
+
+		pp := setupPortalProxy(db)
+		pp.DatabaseConnectionPool = db
+
+		localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(db)
+		if err != nil {
+			log.Errorf("Database error getting repo for Local users: %v", err)
+			panic(err)
+		}
+
+		username := "testuser"
+		password := "changeme"
+		email    := "test.person@somedomain.com"
+		scope    := "stratos.admin"
+		
+		//Hash the password
+		generatedPasswordHash, err := pp.HashPassword(password)
+		if err != nil {
+			log.Errorf("Error hashing user password: %v", err)
+			panic(err)
+		}
+
+		//generate a user GUID
+		userGUID := uuid.NewV4().String()
+
+		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
+		err = localUsersRepo.AddLocalUser(userGUID, generatedPasswordHash, username, email, scope)
+		if err != nil {
+			log.Errorf("Error hashing user password: %v", err)
+			panic(err)
+		}
+
+		//Now generate and update the login time
+		generatedLoginTime := time.Now()
+
+		mock.ExpectExec(updateLastLoginTime).WillReturnResult(sqlmock.NewResult(1,1))
+		localUsersRepo.UpdateLastLoginTime(userGUID, generatedLoginTime)
+		
+		expectedLastLoginTimeRow := sqlmock.NewRows([]string{"login_time"}).AddRow(generatedLoginTime)
+		mock.ExpectQuery(findLastLoginTime).WillReturnRows(expectedLastLoginTimeRow)
+		fetchedLoginTime, err := localUsersRepo.FindLastLoginTime(userGUID)
+		if err != nil {
+			log.Errorf("Error fetching last login time: %v", err)
+			panic(err)
+		}
+
+		Convey("Login times should match", func() {
+			So(fetchedLoginTime, ShouldEqual, generatedLoginTime)
 		})
 		
 		Convey("Expectations should be met", func() {

@@ -301,7 +301,6 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 	guid     := c.FormValue("guid")
 
 	if len(username) == 0 || len(password) == 0 || len(guid) == 0 {
-		//TODO return an appropriate response here
 		return nil, errors.New("Needs username, password and guid")
 	}
 	
@@ -312,13 +311,11 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 	}
 
 	//Check the password hash
-    log.Infof("Finding hash for GUID: %s", guid)
 	hash, err := localUsersRepo.FindPasswordHash(guid)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Infof("Checking hash for password and hash: %s, %s", password, hash)
 	err = p.CheckPasswordHash(password, hash)
 
 	if err != nil {
@@ -365,7 +362,6 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 
 	//Update the last login time here if login was successful
 	loginTime := time.Now()
-	log.Infof("Updating last login time for GUID: %s  to: %s", guid, loginTime)
 	err = localUsersRepo.UpdateLastLoginTime(guid, loginTime)
 	if err != nil {
 		return nil, err
