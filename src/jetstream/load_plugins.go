@@ -10,6 +10,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinfo"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinvite"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/eirini"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	log "github.com/sirupsen/logrus"
 )
@@ -34,6 +35,7 @@ func (pp *portalProxy) loadPlugins() {
 		{"userinvite", userinvite.Init},
 		{"userfavorites", userfavorites.Init},
 		{"demo", demo.Init},
+		{"eirini", eirini.Init},
 	} {
 		plugin, err := p.Init(pp)
 		pp.Plugins[p.Name] = plugin

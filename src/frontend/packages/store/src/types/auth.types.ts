@@ -21,7 +21,9 @@ export interface SessionUser {
 export interface PluginConfig {
   userInvitationsEnabled: 'true' | 'false';
   disablePersistenceFeatures: 'true' | 'false';
-  [key: string]: 'true' | 'false';
+  eiriniEnabled: 'true' | 'false';
+  eiriniDefaultNamespace: string;
+  [key: string]: string | 'true' | 'false';
 }
 export interface SessionEndpoints {
   [type: string]: SessionEndpoint;
