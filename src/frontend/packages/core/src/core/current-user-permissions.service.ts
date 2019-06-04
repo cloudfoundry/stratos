@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../store/src/app-state';
+import { InternalAppState } from '../../../store/src/app-state';
 import {
   CHECKER_GROUPS,
   CurrentUserPermissionsChecker,
@@ -28,8 +28,7 @@ interface ICheckCombiner {
 export class CurrentUserPermissionsService {
   private checker: CurrentUserPermissionsChecker;
   constructor(
-    store: Store<CFAppState>,
-
+    store: Store<InternalAppState>
   ) {
     this.checker = new CurrentUserPermissionsChecker(store);
   }

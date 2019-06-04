@@ -9,7 +9,7 @@ import { debounceTime, withLatestFrom, filter } from 'rxjs/operators';
 import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { UpdateUserFavoriteMetadataAction } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { CFAppState, GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
+import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';

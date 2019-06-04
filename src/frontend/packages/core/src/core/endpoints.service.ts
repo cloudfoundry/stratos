@@ -5,7 +5,7 @@ import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { CFAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { IRequestEntityTypeState, EndpointOnlyAppState } from '../../../store/src/app-state';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import {
   endpointEntitiesSelector,
@@ -16,6 +16,7 @@ import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
 import { UserService } from './user.service';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { BaseRequestDataState } from '../../../store/src/types/entity.types';
 
 
 
@@ -40,7 +41,7 @@ export class EndpointsService implements CanActivate {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<EndpointOnlyAppState>,
     private userService: UserService,
     private endpointHealthChecks: EndpointHealthChecks,
 

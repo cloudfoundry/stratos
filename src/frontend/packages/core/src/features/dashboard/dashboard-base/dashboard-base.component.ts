@@ -16,7 +16,7 @@ import {
 } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
-import { CFAppState } from '../../../../../store/src/app-state';
+import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
@@ -45,7 +45,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
 
   constructor(
     public pageHeaderService: PageHeaderService,
-    private store: Store<CFAppState>,
+    private store: Store<DashboardOnlyAppState>,
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private activatedRoute: ActivatedRoute,

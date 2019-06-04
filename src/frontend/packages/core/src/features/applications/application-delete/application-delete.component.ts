@@ -10,7 +10,7 @@ import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../../store/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import {
   applicationSchemaKey,
   routeSchemaKey,
@@ -172,7 +172,7 @@ export class ApplicationDeleteComponent<T> {
   public cancelUrl: string;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private applicationService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,

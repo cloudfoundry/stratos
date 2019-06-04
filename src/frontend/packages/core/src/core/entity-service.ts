@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { ValidateEntitiesStart } from '../../../store/src/actions/request.actions';
-import { CFAppState } from '../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../store/src/app-state';
 import {
   RequestInfoState,
   RequestSectionKeys,
@@ -32,7 +32,7 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
 export class EntityService<T = any> {
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
     public action: IRequestAction,
     public validateRelations = true,

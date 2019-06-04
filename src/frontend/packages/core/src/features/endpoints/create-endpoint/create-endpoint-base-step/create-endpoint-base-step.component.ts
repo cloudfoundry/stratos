@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
@@ -39,7 +39,7 @@ export class CreateEndpointBaseStepComponent {
       }));
     }
   }
-  constructor(public store: Store<CFAppState>, ) {
+  constructor(public store: Store<GeneralEntityAppState>, ) {
     this.tileSelectorConfig = entityCatalogue.getAllEndpointTypes().map(catalogueEndpoint => {
       const endpoint = catalogueEndpoint.definition;
       return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(

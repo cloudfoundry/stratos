@@ -24,8 +24,6 @@ export interface IRequestEntityTypeState<T> {
   [guid: string]: T;
 }
 
-
-
 export abstract class AppState<
   T extends Record<string, any> = any
   > {
@@ -49,10 +47,15 @@ export abstract class AppState<
   recentlyVisited: IRecentlyVisitedState;
 }
 export interface GeneralRequestDataState {
-  [name: string]: IRequestEntityTypeState<any>;
+  [name: string]: any;
 }
 
 export interface GeneralAppRequestDataState extends BaseRequestDataState, GeneralRequestDataState { }
+
+export type EndpointOnlyAppState = AppState<Pick<BaseRequestDataState, 'endpoint'>>;
+export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
+export type AuthOnlyAppState = Pick<AppState, 'auth'>;
+export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseRequestDataState, 'userFavorites'>>, 'userFavoritesGroups'>;
 
 // One stop shop for all of your app state needs
 
@@ -63,6 +66,10 @@ export abstract class GeneralEntityAppState extends AppState<GeneralRequestDataS
 // Only care about internal entities? Use this one.
 // This should only be used by internal stratos code
 export abstract class InternalAppState extends AppState<BaseRequestDataState> { }
+
+// Only care about specific internal entities? Use this one.
+// This should only be used by internal stratos code
+export type PickedInternalAppState<T extends keyof InternalAppState> = Pick<InternalAppState, T>;
 
 // Care about internal entities and catalogue entities? Use this one.
 // This should only be used by internal stratos code

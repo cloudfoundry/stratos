@@ -1,5 +1,5 @@
 import { RequestMethod } from '@angular/http';
-import { CFAppState } from '../../app-state';
+import { GeneralAppState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
 import { BaseRequestDataState } from '../../types/entity.types';
@@ -167,8 +167,8 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
 }
 
 
-export function startApiRequest(
-  store: Store<CFAppState>,
+export function startApiRequest<T extends GeneralAppState = GeneralAppState>(
+  store: Store<T>,
   apiAction: ICFAction | PaginatedAction,
   requestType: ApiRequestTypes = 'fetch'
 ) {
@@ -176,8 +176,8 @@ export function startApiRequest(
   store.dispatch(getActionFromString(apiAction.actions[0]));
 }
 
-export function completeApiRequest(
-  store: Store<CFAppState>,
+export function completeApiRequest<T extends GeneralAppState = GeneralAppState>(
+  store: Store<T>,
   apiAction: ICFAction | PaginatedAction,
   apiResponse: APIResponse,
   requestType: ApiRequestTypes = 'fetch',
@@ -193,7 +193,7 @@ export function completeApiRequest(
 }
 
 export function failApiRequest(
-  store: Store<CFAppState>,
+  store: Store<GeneralAppState>,
   apiAction: ICFAction | PaginatedAction,
   error,
   requestType: ApiRequestTypes = 'fetch',

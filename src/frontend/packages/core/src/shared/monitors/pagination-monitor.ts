@@ -14,7 +14,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../store/src/app-state';
+import { GeneralEntityAppState, AppState, GeneralRequestDataState } from '../../../../store/src/app-state';
 import { ActionState, ListActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
@@ -42,7 +42,7 @@ export class MultiActionListEntity {
   }
   constructor(public entity: any, public entityKey: string) { }
 }
-export class PaginationMonitor<T = any> {
+export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppState> {
 
   /**
    * Emits the current page of entities.
@@ -71,7 +71,7 @@ export class PaginationMonitor<T = any> {
    * Returns a pagination monitor for a given catalogue entity and pagination key.
    */
   static getMonitorFromCatalogueEntity(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     catalogueEntity: StratosBaseCatalogueEntity,
     paginationKey: string,
     {
@@ -86,7 +86,7 @@ export class PaginationMonitor<T = any> {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<Y>,
     public paginationKey: string,
     public entityConfig: EntityCatalogueEntityConfig,
     public isLocal = false
@@ -135,7 +135,7 @@ export class PaginationMonitor<T = any> {
 
   // ### Initialization methods.
   private init(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     paginationKey: string,
     schema: normalizrSchema.Entity,
   ) {
@@ -159,7 +159,7 @@ export class PaginationMonitor<T = any> {
   }
 
   private createPaginationObservable(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     entityKey: string,
     paginationKey: string,
   ) {
@@ -270,7 +270,7 @@ export class PaginationMonitor<T = any> {
     };
   }
 
-  private getLocalEntities(pagination: PaginationEntityState, allEntities: BaseRequestDataState, defaultSchema: normalizrSchema.Entity) {
+  private getLocalEntities(pagination: PaginationEntityState, allEntities: GeneralRequestDataState, defaultSchema: normalizrSchema.Entity) {
     const pages = Object.keys(pagination.ids);
     if (pages.length > 1) {
       if (pagination.forcedLocalPage) {
@@ -293,7 +293,7 @@ export class PaginationMonitor<T = any> {
     }
   }
 
-  private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: BaseRequestDataState) {
+  private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: GeneralRequestDataState) {
     return page.length
       ? denormalize(page, [schema], allEntities).filter(ent => !!ent)
       : [];

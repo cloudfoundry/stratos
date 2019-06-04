@@ -4,10 +4,9 @@ import { map } from 'rxjs/operators';
 import { GetOrganization } from '../../../actions/organization.actions';
 import { APIResponse } from '../../../actions/request.actions';
 import { GetSpace } from '../../../actions/space.actions';
-import { GeneralEntityAppState, IRequestEntityTypeState } from '../../../app-state';
+import { GeneralEntityAppState, IRequestEntityTypeState, GeneralRequestDataState } from '../../../app-state';
 import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
-import { BaseRequestDataState } from '../../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
@@ -64,7 +63,7 @@ export function orgSpacePostProcess(
   store: Store<GeneralEntityAppState>,
   action: GetOrganization | GetSpace,
   apiResponse: APIResponse,
-  allEntities: BaseRequestDataState): ValidateEntityResult {
+  allEntities: GeneralRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
   const orgOrSpaceCatalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
   const { entityKey } = orgOrSpaceCatalogueEntity;

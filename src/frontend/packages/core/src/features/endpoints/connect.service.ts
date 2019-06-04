@@ -14,12 +14,12 @@ import {
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
-import { CFAppState } from '../../../../store/src/app-state';
+import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../store/src/effects/system.effects';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../core/endpoints.service';
 import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
@@ -67,7 +67,7 @@ export class ConnectEndpointService {
   private connectDelay = 1000;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<EndpointOnlyAppState>,
     private endpointsService: EndpointsService,
     public config: ConnectEndpointConfig,
   ) {

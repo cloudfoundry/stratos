@@ -8,7 +8,7 @@ import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
@@ -56,7 +56,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
 
-  constructor(private store: Store<CFAppState>, activatedRoute: ActivatedRoute, ) {
+  constructor(private store: Store<GeneralEntityAppState>, activatedRoute: ActivatedRoute, ) {
 
     this.existingEndpoints = store.select(selectPaginationState(this.endpointEntityKey, GetAllEndpoints.storeKey))
       .pipe(

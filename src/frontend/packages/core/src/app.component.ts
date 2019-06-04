@@ -4,7 +4,7 @@ import { create } from 'rxjs-spy';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 import { Store } from '@ngrx/store';
-import { CFAppState } from '../../store/src/app-state';
+import { PickedInternalAppState } from '../../store/src/app-state';
 import { Observable } from 'rxjs';
 
 
@@ -21,7 +21,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     private loggedInService: LoggedInService,
-    store: Store<CFAppState>
+    store: Store<PickedInternalAppState<'auth'>>
   ) {
     // We use the username to key the session storage. We could replace this with the users id?
     this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);

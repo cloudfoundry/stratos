@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import { first, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../store/src/app-state';
+import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { Store } from '@ngrx/store';
@@ -36,7 +36,7 @@ const endpointTypesMap = {};
 export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponent>[] = [];
 
 
-export function endpointHasMetrics(endpointGuid: string, store: Store<CFAppState>): Observable<boolean> {
+export function endpointHasMetrics(endpointGuid: string, store: Store<EndpointOnlyAppState>): Observable<boolean> {
   return store.select(endpointEntitiesSelector).pipe(
     first(),
     map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)

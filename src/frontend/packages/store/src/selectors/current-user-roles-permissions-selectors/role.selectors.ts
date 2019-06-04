@@ -1,25 +1,24 @@
 import { compose } from '@ngrx/store';
 
-import { CFAppState } from '../../app-state';
+import { PickedInternalAppState } from '../../app-state';
 import {
   IAllCfRolesState,
   ICfRolesState,
   ICurrentUserRolesState,
-  IOrgRoleState,
   ISpacesRoleState,
   IOrgsRoleState,
   IStratosRolesState,
   IGlobalRolesState,
   RoleEntities,
-  ISpaceRoleState,
 } from '../../types/current-user-roles.types';
 import { PermissionValues, PermissionStrings, ScopeStrings } from '../../../../core/src/core/current-user-permissions.config';
 
 
 
-export const selectCurrentUserRolesState = (state: CFAppState) => state.currentUserRoles;
+export const selectCurrentUserRolesState = (state: PickedInternalAppState<'currentUserRoles'>) => state.currentUserRoles;
 
 export const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => state.internal;
+//TODO This looks like it's wrong, typescript seems to think it's going to return any type.
 export const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: IStratosRolesState) => state[role] || false;
 
 export const selectEntityWithRole = (role: PermissionStrings, type: RoleEntities) => (state: ICfRolesState) => {

@@ -357,8 +357,8 @@ function handleValidationLoopResults(
   store: Store<GeneralEntityAppState>,
   results: ValidateEntityResult[],
   apiResponse: APIResponse,
-  action: IRequestAction,
-  allEntities: BaseRequestDataState): ValidationResult {
+  action: IRequestAction
+): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
   results.forEach(request => {
     // Fetch any missing data
@@ -440,7 +440,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
     parentRelation: entityTree.rootRelation,
   });
 
-  return handleValidationLoopResults(store, results, config.apiResponse, action, allEntities);
+  return handleValidationLoopResults(store, results, config.apiResponse, action);
 }
 
 function getRelationAction(action: IRequestAction): EntityInlineParentAction {

@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../store/src/app-state';
 import { featureFlagSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   getCurrentUserCFEndpointHasScope,
@@ -27,8 +27,7 @@ import {
   PermissionValues,
   ScopeStrings,
 } from './current-user-permissions.config';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 
 
 export interface IConfigGroups {
@@ -41,7 +40,7 @@ export enum CHECKER_GROUPS {
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
-  constructor(private store: Store<CFAppState>, ) { }
+  constructor(private store: Store<GeneralEntityAppState>, ) { }
   public check(
     type: PermissionTypes,
     permission: PermissionValues,
