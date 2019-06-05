@@ -195,7 +195,14 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		return tr, false, nil
 	} else if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		return nil, false, interfaces.LogHTTPError(res, err)
+		errMessage := ""
+		if res.StatusCode == http.StatusUnauthorized {
+			errMessage = ": Unauthorized"
+		}
+		return nil, false, interfaces.NewHTTPShadowError(
+			res.StatusCode,
+			fmt.Sprintf("Could not connect to the endpoint%s", errMessage),
+			"Could not connect to the endpoint: %s", err)
 	}
 
 	defer res.Body.Close()

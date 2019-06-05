@@ -212,7 +212,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 }
 
 func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
-	log.Debug("loginToUAA")
+	log.Debug("doLoginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
 		// Check the Error
@@ -270,7 +270,7 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 
 // Start SSO flow for an Endpoint
 func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
-	log.Debug("loginToCNSI")
+	log.Debug("ssoLoginToCNSI")
 	endpointGUID := c.QueryParam("guid")
 	if len(endpointGUID) == 0 {
 		return interfaces.NewHTTPShadowError(
@@ -371,7 +371,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 			"No Endpoint registered with GUID %s: %s", cnsiGUID, err)
 	}
 
-	// Get ther User ID since we save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
+	// Get the User ID since we save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
 	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
@@ -406,6 +406,9 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 		if cnsiRecord.CNSIType == endpointType {
 			tokenRecord, isAdmin, err := endpointPlugin.Connect(c, cnsiRecord, userID)
 			if err != nil {
+				if shadowError, ok := err.(interfaces.ErrHTTPShadow); ok {
+					return nil, shadowError
+				}
 				return nil, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Could not connect to the endpoint",
@@ -544,8 +547,21 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
 
 	if err != nil {
+		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
+			// Try and parse the Response into UAA error structure (p.login only handles UAA requests)
+			errMessage := ""
+			authError := &interfaces.UAAErrorResponse{}
+			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
+				errMessage = fmt.Sprintf(": %s", authError.ErrorDescription)
+			}
+			return nil, nil, nil, interfaces.NewHTTPShadowError(
+				httpError.Status,
+				fmt.Sprintf("Could not connect to the endpoint%s", errMessage),
+				"Could not connect to the endpoint: %s", err)
+		}
+
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
+			http.StatusBadRequest,
 			"Login failed",
 			"Login failed: %v", err)
 	}
@@ -703,7 +719,7 @@ func (p *portalProxy) logout(c echo.Context) error {
 }
 
 func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*interfaces.UAAResponse, error) {
-	log.Debug("getUAATokenWithCreds")
+	log.Debug("getUAATokenWithAuthorizationCode")
 
 	body := url.Values{}
 	body.Set("grant_type", "authorization_code")
