@@ -45,15 +45,14 @@ func TestLoginToUAA(t *testing.T) {
 
 		defer mockUAA.Close()
 		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
-		uaaUrl, _ := url.Parse(mockUAA.URL)
-		pp.Config.ConsoleConfig.UAAEndpoint = uaaUrl
+		uaaURL, _ := url.Parse(mockUAA.URL)
+		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WillReturnRows(expectNoRows())
 
 		mock.ExpectExec(insertIntoTokens).
-			// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		loginErr := pp.loginToUAA(ctx)
@@ -76,32 +75,17 @@ func TestLocalLogin(t *testing.T) {
 
 		username := "localuser"
 		password := "localuserpass"
-		email        := ""
-		scope        := "stratos.admin"
-
-		req := setupMockReq("POST", "", map[string]string{
-			"username": username,
-			"password": password,
-			"email"   : email,
-			"scope"   : scope,
-		})
-
-		_, _, _, pp, db, _ := setupHTTPTest(req)
-		defer db.Close()
+		scope    := "stratos.admin"
 
 		//Hash the password
-		passwordHash, err := pp.HashPassword(password)
-		if err != nil {
-			panic(err)
-		}
+		passwordHash, _ := HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
 		
-		req = setupMockReq("POST", "", map[string]string{
-			"username": "localuser",
+		req := setupMockReq("POST", "", map[string]string{
+			"username": username,
 			"password": password,
-			"email"   : email,
 			"scope"   : scope,
 			"guid"    : userGUID,
 		})
@@ -140,28 +124,15 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 		email        := ""
 		scope        := "stratos.admin"
 
-		req := setupMockReq("POST", "", map[string]string{
-			"username": username,
-			"password": password,
-			"email"   : email,
-			"scope"   : scope,
-		})
-
-		_, _, _, pp, db, _ := setupHTTPTest(req)
-		defer db.Close()
-
 		//Hash the password
-		passwordHash, err := pp.HashPassword(password)
-		if err != nil {
-			panic(err)
-		}
+		passwordHash, _ := HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
 		
-		req = setupMockReq("POST", "", map[string]string{
-			"username": "localuser",
-			"password": "localuserpass",
+		req := setupMockReq("POST", "", map[string]string{
+			"username": username,
+			"password": password,
 			"email"   : email,
 			"scope"   : scope,
 			"guid"    : userGUID,
@@ -192,33 +163,17 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 
 		username := "localuser"
 		password := "localuserpass"
-		email        := ""
-
-		req := setupMockReq("POST", "", map[string]string{
-			"username": username,
-			"password": password,
-			"email"   : email,
-			"scope"   : "wrongscope",
-		})
-
-		_, _, _, pp, db, _ := setupHTTPTest(req)
-		defer db.Close()
 
 		//Hash the password
-		passwordHash, err := pp.HashPassword(password)
-		if err != nil {
-			panic(err)
-		}
+		passwordHash, _ := HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
 		
 		wrongScope := "not admin scope"
-		req = setupMockReq("POST", "", map[string]string{
-			"username": "localuser",
-			"password": "localuserpass",
-			//"email"   : email,
-			//"scope"   : wrongScope,
+		req := setupMockReq("POST", "", map[string]string{
+			"username": username,
+			"password": password,
 			"guid"    : userGUID,
 		})
 
@@ -269,8 +224,8 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 
 		defer mockUAA.Close()
 		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
-		uaaUrl, _ := url.Parse(mockUAA.URL)
-		pp.Config.ConsoleConfig.UAAEndpoint = uaaUrl
+		uaaURL, _ := url.Parse(mockUAA.URL)
+		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
 
 		err := pp.loginToUAA(ctx)
@@ -309,8 +264,8 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 
 		defer mockUAA.Close()
 		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
-		uaaUrl, _ := url.Parse(mockUAA.URL)
-		pp.Config.ConsoleConfig.UAAEndpoint = uaaUrl
+		uaaURL, _ := url.Parse(mockUAA.URL)
+		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
 
 		mock.ExpectQuery(selectAnyFromTokens).
@@ -382,7 +337,7 @@ func TestLoginToCNSI(t *testing.T) {
 		sessionValues["exp"] = time.Now().AddDate(0, 0, 1).Unix()
 
 		if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
-			t.Error(errors.New("Unable to mock/stub user in session object."))
+			t.Error(errors.New("unable to mock/stub user in session object"))
 		}
 
 		mock.ExpectQuery(selectAnyFromTokens).
@@ -448,7 +403,7 @@ func TestLoginToCNSIWithMissingCNSIRecord(t *testing.T) {
 		// Return nil from db call
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
-			WillReturnError(errors.New("No match for that GUID"))
+			WillReturnError(errors.New("no match for that GUID"))
 
 		loginErr :=	pp.loginToCNSI(ctx)
 		// do the call
@@ -737,7 +692,7 @@ func TestVerifySession(t *testing.T) {
 		sessionValues["exp"] = time.Now().Add(time.Hour).Unix()
 
 		if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
-			t.Error(errors.New("Unable to mock/stub user in session object."))
+			t.Error(errors.New("unable to mock/stub user in session object"))
 		}
 
 		mockTokenGUID := "mock-token-guid"
@@ -850,7 +805,7 @@ func TestVerifySessionExpired(t *testing.T) {
 			WillReturnError(errors.New("Session has expired"))
 
 		if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
-			t.Error(errors.New("Unable to mock/stub user in session object."))
+			t.Error(errors.New("unable to mock/stub user in session object"))
 		}
 
 		mock.ExpectQuery(selectAnyFromTokens).

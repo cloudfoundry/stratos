@@ -1,4 +1,4 @@
-package local_users
+package localusers
 
 import (
 	"database/sql"
@@ -43,7 +43,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	findLastLoginTime = datastore.ModifySQLStatement(findLastLoginTime, databaseProvider)
 }
 
-// FindPasswordHash - return the password hash from the datastore
+// FindPasswordHash returns the password hash from the datastore, for the given user
 func (p *PgsqlLocalUsersRepository) FindPasswordHash(userGUID string) ([]byte, error) {
 	log.Debug("FindPasswordHash")
 	if userGUID == "" {
@@ -61,14 +61,14 @@ func (p *PgsqlLocalUsersRepository) FindPasswordHash(userGUID string) ([]byte, e
 	row := p.db.QueryRow(findPasswordHash, userGUID)
 	err := row.Scan(&passwordHash)
 	if err != nil {
-		msg := "Unable to Find password hash: %s"
+		msg := "Unable to Find password hash: %v"
 		log.Debugf(msg, err)
 		return nil, fmt.Errorf(msg, err)
 	}
 	return passwordHash, nil
 }
 
-// FindUserGUID - return the user GUID from the datastore
+// FindUserGUID returns the user GUID from the datastore for the given username.
 func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error) {
 	log.Debug("FinduserGUID")
 	if username == "" {
@@ -93,6 +93,7 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 	return userGUID.String, nil
 }
 
+//FindUserScope selects the user_scope field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, error) {
 	log.Debug("FindUserScope")
 	if userGUID == "" {
@@ -101,12 +102,12 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 		return "", errors.New(msg)
 	}
 
-	// temp vars to retrieve db data
+	// temp var to retrieve user scope from db select
 	var (
 		userScope string
 	)
 
-	// Get the user scope from the db
+	// Select the user scope from the db
 	err := p.db.QueryRow(findUserScope, userGUID).Scan(&userScope)
 	if err != nil {
 		msg := "Unable to Find user scope: %v"
@@ -116,6 +117,8 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 	return userScope, nil
 }
 
+//UpdateLastLoginTime called when a local user logs in.
+//It updates the last_login timestamp field in the local_users table for the given user.
 func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTime time.Time) error {
 	log.Debug("UpdateLastLoginTime")
 
@@ -156,11 +159,12 @@ func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTi
 	return nil
 }
 
+//FindLastLoginTime selects the last_login field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Time, error) {
 	log.Debug("FindLastLoginTime")
 
 	if userGUID == "" {
-		msg := "Unable to find last login time without a valid user GUID."
+		msg := "unable to find last login time without a valid user GUID"
 		log.Debug(msg)
 		return time.Unix(0, 0), errors.New(msg)
 	}
@@ -173,31 +177,39 @@ func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Tim
 	// Get the user scope from the db
 	err := p.db.QueryRow(findLastLoginTime, userGUID).Scan(&loginTime)
 	if err != nil {
-		msg := "Unable to Find last login time: %v"
+		msg := "unable to Find last login time: %v"
+		log.Debug(msg)
 		return loginTime, fmt.Errorf(msg, err)
 	}
 	return loginTime, nil
 }
 
-// AddLocalUser - Add a new local user to the datastore
+// AddLocalUser - Add a new local user to the datastore.
+// Email is optional
 func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash []byte, username string, email string, scope string) error {
 
 	log.Debug("AddLocalUser")
 
 	if userGUID == "" {
-		msg := "Unable to add new local user without a valid User GUID."
+		msg := "unable to add new local user without a valid User GUID"
 		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	if len(passwordHash) == 0 {
-		msg := "Unable to add new local user without a valid password hash."
+		msg := "unable to add new local user without a valid password hash"
 		log.Debug(msg)
 		return errors.New(msg)
 	}
 
 	if username == "" {
-		msg := "Unable to add new local user without a valid User name."
+		msg := "unable to add new local user without a valid User name"
+		log.Debug(msg)
+		return errors.New(msg)
+	}
+
+	if scope == "" {
+		msg := "unable to add new local user without a valid user scope"
 		log.Debug(msg)
 		return errors.New(msg)
 	}
@@ -205,24 +217,24 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash [
 	// Add the new local user to the DB
 	result, err := p.db.Exec(insertLocalUser, userGUID, passwordHash, username, email, scope)
 	if err != nil {
-		msg := "Unable to INSERT local user: %v"
-		log.Debugf(msg, err)
+		msg := "unable to INSERT local user: %v"
+		log.Debugf(msg)
 		return fmt.Errorf(msg, err)
 	}
 	rowsUpdates, err := result.RowsAffected()
 	if err != nil {
-		return errors.New("Unable to INSERT local user: could not determine number of rows that were updated")
+		return errors.New("unable to INSERT local user: could not determine number of rows that were updated")
 	}
 
 	if rowsUpdates < 1 {
-		return errors.New("Unable to INSERT local user: no rows were updated")
+		return errors.New("unable to INSERT local user: no rows were updated")
 	}
 
 	if rowsUpdates > 1 {
 		log.Warn("INSERT local user: More than 1 row was updated (expected only 1)")
 	}
 
-	log.Debug("Local user INSERT complete")
+	log.Debug("local user INSERT complete")
 
 	return nil
 }

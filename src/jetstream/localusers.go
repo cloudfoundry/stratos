@@ -4,10 +4,10 @@ import (
 	"errors"
 
 	"github.com/labstack/echo"
-
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
 func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
@@ -17,7 +17,7 @@ func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
 		return "", errors.New("Needs username")
 	}
 
-	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for local users: %v", err)
 		return "", err
@@ -44,14 +44,14 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 		return "", errors.New("Needs username, password and scope")
 	}
 	
-	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for local users: %v", err)
 		return "", err
 	}
 
 	//Hash the password
-	passwordHash, err := p.HashPassword(password)
+	passwordHash, err := HashPassword(password)
 	if err != nil {
 		log.Errorf("Error hashing user password: %v", err)
 		return "", err

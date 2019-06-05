@@ -1,25 +1,16 @@
 package main
 
 import (
-	//"errors"
-	// "net/http"
-	// "net/url"
+
 	"fmt"
 	"testing"
 	"time"
 
-	// uuid "github.com/satori/go.uuid"
-
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
-
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
-	uuid "github.com/satori/go.uuid"
-
-	// "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	//"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
-	//"github.com/labstack/echo"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	. "github.com/smartystreets/goconvey/convey"
 	
 )
@@ -43,13 +34,10 @@ func TestAddLocalUser(t *testing.T) {
 		defer db.Close()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
-
 		guid, err := pp.AddLocalUser(ctx)
 		
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
-
         mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
-
 		fetchedGUID, err := pp.FindUserGUID(ctx)
 
 		Convey("Should not fail to login", func() {
@@ -130,33 +118,25 @@ func TestAddLocalUserDuplicate(t *testing.T) {
 		defer db.Close()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
-
 		guid, err := pp.AddLocalUser(ctx)
 
+		//Check that the new local user has been added correctly before we try to add a duplicate
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
-
 		mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
-		
 		fetchedGUID, err := pp.FindUserGUID(ctx)
 
-		Convey("Should not fail add user", func() {
+		Convey("Should not fail to add new user", func() {
 			So(err, ShouldBeNil)
 			So(guid, ShouldEqual, fetchedGUID)
 		})
 
-		req = setupMockReq("POST", "", map[string]string{
-			"username": "testuser",
-			"password": "changeme",
-			"email":    "test.person@somedomain.com",
-			"scope":    "stratos.admin",
-		})
-
+		//Now try to add a duplicate user (non-unique username)
 		mock.ExpectExec(addLocalUser).WillReturnError(fmt.Errorf(""))
-
 		guid, err = pp.AddLocalUser(ctx)
-		Convey("Should fail to add user", func() {
+
+		Convey("Should fail to add duplicate user", func() {
 			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldContainSubstring, "Unable to INSERT local user")
+			So(err.Error(), ShouldContainSubstring, "unable to INSERT local user")
 			So(guid, ShouldEqual, "")
 		})
 
@@ -177,10 +157,9 @@ func TestFindPasswordHash(t *testing.T) {
 		pp := setupPortalProxy(db)
 		pp.DatabaseConnectionPool = db
 
-		localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(db)
+		localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(db)
 		if err != nil {
 			log.Errorf("Database error getting repo for Local users: %v", err)
-			panic(err)
 		}
 
 		username := "testuser"
@@ -189,11 +168,7 @@ func TestFindPasswordHash(t *testing.T) {
 		scope    := "stratos.admin"
 		
 		//Hash the password
-		generatedPasswordHash, err := pp.HashPassword(password)
-		if err != nil {
-			log.Errorf("Error hashing user password: %v", err)
-			panic(err)
-		}
+		generatedPasswordHash, _ := HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
@@ -202,7 +177,6 @@ func TestFindPasswordHash(t *testing.T) {
 		err = localUsersRepo.AddLocalUser(userGUID, generatedPasswordHash, username, email, scope)
 		if err != nil {
 			log.Errorf("Error hashing user password: %v", err)
-			panic(err)
 		}
 
 		expectedHashRow := sqlmock.NewRows([]string{"password_hash"}).AddRow(generatedPasswordHash)
@@ -230,11 +204,7 @@ func TestUpdateLastLoginTime(t *testing.T) {
 		pp := setupPortalProxy(db)
 		pp.DatabaseConnectionPool = db
 
-		localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(db)
-		if err != nil {
-			log.Errorf("Database error getting repo for Local users: %v", err)
-			panic(err)
-		}
+		localUsersRepo, _ := localusers.NewPgsqlLocalUsersRepository(db)
 
 		username := "testuser"
 		password := "changeme"
@@ -242,21 +212,13 @@ func TestUpdateLastLoginTime(t *testing.T) {
 		scope    := "stratos.admin"
 		
 		//Hash the password
-		generatedPasswordHash, err := pp.HashPassword(password)
-		if err != nil {
-			log.Errorf("Error hashing user password: %v", err)
-			panic(err)
-		}
+		generatedPasswordHash, _ := HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
-		err = localUsersRepo.AddLocalUser(userGUID, generatedPasswordHash, username, email, scope)
-		if err != nil {
-			log.Errorf("Error hashing user password: %v", err)
-			panic(err)
-		}
+		localUsersRepo.AddLocalUser(userGUID, generatedPasswordHash, username, email, scope)
 
 		//Now generate and update the login time
 		generatedLoginTime := time.Now()
@@ -266,11 +228,7 @@ func TestUpdateLastLoginTime(t *testing.T) {
 		
 		expectedLastLoginTimeRow := sqlmock.NewRows([]string{"login_time"}).AddRow(generatedLoginTime)
 		mock.ExpectQuery(findLastLoginTime).WillReturnRows(expectedLastLoginTimeRow)
-		fetchedLoginTime, err := localUsersRepo.FindLastLoginTime(userGUID)
-		if err != nil {
-			log.Errorf("Error fetching last login time: %v", err)
-			panic(err)
-		}
+		fetchedLoginTime, _ := localUsersRepo.FindLastLoginTime(userGUID)
 
 		Convey("Login times should match", func() {
 			So(fetchedLoginTime, ShouldEqual, generatedLoginTime)

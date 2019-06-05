@@ -21,7 +21,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -50,6 +50,8 @@ const XSRFTokenCookie = "XSRF-TOKEN"
 // XSRFTokenSessionName - XSRF Token Session name
 const XSRFTokenSessionName = "xsrf_token"
 
+//LogoutResponse is sent upon user logout.
+//It contains a flag to indicate whether or not the user was signed in with SSO
 type LogoutResponse struct {
 	IsSSO bool `json:"isSSO"`
 }
@@ -304,7 +306,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, errors.New("Needs username, password and guid")
 	}
 	
-	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
 		return nil, err
@@ -316,7 +318,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	err = p.CheckPasswordHash(password, hash)
+	err = CheckPasswordHash(password, hash)
 
 	if err != nil {
 		// Check the Error
@@ -367,8 +369,6 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 		return nil, err
 	}
 
-	//Can we re-use this login response struct?
-	//We may need to add a token expiry value here (and to the localusers table, as we check it elsewhere (though we don't seem to use the value)
 	resp := &interfaces.LoginRes{
 		Account:     username,
 		TokenExpiry: 0,
@@ -378,12 +378,15 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 	return resp, nil
 }
 
-func (p *portalProxy) HashPassword(password string) ([]byte, error) {
+//HashPassword accepts a plaintext password string and generates a salted hash
+func HashPassword(password string) ([]byte, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return bytes, err
 }
 
-func (p *portalProxy) CheckPasswordHash(password string, hash []byte) error {
+//CheckPasswordHash accepts a bcrypt salted hash and plaintext password.
+//It verifies the password against the salted hash
+func CheckPasswordHash(password string, hash []byte) error {
 	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
 	return err
 }
@@ -451,10 +454,10 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 // Note, an admin user can connect an endpoint as a system endpoint to share it with others
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	log.Debug("loginToCNSI")
-	cnsiGuid := c.FormValue("cnsi_guid")
+	cnsiGUID := c.FormValue("cnsi_guid")
 	var systemSharedToken = false
 
-	if len(cnsiGuid) == 0 {
+	if len(cnsiGUID) == 0 {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
@@ -466,7 +469,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 		systemSharedToken = systemSharedValue == "true"
 	}
 
-	resp, err := p.DoLoginToCNSI(c, cnsiGuid, systemSharedToken)
+	resp, err := p.DoLoginToCNSI(c, cnsiGUID, systemSharedToken)
 	if err != nil {
 		return err
 	}
@@ -604,12 +607,12 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 			return err
 		}
 
-		uaaUrl, err := url.Parse(cnsiInfo.AuthorizationEndpoint)
+		uaaURL, err := url.Parse(cnsiInfo.AuthorizationEndpoint)
 		if err != nil {
 			return fmt.Errorf("invalid authorization endpoint URL %s %s", cnsiInfo.AuthorizationEndpoint, err)
 		}
 
-		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
+		if uaaURL.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
 			uaaToken.LinkedGUID = uaaToken.TokenGUID
 			err = p.setCNSITokenRecord(theCNSIrecord.GUID, u.UserGUID, uaaToken)
 
@@ -620,13 +623,11 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 			}
 			// Return error from the login
 			return err
-		} else {
-			return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")
 		}
-	} else {
-		log.Warn("Could not find current user UAA token")
-		return err
+		return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")
 	}
+	log.Warn("Could not find current user UAA token")
+	return err
 }
 
 func santizeInfoForSystemSharedTokenUser(cnsiUser *interfaces.ConnectedUser, isSysystemShared bool) {
@@ -646,9 +647,9 @@ func (p *portalProxy) ConnectOAuth2(c echo.Context, cnsiRecord interfaces.CNSIRe
 	return &tokenRecord, nil
 }
 
-func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
+func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 
-	uaaRes, u, err := p.loginHttpBasic(c)
+	uaaRes, u, err := p.loginHTTPBasic(c)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -801,7 +802,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 	return uaaRes, u, nil
 }
 
-func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
+func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")

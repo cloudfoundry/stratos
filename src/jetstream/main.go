@@ -40,7 +40,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/local_users"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 
 )
 
@@ -174,7 +174,7 @@ func main() {
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
-	local_users.InitRepositoryProvider(dc.DatabaseProvider)
+	localusers.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
@@ -344,7 +344,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 
 func initialiseLocalUsersConfiguration(portalProxy *portalProxy) (error) {
 
-	localUsersRepo, err := local_users.NewPgsqlLocalUsersRepository(portalProxy.DatabaseConnectionPool)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
 		return err
@@ -353,7 +353,7 @@ func initialiseLocalUsersConfiguration(portalProxy *portalProxy) (error) {
 	if err == nil {
 		userGUID := uuid.NewV4().String()
 		password := portalProxy.Config.ConsoleConfig.LocalUserPassword
-		passwordHash, err := portalProxy.HashPassword(password)
+		passwordHash, err := HashPassword(password)
 		if err != nil {
 			log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
 			return err
