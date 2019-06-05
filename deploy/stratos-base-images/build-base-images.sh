@@ -144,8 +144,6 @@ build_and_push_image stratos-base Dockerfile.stratos-base
 # Base with ruby
 build_and_push_image stratos-ruby-build-base Dockerfile.stratos-ruby-build-base
 
-exit 1
-
 # Base with go
 build_and_push_image stratos-go-build-base Dockerfile.stratos-go-build-base
 
