@@ -72,7 +72,7 @@
     "ngrx-store-localstorage": "cf-stratos/ngrx-store-localstorage#lodash-dep-update",
     "ngx-moment": "^3.3.0",
     "normalizr": "^3.2.3",
-    "reselect": "^3.0.1",
+    "reselect": "^4.0.0",
     "rxjs": "^6.2.0",
     "rxjs-spy": "^7.0.2",
     "rxjs-websockets": "~6.0.0",
