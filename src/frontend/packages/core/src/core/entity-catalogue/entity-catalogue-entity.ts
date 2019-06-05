@@ -71,8 +71,13 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     return catalogueSchema[schemaKey];
   }
 
-  public getEntityMonitor<T extends AppState>(
-    store: Store<T>,
+  public getGuidFromEntity(entity: Y) {
+    const metadata = this.builder.getMetadata(entity);
+    return this.builder.getGuid(metadata);
+  }
+
+  public getEntityMonitor<Q extends AppState>(
+    store: Store<Q>,
     entityId: string,
     {
       schemaKey = '',

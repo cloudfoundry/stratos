@@ -10,7 +10,7 @@ import { APIResource } from '../../../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
-import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
+import { cfUserSchemaKey,  organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
 import {
   createEntityRelationPaginationKey,

@@ -69,6 +69,11 @@ import {
   StratosCatalogueEndpointEntity,
   StratosBaseCatalogueEntity
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+
+export function registerCFEntities() {
+  generateCFEntities().forEach(entity => entityCatalogue.register(entity));
+}
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition = {

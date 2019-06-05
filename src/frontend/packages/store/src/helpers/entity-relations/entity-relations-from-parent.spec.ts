@@ -10,13 +10,18 @@ import { AppState, IRequestEntityTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
 import { APIResource } from '../../types/api.types';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
-import { organizationSchemaKey } from '../entity-factory';
+import { organizationSchemaKey, spaceSchemaKey } from '../entity-factory';
 import { populatePaginationFromParent } from './entity-relations';
 import { EntityRelationSpecHelper } from './entity-relations.spec';
+import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-foundry.module';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { registerCFEntities } from '../../../../cloud-foundry/src/cf-entity-generator';
 interface SpaceState {
   space: IRequestEntityTypeState<APIResource<ISpace>>;
 }
 describe('Entity Relations - populate from parent', () => {
+  const entityKey = entityCatalogue.getEntityKey('cf', organizationSchemaKey);
+  const spaceEntityKey = entityCatalogue.getEntityKey('cf', spaceSchemaKey);
 
   const helper = new EntityRelationSpecHelper();
 
@@ -29,10 +34,15 @@ describe('Entity Relations - populate from parent', () => {
 
   beforeEach(() => {
     store = getInitialTestStoreState();
-    store.requestData[organizationSchemaKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-    store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState();
+    store.requestData[entityKey] = {};
+    store.request[entityKey] = {};
+    store.requestData[spaceEntityKey] = {};
+    store.request[spaceEntityKey] = {};
+    store.requestData[entityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
+    store.request[entityKey][orgGuid] = getDefaultRequestState();
     TestBed.configureTestingModule({
       imports: [
+        CloudFoundryPackageModule,
         createBasicStoreModule(store),
       ]
     });
@@ -61,9 +71,9 @@ describe('Entity Relations - populate from parent', () => {
     spaces.forEach(space => {
       store.requestData.space[space.metadata.guid] = space;
     });
-    store.requestData[organizationSchemaKey][orgGuid].entity.spaces = spaces;
+    store.requestData[entityKey][orgGuid].entity.spaces = spaces;
 
-    inject([Store], (iStore: Store<CFAppState>) => {
+    inject([Store], (iStore: Store<AppState>) => {
       populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true))
         .pipe(first()).subscribe((action: WrapperRequestActionSuccess) => {
           expect(action).toBeDefined();
@@ -72,13 +82,12 @@ describe('Entity Relations - populate from parent', () => {
           expect(action.totalResults).toBe(spaces.length);
           expect(action.totalPages).toBe(1);
           expect(action.response.result).toEqual(spaceGuids);
-          expect(action.response.entities.space).toEqual(spaces.reduce((map, space) => {
+          expect(action.response.entities[spaceEntityKey]).toEqual(spaces.reduce((map, space) => {
             map[space.metadata.guid] = space;
             return map;
           }, {}));
         });
     })();
-
   }));
 
 });

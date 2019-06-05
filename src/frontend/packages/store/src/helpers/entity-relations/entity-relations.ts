@@ -128,6 +128,7 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
   let response: NormalizedResponse;
   const guids = childEntitiesAsGuids(childEntitiesAsArray);
   const safeEntities = newEntities || {};
+  console.log(safeEntities);
   const entities = pick(safeEntities[childRelation.entityKey], guids as [string]) ||
     pick(allEntities[childRelation.entityKey], guids as [string]);
   response = {
@@ -481,19 +482,19 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
   if (!eicAction || !action.flattenPagination) {
     return observableOf(action);
   }
-  const parentEntitySchema = eicAction.parentEntityConfig as EntitySchema;
+  const parentEntitySchema = entityCatalogue.getEntity(eicAction.parentEntityConfig).getSchema(eicAction.parentEntityConfig.schemaKey);
   const parentGuid = eicAction.parentGuid;
 
   // What the hell is going on here hey? Well I'll tell you...
   // Ensure that the parent is not blocked (fetching, updating, etc) before we check if it has the child param that we need
-  const entityKey = entityCatalogue.getEntityKey(action);
-  return store.select(selectEntity(entityKey, parentGuid)).pipe(
+  const parentEntityKey = entityCatalogue.getEntityKey(eicAction.parentEntityConfig);
+  return store.select(selectEntity(parentEntityKey, parentGuid)).pipe(
     first(),
     mergeMap(entity => {
       if (!entity) {
         return observableOf(null);
       }
-      return store.select(selectRequestInfo(entityKey, parentGuid));
+      return store.select(selectRequestInfo(parentEntityKey, parentGuid));
     }),
     filter((entityInfo: RequestInfoState) => {
       return !isEntityBlocked(entityInfo);
@@ -501,7 +502,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
     first(),
     // At this point we should know that the parent entity is ready to be checked
     withLatestFrom(
-      store.select(selectEntity<any>(entityKey, parentGuid)),
+      store.select(selectEntity<any>(parentEntityKey, parentGuid)),
       store.select(getAPIRequestDataState),
     ),
     map(([entityInfo, entity, allEntities]: [RequestInfoState, any, BaseRequestDataState]) => {
@@ -521,13 +522,20 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           if (!entity.entity[paramName]) {
             return;
           }
+          const catalogueEntity = entityCatalogue.getEntity(eicAction);
+          const entityKey = catalogueEntity.entityKey;
+          const normedEntities = entity.entity[paramName].reduce((normedEntities, entity) => {
+            const guid = catalogueEntity.getGuidFromEntity(entity);
+            normedEntities[entityKey][guid] = entity;
+            return normedEntities;
+          }, { [entityKey]: {} });
           // Yes? Let's create the action that will populate the pagination section with the value
           const config: HandleRelationsConfig = {
             store,
             action,
             allEntities,
             allPagination: {},
-            newEntities: entity.entity[paramName],
+            newEntities: normedEntities,
             apiResponse: null,
             parentEntities: null,
             entities: entity.entity[paramName],
