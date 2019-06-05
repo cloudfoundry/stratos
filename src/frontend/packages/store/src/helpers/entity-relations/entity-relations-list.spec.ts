@@ -26,21 +26,21 @@ describe('Entity Relations - List relations', () => {
     const child2Schema = new CFEntitySchema('child2');
     const child1Schema = new CFEntitySchema('child1', {
       entity: {
-        [child2Schema.key]: child2Schema
+        [child2Schema.entityType]: child2Schema
       }
     });
 
     const action = createBaseAction();
     action.includeRelations = [
-      createEntityRelationKey(action.entityType, child1Schema.key),
-      createEntityRelationKey(child1Schema.key, child2Schema.key)
+      createEntityRelationKey(action.entityType, child1Schema.entityType),
+      createEntityRelationKey(child1Schema.entityType, child2Schema.entityType)
     ];
-    action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.key]: child1Schema } });
+    action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.entityType]: child1Schema } });
 
     const res = listEntityRelations(action);
     expect(res.maxDepth).toBe(2);
     expect(res.relations.length).toBe(2);
-    expect(res.relations).toEqual([child1Schema.key, child2Schema.key]);
+    expect(res.relations).toEqual([child1Schema.entityType, child2Schema.entityType]);
   });
 
 });

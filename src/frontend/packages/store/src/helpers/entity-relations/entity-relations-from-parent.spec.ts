@@ -60,7 +60,7 @@ describe('Entity Relations - populate from parent', () => {
 
   });
 
-  fit('List in parent', async(() => {
+  it('List in parent', async(() => {
     const spaces: APIResource<ISpace>[] = [
       helper.createEmptySpace('1', 'space1`', orgGuid),
       helper.createEmptySpace('2', 'space2`', orgGuid),
