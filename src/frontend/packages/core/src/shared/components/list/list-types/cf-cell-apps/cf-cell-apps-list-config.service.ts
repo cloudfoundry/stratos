@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
@@ -8,9 +11,6 @@ import { ITableColumn } from '../../list-table/table.types';
 import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 @Injectable()
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
@@ -57,7 +57,10 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
       cellFlex: '1',
       cellDefinition: {
         getAsyncLink: (value: APIResource<IApp>) => {
-          const spaceEntity = value.entity.space as APIResource<ISpace>;
+          const spaceEntity = value ? value.entity.space as APIResource<ISpace> : null;
+          if (!spaceEntity) {
+            return;
+          }
           const cf = `/cloud-foundry/${value.entity.cfGuid}/`;
           const org = `organizations/${spaceEntity.entity.organization.metadata.guid}`;
           const space = `/spaces/${spaceEntity.metadata.guid}/summary`;
@@ -74,8 +77,8 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
       cellFlex: '1',
       cellDefinition: {
         getAsyncLink: (value: APIResource<IApp>) => {
-          const space = value.entity.space as APIResource<ISpace>;
-          return `/cloud-foundry/${value.entity.cfGuid}/organizations/${space.entity.organization.metadata.guid}/summary`;
+          const space = value ? value.entity.space as APIResource<ISpace> : null;
+          return space ? `/cloud-foundry/${value.entity.cfGuid}/organizations/${space.entity.organization.metadata.guid}/summary` : null;
         },
         asyncValue: {
           pathToObs: 'appEntityService',
