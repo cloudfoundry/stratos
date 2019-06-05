@@ -44,27 +44,24 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 		return "", errors.New("Needs username, password and scope")
 	}
 	
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
-	if err != nil {
-		log.Errorf("Database error getting repo for local users: %v", err)
-		return "", err
-	}
-
-	//Hash the password
+	//Generate a user GUID and hash the password
+	//generate a user GUID
+	userGUID := uuid.NewV4().String()
 	passwordHash, err := HashPassword(password)
 	if err != nil {
 		log.Errorf("Error hashing user password: %v", err)
 		return "", err
 	}
 
-	//generate a user GUID
-	userGUID := uuid.NewV4().String()
-
-	err = localUsersRepo.AddLocalUser(userGUID, passwordHash, username, email, scope)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Error adding local user %v", err)
-		return "", err
+		log.Errorf("Database error getting repo for local users: %v", err)
+	} else {
+		err = localUsersRepo.AddLocalUser(userGUID, passwordHash, username, email, scope)
+		if err != nil {
+			log.Errorf("Error adding local user %v", err)
+			return "", err
+		}		
 	}
-
 	return userGUID, nil
 }

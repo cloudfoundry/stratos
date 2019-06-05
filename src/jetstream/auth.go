@@ -276,26 +276,52 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 
 func (p *portalProxy) localLogin(c echo.Context) error {
 	log.Debug("localLogin")
-	resp, err := p.doLocalLogin(c)
+
+	//Perform the login and fetch session values if successful
+	userGUID, username, err := p.doLocalLogin(c)
 	if err != nil {
+		//Login failed, return response.
+		errMessage := err.Error()
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			errMessage,
+			"Login failed: %s: %v", errMessage, err)
 		return err
 	}
 
-	jsonString, err := json.Marshal(resp)
-	if err != nil {
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = userGUID
+
+	// Ensure that login disregards cookies from the request
+	req := c.Request()
+	req.Header.Set("Cookie", "")
+	if err = p.setSessionValues(c, sessionValues); err != nil {
 		return err
 	}
 
-	// Add XSRF Token
-	p.ensureXSRFToken(c)
+	//Makes sure the client gets the right session expiry time
+	if err = p.handleSessionExpiryHeader(c); err != nil {
+		return err
+	}
 
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
+	resp := &interfaces.LoginRes{
+		Account:     username,
+		TokenExpiry: 0,
+		APIEndpoint: nil,
+		Admin:       true,
+	}
 
-	return nil
+	if jsonString, err := json.Marshal(resp); err == nil {
+		// Add XSRF Token
+		p.ensureXSRFToken(c)
+		c.Response().Header().Set("Content-Type", "application/json")
+		c.Response().Write(jsonString)
+	}
+
+	return err
 }
 
-func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error) {
+func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
 	log.Debug("doLocalLogin")
 
 	username := c.FormValue("username")
@@ -303,79 +329,42 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 	guid     := c.FormValue("guid")
 
 	if len(username) == 0 || len(password) == 0 || len(guid) == 0 {
-		return nil, errors.New("Needs username, password and guid")
+		return guid, username, errors.New("Needs username, password and guid")
 	}
 	
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
-		return nil, err
+		return guid, username, err
 	}
 
-	//Check the password hash
-	hash, err := localUsersRepo.FindPasswordHash(guid)
+	var errMessage string
+	var scopeOK bool
+	var hash []byte
+	err = nil
+	//Attempt to find the password has for the given user
+	if hash, err = localUsersRepo.FindPasswordHash(guid); err != nil {
+		errMessage = "User not found."
+		//Check the password hash
+	} else if err = CheckPasswordHash(password, hash); err != nil {
+			errMessage = "Access Denied - Invalid username/password credentials"
+	} else {
+		//Ensure the local user has some kind of admin role configured and we check for it here
+		localUserScope, err := localUsersRepo.FindUserScope(guid)
+		if scopeOK = strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope); (err != nil) || (!scopeOK) {
+			errMessage = "Access Denied - User scope invalid"
+		} else {
+			//Update the last login time here if login was successful
+			loginTime := time.Now()
+			if updateLoginTimeErr := localUsersRepo.UpdateLastLoginTime(guid, loginTime); updateLoginTimeErr != nil {
+				log.Errorf("Failed to update last login time for user: %s", guid)
+			}
+		}
+	}
 	if err != nil {
-		return nil, err
+		err = fmt.Errorf(errMessage)
 	}
-
-	err = CheckPasswordHash(password, hash)
-
-	if err != nil {
-		// Check the Error
-		errMessage := "Access Denied - Invalid username/password credentials"
-		err := interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			errMessage,
-			"Login failed: %s: %v", errMessage, err)
-		return nil, err
-	}
-
-	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = guid
-
-	// Ensure that login disregards cookies from the request
-	req := c.Request()
-	req.Header.Set("Cookie", "")
-	if err = p.setSessionValues(c, sessionValues); err != nil {
-		return nil, err
-	}
-
-	//Makes sure the client gets the right session expiry time
-	err = p.handleSessionExpiryHeader(c)
-	if err != nil {
-		return nil, err
-	}
-
-	//Ensure the local user has some kind of admin role configured and we check for it here
-	localUserScope, err := localUsersRepo.FindUserScope(guid)
-	if err != nil {
-		return nil, err
-	}
-	admin := strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope)
-
-	if admin == false {
-		errMessage := "Access Denied - User does not have admin scope."
-		err := interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			errMessage,
-			"Login failed: %s: %v", errMessage, err)
-		return nil, err
-	}
-
-	//Update the last login time here if login was successful
-	loginTime := time.Now()
-	err = localUsersRepo.UpdateLastLoginTime(guid, loginTime)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := &interfaces.LoginRes{
-		Account:     username,
-		TokenExpiry: 0,
-		APIEndpoint: nil,
-		Admin:       admin,
-	}
-	return resp, nil
+	return guid, username, err
 }
 
 //HashPassword accepts a plaintext password string and generates a salted hash
