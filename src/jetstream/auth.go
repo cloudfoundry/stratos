@@ -351,7 +351,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (*interfaces.LoginRes, error)
 	if err != nil {
 		return nil, err
 	}
-	admin := strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserAdminScope)
+	admin := strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope)
 
 	if admin == false {
 		errMessage := "Access Denied - User does not have admin scope."

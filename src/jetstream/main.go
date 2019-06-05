@@ -359,7 +359,7 @@ func initialiseLocalUsersConfiguration(portalProxy *portalProxy) (error) {
 			return err
 		}
 		username := portalProxy.Config.ConsoleConfig.LocalUser
-		scope    := portalProxy.Config.ConsoleConfig.LocalUserAdminScope
+		scope    := portalProxy.Config.ConsoleConfig.LocalUserScope
 		email    := ""
 		localUsersRepo.AddLocalUser(userGUID, passwordHash, username, email, scope)
 	}
@@ -375,13 +375,20 @@ func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.Consol
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("Stratos is intialised with the following setup:")
-	log.Infof("... UAA Endpoint        : %s", config.UAAEndpoint)
-	log.Infof("... Console Client      : %s", config.ConsoleClient)
+	log.Infof("... Auth Endpoint Type  : %s", config.AuthEndpointType)
+	if val, found := interfaces.AuthEndpointTypes[config.AuthEndpointType]; found {
+		if val == interfaces.Local {
+			log.Infof("... Local User          : %s", config.LocalUser)
+			log.Infof("... Local User Scope    : %s", config.LocalUserScope)
+		} else { //Auth type is set to remote
+			log.Infof("... UAA Endpoint        : %s", config.UAAEndpoint)
+			log.Infof("... Console Client      : %s", config.ConsoleClient)
+			log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
+			log.Infof("... Use SSO Login       : %t", config.UseSSO)
+		}
+	}
 	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
 	log.Infof("... Setup Complete      : %t", config.IsSetupComplete)
-	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
-	log.Infof("... Use SSO Login       : %t", config.UseSSO)
-	log.Infof("... Local User          : %s", config.LocalUser)
 }
 
 func showSSOConfig(portalProxy *portalProxy) {

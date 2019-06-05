@@ -181,6 +181,7 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 
 	authEndpointTypeVal, found := p.Env().Lookup("AUTH_ENDPOINT_TYPE")
 	if val, found := interfaces.AuthEndpointTypes[authEndpointTypeVal]; found {
+		consoleConfig.AuthEndpointType = string(val)
 		if val == interfaces.Local {
 			localUser, found := p.Env().Lookup("LOCAL_USER")
 			if !found {
@@ -194,10 +195,9 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 			if !found {
 				return consoleConfig, errors.New("LOCAL_USER_SCOPE not found")
 			}
-			consoleConfig.LocalUserAdminScope = localUserScope
+			consoleConfig.LocalUserScope = localUserScope
 			consoleConfig.LocalUser = localUser
 			consoleConfig.LocalUserPassword = localUserPassword
-			consoleConfig.AuthEndpointType = string(val)
 		}
 	} else {
 		return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")

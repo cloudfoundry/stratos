@@ -185,7 +185,7 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 
 		//Configure the admin scope we expect the user to have
 		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
-		pp.Config.ConsoleConfig.LocalUserAdminScope = "stratos.admin"
+		pp.Config.ConsoleConfig.LocalUserScope = "stratos.admin"
 
 		//The user trying to log in has a non-admin scope
 		rows = sqlmock.NewRows([]string{"scope"}).AddRow(wrongScope)

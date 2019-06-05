@@ -244,7 +244,7 @@ type ConsoleConfig struct {
 	ConsoleClientSecret string   `json:"console_client_secret"`
 	LocalUser           string   `json:"local_user"`
 	LocalUserPassword   string   `json:"local_user_password"`
-	LocalUserAdminScope string   `json:"local_user_scope"`
+	LocalUserScope      string   `json:"local_user_scope"`
 	AuthEndpointType    string   `json:"auth_endpoint_type"`
 	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
 	IsSetupComplete     bool     `json:"is_setup_complete"`
