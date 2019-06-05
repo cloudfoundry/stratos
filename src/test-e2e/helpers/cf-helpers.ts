@@ -175,7 +175,7 @@ export class CFHelpers {
     return reqObj(options).then((response) => {
       const json = JSON.parse(response.body);
       const isSUSE = json.description.indexOf('SUSE') === 0;
-      return isSUSE ? 'opensuse42' : 'cflinuxfs2';
+      return isSUSE ? 'sle15' : 'cflinuxfs2';
     }).catch((e) => {
       return 'unknown';
     });
@@ -389,7 +389,7 @@ export class CFHelpers {
       instance_memory_limit: -1,
       total_reserved_route_ports: -1,
       ...options
-    }
+    };
 
     return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'quota_definitions', body);
   }
@@ -404,7 +404,7 @@ export class CFHelpers {
       memory_limit: 5120,
       total_reserved_route_ports: -1,
       ...options
-    }
+    };
     return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
   }
 
