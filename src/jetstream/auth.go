@@ -338,21 +338,22 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
 		return guid, username, err
 	}
 
-	var errMessage string
 	var scopeOK bool
 	var hash []byte
-	err = nil
+	var authError error
+	var localUserScope string
 	//Attempt to find the password has for the given user
-	if hash, err = localUsersRepo.FindPasswordHash(guid); err != nil {
-		errMessage = "User not found."
+	if hash, authError = localUsersRepo.FindPasswordHash(guid); authError != nil {
+		authError = fmt.Errorf("User not found.")
 		//Check the password hash
-	} else if err = CheckPasswordHash(password, hash); err != nil {
-			errMessage = "Access Denied - Invalid username/password credentials"
+	} else if authError = CheckPasswordHash(password, hash); authError != nil {
+		authError = fmt.Errorf("Access Denied - Invalid username/password credentials")
 	} else {
 		//Ensure the local user has some kind of admin role configured and we check for it here
-		localUserScope, err := localUsersRepo.FindUserScope(guid)
-		if scopeOK = strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope); (err != nil) || (!scopeOK) {
-			errMessage = "Access Denied - User scope invalid"
+		localUserScope, authError = localUsersRepo.FindUserScope(guid)
+		scopeOK = strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope)
+		if (authError != nil) || (!scopeOK) {
+			authError = fmt.Errorf("Access Denied - User scope invalid")
 		} else {
 			//Update the last login time here if login was successful
 			loginTime := time.Now()
@@ -361,10 +362,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
 			}
 		}
 	}
-	if err != nil {
-		err = fmt.Errorf(errMessage)
-	}
-	return guid, username, err
+	return guid, username, authError
 }
 
 //HashPassword accepts a plaintext password string and generates a salted hash

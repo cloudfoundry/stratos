@@ -132,7 +132,7 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 		
 		req := setupMockReq("POST", "", map[string]string{
 			"username": username,
-			"password": password,
+			"password": "wrong_password",
 			"email"   : email,
 			"scope"   : scope,
 			"guid"    : userGUID,

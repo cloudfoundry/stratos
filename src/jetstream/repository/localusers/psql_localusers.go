@@ -122,41 +122,29 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTime time.Time) error {
 	log.Debug("UpdateLastLoginTime")
 
-	if loginTime.IsZero() {
-		msg := "Unable to update last local user login time without a valid time."
-		log.Debug(msg)
+	if loginTime.IsZero() || userGUID == "" {
+		msg := "Unable to update last local user login time without a valid time or user GUID."
 		return errors.New(msg)
 	}
 
-	if userGUID == "" {
-		msg := "Unable to update last local user login time without a user GUID."
-		log.Debug(msg)
-		return errors.New(msg)
-	}
-
-	result, err := p.db.Exec(updateLastLoginTime, userGUID, loginTime)
-
-	if err != nil {
+	var result sql.Result
+	var err error
+	if result, err = p.db.Exec(updateLastLoginTime, userGUID, loginTime); err != nil {
 		msg := "Unable to update last local user login time: %v"
-		log.Debugf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
+
 	rowsUpdates, err := result.RowsAffected()
+
 	if err != nil {
-		return errors.New("unable to update last local user login time: could not determine the number of rows updated")
-	}
-
-	if rowsUpdates < 1 {
-		return errors.New("unable to update last local user login time: no rows were updated")
-	}
-
-	if rowsUpdates > 1 {
+		err = errors.New("unable to update last local user login time: could not determine the number of rows updated")
+	} else if rowsUpdates < 1 {
+		err = errors.New("unable to update last local user login time: no rows were updated")
+	} else if rowsUpdates > 1 {
 		log.Warn("unable to update last local user login time: More than 1 row was updated (expected only 1)")
 	}
 
-	log.Debug("Local user last login time UPDATE complete")
-
-	return nil
+	return err
 }
 
 //FindLastLoginTime selects the last_login field from the local_users table in the db, for the given user.
@@ -190,51 +178,48 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash [
 
 	log.Debug("AddLocalUser")
 
+	//Validate args
+	var err error
 	if userGUID == "" {
 		msg := "unable to add new local user without a valid User GUID"
 		log.Debug(msg)
-		return errors.New(msg)
-	}
-
-	if len(passwordHash) == 0 {
+		err = errors.New(msg)
+	} else if len(passwordHash) == 0 {
 		msg := "unable to add new local user without a valid password hash"
 		log.Debug(msg)
-		return errors.New(msg)
-	}
-
-	if username == "" {
+		err = errors.New(msg)
+	} else if username == "" {
 		msg := "unable to add new local user without a valid User name"
 		log.Debug(msg)
-		return errors.New(msg)
-	}
-
-	if scope == "" {
+		err = errors.New(msg)
+	} else if scope == "" {
 		msg := "unable to add new local user without a valid user scope"
 		log.Debug(msg)
-		return errors.New(msg)
+		err = errors.New(msg)
+	}
+	if err != nil {
+		return err
 	}
 
 	// Add the new local user to the DB
-	result, err := p.db.Exec(insertLocalUser, userGUID, passwordHash, username, email, scope)
-	if err != nil {
+	var result sql.Result
+	if result, err = p.db.Exec(insertLocalUser, userGUID, passwordHash, username, email, scope); err != nil {
 		msg := "unable to INSERT local user: %v"
 		log.Debugf(msg)
-		return fmt.Errorf(msg, err)
-	}
-	rowsUpdates, err := result.RowsAffected()
-	if err != nil {
-		return errors.New("unable to INSERT local user: could not determine number of rows that were updated")
+		err = fmt.Errorf(msg, err)
 	}
 
-	if rowsUpdates < 1 {
-		return errors.New("unable to INSERT local user: no rows were updated")
+	if err == nil {
+		//Validate that 1 row has been updated
+		rowsUpdates, err := result.RowsAffected()
+		if err != nil {
+			err = errors.New("unable to INSERT local user: could not determine number of rows that were updated")
+		} else if rowsUpdates < 1 {
+			err = errors.New("unable to INSERT local user: no rows were updated")
+		} else if rowsUpdates > 1 {
+			log.Warn("INSERT local user: More than 1 row was updated (expected only 1)")
+		}
 	}
 
-	if rowsUpdates > 1 {
-		log.Warn("INSERT local user: More than 1 row was updated (expected only 1)")
-	}
-
-	log.Debug("local user INSERT complete")
-
-	return nil
+	return err
 }
