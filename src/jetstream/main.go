@@ -361,7 +361,8 @@ func initialiseLocalUsersConfiguration(portalProxy *portalProxy) (error) {
 		username := portalProxy.Config.ConsoleConfig.LocalUser
 		scope    := portalProxy.Config.ConsoleConfig.LocalUserScope
 		email    := ""
-		localUsersRepo.AddLocalUser(userGUID, passwordHash, username, email, scope)
+		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: username, Email: email, Scope: scope}
+		localUsersRepo.AddLocalUser(user)
 	}
 	return nil
 }

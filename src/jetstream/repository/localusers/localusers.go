@@ -1,10 +1,14 @@
 package localusers
 
-import "time"
+import (
+	"time"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+)
 
 // Repository is an application of the repository pattern for storing local users
 type Repository interface {
-	AddLocalUser(userGUID string, passwordHash []byte, username string, email string, role string) error
+	AddLocalUser(user interfaces.LocalUser) error
 	FindPasswordHash(userGUID string) ([]byte, error)
 	FindUserGUID(username string) (string, error)
 	FindUserScope(userGUID string) (string, error)

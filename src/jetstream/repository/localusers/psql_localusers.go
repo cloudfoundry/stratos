@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -174,25 +175,25 @@ func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Tim
 
 // AddLocalUser - Add a new local user to the datastore.
 // Email is optional
-func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash []byte, username string, email string, scope string) error {
+func (p *PgsqlLocalUsersRepository) AddLocalUser(user interfaces.LocalUser) error {
 
 	log.Debug("AddLocalUser")
 
 	//Validate args
 	var err error
-	if userGUID == "" {
+	if user.UserGUID == "" {
 		msg := "unable to add new local user without a valid User GUID"
 		log.Debug(msg)
 		err = errors.New(msg)
-	} else if len(passwordHash) == 0 {
+	} else if len(user.PasswordHash) == 0 {
 		msg := "unable to add new local user without a valid password hash"
 		log.Debug(msg)
 		err = errors.New(msg)
-	} else if username == "" {
+	} else if user.Username == "" {
 		msg := "unable to add new local user without a valid User name"
 		log.Debug(msg)
 		err = errors.New(msg)
-	} else if scope == "" {
+	} else if user.Scope == "" {
 		msg := "unable to add new local user without a valid user scope"
 		log.Debug(msg)
 		err = errors.New(msg)
@@ -203,7 +204,7 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(userGUID string, passwordHash [
 
 	// Add the new local user to the DB
 	var result sql.Result
-	if result, err = p.db.Exec(insertLocalUser, userGUID, passwordHash, username, email, scope); err != nil {
+	if result, err = p.db.Exec(insertLocalUser, user.UserGUID, user.PasswordHash, user.Username, user.Email, user.Scope); err != nil {
 		msg := "unable to INSERT local user: %v"
 		log.Debugf(msg)
 		err = fmt.Errorf(msg, err)

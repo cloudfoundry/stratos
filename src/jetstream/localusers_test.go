@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
 	
 )
@@ -29,7 +30,6 @@ func TestAddLocalUser(t *testing.T) {
 			"email":    "test.person@somedomain.com",
 			"scope":    "stratos.admin",
 		})
-
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
@@ -174,7 +174,8 @@ func TestFindPasswordHash(t *testing.T) {
 		userGUID := uuid.NewV4().String()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
-		err = localUsersRepo.AddLocalUser(userGUID, generatedPasswordHash, username, email, scope)
+		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
+		err = localUsersRepo.AddLocalUser(user)
 		if err != nil {
 			log.Errorf("Error hashing user password: %v", err)
 		}
@@ -218,7 +219,9 @@ func TestUpdateLastLoginTime(t *testing.T) {
 		userGUID := uuid.NewV4().String()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
-		localUsersRepo.AddLocalUser(userGUID, generatedPasswordHash, username, email, scope)
+
+		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
+		localUsersRepo.AddLocalUser(user)
 
 		//Now generate and update the login time
 		generatedLoginTime := time.Now()
