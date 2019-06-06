@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
+import { cfEiriniRelationshipLabel, CfScheduler } from '../../../../../cloud-foundry/src/shared/eirini.helper';
 import { GetAllApplications } from '../../../../../store/src/actions/application.actions';
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
@@ -69,6 +70,7 @@ export class CloudFoundryEndpointService {
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
   cfGuid: string;
+  runtimeScheduler$: Observable<CfScheduler>;
 
   getAllOrgsAction: GetAllOrganizations;
 
@@ -191,6 +193,10 @@ export class CloudFoundryEndpointService {
     );
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
+
+    this.runtimeScheduler$ = this.endpoint$.pipe(
+      map(cf => cfEiriniRelationshipLabel(cf.entity)),
+    );
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {

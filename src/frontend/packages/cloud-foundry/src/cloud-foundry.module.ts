@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
+import { filter, first, startWith, switchMap } from 'rxjs/operators';
 
 import { CoreModule } from '../../core/src/core/core.module';
 import { StratosExtension } from '../../core/src/core/extension/extension-service';
@@ -18,15 +18,7 @@ import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { CloudFoundryComponentsModule } from './shared/components/components.module';
 import { EiriniStepperComponent } from './shared/components/eirini-stepper/eirini-stepper.component';
-
-export const eiriniEnabled = (store: Store<AppState>): Observable<boolean> => {
-  return store.select('auth').pipe(
-    map((auth) => auth.sessionData &&
-      auth.sessionData['plugin-config'] &&
-      auth.sessionData['plugin-config'].eiriniEnabled === 'true'
-    ),
-  );
-};
+import { canConfigureEirini } from './shared/eirini.helper';
 
 export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
   type: 'cf',
@@ -47,8 +39,7 @@ export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
         createVisible: (row$: Observable<EndpointModel>): Observable<boolean> => row$.pipe(
           filter(row => row.cnsi_type === 'cf'),
           first(),
-          switchMap(() => eiriniEnabled(store)),
-          // TODO: RC has connected metrics endpoint
+          switchMap(() => canConfigureEirini(store)),
           startWith(false)
         )
       }

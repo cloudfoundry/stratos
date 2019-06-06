@@ -40,9 +40,8 @@ interface BaseEndpointTypeConfig {
    * Indicates if this endpoint types can not be connected (optional - default is false)
    */
   doesNotSupportConnect?: boolean;
-
   /**
-   * // TODO: RC
+   * Add these actions to the endpoint card/row in the endpoints table.
    */
   createActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
 }

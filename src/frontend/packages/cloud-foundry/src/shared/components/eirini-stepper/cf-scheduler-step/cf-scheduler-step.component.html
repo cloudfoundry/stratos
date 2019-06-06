@@ -1,5 +1,5 @@
 <form validate [formGroup]="form" class="stepper-form scheduler">
-  <span>Select the runtime scheduler used by Cloud Foundry</span>
+  <span>Select the Container Manager used by Cloud Foundry</span>
   <mat-radio-group formControlName="scheduler" class="">
     <mat-radio-button [value]="schedulers.DIEGO" class="">{{schedulers.DIEGO}}</mat-radio-button>
     <mat-radio-button [value]="schedulers.EIRINI" class="">{{schedulers.EIRINI}}</mat-radio-button>

@@ -17,12 +17,16 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 export class EiriniStepperComponent {
 
   cfName$: Observable<string>;
+  cancelUrl = '/endpoints';
 
   constructor(
     store: Store<AppState>,
     activatedRoute: ActivatedRoute,
   ) {
     const cfGuid = activatedRoute.snapshot.params.endpointId;
+    if (activatedRoute.snapshot.queryParamMap.get('cf')) {
+      this.cancelUrl = `/cloud-foundry/${cfGuid}/summary`;
+    }
     this.cfName$ = store.select(selectEntity<EndpointModel>(endpointSchemaKey, cfGuid)).pipe(
       filter(endpoint => !!endpoint),
       map(endpoint => endpoint.name)

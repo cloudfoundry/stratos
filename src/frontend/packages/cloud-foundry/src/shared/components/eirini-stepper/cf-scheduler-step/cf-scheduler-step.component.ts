@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { filter, first, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { IStepperStep, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { DeleteEndpointRelation, SaveEndpointRelation } from '../../../../../../store/src/actions/endpoint.actions';
@@ -14,11 +14,7 @@ import { ActionState } from '../../../../../../store/src/reducers/api-request-re
 import { selectEntity, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { endpointsRegisteredMetricsEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../../store/src/types/endpoint.types';
-
-export enum CfSchedulers {
-  DIEGO = 'Deigo',
-  EIRINI = 'Eirini'
-}
+import { cfEiriniRelationship, CfScheduler } from '../../../eirini.helper';
 
 @Component({
   selector: 'app-cf-scheduler-step',
@@ -77,13 +73,46 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
   metricsEndpoints$: Observable<EndpointModel[]>;
   eiriniDefaultNamespace$: Observable<string>;
   cfGuid: string;
-  schedulers = CfSchedulers;
+  schedulers = CfScheduler;
   blocked: Observable<boolean>;
   validate: Observable<boolean>;
   cfName$: Observable<string>;
   private cf$: Observable<EndpointModel>;
 
   private existingRelation: EndpointsRelation;
+
+  ngOnInit() {
+    // Set the initial values
+    combineLatest([
+      this.metricsEndpoints$,
+      this.eiriniDefaultNamespace$,
+      this.cf$
+    ]).pipe(
+      first()
+    ).subscribe(([registeredMetrics, eiriniDefaultNamespace, cf]) => {
+      // Set starting values
+      this.form.controls.eiriniNamespace.setValue(eiriniDefaultNamespace);
+      this.form.controls.scheduler.setValue(CfScheduler.DIEGO);
+
+      // Update given
+      if (registeredMetrics.length === 0) {
+        // Should never get here
+        return;
+      } else {
+        // Is there an already bound relation?
+        this.existingRelation = cfEiriniRelationship(cf);
+        if (!!this.existingRelation && !!registeredMetrics.find(registeredMetric => registeredMetric.guid === this.existingRelation.guid)) {
+          // Cf is already bound to eirini metrics
+          this.form.controls.eiriniMetrics.setValue(this.existingRelation.guid);
+          this.form.controls.eiriniNamespace.setValue(this.existingRelation.metadata.namespace || eiriniDefaultNamespace);
+          this.form.controls.scheduler.setValue(CfScheduler.EIRINI);
+        } else {
+          // Select the first one as default
+          this.form.controls.eiriniMetrics.setValue(registeredMetrics[0].guid);
+        }
+      }
+    });
+  }
 
   onNext: StepOnNextFunction = () => {
     return this.deleteExistingRelation().pipe(
@@ -101,7 +130,7 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
       this.store.dispatch(new DeleteEndpointRelation(this.cfGuid, this.existingRelation, 'cf'));
       return this.store.select(selectUpdateInfo(endpointSchemaKey, this.cfGuid, EndpointsEffect.deleteRelationKey)).pipe(
         pairwise(),
-        filter(([oldVal, newVal]) => oldVal.busy && !newVal.busy),
+        filter(([oldVal, newVal]) => oldVal ? oldVal.busy : false && !newVal.busy),
         map(([oldV, newV]: [ActionState, ActionState]) => {
           return {
             ...newV,
@@ -118,7 +147,7 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
   }
 
   saveRelation(): Observable<ActionState> {
-    if (this.form.controls.scheduler.value === CfSchedulers.EIRINI) {
+    if (this.form.controls.scheduler.value === CfScheduler.EIRINI) {
       this.store.dispatch(new SaveEndpointRelation(this.cfGuid, {
         guid: this.form.controls.eiriniMetrics.value,
         type: EndpointRelationTypes.KUBEMETRICS_CF,
@@ -129,7 +158,8 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
 
       return this.store.select(selectUpdateInfo(endpointSchemaKey, this.cfGuid, EndpointsEffect.updateRelationKey)).pipe(
         pairwise(),
-        filter(([oldVal, newVal]) => oldVal.busy && !newVal.busy),
+        tap(console.log),
+        filter(([oldVal, newVal]) => oldVal ? oldVal.busy : false && !newVal.busy),
         map(([oldV, newV]: [ActionState, ActionState]) => {
           return {
             ...newV,
@@ -146,42 +176,8 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
     });
   }
 
-  ngOnInit() {
-    // Set the initial values
-    combineLatest([
-      this.metricsEndpoints$,
-      this.eiriniDefaultNamespace$,
-      this.cf$
-    ]).pipe(
-      first()
-    ).subscribe(([registeredMetrics, eiriniDefaultNamespace, cf]) => {
-      // Set starting values
-      this.form.controls.eiriniNamespace.setValue(eiriniDefaultNamespace);
-      this.form.controls.scheduler.setValue(CfSchedulers.DIEGO);
-
-      // Update given
-      if (registeredMetrics.length === 0) {
-        // Should never get here
-        return;
-      } else {
-        // Is there an already bound relation?
-        const relations = cf.relations ? cf.relations.receives : [];
-        this.existingRelation = relations.find(receive => receive.type === EndpointRelationTypes.KUBEMETRICS_CF);
-        if (!!this.existingRelation && !!registeredMetrics.find(registeredMetric => registeredMetric.guid === this.existingRelation.guid)) {
-          // Cf is already bound to eirini metrics
-          this.form.controls.eiriniMetrics.setValue(this.existingRelation.guid);
-          this.form.controls.eiriniNamespace.setValue(this.existingRelation.metadata.namespace || eiriniDefaultNamespace);
-          this.form.controls.scheduler.setValue(CfSchedulers.EIRINI);
-        } else {
-          // Select the first one as default
-          this.form.controls.eiriniMetrics.setValue(registeredMetrics[0].guid);
-        }
-      }
-    });
-  }
-
   updateSelectedScheduler(scheduler: string) {
-    if (scheduler === CfSchedulers.EIRINI) {
+    if (scheduler === CfScheduler.EIRINI) {
       this.form.controls.eiriniMetrics.enable();
       this.form.controls.eiriniNamespace.enable();
     } else {
@@ -192,23 +188,3 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
 
 }
 
-
-      // for (let i = 0; i < registeredMetrics.length; i++) {
-      //   const registeredEndpoint = registeredMetrics[i];
-
-      //   if (i === 0) {
-      //     this.form.controls.eiriniMetrics.setValue(registeredEndpoint.guid);
-      //     continue;
-      //   }
-
-      //   if (!registeredEndpoint.relations) {
-      //     continue;
-      //   }
-      //   const cfAlreadyBound = registeredEndpoint.relations.provides.find(provideRelationship => {
-      //     return provideRelationship.guid === this.cfGuid && provideRelationship.type === EndpointRelationTypes.KUBEMETRICS_CF;
-      //   });
-      //   if (cfAlreadyBound) {
-      //     this.form.controls.eiriniMetrics.setValue(registeredEndpoint.guid);
-      //     break;
-      //   }
-      // }
