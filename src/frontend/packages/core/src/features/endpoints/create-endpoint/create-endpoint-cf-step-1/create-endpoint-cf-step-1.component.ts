@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Input, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -27,6 +27,8 @@ import { getEndpointType, getFullEndpointApiUrl } from '../../endpoint-helpers';
   styleUrls: ['./create-endpoint-cf-step-1.component.scss']
 })
 export class CreateEndpointCfStep1Component implements IStepperStep, AfterContentInit {
+
+  @Input() finalStep: boolean;
 
   existingEndpoints: Observable<{
     names: string[],
@@ -111,10 +113,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         if (!result.error) {
           this.store.dispatch(new ShowSnackBar(`Successfully registered '${this.nameField.value}'`));
         }
+        const success = !result.error;
         return {
-          success: !result.error,
-          redirect: false,
-          message: !result.error ? '' : result.message,
+          success,
+          redirect: success && this.finalStep,
+          message: success ? '' : result.message,
           data
         };
       })

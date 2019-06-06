@@ -1,14 +1,19 @@
-import { CoreModule } from './core.module';
-import { TestBed, inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
+import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
+import { CoreModule } from './core.module';
 import { EndpointsService } from './endpoints.service';
 import { UtilsService } from './utils.service';
-import { createBasicStoreModule } from '../../test-framework/store-test-helper';
 
 describe('EndpointsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EndpointsService, UtilsService],
+      providers: [
+        EndpointsService,
+        UtilsService,
+        PaginationMonitorFactory
+      ],
       imports: [
         CoreModule,
         createBasicStoreModule(),

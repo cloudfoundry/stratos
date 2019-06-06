@@ -1,4 +1,5 @@
 import { promise } from 'protractor';
+
 import { NoContentComponent } from './no-content.po';
 import { Page } from './page.po';
 
