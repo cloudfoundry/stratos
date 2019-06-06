@@ -107,6 +107,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   appAutoscalerAppMetrics = {};
   appAutoscalerAppMetricNames = [];
+  appAutoscalerPolicy: AppAutoscalerPolicyLocal;
 
   paramsMetrics: AutoscalerPaginationParams = {
     'start-time': ((new Date()).getTime() - 60000).toString() + '000000',
@@ -155,7 +156,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       map(({ entity }) => {
         if (entity && entity.entity) {
           this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
-          this.loadLatestMetricsUponPolicy(entity.entity);
+          this.appAutoscalerPolicy = entity.entity;
+          this.loadLatestMetricsUponPolicy();
         }
         return entity && entity.entity;
       }),
@@ -187,6 +189,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   getAppMetric(metricName: string, trigger: any, params: any) {
     const action = new GetAppAutoscalerAppMetricAction(this.applicationService.appGuid,
       this.applicationService.cfGuid, metricName, true, trigger, params);
+    this.store.dispatch(action);
     return getPaginationObservables<AppAutoscalerMetricData>({
       store: this.store,
       action,
@@ -197,12 +200,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }, false).entities$;
   }
 
-  loadLatestMetricsUponPolicy(policyEntity: AppAutoscalerPolicyLocal) {
-    if (policyEntity.scaling_rules_map) {
+  loadLatestMetricsUponPolicy() {
+    if (this.appAutoscalerPolicy.scaling_rules_map) {
       this.appAutoscalerAppMetrics = {};
-      Object.keys(policyEntity.scaling_rules_map).map((metricName) => {
+      Object.keys(this.appAutoscalerPolicy.scaling_rules_map).map((metricName) => {
         this.appAutoscalerAppMetrics[metricName] =
-          this.getAppMetric(metricName, policyEntity.scaling_rules_map[metricName], this.paramsMetrics);
+          this.getAppMetric(metricName, this.appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
       });
     }
   }
@@ -309,6 +312,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   fetchScalingHistory() {
+    this.paramsHistory['end-time'] = (new Date()).getTime().toString() + '000000';
     this.store.dispatch(this.scalingHistoryAction);
   }
 }
