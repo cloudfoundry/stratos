@@ -180,7 +180,7 @@ export class CFHelpers {
     return reqObj(options).then((response) => {
       const json = JSON.parse(response.body);
       const isSUSE = json.description.indexOf('SUSE') === 0;
-      return isSUSE ? 'opensuse42' : 'cflinuxfs2';
+      return isSUSE ? 'sle15' : 'cflinuxfs2';
     }).catch((e) => {
       return 'unknown';
     });
