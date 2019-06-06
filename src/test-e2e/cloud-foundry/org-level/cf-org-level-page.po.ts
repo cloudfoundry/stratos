@@ -1,10 +1,12 @@
 import { browser, promise } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
+import { ConfirmDialogComponent } from '../../po/confirm-dialog';
+import { ListComponent } from '../../po/list.po';
+import { MetaCard } from '../../po/meta-card.po';
 
 
 export class CfOrgLevelPage extends CFPage {
-
   static forEndpoint(guid: string, orgGuid): CfOrgLevelPage {
     const page = new CfOrgLevelPage();
     page.navLink = '/cloud-foundry/' + guid + '/organizations/' + orgGuid;
@@ -37,6 +39,27 @@ export class CfOrgLevelPage extends CFPage {
 
   goToUsersTab() {
     return this.goToTab('Users', 'users');
+  }
+
+  clickOnSpace(spaceName: string) {
+    const list = new ListComponent();
+    list.cards.findCardByTitle(spaceName).then((card) => {
+      expect(card).toBeDefined();
+      card.click();
+    });
+  }
+
+  deleteSpace(spaceName: string) {
+    const cardView = new ListComponent();
+    cardView.cards.waitUntilShown();
+
+    cardView.cards.findCardByTitle(spaceName).then((card: MetaCard) => {
+      card.openActionMenu().then(menu => {
+        menu.clickItem('Delete');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', spaceName);
+        card.waitUntilNotShown();
+      });
+    });
   }
 
   private goToTab(label: string, urlSuffix: string) {

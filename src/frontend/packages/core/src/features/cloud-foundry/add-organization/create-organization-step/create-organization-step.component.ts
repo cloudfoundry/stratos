@@ -6,12 +6,21 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { CreateOrganization } from '../../../../../../store/src/actions/organization.actions';
+import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory, organizationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import {
+  endpointSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  quotaDefinitionSchemaKey,
+} from '../../../../../../store/src/helpers/entity-factory';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IOrganization } from '../../../../core/cf-api.types';
+import { IOrganization, IQuotaDefinition } from '../../../../core/cf-api.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -29,10 +38,13 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   cfGuid: string;
   allOrgs: string[];
   orgs$: Observable<APIResource<IOrganization>[]>;
+  quotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
   cfUrl: string;
   addOrg: FormGroup;
 
   get orgName(): any { return this.addOrg ? this.addOrg.get('orgName') : { value: '' }; }
+
+  get quotaDefinition(): any { return this.addOrg ? this.addOrg.get('quotaDefinition') : { value: '' }; }
 
   constructor(
     private store: Store<AppState>,
@@ -45,6 +57,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.addOrg = new FormGroup({
       orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
+      quotaDefinition: new FormControl(),
     });
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
@@ -63,6 +76,28 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       tap((o) => this.allOrgs = o)
     );
 
+    const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    this.quotaDefinitions$ = getPaginationObservables<APIResource<IQuotaDefinition>>(
+      {
+        store: this.store,
+        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          quotaPaginationKey,
+          entityFactory(quotaDefinitionSchemaKey)
+        )
+      },
+      true
+    ).entities$.pipe(
+      filter(o => !!o),
+      tap(quotas => {
+        if (quotas.length === 1) {
+          this.addOrg.patchValue({
+            quotaDefinition: quotas[0].metadata.guid
+          });
+        }
+      })
+    );
+
     this.orgSubscription = this.orgs$.subscribe();
   }
 
@@ -76,10 +111,12 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   validate = () => !!this.addOrg && this.addOrg.valid;
 
   submit: StepOnNextFunction = () => {
-    const orgName = this.addOrg.value.orgName;
-    this.store.dispatch(new CreateOrganization(orgName, this.cfGuid));
+    this.store.dispatch(new CreateOrganization(this.cfGuid, {
+      name: this.orgName.value,
+      quota_definition_guid: this.quotaDefinition.value
+    }));
 
-    return this.store.select(selectRequestInfo(organizationSchemaKey, orgName)).pipe(
+    return this.store.select(selectRequestInfo(organizationSchemaKey, this.orgName.value)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.creating),
       map(requestInfo => ({
         success: !requestInfo.error,

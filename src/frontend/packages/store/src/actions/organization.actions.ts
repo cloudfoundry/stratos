@@ -1,4 +1,4 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
+import { RequestOptions, URLSearchParams, RequestMethod } from '@angular/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
@@ -125,15 +125,13 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
 }
 
 export class CreateOrganization extends CFStartAction implements ICFAction {
-  constructor(public name: string, public endpointGuid: string) {
+  constructor(public endpointGuid: string, public createOrg: IUpdateOrganization) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organizations`;
-    this.options.method = 'post';
-    this.guid = name;
-    this.options.body = {
-      name
-    };
+    this.options.method = RequestMethod.Post;
+    this.options.body = createOrg;
+    this.guid = createOrg.name;
   }
   actions = getActions('Organizations', 'Create Org');
   entity = [entityFactory(organizationSchemaKey)];

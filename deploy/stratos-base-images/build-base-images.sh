@@ -1,5 +1,11 @@
 #!/bin/bash
-set -ex
+set -e
+
+# Colours
+CYAN="\033[96m"
+YELLOW="\033[93m"
+RESET="\033[0m"
+BOLD="\033[1m"
 
 BASE_IMAGE=opensuse:42.3
 REGISTRY=docker.io
@@ -50,11 +56,36 @@ while getopts "b:r:o:t:psh" opt ; do
     esac
 done
 
+printf "${YELLOW}"
+echo "=========================="
+echo "Stratos Base Image Builder"
+echo "=========================="
+printf "${CYAN}"
+echo ""
+echo "BASE IMAGE   : ${BASE_IMAGE}"
+echo "REGISTRY     : ${REGISTRY}"
+echo "ORG          : ${ORGANIZATION}"
+echo "TAG          : ${TAG}"
+echo "IS_SLE       : ${IS_SLE}"
+echo "PUSH IMAGES  : ${PUSH_IMAGES}"
+echo ""
+printf "${RESET}"
+
 if [ -z ${PUSH_IMAGES} ]; then
-    echo "========================================"
-    echo "Images will NOT be pushed"
-    echo "========================================"
+  echo "========================================"
+  echo "Images will NOT be pushed"
+  echo "========================================"
 fi
+
+if [ -n "${IS_SLE}" ]; then
+  # Check env vars
+  : "${SMT_INTERNAL?Environment variable must be set when building SLE images}"
+  : "${SMT_INTERNAL_UPDATE?Environment variable must be set when building SLE images}"
+  : "${SMT_INTERNAL_SDK?Environment variable must be set when building SLE images}"
+  : "${SMT_INTERNAL_SERVER?Environment variable must be set when building SLE images}"
+fi
+
+set -x
 
 __DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_PATH=${__DIRNAME}/..
@@ -65,71 +96,73 @@ pushd $(mktemp -d)
 curl -sSO https://raw.githubusercontent.com/tests-always-included/mo/master/mo
 chmod +x mo
 
+# Copy any scripts required by the docker files to the temporary folder
+cp ${__DIRNAME}/install-ruby.sh .
+
 GO_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-go-build-base:${TAG}
 for i in ${DOCKERFILES}; do
   BASE_IMAGE=${BASE_IMAGE} GO_BUILD_BASE=${GO_BUILD_BASE} IS_SLE=${IS_SLE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
 done
 
 pwd
+
 build_and_push_image() {
     image_name=$1
     docker_file=$2
+    set +x
+    echo ""
+    printf "${CYAN}========= >>>>${RESET}\n"
+    printf "${CYAN}Building image ${YELLOW}${image_name}${CYAN} with docker file ${YELLOW}${docker_file}${RESET}\n"
+    printf "${CYAN}========= >>>>${RESET}\n"
+    echo ""
+    set -x
     docker build . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     if [ ! -z ${PUSH_IMAGES} ]; then
         docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     fi
 }
+
 tag_and_push_image() {
     TAG_FROM=$1
     TAG_TO=$2
+    set +x
+    echo ""
+    printf "${CYAN}========= >>>>${RESET}\n"
+    printf "${CYAN}Tagging image ${YELLOW}${TAG_FROM}${CYAN} to ${YELLOW}${TAG_TO}${RESET}\n"
+    printf "${CYAN}========= >>>>${RESET}\n"
+    echo ""
+    set -x
     docker tag ${REGISTRY}/${ORGANIZATION}/${TAG_FROM}:${TAG} ${REGISTRY}/${ORGANIZATION}/${TAG_TO}:${TAG}
     if [ ! -z ${PUSH_IMAGES} ]; then
         docker push ${REGISTRY}/${ORGANIZATION}/${TAG_TO}:${TAG}
     fi
 }
-# Base image with node installed
-build_go_base(){
-   build_and_push_image stratos-go-build-base Dockerfile.stratos-go-build-base
-}
 
-# Base image with node installed
-build_ui_base(){
-   build_and_push_image stratos-ui-build-base Dockerfile.stratos-ui-build-base
-}
+# Plain OS image
+build_and_push_image stratos-base Dockerfile.stratos-base
 
-build_nginx_base(){
-    build_and_push_image stratos-nginx-base Dockerfile.stratos-nginx-base
-}
-
-build_bk_base(){
-    build_and_push_image stratos-bk-base Dockerfile.stratos-bk-base
-}
-
-build_bk_build_base(){
-    build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
-}
-
-
-build_mariadb_base(){
-    build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
-}
-
-build_aio_base(){
-    tag_and_push_image stratos-bk-build-base stratos-aio-base
-}
+# Base with ruby
+build_and_push_image stratos-ruby-build-base Dockerfile.stratos-ruby-build-base
 
 # Base with go
-build_go_base
-# Used building the UI
-build_ui_base;
+build_and_push_image stratos-go-build-base Dockerfile.stratos-go-build-base
+
+# Used building the UI (has node)
+build_and_push_image stratos-ui-build-base Dockerfile.stratos-ui-build-base
+
 # Used for running the backend
-build_bk_base;
+build_and_push_image stratos-bk-base Dockerfile.stratos-bk-base
+
 # Used for hosting nginx
-build_nginx_base;
+build_and_push_image stratos-nginx-base Dockerfile.stratos-nginx-base
+
 # Used for stratos-jetstream-builder base
-build_bk_build_base;
+build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
+
 # Used for building the DB image
-build_mariadb_base;
+build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
+
 # Used for building the AIO image
-build_aio_base;
+tag_and_push_image stratos-bk-build-base stratos-aio-base
+
 rm -f mo;

@@ -4,19 +4,28 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
-import { IOrganization } from '../../../../core/cf-api.types';
+import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
+import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import {
+  endpointSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  quotaDefinitionSchemaKey,
+} from '../../../../../../store/src/helpers/entity-factory';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IOrganization, IQuotaDefinition } from '../../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
-import { AppState } from '../../../../../../store/src/app-state';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { entityFactory, organizationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 
 
 const enum OrgStatus {
@@ -40,12 +49,13 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   orgSubscription: Subscription;
   currentStatus: string;
   originalName: string;
-  orgName: string;
   org$: Observable<IOrganization>;
   editOrgName: FormGroup;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
+  quotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -55,17 +65,22 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
     this.editOrgName = new FormGroup({
-      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()])
+      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
+      quotaDefinition: new FormControl(),
       // toggleStatus: new FormControl(false),
     });
     this.org$ = this.cfOrgService.org$.pipe(
       map(o => o.entity.entity),
       take(1),
       tap(n => {
-        this.orgName = n.name;
         this.originalName = n.name;
         this.status = n.status === OrgStatus.ACTIVE ? true : false;
         this.currentStatus = n.status;
+
+        this.editOrgName.patchValue({
+          orgName: n.name,
+          quotaDefinition: n.quota_definition_guid,
+        });
       })
     );
 
@@ -97,20 +112,36 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
       tap((o) => this.allOrgsInEndpoint = o)
     );
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
+
+    const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    this.quotaDefinitions$ = getPaginationObservables<APIResource<IQuotaDefinition>>(
+      {
+        store: this.store,
+        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          quotaPaginationKey,
+          entityFactory(quotaDefinitionSchemaKey)
+        )
+      },
+      true
+    ).entities$.pipe(
+      filter(o => !!o),
+    );
   }
 
   validate = (value: string = null) => {
     if (this.allOrgsInEndpoint) {
       return this.allOrgsInEndpoint
         .filter(o => o !== this.originalName)
-        .indexOf(value ? value : this.orgName) === -1;
+        .indexOf(value ? value : this.editOrgName.value.orgName) === -1;
     }
     return true;
   }
 
   submit: StepOnNextFunction = () => {
     this.store.dispatch(new UpdateOrganization(this.orgGuid, this.cfGuid, {
-      name: this.orgName,
+      name: this.editOrgName.value.orgName,
+      quota_definition_guid: this.editOrgName.value.quotaDefinition,
       status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
     }));
 

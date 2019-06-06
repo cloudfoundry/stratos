@@ -263,6 +263,7 @@ export interface IUpdateSpace {
   security_group_guids?: string[];
   allow_ssh?: boolean;
   isolation_segment_guid?: string;
+  space_quota_definition_guid?: string;
 }
 
 export interface IUpdateOrganization {
