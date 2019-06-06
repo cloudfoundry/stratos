@@ -73,7 +73,7 @@ nightlyTag() {
   echo "$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)"
 }
 
-# patchHelmChartAppVersion - update in appVersion when patching the Helm Chart
+# patchHelmChartAppVersion - update appVersion when patching the Helm Chart if configured
 patchHelmChartAppVersion() {
   local CHART_PATH=$1
   local STRATOS_FOLDER=$2
