@@ -129,14 +129,13 @@ function patchAndPushImage {
   DOCKER_FILE=${2}
   FOLDER=${3}
   TARGET=${4:-none}
+  PATCHED_DOCKER_FILE="${DOCKER_FILE}.patched"
 
   patchDockerfile ${DOCKER_FILE} ${FOLDER}
-  buildAndPublishImage ${NAME} "${DOCKER_FILE}.patched" ${FOLDER} ${TARGET}
+  buildAndPublishImage ${NAME} "${PATCHED_DOCKER_FILE}" ${FOLDER} ${TARGET}
 
-  pushd ${FOLDER} > /dev/null 2>&1
-  rm -rf ${DOCKER_FILE}.patched
-  rm -rf ${DOCKER_FILE}.patched.bak
-  popd > /dev/null 2>&1
+  rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}
+  rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}.bak
 }
 
 function patchDockerfile {
@@ -170,9 +169,9 @@ echo "Base path: ${STRATOS_PATH}"
 cleanup
 
 # Clean any old patched docker files left if previously errored
-rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched
-rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.bak
-rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched.bak
+# rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched
+# rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.bak
+# rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched.bak
 
 updateTagForRelease
 
