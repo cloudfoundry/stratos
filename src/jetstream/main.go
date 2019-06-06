@@ -248,14 +248,6 @@ func main() {
 		return
 	}
 
-	if(interfaces.AuthEndpointTypes[portalProxy.Config.ConsoleConfig.AuthEndpointType] == interfaces.AuthEndpointType(interfaces.Local)) {
-		err = initialiseLocalUsersConfiguration(portalProxy)
-		if err != nil {
-			log.Infof("Failed to initialise local users config due to: %s", err)
-			return
-		}
-	}
-
 	showSSOConfig(portalProxy)
 
 	// Initialise Plugins

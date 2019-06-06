@@ -179,10 +179,17 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
 	}
 
-	authEndpointTypeVal, found := p.Env().Lookup("AUTH_ENDPOINT_TYPE")
-	if val, found := interfaces.AuthEndpointTypes[authEndpointTypeVal]; found {
-		consoleConfig.AuthEndpointType = string(val)
+	authEndpointTypeVal, authEndpointTypeIsSet := p.Env().Lookup("AUTH_ENDPOINT_TYPE")
+	if !authEndpointTypeIsSet {
+		//return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
+		//Until front-end support is implemented, default to "remote" if AUTH_ENDPOINT_TYPE is not set
+		authEndpointTypeVal = string(interfaces.Remote)
+	}
+	val, endpointTypeSupported := interfaces.AuthEndpointTypes[authEndpointTypeVal]; 
+	if endpointTypeSupported {
 		if val == interfaces.Local {
+			consoleConfig.AuthEndpointType = string(val)
+			//Auth endpoint type is set to "local", so load the local user config
 			localUser, found := p.Env().Lookup("LOCAL_USER")
 			if !found {
 				return consoleConfig, errors.New("LOCAL_USER not found")
@@ -198,6 +205,12 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 			consoleConfig.LocalUserScope = localUserScope
 			consoleConfig.LocalUser = localUser
 			consoleConfig.LocalUserPassword = localUserPassword
+		} else if val == interfaces.Remote {
+			//Auth endpoint type is set to "remote", so need to load local user config vars
+			consoleConfig.AuthEndpointType = string(val)
+		} else {
+			//Auth endpoint type has been set to an invalid value
+			return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE must be set to either \"local\" or \"remote\"")
 		}
 	} else {
 		return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
