@@ -46,7 +46,7 @@ const catalogueEntity = new StratosBaseCatalogueEntity({
 });
 // spyOn(network, "getDataFromServer").andReturn("mockData")
 
-fdescribe('EntityServiceService', () => {
+describe('EntityServiceService', () => {
   beforeAll(() => {
     const mockedCatalogueGet = spyOn(entityCatalogue, 'getEntity').and.returnValue(catalogueEntity);
   });
