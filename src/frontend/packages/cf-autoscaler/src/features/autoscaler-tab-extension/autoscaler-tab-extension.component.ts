@@ -95,7 +95,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
   public appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
+  appAutoscalerPolicySafe$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
+  appAutoscalerAppMetricNames$: Observable<string[]>;
 
   private appAutoscalerPolicyErrorSub: Subscription;
   private appAutoscalerScalingHistoryErrorSub: Subscription;
@@ -106,8 +108,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private detachConfirmOk = 0;
 
   appAutoscalerAppMetrics = {};
-  appAutoscalerAppMetricNames = [];
-  appAutoscalerPolicy: AppAutoscalerPolicyLocal;
 
   paramsMetrics: AutoscalerPaginationParams = {
     'start-time': ((new Date()).getTime() - 60000).toString() + '000000',
@@ -153,17 +153,22 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       false
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      map(({ entity }) => {
-        if (entity && entity.entity) {
-          this.appAutoscalerAppMetricNames = Object.keys(entity.entity.scaling_rules_map);
-          this.appAutoscalerPolicy = entity.entity;
-          this.loadLatestMetricsUponPolicy();
-        }
-        return entity && entity.entity;
-      }),
+      map(({ entity }) => entity ? entity.entity : null),
       publishReplay(1),
       refCount()
     );
+    this.appAutoscalerPolicySafe$ = this.appAutoscalerPolicyService.waitForEntity$.pipe(
+      map(({ entity }) => entity && entity.entity),
+      publishReplay(1),
+      refCount()
+    );
+
+    this.loadLatestMetricsUponPolicy();
+
+    this.appAutoscalerAppMetricNames$ = this.appAutoscalerPolicySafe$.pipe(
+      map(entity => Object.keys(entity.scaling_rules_map)),
+    );
+
     this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
       createEntityRelationPaginationKey(applicationSchemaKey, this.applicationService.appGuid, 'latest'),
       this.applicationService.appGuid,
@@ -201,13 +206,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   loadLatestMetricsUponPolicy() {
-    if (this.appAutoscalerPolicy.scaling_rules_map) {
-      this.appAutoscalerAppMetrics = {};
-      Object.keys(this.appAutoscalerPolicy.scaling_rules_map).map((metricName) => {
-        this.appAutoscalerAppMetrics[metricName] =
-          this.getAppMetric(metricName, this.appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
-      });
-    }
+    this.appAutoscalerPolicySafe$.pipe(
+      first(),
+    ).subscribe(appAutoscalerPolicy => {
+      this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
+      this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
+      if (appAutoscalerPolicy.scaling_rules_map) {
+        this.appAutoscalerAppMetrics = {};
+        Object.keys(appAutoscalerPolicy.scaling_rules_map).map((metricName) => {
+          this.appAutoscalerAppMetrics[metricName] =
+            this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
+        });
+      }
+    });
   }
 
   initErrorSub() {
