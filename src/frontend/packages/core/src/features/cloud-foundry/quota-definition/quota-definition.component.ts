@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { filter, first, map, startWith } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
 import { GetOrganization } from '../../../../../store/src/actions/organization.actions';
 import { GetQuotaDefinition } from '../../../../../store/src/actions/quota-definitions.actions';
@@ -35,7 +35,7 @@ import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organ
     CloudFoundryOrganizationService
   ]
 })
-export class QuotaDefinitionComponent implements OnDestroy {
+export class QuotaDefinitionComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
   org$: Observable<APIResource<IOrganization>>;
@@ -55,54 +55,50 @@ export class QuotaDefinitionComponent implements OnDestroy {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid || activatedRoute.snapshot.queryParams.orgGuid;
     this.quotaGuid = activatedRoute.snapshot.params.quotaId;
-
+    this.setupOrgObservable();
     this.setupBreadcrumbs();
-    this.fetchQuotaDefinition();
+    this.setupQuotaDefinitionObservable();
   }
 
-  ngOnDestroy(): void {
-    if (this.orgSubscriber) {
-      this.orgSubscriber.unsubscribe();
-    }
-  }
-
-  fetchOrg() {
-    this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
-      organizationSchemaKey,
-      entityFactory(organizationSchemaKey),
-      this.orgGuid,
-      new GetOrganization(this.orgGuid, this.cfGuid),
-      true
-    ).waitForEntity$.pipe(
-      map(data => data.entity),
-    );
-
-    return this.org$;
-  }
-
-  fetchQuotaDefinition() {
-    const quotaOrg = { entity: { quota_definition_guid: this.quotaGuid } };
-    const obs$: Observable<any> = this.quotaGuid ? of(quotaOrg) : this.fetchOrg();
-    this.orgSubscriber = obs$.subscribe((org) => {
-      this.quotaDefinition$ = this.entityServiceFactory.create<APIResource<IQuotaDefinition>>(
-        quotaDefinitionSchemaKey,
-        entityFactory(quotaDefinitionSchemaKey),
-        org.entity.quota_definition_guid,
-        new GetQuotaDefinition(org.entity.quota_definition_guid, this.cfGuid),
+  setupOrgObservable() {
+    if (this.orgGuid) {
+      this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
+        organizationSchemaKey,
+        entityFactory(organizationSchemaKey),
+        this.orgGuid,
+        new GetOrganization(this.orgGuid, this.cfGuid),
+        true
       ).waitForEntity$.pipe(
         map(data => data.entity),
       );
-      this.detailsLoading$ = this.quotaDefinition$.pipe(
-        filter(data => !!data.entity),
-        map(() => false),
-        startWith(true)
-      );
-    });
+    }
+  }
+
+  setupQuotaDefinitionObservable() {
+    const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.org$.pipe(map(org => org.entity.quota_definition_guid));
+    const entityInfo$ = quotaGuid$.pipe(
+      first(),
+      switchMap(quotaGuid => this.entityServiceFactory.create<APIResource<IQuotaDefinition>>(
+        quotaDefinitionSchemaKey,
+        entityFactory(quotaDefinitionSchemaKey),
+        quotaGuid,
+        new GetQuotaDefinition(quotaGuid, this.cfGuid),
+      ).entityObs$
+      )
+    );
+    this.quotaDefinition$ = entityInfo$.pipe(
+      filter(definition => !!definition && !!definition.entity),
+      map(definition => definition.entity)
+    );
+    this.detailsLoading$ = entityInfo$.pipe(
+      filter(definition => !!definition),
+      map(definition => definition.entityRequestInfo.fetching)
+    );
   }
 
   private setupBreadcrumbs() {
     const endpoints$ = this.store.select(endpointEntitiesSelector);
-    const org$ = this.orgGuid ? this.fetchOrg() : of(null);
+    const org$ = this.org$ ? this.org$ : of(null);
     this.breadcrumbs$ = combineLatest(endpoints$, org$).pipe(
       map(([endpoints, org]) => this.getBreadcrumbs(endpoints[this.cfGuid], org)),
       first()
