@@ -4,7 +4,8 @@
 </ng-template>
 <ng-template #manyOrgs>
   <mat-form-field>
-    <mat-select #cfSelect="ngModel" [ngModel]="selectedOrgGuid" id="selectOrgGuid" (selectionChange)="updateOrg($event.value)" required>
+    <mat-select #cfSelect="ngModel" [ngModel]="selectedOrgGuid" id="selectOrgGuid"
+      (selectionChange)="updateOrg($event.value)" required>
       <mat-option *ngFor="let org of organizations$ | async;trackBy:org?.metadata?.guid" [value]="org.metadata.guid">
         {{org.entity.name}}
       </mat-option>
