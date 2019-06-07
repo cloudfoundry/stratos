@@ -27,7 +27,6 @@ const (
 	CLIENT_ID_KEY              = "METRICS_CLIENT"
 	MetricsCfRelation          = "metrics-cf"
 	MetricsKubeRelation        = "metrics-kube"
-	MetricsCfKubeRelation      = "kubeMetrics-cf"
 	relationsSetupNeededMarker = "__RELATIONS_MIGRATION_NEEDED"
 	systemGroupName            = "system"
 )

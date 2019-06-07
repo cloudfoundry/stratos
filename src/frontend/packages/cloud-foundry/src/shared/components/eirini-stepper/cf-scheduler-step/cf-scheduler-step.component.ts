@@ -150,7 +150,7 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
     if (this.form.controls.scheduler.value === CfScheduler.EIRINI) {
       this.store.dispatch(new SaveEndpointRelation(this.cfGuid, {
         guid: this.form.controls.eiriniMetrics.value,
-        type: EndpointRelationTypes.KUBEMETRICS_CF,
+        type: EndpointRelationTypes.METRICS_EIRINI,
         metadata: {
           namespace: this.form.controls.eiriniNamespace.value
         }
