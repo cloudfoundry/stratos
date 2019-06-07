@@ -8,7 +8,7 @@
     <div class="quota-definition-page__name-sub-text">name</div>
     <h2 class="quota-definition-page__name">{{ quotaDefinition.entity.name }}</h2>
     <div class="quota-definition-page__basic-services">
-      <div class="quota-definition-page__basic-services-label">Non basic Services Allowed:</div>
+      <div class="quota-definition-page__basic-services-label">Non Basic Services Allowed:</div>
       <app-boolean-indicator [isTrue]="quotaDefinition.entity?.non_basic_services_allowed" type="yes-no" subtle="true">
       </app-boolean-indicator>
     </div>
@@ -59,7 +59,7 @@
         <app-tile></app-tile>
       </app-tile-group>
 
-      <h4 class="quota-definition-page__section-header">Route</h4>
+      <h4 class="quota-definition-page__section-header">Routes & Domains</h4>
       <app-tile-group>
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="network_route" iconFont="stratos-icons" label="Maximum Routes"
