@@ -18,8 +18,11 @@ DEFAULT_SPACE="e2e"
 SETUP_INVITE_USER="true"
 UAA_CLI_CMD="uaac"
 UAA_ENDPOINT="https://uaa.local.pcfdev.io"
+#(SCF)UAA_ENDPOINT="https://uaa.cf.capbristol.com"
 ADMIN_CLIENT_SECRET="admin-client-secret"
+#(SCF)ADMIN_CLIENT_SECRET="<snip>"
 UAA_ZONE=
+#(SCF)UAA_ZONE=scf
 
 while getopts ":a:p:u:i:c:l:b:d:e:f:g:" opt ; do
   case $opt in
