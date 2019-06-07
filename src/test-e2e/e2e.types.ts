@@ -6,6 +6,7 @@ export interface E2ECred {
 export interface E2ECreds {
   admin: E2ECred;
   nonAdmin: E2ECred;
+  removeUser: E2ECred;
 }
 
 export interface E2EEndpointConfig {

@@ -99,6 +99,7 @@ import {
 import { UserInviteService } from './user-invites/user-invite.service';
 import { InviteUsersCreateComponent } from './users/invite-users/invite-users-create/invite-users-create.component';
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
+import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 import { CfRolesService } from './users/manage-users/cf-roles.service';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
 import { UsersRolesModifyComponent } from './users/manage-users/manage-users-modify/manage-users-modify.component';
@@ -165,6 +166,7 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
     InviteUsersCreateComponent,
     CloudFoundryInviteUserLinkComponent,
     CfAdminAddUserWarningComponent,
+    RemoveUserComponent,
   ],
   providers: [
     EndpointListHelper,
