@@ -159,7 +159,7 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 	}
 	authEndpoint, found := p.Env().Lookup("AUTH_ENDPOINT")
 	if !found {
-		return consoleConfig, errors.New("AUTH_ENDPOINT not found")
+		authEndpoint = uaaEndpoint
 	}
 
 	consoleClient, found := p.Env().Lookup("CONSOLE_CLIENT")

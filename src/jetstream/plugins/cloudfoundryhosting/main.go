@@ -194,7 +194,7 @@ func (ch *CFHosting) Init() error {
 		// Override the configuration to set the authorization endpoint
 		url, err = url.Parse(newCNSI.TokenEndpoint)
 		if err != nil {
-			return fmt.Errorf("Invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
+			return fmt.Errorf("Invalid token endpoint URL %s %s", newCNSI.TokenEndpoint, err)
 		}
 
 		ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
