@@ -1,7 +1,7 @@
 .quota-definition-page {
   &__name-sub-text {
     font-size: 14px;
-    margin-top: -2px;
+    margin-bottom: -3px;
     opacity: .6;
   }
   &__title {
@@ -16,7 +16,7 @@
   }
   &__basic-services {
     display: flex;
-    margin: 5px 0 8px;
+    margin: 8px 0;
   }
   &__basic-services-label {
     margin-right: 10px;

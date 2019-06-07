@@ -8,8 +8,13 @@
     display: flex;
     flex-direction: row;
     padding: 12px;
-    > div {
+    &-inner {
+      display: flex;
       flex: 1;
+      flex-direction: column;
+    }
+    &-inner-reverse {
+      flex-direction: column-reverse;
     }
   }
   &__icon {

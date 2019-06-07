@@ -24,6 +24,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() value: string;
   @Input() showUsage = false;
   @Input() textOnly = false;
+  @Input() labelAtTop = false;
   @Input() link: () => void | string;
 
   formattedValue: string;
@@ -58,7 +59,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   handleValue() {
     const value = parseInt(this.value, 10);
     if (value === -1) {
-      this.formattedValue = '∞';
+      this.formattedValue = 'Unlimited';
     } else {
       this.formattedValue = this.formatForUnits(this.value);
     }
