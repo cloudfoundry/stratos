@@ -61,8 +61,7 @@ function getKeyFromActionOrKey(actionOrKey: SingleEntityAction | string) {
   if (typeof actionOrKey === 'string') {
     return actionOrKey;
   }
-  const { entityType, endpointType } = actionOrKey;
-  return getEntityKey(entityType, endpointType);
+  return entityCatalogue.getEntityKey(actionOrKey) || actionOrKey.entityType;
 }
 
 export function createRequestStateFromResponse(response: NormalizedResponse, state: BaseRequestDataState) {

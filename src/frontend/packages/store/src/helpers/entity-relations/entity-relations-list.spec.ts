@@ -1,14 +1,15 @@
 import { listEntityRelations } from './entity-relations';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
-import { CFEntitySchema } from '../entity-factory';
+import { EntitySchema } from '../entity-schema';
+const endpointType = 'endpointtype1';
 
 describe('Entity Relations - List relations', () => {
   function createBaseAction(): EntityInlineParentAction {
-    const entityKey = 'parent';
+    const entityType = 'parent';
     return {
       endpointType: 'cf',
-      entityType: entityKey,
-      entity: new CFEntitySchema(entityKey),
+      entityType,
+      entity: new EntitySchema(entityType, endpointType),
       includeRelations: [],
       populateMissing: false,
       type: 'type',
@@ -23,8 +24,8 @@ describe('Entity Relations - List relations', () => {
   });
 
   it('relation depth of 2 with relations', () => {
-    const child2Schema = new CFEntitySchema('child2');
-    const child1Schema = new CFEntitySchema('child1', {
+    const child2Schema = new EntitySchema('child2', endpointType);
+    const child1Schema = new EntitySchema('child1', endpointType, {
       entity: {
         [child2Schema.entityType]: child2Schema
       }
@@ -35,7 +36,7 @@ describe('Entity Relations - List relations', () => {
       createEntityRelationKey(action.entityType, child1Schema.entityType),
       createEntityRelationKey(child1Schema.entityType, child2Schema.entityType)
     ];
-    action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.entityType]: child1Schema } });
+    action.entity = new EntitySchema(action.entityType, endpointType, { entity: { [child1Schema.entityType]: child1Schema } });
 
     const res = listEntityRelations(action);
     expect(res.maxDepth).toBe(2);

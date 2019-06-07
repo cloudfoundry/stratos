@@ -6,6 +6,8 @@ import { userProvidedServiceInstanceSchemaKey } from '../../store/src/helpers/en
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../../store/src/types/user.types';
+import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
@@ -21883,6 +21885,71 @@ function getDefaultInitialTestStoreState(): CFAppState {
 
 /* tslint:enable */
 export function createBasicStoreModule(initialState: Partial<CFAppState> = getInitialTestStoreState()): ModuleWithProviders {
+  return StoreModule.forRoot(
+    appReducers,
+    {
+      initialState
+    }
+  );
+}
+
+function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOverride?: any) {
+  return entities.reduce((sections, entity) => {
+    if (typeof entity === 'string') {
+      return {
+        [entity]: dataOverride || {}
+      };
+    };
+    sections[entity.guid] = dataOverride || entity.data || {};
+    return sections;
+  }, {});
+}
+
+export interface TestStoreEntity {
+  guid: string;
+  data?: any;
+}
+
+export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
+  const initialState = Array.from(entityMap.keys()).reduce((state, entityConfig) => {
+    const entities = entityMap.get(entityConfig);
+    const entityKey = entityCatalogue.getEntityKey(entityConfig);
+    return {
+      request: {
+        ...state.request,
+        [entityKey]: getStoreSectionForIds(entities, {
+          fetching: false,
+          updating: {
+            _root_: {
+              busy: false,
+              error: false,
+              message: ''
+            },
+            updating: {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          creating: false,
+          error: false,
+          deleting: {
+            busy: false,
+            error: false,
+            message: '',
+            deleted: false
+          },
+          response: null,
+          message: ''
+        })
+      },
+      requestData: {
+        ...state.requestData,
+        [entityKey]: getStoreSectionForIds(entities)
+      }
+    }
+  }, { request: {}, requestData: {} });
+
   return StoreModule.forRoot(
     appReducers,
     {
