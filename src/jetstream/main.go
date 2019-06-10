@@ -334,31 +334,6 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 	return addSetupMiddleware, nil
 }
 
-func initialiseLocalUsersConfiguration(portalProxy *portalProxy) (error) {
-
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(portalProxy.DatabaseConnectionPool)
-	if err != nil {
-		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
-		return err
-	}
-   
-	if err == nil {
-		userGUID := uuid.NewV4().String()
-		password := portalProxy.Config.ConsoleConfig.LocalUserPassword
-		passwordHash, err := HashPassword(password)
-		if err != nil {
-			log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
-			return err
-		}
-		username := portalProxy.Config.ConsoleConfig.LocalUser
-		scope    := portalProxy.Config.ConsoleConfig.LocalUserScope
-		email    := ""
-		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: username, Email: email, Scope: scope}
-		localUsersRepo.AddLocalUser(user)
-	}
-	return nil
-}
-
 func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.ConsoleConfig) {
 	// For SSO, override the value loaded from the config file, so that this is what we use
 	if !portalProxy.Env().IsSet("SSO_LOGIN") {
