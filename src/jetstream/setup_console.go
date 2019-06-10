@@ -228,7 +228,7 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 
 func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) (error) {
 
-	var err
+	var err error
 	localUserName, found := p.Env().Lookup("LOCAL_USER")
 	if !found {
 		err = errors.New("LOCAL_USER not found")
@@ -271,9 +271,8 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 			log.Errorf("Unable to add Stratos local user due to: %+v", err)
 			return err
 		}
-	} else { 
-		return err
 	}
+	return err
 }
 
 func (p *portalProxy) SaveConsoleConfig(consoleConfig *interfaces.ConsoleConfig, consoleRepoInterface interface{}) error {
