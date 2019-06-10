@@ -254,24 +254,21 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
 		return err
 	}
-
-	if err == nil {
-		userGUID := uuid.NewV4().String()
-		password := localUserPassword
-		passwordHash, err := HashPassword(password)
-		if err != nil {
-			log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
-			return err
-		}
-		scope    := localUserScope
-		email    := ""
-		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username:localUserName, Email: email, Scope: scope}
-		err = localUsersRepo.AddLocalUser(user)
-		if err != nil {
-			log.Errorf("Unable to add Stratos local user due to: %+v", err)
-			return err
-		}
+	userGUID := uuid.NewV4().String()
+	password := localUserPassword
+	passwordHash, err := HashPassword(password)
+	if err != nil {
+		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
+		return err
 	}
+	scope    := localUserScope
+	email    := ""
+	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username:localUserName, Email: email, Scope: scope}
+	err = localUsersRepo.AddLocalUser(user)
+	if err != nil {
+		log.Errorf("Unable to add Stratos local user due to: %+v", err)
+	}
+
 	return err
 }
 
