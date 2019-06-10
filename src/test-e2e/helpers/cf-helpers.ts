@@ -166,18 +166,12 @@ export class CFHelpers {
     });
   }
 
-  // Default Stack based on the CF Vendor
-  fetchDefaultStack(endpoint: E2EConfigCloudFoundry) {
-    const reqObj = this.cfRequestHelper.newRequest();
-    const options = {
-      url: endpoint.url + '/v2/info'
-    };
-    return reqObj(options).then((response) => {
-      const json = JSON.parse(response.body);
-      const isSUSE = json.description.indexOf('SUSE') === 0;
-      return isSUSE ? 'sle15' : 'cflinuxfs2';
-    }).catch((e) => {
-      return 'unknown';
+  // Get defult stack for the default CF
+  fetchDefaultCFEndpointStack() {
+    return this.fetchDefaultCfGuid(true).then(guid => {
+      return this.cfRequestHelper.sendCfGet(guid, '/stacks').then(json => {
+        return json.resources[0].entity.name;
+      });
     });
   }
 
