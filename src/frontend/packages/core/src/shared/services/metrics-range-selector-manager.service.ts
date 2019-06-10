@@ -143,7 +143,7 @@ export class MetricsRangeSelectorManagerService {
   private startWindowPoll(timeWindow: ITimeRange) {
     this.endWindowPoll();
     this.pollIndex = window.setInterval(
-      () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow)),
+      () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value)),
       this.pollInterval
     );
   }
@@ -159,7 +159,7 @@ export class MetricsRangeSelectorManagerService {
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
-    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow));
+    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
     if (timeWindow.value) {
       this.startWindowPoll(timeWindow);
     }

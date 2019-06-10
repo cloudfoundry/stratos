@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { ITimeRange, MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -120,13 +121,18 @@ export class CfAppAutoscalerEventsConfigService
     }
   }
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService, private datePipe: DatePipe) {
+  constructor(
+    private store: Store<AppState>,
+    private appService: ApplicationService,
+    private datePipe: DatePipe,
+    metricsRangeService: MetricsRangeSelectorService) {
     super();
     this.autoscalerEventSource = new CfAppAutoscalerEventsDataSource(
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
-      this
+      this,
+      metricsRangeService
     );
   }
 

@@ -6,6 +6,7 @@ import { ApplicationService } from '../../../../../core/src/features/application
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { BaseCfListConfig } from '../../../../../core/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { ITimeRange, MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -77,13 +78,17 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     }
   }
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService) {
+  constructor(
+    private store: Store<AppState>,
+    private appService: ApplicationService,
+    metricsRangeService: MetricsRangeSelectorService) {
     super();
     this.autoscalerMetricSource = new AppAutoscalerMetricChartDataSource(
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
-      this
+      this,
+      metricsRangeService
     );
   }
 
