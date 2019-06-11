@@ -1,7 +1,7 @@
+import { CfRolesRemovalLevel, CfUserRemovalTestLevel, setupCfUserRemovalTests } from '../users-removal-e2e.helper';
 import { CfTopLevelPage } from './cf-top-level-page.po';
-import { CfUserRemovalTestLevel, setupCfUserRemovalTests, CfRolesRemovalLevel } from '../users-removal-e2e.helper';
 
-describe('CF - Remove user roles (only spaces)', () => {
+xdescribe('CF - Remove user roles (only spaces)', () => {
   setupCfUserRemovalTests(CfUserRemovalTestLevel.Cf, CfRolesRemovalLevel.Spaces, (cfGuid) => {
     const cfPage = CfTopLevelPage.forEndpoint(cfGuid);
     cfPage.navigateTo();
@@ -11,7 +11,7 @@ describe('CF - Remove user roles (only spaces)', () => {
   });
 });
 
-describe('CF - Remove user roles (only orgs / spaces already gone)', () => {
+xdescribe('CF - Remove user roles (only orgs / spaces already gone)', () => {
   setupCfUserRemovalTests(CfUserRemovalTestLevel.Cf, CfRolesRemovalLevel.OrgsSpaces, (cfGuid) => {
     const cfPage = CfTopLevelPage.forEndpoint(cfGuid);
     cfPage.navigateTo();
