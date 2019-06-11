@@ -2,19 +2,19 @@
   <h1>{{ (quotaDefinition$ | async)?.entity?.name }}</h1>
 </app-page-header>
 
-<div class="quota-definition-page" *ngIf="quotaDefinition$ | async as quotaDefinition">
+<div class="quota-definition-base quota-definition-page" *ngIf="quotaDefinition$ | async as quotaDefinition">
 
   <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
-    <div class="quota-definition-page__name-sub-text">name</div>
-    <h2 class="quota-definition-page__name">{{ quotaDefinition.entity.name }}</h2>
-    <div class="quota-definition-page__basic-services">
-      <div class="quota-definition-page__basic-services-label">Non Basic Services Allowed:</div>
+    <div class="quota-definition-base__name-sub-text">Name</div>
+    <h2 class="quota-definition-base__name">{{ quotaDefinition.entity.name }}</h2>
+    <div class="quota-definition-base__basic-services">
+      <div class="quota-definition-base__basic-services-label">Non Basic Services Allowed:</div>
       <app-boolean-indicator [isTrue]="quotaDefinition.entity?.non_basic_services_allowed" type="yes-no" subtle="true">
       </app-boolean-indicator>
     </div>
     <app-tile-grid fit="true">
-      <h3 class="quota-definition-page__title">Quota Limits</h3>
-      <h4 class="quota-definition-page__section-header">Memory</h4>
+      <h3 class="quota-definition-base__title">Quota Limits</h3>
+      <h4 class="quota-definition-base__section-header">Memory</h4>
       <app-tile-group>
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="memory" label="Maximum Memory Usage" units="mb"
@@ -29,7 +29,7 @@
         <app-tile></app-tile>
       </app-tile-group>
 
-      <h4 class="quota-definition-page__section-header">Application</h4>
+      <h4 class="quota-definition-base__section-header">Application</h4>
       <app-tile-group>
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="apps" label="Maximum Application Instances"
@@ -44,7 +44,7 @@
         <app-tile></app-tile>
       </app-tile-group>
 
-      <h4 class="quota-definition-page__section-header">Service</h4>
+      <h4 class="quota-definition-base__section-header">Service</h4>
       <app-tile-group>
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="service" iconFont="stratos-icons" label="Maximum Services"
@@ -59,7 +59,7 @@
         <app-tile></app-tile>
       </app-tile-group>
 
-      <h4 class="quota-definition-page__section-header">Routes & Domains</h4>
+      <h4 class="quota-definition-base__section-header">Routes & Domains</h4>
       <app-tile-group>
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="network_route" iconFont="stratos-icons" label="Maximum Routes"

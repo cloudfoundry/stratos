@@ -75,8 +75,8 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
-import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
 
 /* tslint:enable:max-line-length */

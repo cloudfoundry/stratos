@@ -184,8 +184,9 @@ export class CloudFoundryOrganizationService {
       return quotaDefinition && [
         '/cloud-foundry',
         this.cfGuid,
-        'quota-definitions',
-        quotaDefinition.metadata.guid
+        'organizations',
+        this.orgGuid,
+        'quota'
       ];
     }));
   }

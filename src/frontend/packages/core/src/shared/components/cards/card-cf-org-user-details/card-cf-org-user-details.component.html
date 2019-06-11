@@ -10,7 +10,7 @@
             {{ (cfOrgService.userOrgRole$ | async) }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
-            <a routerLink="../quota">
+            <a [routerLink]="cfOrgService.quotaLink$ | async">
               {{ (cfOrgService.quotaDefinition$ | async)?.name }}
             </a>
           </app-metadata-item>

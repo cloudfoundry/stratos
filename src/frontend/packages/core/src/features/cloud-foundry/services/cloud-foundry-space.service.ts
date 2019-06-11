@@ -162,8 +162,9 @@ export class CloudFoundrySpaceService {
           return [
             '/cloud-foundry',
             this.cfGuid,
-            'quota-definitions',
-            quota.guid
+            'organizations',
+            this.orgGuid,
+            'quota',
           ];
         }
 
@@ -172,8 +173,9 @@ export class CloudFoundrySpaceService {
           this.cfGuid,
           'organizations',
           this.orgGuid,
-          'space-quota-definitions',
-          quota.guid
+          'space',
+          this.spaceGuid,
+          'space-quota'
         ];
       }
     )

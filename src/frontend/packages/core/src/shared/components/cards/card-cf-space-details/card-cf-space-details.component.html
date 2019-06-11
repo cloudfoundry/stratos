@@ -12,14 +12,14 @@
           <app-metadata-item label="Quota Definition Name">
             <ng-container
               *ngIf="(cfSpaceService.spaceQuotaDefinition$ | async) as spaceQuotaDefinition; else fallBackQuota">
-              <a routerLink="../space-quota">
+              <a [routerLink]="cfSpaceService.quotaLink$ | async">
                 {{ spaceQuotaDefinition.name }}
               </a>
             </ng-container>
             <ng-template #fallBackQuota>
               None assigned
               <span *ngIf="cfSpaceService.quotaDefinition$ | async as quotaDefinition">(showing
-                organization's <a routerLink="../quota">{{ quotaDefinition.name }}</a>)
+                organization's <a target="_blank" [routerLink]="cfSpaceService.quotaLink$ | async">{{ quotaDefinition.name }}</a>)
               </span>
             </ng-template>
           </app-metadata-item>
