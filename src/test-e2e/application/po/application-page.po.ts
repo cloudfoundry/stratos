@@ -60,6 +60,10 @@ export class ApplicationBasePage extends CFPage {
     return this.goToTab('GitHub', 'gitscm');
   }
 
+  public goToAutoscalerTab() {
+    return this.goToTab('Autoscale', 'autoscale');
+  }
+
   private goToTab(label: string, urlSuffix: string) {
     return this.tabs.goToItemAndWait(label, this.navLink.substring(0, this.navLink.lastIndexOf('/')), urlSuffix);
   }
