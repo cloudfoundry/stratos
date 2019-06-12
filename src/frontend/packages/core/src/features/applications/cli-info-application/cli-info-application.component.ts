@@ -3,7 +3,6 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';

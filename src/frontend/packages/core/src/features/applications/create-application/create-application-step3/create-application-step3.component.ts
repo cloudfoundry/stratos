@@ -1,35 +1,32 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
+import {
+  applicationEntityType,
+  domainEntityType,
+  organizationEntityType,
+  routeEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { AssociateRouteWithAppApplication } from '../../../../../../store/src/actions/application-service-routes.actions';
+import { CreateNewApplication } from '../../../../../../store/src/actions/application.actions';
+import { GetOrganization } from '../../../../../../store/src/actions/organization.actions';
+import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { CFAppState } from '../../../../../../store/src/app-state';
+import { selectNewAppState } from '../../../../../../store/src/effects/create-app-effects';
+import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CreateNewApplicationState } from '../../../../../../store/src/types/create-application.types';
 import { IDomain } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-
 import { createGetApplicationAction } from '../../application.service';
-import { CFAppState } from '../../../../../../store/src/app-state';
-import { CreateNewApplicationState } from '../../../../../../store/src/types/create-application.types';
-import { RequestInfoState, getDefaultRequestState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CreateNewApplication } from '../../../../../../store/src/actions/application.actions';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
-import {
-  applicationSchemaKey,
-  routeSchemaKey,
-  organizationSchemaKey,
-  entityFactory,
-  domainSchemaKey
-} from '../../../../../../store/src/helpers/entity-factory';
-import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
-import { AssociateRouteWithAppApplication } from '../../../../../../store/src/actions/application-service-routes.actions';
-import { selectNewAppState } from '../../../../../../store/src/effects/create-app-effects';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { GetOrganization } from '../../../../../../store/src/actions/organization.actions';
-import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -106,7 +103,7 @@ export class CreateApplicationStep3Component implements OnInit {
         space_guid: space
       }
     ));
-    return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid)), 'Could not create application');
+    return this.wrapObservable(this.store.select(selectRequestInfo(applicationEntityType, newAppGuid)), 'Could not create application');
   }
 
   createRoute(): Observable<RequestInfoState> {
@@ -128,7 +125,7 @@ export class CreateApplicationStep3Component implements OnInit {
           host: hostName
         }
       ));
-      return this.wrapObservable(this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)),
+      return this.wrapObservable(this.store.select(selectRequestInfo(routeEntityType, newRouteGuid)),
         'Application created. Could not create route');
     }
     return observableOf({
@@ -139,7 +136,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
     this.store.dispatch(new AssociateRouteWithAppApplication(appGuid, routeGuid, endpointGuid));
-    return this.wrapObservable(this.store.select(selectRequestInfo(applicationSchemaKey, appGuid)),
+    return this.wrapObservable(this.store.select(selectRequestInfo(applicationEntityType, appGuid)),
       'Application and route created. Could not associated route with app');
   }
 
@@ -166,7 +163,7 @@ export class CreateApplicationStep3Component implements OnInit {
         const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
           state.cloudFoundryDetails.org,
           new GetOrganization(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
-            createEntityRelationKey(organizationSchemaKey, domainSchemaKey)
+            createEntityRelationKey(organizationEntityType, domainEntityType)
           ]),
           true
         );

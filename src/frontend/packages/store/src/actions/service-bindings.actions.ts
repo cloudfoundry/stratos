@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, serviceBindingSchemaKey } from '../helpers/entity-factory';
+import { cfEntityFactory, serviceBindingEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
@@ -37,9 +37,9 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
     CREATE_SERVICE_BINDING_ACTION_SUCCESS,
     CREATE_SERVICE_BINDING_ACTION_FAILURE
   ];
-  entity = [entityFactory(serviceBindingSchemaKey)];
+  entity = [cfEntityFactory(serviceBindingEntityType)];
   public endpointType = 'cf';
-  entityType = serviceBindingSchemaKey;
+  entityType = serviceBindingEntityType;
   options: RequestOptions;
 }
 
@@ -58,8 +58,8 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
     DELETE_SERVICE_BINDING_ACTION_SUCCESS,
     DELETE_SERVICE_BINDING_ACTION_FAILURE
   ];
-  entity = [entityFactory(serviceBindingSchemaKey)];
-  entityType = serviceBindingSchemaKey;
+  entity = [cfEntityFactory(serviceBindingEntityType)];
+  entityType = serviceBindingEntityType;
   options: RequestOptions;
   removeEntityOnDelete = true;
 }
@@ -72,8 +72,8 @@ export class FetchAllServiceBindings extends CFStartAction implements PaginatedA
     this.options.method = 'get';
   }
   actions = getActions('Service Bindings', 'Get All');
-  entity = [entityFactory(serviceBindingSchemaKey)];
-  entityType = serviceBindingSchemaKey;
+  entity = [cfEntityFactory(serviceBindingEntityType)];
+  entityType = serviceBindingEntityType;
   options: RequestOptions;
   initialParams: PaginationParam = {
     'order-direction': 'asc',

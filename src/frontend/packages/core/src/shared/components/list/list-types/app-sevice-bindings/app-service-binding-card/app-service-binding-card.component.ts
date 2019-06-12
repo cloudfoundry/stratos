@@ -4,14 +4,9 @@ import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { cfEntityFactory, serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstance } from '../../../../../../../../store/src/actions/service-instances.actions';
 import { GetUserProvidedService } from '../../../../../../../../store/src/actions/user-provided-service.actions';
-import {
-  entityFactory,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { AppEnvVarsState } from '../../../../../../../../store/src/types/app-metadata.types';
 import {
@@ -32,7 +27,6 @@ import { AppChip } from '../../../../chips/chips.component';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../list.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 interface EnvVarData {
   key: string;
@@ -91,7 +85,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       }];
   }
   ngOnInit(): void {
-    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(serviceBindingSchemaKey));
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(serviceBindingEntityType));
 
     this.isUserProvidedServiceInstance = !!isUserProvidedServiceInstance(this.row.entity.service_instance.entity);
     if (this.isUserProvidedServiceInstance) {

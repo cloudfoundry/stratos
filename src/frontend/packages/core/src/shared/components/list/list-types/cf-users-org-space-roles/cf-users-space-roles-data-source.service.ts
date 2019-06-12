@@ -1,16 +1,20 @@
 import { Store } from '@ngrx/store';
 
+import {
+  cfEntityFactory,
+  cfUserEntityType,
+  spaceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
-import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { cfUserSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
   constructor(
@@ -20,13 +24,13 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
     store: Store<CFAppState>,
     userPerms: CurrentUserPermissionsService,
     listConfig?: IListConfig<APIResource>) {
-    const paginationKey = cfUserSchemaKey + '-' + orgGuid;
+    const paginationKey = cfUserEntityType + '-' + orgGuid;
     const action = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, []);
 
     super({
       store,
       action,
-      schema: entityFactory(spaceSchemaKey),
+      schema: cfEntityFactory(spaceEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

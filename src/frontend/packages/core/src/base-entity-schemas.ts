@@ -1,8 +1,4 @@
-import {
-  entityFactory,
-  endpointSchemaKey,
-  userProfileSchemaKey
-} from '../../store/src/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory, userProfileSchemaKey } from '../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export const STRATOS_ENDPOINT_TYPE = 'stratos';

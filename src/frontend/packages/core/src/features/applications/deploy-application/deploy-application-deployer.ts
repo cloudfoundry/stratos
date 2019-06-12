@@ -3,8 +3,9 @@ import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription 
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../../../../store/src/app-state';
-import { organizationSchemaKey, spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../../store/src/selectors/api.selectors';
 import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
 import {
@@ -14,11 +15,10 @@ import {
   OverrideAppDetails,
   SocketEventTypes,
 } from '../../../../../store/src/types/deploy-application.types';
+import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
 import { environment } from '../../../environments/environment.prod';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 
 export interface DeployApplicationDeployerStatus {
@@ -117,8 +117,8 @@ export class DeployApplicationDeployer {
     this.connectSub = this.store.select(selectDeployAppState).pipe(
       filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       mergeMap(appDetails => {
-        const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
-        const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(spaceSchemaKey, CF_ENDPOINT_TYPE);
+        const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationEntityType, CF_ENDPOINT_TYPE);
+        const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(spaceEntityType, CF_ENDPOINT_TYPE);
         const orgSubscription = this.store.select(selectEntity(orgEntityKey, appDetails.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectEntity(spaceEntityKey, appDetails.cloudFoundryDetails.space));
         return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));

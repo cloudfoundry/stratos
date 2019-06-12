@@ -1,21 +1,21 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { filter, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import { domainEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
+import { CFAppState } from '../../../../../../store/src/app-state';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   CfAppMapRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { ApplicationService } from '../../application.service';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { entityFactory, domainSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-map-routes',
@@ -61,7 +61,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          new CFEntityConfig(domainSchemaKey)
+          new CFEntityConfig(domainEntityType)
         )
       },
       true

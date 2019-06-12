@@ -16,6 +16,12 @@ import {
   tap,
 } from 'rxjs/operators';
 
+import {
+  applicationEntityType,
+  cfEntityFactory,
+  serviceInstancesEntityType,
+  spaceEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetApplication } from '../../../../../../store/src/actions/application.actions';
 import {
   ResetCreateServiceInstanceOrgAndSpaceState,
@@ -29,12 +35,6 @@ import {
 import { GetServiceInstance } from '../../../../../../store/src/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  serviceInstancesSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -54,7 +54,6 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -139,13 +138,13 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
       switchMap(csi => {
         this.appsEmitted.next(false);
-        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, csi.spaceGuid);
+        const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
         return getPaginationObservables({
           store: this.store,
           action: new GetAllAppsInSpace(csi.cfGuid, csi.spaceGuid, paginationKey),
           paginationMonitor: this.paginationMonitorFactory.create(
             paginationKey,
-            entityFactory(applicationSchemaKey)
+            cfEntityFactory(applicationEntityType)
           )
         }, true).entities$;
       }),
@@ -188,7 +187,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     this.bindAppStepperText = 'Binding Params (Optional)';
     const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
       appId,
-      new GetApplication(appId, cfId, [createEntityRelationKey(applicationSchemaKey, spaceSchemaKey)]),
+      new GetApplication(appId, cfId, [createEntityRelationKey(applicationEntityType, spaceEntityType)]),
       true
     );
     return entityService.waitForEntity$.pipe(
@@ -252,7 +251,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {
     const action = new GetServiceInstance(serviceInstanceId, cfId);
     return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      serviceInstancesSchemaKey,
+      serviceInstancesEntityType,
       action,
       true
     );
@@ -261,7 +260,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   private getSpaceEntityService(spaceGuid: string, cfGuid: string) {
     const action = new GetSpace(spaceGuid, cfGuid);
     return this.entityServiceFactory.create<APIResource<ISpace>>(
-      spaceSchemaKey,
+      spaceEntityType,
       new GetSpace(spaceGuid, cfGuid),
       true);
   }

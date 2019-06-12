@@ -3,20 +3,19 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { applicationEntityType, cfEntityFactory } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { applicationSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { IApp, ISpace } from '../../../../../../core/cf-api.types';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
-import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
-import { CardCell } from '../../../list.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
-import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CardCell } from '../../../list.types';
 
 @Component({
   selector: 'app-card-app',
@@ -45,7 +44,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   }
 
   ngOnInit() {
-    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, entityFactory(applicationSchemaKey));
+    this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(applicationEntityType));
     this.cfOrgSpace = new CfOrgSpaceLabelService(
       this.store,
       this.row.entity.cfGuid,
@@ -53,7 +52,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
       this.row.entity.space_guid
     );
 
-    this.favorite = getFavoriteFromCfEntity(this.row, applicationSchemaKey, this.favoritesConfigMapper);
+    this.favorite = getFavoriteFromCfEntity(this.row, applicationEntityType, this.favoritesConfigMapper);
 
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(

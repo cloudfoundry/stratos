@@ -3,15 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../store/src/app-state';
-import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 
 

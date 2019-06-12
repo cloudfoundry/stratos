@@ -1,13 +1,13 @@
 import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
+import { userProvidedServiceInstanceEntityType } from '../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../store/src/app-state';
-import { userProvidedServiceInstanceSchemaKey } from '../../store/src/helpers/entity-factory';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../../store/src/types/user.types';
-import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
@@ -141,7 +141,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       message: ''
     },
     pagination: {
-      appSummarySchemaKey: {},
+      appSummaryEntityType: {},
       private_domains: {},
       space_quota_definition: {},
       userProfile: {},
@@ -665,7 +665,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       }
     },
     request: {
-      appSummarySchemaKey: {},
+      appSummaryEntityType: {},
       gitRepo: {},
       userProfile: {},
       servicePlanVisibility: {},
@@ -3926,10 +3926,10 @@ function getDefaultInitialTestStoreState(): CFAppState {
       system: {},
       private_domains: {},
       space_quota_definition: {},
-      [userProvidedServiceInstanceSchemaKey]: {}
+      [userProvidedServiceInstanceEntityType]: {}
     },
     requestData: {
-      appSummarySchemaKey: {},
+      appSummaryEntityType: {},
       environmentVars: {},
       stats: {},
       gitRepo: {},
@@ -21825,7 +21825,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
         zoneId: '',
         origin: ''
       },
-      [userProvidedServiceInstanceSchemaKey]: {}
+      [userProvidedServiceInstanceEntityType]: {}
     },
     actionHistory: [],
     lists: {},

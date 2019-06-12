@@ -1,9 +1,24 @@
-
-import { combineLatest as observableCombineLatest, BehaviorSubject, Observable } from 'rxjs';
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { UsersRolesClearUpdateState } from '../../../../../../../store/src/actions/users-roles.actions';
+import { ChangeUserRole } from '../../../../../../../store/src/actions/users.actions';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import {
+  selectUsersRoles,
+  selectUsersRolesChangedRoles,
+} from '../../../../../../../store/src/selectors/users-roles.selector';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
+import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
 import { IOrganization } from '../../../../../core/cf-api.types';
 import {
   AppMonitorComponentTypes,
@@ -14,27 +29,13 @@ import {
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import {
   TableCellConfirmOrgSpaceComponent,
-  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
   TableCellConfirmRoleAddRemComponent,
-  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { CfRolesService } from '../cf-roles.service';
-import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
-import {
-  cfUserSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
-import { ChangeUserRole } from '../../../../../../../store/src/actions/users.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { selectUsersRoles, selectUsersRolesChangedRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
-import { UsersRolesClearUpdateState } from '../../../../../../../store/src/actions/users-roles.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
+
 
 @Component({
   selector: 'app-manage-users-confirm',
@@ -74,7 +75,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     }
   ];
   changes$: Observable<CfRoleChangeWithNames[]>;
-  userSchemaKey = cfUserSchemaKey;
+  userSchemaKey = cfUserEntityType;
   monitorState = AppMonitorComponentTypes.UPDATE;
   private cfAndOrgGuid$: Observable<{ cfGuid: string, orgGuid: string }>;
   public orgName$ = new BehaviorSubject('');
@@ -94,7 +95,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   public getCellConfig(row: CfRoleChangeWithNames): ITableCellRequestMonitorIconConfig {
     const isSpace = !!row.spaceGuid;
-    const schema = isSpace ? entityFactory(spaceSchemaKey) : entityFactory(organizationSchemaKey);
+    const schema = isSpace ? cfEntityFactory(spaceEntityType) : cfEntityFactory(organizationEntityType);
     const guid = isSpace ? row.spaceGuid : row.orgGuid;
     return {
       entityKey: schema.key,

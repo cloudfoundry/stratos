@@ -3,9 +3,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
+import { cfEntityFactory, organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { entityFactory, organizationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
@@ -28,9 +28,9 @@ import { PaginationMonitorFactory } from '../../../../../monitors/pagination-mon
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 
 
 @Component({
@@ -92,7 +92,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       map(u => getOrgRolesString(u)),
     );
 
-    this.favorite = getFavoriteFromCfEntity(this.row, organizationSchemaKey, this.favoritesConfigMapper);
+    this.favorite = getFavoriteFromCfEntity(this.row, organizationEntityType, this.favoritesConfigMapper);
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))
@@ -118,7 +118,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
     this.subscriptions.push(fetchData$.subscribe());
     this.orgGuid = this.row.metadata.guid;
-    this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, entityFactory(organizationSchemaKey));
+    this.entityConfig = new ComponentEntityMonitorConfig(this.orgGuid, cfEntityFactory(organizationEntityType));
 
     const orgQuotaHelper = new OrgQuotaHelper(this.cfEndpointService, this.emf, this.orgGuid);
     this.orgStatus$ = orgQuotaHelper.createStateObs();

@@ -3,23 +3,22 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  domainEntityType,
+  organizationEntityType,
+  privateDomainsEntityType,
+  quotaDefinitionEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllApplications } from '../../../../../store/src/actions/application.actions';
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { DeleteOrganization, GetAllOrganizations } from '../../../../../store/src/actions/organization.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import {
-  cfInfoSchemaKey,
-  domainSchemaKey,
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  privateDomainsSchemaKey,
-  quotaDefinitionSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -39,7 +38,6 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -82,11 +80,11 @@ export class CloudFoundryEndpointService {
     return new GetAllOrganizations(
       paginationKey,
       cfGuid, [
-        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
-        createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
-        createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
-        createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with
+        createEntityRelationKey(organizationEntityType, spaceEntityType),
+        createEntityRelationKey(organizationEntityType, domainEntityType),
+        createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
+        createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
+        createEntityRelationKey(spaceEntityType, routeEntityType), // Not really needed at top level, but if we drop down into an org with
         // lots of spaces it saves spaces x routes requests
       ]);
   }
@@ -97,13 +95,13 @@ export class CloudFoundryEndpointService {
     return new GetAllOrganizations(
       paginationKey,
       cfGuid, [
-        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organizationEntityType, spaceEntityType),
       ]);
   }
 
   public static fetchAppCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
     : Observable<number> {
-    const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
+    const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
     const action = new GetAllApplications(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid);
     action.initialParams = {
@@ -152,7 +150,7 @@ export class CloudFoundryEndpointService {
       action: this.getAllOrgsAction,
       paginationMonitor: this.pmf.create(
         this.getAllOrgsAction.paginationKey,
-        entityFactory(organizationSchemaKey)
+        cfEntityFactory(organizationEntityType)
       )
     }, true).entities$;
 
@@ -225,7 +223,7 @@ export class CloudFoundryEndpointService {
         action,
         paginationMonitor: this.pmf.create(
           action.paginationKey,
-          entityFactory(domainSchemaKey)
+          cfEntityFactory(domainEntityType)
         )
       },
       true

@@ -1,7 +1,6 @@
-import { Action, compose } from '@ngrx/store';
+import { Action } from '@ngrx/store';
 
-import { CFAppState } from '../app-state';
-import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
+import { NewAppCFDetails } from '../types/create-application.types';
 
 export const SET_CF_DETAILS = '[Create App Page] Set Cloud Foundry details';
 export const SET_NAME = '[Create App Page] Set name';

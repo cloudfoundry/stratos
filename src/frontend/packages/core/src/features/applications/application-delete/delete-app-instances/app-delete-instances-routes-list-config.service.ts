@@ -4,9 +4,10 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { FetchAllServiceBindings } from '../../../../../../store/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { serviceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -15,6 +16,7 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { QParam } from '../../../../../../store/src/types/pagination.types';
 import { IServiceBinding } from '../../../../core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { RowState } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import {
   AppServiceBindingListConfigService,
@@ -22,8 +24,6 @@ import {
 import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
@@ -34,7 +34,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   static createFetchServiceBinding = (cfGuid: string, serviceInstanceGuid: string): FetchAllServiceBindings => {
     const action = new FetchAllServiceBindings(
       cfGuid,
-      createEntityRelationPaginationKey(serviceSchemaKey, serviceInstanceGuid),
+      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid),
     );
     action.initialParams['results-per-page'] = 1;
     action.initialParams.q = [

@@ -1,15 +1,15 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import {
-  applicationSchemaKey,
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  serviceBindingSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../helpers/entity-factory';
+  applicationEntityType,
+  cfEntityFactory,
+  organizationEntityType,
+  serviceBindingEntityType,
+  spaceEntityType,
+  spaceWithOrgEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -22,10 +22,10 @@ import { getActions } from './action.helper';
 
 
 export const getUserProvidedServiceInstanceRelations = [
-  createEntityRelationKey(userProvidedServiceInstanceSchemaKey, spaceWithOrgKey),
-  createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-  createEntityRelationKey(userProvidedServiceInstanceSchemaKey, serviceBindingSchemaKey),
-  createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+  createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
+  createEntityRelationKey(spaceEntityType, organizationEntityType),
+  createEntityRelationKey(userProvidedServiceInstanceEntityType, serviceBindingEntityType),
+  createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
 ];
 
 export class GetAllUserProvidedServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
@@ -37,7 +37,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     public spaceGuid?: string
   ) {
     super();
-    this.paginationKey = paginationKey || (spaceGuid ? createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid) :
+    this.paginationKey = paginationKey || (spaceGuid ? createEntityRelationPaginationKey(spaceEntityType, spaceGuid) :
       createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid));
     this.options = new RequestOptions();
     this.options.url = `user_provided_service_instances`;
@@ -48,8 +48,8 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     }
   }
   actions = getActions('User Provided Services', 'Get all User Provided Services');
-  entity = [entityFactory(userProvidedServiceInstanceSchemaKey)];
-  entityType = userProvidedServiceInstanceSchemaKey;
+  entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
+  entityType = userProvidedServiceInstanceEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -76,8 +76,8 @@ export class GetUserProvidedService extends CFStartAction implements EntityInlin
     this.options.params = new URLSearchParams();
   }
   actions = getActions('User Provided Service', 'Get User Provided Service');
-  entity = entityFactory(userProvidedServiceInstanceSchemaKey);
-  entityType = userProvidedServiceInstanceSchemaKey;
+  entity = cfEntityFactory(userProvidedServiceInstanceEntityType);
+  entityType = userProvidedServiceInstanceEntityType;
   options: RequestOptions;
 }
 export interface IUserProvidedServiceInstanceDataCredentials {
@@ -122,8 +122,8 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     };
   }
   actions = getActions('User Provided Service', 'Create User Provided Service');
-  entity = [entityFactory(userProvidedServiceInstanceSchemaKey)];
-  entityType = userProvidedServiceInstanceSchemaKey;
+  entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
+  entityType = userProvidedServiceInstanceEntityType;
   options: RequestOptions;
 }
 
@@ -167,8 +167,8 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     }
   }
   actions = getActions('User Provided Service', 'Update User Provided Service');
-  entity = [entityFactory(userProvidedServiceInstanceSchemaKey)];
-  entityType = userProvidedServiceInstanceSchemaKey;
+  entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
+  entityType = userProvidedServiceInstanceEntityType;
   options: RequestOptions;
   updatingKey = UpdateUserProvidedServiceInstance.updateServiceInstance;
 }
@@ -182,9 +182,9 @@ export class DeleteUserProvidedInstance extends CFStartAction implements ICFActi
     this.options.params = new URLSearchParams();
   }
   actions = getActions('User Provided Service', 'Delete User Provided Service');
-  entity = entityFactory(userProvidedServiceInstanceSchemaKey);
-  entityType = userProvidedServiceInstanceSchemaKey;
+  entity = cfEntityFactory(userProvidedServiceInstanceEntityType);
+  entityType = userProvidedServiceInstanceEntityType;
   options: RequestOptions;
-  clearPaginationEntityKeys = [serviceBindingSchemaKey];
+  clearPaginationEntityKeys = [serviceBindingEntityType];
   removeEntityOnDelete = true;
 }

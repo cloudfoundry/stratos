@@ -1,19 +1,19 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, servicePlanSchemaKey, serviceSchemaKey } from '../helpers/entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { cfEntityFactory, serviceEntityType, servicePlanEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 export class GetAllServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
     public endpointGuid: string = null,
     public includeRelations: string[] = [
-      createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
+      createEntityRelationKey(serviceEntityType, servicePlanEntityType)
     ],
     public populateMissing = true
   ) {
@@ -24,8 +24,8 @@ export class GetAllServices extends CFStartAction implements PaginatedAction, En
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service', 'Get all Services');
-  entity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceSchemaKey).getSchema();
-  entityType = serviceSchemaKey;
+  entity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema();
+  entityType = serviceEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -40,7 +40,7 @@ export class GetService extends CFStartAction implements EntityInlineParentActio
     public guid: string,
     public endpointGuid: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
+      createEntityRelationKey(serviceEntityType, servicePlanEntityType)
     ],
     public populateMissing = true
   ) {
@@ -51,8 +51,8 @@ export class GetService extends CFStartAction implements EntityInlineParentActio
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service', 'Get Service');
-  entity = entityFactory(serviceSchemaKey);
-  entityType = serviceSchemaKey;
+  entity = cfEntityFactory(serviceEntityType);
+  entityType = serviceEntityType;
   options: RequestOptions;
 }
 
@@ -62,7 +62,7 @@ export class GetServicePlansForService extends CFStartAction implements Paginate
     public endpointGuid: string,
     public paginationKey: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
+      createEntityRelationKey(servicePlanEntityType, serviceEntityType),
     ],
     public populateMissing = true
   ) {
@@ -73,8 +73,8 @@ export class GetServicePlansForService extends CFStartAction implements Paginate
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service', 'Get Service plans');
-  entity = [entityFactory(servicePlanSchemaKey)];
-  entityType = servicePlanSchemaKey;
+  entity = [cfEntityFactory(servicePlanEntityType)];
+  entityType = servicePlanEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,

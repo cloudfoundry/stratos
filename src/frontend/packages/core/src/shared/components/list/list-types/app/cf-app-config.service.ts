@@ -4,9 +4,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { IApp } from '../../../../../core/cf-api.types';
@@ -123,7 +123,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       return new UserFavorite(
         row.entity.cfGuid,
         'cf',
-        applicationSchemaKey,
+        applicationEntityType,
         row.entity.guid,
       );
     }),

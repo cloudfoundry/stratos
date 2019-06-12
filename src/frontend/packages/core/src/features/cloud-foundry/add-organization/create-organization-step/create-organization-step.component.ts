@@ -5,13 +5,15 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { CreateOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { entityFactory, organizationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../core/cf-api.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -53,7 +55,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(organizationSchemaKey)
+          entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType).getSchema()
         )
       },
       true
@@ -79,7 +81,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     const orgName = this.addOrg.value.orgName;
     this.store.dispatch(new CreateOrganization(orgName, this.cfGuid));
 
-    return this.store.select(selectRequestInfo(organizationSchemaKey, orgName)).pipe(
+    return this.store.select(selectRequestInfo(organizationEntityType, orgName)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.creating),
       map(requestInfo => ({
         success: !requestInfo.error,

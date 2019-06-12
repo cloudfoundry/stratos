@@ -3,12 +3,12 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { TableCellCustom } from '../../../list.types';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { getCfService } from '../../../../../../features/service-catalog/services-helper';
-import { userProvidedServiceInstanceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-service-name',
@@ -25,7 +25,7 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
   }
 
   ngOnInit() {
-    if (this.entityKey === userProvidedServiceInstanceSchemaKey) {
+    if (this.entityKey === userProvidedServiceInstanceEntityType) {
       this.serviceName$ = of('User Provided');
     } else {
       this.serviceName$ = getCfService(this.row.entity.service_guid, this.row.entity.cfGuid, this.entityServiceFactory).waitForEntity$.pipe(

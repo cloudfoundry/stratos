@@ -3,15 +3,15 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { IService } from '../../../core/cf-api-svc.types';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { serviceSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { cfEntityFactory, serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllServices } from '../../../../../store/src/actions/service.actions';
 import { GetAllServicesForSpace } from '../../../../../store/src/actions/space.actions';
+import { CFAppState } from '../../../../../store/src/app-state';
+import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { IService } from '../../../core/cf-api-svc.types';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 @Injectable()
 export class ServicesWallService {
@@ -25,14 +25,14 @@ export class ServicesWallService {
   }
 
   initServicesObservable = () => {
-    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey);
+    const paginationKey = createEntityRelationPaginationKey(serviceEntityType);
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
         action: new GetAllServices(paginationKey),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          entityFactory(serviceSchemaKey)
+          cfEntityFactory(serviceEntityType)
         )
       },
       true
@@ -48,7 +48,7 @@ export class ServicesWallService {
   )
 
   getSpaceServicePagKey(cfGuid: string, spaceGuid: string) {
-    return createEntityRelationPaginationKey(serviceSchemaKey, `${cfGuid}-${spaceGuid}`);
+    return createEntityRelationPaginationKey(serviceEntityType, `${cfGuid}-${spaceGuid}`);
   }
 
   getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
@@ -59,7 +59,7 @@ export class ServicesWallService {
         action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          entityFactory(serviceSchemaKey)
+          cfEntityFactory(serviceEntityType)
         )
       },
       true

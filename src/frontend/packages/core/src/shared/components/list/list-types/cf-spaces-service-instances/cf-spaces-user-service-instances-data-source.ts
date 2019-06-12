@@ -1,16 +1,16 @@
 import { Store } from '@ngrx/store';
 
+import {
+  applicationEntityType,
+  cfEntityFactory,
+  organizationEntityType,
+  serviceBindingEntityType,
+  spaceEntityType,
+  spaceWithOrgEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllUserProvidedServices } from '../../../../../../../store/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  serviceBindingSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -22,12 +22,12 @@ import { defaultPaginationPageSizeOptionsTable, IListConfig } from '../../list.c
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
+    const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
     const action = new GetAllUserProvidedServices(paginationKey, cfGuid, [
-      createEntityRelationKey(userProvidedServiceInstanceSchemaKey, spaceWithOrgKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(userProvidedServiceInstanceSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+      createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
+      createEntityRelationKey(spaceEntityType, organizationEntityType),
+      createEntityRelationKey(userProvidedServiceInstanceEntityType, serviceBindingEntityType),
+      createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
     ], true, spaceGuid);
     action.initialParams['results-per-page'] = defaultPaginationPageSizeOptionsTable[0];
     action.initialParams['order-direction-field'] = 'creation';
@@ -35,7 +35,7 @@ export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIRe
     super({
       store,
       action,
-      schema: entityFactory(userProvidedServiceInstanceSchemaKey),
+      schema: cfEntityFactory(userProvidedServiceInstanceEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: false,

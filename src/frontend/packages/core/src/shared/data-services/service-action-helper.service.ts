@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
+import { DeleteServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
 import { DeleteServiceInstance } from '../../../../store/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../store/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { serviceInstancesSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../core/cf-api-svc.types';
 import {
@@ -13,7 +14,6 @@ import {
 } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
-import { DeleteServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
 
 
 @Injectable()
@@ -61,7 +61,7 @@ export class ServiceActionHelperService {
     endpointGuid: string,
     userProvided = false
   ) => {
-    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesSchemaKey) :
+    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesEntityType) :
       new DeleteServiceInstance(endpointGuid, serviceInstanceGuid);
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',

@@ -3,16 +3,16 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  serviceInstancesEntityType,
+  servicePlanVisibilityEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstances } from '../../../../../store/src/actions/service-instances.actions';
 import { GetServicePlanVisibilities } from '../../../../../store/src/actions/service-plan-visibility.actions';
 import { GetServicePlanServiceInstances } from '../../../../../store/src/actions/service-plan.actions';
 import { GetServiceInstancesForSpace } from '../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import {
-  entityFactory,
-  serviceInstancesSchemaKey,
-  servicePlanVisibilitySchemaKey,
-} from '../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -64,14 +64,14 @@ export class CreateServiceInstanceHelper {
       map(entity => entity.entity)
     );
 
-    const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, this.cfGuid);
+    const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
     this.servicePlanVisibilities$ = getPaginationObservables<APIResource<IServicePlanVisibility>>(
       {
         store: this.store,
         action: new GetServicePlanVisibilities(this.cfGuid, paginationKey),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          entityFactory(servicePlanVisibilitySchemaKey)
+          cfEntityFactory(servicePlanVisibilityEntityType)
         )
       },
       true
@@ -133,7 +133,7 @@ export class CreateServiceInstanceHelper {
   //             action: getAllOrgsAction,
   //             paginationMonitor: this.paginationMonitorFactory.create(
   //               getAllOrgsAction.paginationKey,
-  //               entityFactory(organizationSchemaKey)
+  //               cfEntityFactory(organizationEntityType)
   //             )
   //           }, true)
   //             .entities$.pipe(share(), first());
@@ -141,13 +141,13 @@ export class CreateServiceInstanceHelper {
   //           // Service plan is not public, but is space-scoped
   //           const action = new GetSpace(servicePlanAccessibility.spaceGuid, this.cfGuid,
   //             [
-  //               createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+  //               createEntityRelationKey(spaceEntityType, organizationEntityType),
   //             ]
   //           );
-  //           action.entity = [entityFactory(spaceWithOrgKey)];
+  //           action.entity = [cfEntityFactory(spaceWithOrgEntityType)];
   //           return this.entityServiceFactory.create<APIResource<ISpace>>(
-  //             spaceSchemaKey,
-  //             entityFactory(spaceWithOrgKey),
+  //             spaceEntityType,
+  //             cfEntityFactory(spaceWithOrgEntityType),
   //             servicePlanAccessibility.spaceGuid,
   //             action,
   //             true
@@ -185,14 +185,14 @@ export class CreateServiceInstanceHelper {
     let action;
     let paginationKey;
     if (spaceGuid) {
-      paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, `${spaceGuid}-${servicePlanGuid}`);
+      paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, `${spaceGuid}-${servicePlanGuid}`);
       const q = [new QParam('service_plan_guid', servicePlanGuid, ':')];
       action = new GetServiceInstancesForSpace(spaceGuid, cfGuid, paginationKey, q);
     } else if (servicePlanGuid) {
-      paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, servicePlanGuid);
+      paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, servicePlanGuid);
       action = new GetServicePlanServiceInstances(servicePlanGuid, cfGuid, paginationKey);
     } else {
-      paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
+      paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
       action = new GetServiceInstances(cfGuid, paginationKey);
     }
     return getPaginationObservables<APIResource<IServiceInstance>>({
@@ -200,7 +200,7 @@ export class CreateServiceInstanceHelper {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         paginationKey,
-        entityFactory(serviceInstancesSchemaKey)
+        cfEntityFactory(serviceInstancesEntityType)
       )
     }, true)
       .entities$.pipe(
@@ -209,14 +209,14 @@ export class CreateServiceInstanceHelper {
   }
 
   // getServicesForSpace = (spaceGuid: string, cfGuid: string) => {
-  //   const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, spaceGuid);
+  //   const paginationKey = createEntityRelationPaginationKey(serviceEntityType, spaceGuid);
   //   return getPaginationObservables<APIResource<IService>>(
   //     {
   //       store: this.store,
   //       action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
   //       paginationMonitor: this.paginationMonitorFactory.create(
   //         paginationKey,
-  //         entityFactory(serviceSchemaKey)
+  //         entityFactory(serviceEntityType)
   //       )
   //     },
   //     true

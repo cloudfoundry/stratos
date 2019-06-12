@@ -1,9 +1,9 @@
-import { metricSchemaKey } from '../helpers/entity-factory';
-import { PaginatedAction } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { environment } from '../../../core/src/environments/environment';
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { PaginatedAction } from '../types/pagination.types';
+import { IRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
@@ -54,7 +54,7 @@ export class MetricsAction implements IRequestAction {
   }
   public guid: string;
 
-  entityType = metricSchemaKey;
+  entityType = metricEntityType;
   type = METRICS_START;
   directApi = false;
 
