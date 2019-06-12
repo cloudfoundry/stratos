@@ -18,6 +18,15 @@ export class UaaHelpers {
     return this.requestHelper.sendGet(`Users/${uaaUserGuid}`);
   }
 
+  getUserByUsername(username: string): promise.Promise<any> {
+    return this.requestHelper.sendGet(`Users?filter=userName+eq+%22${username}%22&startIndex=1`).then(res => {
+      console.log(res);
+      return res.totalResults === 1 ?
+      res.resources[0] :
+      promise.rejected(`Found no or multiple users matching name '${username}'`);
+    });
+  }
+
   getUsers(): promise.Promise<any> {
     return this.requestHelper.sendGet(`Users?attributes=userName%2Cid`);
   }
@@ -39,8 +48,13 @@ export class UaaHelpers {
     });
   }
 
-  deleteUser(uaaUserGuid: string) {
-    return this.requestHelper.sendDelete(`Users/${uaaUserGuid}`);
+  deleteUser(uaaUserGuid?: string, userName?: string) {
+    if (!uaaUserGuid && !userName) {
+      return promise.rejected('Either uaa guid or username should be supplied');
+    }
+    const guidP = uaaUserGuid ? promise.fullyResolved(uaaUserGuid) : this.getUserByUsername(userName).then(user => user.id);
+
+    return guidP.then(guid => this.requestHelper.sendDelete(`Users/${guid}`));
   }
 
   getIdentityZone(zone = 'scf') {

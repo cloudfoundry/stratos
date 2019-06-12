@@ -396,19 +396,14 @@ export class CFHelpers {
         if (!foundUser) {
           throw new Error(`Failed to find user ${username}. Aborting deletion of users`);
         }
-        return this.deleteUser(cfGuid, foundUser.metadata.guid);
+        return this.deleteUser(cfGuid, foundUser.metadata.guid, username);
       })));
   }
 
-  deleteUser(cfGuid: string, userGuid: string, uaaUserGuid?: string): promise.Promise<any> {
+  deleteUser(cfGuid: string, userGuid: string, userName?: string, uaaUserGuid?: string): promise.Promise<any> {
     const uaaHelpers = new UaaHelpers();
     return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
-      .then(() => {
-        if (uaaUserGuid) {
-          return uaaHelpers.deleteUser(uaaUserGuid);
-        }
-        // Else case will be done in invite user PR
-      });
+      .then(() => uaaHelpers.deleteUser(uaaUserGuid, userName));
   }
 
   createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string}> {

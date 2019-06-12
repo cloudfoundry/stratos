@@ -18,7 +18,7 @@ describe('CF - Invite User Configuration - ', () => {
 
   beforeAll(() => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    const e2eSetup = e2e.setup(ConsoleUserType.admin)
+    e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)

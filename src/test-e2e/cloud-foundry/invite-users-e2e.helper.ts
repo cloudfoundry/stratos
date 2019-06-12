@@ -1,4 +1,4 @@
-import { browser, promise } from 'protractor';
+import { promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
@@ -64,6 +64,8 @@ export function setupInviteUserTests(
     let stackedActions: StackedInputActionsPo;
     const fieldOne = 0;
     const fieldTwo = 1;
+    const usersToDelete = [];
+
 
     beforeAll(() => {
       usersTable.getInviteUserButtonComponent().waitUntilShown();
@@ -142,6 +144,8 @@ export function setupInviteUserTests(
       // Clear state
       inviteUserStepper.cancel();
       usersTable.inviteUser();
+
+      usersToDelete.push(validEmail);
     });
 
     function testUser(userName: string, spaceRole: string) {
@@ -178,16 +182,18 @@ export function setupInviteUserTests(
         inviteUserStepper.setSpaceRole(2);
       }
       inviteUserStepper.next();
+      usersToDelete.push(user1, user2);
 
       usersTable.waitUntilShown();
       usersTable.waitForNoLoadingIndicator();
 
       testUser(user1, spaceRole);
       testUser(user2, spaceRole);
-
-      browser.wait(cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, [user1, user2])));
     });
 
+    afterAll(() => {
+      return cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, usersToDelete));
+    });
 
   });
 }

@@ -63,8 +63,8 @@ export class SecretsHelpers {
     return isAdmin ? this.secrets.consoleUsers.admin : this.secrets.consoleUsers.nonAdmin;
   }
 
-  getUaa(): E2EUaa {
-    return this.secrets.uaa;
+  getDefaultCFsUaa(): E2EUaa {
+    return this.getDefaultCFEndpoint().uaa;
   }
 
   getEndpoints(): E2EEndpointsConfig {
