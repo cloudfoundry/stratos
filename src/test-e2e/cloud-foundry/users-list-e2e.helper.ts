@@ -19,7 +19,7 @@ export function setUpTestOrgSpaceE2eTest(
   spaceName: string,
   userName: string,
   dropBillingManager = false,
-  e2eSetup?:E2ESetup
+  e2eSetup?: E2ESetup
 ) {
   const pe2eSetup = e2eSetup || e2e.setup(ConsoleUserType.admin)
     .clearAllEndpoints()
@@ -114,7 +114,7 @@ export function setupCfUserTableTests(
     extendE2ETestTime(timeout);
 
     const usersTable = new CFUsersListComponent();
-    const userRowIndex = 0;
+    let userRowIndex = 0;
 
     let orgUserChip: UserRoleChip;
     const testOrgName = cfLevel === CfUserTableTestLevel.Cf ? orgName : null;
@@ -125,11 +125,14 @@ export function setupCfUserTableTests(
       usersTable.waitForNoLoadingIndicator(20000);
       usersTable.header.waitUntilShown('User table header');
       usersTable.header.setSearchText(userName);
-      expect(usersTable.table.getCell(0, 1).getText()).toBe(userName);
+      return usersTable.table.findRow('username', userName).then(row => {
+        userRowIndex = row;
+        expect(usersTable.table.getCell(0, 1).getText()).toBe(userName);
 
-      orgUserChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'User');
-      usersTable.expandOrgsChips(userRowIndex);
-      return usersTable.expandSpaceChips(userRowIndex);
+        orgUserChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'User');
+        usersTable.expandOrgsChips(userRowIndex);
+        return usersTable.expandSpaceChips(userRowIndex);
+      });
     });
 
     it('Check org user pill is present and cannot be removed', () => {
