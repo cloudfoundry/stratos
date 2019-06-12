@@ -13,7 +13,7 @@ export class UaaRequestHelpers extends RequestHelpers {
 
   constructor() {
     super();
-    this.uaaConfig = e2e.secrets.getUaa();
+    this.uaaConfig = e2e.secrets.getDefaultCFsUaa();
     this.request = this.newRequest({
       headers: {
         'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export class UaaRequestHelpers extends RequestHelpers {
   }
 
   private createUaaToken(req): promise.Promise<string> {
-    const uaa = e2e.secrets.getUaa();
+    const uaa = e2e.secrets.getDefaultCFsUaa();
     const client = `client_id=${uaa.credentials.clientId}`;
     const secret = `client_secret=${uaa.credentials.clientSecret}`;
     const grantType = `grant_type=${uaa.credentials.grantType || 'client_credentials'}`;

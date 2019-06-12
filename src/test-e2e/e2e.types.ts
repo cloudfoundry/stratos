@@ -34,6 +34,7 @@ export interface E2EConfigCloudFoundry extends E2EEndpointConfig {
   testDeployApp: string;
   testDeployAppStack: string;
   services: E2EServicesConfig;
+  uaa: E2EUaa;
 }
 
 export interface E2EEndpointTypeConfig extends E2EEndpointConfig {
@@ -65,5 +66,4 @@ export interface E2EConfig {
   skipSSLValidation: boolean;
   headless: boolean;
   stratosGitHubApiUrl: string;
-  uaa: E2EUaa;
 }
