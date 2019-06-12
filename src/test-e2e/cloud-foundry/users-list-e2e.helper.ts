@@ -1,7 +1,7 @@
 import { browser, promise } from 'protractor';
 import { protractor } from 'protractor/built/ptor';
 
-import { e2e } from '../e2e';
+import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
@@ -18,9 +18,10 @@ export function setUpTestOrgSpaceE2eTest(
   orgName: string,
   spaceName: string,
   userName: string,
-  dropBillingManager = false
+  dropBillingManager = false,
+  e2eSetup?:E2ESetup
 ) {
-  const e2eSetup = e2e.setup(ConsoleUserType.admin)
+  const pe2eSetup = e2eSetup || e2e.setup(ConsoleUserType.admin)
     .clearAllEndpoints()
     .registerDefaultCloudFoundry()
     .connectAllEndpoints(ConsoleUserType.admin)
@@ -37,7 +38,7 @@ export function setUpTestOrgSpaceE2eTest(
       orgName,
       spaceName,
       userName,
-      new CFHelpers(e2eSetup),
+      new CFHelpers(pe2eSetup),
       dropBillingManager), 25000, 'Did not complete "setUpTestOrgSpaceUserRoles" within 25 seconds');
   });
 }
