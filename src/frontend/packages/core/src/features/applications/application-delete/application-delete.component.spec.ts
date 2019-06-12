@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { applicationEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetApplication } from '../../../../../store/src/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { TabNavService } from '../../../../tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -24,7 +24,7 @@ describe('ApplicationDeleteComponent', () => {
       providers: [
         generateTestEntityServiceProvider(
           appId,
-          entityFactory(applicationSchemaKey),
+          cfEntityFactory(applicationEntityType),
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),

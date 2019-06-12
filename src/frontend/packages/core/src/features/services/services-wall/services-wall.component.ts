@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { serviceInstancesEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../../store/src/app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import {
   ServiceInstancesWallListConfigService,
@@ -10,8 +12,6 @@ import {
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { CFAppState } from '../../../../../store/src/app-state';
-import { serviceInstancesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-services-wall',
@@ -33,7 +33,8 @@ export class ServicesWallComponent implements OnDestroy {
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
 
-  constructor(public cloudFoundryService: CloudFoundryService,
+  constructor(
+    public cloudFoundryService: CloudFoundryService,
     public store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService) {
 
@@ -47,7 +48,7 @@ export class ServicesWallComponent implements OnDestroy {
 
     this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
       this.cfOrgSpaceService,
-      serviceInstancesSchemaKey,
+      serviceInstancesEntityType,
       'all').subscribe();
 
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(

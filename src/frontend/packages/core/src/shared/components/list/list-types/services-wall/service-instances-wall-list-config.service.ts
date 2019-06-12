@@ -2,12 +2,12 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import {
+  serviceInstancesEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  serviceInstancesSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
@@ -38,13 +38,14 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   enableTextFilter = true;
   defaultView = 'cards' as ListView;
   cardComponent = new CardMultiActionComponents({
-    [serviceInstancesSchemaKey]: ServiceInstanceCardComponent,
-    [userProvidedServiceInstanceSchemaKey]: UserProvidedServiceInstanceCardComponent
+    [serviceInstancesEntityType]: ServiceInstanceCardComponent,
+    [userProvidedServiceInstanceEntityType]: UserProvidedServiceInstanceCardComponent
   });
   viewType = ListViewTypes.BOTH;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
 
-  constructor(store: Store<CFAppState>,
+  constructor(
+    store: Store<CFAppState>,
     datePipe: DatePipe,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     currentUserPermissionsService: CurrentUserPermissionsService,

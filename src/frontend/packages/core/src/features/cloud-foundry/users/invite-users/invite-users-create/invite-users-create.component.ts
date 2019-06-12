@@ -3,16 +3,12 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../../../../../cloud-foundry/cf-types';
+import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetOrganization } from '../../../../../../../store/src/actions/organization.actions';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { GetSpace } from '../../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  cfUserSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
 import { UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
@@ -28,7 +24,6 @@ import {
 import { StepOnNextFunction } from '../../../../../shared/components/stepper/step/step.component';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invites/user-invite.service';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-invite-users-create',
@@ -111,7 +106,7 @@ export class InviteUsersCreateComponent implements OnInit {
         map(res => {
           if (!res.error && res.failed_invites.length === 0) {
             // Success! Clear all paginations of type users such that lists can be refetched with new user.s
-            this.store.dispatch(new ClearPaginationOfType(new CFEntityConfig(cfUserSchemaKey)));
+            this.store.dispatch(new ClearPaginationOfType(new CFEntityConfig(cfUserEntityType)));
           } else if (res.failed_invites.length > 0) {
             // One or more failed. Push failures back into components
             const newState: StackedInputActionsState[] = [];

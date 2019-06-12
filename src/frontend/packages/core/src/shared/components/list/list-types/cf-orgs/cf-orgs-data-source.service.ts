@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 
+import { cfEntityFactory, organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { entityFactory, organizationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
 
@@ -15,7 +15,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: entityFactory(organizationSchemaKey),
+      schema: cfEntityFactory(organizationEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

@@ -1,12 +1,12 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import {
-  entityFactory,
-  organizationSchemaKey,
-  servicePlanSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  spaceSchemaKey,
-} from '../helpers/entity-factory';
+  cfEntityFactory,
+  organizationEntityType,
+  servicePlanEntityType,
+  servicePlanVisibilityEntityType,
+  spaceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationKey } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
@@ -17,9 +17,9 @@ export class GetServicePlanVisibilities extends CFStartAction implements Paginat
     public endpointGuid: string,
     public paginationKey: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(servicePlanVisibilitySchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(servicePlanVisibilitySchemaKey, organizationSchemaKey),
-      createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
+      createEntityRelationKey(servicePlanVisibilityEntityType, servicePlanEntityType),
+      createEntityRelationKey(servicePlanVisibilityEntityType, organizationEntityType),
+      createEntityRelationKey(organizationEntityType, spaceEntityType)
     ],
     public populateMissing = true
   ) {
@@ -30,8 +30,8 @@ export class GetServicePlanVisibilities extends CFStartAction implements Paginat
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Plan Visibilities', 'Get all');
-  entity = [entityFactory(servicePlanVisibilitySchemaKey)];
-  entityType = servicePlanVisibilitySchemaKey;
+  entity = [cfEntityFactory(servicePlanVisibilityEntityType)];
+  entityType = servicePlanVisibilityEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,

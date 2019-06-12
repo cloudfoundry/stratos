@@ -3,21 +3,29 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { EntityMonitor } from '../../shared/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
-import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../../store/src/types/user-profile.types';
-import { AuthOnlyAppState } from '../../../../store/src/app-state';
-import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../../store/src/effects/user-profile.effects';
-import { userProfileSchemaKey } from '../../../../store/src/helpers/entity-factory';
-import { AuthState } from '../../../../store/src/reducers/auth.reducer';
 import {
   FetchUserProfileAction,
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
 } from '../../../../store/src/actions/user-profile.actions';
-import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
+import { AuthOnlyAppState } from '../../../../store/src/app-state';
+import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../../store/src/effects/user-profile.effects';
+import { userProfileSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import {
+  ActionState,
+  getDefaultActionState,
+  rootUpdatingKey,
+} from '../../../../store/src/reducers/api-request-reducer/types';
+import { AuthState } from '../../../../store/src/reducers/auth.reducer';
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import {
+  UserProfileInfo,
+  UserProfileInfoEmail,
+  UserProfileInfoUpdates,
+} from '../../../../store/src/types/user-profile.types';
 import { userProfileEntitySchema } from '../../base-entity-schemas';
+import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 
 
 @Injectable()

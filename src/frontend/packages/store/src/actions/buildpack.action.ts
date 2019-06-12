@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { buildpackSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { buildpackEntityType, cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';
@@ -14,8 +14,8 @@ export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Buildpacks', 'List all');
-  entity = [entityFactory(buildpackSchemaKey)];
-  entityType = buildpackSchemaKey;
+  entity = [cfEntityFactory(buildpackEntityType)];
+  entityType = buildpackEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,

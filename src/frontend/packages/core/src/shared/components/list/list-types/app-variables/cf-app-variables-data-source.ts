@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import {
+  appEnvVarsEntityType,
+  applicationEntityType,
+  cfEntityFactory,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppEnvVarsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../../../store/src/actions/app-variables.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  appEnvVarsSchemaKey,
-  applicationSchemaKey,
-  entityFactory,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -36,10 +36,10 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
     super({
       store,
       action: new GetAppEnvVarsAction(appService.appGuid, appService.cfGuid),
-      schema: entityFactory(appEnvVarsSchemaKey),
+      schema: cfEntityFactory(appEnvVarsEntityType),
       getRowUniqueId: object => object.name,
       getEmptyType: () => ({ name: '', value: '', }),
-      paginationKey: createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
+      paginationKey: createEntityRelationPaginationKey(applicationEntityType, appService.appGuid),
       transformEntity: map(variables => {
         if (!variables || variables.length === 0) {
           return [];

@@ -1,9 +1,9 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
+import { CFEntitySchema, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { gitCommitSchemaKey, CFEntitySchema } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 import { GitSCM } from '../../../../data-services/scm/scm';
@@ -37,7 +37,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
     super({
       store,
       action,
-      schema: new CFEntitySchema(gitCommitSchemaKey),
+      schema: new CFEntitySchema(gitCommitEntityType),
       getRowUniqueId: object => object.entity.sha,
       paginationKey,
       isLocal: true,

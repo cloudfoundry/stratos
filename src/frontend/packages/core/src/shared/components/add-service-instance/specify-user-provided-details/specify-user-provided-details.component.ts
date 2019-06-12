@@ -8,15 +8,15 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
+import {
+  serviceBindingEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../../../store/src/actions/user-provided-service.actions';
-import {
-  serviceBindingSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -169,7 +169,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       switchMap(p => this.upsService.getUserProvidedServices(
         p.cfGuid,
         p.spaceGuid,
-        [createEntityRelationKey(userProvidedServiceInstanceSchemaKey, serviceBindingSchemaKey)]
+        [createEntityRelationKey(userProvidedServiceInstanceEntityType, serviceBindingEntityType)]
       )),
       map(upsis => upsis.map(upsi => {
         const alreadyBound = !!upsi.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);

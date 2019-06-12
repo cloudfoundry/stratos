@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, featureFlagSchemaKey } from '../helpers/entity-factory';
+import { cfEntityFactory, featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, RequestEntityLocation } from '../types/request.types';
 import { getActions } from './action.helper';
@@ -15,8 +15,8 @@ export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction
         this.guid = endpointGuid;
     }
     guid: string;
-    entityType = featureFlagSchemaKey;
-    entity = [entityFactory(featureFlagSchemaKey)];
+    entityType = featureFlagEntityType;
+    entity = [cfEntityFactory(featureFlagEntityType)];
     actions = getActions('Feature Flags', 'Fetch all');
     options: RequestOptions;
     flattenPagination: false;

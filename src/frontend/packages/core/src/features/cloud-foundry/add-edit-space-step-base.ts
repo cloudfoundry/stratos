@@ -4,16 +4,16 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organization.actions';
+import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
+import { CFAppState } from '../../../../store/src/app-state';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
 import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
-import { CFAppState } from '../../../../store/src/app-state';
-import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organization.actions';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { entityFactory, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 
 export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;
@@ -40,7 +40,7 @@ export class AddEditSpaceStepBase {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          new CFEntityConfig(spaceSchemaKey)
+          new CFEntityConfig(spaceEntityType)
         )
       },
       true

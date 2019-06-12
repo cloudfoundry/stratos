@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
 
+import { organizationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp, IOrganization } from '../../../core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../shared/shared.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { OrgSpaceQuotaHelper } from './cloud-foundry-org-space-quota';
-import { organizationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { APIResource } from '../../../../../store/src/types/api.types';
 
 export class OrgQuotaHelper extends OrgSpaceQuotaHelper<IOrganization> {
   constructor(
@@ -18,7 +18,7 @@ export class OrgQuotaHelper extends OrgSpaceQuotaHelper<IOrganization> {
       cfEndpointService,
       emf,
       orgGuid,
-      organizationSchemaKey,
+      organizationEntityType,
     );
   }
 

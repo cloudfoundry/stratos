@@ -13,15 +13,15 @@ import {
   switchMap,
 } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizations, GetOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { UsersRolesSetChanges } from '../../../../../../store/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import {
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -223,7 +223,7 @@ export class CfRolesService {
     return this.entityServiceFactory.create<APIResource<IOrganization>>(
       orgGuid,
       new GetOrganization(orgGuid, cfGuid, [
-        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
+        createEntityRelationKey(organizationEntityType, spaceEntityType)
       ], true),
       true
     ).waitForEntity$;
@@ -242,11 +242,11 @@ export class CfRolesService {
       const orgs$ = getPaginationObservables<APIResource<IOrganization>>({
         store: this.store,
         action: new GetAllOrganizations(paginationKey, cfGuid, [
-          createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
+          createEntityRelationKey(organizationEntityType, spaceEntityType)
         ], true),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          entityFactory(organizationSchemaKey)
+          cfEntityFactory(organizationEntityType)
         ),
       },
         true

@@ -2,17 +2,15 @@ import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { MetricsConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { metricSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 
 export const enum CellMetrics {

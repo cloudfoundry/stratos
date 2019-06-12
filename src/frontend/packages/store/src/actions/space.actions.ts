@@ -1,18 +1,19 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
+import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 import {
-  applicationSchemaKey,
-  domainSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  serviceInstancesSchemaKey,
-  serviceInstancesWithSpaceSchemaKey,
-  servicePlanSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-} from '../helpers/entity-factory';
+  applicationEntityType,
+  cfEntityFactory,
+  domainEntityType,
+  routeEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  serviceInstancesWithspaceEntityType,
+  servicePlanEntityType,
+  spaceEntityType,
+  spaceWithOrgEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
+import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import {
   createEntityRelationKey,
   EntityInlineChildAction,
@@ -24,7 +25,6 @@ import { getActions } from './action.helper';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
-import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -59,8 +59,8 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
     GET_SPACE_SUCCESS,
     GET_SPACE_FAILED
   ];
-  entity = [entityFactory(spaceSchemaKey)];
-  entityType = spaceSchemaKey;
+  entity = [cfEntityFactory(spaceEntityType)];
+  entityType = spaceEntityType;
   options: RequestOptions;
 }
 
@@ -77,8 +77,8 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     this.options.method = 'get';
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
-  entity = [entityFactory(spaceWithOrgKey)];
-  entityType = spaceSchemaKey;
+  entity = [cfEntityFactory(spaceWithOrgEntityType)];
+  entityType = spaceEntityType;
   options: RequestOptions;
   initialParams = {
     'results-per-page': 100,
@@ -94,8 +94,8 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     public endpointGuid: string,
     public paginationKey: string,
     public includeRelations = [
-      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+      createEntityRelationKey(routeEntityType, domainEntityType),
+      createEntityRelationKey(routeEntityType, applicationEntityType)
     ],
     public populateMissing = true,
     public flattenPagination = true
@@ -118,10 +118,10 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'creation',
   };
   parentGuid: string;
-  entity = entityFactory(routeSchemaKey);
-  entityType = routeSchemaKey;
+  entity = cfEntityFactory(routeEntityType);
+  entityType = routeEntityType;
   options: RequestOptions;
-  parentEntityConfig = new CFEntityConfig(spaceSchemaKey);
+  parentEntityConfig = new CFEntityConfig(spaceEntityType);
 }
 
 export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -140,8 +140,8 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
     this.parentGuid = spaceGuid;
   }
   actions = getActions('Spaces', 'Get Apps');
-  entity = [entityFactory(applicationSchemaKey)];
-  entityType = applicationSchemaKey;
+  entity = [cfEntityFactory(applicationEntityType)];
+  entityType = applicationEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -150,7 +150,7 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
     'order-direction-field': 'creation',
   };
   parentGuid: string;
-  parentEntityConfig = new CFEntityConfig(spaceSchemaKey);
+  parentEntityConfig = new CFEntityConfig(spaceEntityType);
 }
 
 
@@ -159,8 +159,8 @@ export abstract class BaseSpaceAction extends CFStartAction implements ICFAction
     super();
   }
   actions: string[];
-  entity = [entityFactory(spaceSchemaKey)];
-  entityType = spaceSchemaKey;
+  entity = [cfEntityFactory(spaceEntityType)];
+  entityType = spaceEntityType;
   options: RequestOptions;
   removeEntityOnDelete?: boolean;
 }
@@ -203,8 +203,8 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
     this.options.body = updateSpace;
   }
   actions = getActions('Spaces', 'Update Space');
-  entity = [entityFactory(spaceSchemaKey)];
-  entityType = spaceSchemaKey;
+  entity = [cfEntityFactory(spaceEntityType)];
+  entityType = spaceEntityType;
   options: RequestOptions;
   updatingKey = UpdateSpace.UpdateExistingSpace;
 }
@@ -230,7 +230,7 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginatedAc
     public endpointGuid: string = null,
     public spaceGuid: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
+      createEntityRelationKey(serviceEntityType, servicePlanEntityType)
     ],
     public populateMissing = true
   ) {
@@ -241,8 +241,8 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginatedAc
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Space', 'Get all Services');
-  entity = entityFactory(serviceSchemaKey);
-  entityType = serviceSchemaKey;
+  entity = cfEntityFactory(serviceEntityType);
+  entityType = serviceEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -276,8 +276,8 @@ export class GetServiceInstancesForSpace
     this.parentGuid = spaceGuid;
   }
   actions = getActions('Space', 'Get all service instances');
-  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
-  entityType = serviceInstancesSchemaKey;
+  entity = [cfEntityFactory(serviceInstancesWithspaceEntityType)];
+  entityType = serviceInstancesEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -287,5 +287,5 @@ export class GetServiceInstancesForSpace
     q: []
   };
   parentGuid: string;
-  parentEntityConfig = new CFEntityConfig(spaceSchemaKey);
+  parentEntityConfig = new CFEntityConfig(spaceEntityType);
 }

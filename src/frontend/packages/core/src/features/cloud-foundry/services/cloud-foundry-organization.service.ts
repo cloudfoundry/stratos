@@ -4,18 +4,17 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import {
+  domainEntityType,
+  organizationEntityType,
+  privateDomainsEntityType,
+  quotaDefinitionEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetOrganization } from '../../../../../store/src/actions/organization.actions';
 import { DeleteSpace } from '../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import {
-  domainSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  privateDomainsSchemaKey,
-  quotaDefinitionSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { OrgUserRoleNames } from '../../../../../store/src/types/user.types';
@@ -88,21 +87,21 @@ export class CloudFoundryOrganizationService {
     this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
-          createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
-          createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
-          createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
-          createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
-          createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+          createEntityRelationKey(organizationEntityType, spaceEntityType),
+          createEntityRelationKey(organizationEntityType, domainEntityType),
+          createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
+          createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
+          createEntityRelationKey(spaceEntityType, routeEntityType),
         ];
         if (!isAdmin) {
           // We're only interested in fetching org roles via the org request for non-admins.
           // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
           // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
           relations.push(
-            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.USER),
-            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.MANAGER),
-            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.BILLING_MANAGERS),
-            createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.AUDITOR),
+            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.USER),
+            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.MANAGER),
+            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.BILLING_MANAGERS),
+            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.AUDITOR),
           );
         }
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(

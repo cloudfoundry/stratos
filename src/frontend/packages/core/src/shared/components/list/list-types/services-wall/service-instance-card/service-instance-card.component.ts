@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
+import { cfEntityFactory, serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -36,7 +36,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
     if (row) {
       this.serviceInstanceEntity = row;
-      const schema = entityFactory(serviceInstancesSchemaKey);
+      const schema = cfEntityFactory(serviceInstancesEntityType);
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
       this.serviceInstanceTags = row.entity.tags.map(t => ({
         value: t

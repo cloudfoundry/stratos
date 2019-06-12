@@ -4,9 +4,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
+import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -54,7 +54,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     const spaceName = this.createSpaceForm.value.spaceName;
     this.store.dispatch(new CreateSpace(spaceName, this.orgGuid, this.cfGuid));
 
-    return this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(
+    return this.store.select(selectRequestInfo(spaceEntityType, `${this.orgGuid}-${spaceName}`)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),
       this.map('Failed to create space: ')
     );

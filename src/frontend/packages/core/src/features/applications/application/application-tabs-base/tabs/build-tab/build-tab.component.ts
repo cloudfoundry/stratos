@@ -1,27 +1,25 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { combineLatest, distinct, map, startWith, first, mergeMap, tap, delay, filter } from 'rxjs/operators';
+import { Component, Inject, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, tap } from 'rxjs/operators';
 
+import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../store/src/actions/app-metadata.actions';
+import { RestageApplication } from '../../../../../../../../store/src/actions/application.actions';
+import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { EntityService } from '../../../../../../core/entity-service';
+import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
+import { ENTITY_SERVICE } from '../../../../../../shared/entity.tokens';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
-import { ENTITY_SERVICE } from '../../../../../../shared/entity.tokens';
-import { EntityService } from '../../../../../../core/entity-service';
-import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
-import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
-import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
-import { Store } from '@ngrx/store';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { GetAppStatsAction, AppMetadataTypes } from '../../../../../../../../store/src/actions/app-metadata.actions';
-import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { appStatsSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
-import { RestageApplication } from '../../../../../../../../store/src/actions/application.actions';
-import { CFEntityConfig } from '../../../../../../../../cloud-foundry/cf-types';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 

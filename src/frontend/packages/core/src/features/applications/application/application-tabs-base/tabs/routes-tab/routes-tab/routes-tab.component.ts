@@ -2,23 +2,25 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../../../../../../../cloud-foundry/cf-types';
+import { domainEntityType } from '../../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { FetchAllDomains } from '../../../../../../../../../store/src/actions/domains.actions';
+import { CFAppState } from '../../../../../../../../../store/src/app-state';
+import {
+  getPaginationObservables,
+} from '../../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../../../../../store/src/types/api.types';
 import { CurrentUserPermissionsService } from '../../../../../../../core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../shared/components/confirmation-dialog.service';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
-import { PaginationMonitorFactory } from '../../../../../../../shared/monitors/pagination-monitor.factory';
-import { first } from 'rxjs/operators';
-import { CFAppState } from '../../../../../../../../../store/src/app-state';
-import { ApplicationService } from '../../../../../application.service';
-import { APIResource } from '../../../../../../../../../store/src/types/api.types';
-import { FetchAllDomains } from '../../../../../../../../../store/src/actions/domains.actions';
-import { getPaginationObservables } from '../../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { entityFactory, domainSchemaKey } from '../../../../../../../../../store/src/helpers/entity-factory';
 import { CfOrgSpaceDataService } from '../../../../../../../shared/data-services/cf-org-space-service.service';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../../../../cloud-foundry/cf-types';
+import { PaginationMonitorFactory } from '../../../../../../../shared/monitors/pagination-monitor.factory';
+import { ApplicationService } from '../../../../../application.service';
 
 @Component({
   selector: 'app-routes-tab',
@@ -59,7 +61,7 @@ export class RoutesTabComponent implements OnInit {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          new CFEntityConfig(domainSchemaKey)
+          new CFEntityConfig(domainEntityType)
         )
       },
       true

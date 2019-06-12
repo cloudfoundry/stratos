@@ -1,12 +1,12 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import {
-  applicationSchemaKey,
-  domainSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../helpers/entity-factory';
+  applicationEntityType,
+  cfEntityFactory,
+  domainEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -48,8 +48,8 @@ export abstract class BaseRouteAction extends CFStartAction implements ICFAction
   }
   endpointType = 'cf';
   actions: string[];
-  entity = [entityFactory(routeSchemaKey)];
-  entityType = routeSchemaKey;
+  entity = [cfEntityFactory(routeEntityType)];
+  entityType = routeEntityType;
   options: RequestOptions;
 }
 
@@ -133,8 +133,8 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
     };
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
-  entity = [entityFactory(routeSchemaKey)];
-  entityType = routeSchemaKey;
+  entity = [cfEntityFactory(routeEntityType)];
+  entityType = routeEntityType;
   options: RequestOptions;
 }
 
@@ -144,9 +144,9 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
   constructor(
     public endpointGuid: string,
     public includeRelations = [
-      createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
-      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      createEntityRelationKey(routeSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(routeEntityType, applicationEntityType),
+      createEntityRelationKey(routeEntityType, domainEntityType),
+      createEntityRelationKey(routeEntityType, spaceEntityType),
     ],
     public populateMissing = true
   ) {
@@ -156,8 +156,8 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
     this.options.method = 'get';
     this.paginationKey = createEntityRelationPaginationKey('cf', this.endpointGuid);
   }
-  entity = [entityFactory(routeSchemaKey)];
-  entityType = routeSchemaKey;
+  entity = [cfEntityFactory(routeEntityType)];
+  entityType = routeEntityType;
   options: RequestOptions;
   actions = getActions('Routes', 'Fetch all');
   initialParams = {

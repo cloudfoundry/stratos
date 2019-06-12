@@ -1,6 +1,14 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  quotaDefinitionEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
 import { GetOrganization } from '../../actions/organization.actions';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../actions/relation.actions';
@@ -9,13 +17,7 @@ import { CFAppState, IRequestTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
 import { BaseRequestDataState } from '../../types/entity.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
-import {
-  entityFactory,
-  organizationSchemaKey,
-  quotaDefinitionSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../entity-factory';
+import { EntityTreeRelation } from './entity-relation-tree';
 import { validateEntityRelations } from './entity-relations';
 import {
   entityRelationMissingQuotaGuid,
@@ -24,8 +26,6 @@ import {
   EntityRelationSpecHelper,
 } from './entity-relations.spec';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from './entity-relations.types';
-import { getInitialTestStoreState, createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
-import { EntityTreeRelation } from './entity-relation-tree';
 
 describe('Entity Relations - validate', () => {
 
@@ -77,9 +77,9 @@ describe('Entity Relations - validate', () => {
   }
 
   function testListMissingListRequired(done: () => void) {
-    const getOrgAction = new GetOrganization(orgGuid, cfGuid, [createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)], true);
+    const getOrgAction = new GetOrganization(orgGuid, cfGuid, [createEntityRelationKey(organizationEntityType, spaceEntityType)], true);
 
-    const childSpaceToOrgRelation = new EntityTreeRelation(entityFactory(spaceSchemaKey), true, 'spaces', 'entity.spaces', []);
+    const childSpaceToOrgRelation = new EntityTreeRelation(cfEntityFactory(spaceEntityType), true, 'spaces', 'entity.spaces', []);
     const parentOrgToSpaceRelation = new EntityTreeRelation(getOrgAction.entity[0], true, null, '', [childSpaceToOrgRelation]);
 
     const getSpacesAction = new FetchRelationPaginatedAction(
@@ -88,13 +88,13 @@ describe('Entity Relations - validate', () => {
       parentOrgToSpaceRelation,
       childSpaceToOrgRelation,
       getOrgAction.includeRelations,
-      createEntityRelationPaginationKey(organizationSchemaKey, orgGuid) + '-relation',
+      createEntityRelationPaginationKey(organizationEntityType, orgGuid) + '-relation',
       true,
       entityRelationMissingSpacesUrl
     );
     const setSpacesParamsActions = new SetInitialParams(
       {
-        entityType: spaceSchemaKey,
+        entityType: spaceEntityType,
         endpointType: 'cf'
       },
       getSpacesAction.paginationKey,
@@ -129,7 +129,7 @@ describe('Entity Relations - validate', () => {
 
   function testListExistsListRequired(done: () => void) {
     inject([Store], (iStore: Store<CFAppState>) => {
-      noOp(iStore, [createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)], done);
+      noOp(iStore, [createEntityRelationKey(organizationEntityType, spaceEntityType)], done);
     })();
   }
 
@@ -143,11 +143,11 @@ describe('Entity Relations - validate', () => {
     const getOrgAction = new GetOrganization(
       orgGuid,
       cfGuid,
-      [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
+      [createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType)],
       true);
 
     const childQuotaToOrgRelation = new EntityTreeRelation(
-      entityFactory(quotaDefinitionSchemaKey),
+      cfEntityFactory(quotaDefinitionEntityType),
       false,
       'quota_definition',
       'entity.quota_definition',
@@ -191,8 +191,8 @@ describe('Entity Relations - validate', () => {
   describe('validate from store - ', () => {
     beforeEach(() => {
       store = getInitialTestStoreState();
-      store.requestData[organizationSchemaKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-      store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState();
+      store.requestData[organizationEntityType][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
+      store.request[organizationEntityType][orgGuid] = getDefaultRequestState();
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -212,14 +212,14 @@ describe('Entity Relations - validate', () => {
     });
 
     it('List exists, list required', (done) => {
-      store.requestData[organizationSchemaKey][orgGuid].entity.spaces = [
+      store.requestData[organizationEntityType][orgGuid].entity.spaces = [
         helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid)
       ];
       testListExistsListRequired(done);
     });
 
     it('List exists, list not required', (done) => {
-      store.requestData[organizationSchemaKey][orgGuid].entity.spaces = [
+      store.requestData[organizationEntityType][orgGuid].entity.spaces = [
         helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid)
       ];
       testListExistsListNotRequired(done);
@@ -232,25 +232,25 @@ describe('Entity Relations - validate', () => {
     it('child has missing required relation', (done) => {
       const space = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
       space.entity.routes_url = 'routes_url';
-      store.requestData[organizationSchemaKey][orgGuid].entity.spaces = [space];
+      store.requestData[organizationEntityType][orgGuid].entity.spaces = [space];
 
       const getOrgAction = new GetOrganization(
         orgGuid,
         cfGuid,
         [
-          createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
-          createEntityRelationKey(spaceSchemaKey, routeSchemaKey)
+          createEntityRelationKey(organizationEntityType, spaceEntityType),
+          createEntityRelationKey(spaceEntityType, routeEntityType)
         ],
         true);
 
       const childRoutesToSpaceRelation = new EntityTreeRelation(
-        entityFactory(routeSchemaKey),
+        cfEntityFactory(routeEntityType),
         true,
         'routes',
         'entity.routes',
         []);
 
-      const childSpaceToOrgRelation = new EntityTreeRelation(entityFactory(spaceSchemaKey), true, 'spaces', 'entity.spaces', [
+      const childSpaceToOrgRelation = new EntityTreeRelation(cfEntityFactory(spaceEntityType), true, 'spaces', 'entity.spaces', [
         childRoutesToSpaceRelation
       ]);
       const parentOrgToSpaceRelation = new EntityTreeRelation(getOrgAction.entity[0], true, null, '', [childSpaceToOrgRelation]);
@@ -261,13 +261,13 @@ describe('Entity Relations - validate', () => {
         childSpaceToOrgRelation,
         childRoutesToSpaceRelation,
         getOrgAction.includeRelations,
-        createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid) + '-relation',
+        createEntityRelationPaginationKey(spaceEntityType, spaceGuid) + '-relation',
         true,
         space.entity.routes_url
       );
       const setSpaceRoutesParamsActions = new SetInitialParams(
         {
-          entityType: routeSchemaKey,
+          entityType: routeEntityType,
           endpointType: 'cf'
         },
         getSpaceRoutesAction.paginationKey,
@@ -305,7 +305,7 @@ describe('Entity Relations - validate', () => {
       const getOrgAction = new GetOrganization(
         orgGuid,
         cfGuid,
-        [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
+        [createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType)],
         populateMissing);
 
       inject([Store], (iStore: Store<CFAppState>) => {
@@ -339,7 +339,7 @@ describe('Entity Relations - validate', () => {
       const getOrgAction = new GetOrganization(
         orgGuid,
         cfGuid,
-        [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
+        [createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType)],
         true);
 
       inject([Store], (iStore: Store<CFAppState>) => {
@@ -373,22 +373,22 @@ describe('Entity Relations - validate', () => {
 
     it('Have missing relation in store, associate it with parent', (done) => {
       const quotaDefinition = helper.createEmptyQuotaDefinition('quota_guid', 'missing but in store');
-      store.requestData[quotaDefinitionSchemaKey] = {
+      store.requestData[quotaDefinitionEntityType] = {
         [quotaDefinition.metadata.guid]: quotaDefinition
       };
-      const org = store.requestData[organizationSchemaKey][orgGuid];
+      const org = store.requestData[organizationEntityType][orgGuid];
       org.entity.quota_definition_guid = quotaDefinition.metadata.guid;
 
 
       const getOrgAction = new GetOrganization(
         orgGuid,
         cfGuid,
-        [createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey)],
+        [createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType)],
         true);
 
       const associateAction = new WrapperRequestActionSuccess({
         entities: {
-          [organizationSchemaKey]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
+          [organizationEntityType]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
         },
         result: [org.metadata.guid]
       }, {
@@ -396,7 +396,7 @@ describe('Entity Relations - validate', () => {
         entity: getOrgAction.entity[0],
         entityLocation: RequestEntityLocation.OBJECT,
         guid: orgGuid,
-        entityType: organizationSchemaKey,
+        entityType: organizationEntityType,
         type: '[Entity] Associate with parent',
         childEntityKey: 'quota_definition',
         endpointType: 'cf'
@@ -433,7 +433,7 @@ describe('Entity Relations - validate', () => {
     beforeEach(() => {
       store = getInitialTestStoreState();
 
-      store.request[organizationSchemaKey][orgGuid] = getDefaultRequestState();
+      store.request[organizationEntityType][orgGuid] = getDefaultRequestState();
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -443,7 +443,7 @@ describe('Entity Relations - validate', () => {
       apiResponse = {
         response: {
           entities: {
-            [organizationSchemaKey]: {
+            [organizationEntityType]: {
               [orgGuid]: helper.createEmptyOrg(orgGuid, 'org-name')
             }
           },
@@ -465,15 +465,15 @@ describe('Entity Relations - validate', () => {
 
     it('List exists, list required', (done) => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
-      apiResponse.response.entities[organizationSchemaKey][orgGuid].entity.spaces = [newSpace];
-      apiResponse.response.entities[spaceSchemaKey] = { [spaceGuid]: newSpace };
+      apiResponse.response.entities[organizationEntityType][orgGuid].entity.spaces = [newSpace];
+      apiResponse.response.entities[spaceEntityType] = { [spaceGuid]: newSpace };
       testListExistsListRequired(done);
     });
 
     it('List exists, list not required', (done) => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
-      apiResponse.response.entities[organizationSchemaKey][orgGuid].entity.spaces = [newSpace];
-      apiResponse.response.entities[spaceSchemaKey] = { [spaceGuid]: newSpace };
+      apiResponse.response.entities[organizationEntityType][orgGuid].entity.spaces = [newSpace];
+      apiResponse.response.entities[spaceEntityType] = { [spaceGuid]: newSpace };
       testListExistsListNotRequired(done);
     });
 

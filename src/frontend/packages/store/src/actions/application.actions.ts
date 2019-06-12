@@ -1,14 +1,14 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { applicationEntityType, appStatsEntityType, cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { IApp } from '../../../core/src/core/cf-api.types';
-import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -42,7 +42,7 @@ export const RESTAGE = '[Application] Restage';
 export const RESTAGE_SUCCESS = '[Application] Restage success';
 export const RESTAGE_FAILED = '[Application] Restage failed';
 
-const applicationEntitySchema = entityFactory(applicationSchemaKey);
+const applicationEntitySchema = cfEntityFactory(applicationEntityType);
 
 export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
@@ -55,7 +55,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [applicationEntitySchema];
-  entityType = applicationSchemaKey;
+  entityType = applicationEntityType;
   endpointType = CF_ENDPOINT_TYPE;
   options: RequestOptions;
   initialParams: PaginationParam = {
@@ -77,7 +77,7 @@ export class GetApplication extends CFStartAction implements ICFAction, EntityIn
   }
   actions = [GET, GET_SUCCESS, GET_FAILED];
   entity = [applicationEntitySchema];
-  entityType = applicationSchemaKey;
+  entityType = applicationEntityType;
   options: RequestOptions;
 }
 
@@ -98,7 +98,7 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
   }
   actions = [CREATE, CREATE_SUCCESS, CREATE_FAILED];
   entity = [applicationEntitySchema];
-  entityType = applicationSchemaKey;
+  entityType = applicationEntityType;
   options: RequestOptions;
 }
 
@@ -135,16 +135,16 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   }
   actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
   entity = [applicationEntitySchema];
-  entityType = applicationSchemaKey;
+  entityType = applicationEntityType;
   options: RequestOptions;
   updatingKey = UpdateExistingApplication.updateKey;
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
     const keepFromOld = pick(
-      oldEntities[applicationSchemaKey][this.guid].entity,
+      oldEntities[applicationEntityType][this.guid].entity,
       Object.keys(applicationEntitySchema.schema)
     );
-    newEntities[applicationSchemaKey][this.guid].entity = {
-      ...newEntities[applicationSchemaKey][this.guid].entity,
+    newEntities[applicationEntityType][this.guid].entity = {
+      ...newEntities[applicationEntityType][this.guid].entity,
       ...keepFromOld
     };
     return newEntities;
@@ -168,7 +168,7 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
   }
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
   entity = [applicationEntitySchema];
-  entityType = applicationSchemaKey;
+  entityType = applicationEntityType;
   options: RequestOptions;
 }
 
@@ -190,8 +190,8 @@ export class DeleteApplicationInstance extends CFStartAction
     this.guid = `${appGuid}-${index}`;
   }
   actions = [DELETE_INSTANCE, DELETE_INSTANCE_SUCCESS, DELETE_INSTANCE_FAILED];
-  entity = [entityFactory(appStatsSchemaKey)];
-  entityType = appStatsSchemaKey;
+  entity = [cfEntityFactory(appStatsEntityType)];
+  entityType = appStatsEntityType;
   removeEntityOnDelete = true;
   options: RequestOptions;
 }
@@ -208,7 +208,7 @@ export class RestageApplication extends CFStartAction implements ICFAction {
   }
   actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
   entity = [applicationEntitySchema];
-  entityType = applicationSchemaKey;
+  entityType = applicationEntityType;
   options: RequestOptions;
   updatingKey = 'restaging';
 }

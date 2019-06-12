@@ -1,16 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { MetricsTabComponent } from './metrics-tab.component';
-import { SharedModule } from '../../../../../../shared/shared.module';
-import { MDAppModule } from '../../../../../../core/md.module';
-import { generateTestEntityServiceProvider } from '../../../../../../../test-framework/entity-service.helper';
-import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
-import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
-import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { entityFactory, applicationSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+
+import { applicationEntityType, cfEntityFactory } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetApplication } from '../../../../../../../../store/src/actions/application.actions';
+import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
+import { generateTestEntityServiceProvider } from '../../../../../../../test-framework/entity-service.helper';
+import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
+import { MDAppModule } from '../../../../../../core/md.module';
+import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
+import { SharedModule } from '../../../../../../shared/shared.module';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { MetricsTabComponent } from './metrics-tab.component';
 
 describe('MetricsTabComponent', () => {
   let component: MetricsTabComponent;
@@ -31,7 +31,7 @@ describe('MetricsTabComponent', () => {
         ApplicationEnvVarsHelper,
         generateTestEntityServiceProvider(
           appId,
-          entityFactory(applicationSchemaKey),
+          cfEntityFactory(applicationEntityType),
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),

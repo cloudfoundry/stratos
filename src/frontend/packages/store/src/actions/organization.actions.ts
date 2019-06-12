@@ -1,12 +1,17 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
+import {
+  cfEntityFactory,
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
-import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
@@ -46,8 +51,8 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
     GET_ORGANIZATION_SUCCESS,
     GET_ORGANIZATION_FAILED
   ];
-  entity = [entityFactory(organizationSchemaKey)];
-  entityType = organizationSchemaKey;
+  entity = [cfEntityFactory(organizationEntityType)];
+  entityType = organizationEntityType;
   options: RequestOptions;
 }
 
@@ -66,8 +71,8 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
     this.parentGuid = orgGuid;
   }
   actions = [GET_ORGANIZATION_SPACES, GET_ORGANIZATION_SPACES_SUCCESS, GET_ORGANIZATION_SPACES_FAILED];
-  entity = entityFactory(spaceSchemaKey);
-  entityType = spaceSchemaKey;
+  entity = cfEntityFactory(spaceEntityType);
+  entityType = spaceEntityType;
   options: RequestOptions;
   flattenPagination = true;
   initialParams = {
@@ -76,7 +81,7 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
     'order-direction-field': 'name'
   };
   parentGuid: string;
-  parentEntityConfig = new CFEntityConfig(organizationSchemaKey);
+  parentEntityConfig = new CFEntityConfig(organizationEntityType);
 }
 
 export class GetAllOrganizations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
@@ -96,8 +101,8 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
     GET_ORGANIZATIONS_SUCCESS,
     GET_ORGANIZATIONS_FAILED
   ];
-  entity = [entityFactory(organizationSchemaKey)];
-  entityType = organizationSchemaKey;
+  entity = [cfEntityFactory(organizationEntityType)];
+  entityType = organizationEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -120,8 +125,8 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
     this.options.params.append('async', 'false');
   }
   actions = [DELETE_ORGANIZATION, DELETE_ORGANIZATION_SUCCESS, DELETE_ORGANIZATION_FAILED];
-  entity = [entityFactory(organizationSchemaKey)];
-  entityType = organizationSchemaKey;
+  entity = [cfEntityFactory(organizationEntityType)];
+  entityType = organizationEntityType;
   options: RequestOptions;
   removeEntityOnDelete = true;
 }
@@ -138,8 +143,8 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
     };
   }
   actions = getActions('Organizations', 'Create Org');
-  entity = [entityFactory(organizationSchemaKey)];
-  entityType = organizationSchemaKey;
+  entity = [cfEntityFactory(organizationEntityType)];
+  entityType = organizationEntityType;
   options: RequestOptions;
   guid: string;
 }
@@ -155,8 +160,8 @@ export class UpdateOrganization extends CFStartAction implements ICFAction {
     this.options.body = updateOrg;
   }
   actions = getActions('Organizations', 'Update Org');
-  entity = [entityFactory(organizationSchemaKey)];
-  entityType = organizationSchemaKey;
+  entity = [cfEntityFactory(organizationEntityType)];
+  entityType = organizationEntityType;
   options: RequestOptions;
   updatingKey = UpdateOrganization.UpdateExistingOrg;
 }
@@ -182,8 +187,8 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     GET_ORGANIZATION_USERS_SUCCESS,
     GET_ORGANIZATION_USERS_FAILED
   ];
-  entity = [entityFactory(cfUserSchemaKey)];
-  entityType = cfUserSchemaKey;
+  entity = [cfEntityFactory(cfUserEntityType)];
+  entityType = cfUserEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,

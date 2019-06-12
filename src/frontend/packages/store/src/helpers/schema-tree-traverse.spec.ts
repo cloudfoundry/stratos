@@ -1,5 +1,5 @@
+import { CFEntitySchema } from '../../../cloud-foundry/src/cf-entity-factory';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
-import { CFEntitySchema } from './entity-factory';
 import { EntitySchemaTreeBuilder } from './schema-tree-traverse';
 
 

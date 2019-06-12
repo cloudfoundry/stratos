@@ -4,13 +4,14 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, switchMap } from 'rxjs/operators';
 
+import { cfUserEntityType, organizationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { IOrganization } from '../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../core/src/shared/monitors/pagination-monitor.factory';
 import { GetAllOrganizations, GetAllOrgUsers } from '../actions/organization.actions';
 import { GET_CF_USERS_AS_NON_ADMIN, GetAllUsersAsNonAdmin } from '../actions/users.actions';
 import { CFAppState } from '../app-state';
-import { cfUserSchemaKey, endpointSchemaKey, entityFactory, organizationSchemaKey } from '../helpers/entity-factory';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
 import { createPaginationCompleteWatcher, fetchPaginationStateFromAction } from '../helpers/store-helpers';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
@@ -39,7 +40,7 @@ export class UsersEffects {
     switchMap(action => {
       const mockRequestType: ApiRequestTypes = 'fetch';
       const mockPaginationAction: PaginatedAction = {
-        entityType: cfUserSchemaKey,
+        entityType: cfUserEntityType,
         endpointType: '',
         type: action.type,
         paginationKey: action.paginationKey,
@@ -78,7 +79,7 @@ export class UsersEffects {
       // Fetch the users
       const getUsersAction = new GetAllOrgUsers(
         organisation.metadata.guid,
-        createEntityRelationPaginationKey(organizationSchemaKey, organisation.metadata.guid),
+        createEntityRelationPaginationKey(organizationEntityType, organisation.metadata.guid),
         action.cfGuid,
         false, // By definition this is a non-admin block
         action.includeRelations,
@@ -128,10 +129,10 @@ export class UsersEffects {
             // Create a normalized response containing the list of guids. Note - we're not interested in the user entities as these
             // have already be stored
             const mappedData = {
-              entities: { [cfUserSchemaKey]: {} },
+              entities: { [cfUserEntityType]: {} },
               result: []
             } as NormalizedResponse;
-            const userData = mappedData.entities[cfUserSchemaKey];
+            const userData = mappedData.entities[cfUserEntityType];
             userGuids.forEach(userGuid => {
               userData[userGuid] = {};
             });
@@ -158,11 +159,11 @@ export class UsersEffects {
       first(),
       map(cfEndpoint => {
         const mappedData = {
-          entities: { [cfUserSchemaKey]: {} },
+          entities: { [cfUserEntityType]: {} },
           result: []
         } as NormalizedResponse;
         const userGuid = cfEndpoint.user.guid;
-        mappedData.entities[cfUserSchemaKey] = {
+        mappedData.entities[cfUserEntityType] = {
           [userGuid]: {
             entity: {
               guid: userGuid,
@@ -205,7 +206,7 @@ export class UsersEffects {
       action: new GetAllOrganizations(getAllOrgsPaginationKey, cfGuid),
       paginationMonitor: this.paginationMonitorFactory.create(
         getAllOrgsPaginationKey,
-        entityFactory(organizationSchemaKey)
+        entityFactory(organizationEntityType)
       )
     }).entities$.pipe(
       filter(entities => !!entities),

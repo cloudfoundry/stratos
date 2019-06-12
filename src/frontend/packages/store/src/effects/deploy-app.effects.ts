@@ -5,30 +5,30 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { gitBranchesEntityType, gitCommitEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { parseHttpPipeError } from '../../../core/src/core/utils.service';
 import {
-    CHECK_PROJECT_EXISTS,
-    CheckProjectExists,
-    FETCH_BRANCHES_FOR_PROJECT,
-    FETCH_COMMIT,
-    FETCH_COMMITS,
-    FetchBranchesForProject,
-    FetchCommit,
-    FetchCommits,
-    ProjectDoesntExist,
-    ProjectExists,
-    ProjectFetchFail,
+  CHECK_PROJECT_EXISTS,
+  CheckProjectExists,
+  FETCH_BRANCHES_FOR_PROJECT,
+  FETCH_COMMIT,
+  FETCH_COMMITS,
+  FetchBranchesForProject,
+  FetchCommit,
+  FetchCommits,
+  ProjectDoesntExist,
+  ProjectExists,
+  ProjectFetchFail,
 } from '../actions/deploy-applications.actions';
-import { gitBranchesSchemaKey, gitCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
 import { GitCommit } from '../types/git.types';
 import {
-    ICFAction,
-    StartRequestAction,
-    WrapperRequestActionFailed,
-    WrapperRequestActionSuccess,
+  ICFAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { CFAppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
@@ -74,7 +74,7 @@ export class DeployAppEffects {
         mergeMap(action => {
             const actionType = 'fetch';
             const apiAction = {
-                entityType: gitBranchesSchemaKey,
+                entityType: gitBranchesEntityType,
                 type: action.type,
                 paginationKey: 'branches'
             } as PaginatedAction;
@@ -91,7 +91,7 @@ export class DeployAppEffects {
                         const id = `${scmType}-${action.projectName}-${b.name}`;
                         b.projectId = action.projectName;
                         b.entityId = id;
-                        mappedData.entities[gitBranchesSchemaKey][id] = {
+                        mappedData.entities[gitBranchesEntityType][id] = {
                             entity: b,
                             metadata: {}
                         };
@@ -112,14 +112,14 @@ export class DeployAppEffects {
         mergeMap(action => {
             const actionType = 'fetch';
             const apiAction = {
-                entityType: gitCommitSchemaKey,
+                entityType: gitCommitEntityType,
                 type: action.type
             } as ICFAction;
             this.store.dispatch(new StartRequestAction(apiAction, actionType));
             return action.scm.getCommit(action.projectName, action.commitSha).pipe(
                 mergeMap(commit => {
                     const mappedData = {
-                        entities: { [gitCommitSchemaKey]: {} },
+                        entities: { [gitCommitEntityType]: {} },
                         result: []
                     } as NormalizedResponse;
                     this.addCommit(mappedData, action.scm.getType(), action.projectName, commit);
@@ -138,7 +138,7 @@ export class DeployAppEffects {
         mergeMap(action => {
             const actionType = 'fetch';
             const apiAction = {
-                entityType: gitCommitSchemaKey,
+                entityType: gitCommitEntityType,
                 type: action.type,
                 paginationKey: action.paginationKey
             } as PaginatedAction;
@@ -146,7 +146,7 @@ export class DeployAppEffects {
             return action.scm.getCommits(action.projectName, action.sha).pipe(
                 mergeMap((commits: GitCommit[]) => {
                     const mappedData = {
-                        entities: { [gitCommitSchemaKey]: {} },
+                        entities: { [gitCommitEntityType]: {} },
                         result: []
                     } as NormalizedResponse;
                     commits.forEach(commit => {
@@ -163,7 +163,7 @@ export class DeployAppEffects {
 
     addCommit(mappedData: NormalizedResponse, scmType: string, projectName: string, commit: GitCommit) {
         const id = scmType + '-' + projectName + '-' + commit.sha;
-        mappedData.entities[gitCommitSchemaKey][id] = {
+        mappedData.entities[gitCommitEntityType][id] = {
             entity: commit,
             metadata: {}
         };

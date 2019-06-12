@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { entityFactory, metricSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { cfEntityFactory, metricEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
@@ -44,7 +44,7 @@ export class CloudFoundryCellBaseComponent {
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   public name$: Observable<string>;
   public waitForEntityId: string;
-  public waitForEntitySchema = entityFactory(metricSchemaKey);
+  public waitForEntitySchema = cfEntityFactory(metricEntityType);
   public cfCellService: CloudFoundryCellService;
 
 

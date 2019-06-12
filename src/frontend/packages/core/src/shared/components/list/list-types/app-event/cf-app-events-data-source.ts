@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { appEventEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllAppEvents } from '../../../../../../../store/src/actions/app-event.actions';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { appEventSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 
@@ -45,7 +45,7 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
       {
         store,
         action,
-        schema: entityFactory(appEventSchemaKey),
+        schema: cfEntityFactory(appEventEntityType),
         getRowUniqueId: (object: EntityInfo) => {
           return object.entity.metadata ? object.entity.metadata.guid : null;
         },

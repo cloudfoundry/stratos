@@ -4,6 +4,12 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
+import { cfEntityFactory, organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
+import { CFAppState } from '../../../../../../store/src/app-state';
+import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -11,12 +17,6 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
-import { CFAppState } from '../../../../../../store/src/app-state';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { entityFactory, organizationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 
 
 const enum OrgStatus {
@@ -87,7 +87,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(organizationSchemaKey)
+          cfEntityFactory(organizationEntityType)
         )
       },
       true
@@ -115,7 +115,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     }));
 
     // Update action
-    return this.store.select(selectRequestInfo(organizationSchemaKey, this.orgGuid)).pipe(
+    return this.store.select(selectRequestInfo(organizationEntityType, this.orgGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
       map(o => o.updating[UpdateOrganization.UpdateExistingOrg]),
       map(o => ({

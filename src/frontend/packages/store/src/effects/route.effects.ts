@@ -6,7 +6,6 @@ import { map } from 'rxjs/operators';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { RouteEvents, UnmapRoute } from '../actions/route.actions';
 import { CFAppState } from '../app-state';
-import { routeSchemaKey } from '../helpers/entity-factory';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
 @Injectable()

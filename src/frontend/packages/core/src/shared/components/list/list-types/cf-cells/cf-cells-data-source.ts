@@ -1,14 +1,17 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import { cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  FetchCFCellMetricsPaginatedAction,
+  MetricQueryConfig,
+} from '../../../../../../../store/src/actions/metrics.actions';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { IMetricVectorResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { MetricQueryConfig, FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
-import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfCellsDataSource
     extends ListDataSource<IMetricVectorResult<IMetricCell>, IMetrics<IMetricVectorResult<IMetricCell>>> {
@@ -29,7 +32,7 @@ export class CfCellsDataSource
         super({
             store,
             action,
-            schema: entityFactory(action.entityType),
+            schema: cfEntityFactory(action.entityType),
             getRowUniqueId: (row) => row.metric.bosh_job_id,
             paginationKey: action.paginationKey,
             isLocal: true,

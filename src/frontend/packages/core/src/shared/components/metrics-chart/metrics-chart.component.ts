@@ -3,15 +3,20 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
+import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { CFAppState } from '../../../../../store/src/app-state';
+import {
+  ChartSeries,
+  IMetrics,
+  MetricResultTypes,
+  MetricsFilterSeries,
+} from '../../../../../store/src/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { ChartSeries, IMetrics, MetricResultTypes, MetricsFilterSeries } from '../../../../../store/src/types/base-metric.types';
-import { CFAppState } from '../../../../../store/src/app-state';
-import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 
 
 export interface MetricsConfig<T = any> {
@@ -92,7 +97,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.guid,
       {
-        entityType: metricSchemaKey,
+        entityType: metricEntityType,
         endpointType: ''
       }
     );

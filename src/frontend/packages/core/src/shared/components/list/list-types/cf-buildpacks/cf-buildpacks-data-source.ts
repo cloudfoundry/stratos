@@ -1,13 +1,16 @@
 import { Store } from '@ngrx/store';
 
+import { buildpackEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { FetchAllBuildpacks } from '../../../../../../../store/src/actions/buildpack.action';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { endpointSchemaKey, entityFactory, buildpackSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { FetchAllBuildpacks } from '../../../../../../../store/src/actions/buildpack.action';
 
 export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
@@ -16,7 +19,7 @@ export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: entityFactory(buildpackSchemaKey),
+      schema: cfEntityFactory(buildpackEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,

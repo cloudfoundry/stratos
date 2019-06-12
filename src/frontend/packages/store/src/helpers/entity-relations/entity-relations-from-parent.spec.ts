@@ -2,7 +2,10 @@ import { async, inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
+import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-foundry.module';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
 import { GetAllOrganizationSpaces } from '../../actions/organization.actions';
 import { RequestTypes } from '../../actions/request.actions';
@@ -10,18 +13,15 @@ import { AppState, IRequestEntityTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
 import { APIResource } from '../../types/api.types';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
-import { organizationSchemaKey, spaceSchemaKey } from '../entity-factory';
 import { populatePaginationFromParent } from './entity-relations';
 import { EntityRelationSpecHelper } from './entity-relations.spec';
-import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-foundry.module';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { registerCFEntities } from '../../../../cloud-foundry/src/cf-entity-generator';
+
 interface SpaceState {
   space: IRequestEntityTypeState<APIResource<ISpace>>;
 }
 describe('Entity Relations - populate from parent', () => {
-  const entityKey = entityCatalogue.getEntityKey('cf', organizationSchemaKey);
-  const spaceEntityKey = entityCatalogue.getEntityKey('cf', spaceSchemaKey);
+  const entityKey = entityCatalogue.getEntityKey('cf', organizationEntityType);
+  const spaceEntityKey = entityCatalogue.getEntityKey('cf', spaceEntityType);
 
   const helper = new EntityRelationSpecHelper();
 

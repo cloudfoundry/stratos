@@ -5,6 +5,13 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import {
+  applicationEntityType,
+  domainEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   AssociateRouteWithAppApplication,
   GetAppRoutes,
@@ -14,13 +21,6 @@ import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GetSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  domainSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -33,7 +33,6 @@ import { pathGet } from '../../../../core/utils.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
@@ -122,7 +121,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         action: fetchAllDomainsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           fetchAllDomainsAction.paginationKey,
-          new CFEntityConfig(domainSchemaKey)
+          new CFEntityConfig(domainEntityType)
         )
       },
       true
@@ -136,7 +135,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             this.spaceGuid = app.entity.entity.space_guid;
             const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
               this.spaceGuid,
-              new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
+              new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)]),
               true
             );
             return spaceService.waitForEntity$;
@@ -238,7 +237,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     }
 
     this.store.dispatch(new CreateRoute(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port)));
-    return this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid))
+    return this.store.select(selectRequestInfo(routeEntityType, newRouteGuid))
       .pipe(
         filter(route => !route.creating && !route.fetching),
         mergeMap(route => {
@@ -253,7 +252,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
     this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, routeGuid, this.cfGuid));
-    return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
+    return this.store.select(selectRequestInfo(applicationEntityType, this.appGuid)).pipe(
       pairwise(),
       filter(([oldApp, newApp]) => {
         return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);

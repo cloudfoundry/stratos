@@ -3,23 +3,19 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
+import { spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
-import {
-  createEntityRelationPaginationKey
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import {
-  spaceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
-import {
-  CfAppRoutesListConfigServiceBase
-} from './cf-app-routes-list-config-base';
 import { IListConfig } from '../../list.component.types';
+import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
@@ -33,7 +29,7 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
     currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
-    const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid));
+    const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid));
     // If parentEntitySchema is set the entity validation process will look for the space routes in the parent space entity
     // In this case, we do have them however they're missing the route-->app relationship.. which means we fetch them at a rate of one per
     // route. For spaces with hundreds of routes this isn't acceptable, so remove the link to the parent and fetch the list afresh.

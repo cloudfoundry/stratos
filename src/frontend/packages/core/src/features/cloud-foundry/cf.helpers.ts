@@ -3,15 +3,16 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { applicationEntityType, cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { applicationSchemaKey, endpointSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectEntities } from '../../../../store/src/selectors/api.selectors';
 import {
   getCurrentUserCFEndpointRolesState,
 } from '../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { ICfRolesState } from '../../../../store/src/types/current-user-roles.types';
@@ -29,15 +30,12 @@ import { UserRoleLabels } from '../../../../store/src/types/users-roles.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { pathGet } from '../../core/utils.service';
 import { extractActualListEntity } from '../../shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 
 
 export interface IUserRole<T> {
@@ -221,8 +219,8 @@ export const getActiveRouteCfCellProvider = {
 
 export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
   const appWallPagKey = 'applicationWall';
-  const entityKey = EntityCatalogueHelpers.buildEntityKey(applicationSchemaKey, CF_ENDPOINT_TYPE);
-  store.dispatch(new SetClientFilter(new CFEntityConfig(applicationSchemaKey), appWallPagKey,
+  const entityKey = EntityCatalogueHelpers.buildEntityKey(applicationEntityType, CF_ENDPOINT_TYPE);
+  store.dispatch(new SetClientFilter(new CFEntityConfig(applicationEntityType), appWallPagKey,
     {
       string: '',
       items: {
@@ -305,7 +303,7 @@ export function fetchTotalResults(
     action: newAction,
     paginationMonitor: paginationMonitorFactory.create(
       newAction.paginationKey,
-      entityFactory(newAction.entityType)
+      cfEntityFactory(newAction.entityType)
     )
   });
   // Ensure the request is made by sub'ing to the entities observable

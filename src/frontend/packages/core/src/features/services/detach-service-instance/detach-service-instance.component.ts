@@ -5,6 +5,11 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { GetServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
+import { CFAppState } from '../../../../../store/src/app-state';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding, IServiceInstance } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import {
@@ -12,12 +17,6 @@ import {
 } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { CFAppState } from '../../../../../store/src/app-state';
-import { GetServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-detach-service-instance',
@@ -30,7 +29,7 @@ export class DetachServiceInstanceComponent {
   cfGuid: string;
   selectedBindings: APIResource<IServiceBinding>[];
   deleteStarted: boolean;
-  serviceBindingSchemaKey = serviceBindingSchemaKey;
+  serviceBindingEntityType = serviceBindingEntityType;
   public confirmColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
     {
       headerCell: () => 'Name',

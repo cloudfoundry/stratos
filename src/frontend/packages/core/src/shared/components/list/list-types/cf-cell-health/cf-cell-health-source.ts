@@ -1,12 +1,13 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IMetrics, IMetricMatrixResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { IListConfig } from '../../list.component.types';
+
+import { cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
-import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 
 export interface CfCellHealthEntry {
@@ -33,7 +34,7 @@ export class CfCellHealthDataSource extends ListDataSource<CfCellHealthEntry, IM
         super({
             store,
             action,
-            schema: entityFactory(action.entityType),
+            schema: cfEntityFactory(action.entityType),
             getRowUniqueId: (row: CfCellHealthEntry) => row.timestamp.toString(),
             paginationKey: action.paginationKey,
             isLocal: true,
