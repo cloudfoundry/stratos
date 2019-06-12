@@ -6,7 +6,6 @@ export interface E2ECred {
 export interface E2ECreds {
   admin: E2ECred;
   nonAdmin: E2ECred;
-  removeUser: E2ECred;
 }
 
 export interface E2EEndpointConfig {
@@ -54,10 +53,23 @@ export interface E2EEndpointsConfig {
   ];
 }
 
+export interface E2EUaaCredentials {
+  clientId: string;
+  clientSecret: string;
+  grantType?: string;
+}
+
+export interface E2EUaa {
+  credentials: E2EUaaCredentials;
+  tokenEndpoint: string;
+  zone: string;
+}
+
 export interface E2EConfig {
   consoleUsers: E2ECreds;
   endpoints: E2EEndpointsConfig;
   skipSSLValidation: boolean;
   headless: boolean;
   stratosGitHubApiUrl: string;
+  uaa: E2EUaa;
 }

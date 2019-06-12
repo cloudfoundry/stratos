@@ -18,7 +18,7 @@ import { E2EConfigCloudFoundry } from '../e2e.types';
 import { ListComponent } from '../po/list.po';
 import { MetaCardTitleType } from '../po/meta-card.po';
 import { CFRequestHelpers } from './cf-request-helpers';
-
+import { UaaHelpers } from './uaa-helpers';
 
 export class CFHelpers {
   static cachedDefaultCfGuid: string;
@@ -400,10 +400,23 @@ export class CFHelpers {
       })));
   }
 
-  deleteUser(cfGuid: string, userGuid: string): promise.Promise<any> {
-    return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`).then(res => res.resources);
+  deleteUser(cfGuid: string, userGuid: string, uaaUserGuid?: string): promise.Promise<any> {
+    const uaaHelpers = new UaaHelpers();
+    return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
+      .then(() => {
+        if (uaaUserGuid) {
+          return uaaHelpers.deleteUser(uaaUserGuid);
+        }
+        // Else case will be done in invite user PR
+      });
   }
 
+  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string}> {
+    const body = {
+      guid: uaaUserGuid
+    };
+    return this.cfRequestHelper.sendCfPost<{ guid: string}>(cfGuid, 'users', body);
+  }
 
   /**
    * Nav from cf page to org and optional space via the org and space lists
@@ -446,7 +459,7 @@ export class CFHelpers {
         spacePage.loadingIndicator.waitUntilNotShown();
         return spacePage;
       });
-  }
+    }
 
   addOrgQuota(cfGuid, name, options = {}) {
     const body = {
