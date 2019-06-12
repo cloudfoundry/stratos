@@ -105,7 +105,7 @@
     "delete": "^0.3.2",
     "fs-extra": "^3.0.1",
     "globby": "^8.0.1",
-    "gulp": "^4.0.0",
+    "gulp": "^4.0.2",
     "gulp-zip": "^4.2.0",
     "istanbul": "^0.4.5",
     "jasmine-core": "~3.3.0",
