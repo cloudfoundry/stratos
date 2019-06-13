@@ -20,7 +20,6 @@ export class UaaHelpers {
 
   getUserByUsername(username: string): promise.Promise<any> {
     return this.requestHelper.sendGet(`Users?filter=userName+eq+%22${username}%22&startIndex=1`).then(res => {
-      console.log(res);
       return res.totalResults === 1 ?
       res.resources[0] :
       promise.rejected(`Found no or multiple users matching name '${username}'`);
