@@ -15,7 +15,7 @@ func init() {
 		createFavoritesTable += "target                    VARCHAR(255)  NOT NULL,"
 		createFavoritesTable += "metadata                  TEXT,"
 		createFavoritesTable += "last_updated              TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-		createFavoritesTable += "PRIMARY KEY (provider, target) );"
+		createFavoritesTable += "PRIMARY KEY (provider, type, target) );"
 
 		_, err := txn.Exec(createFavoritesTable)
 		if err != nil {

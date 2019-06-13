@@ -3,7 +3,6 @@ package relations
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -15,11 +14,11 @@ import (
 var (
 	getRelations       = `SELECT provider, type, target, metadata FROM relations`
 	getRelationsByType = `SELECT provider, type, target, metadata FROM relations WHERE type = $1`
-	getRelation        = `SELECT provider, type, target, metadata FROM relations WHERE provider = $1 AND target = $2`
-	deleteRelation     = `DELETE FROM relations WHERE provider = $1 AND target = $2`
+	getRelation        = `SELECT provider, type, target, metadata FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
+	deleteRelation     = `DELETE FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
 	deleteRelations    = `DELETE FROM relations WHERE provider = $1 OR target = $1`
 	insertRelation     = `INSERT INTO relations (provider, type, target, metadata) VALUES ($1, $2, $3, $4)`
-	updateRelation     = `UPDATE relations SET provider = $1, type = $2, target = $3, metadata = $4 WHERE provider = $5 AND target = $6`
+	updateRelation     = `UPDATE relations SET provider = $1, type = $2, target = $3, metadata = $4 WHERE provider = $5 AND type = $6 AND target = $7`
 )
 
 // InitRepositoryProvider - One time init for the given DB Provider
@@ -117,9 +116,9 @@ func (p *RelationsDBStore) ListByType(relationType string) ([]*interfaces.Relati
 }
 
 // Delete will delete a Relation from the datastore
-func (p *RelationsDBStore) DeleteRelation(provider string, target string) error {
-	if _, err := p.db.Exec(deleteRelation, provider, target); err != nil {
-		return fmt.Errorf("Unable to delete Relations record: %v", err)
+func (p *RelationsDBStore) DeleteRelation(provider string, relType string, target string) error {
+	if _, err := p.db.Exec(deleteRelation, provider, relType, target); err != nil {
+		return fmt.Errorf("Unable to delete Relation: %v", err)
 	}
 
 	return nil
@@ -133,23 +132,19 @@ func (p *RelationsDBStore) DeleteRelations(providerOrTarget string) error {
 	return nil
 }
 
-func (p *RelationsDBStore) GetRelation(provider string, target string) (*interfaces.RelationsRecord, error) {
+func (p *RelationsDBStore) GetRelation(provider string, relType string, target string) (*interfaces.RelationsRecord, error) {
 	var (
-		// pCNSIType              string
-		// pURL                   string
-		// cipherTextClientSecret []byte
-		// subType                sql.NullString
 		metadata sql.NullString
 	)
 
 	relation := new(interfaces.RelationsRecord)
 
 	// &relation.AuthorizationEndpoint, &relation.TokenEndpoint, &relation.DopplerLoggingEndpoint, &relation.SkipSSLValidation, &relation.ClientId, &cipherTextClientSecret, &relation.SSOAllowed, &subType, &metadata)
-	err := p.db.QueryRow(getRelation, provider, target).Scan(&relation.Provider, &relation.RelationType, &relation.Target, &metadata)
+	err := p.db.QueryRow(getRelation, provider, relType, target).Scan(&relation.Provider, &relation.RelationType, &relation.Target, &metadata)
 
 	switch {
 	case err == sql.ErrNoRows:
-		return new(interfaces.RelationsRecord), errors.New("No match for that Relation")
+		return new(interfaces.RelationsRecord), fmt.Errorf("No match for that Relation")
 	case err != nil:
 		return new(interfaces.RelationsRecord), fmt.Errorf("Error trying to Find CNSI record: %v", err)
 	default:
@@ -177,7 +172,7 @@ func (p *RelationsDBStore) Save(relationsRecord interfaces.RelationsRecord) (*in
 		return nil, fmt.Errorf("Unable to marshal Relations metadata: %v", err)
 	}
 
-	existingRelation, err := p.GetRelation(relationsRecord.Provider, relationsRecord.Target)
+	existingRelation, err := p.GetRelation(relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target)
 
 	log.Warnf("Save: %v", existingRelation)
 	log.Warnf("Save: %v", relationsRecord.Provider)
@@ -186,7 +181,7 @@ func (p *RelationsDBStore) Save(relationsRecord interfaces.RelationsRecord) (*in
 
 	if err == nil && existingRelation != nil {
 		log.Warnf("updateRelation: %v", existingRelation)
-		if _, err := p.db.Exec(updateRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString, relationsRecord.Provider, relationsRecord.Target); err != nil {
+		if _, err := p.db.Exec(updateRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target); err != nil {
 			return nil, fmt.Errorf("Unable to update Relations record: %v", err)
 		}
 	} else {

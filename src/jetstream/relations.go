@@ -43,7 +43,7 @@ func (p *portalProxy) RemoveRelation(relation interfaces.RelationsRecord) error 
 		return err
 	}
 
-	return store.DeleteRelation(relation.Provider, relation.Target)
+	return store.DeleteRelation(relation.Provider, relation.RelationType, relation.Target)
 }
 
 func (p *portalProxy) listRelations(c echo.Context) error {
