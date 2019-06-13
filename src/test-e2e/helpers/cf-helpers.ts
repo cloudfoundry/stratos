@@ -14,6 +14,10 @@ import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFRequestHelpers } from './cf-request-helpers';
 
+const stackPriority = {
+  cf: [ 'cflinuxfs3', 'cflinuxfs2' ],
+  suse: [ 'sle15', 'opensuse42' ]
+};
 
 export class CFHelpers {
   static cachedDefaultCfGuid: string;
@@ -166,18 +170,35 @@ export class CFHelpers {
     });
   }
 
-  // Default Stack based on the CF Vendor
-  fetchDefaultStack(endpoint: E2EConfigCloudFoundry) {
-    const reqObj = this.cfRequestHelper.newRequest();
-    const options = {
-      url: endpoint.url + '/v2/info'
-    };
-    return reqObj(options).then((response) => {
-      const json = JSON.parse(response.body);
-      const isSUSE = json.description.indexOf('SUSE') === 0;
-      return isSUSE ? 'sle15' : 'cflinuxfs2';
-    }).catch((e) => {
-      return 'unknown';
+  // Get defult stack for the default CF
+  fetchDefaultCFEndpointStack() {
+    return this.fetchDefaultCfGuid(true).then(guid => {
+      return this.cfRequestHelper.sendCfGet(guid, '/stacks').then(json => {
+
+        const endpoint = this.cfRequestHelper.getDefaultCFEndpoint();
+        // Get the info for the Default CF
+        const reqObj = this.cfRequestHelper.newRequest();
+        const options = {
+          url: endpoint.url + '/v2/info'
+        };
+        return reqObj(options).then((response) => {
+          const infoJson = JSON.parse(response.body);
+          const isSUSE = infoJson.description.indexOf('SUSE') === 0;
+
+          const stackPriorities = isSUSE ? stackPriority.suse : stackPriority.cf;
+          const stacksAvailable = {};
+          json.resources.forEach(s => stacksAvailable[s.entity.name] = true);
+
+          for (const s of stackPriorities) {
+            if (stacksAvailable[s]) {
+              return s;
+            }
+          }
+          return stackPriorities[0];
+        }).catch((e) => {
+          return 'unknown';
+        });
+      });
     });
   }
 

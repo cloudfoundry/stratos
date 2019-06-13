@@ -28,6 +28,10 @@ export class CFRequestHelpers extends RequestHelpers {
       });
   }
 
+  getDefaultCFEndpoint = () => {
+    return this.e2eHelper.secrets.getDefaultCFEndpoint();
+  }
+
   getCfGuid = (cfName?: string): promise.Promise<string> =>
     this.getCfInfo(cfName).then((endpoint: EndpointModel) => endpoint ? endpoint.guid : null)
 
