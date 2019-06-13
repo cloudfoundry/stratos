@@ -186,20 +186,18 @@ export class CFHelpers {
           const isSUSE = infoJson.description.indexOf('SUSE') === 0;
 
           const stackPriorities = isSUSE ? stackPriority.suse : stackPriority.cf;
-          const stacksAvaialble = {};
-          json.resources.forEach(s => stacksAvaialble[s.entity.name] = true);
+          const stacksAvailable = {};
+          json.resources.forEach(s => stacksAvailable[s.entity.name] = true);
 
           for (const s of stackPriorities) {
-            if (stacksAvaialble[s]) {
+            if (stacksAvailable[s]) {
               return s;
             }
           }
-
           return stackPriorities[0];
         }).catch((e) => {
           return 'unknown';
         });
-        return json.resources[0].entity.name;
       });
     });
   }
