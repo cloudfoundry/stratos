@@ -37,6 +37,11 @@ run:
 
       # Generate Helm package
       updateHelmDependency
+
+      # Generate imagelist
+      ./imagelist-gen.sh ./console
+
+      # Package console Helm Chart
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${RELEASE_VERSION}-${COMMIT}.tgz
       cd ${ROOT_DIR}/helm-chart/

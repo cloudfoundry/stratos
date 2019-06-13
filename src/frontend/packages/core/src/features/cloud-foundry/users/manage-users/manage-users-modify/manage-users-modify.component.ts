@@ -167,12 +167,18 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
     // Set the starting state of the org table
     if (this.activeRouteCfOrgSpace.orgGuid) {
-      this.store.dispatch(new UsersRolesSetOrg(this.activeRouteCfOrgSpace.orgGuid));
+      this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid).pipe(
+        first()
+      ).subscribe(org => {
+        this.store.dispatch(new UsersRolesSetOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.entity.name));
+      });
     } else {
       this.orgGuidChangedSub = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid).pipe(
         filter(orgs => orgs && !!orgs.length),
         first()
-      ).subscribe(orgs => this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid)));
+      ).subscribe(orgs => {
+        this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
+      });
     }
 
     const users$: Observable<CfUserWithWarning[]> = this.store.select(selectUsersRolesPicked).pipe(
