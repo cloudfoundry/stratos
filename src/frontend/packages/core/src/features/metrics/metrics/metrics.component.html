@@ -26,46 +26,42 @@
   </div>
 
   <div>
-    <div *ngFor="let targetEndpoint of ep.entity.endpoints" class="metric-endpoint">
-      <mat-card class="metrics-provision">
-        <mat-card-content>
-          <div class="metrics-info" *ngIf="ep.metadata[targetEndpoint.guid] as metadata">
-            <mat-icon fontSet="{{ metadata.icon.font }}">
-              {{ metadata.icon.name }}</mat-icon>
-            <div class="metrics-metadata">
-              <div>{{ targetEndpoint.name }}</div>
-              <div>{{ metadata.type }}</div>
-              <div class="metrics-metadata__cols">
-                <div class="metrics-metadata__two-cols">
-                  <app-metadata-item icon="link" label="Address">{{ targetEndpoint.metadata.fullApiEndpoint }}
-                  </app-metadata-item>
-                  <app-metadata-item icon="history" label="Prometheus Job">
-                    {{ metadata.relation.metadata?.job || 'N/A' }}
-                  </app-metadata-item>
-                  <app-metadata-item icon="history" label="Prometheus Environment">
-                    {{ metadata.relation.metadata?.environment || 'N/A' }}</app-metadata-item>
-                </div>
-                <div class="metrics-metadata__two-cols">
-                  <ng-container *ngIf="metadata.relation.metadata?.job as job">
-                    <div class="metrics-extra" *ngIf="jobDetails$ | async as jobDetails">
-                      <div *ngIf="jobDetails[job]">
+      <div *ngFor="let svc of ep.entity.endpoints" class="metric-endpoint">
+        <mat-card class="metrics-provision">
+          <mat-card-content>
+            <div class="metrics-info">
+              <mat-icon fontSet="{{ ep.metadata[svc.guid].icon.font }}">{{ ep.metadata[svc.guid].icon.name }}</mat-icon>
+              <div class="metrics-metadata">
+                <div>{{ svc.name }}</div>
+                <div>{{ ep.metadata[svc.guid].type }}</div>
+                <div class="metrics-metadata__cols">
+                  <div class="metrics-metadata__two-cols">
+                    <app-metadata-item icon="link" label="Address">{{ svc.metadata.fullApiEndpoint }}</app-metadata-item>
+                    <ng-container *ngIf="getKubeRelation(ep.entity.provider) as rel">
+                        <app-metadata-item icon="history" label="Prometheus Job">{{ rel.metadata.metrics_job || 'N/A' }}</app-metadata-item>
+                        <app-metadata-item icon="history" label="Prometheus Environment">{{ rel.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
+                    </ng-container>
+                    <ng-container *ngIf="getEiriniRelation(ep.entity.provider) as rel">
+                        <app-metadata-item icon="history" label="Eirini Pod Namespace">{{ rel.metadata.namespace || 'N/A' }}</app-metadata-item>
+                    </ng-container>
+                  </div>
+                  <div class="metrics-metadata__two-cols" *ngIf="getCfRelation(ep.entity.provider) as rel">
+                    <div class="metrics-extra" *ngIf="rel.metadata && rel.metadata.job && (jobDetails$ | async) as jobDetails">
+                      <div *ngIf="jobDetails[rel.metadata.job]">
                         <app-metadata-item icon="help_outline" label="Exporter Health">{{
-                              jobDetails[job].health | uppercase }}</app-metadata-item>
+                          jobDetails[rel.metadata.job].health | uppercase }}</app-metadata-item>
                         <app-metadata-item icon="schedule" label="Exporter Last Scrape">{{
-                              jobDetails[job].lastScrape | date:'medium' }}
-                        </app-metadata-item>
+                          jobDetails[rel.metadata.job].lastScrape | date:'medium' }}</app-metadata-item>
                         <app-metadata-item icon="error_outline" label="Exporter Last Error">{{
-                              jobDetails[job].lastError || 'None' }}</app-metadata-item>
+                          jobDetails[rel.metadata.job].lastError || 'None' }}</app-metadata-item>
                       </div>
                     </div>
-                  </ng-container>
-
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
   </div>
 </div>

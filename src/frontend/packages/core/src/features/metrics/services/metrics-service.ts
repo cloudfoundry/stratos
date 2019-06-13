@@ -11,6 +11,10 @@ import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;
+  /**
+   * Convience property containiner unique endpoints that are related to this metric endpoint.
+   * There may be multiple relations for the same endpoint (eirini + cf)
+   */
   endpoints: EndpointModel[];
 }
 
@@ -39,13 +43,17 @@ export class MetricsService {
         const result: MetricsEndpointProvider[] = [];
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         metrics.forEach(ep => {
+
           const provider: MetricsEndpointProvider = {
             provider: ep,
-            endpoints: [] as EndpointModel[],
+            endpoints: [],
           };
-          const endpointProviders = ep.relations ? ep.relations.provides : [];
-          endpointProviders.forEach(providerRelation => {
-            const targetEndpoint = endpoints.find(e => e.guid === providerRelation.guid);
+          const providesMetricsFor = ep.relations ? ep.relations.provides : [];
+          providesMetricsFor.forEach(relation => {
+            if (provider.endpoints.find(e => e.guid === relation.guid)) {
+              return;
+            }
+            const targetEndpoint = endpoints.find(e => e.guid === relation.guid);
             if (targetEndpoint) {
               provider.endpoints.push(targetEndpoint);
               targetEndpoint.metadata = targetEndpoint.metadata || {};

@@ -6,6 +6,7 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../store/src/types/endpoint.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
 import { EndpointIcon, getIconForEndpoint, getNameForEndpointType } from '../../endpoints/endpoint-helpers';
@@ -60,11 +61,11 @@ export class MetricsComponent {
       map(eps => eps.find((item) => item.provider.guid === metricsGuid)),
       map(ep => {
         const metadata = {};
-        ep.endpoints.forEach(endpoint => {
+
+        Object.values(ep.endpoints).forEach(endpoint => {
           metadata[endpoint.guid] = {
             type: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
             icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type),
-            relation: ep.provider.relations.provides.find(provider => provider.guid === endpoint.guid)
           };
         });
         return {
@@ -98,5 +99,22 @@ export class MetricsComponent {
         return mapped;
       }, {}))
     );
+  }
+
+  getKubeRelation(endpoint: EndpointModel): EndpointsRelation {
+    return this.getRelation(endpoint, EndpointRelationTypes.METRICS_KUBE);
+  }
+
+  getEiriniRelation(endpoint: EndpointModel): EndpointsRelation {
+    return this.getRelation(endpoint, EndpointRelationTypes.METRICS_EIRINI);
+  }
+
+  getCfRelation(endpoint: EndpointModel): EndpointsRelation {
+    return this.getRelation(endpoint, EndpointRelationTypes.METRICS_CF);
+  }
+
+  getRelation(endpoint: EndpointModel, relType: EndpointRelationTypes): EndpointsRelation {
+    console.log(endpoint, relType);
+    return endpoint.relations ? endpoint.relations.provides.find(e => e.type === relType) : null;
   }
 }
