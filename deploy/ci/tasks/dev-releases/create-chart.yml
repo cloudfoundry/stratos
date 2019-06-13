@@ -33,6 +33,7 @@ run:
       IMAGE_TAG=${GIT_TAG}
       cd ${STRATOS}/deploy/kubernetes/
       patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console ${RELEASE_VERSION} ${VERSION}
+      patchHelmChartAppVersion ./console ${STRATOS}
 
       # Generate Helm package
       updateHelmDependency
