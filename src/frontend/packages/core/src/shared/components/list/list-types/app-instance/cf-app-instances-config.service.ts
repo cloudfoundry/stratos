@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { combineLatest as combineLatestOp, filter, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../store/src/actions/application.actions';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import {
+  FetchApplicationMetricsAction,
+  FetchCfEiriniMetricsAction,
+  MetricQueryConfig,
+} from '../../../../../../../store/src/actions/metrics.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, metricSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
@@ -14,6 +18,7 @@ import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -23,6 +28,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
+import { TableCellKubeNodeComponent } from './table-cell-kube-node/table-cell-kube-node.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 
 export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
@@ -38,7 +44,6 @@ export function createAppInstancesMetricAction(appGuid: string, cfGuid: string):
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
 
   instancesSource: CfAppInstancesDataSource;
-  metricResults$: Observable<IMetricMatrixResult<IMetricApplication>[]>;
   columns: Array<ITableColumn<ListAppInstance>> = [
     {
       columnId: 'index',
@@ -120,10 +125,15 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   cfCellColumn: ITableColumn<ListAppInstance> = {
     columnId: 'cell',
     headerCell: () => 'Cell',
-    cellConfig: {
-      metricResults$: null
-    },
+    cellConfig: { },
     cellComponent: TableCellCfCellComponent,
+    cellFlex: '2'
+  };
+  cfEiriniColumn: ITableColumn<ListAppInstance> = {
+    columnId: 'eirini',
+    headerCell: () => 'Kube Node',
+    cellConfig: { },
+    cellComponent: TableCellKubeNodeComponent,
     cellFlex: '2'
   };
 
@@ -167,7 +177,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     createEnabled: row$ =>
       row$.pipe(switchMap(row => {
         return this.appService.app$.pipe(
-          combineLatest(this.appService.appSpace$),
+          combineLatestOp(this.appService.appSpace$),
           map(([app, space]) => {
             return row.value &&
               row.value.state === 'RUNNING' &&
@@ -190,21 +200,30 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
-    entityServiceFactory: EntityServiceFactory
+    entityServiceFactory: EntityServiceFactory,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
-    this.initialised$ = this.endpointsService.hasCellMetrics(appService.cfGuid).pipe(
-      map(hasMetrics => {
-        if (hasMetrics) {
+    this.initialised$ = combineLatest([
+      this.endpointsService.hasEiriniMetrics(appService.cfGuid),
+      this.endpointsService.hasCellMetrics(appService.cfGuid)
+    ]).pipe(
+      map(([hasEiriniMetrics, hasCellMetrics]) => {
+        if (hasCellMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
           this.cfCellColumn.cellConfig = {
             metricEntityService: this.createMetricsResults(entityServiceFactory),
             cfGuid: this.appService.cfGuid
           };
         }
+        if (hasEiriniMetrics) {
+          this.columns.splice(1, 0, this.cfEiriniColumn);
+          this.cfEiriniColumn.cellConfig = {
+            eiriniPodsService: this.createEiriniPodService(entityServiceFactory)
+          };
+        }
         return true;
-      })
-    );
+    }));
 
     this.instancesSource = new CfAppInstancesDataSource(
       this.store,
@@ -229,6 +248,23 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       entityFactory(metricSchemaKey),
       metricsAction.guid,
       metricsAction,
+      false
+    );
+  }
+
+  private createEiriniPodService(entityServiceFactory: EntityServiceFactory) {
+    const metricsKey = `${this.appService.cfGuid}:${this.appService.appGuid}:appPods`;
+    const action = new FetchCfEiriniMetricsAction(
+      metricsKey,
+      this.appService.cfGuid,
+      new MetricQueryConfig(`kube_pod_labels{label_guid="${this.appService.appGuid}"} / on(pod) group_right kube_pod_info`),
+      MetricQueryType.QUERY
+    );
+    return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
+      metricSchemaKey,
+      entityFactory(metricSchemaKey),
+      action.guid,
+      action,
       false
     );
   }

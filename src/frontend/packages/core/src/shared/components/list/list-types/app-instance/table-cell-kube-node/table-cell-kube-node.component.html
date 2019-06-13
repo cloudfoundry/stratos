@@ -1,0 +1,6 @@
+<ng-container *ngIf="(nodeName$ | async) as name; else loading">
+  {{name}}
+</ng-container>
+<ng-template #loading>
+  <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+</ng-template>

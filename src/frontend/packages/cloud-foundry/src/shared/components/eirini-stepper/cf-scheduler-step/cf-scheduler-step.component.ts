@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { IStepperStep, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { DeleteEndpointRelation, SaveEndpointRelation } from '../../../../../../store/src/actions/endpoint.actions';
@@ -158,7 +158,6 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
 
       return this.store.select(selectUpdateInfo(endpointSchemaKey, this.cfGuid, EndpointsEffect.updateRelationKey)).pipe(
         pairwise(),
-        tap(console.log),
         filter(([oldVal, newVal]) => oldVal ? oldVal.busy : false && !newVal.busy),
         map(([oldV, newV]: [ActionState, ActionState]) => {
           return {

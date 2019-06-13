@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { combineLatest as observableCombineLatest, combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { cfEiriniRelationship, eiriniEnabled } from '../../../cloud-foundry/src/shared/eirini.helper';
 import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../store/src/actions/metrics.actions';
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { entityFactory } from '../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../../../store/src/helpers/entity-factory';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectEntity } from '../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { IMetrics } from '../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
@@ -148,6 +150,18 @@ export class EndpointsService implements CanActivate {
           first()
         );
       })
+    );
+  }
+
+  hasEiriniMetrics(endpointId: string): Observable<boolean> {
+    const hasProvider$ = this.store.select(selectEntity<EndpointModel>(endpointSchemaKey, endpointId)).pipe(
+      map(cf => cfEiriniRelationship(cf))
+    );
+    return combineLatest([
+      eiriniEnabled(this.store),
+      hasProvider$
+    ]).pipe(
+      map(([eirini, hasProvider]) => !!eirini && !!hasProvider)
     );
   }
 

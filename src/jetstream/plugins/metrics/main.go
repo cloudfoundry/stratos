@@ -113,8 +113,9 @@ func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
 
-	// Note: User needs to be an admin of the given Cloud Foundry to retrieve metrics
+	// Note: User needs to be an admin of the given Cloud Foundry to retrieve cf general, cell and eirini metrics
 	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
+	echoContext.GET("/metrics/cf/eirini/:op", m.getCloudFoundryEiriniMetrics)
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 }
 
@@ -380,6 +381,8 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: RC Should we not do this now and rely on the relations table?
 
 	for _, endpoint := range userEndpoints {
 		if stringInSlice(endpoint.GUID, cnsiList) {

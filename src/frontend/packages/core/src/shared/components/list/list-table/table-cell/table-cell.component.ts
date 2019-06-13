@@ -25,6 +25,9 @@ import {
   TableCellEventTypeComponent,
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
+import {
+  TableCellKubeNodeComponent,
+} from '../../list-types/app-instance/table-cell-kube-node/table-cell-kube-node.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import {
   TableCellEditVariableComponent,
@@ -163,7 +166,8 @@ export const listTableCells = [
   TableCellAServicePlanExtrasComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
-  ...coreEndpointListDetailsComponents
+  ...coreEndpointListDetailsComponents,
+  TableCellKubeNodeComponent
 ];
 
 @Component({
