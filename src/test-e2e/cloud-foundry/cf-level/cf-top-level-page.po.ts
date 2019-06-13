@@ -1,7 +1,9 @@
 import { browser, by, element, promise, protractor } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
+import { ConfirmDialogComponent } from '../../po/confirm-dialog';
 import { ListComponent } from '../../po/list.po';
+import { MetaCardTitleType } from '../../po/meta-card.po';
 import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 
 
@@ -39,6 +41,18 @@ export class CfTopLevelPage extends CFPage {
     const cardView = new ListComponent();
     cardView.cards.waitUntilShown();
     return cardView;
+  }
+
+  deleteOrg(orgName) {
+    const cardView = this.goToOrgView();
+
+    cardView.cards.findCardByTitle(orgName, MetaCardTitleType.CUSTOM, true).then(card => {
+      card.openActionMenu().then(menu => {
+        menu.clickItem('Delete');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', orgName);
+        card.waitUntilNotShown();
+      });
+    });
   }
 
   isSummaryView(): promise.Promise<boolean> {
@@ -113,6 +127,14 @@ export class CfTopLevelPage extends CFPage {
 
   goToSecurityGroupsTab() {
     return this.goToTab('Security Groups', 'security-groups');
+  }
+
+  clickOnOrg(orgName: string) {
+    const list = new ListComponent();
+    list.cards.findCardByTitle(orgName).then((card) => {
+      expect(card).toBeDefined();
+      card.click();
+    });
   }
 
   private goToTab(label: string, urlSuffix: string): promise.Promise<any> {

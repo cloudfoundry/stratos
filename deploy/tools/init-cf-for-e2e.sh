@@ -10,6 +10,7 @@ ADMIN="admin"
 ADMIN_PASS="admin"
 USER="user"
 USER_PASS="pass"
+REMOVE_USER="e2e-remove-user"
 SKIP_LOGIN="false"
 CF_API_ENDPOINT="https://api.local.pcfdev.io"
 DEFAULT_ORG="e2e"
@@ -55,26 +56,30 @@ function createOrgSpace() {
   local ORG=$1
   local SPACE=$2
   cf delete-org $ORG -f
-  
+
   cf create-org $ORG
   cf target -o $ORG
   cf create-space $SPACE
   cf target -o $ORG -s $SPACE
-  
+
   cf set-org-role $ADMIN $ORG OrgManager
   cf set-org-role $USER $ORG OrgManager
-  
+  cf set-org-role $REMOVE_USER $ORG OrgManager
+
   cf set-space-role $ADMIN $ORG $SPACE SpaceManager
   cf set-space-role $ADMIN $ORG $SPACE SpaceDeveloper
-  
+
   cf set-space-role $USER $ORG $SPACE SpaceManager
   cf set-space-role $USER $ORG $SPACE SpaceDeveloper
+
+  cf set-space-role $REMOVE_USER $ORG $SPACE SpaceManager
+  cf set-space-role $REMOVE_USER $ORG $SPACE SpaceDeveloper
 }
 
 function cloneRepo() {
   PROJECT=$1
   REPO=$2
-  
+
   if [ ! -d "./cfpushtemp/$REPO" ]; then
     echo "Cloning: $PROJECT/$REPO"
     mkdir -p cfpushtemp
@@ -85,6 +90,7 @@ function cloneRepo() {
 }
 
 cf create-user $USER $USER_PASS
+cf create-user $REMOVE_USER $USER_PASS
 
 createOrgSpace "test-e2e" "test-e2e"
 createOrgSpace $DEFAULT_ORG $DEFAULT_SPACE

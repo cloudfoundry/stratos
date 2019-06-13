@@ -1,6 +1,13 @@
 import { promise } from 'protractor';
 
-import { IApp, IDomain, IOrganization, IRoute, ISpace } from '../../frontend/packages/core/src/core/cf-api.types';
+import {
+  IApp,
+  IDomain,
+  IOrganization,
+  IQuotaDefinition,
+  IRoute,
+  ISpace,
+} from '../../frontend/packages/core/src/core/cf-api.types';
 import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
 import { CfUser } from '../../frontend/packages/store/src/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
@@ -121,6 +128,23 @@ export class CFHelpers {
     });
   }
 
+  deleteQuotaDefinitionIfExisting(cfGuid: string, quotaGuid: string) {
+    return this.fetchQuotaDefinition(cfGuid, quotaGuid).then(quota => {
+      if (quota) {
+        return this.cfRequestHelper.sendCfDelete(cfGuid, 'quota_definitions/' + quota.metadata.guid + '?recursive=true&async=false');
+      }
+    });
+  }
+
+  deleteSpaceQuotaDefinitionIfExisting(cfGuid: string, spaceQuotaGuid: string) {
+    return this.fetchQuotaDefinition(cfGuid, spaceQuotaGuid).then(spaceQuota => {
+      if (spaceQuota) {
+        const url = 'space_quota_definitions/' + spaceQuota.metadata.guid + '?recursive=true&async=false';
+        return this.cfRequestHelper.sendCfDelete(cfGuid, url);
+      }
+    });
+  }
+
   deleteSpaceIfExisting(cnsiGuid: string, orgGuid: string, spaceName: string) {
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName).then(space => {
       if (space) {
@@ -151,7 +175,7 @@ export class CFHelpers {
     return reqObj(options).then((response) => {
       const json = JSON.parse(response.body);
       const isSUSE = json.description.indexOf('SUSE') === 0;
-      return isSUSE ? 'opensuse42' : 'cflinuxfs2';
+      return isSUSE ? 'sle15' : 'cflinuxfs2';
     }).catch((e) => {
       return 'unknown';
     });
@@ -159,6 +183,16 @@ export class CFHelpers {
 
   fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<any>> {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
+      if (json.total_results > 0) {
+        const org = json.resources[0];
+        return org;
+      }
+      return null;
+    });
+  }
+
+  fetchQuotaDefinition(cnsiGuid: string, quotaName: string): promise.Promise<APIResource<any>> {
+    return this.cfRequestHelper.sendCfGet(cnsiGuid, 'quota_definitions?q=name IN ' + quotaName).then(json => {
       if (json.total_results > 0) {
         const org = json.resources[0];
         return org;
@@ -214,15 +248,19 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfDelete(cnsiGuid, 'apps/' + appGuid);
   }
 
-  baseAddSpace(cnsiGuid: string, orgGuid: string, spaceName: string, userGuid: string): promise.Promise<APIResource<ISpace>> {
+  baseAddSpace(cnsiGuid: string, orgGuid: string, spaceName: string, userGuid?: string): promise.Promise<APIResource<ISpace>> {
+    const body = {
+      name: spaceName,
+      manager_guids: [],
+      developer_guids: [],
+      organization_guid: orgGuid
+    };
+
+    if (userGuid) {
+      body.developer_guids = [userGuid];
+    }
     const cfRequestHelper = this.cfRequestHelper;
-    return cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces',
-      {
-        name: spaceName,
-        manager_guids: [],
-        developer_guids: [userGuid],
-        organization_guid: orgGuid
-      });
+    return cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces', body);
   }
 
   baseAddOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<IOrganization>> {
@@ -339,6 +377,35 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'spaces/' + spaceGuid + '/managers', {
       username: userName
     });
+  }
+
+  addOrgQuota(cfGuid, name, options = {}) {
+    const body = {
+      name,
+      non_basic_services_allowed: true,
+      total_services: -1,
+      total_routes: -1,
+      memory_limit: 5120,
+      instance_memory_limit: -1,
+      total_reserved_route_ports: -1,
+      ...options
+    };
+
+    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'quota_definitions', body);
+  }
+
+  addSpaceQuota(cfGuid, orgGuid, name, options = {}) {
+    const body = {
+      name,
+      organization_guid: orgGuid,
+      non_basic_services_allowed: true,
+      total_services: -1,
+      total_routes: -1,
+      memory_limit: 5120,
+      total_reserved_route_ports: -1,
+      ...options
+    };
+    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
   }
 
 }

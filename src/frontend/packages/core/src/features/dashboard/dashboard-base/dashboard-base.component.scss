@@ -30,7 +30,7 @@ $app-sub-header-height: 48px;
     height: calc(100% - 56px);
   }
   &__content {
-    flex: auto;
+    flex: 1;
     max-height: 100%;
     overflow: auto;
     padding: 20px;
