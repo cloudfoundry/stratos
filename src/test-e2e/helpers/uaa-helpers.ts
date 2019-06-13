@@ -1,5 +1,6 @@
 import { promise } from 'protractor';
 
+import { e2e } from '../e2e';
 import { UaaRequestHelpers } from './uaa-request-helpers';
 
 export class UaaHelpers {
@@ -30,14 +31,14 @@ export class UaaHelpers {
     return this.requestHelper.sendGet(`Users?attributes=userName%2Cid`);
   }
 
-  createUser(userName: string): promise.Promise<{id: string}> {
+  createUser(userName: string, zone?: string): promise.Promise<{id: string}> {
     const body = {
       externalId: 'e2e',
       userName,
       password: userName,
       emails: [{value: userName + '@e2e.com'}],
       origin: 'uaa',
-      zoneId: 'scf'
+      zoneId: e2e.secrets.getDefaultCfsUaaZone(zone)
     };
     return this.requestHelper.sendPost('Users', JSON.stringify(body)).then(res => {
       const newUser = JSON.parse(res);
@@ -56,8 +57,8 @@ export class UaaHelpers {
     return guidP.then(guid => this.requestHelper.sendDelete(`Users/${guid}`));
   }
 
-  getIdentityZone(zone = 'scf') {
-    return this.requestHelper.sendGet(`identity-zones/${zone}`);
+  getIdentityZone(zone?: string) {
+    return this.requestHelper.sendGet(`identity-zones/${e2e.secrets.getDefaultCfsUaaZone(zone)}`);
   }
 
   getClients() {

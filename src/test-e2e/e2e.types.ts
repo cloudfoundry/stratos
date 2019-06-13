@@ -54,14 +54,14 @@ export interface E2EEndpointsConfig {
   ];
 }
 
-export interface E2EUaaCredentials {
+export interface E2EUaaCreds {
   clientId: string;
   clientSecret: string;
   grantType?: string;
 }
 
 export interface E2EUaa {
-  credentials: E2EUaaCredentials;
+  creds: E2EUaaCreds;
   tokenEndpoint: string;
   zone: string;
 }
