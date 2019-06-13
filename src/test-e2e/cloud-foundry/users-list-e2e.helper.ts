@@ -127,7 +127,7 @@ export function setupCfUserTableTests(
       usersTable.header.setSearchText(userName);
       return usersTable.table.findRow('username', userName).then(row => {
         userRowIndex = row;
-        expect(usersTable.table.getCell(0, 1).getText()).toBe(userName);
+        expect(usersTable.table.getCell(userRowIndex, 1).getText()).toBe(userName);
 
         orgUserChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'User');
         usersTable.expandOrgsChips(userRowIndex);

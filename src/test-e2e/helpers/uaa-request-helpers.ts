@@ -66,9 +66,9 @@ export class UaaRequestHelpers extends RequestHelpers {
 
   private createUaaToken(req): promise.Promise<string> {
     const uaa = e2e.secrets.getDefaultCFsUaa();
-    const client = `client_id=${uaa.credentials.clientId}`;
-    const secret = `client_secret=${uaa.credentials.clientSecret}`;
-    const grantType = `grant_type=${uaa.credentials.grantType || 'client_credentials'}`;
+    const client = `client_id=${uaa.creds.clientId}`;
+    const secret = `client_secret=${uaa.creds.clientSecret}`;
+    const grantType = `grant_type=${uaa.creds.grantType || 'client_credentials'}`;
     const body = `${client}&${secret}&${grantType}&token_format=opaque`;
     return this.sendRequest(req, { method: 'POST', url: `oauth/token`, headers: {
       'Content-Type': 'application/x-www-form-urlencoded'

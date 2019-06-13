@@ -67,6 +67,10 @@ export class SecretsHelpers {
     return this.getDefaultCFEndpoint().uaa;
   }
 
+  getDefaultCfsUaaZone(override?: string): string {
+    return override || this.getDefaultCFsUaa().zone;
+  }
+
   getEndpoints(): E2EEndpointsConfig {
     return this.secrets.endpoints;
   }
