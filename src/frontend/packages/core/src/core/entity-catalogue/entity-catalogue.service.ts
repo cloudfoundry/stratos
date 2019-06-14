@@ -1,7 +1,6 @@
 import {
   IEntityMetadata,
   EntityCatalogueEntityConfig,
-  EntityCatalogueSchemas,
   IStratosBaseEntityDefinition,
 } from './entity-catalogue.types';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';

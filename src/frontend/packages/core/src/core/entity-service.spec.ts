@@ -26,6 +26,7 @@ import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueTestHelper } from '../../test-framework/entity-catalogue-test-helpers';
 
 const endpointType = 'endpoint1';
 const entitySchema = new EntitySchema('child2', endpointType);
@@ -44,11 +45,18 @@ const catalogueEntity = new StratosBaseCatalogueEntity({
   label: 'Entity',
   labelPlural: 'Entities',
 });
-// spyOn(network, "getDataFromServer").andReturn("mockData")
 
 describe('EntityServiceService', () => {
   beforeAll(() => {
-    const mockedCatalogueGet = spyOn(entityCatalogue, 'getEntity').and.returnValue(catalogueEntity);
+    const helper = new EntityCatalogueTestHelper(
+      spyOn,
+      {
+        catalogueEntities: [
+          [entitySchema, catalogueEntity]
+        ]
+      }
+    );
+    helper.mockGetEntityResponses();
   });
   function createTestService(
     store: Store<GeneralAppState>,

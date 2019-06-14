@@ -906,19 +906,6 @@ describe('CurrentUserPermissionsService', () => {
     ).subscribe();
   });
 
-  it('should not allow if no feature flag', done => {
-    service.can(
-      [new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation)],
-      'c80420ca-204b-4879-bf69-b6b7a202ad87'
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(false);
-        done();
-      }),
-      first()
-    ).subscribe();
-  });
-
   it('should allow if stratos admin', done => {
     service.can(new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN)).pipe(
       tap(can => {
