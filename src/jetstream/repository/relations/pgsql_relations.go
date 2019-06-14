@@ -16,7 +16,7 @@ var (
 	getRelationsByType = `SELECT provider, type, target, metadata FROM relations WHERE type = $1`
 	getRelation        = `SELECT provider, type, target, metadata FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
 	deleteRelation     = `DELETE FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
-	deleteRelations    = `DELETE FROM relations WHERE provider = $1 OR target = $1`
+	deleteRelations    = `DELETE FROM relations WHERE provider = $1 OR target = $2`
 	insertRelation     = `INSERT INTO relations (provider, type, target, metadata) VALUES ($1, $2, $3, $4)`
 	updateRelation     = `UPDATE relations SET provider = $1, type = $2, target = $3, metadata = $4 WHERE provider = $5 AND type = $6 AND target = $7`
 )
@@ -125,7 +125,7 @@ func (p *RelationsDBStore) DeleteRelation(provider string, relType string, targe
 }
 
 func (p *RelationsDBStore) DeleteRelations(providerOrTarget string) error {
-	if _, err := p.db.Exec(deleteRelations, providerOrTarget); err != nil {
+	if _, err := p.db.Exec(deleteRelations, providerOrTarget, providerOrTarget); err != nil {
 		return fmt.Errorf("Unable to delete Relations: %v", err)
 	}
 
