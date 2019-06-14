@@ -5,12 +5,12 @@
   [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
-      <div *ngIf="!!endpointConfig && endpointConfig.entity.logoUrl" class="endpoint-card__image-wrapper">
-        <img class="endpoint-card__image" src="{{endpointConfig.entity.logoUrl}}" />
+      <div *ngIf="!!endpointConfig && endpointConfig.definition.logoUrl" class="endpoint-card__image-wrapper">
+        <img class="endpoint-card__image" src="{{endpointConfig.definition.logoUrl}}" />
       </div>
       <div class="endpoint-card__title-text">
         <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
-        <div class="endpoint-card__title-subtext">{{!endpointConfig ? 'Unknown' : endpointConfig.entity.label}}
+        <div class="endpoint-card__title-subtext">{{!endpointConfig ? 'Unknown' : endpointConfig.definition.label}}
           <!--
           <ng-container *ngIf="endpointParentType">
             ({{ endpointParentType }})</ng-container>

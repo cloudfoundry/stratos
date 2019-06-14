@@ -69,7 +69,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.pRow = row;
 
     this.endpointConfig = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type);
-    // this.endpointParentType = row.sub_type ? getEndpointType(row.cnsi_type, null).label : null;
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
     if (this.endpointConfig) {

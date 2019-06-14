@@ -1,5 +1,5 @@
 <form #form="ngForm" class="stepper-form">
-  <h1 class="create-endpoint__section-title">{{endpoint.entity.label}} Information</h1>
+  <h1 class="create-endpoint__section-title">{{endpoint.definition.label}} Information</h1>
   <mat-form-field>
     <input matInput id="name" name="name" ngModel #nameField="ngModel" required placeholder="Name"
       [appUnique]="(existingEndpoints | async)?.names">
