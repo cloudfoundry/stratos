@@ -17,8 +17,10 @@ import { AppState } from '../../store/src/app-state';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { CloudFoundryComponentsModule } from './shared/components/components.module';
-import { EiriniStepperComponent } from './shared/components/eirini-stepper/eirini-stepper.component';
-import { canConfigureEirini } from './shared/eirini.helper';
+import {
+  ContainerOrchestratorStepperComponent,
+} from './shared/components/container-orchestrator-stepper/container-orchestrator-stepper.component';
+import { canConfigureOrchestrator } from './shared/eirini.helper';
 
 export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
   type: 'cf',
@@ -39,7 +41,7 @@ export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
         createVisible: (row$: Observable<EndpointModel>): Observable<boolean> => row$.pipe(
           filter(row => row.cnsi_type === 'cf'),
           first(),
-          switchMap(() => canConfigureEirini(store)),
+          switchMap(() => canConfigureOrchestrator(store)),
           startWith(false)
         )
       }
@@ -49,10 +51,8 @@ export const cloudFoundryEndpointTypes: EndpointTypeExtensionConfig[] = [{
 
 const customRoutes: Routes = [
   {
-    // path: 'eirini',
     path: ':endpointId/eirini',
-    component: EiriniStepperComponent,
-    // pathMatch: 'full',
+    component: ContainerOrchestratorStepperComponent,
     data: {
       stratosNavigation: {
         text: 'Applications',

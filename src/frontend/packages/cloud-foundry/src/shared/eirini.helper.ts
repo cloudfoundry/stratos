@@ -6,7 +6,7 @@ import { AppState } from '../../../store/src/app-state';
 import { endpointsRegisteredMetricsEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointRelationTypes } from '../../../store/src/types/endpoint.types';
 
-export enum CfScheduler {
+export enum CfContainerOrchestrator {
   DIEGO = 'Diego',
   EIRINI = 'Eirini'
 }
@@ -20,7 +20,7 @@ export const eiriniEnabled = (store: Store<AppState>): Observable<boolean> => {
   );
 };
 
-export const canConfigureEirini = (store: Store<AppState>): Observable<boolean> => {
+export const canConfigureOrchestrator = (store: Store<AppState>): Observable<boolean> => {
   const hasConnectedMetricsEndpoints$ = store.select(endpointsRegisteredMetricsEntitiesSelector).pipe(
     first(),
     map(registeredMetrics => Object.values(registeredMetrics).filter(registeredMetric => !!registeredMetric.user)),
@@ -40,5 +40,5 @@ export const cfEiriniRelationship = (cf: EndpointModel) => {
 };
 
 export const cfEiriniRelationshipLabel = (cf: EndpointModel) => {
-  return cfEiriniRelationship(cf) ? CfScheduler.EIRINI : CfScheduler.DIEGO;
+  return cfEiriniRelationship(cf) ? CfContainerOrchestrator.EIRINI : CfContainerOrchestrator.DIEGO;
 };

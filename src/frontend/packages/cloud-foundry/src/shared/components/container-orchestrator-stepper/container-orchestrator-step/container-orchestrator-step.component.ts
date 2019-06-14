@@ -14,14 +14,14 @@ import { ActionState } from '../../../../../../store/src/reducers/api-request-re
 import { selectEntity, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { endpointsRegisteredMetricsEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../../store/src/types/endpoint.types';
-import { cfEiriniRelationship, CfScheduler } from '../../../eirini.helper';
+import { CfContainerOrchestrator, cfEiriniRelationship } from '../../../eirini.helper';
 
 @Component({
-  selector: 'app-cf-scheduler-step',
-  templateUrl: './cf-scheduler-step.component.html',
-  styleUrls: ['./cf-scheduler-step.component.scss']
+  selector: 'app-container-orchestrator-step',
+  templateUrl: './container-orchestrator-step.component.html',
+  styleUrls: ['./container-orchestrator-step.component.scss']
 })
-export class CfSchedulerStepComponent implements OnInit, IStepperStep {
+export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep {
 
   constructor(
     private store: Store<AppState>,
@@ -61,19 +61,19 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
       startWith(false)
     );
 
-    // Track changes of scheduler
-    this.form.controls.scheduler.valueChanges.subscribe(value => this.updateSelectedScheduler(value));
+    // Track changes of orchestrator
+    this.form.controls.orchestrator.valueChanges.subscribe(value => this.updateSelectedOrchestrator(value));
   }
 
   form: FormGroup = this.fb.group({
-    scheduler: new FormControl('', [Validators.required]),
+    orchestrator: new FormControl('', [Validators.required]),
     eiriniMetrics: new FormControl('', [Validators.required]),
     eiriniNamespace: new FormControl('', [Validators.required])
   });
   metricsEndpoints$: Observable<EndpointModel[]>;
   eiriniDefaultNamespace$: Observable<string>;
   cfGuid: string;
-  schedulers = CfScheduler;
+  orchestrator = CfContainerOrchestrator;
   blocked: Observable<boolean>;
   validate: Observable<boolean>;
   cfName$: Observable<string>;
@@ -92,7 +92,7 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
     ).subscribe(([registeredMetrics, eiriniDefaultNamespace, cf]) => {
       // Set starting values
       this.form.controls.eiriniNamespace.setValue(eiriniDefaultNamespace);
-      this.form.controls.scheduler.setValue(CfScheduler.DIEGO);
+      this.form.controls.orchestrator.setValue(CfContainerOrchestrator.DIEGO);
 
       // Update given
       if (registeredMetrics.length === 0) {
@@ -105,7 +105,7 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
           // Cf is already bound to eirini metrics
           this.form.controls.eiriniMetrics.setValue(this.existingRelation.guid);
           this.form.controls.eiriniNamespace.setValue(this.existingRelation.metadata.namespace || eiriniDefaultNamespace);
-          this.form.controls.scheduler.setValue(CfScheduler.EIRINI);
+          this.form.controls.orchestrator.setValue(CfContainerOrchestrator.EIRINI);
         } else {
           // Select the first one as default
           this.form.controls.eiriniMetrics.setValue(registeredMetrics[0].guid);
@@ -147,7 +147,7 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
   }
 
   saveRelation(): Observable<ActionState> {
-    if (this.form.controls.scheduler.value === CfScheduler.EIRINI) {
+    if (this.form.controls.orchestrator.value === CfContainerOrchestrator.EIRINI) {
       this.store.dispatch(new SaveEndpointRelation(this.cfGuid, {
         guid: this.form.controls.eiriniMetrics.value,
         type: EndpointRelationTypes.METRICS_EIRINI,
@@ -159,12 +159,10 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
       return this.store.select(selectUpdateInfo(endpointSchemaKey, this.cfGuid, EndpointsEffect.updateRelationKey)).pipe(
         pairwise(),
         filter(([oldVal, newVal]) => oldVal ? oldVal.busy : false && !newVal.busy),
-        map(([oldV, newV]: [ActionState, ActionState]) => {
-          return {
-            ...newV,
-            message: `Failed to save relation${newV.message ? `: ${newV.message}` : ''}`,
-          };
-        })
+        map(([oldV, newV]: [ActionState, ActionState]) => ({
+          ...newV,
+          message: `Failed to save relation${newV.message ? `: ${newV.message}` : ''}`,
+        }))
       );
     }
     // For diego there's no eirini relationship to save, so no op (any existing eirini relation would have been removed in previous step)
@@ -175,8 +173,8 @@ export class CfSchedulerStepComponent implements OnInit, IStepperStep {
     });
   }
 
-  updateSelectedScheduler(scheduler: string) {
-    if (scheduler === CfScheduler.EIRINI) {
+  updateSelectedOrchestrator(orchestrator: string) {
+    if (orchestrator === CfContainerOrchestrator.EIRINI) {
       this.form.controls.eiriniMetrics.enable();
       this.form.controls.eiriniNamespace.enable();
     } else {

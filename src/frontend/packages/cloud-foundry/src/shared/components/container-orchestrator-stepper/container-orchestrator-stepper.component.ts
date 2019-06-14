@@ -10,11 +10,11 @@ import { selectEntity } from '../../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 @Component({
-  selector: 'app-eirini-stepper',
-  templateUrl: './eirini-stepper.component.html',
-  styleUrls: ['./eirini-stepper.component.scss']
+  selector: 'app-container-orchestrator-stepper',
+  templateUrl: './container-orchestrator-stepper.component.html',
+  styleUrls: ['./container-orchestrator-stepper.component.scss']
 })
-export class EiriniStepperComponent {
+export class ContainerOrchestratorStepperComponent {
 
   cfName$: Observable<string>;
   cancelUrl = '/endpoints';

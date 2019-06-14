@@ -1,0 +1,21 @@
+<form validate [formGroup]="form" class="stepper-form orchestrator">
+  <span>Select the container orchestrator used by Cloud Foundry</span>
+  <mat-radio-group formControlName="orchestrator" class="">
+    <mat-radio-button [value]="orchestrator.DIEGO" class="">{{orchestrator.DIEGO}}</mat-radio-button>
+    <mat-radio-button [value]="orchestrator.EIRINI" class="">{{orchestrator.EIRINI}}</mat-radio-button>
+  </mat-radio-group>
+  <div [ngClass]="{'orchestrator__eirini-disabled': form.controls.orchestrator.value !== orchestrator.EIRINI}">
+    <span>Metrics endpoint that provides information from Kubernetes</span>
+    <mat-form-field>
+      <mat-select formControlName="eiriniMetrics" placeholder="Endpoint" required>
+        <mat-option *ngFor="let metricsEndpoint of metricsEndpoints$ | async" [value]="metricsEndpoint.guid">
+          {{ metricsEndpoint.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <span>Kubernetes namespace of Eirini pods</span>
+    <mat-form-field>
+      <input matInput placeholder="Namespace" formControlName="eiriniNamespace" type="text" required>
+    </mat-form-field>
+  </div>
+</form>

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
-import { canConfigureEirini, eiriniEnabled } from '../../../../../../cloud-foundry/src/shared/eirini.helper';
+import { canConfigureOrchestrator, eiriniEnabled } from '../../../../../../cloud-foundry/src/shared/eirini.helper';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
@@ -25,7 +25,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   subs: Subscription[] = [];
 
   eiriniEnabled$: Observable<boolean>;
-  canConfigureEirini$: Observable<boolean>;
+  canConfigureOrchestrator$: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
@@ -49,7 +49,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     );
 
     this.eiriniEnabled$ = eiriniEnabled(this.store);
-    this.canConfigureEirini$ = canConfigureEirini(this.store);
+    this.canConfigureOrchestrator$ = canConfigureOrchestrator(this.store);
   }
 
   getApiEndpointUrl(apiEndpoint) {

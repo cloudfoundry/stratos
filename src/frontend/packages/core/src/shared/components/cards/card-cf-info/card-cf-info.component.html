@@ -10,10 +10,10 @@
           <app-metadata-item icon="link" label="Instance Address">{{ apiUrl }}</app-metadata-item>
           <app-metadata-item icon="info_outline" label="CF API Version">
             {{ (cfEndpointService.info$ | async)?.entity.entity.api_version }}</app-metadata-item>
-          <app-metadata-item *ngIf="eiriniEnabled$ | async" icon="account_balance_wallet" label="Container Manager">
+          <app-metadata-item *ngIf="eiriniEnabled$ | async" icon="account_balance_wallet" label="Container Orchestrator">
             <div class="user-invites">
-              {{ (cfEndpointService.runtimeScheduler$ | async) }}
-              <ng-container *ngIf="(canConfigureEirini$ | async)">
+              {{ (cfEndpointService.containerOrchestrator$ | async) }}
+              <ng-container *ngIf="(canConfigureOrchestrator$ | async)">
                 - <button color="primary" mat-button (click)="configureEirini()">Configure</button>
               </ng-container>
             </div>
