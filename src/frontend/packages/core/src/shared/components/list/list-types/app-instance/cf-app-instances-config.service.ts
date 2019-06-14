@@ -13,6 +13,7 @@ import {
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, metricSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
+import { EndpointsRelation } from '../../../../../../../store/src/types/endpoint.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
@@ -205,10 +206,10 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   ) {
 
     this.initialised$ = combineLatest([
-      this.endpointsService.hasEiriniMetrics(appService.cfGuid),
+      this.endpointsService.eiriniMetricsProvider(appService.cfGuid),
       this.endpointsService.hasCellMetrics(appService.cfGuid)
     ]).pipe(
-      map(([hasEiriniMetrics, hasCellMetrics]) => {
+      map(([eiriniMetricsProvider, hasCellMetrics]) => {
         if (hasCellMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
           this.cfCellColumn.cellConfig = {
@@ -216,10 +217,10 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
             cfGuid: this.appService.cfGuid
           };
         }
-        if (hasEiriniMetrics) {
+        if (eiriniMetricsProvider) {
           this.columns.splice(1, 0, this.cfEiriniColumn);
           this.cfEiriniColumn.cellConfig = {
-            eiriniPodsService: this.createEiriniPodService(entityServiceFactory)
+            eiriniPodsService: this.createEiriniPodService(entityServiceFactory, eiriniMetricsProvider)
           };
         }
         return true;
@@ -252,12 +253,13 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     );
   }
 
-  private createEiriniPodService(entityServiceFactory: EntityServiceFactory) {
+  private createEiriniPodService(entityServiceFactory: EntityServiceFactory, eiriniMetricsProvider: EndpointsRelation) {
     const metricsKey = `${this.appService.cfGuid}:${this.appService.appGuid}:appPods`;
     const action = new FetchCfEiriniMetricsAction(
       metricsKey,
       this.appService.cfGuid,
-      new MetricQueryConfig(`kube_pod_labels{label_guid="${this.appService.appGuid}"} / on(pod) group_right kube_pod_info`),
+      // tslint:disable-next-line:max-line-length
+      new MetricQueryConfig(`kube_pod_labels{label_guid="${this.appService.appGuid}",namespace="${eiriniMetricsProvider.metadata.namespace}"} / on(pod) group_right kube_pod_info`),
       MetricQueryType.QUERY
     );
     return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(

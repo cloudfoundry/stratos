@@ -14,7 +14,7 @@ import { getPaginationObservables } from '../../../store/src/reducers/pagination
 import { selectEntity } from '../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { IMetrics } from '../../../store/src/types/base-metric.types';
-import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
+import { EndpointModel, EndpointsRelation, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
 import { getEndpointHasCfMetrics, getEndpointType } from '../features/endpoints/endpoint-helpers';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
@@ -153,15 +153,21 @@ export class EndpointsService implements CanActivate {
     );
   }
 
-  hasEiriniMetrics(endpointId: string): Observable<boolean> {
-    const hasProvider$ = this.store.select(selectEntity<EndpointModel>(endpointSchemaKey, endpointId)).pipe(
+  eiriniMetricsProvider(endpointId: string): Observable<EndpointsRelation> {
+    const eiriniProvider$ = this.store.select(selectEntity<EndpointModel>(endpointSchemaKey, endpointId)).pipe(
       map(cf => cfEiriniRelationship(cf))
     );
     return combineLatest([
       eiriniEnabled(this.store),
-      hasProvider$
+      eiriniProvider$
     ]).pipe(
-      map(([eirini, hasProvider]) => !!eirini && !!hasProvider)
+      map(([eirini, eiriniProvider]) => eirini ? eiriniProvider : null)
+    );
+  }
+
+  hasEiriniMetrics(endpointId: string): Observable<boolean> {
+    return this.eiriniMetricsProvider(endpointId).pipe(
+      map(eirini => !!eirini)
     );
   }
 
