@@ -4,6 +4,7 @@ import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFPage } from '../po/cf-page.po';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
 import { InviteUserStepperPo } from '../po/invite-users-stepper.po';
@@ -20,6 +21,8 @@ export function setupInviteUserTests(
 ) {
   let defaultCf: E2EConfigCloudFoundry = e2e.secrets.getDefaultCFEndpoint();
   let cfHelper: CFHelpers;
+
+  extendE2ETestTime(100000);
 
   beforeAll(() => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
@@ -184,7 +187,7 @@ export function setupInviteUserTests(
       inviteUserStepper.next();
       usersToDelete.push(user1, user2);
 
-      usersTable.waitUntilShown();
+      usersTable.waitUntilShown(null, 15000);
       usersTable.waitForNoLoadingIndicator();
 
       testUser(user1, spaceRole);
