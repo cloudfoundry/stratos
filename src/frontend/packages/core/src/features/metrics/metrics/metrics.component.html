@@ -33,15 +33,15 @@
               <mat-icon fontSet="{{ ep.metadata[svc.guid].icon.font }}">{{ ep.metadata[svc.guid].icon.name }}</mat-icon>
               <div class="metrics-metadata">
                 <div>{{ svc.name }}</div>
-                <div>{{ ep.metadata[svc.guid].type }}</div>
+                <div>{{ ep.metadata[svc.guid].typeLabel }}</div>
                 <div class="metrics-metadata__cols">
                   <div class="metrics-metadata__two-cols">
                     <app-metadata-item icon="link" label="Address">{{ svc.metadata.fullApiEndpoint }}</app-metadata-item>
-                    <ng-container *ngIf="getKubeRelation(ep.entity.provider) as rel">
+                    <ng-container *ngIf="ep.metadata[svc.guid].type === 'k8s' && getKubeRelation(ep.entity.provider) as rel">
                         <app-metadata-item icon="history" label="Prometheus Job">{{ rel.metadata.metrics_job || 'N/A' }}</app-metadata-item>
                         <app-metadata-item icon="history" label="Prometheus Environment">{{ rel.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
                     </ng-container>
-                    <ng-container *ngIf="getEiriniRelation(ep.entity.provider) as rel">
+                    <ng-container *ngIf="ep.metadata[svc.guid].type === 'k8s' && getEiriniRelation(ep.entity.provider) as rel">
                         <app-metadata-item icon="history" label="Eirini Pod Namespace">{{ rel.metadata.namespace || 'N/A' }}</app-metadata-item>
                     </ng-container>
                   </div>

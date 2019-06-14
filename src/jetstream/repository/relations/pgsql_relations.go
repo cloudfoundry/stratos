@@ -12,19 +12,21 @@ import (
 )
 
 var (
-	getRelations       = `SELECT provider, type, target, metadata FROM relations`
-	getRelationsByType = `SELECT provider, type, target, metadata FROM relations WHERE type = $1`
-	getRelation        = `SELECT provider, type, target, metadata FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
-	deleteRelation     = `DELETE FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
-	deleteRelations    = `DELETE FROM relations WHERE provider = $1 OR target = $2`
-	insertRelation     = `INSERT INTO relations (provider, type, target, metadata) VALUES ($1, $2, $3, $4)`
-	updateRelation     = `UPDATE relations SET provider = $1, type = $2, target = $3, metadata = $4 WHERE provider = $5 AND type = $6 AND target = $7`
+	getRelations         = `SELECT provider, type, target, metadata FROM relations`
+	getRelationsByType   = `SELECT provider, type, target, metadata FROM relations WHERE type = $1`
+	getRelationsByTarget = `SELECT provider, type, target, metadata FROM relations WHERE target = $1`
+	getRelation          = `SELECT provider, type, target, metadata FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
+	deleteRelation       = `DELETE FROM relations WHERE provider = $1 AND type = $2 AND target = $3`
+	deleteRelations      = `DELETE FROM relations WHERE provider = $1 OR target = $2`
+	insertRelation       = `INSERT INTO relations (provider, type, target, metadata) VALUES ($1, $2, $3, $4)`
+	updateRelation       = `UPDATE relations SET provider = $1, type = $2, target = $3, metadata = $4 WHERE provider = $5 AND type = $6 AND target = $7`
 )
 
 // InitRepositoryProvider - One time init for the given DB Provider
 func InitRepositoryProvider(databaseProvider string) {
 	// Modify the database statements if needed, for the given database type
 	getRelationsByType = datastore.ModifySQLStatement(getRelationsByType, databaseProvider)
+	getRelationsByTarget = datastore.ModifySQLStatement(getRelationsByTarget, databaseProvider)
 	getRelation = datastore.ModifySQLStatement(getRelation, databaseProvider)
 	deleteRelation = datastore.ModifySQLStatement(deleteRelation, databaseProvider)
 	deleteRelations = datastore.ModifySQLStatement(deleteRelations, databaseProvider)
@@ -75,6 +77,46 @@ func (p *RelationsDBStore) List() ([]*interfaces.RelationsRecord, error) {
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("Unable to List Relations records: %v", err)
 	}
+
+	return relationsList, nil
+}
+
+// List - Returns a list of all relations
+func (p *RelationsDBStore) ListByTarget(target string) ([]*interfaces.RelationsRecord, error) {
+	log.Debug("ListByTarget")
+	rows, err := p.db.Query(getRelationsByTarget, target)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve Relations records: %v", err)
+	}
+	defer rows.Close()
+
+	var relationsList []*interfaces.RelationsRecord
+	relationsList = make([]*interfaces.RelationsRecord, 0)
+
+	for rows.Next() {
+		relation := new(interfaces.RelationsRecord)
+		var metaString sql.NullString
+		err := rows.Scan(&relation.Provider, &relation.RelationType, &relation.Target, &metaString)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to scan Relations records: %v", err)
+		}
+
+		var metadata map[string]interface{}
+		err = json.Unmarshal([]byte(metaString.String), &metadata)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to Marshal Relations metadata: %v", err)
+		}
+		relation.Metadata = metadata
+
+		log.Warnf("ListByTarget1 %+v", relation)
+
+		relationsList = append(relationsList, relation)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Unable to List Relations records: %v", err)
+	}
+	log.Warnf("ListByTarget2 %+1", relationsList)
 
 	return relationsList, nil
 }

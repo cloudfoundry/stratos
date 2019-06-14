@@ -187,6 +187,7 @@ func (m *MetricsSpecification) makePrometheusRequest(c echo.Context, cnsiList []
 	// For each CNSI, find the metrics endpoint that we need to talk to
 	metrics, err2 := m.getMetricsEndpoints(userGUID, cnsiList)
 	if err2 != nil {
+		log.Error("Error getting metrics ", err2)
 		return errors.New("Can not get metric endpoint metadata")
 	}
 

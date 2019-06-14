@@ -372,7 +372,7 @@ func hasMetricsProvider(providers []MetricsMetadata, url string) (*MetricsMetada
 
 func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {
 
-	metricsProviders := make([]MetricsMetadata, 0)
+	metricsMetadatas := make(map[string]MetricsMetadata)
 	endpointsMap := make(map[string]*interfaces.ConnectedEndpoint)
 	results := make(map[string]EndpointMetricsRelation)
 
@@ -383,13 +383,9 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 		return nil, err
 	}
 
-	// TODO: RC Should we not do this now and rely on the relations table?
-
 	for _, endpoint := range userEndpoints {
-		if stringInSlice(endpoint.GUID, cnsiList) {
-			// Found the Endpoint, so add it to our list
-			endpointsMap[endpoint.GUID] = endpoint
-		} else if endpoint.CNSIType == "metrics" {
+		endpointsMap[endpoint.GUID] = endpoint
+		if endpoint.CNSIType == "metrics" {
 			// Parse out the metadata
 			var m []MetricsProviderMetadata
 			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
@@ -401,43 +397,57 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 					info.URL = item.URL
 					info.Job = item.Job
 					info.Environment = item.Environment
-					metricsProviders = append(metricsProviders, info)
+					metricsMetadatas[endpoint.GUID+item.Type] = info
 				}
 			}
 		}
 	}
 
-	for _, metricProviderInfo := range metricsProviders {
-		for guid, info := range endpointsMap {
-			// Depends on the type
-			if info.CNSIType == metricProviderInfo.Type && info.DopplerLoggingEndpoint == metricProviderInfo.URL {
-				relate := EndpointMetricsRelation{}
-				relate.endpoint = info
-				// Make a copy
-				relate.metrics = &MetricsMetadata{}
-				*relate.metrics = metricProviderInfo
-				results[guid] = relate
-				delete(endpointsMap, guid)
-				break
-			}
-			// K8s
-			log.Debugf("Processing endpoint: %+v", info)
-			log.Debugf("Processing endpoint Metrics provider: %+v", metricProviderInfo)
-			if info.APIEndpoint.String() == metricProviderInfo.URL {
-				relate := EndpointMetricsRelation{}
-				relate.endpoint = info
-				relate.metrics = &metricProviderInfo
-				results[guid] = relate
-				delete(endpointsMap, guid)
-				break
-			}
+	for _, cnsiGuid := range cnsiList {
+		// Fetch a list of all relations with a provider for this endpoint
+		providers, err := m.portalProxy.ListRelationsByTarget(cnsiGuid)
+		if err != nil {
+			return nil, errors.New("Can not fetch list of targets for cnsi")
 		}
+
+		// Filter list down to either cf or kube metrics providers
+		metricsProviders := filterRelations(providers, func(v *interfaces.RelationsRecord) bool {
+			return v.RelationType == MetricsCfRelation || v.RelationType == MetricsKubeRelation
+		})
+
+		if len(metricsProviders) == 0 {
+			return nil, fmt.Errorf("Can not find a metric provider for endpoint %v", cnsiGuid)
+		}
+
+		// Create the results (list of unique <cf/kube endpoint and metrics relation>)
+		length := len(results)
+		for _, provider := range metricsProviders {
+			relate := EndpointMetricsRelation{}
+			relate.endpoint = endpointsMap[provider.Target]
+			if relate.endpoint == nil {
+				continue
+			}
+			var relationMap = ""
+			if provider.RelationType == MetricsCfRelation {
+				relationMap = "cf"
+			} else if provider.RelationType == MetricsCfRelation {
+				relationMap = "k8s"
+			}
+			if len(relationMap) == 0 {
+				return nil, fmt.Errorf("Unknown relation type %v", provider.RelationType)
+			}
+			// Make a copy
+			relate.metrics = &MetricsMetadata{}
+			*relate.metrics = metricsMetadatas[provider.Provider+relationMap]
+			results[provider.Provider] = relate
+		}
+
+		if length == len(results) {
+			return nil, fmt.Errorf("Can not find a connected metrics endpoint for endpoint %v", cnsiGuid)
+		}
+
 	}
 
-	// Did we find a metric provider for each endpoint?
-	if len(endpointsMap) != 0 {
-		return nil, errors.New("Can not find a metric provider for all of the specified endpoints")
-	}
 	return results, nil
 }
 
@@ -553,6 +563,16 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, consol
 
 func filterEndpoints(vs []*interfaces.ConnectedEndpoint, f func(*interfaces.ConnectedEndpoint) bool) []*interfaces.ConnectedEndpoint {
 	vsf := make([]*interfaces.ConnectedEndpoint, 0)
+	for _, v := range vs {
+		if f(v) {
+			vsf = append(vsf, v)
+		}
+	}
+	return vsf
+}
+
+func filterRelations(vs []*interfaces.RelationsRecord, f func(*interfaces.RelationsRecord) bool) []*interfaces.RelationsRecord {
+	vsf := make([]*interfaces.RelationsRecord, 0)
 	for _, v := range vs {
 		if f(v) {
 			vsf = append(vsf, v)

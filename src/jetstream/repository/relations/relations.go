@@ -6,6 +6,7 @@ import (
 
 type RelationsStore interface {
 	List() ([]*interfaces.RelationsRecord, error)
+	ListByTarget(target string) ([]*interfaces.RelationsRecord, error)
 	ListByType(relationType string) ([]*interfaces.RelationsRecord, error)
 	DeleteRelation(provider string, relType string, target string) error
 	DeleteRelations(providerOrTarget string) error

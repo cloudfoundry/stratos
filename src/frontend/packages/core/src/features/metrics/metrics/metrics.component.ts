@@ -64,7 +64,8 @@ export class MetricsComponent {
 
         Object.values(ep.endpoints).forEach(endpoint => {
           metadata[endpoint.guid] = {
-            type: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
+            type: endpoint.cnsi_type,
+            typeLabel: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
             icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type),
           };
         });
@@ -114,7 +115,6 @@ export class MetricsComponent {
   }
 
   getRelation(endpoint: EndpointModel, relType: EndpointRelationTypes): EndpointsRelation {
-    console.log(endpoint, relType);
     return endpoint.relations ? endpoint.relations.provides.find(e => e.type === relType) : null;
   }
 }

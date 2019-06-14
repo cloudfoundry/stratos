@@ -28,6 +28,15 @@ func (p *portalProxy) ListRelations() ([]*interfaces.RelationsRecord, error) {
 	return store.List()
 }
 
+func (p *portalProxy) ListRelationsByTarget(target string) ([]*interfaces.RelationsRecord, error) {
+	store, err := relations.NewRelationsDBStore(p.DatabaseConnectionPool)
+	if err != nil {
+		return nil, err
+	}
+
+	return store.ListByTarget(target)
+}
+
 func (p *portalProxy) RemoveRelations(providerOrTarget string) error {
 	store, err := relations.NewRelationsDBStore(p.DatabaseConnectionPool)
 	if err != nil {

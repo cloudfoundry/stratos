@@ -83,6 +83,7 @@ type PortalProxy interface {
 	// Relations
 	SaveRelation(relation RelationsRecord) (*RelationsRecord, error)
 	ListRelations() ([]*RelationsRecord, error)
+	ListRelationsByTarget(target string) ([]*RelationsRecord, error)
 	RemoveRelations(providerOrTarget string) error
 	RemoveRelation(relation RelationsRecord) error
 

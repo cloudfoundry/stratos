@@ -145,7 +145,7 @@ export class EndpointsService implements CanActivate {
             entityFactory(action.entityKey)
           )
         }).entities$.pipe(
-          filter(entities => !!entities && !!entities.length),
+          filter(entities => !!entities),
           map(entities => !!entities.find(entity => !!entity.data.result.length)),
           first()
         );

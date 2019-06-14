@@ -60,7 +60,6 @@ export class MarkdownPreviewComponent {
           const titleElement = h1[0];
           const titleText = titleElement.innerText;
           this.title = titleText;
-          // console.log('Got title: ' + titleText);
         }, 100);
       } else {
         this.title = 'Help';
