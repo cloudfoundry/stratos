@@ -72,3 +72,21 @@ fetchImageTag() {
 nightlyTag() {
   echo "$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)"
 }
+
+# patchHelmChartAppVersion - update appVersion when patching the Helm Chart if configured
+patchHelmChartAppVersion() {
+  local CHART_PATH=$1
+  local STRATOS_FOLDER=$2
+
+  if [ -f "${STRATOS_FOLDER}/custom-src/stratos.yaml" ]; then
+    PROD_VERSION=$(cat "${STRATOS_FOLDER}/custom-src/stratos.yaml" | grep "productVersion")
+    if [ ! -z "${PROD_VERSION}" ]; then
+      PROD_VERSION=$(echo $PROD_VERSION | grep --extended --only-matching '[0-9\.]+')
+      if [ ! -z "${PROD_VERSION}" ]; then
+        echo "Setting appVersion to: ${PROD_VERSION}"
+        sed -i.bak -e 's/appVersion: [0-9\.]*/appVersion: '"${PROD_VERSION}"'/g' ${CHART_PATH}/Chart.yaml
+      fi
+    fi
+  fi
+
+}
