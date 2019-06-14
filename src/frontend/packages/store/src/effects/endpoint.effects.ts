@@ -213,7 +213,7 @@ export class EndpointsEffect {
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
       `Please ensure the endpoint address is correct and try again` +
-      `${e.error.error ? '(' + e.error.error + ').' : '.'}`;
+      `${e.error.error ? ' (' + e.error.error + ').' : '.'}`;
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
     }

@@ -7,5 +7,10 @@
         An organization with this name already exists. Please enter a different one.
       </mat-error>
     </mat-form-field>
+    <mat-form-field>
+      <mat-select formControlName="quotaDefinition" class="form-control" placeholder="Quota Definition">
+        <mat-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">{{ quota.entity.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
   </form>
 </div>

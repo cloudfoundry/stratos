@@ -51,7 +51,7 @@ describe('Application View -', () => {
   });
 
   beforeAll(() => {
-    return cfHelper.fetchDefaultStack(e2e.secrets.getDefaultCFEndpoint()).then(stack => defaultStack = stack);
+    return cfHelper.fetchDefaultCFEndpointStack().then(stack => defaultStack = stack);
   });
 
   afterAll(() => {
