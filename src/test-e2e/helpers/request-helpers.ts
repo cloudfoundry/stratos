@@ -8,6 +8,18 @@ import { ConsoleUserType } from './e2e-helpers';
 
 // This helper is used internally - tests should not need to use this class
 
+export interface RequestDefaults {
+    headers: {
+      'Content-Type'?: string,
+      Accept?: string,
+      [key: string]: string
+    };
+    resolveWithFullResponse: boolean;
+    jar: any;
+    agentOptions: object;
+    timeout: number;
+}
+
 export class RequestHelpers {
 
 
@@ -21,33 +33,30 @@ export class RequestHelpers {
    * @newRequest
    * @description Create a new request
    */
-  newRequest() {
-    const cookieJar = request.jar();
+  newRequest(defaults: Partial<RequestDefaults> = {
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    resolveWithFullResponse: true,
+    jar: request.jar(),
+    timeout: 30000
+  }) {
     const skipSSLValidation = browser.params.skipSSLValidation;
-    let ca;
-
     if (skipSSLValidation) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     } else if (browser.params.caCert) {
       let caCertFile = join(__dirname, '..', 'dev-ssl');
       caCertFile = join(caCertFile, browser.params.caCert);
       if (existsSync(caCertFile)) {
-        ca = readFileSync(caCertFile);
+        const ca = readFileSync(caCertFile);
+        defaults.agentOptions = {
+          ca
+        };
       }
     }
 
-    return request.defaults({
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      resolveWithFullResponse: true,
-      agentOptions: {
-        ca
-      },
-      jar: cookieJar,
-      timeout: 30000
-    });
+    return request.defaults(defaults);
   }
 
   /**
@@ -58,14 +67,14 @@ export class RequestHelpers {
    * @param {object?} body - the request body
    * @param {object?} formData - the form data
    */
-  sendRequest(req, options, body?, formData?): promise.Promise<any> {
+  sendRequest(req, options, body?: any, formData?): promise.Promise<any> {
 
     const p = promise.defer<any>();
     const reqObj = req || this.newRequest();
 
     options.url = this.getHost() + '/' + options.url;
     if (body) {
-      options.body = JSON.stringify(body);
+      options.body = typeof body !== 'string' ? JSON.stringify(body) : body;
     } else if (formData) {
       options.formData = formData;
     }
@@ -82,7 +91,7 @@ export class RequestHelpers {
       E2E.debugLog('OK');
 
       // Get XSRF Token
-      if (response.headers['x-xsrf-token']) {
+      if (response.headers && response.headers['x-xsrf-token']) {
         reqObj._xsrfToken = response.headers['x-xsrf-token'];
       }
       p.fulfill(response.body);

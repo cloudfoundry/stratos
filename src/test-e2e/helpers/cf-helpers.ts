@@ -13,6 +13,7 @@ import { CfUser } from '../../frontend/packages/store/src/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFRequestHelpers } from './cf-request-helpers';
+import { UaaHelpers } from './uaa-helpers';
 
 const stackPriority = {
   cf: [ 'cflinuxfs3', 'cflinuxfs2' ],
@@ -398,6 +399,24 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'spaces/' + spaceGuid + '/managers', {
       username: userName
     });
+  }
+
+  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string}> {
+    const body = {
+      guid: uaaUserGuid
+    };
+    return this.cfRequestHelper.sendCfPost<{ guid: string}>(cfGuid, 'users', body);
+  }
+
+  deleteUser(cfGuid: string, userGuid: string, uaaUserGuid?: string): promise.Promise<any> {
+    const uaaHelpers = new UaaHelpers();
+    return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
+      .then(() => {
+        if (uaaUserGuid) {
+          return uaaHelpers.deleteUser(uaaUserGuid);
+        }
+        // Else case will be done in invite user PR
+      });
   }
 
   addOrgQuota(cfGuid, name, options = {}) {
