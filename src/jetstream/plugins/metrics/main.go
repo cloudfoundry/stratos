@@ -545,7 +545,6 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, consol
 			continue
 		}
 		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpointUrl); ok {
-			// log.Infof("found cf2. provider: %v", provider)
 			relation := interfaces.RelationsRecord{
 				Provider:     metricEndpoint.GUID,
 				RelationType: MetricsCfRelation,

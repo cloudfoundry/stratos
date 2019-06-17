@@ -1,5 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../core/tab-nav.service';
+import { BaseTestModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { ContainerOrchestratorStepComponent } from './container-orchestrator-step/container-orchestrator-step.component';
 import { ContainerOrchestratorStepperComponent } from './container-orchestrator-stepper.component';
 
 describe('ContainerOrchestratorStepperComponent', () => {
@@ -8,7 +11,9 @@ describe('ContainerOrchestratorStepperComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ContainerOrchestratorStepperComponent ]
+      declarations: [ ContainerOrchestratorStepperComponent, ContainerOrchestratorStepComponent ],
+      imports: [ ...BaseTestModules ],
+      providers: [TabNavService]
     })
     .compileComponents();
   }));

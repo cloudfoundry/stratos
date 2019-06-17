@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ContainerOrchestratorStepComponent } from './container-orchestrator-step.component';
 
 describe('ContainerOrchestratorStepComponent', () => {
@@ -8,7 +9,8 @@ describe('ContainerOrchestratorStepComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ContainerOrchestratorStepComponent ]
+      declarations: [ ContainerOrchestratorStepComponent ],
+      imports: [ ...BaseTestModules ]
     })
     .compileComponents();
   }));
