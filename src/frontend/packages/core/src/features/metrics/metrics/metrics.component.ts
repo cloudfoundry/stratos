@@ -91,8 +91,8 @@ export class MetricsComponent {
     );
 
     this.jobDetails$ = this.metricsEndpoint$.pipe(
-      filter(mi => !!mi && !!mi.entity.provider && !!mi.entity.provider.metadata && !!mi.entity.provider.metadata.cfMetricsTargets),
-      map(mi => mi.entity.provider.metadata.cfMetricsTargets),
+      filter(mi => !!mi && !!mi.entity.provider && !!mi.entity.provider.metadata && !!mi.entity.provider.metadata.metricsTargets),
+      map(mi => mi.entity.provider.metadata.metricsTargets),
       map((targetsData: MetricsAPITargets) => targetsData.activeTargets.reduce((mapped, t) => {
         if (t.labels && t.labels.job) {
           mapped[t.labels.job] = t;

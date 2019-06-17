@@ -2,11 +2,11 @@ import { Component, Input, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
 import { EntityService } from '../../../../../../core/entity-service';
 import { TableCellCustom } from '../../../list.types';
 import { ListAppInstance } from '../app-instance-types';
-import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
-import { IMetrics, IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 
 @Component({
   selector: 'app-table-cell-cf-cell-usage',
@@ -36,7 +36,7 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
         return metricResult ? metricResult.metric : null;
       }),
       tap(metric => {
-        // No metric? It should exists so start polling to ensure we fetch it. It could be missing if the instance was just created
+        // No metric? It should exist so start polling to ensure we fetch it. It could be missing if the instance was just created
         // and cf hasn't yet emitted metrics for it
         if (!metric && !this.fetchMetricsSub) {
           this.fetchMetricsSub = metricEntityService.poll(5000).subscribe();

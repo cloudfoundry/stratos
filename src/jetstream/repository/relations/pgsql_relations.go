@@ -108,15 +108,12 @@ func (p *RelationsDBStore) ListByTarget(target string) ([]*interfaces.RelationsR
 		}
 		relation.Metadata = metadata
 
-		log.Warnf("ListByTarget1 %+v", relation)
-
 		relationsList = append(relationsList, relation)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("Unable to List Relations records: %v", err)
 	}
-	log.Warnf("ListByTarget2 %+1", relationsList)
 
 	return relationsList, nil
 }
@@ -216,18 +213,11 @@ func (p *RelationsDBStore) Save(relationsRecord interfaces.RelationsRecord) (*in
 
 	existingRelation, err := p.GetRelation(relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target)
 
-	log.Warnf("Save: %v", existingRelation)
-	log.Warnf("Save: %v", relationsRecord.Provider)
-	log.Warnf("Save: %v", relationsRecord.Target)
-	log.Warnf("Save: %v", err)
-
 	if err == nil && existingRelation != nil {
-		log.Warnf("updateRelation: %v", existingRelation)
 		if _, err := p.db.Exec(updateRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target); err != nil {
 			return nil, fmt.Errorf("Unable to update Relations record: %v", err)
 		}
 	} else {
-		log.Warn("insertRelation")
 		if _, err := p.db.Exec(insertRelation, relationsRecord.Provider, relationsRecord.RelationType, relationsRecord.Target, metaString); err != nil {
 			return nil, fmt.Errorf("Unable to insert Relations record: %v", err)
 		}

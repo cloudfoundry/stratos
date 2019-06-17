@@ -114,9 +114,11 @@ func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
 
-	// Note: User needs to be an admin of the given Cloud Foundry to retrieve cf general, cell and eirini metrics
+	// Note: User does not need to be an admin of the given Cloud Foundry for the following endpoints
 	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
 	echoContext.GET("/metrics/cf/eirini/:op", m.getCloudFoundryEiriniMetrics)
+
+	// Note: User needs to be an admin of the given Cloud Foundry for the following endpoints
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 }
 
@@ -532,12 +534,12 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, consol
 
 	// Try to match up endpoint to metric
 	for _, metricEndpoint := range metricsEndpoints {
-		tokenRecord, found := m.portalProxy.GetCNSITokenRecord(endpointGuid, consoleUserID)
+		metricsTokenRecord, found := m.portalProxy.GetCNSITokenRecord(metricEndpoint.GUID, consoleUserID)
 		if found == false {
 			// Console user has not connected to endpoint
 			continue
 		}
-		metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenRecord.Metadata, endpointGuid)
+		metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(metricsTokenRecord.Metadata, metricEndpoint.GUID)
 		if err != nil {
 			log.Warnf("Failed to link endpoint to metric endpoints (creating providers from token): %v", err)
 			continue

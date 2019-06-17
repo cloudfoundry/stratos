@@ -65,7 +65,7 @@ export interface EndpointModel {
   token_endpoint?: string;
   user?: EndpointUser;
   metadata?: {
-    cfMetricsTargets?: MetricsAPITargets;
+    metricsTargets?: MetricsAPITargets;
     userInviteAllowed?: 'true' | any;
     fullApiEndpoint?: string;
   };

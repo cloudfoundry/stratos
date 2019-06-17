@@ -82,7 +82,7 @@ function updateMetricsInfo(state: IRequestEntityTypeState<EndpointModel>, action
         ...existingEndpoint,
         metadata: {
           ...existingEndpoint.metadata,
-          cfMetricsTargets: action.data.data
+          metricsTargets: action.data.data
         }
       },
     };

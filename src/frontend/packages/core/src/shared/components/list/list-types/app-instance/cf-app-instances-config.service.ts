@@ -19,7 +19,6 @@ import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -202,12 +201,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private confirmDialog: ConfirmationDialogService,
     private endpointsService: EndpointsService,
     entityServiceFactory: EntityServiceFactory,
-    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
     this.initialised$ = combineLatest([
       this.endpointsService.eiriniMetricsProvider(appService.cfGuid),
-      this.endpointsService.hasCellMetrics(appService.cfGuid)
+      this.endpointsService.hasCellMetrics(appService.cfGuid),
     ]).pipe(
       map(([eiriniMetricsProvider, hasCellMetrics]) => {
         if (hasCellMetrics) {

@@ -32,7 +32,7 @@ export class TableCellKubeNodeComponent extends TableCellCustom<ListAppInstance>
         return metricResult ? metricResult.metric.node : null;
       }),
       tap(metric => {
-        // No metric? It should exists so start polling to ensure we fetch it. It could be missing if the instance was just created
+        // No metric? It should exist so start polling to ensure we fetch it. It could be missing if the instance was just created
         // and cf hasn't yet emitted metrics for it
         if (!metric && !this.fetchMetricsSub) {
           this.fetchMetricsSub = config.eiriniPodsService.poll(5000).subscribe();

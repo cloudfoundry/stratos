@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/labstack/echo"
@@ -23,9 +24,7 @@ var (
 		"firehose_value_metric_rep_capacity_total_memory",
 		"firehose_value_metric_rep_num_cpus",
 	}
-	eiriniWhiteList = []string{
-		"kube_pod_labels",
-	}
+	eiriniWhiteList = []string{}
 )
 
 // Metrics endpoints - non-admin - for a Cloud Foundry Application
@@ -120,7 +119,7 @@ func getEchoURL(c echo.Context) url.URL {
 	return *u
 }
 
-func (m *MetricsSpecification) isAdmin(cnsiList []string, userGUID string) (error) {
+func (m *MetricsSpecification) isAdmin(cnsiList []string, userGUID string) error {
 	// User must be an admin of the Cloud Foundry
 	// Check each in the list and if any is not, then return an error
 	canAccessMetrics := true
@@ -148,13 +147,13 @@ func (m *MetricsSpecification) isAdmin(cnsiList []string, userGUID string) (erro
 		}
 	}
 
-		// Only proceed if the user is an Cloud Foundry admin of all of the endpoints we are requesting metrics for
-		if !canAccessMetrics {
-			return interfaces.NewHTTPShadowError(
-				http.StatusUnauthorized,
-				"You must be a Cloud Foundry admin to access CF-level metrics",
-				"You must be a Cloud Foundry admin to access CF-level metrics")
-		}
+	// Only proceed if the user is an Cloud Foundry admin of all of the endpoints we are requesting metrics for
+	if !canAccessMetrics {
+		return interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"You must be a Cloud Foundry admin to access CF-level metrics",
+			"You must be a Cloud Foundry admin to access CF-level metrics")
+	}
 
 	return nil
 }
@@ -212,7 +211,9 @@ func isAllowedEiriniMetricsQuery(query string) bool {
 			return true
 		}
 	}
-	return false
+	match, _ := regexp.MatchString("kube_pod_labels{([\\S]*) \\/ on\\(pod\\) group_right kube_pod_info", query)
+
+	return match
 }
 
 // Metrics endpoints - cells - with white list of cell prometheus query values
@@ -222,23 +223,15 @@ func (m *MetricsSpecification) getCloudFoundryCellMetrics(c echo.Context) error 
 	values := uri.Query()
 	query := values.Get("query")
 
-	userGUID, err := m.portalProxy.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return errors.New("Could not find session user_id")
+	// Fail all queries that are not of type 'cell'
+	if !isAllowedCellMetricsQuery(query) {
+		return interfaces.NewHTTPShadowError(
+			http.StatusForbidden,
+			"Unsupported prometheus query",
+			"Unsupported prometheus query")
 	}
 
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
-	// TODO: RC Test
-	err = m.isAdmin(cnsiList, userGUID)
-	if err != nil {
-		return err
-	}
-
-	// Fail all queries that are not of type 'cell'
-	if !isAllowedCellMetricsQuery(query) {
-		return errors.New("Unsupported prometheus query")
-	}
-
 	return m.makePrometheusRequest(c, cnsiList, "", true)
 }
 
@@ -248,23 +241,15 @@ func (m *MetricsSpecification) getCloudFoundryEiriniMetrics(c echo.Context) erro
 	values := uri.Query()
 	query := values.Get("query")
 
-	userGUID, err := m.portalProxy.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return errors.New("Could not find session user_id")
-	}
-
-	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
-	err = m.isAdmin(cnsiList, userGUID)
-	if err != nil {
-		return err
-	}
-
 	// Fail all queries that are not of type on the white list
 	if !isAllowedEiriniMetricsQuery(query) {
-		return errors.New("Unsupported prometheus query")
+		return interfaces.NewHTTPShadowError(
+			http.StatusForbidden,
+			"Unsupported prometheus query",
+			"Unsupported prometheus query")
 	}
+	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	return m.makePrometheusRequest(c, cnsiList, "", false)
 
 }
-

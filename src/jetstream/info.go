@@ -32,7 +32,7 @@ func (p *portalProxy) info(c echo.Context) error {
 }
 
 // Add a set of endpoint relations to each endpoint via the relations table
-func (p *portalProxy) updateRelations(endpoints map[string]map[string]*interfaces.EndpointDetail) error {
+func (p *portalProxy) updateEndpointsWithRelations(endpoints map[string]map[string]*interfaces.EndpointDetail) error {
 	relations, err := p.ListRelations()
 	if err != nil {
 		return fmt.Errorf("Failed to fetch relations: %v", err)
@@ -92,7 +92,6 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		Endpoints:    make(map[string]map[string]*interfaces.EndpointDetail),
 		CloudFoundry: p.Config.CloudFoundryInfo,
 		PluginConfig: p.Config.PluginConfig,
-		Configuration: make(map[string]string),
 	}
 
 	// Only add diagnostics information if the user is an admin
@@ -135,7 +134,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		s.Endpoints[cnsiType][cnsi.GUID] = endpoint
 	}
 
-	err = p.updateRelations(s.Endpoints)
+	err = p.updateEndpointsWithRelations(s.Endpoints)
 	if err != nil {
 		log.Warnf("Failed to add relations data to endpoints during info request: %v", err)
 	}
@@ -149,8 +148,6 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	}
 
 	s.Plugins = p.PluginsStatus
-
-	s.Configuration["eirini"] = "true"
 
 	return s, nil
 }
