@@ -1,5 +1,6 @@
+import { CfRolesRemovalLevel, CfUserRemovalTestLevel, setupCfUserRemovalTests } from '../users-removal-e2e.helper';
 import { CfTopLevelPage } from './cf-top-level-page.po';
-import { CfUserRemovalTestLevel, setupCfUserRemovalTests, CfRolesRemovalLevel } from '../users-removal-e2e.helper';
+
 
 describe('CF - Remove user roles (only spaces)', () => {
   setupCfUserRemovalTests(CfUserRemovalTestLevel.Cf, CfRolesRemovalLevel.Spaces, (cfGuid) => {

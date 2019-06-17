@@ -13,7 +13,12 @@ import { CfUser } from '../../frontend/packages/store/src/types/user.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFRequestHelpers } from './cf-request-helpers';
+import { UaaHelpers } from './uaa-helpers';
 
+const stackPriority = {
+  cf: [ 'cflinuxfs3', 'cflinuxfs2' ],
+  suse: [ 'sle15', 'opensuse42' ]
+};
 
 export class CFHelpers {
   static cachedDefaultCfGuid: string;
@@ -166,18 +171,35 @@ export class CFHelpers {
     });
   }
 
-  // Default Stack based on the CF Vendor
-  fetchDefaultStack(endpoint: E2EConfigCloudFoundry) {
-    const reqObj = this.cfRequestHelper.newRequest();
-    const options = {
-      url: endpoint.url + '/v2/info'
-    };
-    return reqObj(options).then((response) => {
-      const json = JSON.parse(response.body);
-      const isSUSE = json.description.indexOf('SUSE') === 0;
-      return isSUSE ? 'sle15' : 'cflinuxfs2';
-    }).catch((e) => {
-      return 'unknown';
+  // Get defult stack for the default CF
+  fetchDefaultCFEndpointStack() {
+    return this.fetchDefaultCfGuid(true).then(guid => {
+      return this.cfRequestHelper.sendCfGet(guid, '/stacks').then(json => {
+
+        const endpoint = this.cfRequestHelper.getDefaultCFEndpoint();
+        // Get the info for the Default CF
+        const reqObj = this.cfRequestHelper.newRequest();
+        const options = {
+          url: endpoint.url + '/v2/info'
+        };
+        return reqObj(options).then((response) => {
+          const infoJson = JSON.parse(response.body);
+          const isSUSE = infoJson.description.indexOf('SUSE') === 0;
+
+          const stackPriorities = isSUSE ? stackPriority.suse : stackPriority.cf;
+          const stacksAvailable = {};
+          json.resources.forEach(s => stacksAvailable[s.entity.name] = true);
+
+          for (const s of stackPriorities) {
+            if (stacksAvailable[s]) {
+              return s;
+            }
+          }
+          return stackPriorities[0];
+        }).catch((e) => {
+          return 'unknown';
+        });
+      });
     });
   }
 
@@ -377,6 +399,24 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'spaces/' + spaceGuid + '/managers', {
       username: userName
     });
+  }
+
+  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string}> {
+    const body = {
+      guid: uaaUserGuid
+    };
+    return this.cfRequestHelper.sendCfPost<{ guid: string}>(cfGuid, 'users', body);
+  }
+
+  deleteUser(cfGuid: string, userGuid: string, uaaUserGuid?: string): promise.Promise<any> {
+    const uaaHelpers = new UaaHelpers();
+    return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
+      .then(() => {
+        if (uaaUserGuid) {
+          return uaaHelpers.deleteUser(uaaUserGuid);
+        }
+        // Else case will be done in invite user PR
+      });
   }
 
   addOrgQuota(cfGuid, name, options = {}) {

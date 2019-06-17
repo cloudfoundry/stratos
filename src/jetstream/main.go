@@ -346,13 +346,14 @@ func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("... Auth Endpoint Type  : %s", config.AuthEndpointType)
 	if val, found := interfaces.AuthEndpointTypes[config.AuthEndpointType]; found {
 		if val == interfaces.Local {
-			log.Infof("... Local User          : %s", config.LocalUser)
-			log.Infof("... Local User Scope    : %s", config.LocalUserScope)
+			log.Infof("... Local User          		: %s", config.LocalUser)
+			log.Infof("... Local User Scope    		: %s", config.LocalUserScope)
 		} else { //Auth type is set to remote
-			log.Infof("... UAA Endpoint        : %s", config.UAAEndpoint)
-			log.Infof("... Console Client      : %s", config.ConsoleClient)
-			log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
-			log.Infof("... Use SSO Login       : %t", config.UseSSO)
+			log.Infof("... UAA Endpoint        		: %s", config.UAAEndpoint)
+			log.Infof("... Authorization Endpoint 	: %s", config.AuthorizationEndpoint)
+			log.Infof("... Console Client      		: %s", config.ConsoleClient)
+			log.Infof("... Admin Scope         		: %s", config.ConsoleAdminScope)
+			log.Infof("... Use SSO Login       		: %t", config.UseSSO)
 		}
 	}
 	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
