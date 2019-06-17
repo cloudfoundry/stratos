@@ -44,7 +44,7 @@ export class UaaRequestHelpers extends RequestHelpers {
   })
 
   sendGet(url: string): promise.Promise<any> {
-    return this.sendUaaRequest(url, 'GET');
+    return this.sendUaaRequest(url, 'GET').then(JSON.parse);
   }
 
   sendPost(url: string, body: string): promise.Promise<any> {

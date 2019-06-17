@@ -10,8 +10,13 @@ import {
 } from '../../frontend/packages/core/src/core/cf-api.types';
 import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
 import { CfUser } from '../../frontend/packages/store/src/types/user.types';
+import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
+import { CfOrgLevelPage } from '../cloud-foundry/org-level/cf-org-level-page.po';
+import { CfSpaceLevelPage } from '../cloud-foundry/space-level/cf-space-level-page.po';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
+import { ListComponent } from '../po/list.po';
+import { MetaCardTitleType } from '../po/meta-card.po';
 import { CFRequestHelpers } from './cf-request-helpers';
 import { UaaHelpers } from './uaa-helpers';
 
@@ -203,7 +208,7 @@ export class CFHelpers {
     });
   }
 
-  fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<any>> {
+  fetchOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<IOrganization>> {
     return this.cfRequestHelper.sendCfGet(cnsiGuid, 'organizations?q=name IN ' + orgName).then(json => {
       if (json.total_results > 0) {
         const org = json.resources[0];
@@ -401,6 +406,28 @@ export class CFHelpers {
     });
   }
 
+  fetchOrgUsers(cfGuid: string, orgGuid: string): promise.Promise<APIResource<CfUser>[]> {
+    return this.cfRequestHelper.sendCfGet(cfGuid, `organizations/${orgGuid}/users`).then(res => res.resources);
+  }
+
+  deleteUsers(cfGuid: string, orgName: string, usernames: string[]): promise.Promise<any> {
+    return this.fetchOrg(cfGuid, orgName)
+      .then(org => this.fetchOrgUsers(cfGuid, org.metadata.guid))
+      .then(orgUsers => promise.all(usernames.map(username => {
+        const foundUser = orgUsers.find(user => user.entity.username === username);
+        if (!foundUser) {
+          throw new Error(`Failed to find user ${username}. Aborting deletion of users`);
+        }
+        return this.deleteUser(cfGuid, foundUser.metadata.guid, username);
+      })));
+  }
+
+  deleteUser(cfGuid: string, userGuid: string, userName?: string, uaaUserGuid?: string): promise.Promise<any> {
+    const uaaHelpers = new UaaHelpers();
+    return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
+      .then(() => uaaHelpers.deleteUser(uaaUserGuid, userName));
+  }
+
   createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string}> {
     const body = {
       guid: uaaUserGuid
@@ -408,16 +435,48 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfPost<{ guid: string}>(cfGuid, 'users', body);
   }
 
-  deleteUser(cfGuid: string, userGuid: string, uaaUserGuid?: string): promise.Promise<any> {
-    const uaaHelpers = new UaaHelpers();
-    return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
-      .then(() => {
-        if (uaaUserGuid) {
-          return uaaHelpers.deleteUser(uaaUserGuid);
-        }
-        // Else case will be done in invite user PR
+  /**
+   * Nav from cf page to org and optional space via the org and space lists
+   */
+  navFromCfToOrg(orgName: string): promise.Promise<CfOrgLevelPage> {
+    return CfTopLevelPage.detect()
+      .then(cfPage => {
+        cfPage.waitForPageOrChildPage();
+        cfPage.loadingIndicator.waitUntilNotShown();
+        cfPage.goToOrgTab();
+
+        // Find the Org and click on it
+        const list = new ListComponent();
+        return list.cards.findCardByTitle(orgName, MetaCardTitleType.CUSTOM, true);
+      })
+      .then(card => {
+        expect(card).toBeDefined();
+        card.click();
+        return CfOrgLevelPage.detect();
+      })
+      .then(orgPage => {
+        orgPage.waitForPageOrChildPage();
+        orgPage.loadingIndicator.waitUntilNotShown();
+        return orgPage;
       });
   }
+
+  navFromOrgToSpace(orgPage: CfOrgLevelPage, spaceName: string): promise.Promise<CfSpaceLevelPage> {
+    orgPage.goToSpacesTab();
+    // Find the Org and click on it
+    const list = new ListComponent();
+    return list.cards.findCardByTitle(spaceName, MetaCardTitleType.CUSTOM, true)
+      .then(card => {
+        expect(card).toBeDefined();
+        card.click();
+        return CfSpaceLevelPage.detect();
+      })
+      .then(spacePage => {
+        spacePage.waitForPageOrChildPage();
+        spacePage.loadingIndicator.waitUntilNotShown();
+        return spacePage;
+      });
+    }
 
   addOrgQuota(cfGuid, name, options = {}) {
     const body = {

@@ -107,7 +107,7 @@ export class ServicesHelperE2E {
 
       this.setServiceInstanceDetail(serviceInstanceName);
 
-      this.createInstanceAttempt(0, 3, serviceName, serviceInstanceName);
+      this.createInstanceAttempt(0, 4, serviceName, serviceInstanceName);
     });
   }
 
@@ -116,7 +116,7 @@ export class ServicesHelperE2E {
     browser.wait(until.or(
       until.invisibilityOf(this.createServiceInstance.stepper.nextButton()),
       this.createServiceInstance.stepper.canNext.bind(this.createServiceInstance.stepper)
-    ), 10000);
+    ), 20000);
 
     this.createServiceInstance.stepper.canNext().then(canNext => {
       if (canNext) {

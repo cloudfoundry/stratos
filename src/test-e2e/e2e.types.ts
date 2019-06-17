@@ -28,12 +28,18 @@ export interface E2EServicesConfig {
   spaceScopedService: ServiceConfig;
 }
 
+export interface E2ECfInviteConfig {
+  clientId: string;
+  clientSecret: string;
+}
+
 export interface E2EConfigCloudFoundry extends E2EEndpointConfig {
   testOrg: string;
   testSpace: string;
   testDeployApp: string;
   testDeployAppStack: string;
   services: E2EServicesConfig;
+  invite: E2ECfInviteConfig;
   uaa: E2EUaa;
 }
 

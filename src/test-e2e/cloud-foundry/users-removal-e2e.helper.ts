@@ -230,7 +230,7 @@ export function setupCfUserRemovalTests(
   }
 
   afterAll(() => {
-    const deleteUser = uaaUserGuid ? cfHelper.deleteUser(cfGuid, userGuid, uaaUserGuid) : promise.fullyResolved(true);
+    const deleteUser = uaaUserGuid ? cfHelper.deleteUser(cfGuid, userGuid, userName, uaaUserGuid) : promise.fullyResolved(true);
     return promise.all([
       deleteUser,
       cfHelper.deleteOrgIfExisting(cfGuid, orgName)
