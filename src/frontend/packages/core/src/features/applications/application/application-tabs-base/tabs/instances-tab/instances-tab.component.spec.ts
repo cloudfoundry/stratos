@@ -1,18 +1,18 @@
-import { async, ComponentFixture, TestBed, inject } from '@angular/core/testing';
-
-import { InstancesTabComponent } from './instances-tab.component';
-import { CoreModule } from '../../../../../../core/core.module';
-import { SharedModule } from '../../../../../../shared/shared.module';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
-import { ApplicationService } from '../../../../application.service';
-import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
-import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
+
 import { appReducers } from '../../../../../../../../store/src/reducers.module';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
-import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../../../../core/core.module';
+import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
+import { SharedModule } from '../../../../../../shared/shared.module';
+import { ApplicationService } from '../../../../application.service';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { InstancesTabComponent } from './instances-tab.component';
 
 describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;

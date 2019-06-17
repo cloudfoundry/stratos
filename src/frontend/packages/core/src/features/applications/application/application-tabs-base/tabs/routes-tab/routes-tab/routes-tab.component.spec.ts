@@ -1,10 +1,10 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RoutesTabComponent } from './routes-tab.component';
-import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestApplicationServiceProvider } from '../../../../../../../../test-framework/application-service-helper';
+import { BaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationEnvVarsHelper } from '../../build-tab/application-env-vars.service';
-import { DatePipe } from '@angular/common';
+import { RoutesTabComponent } from './routes-tab.component';
 
 describe('RoutesTabComponent', () => {
   let component: RoutesTabComponent;

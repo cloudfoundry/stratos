@@ -1,13 +1,13 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServicesTabComponent } from './services-tab.component';
-import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { EntityMonitorFactory } from '../../../../../../shared/monitors/entity-monitor.factory.service';
 import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
-import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
+import { EntityMonitorFactory } from '../../../../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
-import { DatePipe } from '@angular/common';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { ServicesTabComponent } from './services-tab.component';
 
 describe('ServicesTabComponent', () => {
   let component: ServicesTabComponent;
