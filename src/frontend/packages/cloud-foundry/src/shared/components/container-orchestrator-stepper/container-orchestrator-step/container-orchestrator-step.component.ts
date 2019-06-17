@@ -17,7 +17,7 @@ import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../.
 import { CfContainerOrchestrator, cfEiriniRelationship } from '../../../eirini.helper';
 
 @Component({
-  selector: 'app-container-orchestrator-step',
+  selector: 'cf-container-orchestrator-step',
   templateUrl: './container-orchestrator-step.component.html',
   styleUrls: ['./container-orchestrator-step.component.scss']
 })

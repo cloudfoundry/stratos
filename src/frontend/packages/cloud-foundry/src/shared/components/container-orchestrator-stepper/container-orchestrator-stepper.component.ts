@@ -10,7 +10,7 @@ import { selectEntity } from '../../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 @Component({
-  selector: 'app-container-orchestrator-stepper',
+  selector: 'cf-container-orchestrator-stepper',
   templateUrl: './container-orchestrator-stepper.component.html',
   styleUrls: ['./container-orchestrator-stepper.component.scss']
 })
