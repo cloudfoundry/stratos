@@ -341,12 +341,13 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("Stratos is initialized with the following setup:")
-	log.Infof("... UAA Endpoint        : %s", config.UAAEndpoint)
-	log.Infof("... Console Client      : %s", config.ConsoleClient)
-	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
-	log.Infof("... Setup Complete      : %t", config.IsSetupComplete())
-	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
-	log.Infof("... Use SSO Login       : %t", config.UseSSO)
+	log.Infof("... UAA Endpoint                  : %s", config.UAAEndpoint)
+	log.Infof("... Authorization Endpoint        : %s", config.AuthorizationEndpoint)
+	log.Infof("... Console Client                : %s", config.ConsoleClient)
+	log.Infof("... Skip SSL Validation           : %t", config.SkipSSLValidation)
+	log.Infof("... Setup Complete                : %t", config.IsSetupComplete())
+	log.Infof("... Admin Scope                   : %s", config.ConsoleAdminScope)
+	log.Infof("... Use SSO Login                 : %t", config.UseSSO)
 }
 
 func showSSOConfig(portalProxy *portalProxy) {

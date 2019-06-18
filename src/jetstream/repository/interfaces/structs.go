@@ -218,6 +218,7 @@ type Versions struct {
 
 type ConsoleConfig struct {
 	UAAEndpoint         *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
+	AuthorizationEndpoint *url.URL `json:"authorization_endpoint" configName:"AUTHORIZATION_ENDPOINT"`
 	ConsoleAdminScope   string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
 	ConsoleClient       string   `json:"console_client" configName:"CONSOLE_CLIENT"`
 	ConsoleClientSecret string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`

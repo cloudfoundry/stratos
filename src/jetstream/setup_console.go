@@ -122,6 +122,13 @@ func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *int
 		return err
 	}
 
+	if err := consoleRepo.SetValue(systemGroupName, "Env().Lookup(", consoleConfig.TODO.UAAEndpoint.String()); err != nil {
+		return err
+	}
+	
+	// TOOD: Default?????
+		
+
 	if err := consoleRepo.SetValue(systemGroupName, "CONSOLE_CLIENT", consoleConfig.ConsoleClient); err != nil {
 		return err
 	}

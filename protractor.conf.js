@@ -72,15 +72,25 @@ const longSuite = globby.sync([
   './src/test-e2e/application/application-deploy-e2e.spec.ts',
   './src/test-e2e/application/application-deploy-local-e2e.spec.ts',
   './src/test-e2e/marketplace/**/*-e2e.spec.ts',
-  './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/cf-level/cf-users-list-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/org-level/org-users-list-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/space-level/space-users-list-e2e.spec.ts'
 ])
 
-const fullMinusLongSuite = globby.sync([
+const longSuite2 = globby.sync([
+  './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/cf-level/cf-users-removal-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/org-level/org-users-removal-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/space-level/space-users-removal-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/cf-level/cf-invite-config-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/org-level/org-invite-user-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts'
+])
+
+const fullMinusLongSuites= globby.sync([
   ...fullSuite,
   ...longSuite.map(file => '!' + file),
+  ...longSuite2.map(file => '!' + file),
 ])
 
 exports.config = {
@@ -99,8 +109,12 @@ exports.config = {
       ...longSuite,
       ...excludeTests
     ]),
+    longSuite2: globby.sync([
+      ...longSuite2,
+      ...excludeTests
+    ]),
     fullMinusLongSuite: globby.sync([
-      ...fullMinusLongSuite,
+      ...fullMinusLongSuites,
       ...excludeTests
     ]),
     sso: globby.sync([

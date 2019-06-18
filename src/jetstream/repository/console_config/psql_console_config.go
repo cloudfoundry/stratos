@@ -13,7 +13,7 @@ import (
 )
 
 // Legacy
-var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso FROM console_config`
+var getConsoleConfig = `SELECT uaa_endpoint, auth_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso FROM console_config`
 
 var deleteConsoleConfig = `DELETE FROM console_config`
 
@@ -159,6 +159,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	var consoleConfig *interfaces.ConsoleConfig
 	for rows.Next() {
 		var (
+			uaaEndpoint  string
 			authEndpoint string
 		)
 		rowCount++
@@ -167,15 +168,19 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 		}
 
 		consoleConfig = new(interfaces.ConsoleConfig)
-		err := rows.Scan(&authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
+		err := rows.Scan(&uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
 			&consoleConfig.ConsoleClientSecret, &consoleConfig.SkipSSLValidation, &consoleConfig.UseSSO)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan config record: %v", err)
 		}
 
-		if consoleConfig.UAAEndpoint, err = url.Parse(authEndpoint); err != nil {
+		if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 			return nil, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
 		}
+		
+		if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint); err != nil {
+			return nil, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
+		}		
 	}
 
 	return consoleConfig, nil
