@@ -7,10 +7,10 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { CreateOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../core/cf-api.types';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
@@ -81,7 +81,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     const orgName = this.addOrg.value.orgName;
     this.store.dispatch(new CreateOrganization(orgName, this.cfGuid));
 
-    return this.store.select(selectRequestInfo(organizationEntityType, orgName)).pipe(
+    return this.store.select(selectCfRequestInfo(organizationEntityType, orgName)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.creating),
       map(requestInfo => ({
         success: !requestInfo.error,

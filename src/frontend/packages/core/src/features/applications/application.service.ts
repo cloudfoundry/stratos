@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import {
   appEnvVarsEntityType,
   applicationEntityType,
@@ -15,6 +15,7 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfEntity } from '../../../../cloud-foundry/src/selectors/api.selectors';
 import {
   AppMetadataTypes,
   GetAppStatsAction,
@@ -34,13 +35,12 @@ import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectEntity, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { AppStat } from '../../../../store/src/types/app-metadata.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IApp, IAppSummary, IOrganization, ISpace } from '../../core/cf-api.types';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -187,8 +187,7 @@ export class ApplicationService {
       switchMap(app => this.appSpace$.pipe(
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
-          const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationEntityType, CF_ENDPOINT_TYPE);
-          return this.store.select(selectEntity(orgEntityKey, orgGuid));
+          return this.store.select(selectCfEntity(organizationEntityType, orgGuid));
         }),
         filter(org => !!org)
       ))

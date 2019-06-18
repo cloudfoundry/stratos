@@ -6,9 +6,9 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { UpdateSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
@@ -76,7 +76,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
       allow_ssh: this.sshEnabled
     }));
 
-    return this.store.select(selectRequestInfo(spaceEntityType, this.spaceGuid)).pipe(
+    return this.store.select(selectCfRequestInfo(spaceEntityType, this.spaceGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map((state) => state.updating[UpdateSpace.UpdateExistingSpace]),
       this.map('Failed to update space: ')

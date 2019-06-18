@@ -14,7 +14,8 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { GeneralEntityAppState, GeneralRequestDataState, AppState } from '../../../../store/src/app-state';
+import { AppState, GeneralRequestDataState } from '../../../../store/src/app-state';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import {
   ActionState,
   getDefaultActionState,
@@ -23,7 +24,6 @@ import {
   UpdatingSection,
 } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 
 
 export class EntityMonitor<T = any, Y extends AppState = AppState> {

@@ -5,9 +5,9 @@ import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
@@ -54,7 +54,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     const spaceName = this.createSpaceForm.value.spaceName;
     this.store.dispatch(new CreateSpace(spaceName, this.orgGuid, this.cfGuid));
 
-    return this.store.select(selectRequestInfo(spaceEntityType, `${this.orgGuid}-${spaceName}`)).pipe(
+    return this.store.select(selectCfRequestInfo(spaceEntityType, `${this.orgGuid}-${spaceName}`)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),
       this.map('Failed to create space: ')
     );

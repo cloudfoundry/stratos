@@ -22,7 +22,10 @@ import { APIResource, NormalizedResponse } from '../../types/api.types';
 import { BaseRequestDataState } from '../../types/entity.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
+import { EntitySchema } from '../entity-schema';
 import { pick } from '../reducer.helper';
+import { EntityTreeRelation } from './entity-relation-tree';
+import { createValidationPaginationWatcher } from './entity-relation-tree.helpers';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
@@ -34,9 +37,6 @@ import {
   ValidateEntityRelationsConfig,
   ValidationResult,
 } from './entity-relations.types';
-import { EntitySchema } from '../entity-schema';
-import { EntityTreeRelation } from './entity-relation-tree';
-import { createValidationPaginationWatcher } from './entity-relation-tree.helpers';
 
 // TODO This 1 needs a tidy up and 2 only works with CF entities.
 interface ValidateResultFetchingState {

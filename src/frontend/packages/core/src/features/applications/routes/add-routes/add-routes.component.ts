@@ -12,6 +12,7 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import {
   AssociateRouteWithAppApplication,
   GetAppRoutes,
@@ -24,7 +25,6 @@ import { CFAppState } from '../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { Route, RouteMode } from '../../../../../../store/src/types/route.types';
 import { IDomain, ISpace } from '../../../../core/cf-api.types';
@@ -237,7 +237,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     }
 
     this.store.dispatch(new CreateRoute(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port)));
-    return this.store.select(selectRequestInfo(routeEntityType, newRouteGuid))
+    return this.store.select(selectCfRequestInfo(routeEntityType, newRouteGuid))
       .pipe(
         filter(route => !route.creating && !route.fetching),
         mergeMap(route => {
@@ -252,7 +252,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
     this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, routeGuid, this.cfGuid));
-    return this.store.select(selectRequestInfo(applicationEntityType, this.appGuid)).pipe(
+    return this.store.select(selectCfRequestInfo(applicationEntityType, this.appGuid)).pipe(
       pairwise(),
       filter(([oldApp, newApp]) => {
         return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);

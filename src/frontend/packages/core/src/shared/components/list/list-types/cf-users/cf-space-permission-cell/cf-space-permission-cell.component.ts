@@ -5,15 +5,14 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../../../store/src/types/user.types';
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { EntityCatalogueHelpers } from '../../../../../../core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
@@ -76,9 +75,8 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
-    const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationEntityType, CF_ENDPOINT_TYPE);
     const orgNames$ = orgGuids.length ? combineLatest(
-      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(orgEntityKey, orgGuid)).pipe(first()))
+      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, orgGuid)).pipe(first()))
     ).pipe(
       filter(org => !!org),
       first(),

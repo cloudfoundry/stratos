@@ -4,9 +4,9 @@ import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
 
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../../cloud-foundry/src/selectors/api.selectors';
 import { CreateServiceBinding } from '../../../../../store/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import { selectRequestInfo } from '../../../../../store/src/selectors/api.selectors';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { SpaceScopedService } from '../../../features/service-catalog/services.service';
 
@@ -135,7 +135,7 @@ export class CsiModeService {
       params
     ));
 
-    return this.store.select(selectRequestInfo(serviceBindingEntityType, guid)).pipe(
+    return this.store.select(selectCfRequestInfo(serviceBindingEntityType, guid)).pipe(
       filter(s => {
         return s && !s.creating;
       }),

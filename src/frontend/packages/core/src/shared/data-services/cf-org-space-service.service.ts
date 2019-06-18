@@ -68,9 +68,9 @@ export const enum CfOrgSpaceSelectMode {
 
 export const initCfOrgSpaceService = (store: Store<CFAppState>,
   cfOrgSpaceService: CfOrgSpaceDataService,
-  schemaKey: string,
+  entityKey: string,
   paginationKey: string): Observable<any> => {
-  return store.select(selectPaginationState(schemaKey, paginationKey)).pipe(
+  return store.select(selectPaginationState(entityKey, paginationKey)).pipe(
     filter((pag) => !!pag),
     first(),
     tap(pag => {

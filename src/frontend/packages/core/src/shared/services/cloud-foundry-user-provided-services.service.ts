@@ -11,6 +11,7 @@ import {
   spaceEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../cloud-foundry/src/selectors/api.selectors';
 import {
   CreateUserProvidedServiceInstance,
   GetAllUserProvidedServices,
@@ -23,7 +24,6 @@ import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { QParam } from '../../../../store/src/types/pagination.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
@@ -97,7 +97,7 @@ export class CloudFoundryUserProvidedServicesService {
     data: IUserProvidedServiceInstanceData
   ): Observable<RequestInfoState> {
     const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data, serviceInstancesEntityType);
-    const create$ = this.store.select(selectRequestInfo(userProvidedServiceInstanceEntityType, guid));
+    const create$ = this.store.select(selectCfRequestInfo(userProvidedServiceInstanceEntityType, guid));
     this.store.dispatch(action);
     return create$.pipe(
       debounceTime(250),

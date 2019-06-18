@@ -3,9 +3,12 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  servicePlanEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../../core/cf-api-svc.types';
 import { TableCellCustom } from '../../../list.types';
@@ -26,7 +29,7 @@ export class TableCellServicePlanComponent<T> extends TableCellCustom<T> impleme
     if (this.entityKey === userProvidedServiceInstanceEntityType) {
       this.servicePlanName$ = of('-');
     } else {
-      this.servicePlanName$ = this.store.select(selectEntity<APIResource<IServicePlan>>('servicePlan', this.row.entity.service_plan_guid))
+      this.servicePlanName$ = this.store.select(selectCfEntity<APIResource<IServicePlan>>(servicePlanEntityType, this.row.entity.service_plan_guid))
         .pipe(
           filter(s => !!s),
           map(s => s.entity.name)
