@@ -128,7 +128,6 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
   let response: NormalizedResponse;
   const guids = childEntitiesAsGuids(childEntitiesAsArray);
   const safeEntities = newEntities || {};
-  console.log(safeEntities);
   const entities = pick(safeEntities[childRelation.entityKey], guids as [string]) ||
     pick(allEntities[childRelation.entityKey], guids as [string]);
   response = {
@@ -222,7 +221,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
  * Iterate through required parent-child relationships and check if they exist
  */
 function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
-  const { store, cfGuid, entities, parentRelation, allEntities, allPagination, newEntities } = config;
+  const { cfGuid, entities, parentRelation, allEntities, allPagination, newEntities } = config;
 
   if (!entities) {
     return [];

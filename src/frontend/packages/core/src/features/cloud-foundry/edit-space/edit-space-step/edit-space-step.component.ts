@@ -8,7 +8,6 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { AssociateSpaceQuota, DisassociateSpaceQuota } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { UpdateSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { spaceQuotaSchemaKey, spaceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -104,12 +103,14 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   }
 
   updateSpace$() {
-    this.store.dispatch(new UpdateSpace(this.spaceGuid, this.cfGuid, {
+    const updateAction = new UpdateSpace(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
       allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
-    }));
+    });
+    this.store.dispatch(updateAction);
 
-    return this.store.select(selectRequestInfo(spaceSchemaKey, this.spaceGuid)).pipe(
+    return this.store.select(selectRequestInfo(updateAction, this.spaceGuid)).pipe(
+      tap(console.log),
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map((state) => state.updating[UpdateSpace.UpdateExistingSpace])
     );
@@ -118,16 +119,19 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   updateSpaceQuota$() {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
     let spaceQuotaQueryGuid;
+    let action: AssociateSpaceQuota | DisassociateSpaceQuota;
 
     if (spaceQuotaGuid) {
       spaceQuotaQueryGuid = spaceQuotaGuid;
-      this.store.dispatch(new AssociateSpaceQuota(this.spaceGuid, this.cfGuid, spaceQuotaGuid));
+      action = new AssociateSpaceQuota(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
     } else {
       spaceQuotaQueryGuid = this.originalSpaceQuotaGuid;
-      this.store.dispatch(new DisassociateSpaceQuota(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid));
+      action = new DisassociateSpaceQuota(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid);
     }
+    this.store.dispatch(action);
 
-    return this.store.select(selectRequestInfo(spaceQuotaSchemaKey, spaceQuotaQueryGuid)).pipe(
+
+    return this.store.select(selectRequestInfo(action, spaceQuotaQueryGuid)).pipe(
       filter(o => {
         return !!o &&
           o.updating[AssociateSpaceQuota.UpdateExistingSpaceQuota] &&

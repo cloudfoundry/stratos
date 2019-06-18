@@ -139,14 +139,15 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   submit: StepOnNextFunction = () => {
-    this.store.dispatch(new UpdateOrganization(this.orgGuid, this.cfGuid, {
+    const action = new UpdateOrganization(this.orgGuid, this.cfGuid, {
       name: this.editOrgName.value.orgName,
       quota_definition_guid: this.editOrgName.value.quotaDefinition,
       status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
-    }));
+    });
+    this.store.dispatch(action);
 
     // Update action
-    return this.store.select(selectRequestInfo(organizationSchemaKey, this.orgGuid)).pipe(
+    return this.store.select(selectRequestInfo(action, this.orgGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
       map(o => o.updating[UpdateOrganization.UpdateExistingOrg]),
       map(o => ({

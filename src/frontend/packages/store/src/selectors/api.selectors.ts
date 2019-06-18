@@ -1,6 +1,8 @@
 import { compose } from '@ngrx/store';
 
-import { IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState, AppState, GeneralEntityAppState } from '../app-state';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 
@@ -50,10 +52,14 @@ export function selectDeletionInfo(entityKey: string, entityGuid: string) {
   );
 }
 
-export function selectRequestInfo(entityKeys: string, entityGuid: string) {
+export function selectRequestInfo(entityKeyOrConfig: string | EntityCatalogueEntityConfig, entityGuid: string) {
+  // TODO: Temp to get working
+  const entityKey = typeof (entityKeyOrConfig) === 'string' ?
+    entityKeyOrConfig :
+    EntityCatalogueHelpers.buildEntityKey(entityKeyOrConfig.entityType, entityKeyOrConfig.endpointType);
   return compose(
     getEntityById<RequestInfoState>(entityGuid),
-    getRequestEntityKey<RequestInfoState>(entityKeys),
+    getRequestEntityKey<RequestInfoState>(entityKey),
     getAPIRequestInfoState
   );
 }

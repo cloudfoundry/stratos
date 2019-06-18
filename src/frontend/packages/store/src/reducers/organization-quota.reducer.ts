@@ -1,6 +1,6 @@
 import { IOrganization } from '../../../core/src/core/cf-api.types';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { IRequestEntityTypeState } from '../app-state';
-import { organizationSchemaKey } from '../helpers/entity-factory';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
@@ -12,7 +12,8 @@ export function updateOrganizationQuotaReducer(
   switch (action.type) {
     case '[Organizations] Update Org success':
       const response = action.response;
-      const newOrg = response.entities[organizationSchemaKey][response.result[0]];
+      const entityKey = EntityCatalogueHelpers.buildEntityKey(action.apiAction.entityType, action.apiAction.endpointType);
+      const newOrg = response.entities[entityKey][response.result[0]];
       const quotaDefinitionGuid = newOrg.entity.quota_definition_guid;
       const org = state[newOrg.metadata.guid];
       return applyQuotaDefinition(state, org, quotaDefinitionGuid);

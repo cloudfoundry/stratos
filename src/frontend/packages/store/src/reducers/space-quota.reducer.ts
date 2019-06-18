@@ -1,4 +1,5 @@
 import { ISpace, ISpaceQuotaDefinition } from '../../../core/src/core/cf-api.types';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import {
   ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
   AssociateSpaceQuota,
@@ -6,7 +7,6 @@ import {
   DisassociateSpaceQuota,
 } from '../actions/quota-definitions.actions';
 import { IRequestEntityTypeState } from '../app-state';
-import { spaceQuotaSchemaKey } from '../helpers/entity-factory';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
@@ -21,7 +21,8 @@ export function updateSpaceQuotaReducer(
     case ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS:
       const associateAction = action.apiAction as AssociateSpaceQuota;
       const response = action.response;
-      const newSpaceQuota = response.entities[spaceQuotaSchemaKey][response.result[0]];
+      const entityKey = EntityCatalogueHelpers.buildEntityKey(action.apiAction.entityType, action.apiAction.endpointType);
+      const newSpaceQuota = response.entities[entityKey][response.result[0]];
       space = state[associateAction.spaceGuid];
 
       return applySpaceQuota(state, space, newSpaceQuota);
@@ -48,7 +49,6 @@ function applySpaceQuota(
         space_quota_definition: spaceQuota.metadata.guid,
         space_quota_definition_guid: spaceQuota.metadata.guid,
         space_quota_definition_url: spaceQuota.metadata.url
-
       },
     },
   };
