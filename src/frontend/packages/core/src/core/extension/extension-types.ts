@@ -5,38 +5,38 @@ import { Schema, schema } from 'normalizr';
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
 
-interface BaseEndpointTypeConfig {
-  type?: EndpointType;
-  subType?: string;
-  label: string;
-  urlValidation?: string;
-  allowTokenSharing?: boolean;
-  icon?: string;
-  iconFont?: string;
-  imagePath?: string;
-  authTypes?: string[];
-  /**
-   * Get the link to the home page for the given endpoint GUID
-   */
-  homeLink?: (s) => string[];
-  /**
-   * Schema keys associated with this endpoint type (used when clearing pagination)
-   */
-  entitySchemaKeys?: string[];
-  /**
-   * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
-   */
-  listDetailsComponent?: any;
-  /**
-   * When all endpoints are displayed together use the order to define the position. Lower number = earlier position
-   */
-  order?: number;
-  /**
-   * Indicates if this endpoint types can not be connected (optional - default is false)
-   */
-  doesNotSupportConnect?: boolean;
+// interface BaseEndpointTypeConfig {
+//   type?: EndpointType;
+//   subType?: string;
+//   label: string;
+//   urlValidation?: string;
+//   allowTokenSharing?: boolean;
+//   icon?: string;
+//   iconFont?: string;
+//   imagePath?: string;
+//   authTypes?: string[];
+//   /**
+//    * Get the link to the home page for the given endpoint GUID
+//    */
+//   homeLink?: (s) => string[];
+//   /**
+//    * Schema keys associated with this endpoint type (used when clearing pagination)
+//    */
+//   entitySchemaKeys?: string[];
+//   /**
+//    * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
+//    */
+//   listDetailsComponent?: any;
+//   /**
+//    * When all endpoints are displayed together use the order to define the position. Lower number = earlier position
+//    */
+//   order?: number;
+//   /**
+//    * Indicates if this endpoint types can not be connected (optional - default is false)
+//    */
+//   doesNotSupportConnect?: boolean;
 
-}
+// }
 
 /**
  * Configuration for an endpoint type used to defined endpoints via extensions and at runtime. All EndpointTypeExtensionConfig and their

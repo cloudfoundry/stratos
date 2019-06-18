@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
+import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
@@ -21,7 +22,7 @@ import {
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   CloudFoundryOrganizationService,
-  createQuotaDefinition,
+  createSpaceQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
@@ -30,10 +31,9 @@ import { PaginationMonitorFactory } from '../../../../../monitors/pagination-mon
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
-import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Component({
   selector: 'app-cf-space-card',
@@ -143,7 +143,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   setValues = (roles: string, apps: APIResource<IApp>[]) => {
     this.userRolesInSpace = roles;
     const quotaDefinition = this.row.entity.space_quota_definition ?
-      this.row.entity.space_quota_definition.entity : createQuotaDefinition(this.orgGuid);
+      this.row.entity.space_quota_definition.entity : createSpaceQuotaDefinition(this.orgGuid);
     if (apps) {
       this.setAppsDependentCounts(apps);
       this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');

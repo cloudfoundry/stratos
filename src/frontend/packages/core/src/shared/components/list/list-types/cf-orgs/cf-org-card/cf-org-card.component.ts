@@ -21,16 +21,18 @@ import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
-import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import {
+  createOrgQuotaDefinition,
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 
 
 @Component({
@@ -130,7 +132,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   setValues = (role: string, apps: APIResource<IApp>[]) => {
     this.userRolesInOrg = role;
-    const quotaDefinition = this.row.entity.quota_definition || { entity: createQuotaDefinition(this.orgGuid), metadata: null };
+    const quotaDefinition = this.row.entity.quota_definition || { entity: createOrgQuotaDefinition(), metadata: null };
 
     if (apps) {
       this.setAppsDependentCounts(apps);

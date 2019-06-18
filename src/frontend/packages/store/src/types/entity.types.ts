@@ -14,9 +14,11 @@ import {
   IDomain,
   IFeatureFlag,
   IOrganization,
+  IOrgQuotaDefinition,
   IRoute,
   ISecurityGroup,
   ISpace,
+  ISpaceQuotaDefinition,
   IStack,
 } from '../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
@@ -87,7 +89,8 @@ interface CFEntityValues {
   userProvidedServiceInstance: IRequestEntityTypeState<IUserProvidedServiceInstance>;
   cloudFoundryInfo: IRequestEntityTypeState<any>;
   private_domains: IRequestEntityTypeState<any>;
-  space_quota_definition: IRequestEntityTypeState<any>;
+  quota_definition: IRequestEntityTypeState<APIResource<IOrgQuotaDefinition>>;
+  space_quota_definition: IRequestEntityTypeState<APIResource<ISpaceQuotaDefinition>>;
   appSummarySchemaKey: IRequestEntityTypeState<IAppSummary>;
 }
 export type ExtendedRequestState<T extends string | number | symbol, Y> = Record<T, Y>;

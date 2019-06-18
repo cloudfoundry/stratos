@@ -20,7 +20,7 @@ import {
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IOrganization, IQuotaDefinition } from '../../../../core/cf-api.types';
+import { IOrganization, IOrgQuotaDefinition } from '../../../../core/cf-api.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -38,7 +38,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   cfGuid: string;
   allOrgs: string[];
   orgs$: Observable<APIResource<IOrganization>[]>;
-  quotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+  quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
   cfUrl: string;
   addOrg: FormGroup;
 
@@ -77,7 +77,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     );
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    this.quotaDefinitions$ = getPaginationObservables<APIResource<IQuotaDefinition>>(
+    this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,
         action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),

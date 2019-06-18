@@ -4,9 +4,10 @@ import {
   IApp,
   IDomain,
   IOrganization,
-  IQuotaDefinition,
+  IOrgQuotaDefinition,
   IRoute,
   ISpace,
+  ISpaceQuotaDefinition,
 } from '../../frontend/packages/core/src/core/cf-api.types';
 import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
 import { CfUser } from '../../frontend/packages/store/src/types/user.types';
@@ -490,7 +491,7 @@ export class CFHelpers {
       ...options
     };
 
-    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'quota_definitions', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<IOrgQuotaDefinition>>(cfGuid, 'quota_definitions', body);
   }
 
   addSpaceQuota(cfGuid, orgGuid, name, options = {}) {
@@ -504,7 +505,7 @@ export class CFHelpers {
       total_reserved_route_ports: -1,
       ...options
     };
-    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<ISpaceQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
   }
 
 }

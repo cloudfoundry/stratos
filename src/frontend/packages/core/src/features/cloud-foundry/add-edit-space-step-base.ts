@@ -18,7 +18,7 @@ import {
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { IQuotaDefinition } from '../../core/cf-api.types';
+import { ISpaceQuotaDefinition } from '../../core/cf-api.types';
 import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
@@ -30,7 +30,7 @@ export class AddEditSpaceStepBase {
   allSpacesInOrg: string[];
   allSpacesInOrg$: Observable<string[]>;
   validate: (spaceName: string) => boolean;
-  quotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+  quotaDefinitions$: Observable<APIResource<ISpaceQuotaDefinition>[]>;
   hasSpaceQuotas$: Observable<boolean>;
 
   constructor(
@@ -63,7 +63,7 @@ export class AddEditSpaceStepBase {
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.orgGuid);
-    this.quotaDefinitions$ = getPaginationObservables<APIResource<IQuotaDefinition>>(
+    this.quotaDefinitions$ = getPaginationObservables<APIResource<ISpaceQuotaDefinition>>(
       {
         store: this.store,
         action: new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, this.orgGuid, this.cfGuid),

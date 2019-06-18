@@ -1,4 +1,4 @@
-import { IQuotaDefinition, ISpace } from '../../../core/src/core/cf-api.types';
+import { ISpace, ISpaceQuotaDefinition } from '../../../core/src/core/cf-api.types';
 import {
   ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
   AssociateSpaceQuota,
@@ -37,7 +37,7 @@ export function updateSpaceQuotaReducer(
 function applySpaceQuota(
   state: IRequestEntityTypeState<entityOrgType>,
   space: entityOrgType,
-  spaceQuota: APIResource<IQuotaDefinition>
+  spaceQuota: APIResource<ISpaceQuotaDefinition>
 ) {
   return {
     ...state,

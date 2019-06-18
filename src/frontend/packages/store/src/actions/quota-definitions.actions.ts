@@ -1,5 +1,6 @@
 import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
+import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 import {
   entityFactory,
   organizationSchemaKey,
@@ -44,7 +45,7 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
     GET_QUOTA_DEFINITIONS_FAILED
   ];
   entity = [entityFactory(quotaDefinitionSchemaKey)];
-  entityKey = quotaDefinitionSchemaKey;
+  entityType = quotaDefinitionSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -74,9 +75,9 @@ export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implemen
     GET_SPACE_QUOTA_DEFINITIONS_SUCCESS,
     GET_SPACE_QUOTA_DEFINITIONS_FAILED
   ];
-  parentEntitySchema = entityFactory(organizationSchemaKey);
+  parentEntityConfig = new CFEntityConfig(organizationSchemaKey);
   entity = [entityFactory(spaceQuotaSchemaKey)];
-  entityKey = spaceQuotaSchemaKey;
+  entityType = spaceQuotaSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -102,7 +103,7 @@ export class AssociateSpaceQuota extends CFStartAction implements ICFAction {
     ASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED
   ];
   entity = [entityFactory(spaceQuotaSchemaKey)];
-  entityKey = spaceQuotaSchemaKey;
+  entityType = spaceQuotaSchemaKey;
   options: RequestOptions;
   updatingKey = AssociateSpaceQuota.UpdateExistingSpaceQuota;
   guid: string;
@@ -124,7 +125,7 @@ export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
     DISASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED
   ];
   entity = [entityFactory(spaceQuotaSchemaKey)];
-  entityKey = spaceQuotaSchemaKey;
+  entityType = spaceQuotaSchemaKey;
   options: RequestOptions;
   updatingKey = AssociateSpaceQuota.UpdateExistingSpaceQuota;
   guid: string;
