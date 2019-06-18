@@ -3,28 +3,23 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { getCFEntityKey } from '../../../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import {
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../../../store/src/helpers/entity-factory';
+import { organizationSchemaKey, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../../../store/src/types/user.types';
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
-import { EntityCatalogueHelpers } from '../../../../../../core/entity-catalogue/entity-catalogue.helper';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -81,7 +76,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
-    const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
+    const orgEntityKey = getCFEntityKey(organizationSchemaKey);
     const orgNames$ = orgGuids.length ? combineLatest(
       orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(orgEntityKey, orgGuid)).pipe(first()))
     ).pipe(

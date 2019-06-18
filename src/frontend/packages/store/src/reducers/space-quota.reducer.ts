@@ -1,5 +1,5 @@
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { ISpace, ISpaceQuotaDefinition } from '../../../core/src/core/cf-api.types';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import {
   ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
   AssociateSpaceQuota,
@@ -21,7 +21,7 @@ export function updateSpaceQuotaReducer(
     case ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS:
       const associateAction = action.apiAction as AssociateSpaceQuota;
       const response = action.response;
-      const entityKey = EntityCatalogueHelpers.buildEntityKey(action.apiAction.entityType, action.apiAction.endpointType);
+      const entityKey = getCFEntityKey(action.apiAction.entityType);
       const newSpaceQuota = response.entities[entityKey][response.result[0]];
       space = state[associateAction.spaceGuid];
 

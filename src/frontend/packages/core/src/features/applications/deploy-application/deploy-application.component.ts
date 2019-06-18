@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
@@ -16,8 +17,6 @@ import { CfAppsDataSource } from '../../../shared/components/list/list-types/app
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { getApplicationDeploySourceTypes, getAutoSelectedDeployType } from './deploy-application-steps.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
 
 @Component({
   selector: 'app-deploy-application',
@@ -43,10 +42,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
   ) {
-    this.entityKey = EntityCatalogueHelpers.buildEntityKey(
-      applicationSchemaKey,
-      CF_ENDPOINT_TYPE
-    );
+    this.entityKey = getCFEntityKey(applicationSchemaKey);
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 

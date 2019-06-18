@@ -3,7 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import {
   AppMetadataTypes,
   GetAppStatsAction,
@@ -40,7 +41,6 @@ import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { AppStat } from '../../../../store/src/types/app-metadata.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IApp, IAppSummary, IOrganization, ISpace } from '../../core/cf-api.types';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -187,7 +187,7 @@ export class ApplicationService {
       switchMap(app => this.appSpace$.pipe(
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
-          const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
+          const orgEntityKey = getCFEntityKey(organizationSchemaKey);
           return this.store.select(selectEntity(orgEntityKey, orgGuid));
         }),
         filter(org => !!org)

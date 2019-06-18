@@ -2,16 +2,16 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { CFAppState } from '../../../../store/src/app-state';
 import { endpointSchemaKey, organizationSchemaKey, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { haveMultiConnectedCfs } from '../../features/cloud-foundry/cf.helpers';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { IOrganization, ISpace } from '../../core/cf-api.types';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
+import { haveMultiConnectedCfs } from '../../features/cloud-foundry/cf.helpers';
 
 export class CfOrgSpaceLabelService {
 
@@ -31,8 +31,8 @@ export class CfOrgSpaceLabelService {
     private orgGuid?: string,
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
-    const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(organizationSchemaKey, CF_ENDPOINT_TYPE);
-    const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(spaceSchemaKey, CF_ENDPOINT_TYPE);
+    const orgEntityKey = getCFEntityKey(organizationSchemaKey);
+    const spaceEntityKey = getCFEntityKey(spaceSchemaKey);
     // TODO We shouldn't have to expose STRATOS_ENDPOINT_TYPE - I'm not sure about that anymore, that's up to the extension.
     const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
 

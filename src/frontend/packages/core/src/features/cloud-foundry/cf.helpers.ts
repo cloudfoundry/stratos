@@ -3,7 +3,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../store/src/app-state';
@@ -31,7 +32,6 @@ import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-ap
 import { ISpace } from '../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { pathGet } from '../../core/utils.service';
 import { extractActualListEntity } from '../../shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';
@@ -256,7 +256,7 @@ export const getActiveRouteCfCellProvider = {
 
 export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
   const appWallPagKey = 'applicationWall';
-  const entityKey = EntityCatalogueHelpers.buildEntityKey(applicationSchemaKey, CF_ENDPOINT_TYPE);
+  const entityKey = getCFEntityKey(applicationSchemaKey);
   store.dispatch(new SetClientFilter(new CFEntityConfig(applicationSchemaKey), appWallPagKey,
     {
       string: '',

@@ -1,8 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   applicationSchemaKey,
@@ -75,15 +74,9 @@ export function requestReducer(state: IRequestState, action: Action) {
   return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
-// TODO: This could replace `EntityCatalogueHelpers.buildEntityKey` in a lot of places
-function getCFEntityKey(type: string) {
-  return EntityCatalogueHelpers.buildEntityKey(type, CF_ENDPOINT_TYPE);
-}
-
 function getInternalEntityKey(type: string) {
   return entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, type);
 }
-
 
 // TODO Add these reducers to the catalogue
 export function requestDataReducer(state: BaseRequestDataState, action: Action) {
