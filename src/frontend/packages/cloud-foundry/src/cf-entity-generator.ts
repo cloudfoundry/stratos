@@ -1,75 +1,73 @@
 import {
-  IStratosEndpointDefinition,
-} from '../../core/src/core/entity-catalogue/entity-catalogue.types';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  spaceSchemaKey,
-  organizationSchemaKey,
-  featureFlagSchemaKey,
-  stackSchemaKey,
-  routeSchemaKey,
-  appEventSchemaKey,
-  gitBranchesSchemaKey,
-  gitRepoSchemaKey,
-  gitCommitSchemaKey,
-  domainSchemaKey,
-  cfUserSchemaKey,
-  serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  serviceBindingSchemaKey,
-  securityGroupSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  serviceBrokerSchemaKey,
-  buildpackSchemaKey,
-  appStatsSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-  cfInfoSchemaKey,
-  privateDomainsSchemaKey,
-  spaceQuotaSchemaKey,
-  serviceSchemaKey,
-  serviceBindingNoBindingsSchemaKey,
-  spaceWithOrgKey,
-  serviceInstancesWithSpaceSchemaKey,
-  serviceInstancesWithNoBindingsSchemaKey,
-  appSummarySchemaKey,
-  appEnvVarsSchemaKey,
-  quotaDefinitionSchemaKey
-} from '../../store/src/helpers/entity-factory';
-import { APIResource } from '../../store/src/types/api.types';
-import {
-  IApp,
-  ISpace,
-  IOrganization,
-  IFeatureFlag,
-  IStack,
-  IRoute,
-  IDomain,
-  ISecurityGroup,
-  IBuildpack
-} from '../../core/src/core/cf-api.types';
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import { IBasicCFMetaData, IAppFavMetadata, ISpaceFavMetadata, IOrgFavMetadata } from './cf-metadata-types';
-import { GitBranch, GitRepo, GitCommit } from '../../store/src/types/git.types';
-import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
-import { CfUser } from '../../store/src/types/user.types';
-import {
-  IServiceInstance,
-  IServicePlan,
   IService,
   IServiceBinding,
   IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
   IUserProvidedServiceInstance,
 } from '../../core/src/core/cf-api-svc.types';
-import { AppStats } from '../../store/src/types/app-metadata.types';
-import { CF_ENDPOINT_TYPE } from '../cf-types';
 import {
-  StratosCatalogueEntity,
+  IApp,
+  IBuildpack,
+  IDomain,
+  IFeatureFlag,
+  IOrganization,
+  IRoute,
+  ISecurityGroup,
+  ISpace,
+  IStack,
+} from '../../core/src/core/cf-api.types';
+import {
+  StratosBaseCatalogueEntity,
   StratosCatalogueEndpointEntity,
-  StratosBaseCatalogueEntity
+  StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import {
+  appEnvVarsSchemaKey,
+  appEventSchemaKey,
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  buildpackSchemaKey,
+  cfInfoSchemaKey,
+  cfUserSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  featureFlagSchemaKey,
+  gitBranchesSchemaKey,
+  gitCommitSchemaKey,
+  gitRepoSchemaKey,
+  organizationSchemaKey,
+  privateDomainsSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  securityGroupSchemaKey,
+  serviceBindingNoBindingsSchemaKey,
+  serviceBindingSchemaKey,
+  serviceBrokerSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceInstancesWithNoBindingsSchemaKey,
+  serviceInstancesWithSpaceSchemaKey,
+  servicePlanSchemaKey,
+  servicePlanVisibilitySchemaKey,
+  serviceSchemaKey,
+  spaceQuotaSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
+  stackSchemaKey,
+  userProvidedServiceInstanceSchemaKey,
+} from '../../store/src/helpers/entity-factory';
+import { APIResource } from '../../store/src/types/api.types';
+import { AppStats } from '../../store/src/types/app-metadata.types';
+import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';
+import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+import { CfUser } from '../../store/src/types/user.types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
+import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));

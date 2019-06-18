@@ -12,38 +12,38 @@ import { SystemInfo, systemStoreNames } from './../types/system.types';
 
 @Injectable()
 export class SystemEffects {
-    constructor(
-        private httpClient: HttpClient,
-        private actions$: Actions,
-        private store: Store<CFAppState>
-    ) { }
+  constructor(
+    private httpClient: HttpClient,
+    private actions$: Actions,
+    private store: Store<CFAppState>
+  ) { }
 
-    static guid = 'info';
+  static guid = 'info';
 
-    @Effect() getInfo$ = this.actions$.pipe(
-        ofType<GetSystemInfo>(GET_SYSTEM_INFO),
-        mergeMap(action => {
-            const apiAction = {
-                entityType: systemStoreNames.type,
-                guid: SystemEffects.guid,
-                type: action.type,
-            } as IRequestAction;
-            this.store.dispatch(new StartRequestAction(apiAction));
-            const { associatedAction } = action;
-            const actionType = 'fetch';
-            this.store.dispatch(new StartRequestAction(associatedAction, actionType));
-            return this.httpClient.get('/pp/v1/info').pipe(
-                mergeMap((info: SystemInfo) => {
-                    return [
-                        new GetSystemSuccess(info, action.login, associatedAction),
-                        new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)
-                    ];
-                }), catchError((e) => {
-                    return [
-                        new GetSystemFailed(),
-                        new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
-                        new WrapperRequestActionFailed('Could not fetch system info', apiAction)
-                    ];
-                }));
+  @Effect() getInfo$ = this.actions$.pipe(
+    ofType<GetSystemInfo>(GET_SYSTEM_INFO),
+    mergeMap(action => {
+      const apiAction = {
+        entityType: systemStoreNames.type,
+        guid: SystemEffects.guid,
+        type: action.type,
+      } as IRequestAction;
+      this.store.dispatch(new StartRequestAction(apiAction));
+      const { associatedAction } = action;
+      const actionType = 'fetch';
+      this.store.dispatch(new StartRequestAction(associatedAction, actionType));
+      return this.httpClient.get('/pp/v1/info').pipe(
+        mergeMap((info: SystemInfo) => {
+          return [
+            new GetSystemSuccess(info, action.login, associatedAction),
+            new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)
+          ];
+        }), catchError((e) => {
+          return [
+            new GetSystemFailed(),
+            new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
+            new WrapperRequestActionFailed('Could not fetch system info', apiAction)
+          ];
         }));
+    }));
 }

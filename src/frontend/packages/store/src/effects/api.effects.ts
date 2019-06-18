@@ -6,11 +6,15 @@ import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { LoggerService } from '../../../core/src/core/logger.service';
+import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { isJetStreamError } from '../../../core/src/jetstream.helpers';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { isEntityInlineParentAction } from '../helpers/entity-relations/entity-relation-tree.helpers';
 import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
 import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
@@ -31,11 +35,6 @@ import { CFAppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { isEntityInlineParentAction } from '../helpers/entity-relations/entity-relation-tree.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -57,11 +56,9 @@ interface JetStreamCFErrorResponse {
 @Injectable()
 export class APIEffect {
   constructor(
-    private logger: LoggerService,
     private http: Http,
     private actions$: Actions,
     private store: Store<CFAppState>,
-
   ) {
 
   }
