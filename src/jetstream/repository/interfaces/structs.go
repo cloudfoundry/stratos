@@ -200,7 +200,7 @@ type Info struct {
 	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
 }
 
-// Extends CNSI Record and adds the user
+// EndpointDetail extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
 	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
@@ -216,14 +216,15 @@ type Versions struct {
 	DatabaseVersion int64  `json:"database_version"`
 }
 
+// ConsoleConfig is essential configuration settings
 type ConsoleConfig struct {
-	UAAEndpoint         *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
+	UAAEndpoint           *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
 	AuthorizationEndpoint *url.URL `json:"authorization_endpoint" configName:"AUTHORIZATION_ENDPOINT"`
-	ConsoleAdminScope   string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
-	ConsoleClient       string   `json:"console_client" configName:"CONSOLE_CLIENT"`
-	ConsoleClientSecret string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`
-	SkipSSLValidation   bool     `json:"skip_ssl_validation" configName:"SKIP_SSL_VALIDATION"`
-	UseSSO              bool     `json:"use_sso" configName:"SSO_LOGIN"`
+	ConsoleAdminScope     string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
+	ConsoleClient         string   `json:"console_client" configName:"CONSOLE_CLIENT"`
+	ConsoleClientSecret   string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`
+	SkipSSLValidation     bool     `json:"skip_ssl_validation" configName:"SKIP_SSL_VALIDATION"`
+	UseSSO                bool     `json:"use_sso" configName:"SSO_LOGIN"`
 }
 
 // IsSetupComplete indicates if we have enough config

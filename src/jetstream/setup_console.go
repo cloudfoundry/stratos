@@ -44,6 +44,8 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 	}
 
 	consoleConfig.UAAEndpoint = url
+	// Default auth endpoint to the same value as UAA Endpoint when setup via the UI setup (for now)
+	consoleConfig.AuthorizationEndpoint = url
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	consoleConfig.ConsoleClient = c.FormValue("console_client")
@@ -122,12 +124,9 @@ func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *int
 		return err
 	}
 
-	if err := consoleRepo.SetValue(systemGroupName, "Env().Lookup(", consoleConfig.TODO.UAAEndpoint.String()); err != nil {
+	if err := consoleRepo.SetValue(systemGroupName, "AUTHORIZATION_ENDPOINT", consoleConfig.AuthorizationEndpoint.String()); err != nil {
 		return err
 	}
-	
-	// TOOD: Default?????
-		
 
 	if err := consoleRepo.SetValue(systemGroupName, "CONSOLE_CLIENT", consoleConfig.ConsoleClient); err != nil {
 		return err
@@ -189,12 +188,19 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet, consoleRepo console_config.Repository) (*interfaces.ConsoleConfig, error) {
+func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interfaces.ConsoleConfig, error) {
 	log.Debug("initialiseConsoleConfig")
 
 	consoleConfig := &interfaces.ConsoleConfig{}
 	if err := config.Load(consoleConfig, envLookup.Lookup); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to load Console configuration. %v", err)
+	}
+
+	// Default authorization endpoint to be UAA endpoint
+	if consoleConfig.AuthorizationEndpoint == nil {
+		// No Authorization endpoint
+		consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
+		log.Error("Set Auth Endpoint to same value as UAA Endpoint")
 	}
 
 	return consoleConfig, nil
@@ -260,7 +266,7 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 	console_config.InitializeConfEnvProvider(consoleRepo)
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
-	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env(), consoleRepo)
+	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
 	if err != nil {
 		log.Errorf("Unable to load console config; %+v", err)
 		return false

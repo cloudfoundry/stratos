@@ -160,11 +160,11 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	for rows.Next() {
 		var (
 			uaaEndpoint  string
-			authEndpoint string
+			authEndpoint sql.NullString
 		)
 		rowCount++
 		if rowCount > 1 {
-			return nil, errors.New("Multiple configuration data detected!")
+			return nil, errors.New("Multiple configuration data detected")
 		}
 
 		consoleConfig = new(interfaces.ConsoleConfig)
@@ -177,10 +177,13 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 		if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 			return nil, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
 		}
-		
-		if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint); err != nil {
-			return nil, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
-		}		
+
+		// Might be null if database was upgraded
+		if authEndpoint.Valid {
+			if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint.String); err != nil {
+				return nil, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
+			}
+		}
 	}
 
 	return consoleConfig, nil

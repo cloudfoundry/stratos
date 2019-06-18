@@ -319,7 +319,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 	}
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
-	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env(), consoleRepo)
+	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
 	if err != nil {
 		// Could not read config - this should not happen - so abort if it does
 		log.Fatalf("Unable to load console config; %+v", err)
