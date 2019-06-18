@@ -68,7 +68,9 @@ export function createEntityRelationPaginationKey(parentSchemaKey: string, paren
 }
 
 // TODO Does this need the entity key or type?
-export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
+// TODO: See createEntityRelationKey in entity-relations.tree.ts
+export const createEntityRelationKey = (parentEntityType: string, childEntityType: string) => `${parentEntityType}-${childEntityType}`;
+
 /**
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
  *

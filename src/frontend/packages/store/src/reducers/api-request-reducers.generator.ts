@@ -75,6 +75,7 @@ export function requestReducer(state: IRequestState, action: Action) {
   return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
+// TODO: This could replace `EntityCatalogueHelpers.buildEntityKey` in a lot of places
 function getCFEntityKey(type: string) {
   return EntityCatalogueHelpers.buildEntityKey(type, CF_ENDPOINT_TYPE);
 }

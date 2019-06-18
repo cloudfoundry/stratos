@@ -1,5 +1,6 @@
 export abstract class EntityCatalogueHelpers {
   static readonly endpointType = 'endpoint';
+  // TODO: Review/remove?
   static buildEntityKey(entityType: string, endpointType: string): string {
     if (!entityType) {
       return endpointType;

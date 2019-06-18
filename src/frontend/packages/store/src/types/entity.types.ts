@@ -35,6 +35,7 @@ import { UserProfileInfo } from './user-profile.types';
 import { CfUser } from './user.types';
 
 export interface BaseRequestDataState {
+  // TODO: Add `stratos` to types
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   // featureFlag: IRequestEntityTypeState<IFeatureFlag>;
