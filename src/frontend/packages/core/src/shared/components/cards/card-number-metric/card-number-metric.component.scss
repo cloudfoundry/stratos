@@ -17,6 +17,10 @@
       flex-direction: column-reverse;
     }
   }
+  &__limit,
+  &__usage-count  {
+    white-space: nowrap;
+  }
   &__icon {
     flex: 0 0 40px;
     font-size: 40px;
@@ -29,6 +33,9 @@
   }
   &__value {
     font-size: 23px;
+    &--unlimited {
+      opacity: .3;
+    }
   }
   &__limit {
     font-size: 18px;
