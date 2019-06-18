@@ -1,4 +1,4 @@
-import { IStartRequestAction, IRequestAction } from '../../types/request.types';
+import { IRequestAction, IStartRequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
   mergeUpdatingState,

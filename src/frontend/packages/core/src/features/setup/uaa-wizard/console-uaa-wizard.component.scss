@@ -1,8 +1,13 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .uaa-wizard {
   display: flex;
-  height: 100%;
+  flex: 1;
   margin: 0 100px;
-  padding-top: 56px;
   &__form {
     display: block;
     flex-direction: column;

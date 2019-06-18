@@ -1,6 +1,6 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Space"
   [favorite]="favorite$ | async">
-  <h1> {{ name$ | async }}</h1>
+  <h1>{{ name$ | async }}</h1>
 </app-page-header>
 <app-loading-page [entityId]="cfSpaceService.spaceGuid" [entitySchema]="schema" deleteText="Deleting space"
   text="Retrieving space">

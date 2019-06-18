@@ -5,7 +5,6 @@
 <!--- Put an 'x' in one or more boxes below.  -->
 * [ ] Cloud Foundry Application (cf push)
 * [ ] Kubernetes, using a helm chart
-* [ ] Docker, using docker compose
 * [ ] Docker, single container deploying all components
 * [ ] npm run start
 * [ ] Other (please specify below)
@@ -15,7 +14,6 @@
 <!--- Put an 'x' in one or more boxes below.  -->
 * [ ] Cloud Foundry Application (cf push)
 * [ ] Kubernetes, using a helm chart
-* [ ] Docker, using docker compose
 * [ ] Docker, single container deploying all components
 * [ ] Other (please specify below)
 

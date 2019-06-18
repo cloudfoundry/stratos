@@ -43,6 +43,6 @@ COPY src/jetstream/templates /srv/templates
 EXPOSE 443
 ENTRYPOINT ["/entrypoint.sh"]
 
-# use --target=dev-build to build backend image for docker-compose
+# use --target=dev-build to build backend image for development
 FROM prod-build as dev-build
 RUN CERTS_PATH=dev-certs /generate_cert.sh 
