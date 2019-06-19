@@ -46,7 +46,7 @@ func InitializeConfEnvProvider(configStore Repository) error {
 func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) error {
 
 	// Determine if we need to migrate data first
-	v, ok, err := configStore.GetValue(systemGroupName, configSetupNeededMarker)
+	_, ok, err := configStore.GetValue(systemGroupName, configSetupNeededMarker)
 	if err != nil {
 		log.Errorf("MigrateSetupData: Unable to check migration marker: %v", err)
 		return err
