@@ -3,12 +3,12 @@
     <mat-card-title>
       {{metricType}} <br />
       <div class="autoscaler-metric-subtitle">
-        {{paramsMetrics['start-time'] / 1000000 | date:'medium'}} ~
-        {{paramsMetrics['end-time'] / 1000000 | date:'medium'}}
+        {{paramsMetricsStart | date:'medium'}} ~
+        {{paramsMetricsEnd | date:'medium'}}
       </div>
     </mat-card-title>
   </mat-card-header>
-  <mat-card-content>
+  <mat-card-content class="autoscaler-chart-card">
     <div class="autoscaler-chart-gauge">
       <ngx-charts-gauge [margin]="[0,30,0,70]" [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
         [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [textValue]="" [scheme]="'cool'"

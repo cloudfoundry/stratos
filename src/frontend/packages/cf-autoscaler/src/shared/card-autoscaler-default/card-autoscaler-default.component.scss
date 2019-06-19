@@ -18,13 +18,6 @@
     text-align: right;
   }
 
-  mat-form-field {
-    width: 50px;
-    .mat-form-field-infix {
-      border-top: unset;
-    }
-  }
-
   app-metadata-item {
     .metadata-item__content {
       flex-direction: row;

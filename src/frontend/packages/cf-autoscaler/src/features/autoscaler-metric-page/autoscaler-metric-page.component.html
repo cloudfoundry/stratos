@@ -1,5 +1,5 @@
 <app-page-header>
-  <h1>AutoScaler Metric Charts: {{ (applicationService.application$ | async)?.app.entity.name }} </h1>
+  <h1>AutoScaler Metric Charts: {{ applicationName$ | async }} </h1>
   <div class="page-header-right">
     <button mat-icon-button mat-button routerLink="{{parentUrl}}">
       <mat-icon>clear</mat-icon>

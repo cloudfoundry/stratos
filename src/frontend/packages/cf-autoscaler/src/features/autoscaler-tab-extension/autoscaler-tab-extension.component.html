@@ -1,5 +1,5 @@
 <div class="autoscaler-tab">
-  <app-tile-grid>
+  <app-tile-grid class="app-autoscaler-tile-grid-100">
     <app-tile-group *ngIf="!(appAutoscalerPolicy$ | async)">
       <app-tile>
         <mat-card>
@@ -35,14 +35,14 @@
                   (click)="disableAutoscaler()">Enabled</mat-slide-toggle>
                 <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 2" checked="false"
                   (click)="updatePolicyPage()">Disabled</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="!(policy.enabled)" checked="false" (click)="updatePolicyPage()">Disabled
+                <mat-slide-toggle *ngIf="!policy.enabled" checked="false" (click)="updatePolicyPage()">Disabled
                 </mat-slide-toggle>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile *ngIf="!(policy.enabled)">
+      <app-tile *ngIf="!policy.enabled">
         <app-card-app-instances></app-card-app-instances>
       </app-tile>
       <app-tile *ngIf="policy.enabled" class="autoscaler-tab-tile-1of3">

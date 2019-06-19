@@ -49,22 +49,26 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     domain: ['#01579b']
   };
 
-  public current = (new Date()).getTime();
+  public paramsMetricsEnd: number = (new Date()).getTime();
+  public paramsMetricsStart: number = this.paramsMetricsEnd - 30 * 60 * 1000;
   public paramsMetrics: AutoscalerPaginationParams = {
-    'start-time': this.current - 30 * 60 * 1000 + '000000',
-    'end-time': this.current + '000000',
+    'start-time': this.paramsMetricsStart + '000000',
+    'end-time': this.paramsMetricsEnd + '000000',
     page: '1',
     'results-per-page': '10000000',
     'order-direction': 'asc'
   };
+
   public metricType: string;
 
   @Input('row')
   set row(row: APIResource<AppScalingTrigger>) {
     if (row) {
       if (row.entity.query && row.entity.query.params) {
-        this.paramsMetrics['start-time'] = row.entity.query.params.start + '000000000';
-        this.paramsMetrics['end-time'] = row.entity.query.params.end + '000000000';
+        this.paramsMetricsStart = row.entity.query.params.start * 1000;
+        this.paramsMetricsEnd = row.entity.query.params.end * 1000;
+        this.paramsMetrics['start-time'] = this.paramsMetricsStart + '000000';
+        this.paramsMetrics['end-time'] = this.paramsMetricsEnd + '000000';
 
         this.appAutoscalerAppMetricLegend = this.getLegend2(row.entity);
         this.metricType = AutoscalerConstants.getMetricFromMetricId(row.metadata.guid);
@@ -99,7 +103,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     };
   }
 
-  getAppMetric(metricName: string, trigger: any, params: any): Observable<AppAutoscalerMetricData[]> {
+  getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerPaginationParams): Observable<AppAutoscalerMetricData[]> {
     const action = new GetAppAutoscalerAppMetricAction(this.appService.appGuid,
       this.appService.cfGuid, metricName, false, trigger, params);
     this.store.dispatch(action);

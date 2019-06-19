@@ -52,6 +52,8 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
+        upper: [],
+        lower: [],
       },
       metadata: {
         guid: '',

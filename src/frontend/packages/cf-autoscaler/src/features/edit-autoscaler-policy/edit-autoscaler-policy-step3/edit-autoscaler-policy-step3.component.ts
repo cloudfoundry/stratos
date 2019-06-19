@@ -4,9 +4,8 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import * as moment from 'moment-timezone';
 import { Observable } from 'rxjs';
 
-import { cloneObject } from '../../../../../core/src/core/utils.service';
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
-import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
+import { AutoscalerConstants, PolicyAlert, shiftArray, deepClone } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateIsAfter,
   numberWithFractionOrExceedRange,
@@ -69,31 +68,32 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   addRecurringSchedule = () => {
-    this.currentPolicy.schedules.recurring_schedule.push(cloneObject(AutoscalerConstants.PolicyDefaultRecurringSchedule));
+    this.currentPolicy.schedules.recurring_schedule.push(deepClone(AutoscalerConstants.PolicyDefaultRecurringSchedule));
     this.editRecurringSchedule(this.currentPolicy.schedules.recurring_schedule.length - 1);
   }
 
-  removeRecurringSchedule(index) {
+  removeRecurringSchedule(index: number) {
     if (this.editIndex === index) {
       this.editIndex = -1;
     }
     this.currentPolicy.schedules.recurring_schedule.splice(index, 1);
   }
 
-  editRecurringSchedule(index) {
+  editRecurringSchedule(index: number) {
+    const editSchedule = this.currentPolicy.schedules.recurring_schedule[index];
     this.editIndex = index;
-    this.editEffectiveType = this.currentPolicy.schedules.recurring_schedule[index].start_date ? 'custom' : 'always';
-    this.editRepeatType = this.currentPolicy.schedules.recurring_schedule[index].days_of_week ? 'week' : 'month';
+    this.editEffectiveType = editSchedule.start_date ? 'custom' : 'always';
+    this.editRepeatType = editSchedule.days_of_week ? 'week' : 'month';
     this.editRecurringScheduleForm.setValue({
-      days_of_week: shiftArray(this.currentPolicy.schedules.recurring_schedule[index].days_of_week || [], -1),
-      days_of_month: shiftArray(this.currentPolicy.schedules.recurring_schedule[index].days_of_month || [], -1),
-      instance_min_count: this.currentPolicy.schedules.recurring_schedule[index].instance_min_count,
-      instance_max_count: Math.abs(Number(this.currentPolicy.schedules.recurring_schedule[index].instance_max_count)),
-      initial_min_instance_count: this.currentPolicy.schedules.recurring_schedule[index].initial_min_instance_count,
-      start_date: this.currentPolicy.schedules.recurring_schedule[index].start_date || '',
-      end_date: this.currentPolicy.schedules.recurring_schedule[index].end_date || '',
-      start_time: this.currentPolicy.schedules.recurring_schedule[index].start_time,
-      end_time: this.currentPolicy.schedules.recurring_schedule[index].end_time,
+      days_of_week: shiftArray(editSchedule.days_of_week || [], -1),
+      days_of_month: shiftArray(editSchedule.days_of_month || [], -1),
+      instance_min_count: editSchedule.instance_min_count,
+      instance_max_count: Math.abs(Number(editSchedule.instance_max_count)),
+      initial_min_instance_count: editSchedule.initial_min_instance_count,
+      start_date: editSchedule.start_date || '',
+      end_date: editSchedule.end_date || '',
+      start_time: editSchedule.start_time,
+      end_time: editSchedule.end_time,
       effective_type: this.editEffectiveType,
       repeat_type: this.editRepeatType,
     });
@@ -180,7 +180,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     };
   }
 
-  validateRecurringScheduleDate(mutualName): ValidatorFn {
+  validateRecurringScheduleDate(mutualName: string): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       if (this.editEffectiveType === 'always') {
         return null;
@@ -200,7 +200,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     };
   }
 
-  validateRecurringScheduleTime(mutualName): ValidatorFn {
+  validateRecurringScheduleTime(mutualName: string): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editRecurringScheduleForm &&
         timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time').value, this.editRecurringScheduleForm.get('end_time').value);

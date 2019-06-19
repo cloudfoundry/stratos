@@ -41,12 +41,17 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
+  AutoscalerPaginationParams,
 } from './app-autoscaler.actions';
 import {
   AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricDataLocal,
   AppScalingTrigger,
+  AppAutoscalerMetricData,
+  AppAutoscalerPolicyLocal,
+  AppAutoscalerEvent,
 } from './app-autoscaler.types';
+import { PaginationResponse } from '../../../store/src/types/api.types';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -82,9 +87,6 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(action.entityKey, mappedData, action.guid, healthInfo);
-            // if (healthInfo.uptime > 0 && action.onSucceed) {
-            //   action.onSucceed();
-            // }
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -245,13 +247,14 @@ export class AutoscalerEffects {
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {
-            const data = response.json();
+            const data: PaginationResponse<AppAutoscalerMetricData> = response.json();
             const mappedData = {
               entities: { [action.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.addMetric(action.entityKey, mappedData, action.guid, action.metricName, data,
-              action.initialParams['start-time'], action.initialParams['end-time'], action.skipFormat, action.trigger);
+            this.addMetric(
+              action.entityKey, mappedData, action.guid, action.metricName, data, parseInt(action.initialParams['start-time'], 10),
+              parseInt(action.initialParams['end-time'], 10), action.skipFormat, action.trigger);
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -314,8 +317,6 @@ export class AutoscalerEffects {
           }
           const response: AppAutoscalerFetchPolicyFailedResponse = { status: err.status, noPolicy };
 
-          // const notFound = err.status === 404 && err._body === '{}';
-          // err._body = notFound ? 'No policy is defined for this application.' : err._body;
           return [
             new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType, null, response)
           ];
@@ -327,7 +328,7 @@ export class AutoscalerEffects {
     mappedData: NormalizedResponse<APIResource<AppAutoscalerMetricDataLocal>>,
     appId: string,
     metricName: string,
-    data,
+    data: PaginationResponse<AppAutoscalerMetricData>,
     startTime: number,
     endTime: number,
     skipFormat: boolean,
@@ -357,10 +358,10 @@ export class AutoscalerEffects {
     mappedData.result.push(appGuid);
   }
 
-  transformEventData(key: string, mappedData: NormalizedResponse, appGuid: string, data: any) {
+  transformEventData(key: string, mappedData: NormalizedResponse, appGuid: string, data: PaginationResponse<AppAutoscalerEvent>) {
     mappedData.entities[key] = [];
     data.resources.forEach((item) => {
-      const id = AutoscalerConstants.createMetricId(appGuid, item.timestamp);
+      const id = AutoscalerConstants.createMetricId(appGuid, item.timestamp + '');
       mappedData.entities[key][id] = {
         entity: item,
         metadata: {
@@ -373,18 +374,19 @@ export class AutoscalerEffects {
     mappedData.result = Object.keys(mappedData.entities[key]);
   }
 
-  transformTriggerData(key: string, mappedData: NormalizedResponse, data: any, query: AutoscalerQuery, appGuid: string) {
-    mappedData.entities[key] = [];
-    Object.keys(data.scaling_rules_map).forEach((metricType) => {
+  transformTriggerData(
+    key: string, mappedData: NormalizedResponse, data: AppAutoscalerPolicyLocal, query: AutoscalerQuery, appGuid: string) {
+    mappedData.entities[key] = Object.keys(data.scaling_rules_map).reduce((entity, metricType) => {
       const id = AutoscalerConstants.createMetricId(appGuid, metricType);
       data.scaling_rules_map[metricType].query = query;
-      mappedData.entities[key][id] = {
+      entity[id] = {
         entity: data.scaling_rules_map[metricType],
         metadata: {
           guid: id
         }
       };
-    });
+      return entity;
+    }, []);
     mappedData.result = Object.keys(mappedData.entities[key]);
   }
 
@@ -396,7 +398,7 @@ export class AutoscalerEffects {
     return headers;
   }
 
-  buildParams(initialParams, params?, paginationParams?) {
+  buildParams(initialParams: AutoscalerPaginationParams, params?: PaginationParam, paginationParams?: AutoscalerPaginationParams) {
     const searchParams = new URLSearchParams();
     if (initialParams) {
       Object.keys(initialParams).forEach((key) => {

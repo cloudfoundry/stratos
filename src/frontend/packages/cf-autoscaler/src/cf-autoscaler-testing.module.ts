@@ -14,13 +14,3 @@ export class CfAutoscalerTestingModule {
     registerEntitiesForTesting(autoscalerEntities);
   }
 }
-
-// export const KubernetesBaseTestModules = [
-//   KubernetesTestingModule,
-//   RouterTestingModule,
-//   CoreModule,
-//   createBasicStoreModule(),
-//   NoopAnimationsModule,
-//   HttpModule,
-//   SharedModule,
-// ];

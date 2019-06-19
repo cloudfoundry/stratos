@@ -4,20 +4,19 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { cloneObject } from '../../../../core/src/core/utils.service';
 import { entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 import { appAutoscalerPolicySchemaKey } from '../../store/autoscaler.store.module';
+import { deepClone } from '../../core/autoscaler-helpers/autoscaler-util';
 
 
 @Injectable()
 export class EditAutoscalerPolicyService {
 
   private initialState: AppAutoscalerPolicyLocal = autoscalerTransformArrayToMap({
-    enabled: true,
     instance_min_count: 1,
     instance_max_count: 10,
     scaling_rules: [],
@@ -56,7 +55,7 @@ export class EditAutoscalerPolicyService {
   }
 
   setState(state: AppAutoscalerPolicy) {
-    this.stateSubject.next(cloneObject(state));
+    this.stateSubject.next(deepClone(state));
   }
 
   getState(): Observable<AppAutoscalerPolicyLocal> {

@@ -126,10 +126,10 @@ export const PolicyAlert = {
 };
 
 export function isEqual(a: any, b: any): boolean {
-  if (typeof (a) !== typeof (b)) {
+  if (typeof a !== typeof b) {
     return false;
   } else {
-    if (typeof (a) === 'object') {
+    if (typeof a === 'object') {
       if (Object.keys(a).length !== Object.keys(b).length) {
         return false;
       }
@@ -160,7 +160,8 @@ export function buildLegendData(trigger: AppScalingTrigger): AppAutoscalerMetric
   const legendData: AppAutoscalerMetricLegend[] = [];
   let latestUl: AppScalingRule = null;
   if (trigger.upper && trigger.upper.length > 0) {
-    latestUl = buildUpperLegendData(legendData, trigger.upper, !trigger.lower || trigger.lower.length === 0);
+    const noLowerRule = !trigger.lower || trigger.lower.length === 0;
+    latestUl = buildUpperLegendData(legendData, trigger.upper, noLowerRule);
   }
   if (trigger.lower && trigger.lower.length > 0) {
     latestUl = buildLowerLegendData(legendData, trigger.lower, latestUl);
@@ -168,16 +169,20 @@ export function buildLegendData(trigger: AppScalingTrigger): AppAutoscalerMetric
   return legendData;
 }
 
+function getLegendName(currentRule: AppScalingRule, latestRule: AppScalingRule, singleRange: boolean, isLowerRule: boolean) {
+  if (singleRange) {
+    const operator = isLowerRule ? getOppositeOperator(currentRule.operator) : currentRule.operator;
+    return `${currentRule.metric_type} ${operator} ${currentRule.threshold}`;
+  } else {
+    return `${currentRule.threshold} ${getLeftOperator(currentRule.operator)} ${currentRule.
+      metric_type} ${getRightOperator(latestRule.operator)} ${latestRule.threshold}`;
+  }
+}
+
 function buildUpperLegendData(legendData: any, upper: AppScalingRule[], noLower: boolean): AppScalingRule {
   let latestUl: AppScalingRule;
-  upper.map((item, index) => {
-    let name = '';
-    if (index === 0) {
-      name = `${item.metric_type} ${item.operator} ${item.threshold}`;
-    } else {
-      name = `${item.threshold} ${getLeftOperator(item.operator)} ${item.
-        metric_type} ${getRightOperator(latestUl.operator)} ${latestUl.threshold}`;
-    }
+  upper.forEach((item, index) => {
+    const name = getLegendName(item, latestUl, index === 0, false);
     legendData.push({
       name,
       value: item.color
@@ -198,14 +203,9 @@ function buildLowerLegendData(
   lower: AppScalingRule[],
   latestUl: AppScalingRule
 ): AppScalingRule {
-  lower.map((item, index) => {
-    let name = '';
-    if (!latestUl || !latestUl.threshold) {
-      name = `${item.metric_type} ${getOppositeOperator(item.operator)} ${item.threshold}`;
-    } else {
-      name = `${item.threshold} ${getLeftOperator(item.operator)} ${item.
-        metric_type} ${getRightOperator(latestUl.operator)} ${latestUl.threshold}`;
-    }
+  lower.forEach((item, index) => {
+    const isSingleRange = !latestUl || !latestUl.threshold;
+    const name = getLegendName(item, latestUl, isSingleRange, true);
     legendData.push({
       name,
       value: index === 0 ? AutoscalerConstants.normalColor : latestUl.color
@@ -257,9 +257,36 @@ function getLeftOperator(operator: string): string {
 }
 
 export function shiftArray(array: number[], step: number): number[] {
-  const days = [];
-  for (let i = 0; i < array.length; i++) {
-    days[i] = array[i] + step;
+  return array.map(value => value + step);
+}
+
+export function deepClone(obj: any) {
+  let result = {};
+  const oClass = isClass(obj);
+  if (oClass === 'Object') {
+    result = {};
+  } else if (oClass === 'Array') {
+    result = [];
+  } else {
+    return obj;
   }
-  return days;
+  Object.keys(obj).map((key, value) => {
+    const vClass = isClass(value);
+    if (vClass === 'Object' || vClass === 'Array') {
+      result[key] = deepClone(value);
+    } else {
+      result[key] = obj[key];
+    }
+  });
+  return result;
+}
+
+function isClass(o: any) {
+  if (o === null) {
+    return 'Null';
+  }
+  if (o === undefined) {
+    return 'Undefined';
+  }
+  return Object.prototype.toString.call(o).slice(8, -1);
 }

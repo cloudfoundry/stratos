@@ -145,10 +145,10 @@ function buildMetricColorData(metricData: AppAutoscalerMetricDataPoint[], trigge
       value: getColor(trigger, item.value),
     });
   });
-  if (trigger.upper && trigger.upper.length > 0) {
+  if (trigger.upper.length > 0) {
     buildSingleColor(colorTarget, trigger.upper);
   }
-  if (trigger.lower && trigger.lower.length > 0) {
+  if (trigger.lower.length > 0) {
     buildSingleColor(colorTarget, trigger.lower);
   }
   return colorTarget;
@@ -164,15 +164,8 @@ function buildSingleColor(lineChartSeries: AppAutoscalerMetricDataPoint[], ul: A
   });
 }
 
-function buildMarkLineData(metricData, trigger: AppScalingTrigger): AppAutoscalerMetricDataLine[] {
-  const lineChartSeries: AppAutoscalerMetricDataLine[] = [];
-  if (trigger.upper && trigger.upper.length > 0) {
-    buildSingleMarkLine(lineChartSeries, metricData, trigger.upper);
-  }
-  if (trigger.lower && trigger.lower.length > 0) {
-    buildSingleMarkLine(lineChartSeries, metricData, trigger.lower);
-  }
-  return lineChartSeries;
+function buildMarkLineData(metricData: AppAutoscalerMetricDataPoint[], trigger: AppScalingTrigger): AppAutoscalerMetricDataLine[] {
+  return buildSingleMarkLine(metricData, trigger.upper).concat(buildSingleMarkLine(metricData, trigger.lower));
 }
 
 function buildTriggerName(item: AppScalingRule): string {
@@ -180,20 +173,20 @@ function buildTriggerName(item: AppScalingRule): string {
   return `${type} threshold: ${item.operator} ${item.threshold}`;
 }
 
-function buildSingleMarkLine(lineChartSeries: AppAutoscalerMetricDataLine[], metricData: AppAutoscalerMetricData[], ul: AppScalingRule[]) {
-  ul.forEach(item => {
+function buildSingleMarkLine(metricData: AppAutoscalerMetricDataPoint[], ul: AppScalingRule[]) {
+  return ul.reduce((lineChartSeries, item) => {
     const lineData = {
       name: buildTriggerName(item),
-      series: []
+      series: metricData.map((data) => {
+        return {
+          name: data.name,
+          value: item.threshold,
+        };
+      })
     };
-    metricData.map((data) => {
-      lineData.series.push({
-        name: data.name,
-        value: item.threshold,
-      });
-    });
     lineChartSeries.push(lineData);
-  });
+    return lineChartSeries;
+  }, []);
 }
 
 function executeCompare(val1: number, operator: string, val2: number): boolean {
@@ -210,21 +203,18 @@ function executeCompare(val1: number, operator: string, val2: number): boolean {
 }
 
 function getColor(trigger: AppScalingTrigger, value: any): string {
-  let color = AutoscalerConstants.normalColor;
-  if (Number.isNaN(value)) {
-    return color;
-  }
-  for (let i = 0; trigger.upper && trigger.upper.length > 0 && i < trigger.upper.length; i++) {
-    if (executeCompare(value, trigger.upper[i].operator, trigger.upper[i].threshold)) {
-      color = trigger.upper[i].color;
-      break;
+  const color = AutoscalerConstants.normalColor;
+  if (!Number.isNaN(value)) {
+    for (let i = 0; trigger.upper && trigger.upper.length > 0 && i < trigger.upper.length; i++) {
+      if (executeCompare(value, trigger.upper[i].operator, trigger.upper[i].threshold)) {
+        return trigger.upper[i].color;
+      }
     }
-  }
-  for (let i = 0; trigger.lower && trigger.lower.length > 0 && i < trigger.lower.length; i++) {
-    const index = trigger.lower.length - 1 - i;
-    if (executeCompare(value, trigger.lower[index].operator, trigger.lower[index].threshold)) {
-      color = trigger.lower[index].color;
-      break;
+    for (let i = 0; trigger.lower && trigger.lower.length > 0 && i < trigger.lower.length; i++) {
+      const index = trigger.lower.length - 1 - i;
+      if (executeCompare(value, trigger.lower[index].operator, trigger.lower[index].threshold)) {
+        return trigger.lower[index].color;
+      }
     }
   }
   return color;
@@ -235,66 +225,52 @@ function getMetricBasicInfo(
   source: AppAutoscalerMetricData[],
   trigger: AppScalingTrigger
 ): AppAutoscalerMetricBasicInfo {
-  const map = {};
-  let interval = AutoscalerConstants.metricMap[metricName].interval;
+  const intervalMap = {};
   let maxCount = 1;
   let preTimestamp = 0;
   let maxValue = -1;
   const unit = AutoscalerConstants.metricMap[metricName].unit_internal;
-  map[interval] = 1;
-  for (const item of source) {
+  intervalMap[AutoscalerConstants.metricMap[metricName].interval] = 1;
+  const resultInterval = source.reduce((interval, item) => {
     maxValue = Math.max(Number(item.value), maxValue);
     const thisTimestamp = Math.round(item.timestamp / AutoscalerConstants.S2NS);
     const currentInterval = thisTimestamp - preTimestamp;
-    map[currentInterval] = map[currentInterval] ? map[currentInterval] + 1 : 1;
-    if (map[currentInterval] > maxCount) {
+    intervalMap[currentInterval] = intervalMap[currentInterval] ? intervalMap[currentInterval] + 1 : 1;
+    if (intervalMap[currentInterval] > maxCount) {
       interval = currentInterval;
-      maxCount = map[currentInterval];
+      maxCount = intervalMap[currentInterval];
     }
     preTimestamp = thisTimestamp;
     // unit = item.unit === '' ? unit : item.unit;
-  }
+    return interval;
+  }, AutoscalerConstants.metricMap[metricName].interval);
   return {
-    interval,
+    interval: resultInterval,
     unit,
-    chartMaxValue: getChartMax(trigger, maxValue)
+    chartMaxValue: getChartMax(trigger, maxValue, metricName)
   };
 }
 
-function getChartMax(trigger: AppScalingTrigger, maxValue: number): number {
-  let thresholdCount = 0;
-  let maxThreshold = 0;
-  let thresholdmax = 0;
-  let metricType = '';
-  if (trigger.upper && trigger.upper.length > 0) {
-    thresholdCount += trigger.upper.length;
-    maxThreshold = trigger.upper[0].threshold;
-    metricType = trigger.upper[0].metric_type;
-  }
-  if (trigger.lower && trigger.lower.length > 0) {
-    thresholdCount += trigger.lower.length;
-    maxThreshold = Math.max(trigger.lower[0].threshold, maxThreshold);
-    metricType = trigger.lower[0].metric_type;
-  }
-  if (AutoscalerConstants.MetricPercentageTypes.indexOf(metricType) >= 0) {
+function getMaxThreshod(rules: AppScalingRule[]) {
+  return rules.length > 0 ? rules[0].threshold : 0;
+}
+
+function getChartMax(trigger: AppScalingTrigger, maxValue: number, metricName: string): number {
+  if (AutoscalerConstants.MetricPercentageTypes.indexOf(metricName) >= 0) {
     return 100;
   }
-  if (maxThreshold > 0) {
-    thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));
-  }
-  thresholdmax = Math.max(maxValue, thresholdmax, 10);
-  thresholdmax = getTrimmedInteger(thresholdmax);
-  return thresholdmax;
+  const thresholdCount = trigger.upper.length + trigger.lower.length;
+  const maxThreshold = Math.max(getMaxThreshod(trigger.upper), getMaxThreshod(trigger.lower));
+  const thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));
+  return getTrimmedInteger(Math.max(maxValue, thresholdmax, 10));
 }
 
 function getTrimmedInteger(thresholdmax: number): number {
   for (let i = 10; i < Number.MAX_VALUE && i < thresholdmax; i = i * 10) {
     if (thresholdmax / i >= 1 && thresholdmax / i < 10 && thresholdmax > 100) {
-      thresholdmax = (Math.ceil(thresholdmax / i * 10)) * i / 10;
-      break;
+      return (Math.ceil(thresholdmax / i * 10)) * i / 10;
     } else if (thresholdmax / i >= 1 && thresholdmax / i < 10 && thresholdmax <= 100) {
-      thresholdmax = (Math.ceil(thresholdmax / i)) * i;
-      break;
+      return (Math.ceil(thresholdmax / i)) * i;
     }
   }
   return thresholdmax;

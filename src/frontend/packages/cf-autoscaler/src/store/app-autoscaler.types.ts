@@ -1,7 +1,6 @@
 import { AutoscalerQuery } from './app-autoscaler.actions';
 
 export interface AppAutoscalerPolicy {
-  enabled: boolean;
   instance_min_count: number;
   instance_max_count: number;
   scaling_rules?: AppScalingRule[];
@@ -31,8 +30,8 @@ export interface AppScalingRule {
 }
 
 export interface AppScalingTrigger {
-  upper?: AppScalingRule[];
-  lower?: AppScalingRule[];
+  upper: AppScalingRule[];
+  lower: AppScalingRule[];
   query?: AutoscalerQuery;
 }
 
@@ -49,6 +48,7 @@ export interface AppRecurringSchedule {
 }
 
 export interface AppAutoscalerPolicyLocal extends AppAutoscalerPolicy {
+  enabled: boolean;
   scaling_rules_form: AppScalingRule[];
   scaling_rules_map: {
     [metricName: string]: AppScalingTrigger

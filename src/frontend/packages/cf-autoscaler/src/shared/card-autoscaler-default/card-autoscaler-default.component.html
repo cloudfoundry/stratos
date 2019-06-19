@@ -7,8 +7,9 @@
       <div class="app-metadata">
         <div class="app-metadata__two-cols">
           <app-metadata-item label="Current">
-              <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances" [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
-                </app-running-instances>
+            <app-running-instances [instances]="applicationInstances$ | async" [cfGuid]="appService.cfGuid"
+              [appGuid]="this.appService.appGuid">
+            </app-running-instances>
           </app-metadata-item>
         </div>
       </div>
@@ -23,13 +24,7 @@
         <div class="app-metadata__two-cols">
           <app-metadata-item label="Minimum">
             <div *ngIf="appAutoscalerPolicy$ | async as policy">
-              <div *ngIf="!isEditing">{{ policy.instance_min_count }}</div>
-              <form [hidden]="!isEditing" class="card-autoscaler-default__form">
-                <mat-form-field>
-                  <input #instanceField matInput type="number" name="instance_min_count"
-                    [(ngModel)]="instanceMinCountEdit" value="{{ instanceMinCountCurrent }}" />
-                </mat-form-field>
-              </form>
+              <div>{{ policy.instance_min_count }}</div>
             </div>
             <div *ngIf="!(appAutoscalerPolicy$ | async)">-</div>
           </app-metadata-item>
@@ -37,13 +32,7 @@
         <div class="app-metadata__two-cols">
           <app-metadata-item label="Maximum">
             <div *ngIf="appAutoscalerPolicy$ | async as policy">
-              <div *ngIf="!isEditing">{{ policy.instance_max_count }}</div>
-              <form [hidden]="!isEditing" class="card-autoscaler-default__form">
-                <mat-form-field>
-                  <input #instanceField matInput type="number" name="instance_max_count"
-                    [(ngModel)]="instanceMaxCountEdit" value="{{ instanceMaxCountCurrent }}" />
-                </mat-form-field>
-              </form>
+              <div>{{ policy.instance_max_count }}</div>
             </div>
             <div *ngIf="!(appAutoscalerPolicy$ | async)">-</div>
           </app-metadata-item>
@@ -51,17 +40,9 @@
       </div>
     </mat-card-content>
   </div>
-  <mat-card-actions *ngIf="(appAutoscalerPolicy$ | async) && !isEditing" class="card-autoscaler-default__actions">
-      <button (click)="onUpdate()" mat-icon-button>
-        <mat-icon>edit</mat-icon>
-      </button>
-    </mat-card-actions>
-    <mat-card-actions *ngIf="(appAutoscalerPolicy$ | async) && isEditing" class="card-autoscaler-default__actions">
-      <button (click)="finishEdit(false)" mat-icon-button>
-        <mat-icon>clear</mat-icon>
-      </button>
-      <button (click)="finishEdit(true)" mat-icon-button>
-        <mat-icon>done</mat-icon>
-      </button>
-    </mat-card-actions>
+  <mat-card-actions *ngIf="(appAutoscalerPolicy$ | async)" class="card-autoscaler-default__actions">
+    <button (click)="onUpdate()" mat-icon-button>
+      <mat-icon>edit</mat-icon>
+    </button>
+  </mat-card-actions>
 </mat-card>

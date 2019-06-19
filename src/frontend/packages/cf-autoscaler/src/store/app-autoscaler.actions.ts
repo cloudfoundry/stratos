@@ -5,7 +5,7 @@ import { createEntityRelationPaginationKey } from '../../../store/src/helpers/en
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../store/src/types/request.types';
-import { AppAutoscalerPolicyLocal } from './app-autoscaler.types';
+import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
@@ -37,12 +37,6 @@ export const AppAutoscalerMetricEvents = {
   GET_APP_AUTOSCALER_METRIC_SUCCESS: '[App Autoscaler] Get autoscaler metric success',
   GET_APP_AUTOSCALER_METRIC_FAILED: '[App Autoscaler] Get autoscaler metric failed'
 };
-
-// export const AppAutoscalerHealthEvents = {
-//   GET_APP_AUTOSCALER_HEALTH: '[App Autoscaler] Get autoscaler health',
-//   GET_APP_AUTOSCALER_HEALTH_SUCCESS: '[App Autoscaler] Get autoscaler health success',
-//   GET_APP_AUTOSCALER_HEALTH_FAILED: '[App Autoscaler] Get autoscaler health failed'
-// };
 
 export const APP_AUTOSCALER_POLICY = '[New App Autoscaler] Fetch policy';
 export const APP_AUTOSCALER_POLICY_TRIGGER = '[New App Autoscaler] Fetch policy trigger';
@@ -144,8 +138,8 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
     public paginationKey: string,
     public guid: string,
     public endpointGuid: string,
-    public normalFormat?,
-    public params?,
+    public normalFormat?: boolean,
+    public params?: AutoscalerPaginationParams,
   ) {
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
   }
@@ -177,8 +171,8 @@ export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
     public endpointGuid: string,
     public metricName: string,
     public skipFormat: boolean,
-    public trigger,
-    public params
+    public trigger: AppScalingTrigger,
+    public params: AutoscalerPaginationParams,
   ) {
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid, metricName);
   }
@@ -200,8 +194,8 @@ export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricActio
     public endpointGuid: string,
     public metricName: string,
     public skipFormat: boolean,
-    public trigger,
-    public params
+    public trigger: AppScalingTrigger,
+    public params: AutoscalerPaginationParams,
   ) {
     super(guid, endpointGuid, metricName, skipFormat, trigger, params);
     this.url = `apps/${guid}/metric/${metricName}`;

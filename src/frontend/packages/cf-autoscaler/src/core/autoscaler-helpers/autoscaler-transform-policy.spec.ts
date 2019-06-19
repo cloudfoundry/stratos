@@ -8,7 +8,6 @@ import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-a
 describe('Autoscaler Transform Policy Helper', () => {
   it('Test policy transformation', () => {
     const arrayPolicy: AppAutoscalerPolicy =  {
-      enabled: true,
       instance_min_count: 1,
       instance_max_count: 10,
       scaling_rules: [
@@ -142,8 +141,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 10,
           operator: '<=',
           cool_down_secs: 300,
-          adjustment: '-2',
-          color: 'rgba(51, 136, 255, 0.6)'
+          adjustment: '-2'
         },
         {
           metric_type: 'memoryused',
@@ -151,8 +149,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 30,
           operator: '<',
           cool_down_secs: 300,
-          adjustment: '-1',
-          color: 'rgba(51, 204, 255, 0.6)'
+          adjustment: '-1'
         },
         {
           metric_type: 'memoryused',
@@ -160,8 +157,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 120,
           operator: '>',
           cool_down_secs: 300,
-          adjustment: '+3',
-          color: 'rgba(255, 85, 0, 0.6)'
+          adjustment: '+3'
         },
         {
           metric_type: 'memoryused',
@@ -169,8 +165,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 90,
           operator: '>=',
           cool_down_secs: 300,
-          adjustment: '+2',
-          color: 'rgba(255, 170, 0, 0.6)'
+          adjustment: '+2'
         },
         {
           metric_type: 'memoryused',
@@ -178,8 +173,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 200,
           operator: '>=',
           cool_down_secs: 300,
-          adjustment: '+4',
-          color: 'rgba(255, 0, 0, 0.6)'
+          adjustment: '+4'
         },
         {
           metric_type: 'memoryutil',
@@ -187,8 +181,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 20,
           operator: '<',
           cool_down_secs: 300,
-          adjustment: '-3',
-          color: 'rgba(51, 204, 255, 0.6)'
+          adjustment: '-3'
         },
         {
           metric_type: 'responsetime',
@@ -196,8 +189,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 50,
           operator: '>=',
           cool_down_secs: 300,
-          adjustment: '+4',
-          color: 'rgba(255, 0, 0, 0.6)'
+          adjustment: '+4'
         },
         {
           metric_type: 'responsetime',
@@ -205,8 +197,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 40,
           operator: '<',
           cool_down_secs: 300,
-          adjustment: '-5',
-          color: 'rgba(51, 204, 255, 0.6)'
+          adjustment: '-5'
         },
         {
           metric_type: 'memoryutil',
@@ -214,8 +205,7 @@ describe('Autoscaler Transform Policy Helper', () => {
           threshold: 90,
           operator: '>=',
           cool_down_secs: 300,
-          adjustment: '+6',
-          color: 'rgba(255, 0, 0, 0.6)'
+          adjustment: '+6'
         }
       ],
       schedules: {
@@ -453,9 +443,7 @@ describe('Autoscaler Transform Policy Helper', () => {
     expect(isEqual(mapPolicyFromArray, mapPolicy)).toBe(true);
     expect(isEqual(arrayPolicyFromMap, autoscalerTransformMapToArray(autoscalerTransformArrayToMap(arrayPolicy)))).toBe(true);
     delete arrayPolicy.scaling_rules;
-    delete mapPolicy.scaling_rules;
-    delete mapPolicy.scaling_rules_map;
-    delete mapPolicy.scaling_rules_form;
-    expect(isEqual(mapPolicy, autoscalerTransformMapToArray(mapPolicy))).toBe(true);
+    mapPolicy.scaling_rules_form = [];
+    expect(isEqual(arrayPolicy, autoscalerTransformMapToArray(mapPolicy))).toBe(true);
   });
 });

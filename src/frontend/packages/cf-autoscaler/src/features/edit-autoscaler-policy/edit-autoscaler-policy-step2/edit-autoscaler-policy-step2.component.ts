@@ -3,13 +3,13 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Observable } from 'rxjs';
 
-import { cloneObject } from '../../../../../core/src/core/utils.service';
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import {
   AutoscalerConstants,
   getAdjustmentType,
   getScaleType,
   PolicyAlert,
+  deepClone,
 } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   getThresholdMax,
@@ -66,18 +66,18 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
   }
 
   addTrigger = () => {
-    this.currentPolicy.scaling_rules_form.push(cloneObject(AutoscalerConstants.PolicyDefaultTrigger));
+    this.currentPolicy.scaling_rules_form.push(deepClone(AutoscalerConstants.PolicyDefaultTrigger));
     this.editTrigger(this.currentPolicy.scaling_rules_form.length - 1);
   }
 
-  removeTrigger(index) {
+  removeTrigger(index: number) {
     if (this.editIndex === index) {
       this.editIndex = -1;
     }
     this.currentPolicy.scaling_rules_form.splice(index, 1);
   }
 
-  editTrigger(index) {
+  editTrigger(index: number) {
     this.editIndex = index;
     this.editScaleType = getScaleType(this.currentPolicy.scaling_rules_form[index].operator);
     this.editAdjustmentType = getAdjustmentType(this.currentPolicy.scaling_rules_form[index].adjustment);

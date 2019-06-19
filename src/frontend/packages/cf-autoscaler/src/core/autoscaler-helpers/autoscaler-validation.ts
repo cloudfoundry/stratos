@@ -37,39 +37,45 @@ export function recurringSchedulesInvalidRepeatOn(inputRecurringSchedules: AppRe
 export function recurringSchedulesOverlapping(
   newSchedule: AppRecurringSchedule, index: number,
   inputRecurringSchedules: AppRecurringSchedule[], property: string) {
-  for (let i = 0; inputRecurringSchedules && i < inputRecurringSchedules.length; i++) {
+  if (!inputRecurringSchedules) {
+    return false;
+  }
+  const overlappingSchedule = inputRecurringSchedules.find((value, i) => {
     if (index === i || !inputRecurringSchedules[i].hasOwnProperty(property) ||
       inputRecurringSchedules[i].start_date && newSchedule.start_date && !dateOverlaps(inputRecurringSchedules[i], newSchedule)) {
-      continue;
+      return false;
     }
     if (timeOverlaps(inputRecurringSchedules[i], newSchedule)) {
       const intersects = intersect(inputRecurringSchedules[i][property], newSchedule[property]);
       return intersects.length > 0;
     }
-  }
-  return false;
+  });
+  return !!overlappingSchedule;
 }
 
 export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index: number, inputSpecificDates: AppSpecificDate[]) {
-  const dateRangeList = [];
   const start = moment(newSchedule.start_date_time, AutoscalerConstants.MomentFormateDateTimeT);
   const end = moment(newSchedule.end_date_time, AutoscalerConstants.MomentFormateDateTimeT);
-  for (let i = 0; inputSpecificDates && i < inputSpecificDates.length; i++) {
-    if (i !== index) {
-      const starti = moment(inputSpecificDates[i].start_date_time, AutoscalerConstants.MomentFormateDateTimeT);
-      const endi = moment(inputSpecificDates[i].end_date_time, AutoscalerConstants.MomentFormateDateTimeT);
-      dateRangeList.push({
-        start: starti,
-        end: endi
-      });
-    }
+  if (inputSpecificDates) {
+    const dateRangeList = inputSpecificDates.map((value, i) => {
+      if (i !== index) {
+        const starti = moment(value.start_date_time, AutoscalerConstants.MomentFormateDateTimeT);
+        const endi = moment(value.end_date_time, AutoscalerConstants.MomentFormateDateTimeT);
+        return {
+          start: starti,
+          end: endi
+        };
+      }
+    });
+    const overlappingSchedule = dateRangeList.find((item) => {
+      if (item && dateTimeOverlaps(start, end, item.start, item.end)) {
+        return true;
+      }
+    });
+    return !!overlappingSchedule;
+  } else {
+    return false;
   }
-  for (const item of dateRangeList) {
-    if (dateTimeOverlaps(start, end, item.start, item.end)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 function timeOverlaps(timeI: AppRecurringSchedule, tiemJ: AppRecurringSchedule) {
@@ -99,27 +105,27 @@ function dateTimeOverlaps(
 }
 
 export function getThresholdMin(policyTriggers: AppScalingRule[], metricType: string, scaleType: string, index: number) {
-  let thresholdMin = 1;
   if (scaleType === 'upper') {
-    policyTriggers.map((trigger, triggerIndex) => {
+    return policyTriggers.reduce((thresholdMin, trigger, triggerIndex) => {
       if (triggerIndex !== index && trigger.metric_type === metricType &&
         AutoscalerConstants.LowerOperators.indexOf(trigger.operator) >= 0) {
-        thresholdMin = Math.max(trigger.threshold + 1, thresholdMin);
+        return Math.max(trigger.threshold + 1, thresholdMin);
       }
-    });
+    }, 1);
+  } else {
+    return 1;
   }
-  return thresholdMin;
 }
 
 export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: string, scaleType: string, index: number) {
-  let thresholdMax = Number.MAX_VALUE;
   if (scaleType === 'lower') {
-    policyTriggers.map((trigger, triggerIndex) => {
+    return policyTriggers.reduce((thresholdMax, trigger, triggerIndex) => {
       if (triggerIndex !== index && trigger.metric_type === metricType &&
         AutoscalerConstants.UpperOperators.indexOf(trigger.operator) >= 0) {
-        thresholdMax = Math.min(trigger.threshold - 1, thresholdMax);
+        return Math.min(trigger.threshold - 1, thresholdMax);
       }
-    });
+    }, Number.MAX_VALUE);
+  } else {
+    return Number.MAX_VALUE;
   }
-  return thresholdMax;
 }

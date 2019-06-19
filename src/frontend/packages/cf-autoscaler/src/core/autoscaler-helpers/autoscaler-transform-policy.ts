@@ -6,16 +6,16 @@ import {
   AppScalingRule,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
-import { AutoscalerConstants, getScaleType, isEqual } from './autoscaler-util';
+import { AutoscalerConstants, getScaleType, isEqual, deepClone } from './autoscaler-util';
 
 export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
-  const newPolicy: AppAutoscalerPolicyLocal = {
+  let newPolicy: AppAutoscalerPolicyLocal = {
     ...policy,
     enabled: true,
     scaling_rules_map: {},
     scaling_rules_form: []
   };
-  initIfUndefined(newPolicy, 'scaling_rules', []);
+  newPolicy = initIfUndefined(newPolicy, 'scaling_rules', []) as AppAutoscalerPolicyLocal;
   newPolicy.scaling_rules.map((trigger) => {
     pushAndSortTrigger(newPolicy.scaling_rules_map, trigger.metric_type, trigger);
   });
@@ -31,9 +31,9 @@ export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
     }
     buildFormUponMap(newPolicy, metricName);
   });
-  initIfUndefined(newPolicy, 'schedules', { timezone: moment.tz.guess() });
-  initIfUndefined(newPolicy.schedules, 'recurring_schedule', []);
-  initIfUndefined(newPolicy.schedules, 'specific_date', []);
+  newPolicy = initIfUndefined(newPolicy, 'schedules', { timezone: moment.tz.guess() });
+  newPolicy.schedules = initIfUndefined(newPolicy.schedules, 'recurring_schedule', []);
+  newPolicy.schedules = initIfUndefined(newPolicy.schedules, 'specific_date', []);
   return newPolicy;
 }
 
@@ -77,41 +77,52 @@ function setLowerColor(array: AppScalingRule[]) {
   }
 }
 
-export function autoscalerTransformMapToArray(newPolicy: AppAutoscalerPolicyLocal) {
-  newPolicy = JSON.parse(JSON.stringify(newPolicy));
-  const scalingRules = [];
-  if (newPolicy.scaling_rules_form) {
-    newPolicy.scaling_rules_form.map((trigger) => {
-      deleteIf(trigger, 'breach_duration_secs',
-        trigger.breach_duration_secs === AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default);
-      deleteIf(trigger, 'cool_down_secs', trigger.cool_down_secs === AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default);
-      delete trigger.color;
-      scalingRules.push(trigger);
-    });
-  }
+export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLocal) {
+  const newPolicy: AppAutoscalerPolicy = {
+    instance_min_count: oldPolicy.instance_min_count,
+    instance_max_count: oldPolicy.instance_max_count
+  };
+  const scalingRules: AppScalingRule[] = oldPolicy.scaling_rules_form.map((trigger) => {
+    return {
+      adjustment: trigger.adjustment,
+      breach_duration_secs: trigger.breach_duration_secs,
+      cool_down_secs: trigger.breach_duration_secs,
+      metric_type: trigger.metric_type,
+      operator: trigger.operator,
+      threshold: trigger.threshold
+    };
+  });
   if (scalingRules.length > 0) {
     newPolicy.scaling_rules = scalingRules;
-  } else {
-    delete newPolicy.scaling_rules;
   }
-  delete newPolicy.scaling_rules_form;
-  delete newPolicy.scaling_rules_map;
-  if (newPolicy.schedules) {
-    deleteIf(newPolicy.schedules, 'recurring_schedule',
-      newPolicy.schedules.recurring_schedule && newPolicy.schedules.recurring_schedule.length === 0);
-    deleteIf(newPolicy.schedules, 'specific_date',
-      newPolicy.schedules.specific_date && newPolicy.schedules.specific_date.length === 0);
-    deleteIf(newPolicy, 'schedules', !newPolicy.schedules.recurring_schedule && !newPolicy.schedules.specific_date);
+  if (oldPolicy.schedules &&
+    (hasNamedSchedule(oldPolicy.schedules.recurring_schedule) || hasNamedSchedule(oldPolicy.schedules.specific_date))) {
+    newPolicy.schedules = {
+      timezone: oldPolicy.schedules.timezone
+    };
+    if (hasNamedSchedule(oldPolicy.schedules.recurring_schedule)) {
+      newPolicy.schedules.recurring_schedule = oldPolicy.schedules.recurring_schedule;
+    }
+    if (hasNamedSchedule(oldPolicy.schedules.specific_date)) {
+      newPolicy.schedules.specific_date = oldPolicy.schedules.specific_date;
+    }
   }
   return newPolicy;
 }
 
+function hasNamedSchedule(schedule: any) {
+  return schedule !== undefined && schedule !== null && schedule.length > 0;
+}
+
 function pushAndSortTrigger(map: { [metricName: string]: AppScalingTrigger }, metricName: string, newTrigger: AppScalingRule) {
   const scaleType = getScaleType(newTrigger.operator);
-  initIfUndefined(newTrigger, 'breach_duration_secs', AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default);
-  initIfUndefined(newTrigger, 'cool_down_secs', AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default);
+  newTrigger = initIfUndefined(newTrigger, 'breach_duration_secs', AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default);
+  newTrigger = initIfUndefined(newTrigger, 'cool_down_secs', AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default);
   if (!map[metricName]) {
-    map[metricName] = {};
+    map[metricName] = {
+      upper: [],
+      lower: []
+    };
   }
   if (!map[metricName][scaleType]) {
     map[metricName][scaleType] = [];
@@ -126,9 +137,9 @@ function pushAndSortTrigger(map: { [metricName: string]: AppScalingTrigger }, me
 }
 
 function buildFormUponMap(newPolicy: AppAutoscalerPolicyLocal, metricName: string) {
-  AutoscalerConstants.ScaleTypes.map((triggerType) => {
+  AutoscalerConstants.ScaleTypes.forEach((triggerType) => {
     if (newPolicy.scaling_rules_map[metricName][triggerType]) {
-      newPolicy.scaling_rules_map[metricName][triggerType].map((trigger) => {
+      newPolicy.scaling_rules_map[metricName][triggerType].forEach((trigger: AppScalingRule) => {
         newPolicy.scaling_rules_form.push(trigger);
       });
     }
@@ -136,9 +147,11 @@ function buildFormUponMap(newPolicy: AppAutoscalerPolicyLocal, metricName: strin
 }
 
 function initIfUndefined(fatherEntity: any, childName: string, defaultData: any) {
-  if (fatherEntity[childName] === undefined || fatherEntity[childName] === '') {
-    fatherEntity[childName] = defaultData;
+  const entity = deepClone(fatherEntity);
+  if (entity[childName] === undefined || entity[childName] === '') {
+    entity[childName] = defaultData;
   }
+  return entity;
 }
 
 function deleteIf(fatherEntity: any, childName: string, condition: boolean) {

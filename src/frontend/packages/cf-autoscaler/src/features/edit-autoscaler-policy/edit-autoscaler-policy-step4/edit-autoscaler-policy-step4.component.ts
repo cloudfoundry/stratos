@@ -8,12 +8,11 @@ import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { cloneObject } from '../../../../../core/src/core/utils.service';
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
+import { AutoscalerConstants, PolicyAlert, deepClone } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
@@ -103,19 +102,20 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
         return msg;
       }),
       distinctUntilChanged(),
-    ).pipe(map(errorMessage => {
-      if (errorMessage) {
-        return {
-          success: false,
-          message: `Could not update policy: ${errorMessage}`,
-        };
-      } else {
-        return {
-          success: true,
-          redirect: true
-        };
-      }
-    }));
+    ).pipe(map(
+      errorMessage => {
+        if (errorMessage) {
+          return {
+            success: false,
+            message: `Could not update policy: ${errorMessage}`,
+          };
+        } else {
+          return {
+            success: true,
+            redirect: true
+          };
+        }
+      }));
     return waitForAppAutoscalerUpdateStatus$.pipe(take(1), map(res => {
       return {
         ...res,
@@ -124,7 +124,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   addSpecificDate = () => {
-    this.currentPolicy.schedules.specific_date.push(cloneObject(AutoscalerConstants.PolicyDefaultSpecificDate));
+    this.currentPolicy.schedules.specific_date.push(deepClone(AutoscalerConstants.PolicyDefaultSpecificDate));
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
 

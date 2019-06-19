@@ -65,8 +65,6 @@ export class MetricsRangeSelectorManagerService {
           this.startEnd[0],
           this.startEnd[1]
         ];
-        // this.start = null;
-        // this.end = null;
         this.commitAction(action);
       };
     }

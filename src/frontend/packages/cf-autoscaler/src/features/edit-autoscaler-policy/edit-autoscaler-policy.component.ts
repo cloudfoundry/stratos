@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map, publishReplay, refCount } from 'rxjs/operators';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 
 import { ApplicationService } from '../../../../core/src/features/applications/application.service';
@@ -13,12 +15,22 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
     EditAutoscalerPolicyService
   ]
 })
-export class EditAutoscalerPolicyComponent {
+export class EditAutoscalerPolicyComponent implements OnInit {
 
   parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
+  applicationName$: Observable<string>;
 
   constructor(
     public applicationService: ApplicationService,
   ) {
   }
+
+  ngOnInit() {
+    this.applicationName$ = this.applicationService.app$.pipe(
+      map(({ entity }) => entity ? entity.entity.name : null),
+      publishReplay(1),
+      refCount()
+    );
+  }
+
 }

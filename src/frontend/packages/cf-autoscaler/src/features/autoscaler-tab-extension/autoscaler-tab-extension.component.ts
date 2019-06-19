@@ -38,6 +38,7 @@ import {
   AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppAutoscalerScalingHistory,
+  AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import {
   appAutoscalerAppMetricSchemaKey,
@@ -191,7 +192,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.initErrorSub();
   }
 
-  getAppMetric(metricName: string, trigger: any, params: any) {
+  getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerPaginationParams) {
     const action = new GetAppAutoscalerAppMetricAction(this.applicationService.appGuid,
       this.applicationService.cfGuid, metricName, true, trigger, params);
     this.store.dispatch(action);
@@ -212,11 +213,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
       this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
       if (appAutoscalerPolicy.scaling_rules_map) {
-        this.appAutoscalerAppMetrics = {};
-        Object.keys(appAutoscalerPolicy.scaling_rules_map).map((metricName) => {
-          this.appAutoscalerAppMetrics[metricName] =
-            this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
-        });
+        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap, metricName) => {
+          metricMap[metricName] = this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
+          return metricMap;
+        }, {});
       }
     });
   }

@@ -80,7 +80,7 @@ export type StratosRouteType = StratosTabType | StratosActionType;
 
 export interface StratosExtensionRoutes {
   path: string;
-  component: Type<any>;
+  component: any;
 }
 
 // Stores the extension metadata as defined by the decorators

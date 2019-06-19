@@ -1,5 +1,5 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
-  <app-tile-grid>
+  <app-tile-grid class="app-autoscaler-tile-grid-100">
     <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.recurring_schedule; let index = index">
       <app-tile>
         <mat-card>
@@ -10,10 +10,10 @@
           </mat-card-header>
           <mat-card-content>
             <div *ngIf="editIndex!=index">
-              <span *ngIf="rule.initial_min_instance_count">The initial number of application instance is
+              <span *ngIf="rule.initial_min_instance_count">The initial number of application instances is
                 {{rule.initial_min_instance_count}}, and the range </span>
-              <span *ngIf="!rule.initial_min_instance_count">The number of application instance </span>
-              <span>is limited to from {{rule.instance_min_count}} to {{rule.instance_max_count}} during
+              <span *ngIf="!rule.initial_min_instance_count">The number of application instances </span>
+              <span>is limited from {{rule.instance_min_count}} to {{rule.instance_max_count}} during
                 {{rule.start_time}} ~ {{rule.end_time}} every </span>
               <span *ngIf="rule.days_of_month">{{rule.days_of_month}} of the month</span>
               <span *ngIf="rule.days_of_week">{{rule.days_of_week}} of the week</span>
@@ -113,18 +113,10 @@
                 *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')">
                 {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
               </mat-error>
-              <!-- <mat-error
-                    *ngIf="editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')">
-                    {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
-                  </mat-error> -->
               <mat-error
                 *ngIf="editRecurringScheduleForm.get('start_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')">
                 {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
               </mat-error>
-              <!-- <mat-error
-                    *ngIf="editRecurringScheduleForm.get('end_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')">
-                    {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
-                  </mat-error> -->
               <mat-error
                 *ngIf="editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')">
                 {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}

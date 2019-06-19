@@ -1,5 +1,5 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
-  <app-tile-grid>
+  <app-tile-grid class="app-autoscaler-tile-grid-100">
     <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.specific_date; let index = index">
       <app-tile>
         <mat-card>
@@ -10,10 +10,10 @@
           </mat-card-header>
           <mat-card-content>
             <div *ngIf="editIndex!=index">
-              <span *ngIf="rule.initial_min_instance_count">The initial number of application instance is
+              <span *ngIf="rule.initial_min_instance_count">The initial number of application instances is
                 {{rule.initial_min_instance_count}}, and the range </span>
-              <span *ngIf="!rule.initial_min_instance_count">The number of application instance </span>
-              <span>is limited to from {{rule.instance_min_count}} to {{rule.instance_max_count}} from
+              <span *ngIf="!rule.initial_min_instance_count">The number of application instances </span>
+              <span>is limited from {{rule.instance_min_count}} to {{rule.instance_max_count}} from
                 {{rule.start_date_time}} to {{rule.end_date_time}}.</span>
             </div>
             <div *ngIf="editIndex==index">
@@ -77,14 +77,6 @@
                 *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeNow')">
                 {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeNow}}
               </mat-error>
-              <!-- <mat-error
-                    *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime')">
-                    {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime}}
-                  </mat-error> -->
-              <!-- <mat-error
-                *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleSpecificConflict')">
-                {{policyAlert.alertInvalidPolicyScheduleSpecificConflict}}
-              </mat-error> -->
             </div>
           </mat-card-content>
           <mat-card-actions class="autoscaler-policy-edit__actions">

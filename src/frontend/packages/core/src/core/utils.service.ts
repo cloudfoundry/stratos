@@ -280,7 +280,3 @@ export const sortStringify = (obj: { [key: string]: string }): string => {
     return res += `${key}-${obj[key]},`;
   }, '');
 };
-
-export function cloneObject(obj: any) {
-  return JSON.parse(JSON.stringify(obj));
-}
