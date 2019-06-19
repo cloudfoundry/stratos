@@ -151,7 +151,7 @@ export class CfRolesService {
   }
 
   private populateUserRoles(user: APIResource<CfUser>, roles: CfUserRolesSelected) {
-    const mappedUser = {};
+    const mappedUser: { [orgGuid: string]: IUserPermissionInOrg } = {};
     const orgRoles = this.cfUserService.getOrgRolesFromUser(user.entity);
     const spaceRoles = this.cfUserService.getSpaceRolesFromUser(user.entity);
     // ... populate org roles ...
@@ -164,7 +164,10 @@ export class CfRolesService {
     // ... and for each space, populate space roles
     spaceRoles.forEach(space => {
       if (!mappedUser[space.orgGuid]) {
-        mappedUser[space.orgGuid] = createDefaultOrgRoles(space.orgGuid);
+        mappedUser[space.orgGuid] = createDefaultOrgRoles(space.orgGuid, space.orgName);
+      }
+      if (!space.orgName && mappedUser[space.orgGuid]) {
+        space.orgName = mappedUser[space.orgGuid].name;
       }
       mappedUser[space.orgGuid].spaces[space.spaceGuid] = {
         ...space
@@ -204,15 +207,29 @@ export class CfRolesService {
     const newChanges = [];
 
     // Compare org roles
-    const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid);
-    newChanges.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, add: false, role: null },
+    const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid, newRoles.name);
+    newChanges.push(...this.comparePermissions({
+      userGuid: user.guid,
+      orgGuid,
+      orgName: newRoles.name,
+      add: false,
+      role: null
+    },
       existingOrgRoles.permissions, newRoles.permissions));
 
     // Compare space roles
     Object.keys(newRoles.spaces).forEach(spaceGuid => {
       const newSpace = newRoles.spaces[spaceGuid];
-      const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, spaceGuid);
-      newChanges.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, spaceGuid, add: false, role: null },
+      const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, newRoles.name, spaceGuid, newSpace.name);
+      newChanges.push(...this.comparePermissions({
+        userGuid: user.guid,
+        orgGuid,
+        orgName: newRoles.name,
+        spaceGuid,
+        spaceName: newSpace.name,
+        add: false,
+        role: null
+      },
         oldSpace.permissions, newSpace.permissions));
     });
 

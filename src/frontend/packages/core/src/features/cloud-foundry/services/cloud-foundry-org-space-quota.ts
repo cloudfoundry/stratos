@@ -17,11 +17,11 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
     protected cfEndpointService: CloudFoundryEndpointService,
     emf: EntityMonitorFactory,
     orgOrSpaceGuid: string,
-    orgOrspaceEntityType: string,
+    orgOrSpaceEntityType: string,
   ) {
     this.orgOrSpace$ = emf.create<APIResource<T>>(
       orgOrSpaceGuid,
-      new CFEntityConfig(orgOrspaceEntityType),
+      new CFEntityConfig(orgOrSpaceEntityType),
       false
     ).entity$.pipe(filter(orgOrSpace => !!orgOrSpace));
   }

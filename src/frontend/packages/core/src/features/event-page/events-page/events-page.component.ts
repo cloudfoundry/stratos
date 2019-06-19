@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
+import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
+
+import { AppState } from '../../../../../store/src/app-state';
+import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
+import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
 
 @Component({
   selector: 'app-events-page',
@@ -10,10 +14,16 @@ import { tap } from 'rxjs/operators';
 })
 export class EventsPageComponent {
   public events$: Observable<IGlobalEvent[]>;
+  public back$: Observable<string>;
 
   constructor(
-    eventService: GlobalEventService
+    eventService: GlobalEventService,
+    store: Store<AppState>
   ) {
     this.events$ = eventService.events$;
+
+    this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
+      map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
+    );
   }
 }

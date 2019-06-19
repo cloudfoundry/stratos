@@ -5,7 +5,7 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
-import { spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { spaceEntityType, organizationEntityType, cfEntityFactory, spaceQuotaEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organization.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../store/src/app-state';
@@ -14,6 +14,9 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ISpaceQuotaDefinition } from '../../core/cf-api.types';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { GetOrganizationSpaceQuotaDefinitions } from '../../../../store/src/actions/quota-definitions.actions';
 
 export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;
@@ -22,6 +25,9 @@ export class AddEditSpaceStepBase {
   allSpacesInOrg: string[];
   allSpacesInOrg$: Observable<string[]>;
   validate: (spaceName: string) => boolean;
+  quotaDefinitions$: Observable<APIResource<ISpaceQuotaDefinition>[]>;
+  hasSpaceQuotas$: Observable<boolean>;
+
   constructor(
     protected store: Store<CFAppState>,
     protected activatedRoute: ActivatedRoute,
@@ -51,6 +57,24 @@ export class AddEditSpaceStepBase {
     );
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
+    const quotaPaginationKey = createEntityRelationPaginationKey(organizationEntityType, this.orgGuid);
+    this.quotaDefinitions$ = getPaginationObservables<APIResource<ISpaceQuotaDefinition>>(
+      {
+        store: this.store,
+        action: new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, this.orgGuid, this.cfGuid),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          quotaPaginationKey,
+          cfEntityFactory(spaceQuotaEntityType)
+        )
+      },
+      true
+    ).entities$.pipe(
+      filter(o => !!o),
+    );
+
+    this.hasSpaceQuotas$ = this.quotaDefinitions$.pipe(
+      map(q => q && q.length > 0)
+    );
   }
 
   destroy(): void {

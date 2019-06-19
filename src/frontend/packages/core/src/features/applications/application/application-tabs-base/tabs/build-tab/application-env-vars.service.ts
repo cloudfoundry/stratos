@@ -16,54 +16,52 @@ import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagi
 
 
 export interface EnvVarStratosProject {
-    deploySource: EnvVarStratosProjectSource;
-    deployOverrides: OverrideAppDetails;
+  deploySource: EnvVarStratosProjectSource;
+  deployOverrides: OverrideAppDetails;
 }
 
 export interface EnvVarStratosProjectSource {
-    type: string;
-    timestamp: number;
-    project?: string;
-    scm?: string;
-    branch?: string;
-    url?: string;
-    commit?: string;
+  type: string;
+  timestamp: number;
+  project?: string;
+  scm?: string;
+  branch?: string;
+  url?: string;
+  commit?: string;
 }
 
 @Injectable()
 export class ApplicationEnvVarsHelper {
 
-    constructor(
-        private store: Store<CFAppState>,
-        private paginationMonitorFactory: PaginationMonitorFactory,
+  constructor(
+    private store: Store<CFAppState>,
+    private paginationMonitorFactory: PaginationMonitorFactory,
+  ) { }
 
-    ) { }
+  createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
+    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const action = new GetAppEnvVarsAction(appGuid, cfGuid);
+    return getPaginationObservables<APIResource>({
+      store: this.store,
+      action,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        action.paginationKey,
+        catalogueEntity.getSchema()
+      )
+    }, true);
+  }
 
-    createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
-        const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-        const action = new GetAppEnvVarsAction(appGuid, cfGuid);
-        return getPaginationObservables<APIResource>({
-            store: this.store,
-            action,
-            paginationMonitor: this.paginationMonitorFactory.create(
-                action.paginationKey,
-                catalogueEntity.getSchema()
-            )
-        }, true);
+  FetchStratosProject(appEnvVars): EnvVarStratosProject {
+    if (!appEnvVars) {
+      return null;
     }
-
-    FetchStratosProject(appEnvVars): EnvVarStratosProject {
-        if (!appEnvVars) {
-            return null;
-        }
-        const stratosProjectString = appEnvVars.environment_json ? appEnvVars.environment_json.STRATOS_PROJECT : null;
-        try {
-            const res = stratosProjectString ? JSON.parse(stratosProjectString) as EnvVarStratosProject : null;
-            return res;
-        } catch (err) {
-            // noop
-        }
-        return null;
-
+    const stratosProjectString = appEnvVars.environment_json ? appEnvVars.environment_json.STRATOS_PROJECT : null;
+    try {
+      const res = stratosProjectString ? JSON.parse(stratosProjectString) as EnvVarStratosProject : null;
+      return res;
+    } catch (err) {
+      // noop
     }
+    return null;
+  }
 }

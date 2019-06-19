@@ -41,11 +41,6 @@ function clean_deployments {
     docker rm $PGSQL_DOCKER
   fi
 
-  echo "Stopping previous Docker Compose (if any)"
-  pushd deploy
-  docker-compose -f docker-compose.development.yml down
-  popd
-
   echo "Stopping previous Docker All-in-one (if any)"
   # Kill any existing docker all-in-one docker containers
   RUNNING=$(docker ps -q --filter "ancestor=stratos-aio:latest")

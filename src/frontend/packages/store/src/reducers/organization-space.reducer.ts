@@ -29,11 +29,17 @@ function addSpaceToOrg(
   newSpace: APIResource<ISpace>
 ) {
   const orgToModify = getOrg(state, orgGuid);
+
+  if (!orgToModify) {
+    return state;
+  }
+
   const newSpaces = [
     ...orgToModify.entity.spaces,
     newSpace.metadata.guid
   ];
   const mergedOrg = applySpacesToOrg(orgToModify, newSpaces);
+
   return {
     ...state,
     [orgGuid]: mergedOrg

@@ -1,7 +1,7 @@
 import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
-import { userProvidedServiceInstanceEntityType } from '../../cloud-foundry/src/cf-entity-factory';
+import { appSummaryEntityType, userProvidedServiceInstanceEntityType } from '../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../store/src/app-state';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
@@ -141,9 +141,8 @@ function getDefaultInitialTestStoreState(): CFAppState {
       message: ''
     },
     pagination: {
-      appSummaryEntityType: {},
+      [appSummaryEntityType]: {},
       private_domains: {},
-      space_quota_definition: {},
       userProfile: {},
       featureFlag: {},
       serviceBroker: {},
@@ -620,8 +619,78 @@ function getDefaultInitialTestStoreState(): CFAppState {
       domain: {},
       metrics: {},
       servicePlan: {},
-      userProvidedServiceInstance: {},
-      cloudFoundryInfo: {}
+      cloudFoundryInfo: {},
+      [userProvidedServiceInstanceEntityType]: {},
+      quota_definition: {
+        'endpoint-all': {
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 1,
+          ids: {
+            '1': [
+              '037d050d-979e-4dbf-940d-51a8a90729c8',
+            ]
+          },
+          pageRequests: {
+            '1': {
+              busy: false,
+              error: false,
+              message: '',
+              maxed: false
+            }
+          },
+          params: {
+            'results-per-page': 100,
+            page: 1,
+            'order-direction': 'asc',
+            q: []
+          },
+          clientPagination: {
+            pageSize: 9,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 1
+          }
+        }
+      },
+      space_quota_definition: {
+        'endpoint-all': {
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 1,
+          ids: {
+            '1': [
+              'a42468c7-b66c-4570-9e25-7cdcf1f3591b'
+            ]
+          },
+          pageRequests: {
+            '1': {
+              busy: false,
+              error: false,
+              message: '',
+              maxed: false
+            }
+          },
+          params: {
+            'results-per-page': 100,
+            page: 1,
+            'order-direction': 'asc',
+            q: []
+          },
+          clientPagination: {
+            pageSize: 9,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 1
+          }
+        }
+      },
     },
     dashboard: {
       sidenavOpen: true,
@@ -665,7 +734,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       }
     },
     request: {
-      appSummaryEntityType: {},
+      [appSummaryEntityType]: {},
       gitRepo: {},
       userProfile: {},
       servicePlanVisibility: {},
@@ -3925,16 +3994,16 @@ function getDefaultInitialTestStoreState(): CFAppState {
       event: {},
       system: {},
       private_domains: {},
+      quota_definition: {},
       space_quota_definition: {},
       [userProvidedServiceInstanceEntityType]: {}
     },
     requestData: {
-      appSummaryEntityType: {},
+      [appSummaryEntityType]: {},
       environmentVars: {},
       stats: {},
       gitRepo: {},
       private_domains: {},
-      space_quota_definition: {},
       userFavorites: {},
       servicePlanVisibility: {},
       serviceBroker: {
@@ -21825,7 +21894,60 @@ function getDefaultInitialTestStoreState(): CFAppState {
         zoneId: '',
         origin: ''
       },
-      [userProvidedServiceInstanceEntityType]: {}
+      [userProvidedServiceInstanceEntityType]: {},
+      quota_definition: {
+        '037d050d-979e-4dbf-940d-51a8a90729c8': {
+          entity: {
+            name: 'default',
+            non_basic_services_allowed: true,
+            total_services: -1,
+            total_routes: 100,
+            total_private_domains: -1,
+            memory_limit: 102400,
+            trial_db_allowed: false,
+            instance_memory_limit: -1,
+            app_instance_limit: -1,
+            app_task_limit: -1,
+            total_service_keys: -1,
+            total_reserved_route_ports: -1,
+            guid: '037d050d-979e-4dbf-940d-51a8a90729c8',
+            cfGuid: 'IcXF69N2sUyBYliHug7f-_17WCA'
+          },
+          metadata: {
+            guid: '037d050d-979e-4dbf-940d-51a8a90729c8',
+            url: '/v2/quota_definitions/037d050d-979e-4dbf-940d-51a8a90729c8',
+            created_at: '2019-05-09T11:21:23Z',
+            updated_at: '2019-05-09T11:28:48Z'
+          }
+        },
+      },
+      space_quota_definition: {
+        'a42468c7-b66c-4570-9e25-7cdcf1f3591b': {
+          entity: {
+            name: 'acceptance.e2e.quota.20190515T093829298Z',
+            organization_guid: 'b044afa4-eceb-4eb9-9bdd-476005bcbbde',
+            non_basic_services_allowed: true,
+            total_services: -1,
+            total_routes: 10,
+            memory_limit: 5120,
+            instance_memory_limit: -1,
+            app_instance_limit: -1,
+            app_task_limit: 5,
+            total_service_keys: -1,
+            total_reserved_route_ports: 5,
+            organization_url: '/v2/organizations/b044afa4-eceb-4eb9-9bdd-476005bcbbde',
+            spaces_url: '/v2/space_quota_definitions/a42468c7-b66c-4570-9e25-7cdcf1f3591b/spaces',
+            guid: 'a42468c7-b66c-4570-9e25-7cdcf1f3591b',
+            cfGuid: 'IcXF69N2sUyBYliHug7f-_17WCA'
+          },
+          metadata: {
+            guid: 'a42468c7-b66c-4570-9e25-7cdcf1f3591b',
+            url: '/v2/space_quota_definitions/a42468c7-b66c-4570-9e25-7cdcf1f3591b',
+            created_at: '2019-05-15T09:38:29Z',
+            updated_at: '2019-05-15T09:38:29Z'
+          }
+        }
+      },
     },
     actionHistory: [],
     lists: {},
@@ -21899,7 +22021,7 @@ function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOv
       return {
         [entity]: dataOverride || {}
       };
-    };
+    }
     sections[entity.guid] = dataOverride || entity.data || {};
     return sections;
   }, {});
@@ -21947,7 +22069,7 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
         ...state.requestData,
         [entityKey]: getStoreSectionForIds(entities)
       }
-    }
+    };
   }, { request: {}, requestData: {} });
 
   return StoreModule.forRoot(

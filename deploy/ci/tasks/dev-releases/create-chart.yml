@@ -33,8 +33,15 @@ run:
       IMAGE_TAG=${GIT_TAG}
       cd ${STRATOS}/deploy/kubernetes/
       patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console ${RELEASE_VERSION} ${VERSION}
+      patchHelmChartAppVersion ./console ${STRATOS}
+
       # Generate Helm package
       updateHelmDependency
+
+      # Generate imagelist
+      ./imagelist-gen.sh ./console
+
+      # Package console Helm Chart
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${RELEASE_VERSION}-${COMMIT}.tgz
       cd ${ROOT_DIR}/helm-chart/

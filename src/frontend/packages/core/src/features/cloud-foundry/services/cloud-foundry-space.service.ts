@@ -16,7 +16,7 @@ import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
-import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
+import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -28,7 +28,7 @@ import { fetchServiceInstancesCount } from '../../service-catalog/services-helpe
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService, createQuotaDefinition } from './cloud-foundry-organization.service';
+import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -37,7 +37,15 @@ export class CloudFoundrySpaceService {
   orgGuid: string;
   spaceGuid: string;
   userRole$: Observable<string>;
-  quotaDefinition$: Observable<IQuotaDefinition>;
+  /**
+   * Sensible quota to use for space. If there's no specific space quota set this will be the org quota. If there's no org quota
+   * a mock quota with everything allowed will be used
+   */
+  quotaDefinition$: Observable<ISpaceQuotaDefinition | IOrgQuotaDefinition>;
+  /**
+   * Actual Space Quota. In almost all cases `quotaDefinition$` should be used instead
+   */
+  spaceQuotaDefinition$: Observable<ISpaceQuotaDefinition>;
   allowSsh$: Observable<string>;
   totalMem$: Observable<number>;
   routes$: Observable<APIResource<IRoute>[]>;
@@ -109,7 +117,7 @@ export class CloudFoundrySpaceService {
             createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.AUDITOR),
           );
         }
-        const getSpaceAction = new GetSpace(this.spaceGuid, this.cfGuid, relations)
+        const getSpaceAction = new GetSpace(this.spaceGuid, this.cfGuid, relations);
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
           this.spaceGuid,
           new GetSpace(this.spaceGuid, this.cfGuid, relations),
@@ -131,15 +139,17 @@ export class CloudFoundrySpaceService {
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
-    this.quotaDefinition$ = this.space$.pipe(
-      map(q => q.entity.entity.space_quota_definition),
-      switchMap(def => def ? of(def.entity) : this.cfOrgService.quotaDefinition$),
+    this.spaceQuotaDefinition$ = this.space$.pipe(
+      map(q => q.entity.entity.space_quota_definition ? q.entity.entity.space_quota_definition.entity : null)
+    );
+    this.quotaDefinition$ = this.spaceQuotaDefinition$.pipe(
+      switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$),
       map(def => def ?
         {
           ...def,
-          organization_guid: this.orgGuid
+          organization_guid: this.orgGuid,
         } :
-        createQuotaDefinition(this.orgGuid)
+        createOrgQuotaDefinition()
       )
     );
   }

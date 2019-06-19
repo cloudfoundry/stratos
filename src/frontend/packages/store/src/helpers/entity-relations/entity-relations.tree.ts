@@ -1,6 +1,6 @@
-import { createEntityRelationKey, EntityInlineParentAction, EntityTree } from './entity-relations.types';
 import { EntitySchema } from '../entity-schema';
 import { EntityTreeRelation } from './entity-relation-tree';
+import { createEntityRelationKey, EntityInlineParentAction, EntityTree } from './entity-relations.types';
 
 const entityTreeCache: {
   [entityKey: string]: EntityTree
@@ -8,9 +8,7 @@ const entityTreeCache: {
 
 function generateCacheKey(entityKey: string, action: EntityInlineParentAction): string {
   const includeRelations = action.includeRelations || [];
-  const relationKey = [...includeRelations].sort((a, b) => {
-    return a.localeCompare(b);
-  }).join(',');
+  const relationKey = [...includeRelations].sort((a, b) => a.localeCompare(b)).join(',');
   return entityKey + '+' + relationKey;
 }
 

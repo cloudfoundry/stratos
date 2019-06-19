@@ -3,8 +3,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import { applicationEntityType, cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../store/src/app-state';
@@ -28,6 +29,7 @@ import {
 } from '../../../../store/src/types/user.types';
 import { UserRoleLabels } from '../../../../store/src/types/users-roles.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
+import { ISpace } from '../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
 import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
@@ -36,7 +38,6 @@ import { extractActualListEntity } from '../../shared/components/list/data-sourc
 import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
-
 
 export interface IUserRole<T> {
   string: string;
@@ -162,6 +163,42 @@ export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
   return hasRole(user, spaceGuid, CfUserRoleParams.SPACES);
 }
 
+export function hasRoleWithinOrg(user: CfUser, orgGuid: string): boolean {
+  return isOrgManager(user, orgGuid) ||
+    isOrgBillingManager(user, orgGuid) ||
+    isOrgAuditor(user, orgGuid) ||
+    isOrgUser(user, orgGuid);
+}
+
+export function hasRoleWithinSpace(user: CfUser, spaceGuid: string): boolean {
+  return isSpaceManager(user, spaceGuid) ||
+    isSpaceAuditor(user, spaceGuid) ||
+    isSpaceDeveloper(user, spaceGuid);
+}
+
+export function hasRoleWithin(user: CfUser, orgGuid?: string, spaceGuid?: string): boolean {
+  return hasRoleWithinOrg(user, orgGuid) || hasRoleWithinSpace(user, spaceGuid);
+}
+
+export function hasSpaceRoleWithinOrg(user: CfUser, orgGuid: string): boolean {
+  const roles = [
+    CfUserRoleParams.MANAGED_SPACES,
+    CfUserRoleParams.AUDITED_SPACES,
+    CfUserRoleParams.SPACES
+  ];
+  const orgSpaces = [];
+
+  for (const role of roles) {
+    const roleSpaces = user[role] as APIResource<ISpace>[];
+
+    orgSpaces.push(...roleSpaces.filter((space) => {
+      return space.entity.organization_guid === orgGuid;
+    }));
+  }
+
+  return orgSpaces.some((space) => hasRoleWithinSpace(user, space.metadata.guid));
+}
+
 function hasRole(user: CfUser, guid: string, roleType: string) {
   if (user[roleType]) {
     const roles = user[roleType] as APIResource[];
@@ -190,7 +227,7 @@ export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   return ({
     cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
-    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId')
+    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId'),
   });
 }
 
@@ -219,7 +256,7 @@ export const getActiveRouteCfCellProvider = {
 
 export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
   const appWallPagKey = 'applicationWall';
-  const entityKey = EntityCatalogueHelpers.buildEntityKey(applicationEntityType, CF_ENDPOINT_TYPE);
+  const entityKey = getCFEntityKey(applicationEntityType);
   store.dispatch(new SetClientFilter(new CFEntityConfig(applicationEntityType), appWallPagKey,
     {
       string: '',
@@ -253,6 +290,13 @@ export function canUpdateOrgSpaceRoles(
   ).pipe(
     map((checks: boolean[]) => checks.some(check => check))
   );
+}
+
+export function canUpdateOrgRoles(
+  perms: CurrentUserPermissionsService,
+  cfGuid: string,
+  orgGuid?: string): Observable<boolean> {
+  return perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 }
 
 export function waitForCFPermissions(store: Store<CFAppState>, cfGuid: string): Observable<ICfRolesState> {
@@ -351,6 +395,23 @@ export function createCfOrgSpaceSteppersUrl(
     }
   }
   route += stepperPath;
+  return route;
+}
+
+export function createCfOrgSpaceUserRemovalUrl(
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string,
+): string {
+  let route = `/cloud-foundry/${cfGuid}`;
+  if (orgGuid) {
+    route += `/organizations/${orgGuid}`;
+    if (spaceGuid) {
+      route += `/spaces/${spaceGuid}`;
+    }
+  }
+  route += '/users/remove';
+
   return route;
 }
 

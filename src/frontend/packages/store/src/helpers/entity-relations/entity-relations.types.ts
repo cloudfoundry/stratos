@@ -2,11 +2,11 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { getPaginationKey } from '../../actions/pagination.actions';
 import { APIResponse } from '../../actions/request.actions';
-import { IRequestTypeState, AppState, GeneralEntityAppState, GeneralRequestDataState } from '../../app-state';
+import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../app-state';
 import { IRequestAction } from '../../types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
-import { getPaginationKey } from '../../actions/pagination.actions';
 
 export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = GeneralEntityAppState> {
   /**
@@ -68,7 +68,9 @@ export function createEntityRelationPaginationKey(parentSchemaKey: string, paren
 }
 
 // TODO Does this need the entity key or type?
-export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
+// TODO: See createEntityRelationKey in entity-relations.tree.ts
+export const createEntityRelationKey = (parentEntityType: string, childEntityType: string) => `${parentEntityType}-${childEntityType}`;
+
 /**
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
  *

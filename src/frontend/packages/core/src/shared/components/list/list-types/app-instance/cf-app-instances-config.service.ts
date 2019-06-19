@@ -192,7 +192,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     entityServiceFactory: EntityServiceFactory
   ) {
 
-    this.initialised$ = this.endpointsService.hasMetrics(appService.cfGuid).pipe(
+    this.initialised$ = this.endpointsService.hasCellMetrics(appService.cfGuid).pipe(
       map(hasMetrics => {
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);

@@ -120,7 +120,7 @@ function createEntityWatcher(store, paramAction, guid: string): Observable<Valid
  * Create actions required to populate parent entities with exist children
  */
 function createActionsForExistingEntities(config: HandleRelationsConfig): Action {
-  const { store, allEntities, newEntities, childEntities, childRelation, action } = config;
+  const { allEntities, newEntities, childEntities, childRelation, action } = config;
   const childEntitiesAsArray = childEntities as Array<any>;
 
   const paramAction = action || createAction(config);
@@ -128,7 +128,6 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
   let response: NormalizedResponse;
   const guids = childEntitiesAsGuids(childEntitiesAsArray);
   const safeEntities = newEntities || {};
-  console.log(safeEntities);
   const entities = pick(safeEntities[childRelation.entityKey], guids as [string]) ||
     pick(allEntities[childRelation.entityKey], guids as [string]);
   response = {
@@ -222,7 +221,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
  * Iterate through required parent-child relationships and check if they exist
  */
 function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
-  const { store, cfGuid, entities, parentRelation, allEntities, allPagination, newEntities } = config;
+  const { cfGuid, entities, parentRelation, allEntities, allPagination, newEntities } = config;
 
   if (!entities) {
     return [];
@@ -525,7 +524,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           const catalogueEntity = entityCatalogue.getEntity(eicAction);
           const entityKey = catalogueEntity.entityKey;
           const normedEntities = entity.entity[paramName].reduce((normedEntities, entity) => {
-            const guid = catalogueEntity.getGuidFromEntity(entity);
+            const guid = typeof(entity) === 'string' ? entity : catalogueEntity.getGuidFromEntity(entity);
             normedEntities[entityKey][guid] = entity;
             return normedEntities;
           }, { [entityKey]: {} });

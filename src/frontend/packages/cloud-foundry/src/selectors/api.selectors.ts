@@ -35,9 +35,10 @@ export function selectCfUpdateInfo(
 }
 
 export function selectCfEntity<T = APIResource>(
-  entityKey: string,
+  entityType: string,
   guid: string
 ) {
+  const entityKey = entityCatalogue.getEntityKey(entityType, CF_ENDPOINT_TYPE);
   return compose(
     getEntityById<T>(guid),
     getRequestEntityKey<T>(entityKey),
