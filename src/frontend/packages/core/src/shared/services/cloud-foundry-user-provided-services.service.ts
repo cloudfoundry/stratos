@@ -97,7 +97,7 @@ export class CloudFoundryUserProvidedServicesService {
     data: IUserProvidedServiceInstanceData
   ): Observable<RequestInfoState> {
     const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data, serviceInstancesEntityType);
-    const create$ = this.store.select(selectRequestInfo(userProvidedServiceInstanceEntityType, guid));
+    const create$ = this.store.select(selectRequestInfo(action, guid));
     this.store.dispatch(action);
     return create$.pipe(
       debounceTime(250),
