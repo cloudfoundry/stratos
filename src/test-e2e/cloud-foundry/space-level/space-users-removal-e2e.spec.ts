@@ -1,5 +1,5 @@
+import { CfRolesRemovalLevel, CfUserRemovalTestLevel, setupCfUserRemovalTests } from '../users-removal-e2e.helper';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
-import { setupCfUserRemovalTests, CfUserRemovalTestLevel, CfRolesRemovalLevel } from '../users-removal-e2e.helper';
 
 describe('CF - Space Level - Remove user', () => {
   setupCfUserRemovalTests(CfUserRemovalTestLevel.Space, CfRolesRemovalLevel.Spaces, (cfGuid, orgGuid, spaceGuid) => {

@@ -20,7 +20,7 @@ Post 2.0 is released we will be working towards a regular recycle cycle each Spr
 
 We work on a 2-week Sprint cycle. Sprints start on Wednesdays. For reference, Sprint 27 started 4 April 2018.
 
-We are using GitHub issues to track all work items. We use ZenHub to manage these in an agile fashion - see: https://app.zenhub.com/workspace/o/cloudfoundry-incubator/stratos/boards
+We are using GitHub issues to track all work items. See: https://github.com/cloudfoundry-incubator/stratos/issues
 
 ## High-Level Features
 

@@ -15,8 +15,16 @@ SKIP_LOGIN="false"
 CF_API_ENDPOINT="https://api.local.pcfdev.io"
 DEFAULT_ORG="e2e"
 DEFAULT_SPACE="e2e"
+SETUP_INVITE_USER="true"
+UAA_CLI_CMD="uaac"
+UAA_ENDPOINT="https://uaa.local.pcfdev.io"
+#(SCF)UAA_ENDPOINT="https://uaa.cf.capbristol.com"
+ADMIN_CLIENT_SECRET="admin-client-secret"
+#(SCF)ADMIN_CLIENT_SECRET="<snip>"
+UAA_ZONE=
+#(SCF)UAA_ZONE=scf
 
-while getopts ":a:p:u:i:c:l" opt ; do
+while getopts ":a:p:u:i:c:l:b:d:e:f:g:" opt ; do
   case $opt in
     a)
       ADMIN="${OPTARG}"
@@ -35,6 +43,21 @@ while getopts ":a:p:u:i:c:l" opt ; do
     ;;
     l)
       SKIP_LOGIN="true"
+    ;;
+    b)
+      SETUP_INVITE_USER="${OPTARG}"
+    ;;
+    d)
+      UAA_CLI_CMD="${OPTARG}"
+    ;;
+    e)
+      UAA_ENDPOINT="${OPTARG}"
+    ;;
+    f)
+      ADMIN_CLIENT_SECRET="${OPTARG}"
+    ;;
+    g)
+      UAA_ZONE="${OPTARG}"
     ;;
   esac
 done
@@ -89,6 +112,23 @@ function cloneRepo() {
   fi
 }
 
+function addInviteUserUaaClient() {
+  echo "Setting up UAA Client for invite user tests"
+  
+  ZONE_ARG=""
+  if [ -n "${UAA_ZONE}" ]; then
+    echo "UAA ZONE: ${UAA_ZONE}"
+    ZONE_ARG="-z ${UAA_ZONE}"
+  fi
+  
+  echo "UAA Endpoint: ${UAA_ENDPOINT}"
+  ${UAA_CLI_CMD} target ${UAA_ENDPOINT} --skip-ssl-validation
+  ${UAA_CLI_CMD} token client get admin -s ${ADMIN_CLIENT_SECRET}
+  
+  echo "Adding Client"
+  ${UAA_CLI_CMD} client add stratos-invite --scope scim.invite,cloud_controller.admin --authorized_grant_types client_credentials --authorities scim.invite,cloud_controller.admin -s changeme ${ZONE_ARG}
+}
+
 cf create-user $USER $USER_PASS
 cf create-user $REMOVE_USER $USER_PASS
 
@@ -103,5 +143,9 @@ cloneRepo "cf-stratos" "go-env"
 pushd cfpushtemp/go-env
 cf push
 popd
+
+if [ "${SETUP_INVITE_USER}" == "true" ]; then
+  addInviteUserUaaClient
+fi
 
 echo "All done"
