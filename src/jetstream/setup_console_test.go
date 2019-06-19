@@ -1,41 +1,18 @@
 package main
 
 import (
-	// "errors"
-	// "fmt"
-	// "net/url"
 	"testing"
-	// "time"
-
-//	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-	log "github.com/sirupsen/logrus"
-	"github.com/govau/cf-common/env"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 
-	// "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	// "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/govau/cf-common/env"
 	. "github.com/smartystreets/goconvey/convey"
-
 )
 
 func TestConsoleSetup(t *testing.T) {
 
 	Convey("Check that we can migrate data from the old console_config table", t, func() {
-
-		// Remove the migration that migrates the console data - we'll apply that later
-		migrationSteps := datastore.GetOrderedMigrations()
-
-		var newSteps []datastore.StratosMigrationStep
-
-		for _, step := range migrationSteps {
-			log.Info(step.Name)
-			if step.Name != "ConfigSchema" {
-				newSteps = append(newSteps, step)
-			}
-		}
-		datastore.SetMigrations(newSteps)
 
 		db, err := datastore.GetSQLLiteConnectionWithPath("file::memory:?cache=shared", true)
 		if err != nil {
@@ -45,18 +22,10 @@ func TestConsoleSetup(t *testing.T) {
 
 		// Okay, so now we have a db set up in the state BEFORE we migrate to the new schema
 		// Insert a row into the setup table (need to do this manually now)
-		addMarker := "INSERT INTO console_config (uaa_endpoint, console_client, console_client_secret, console_admin_scope) VALUES ('TEST_UAA', 'TEST_CLIENT', 'TEST_SCOPE', 'TEST_SECRET')"
+		addMarker := "INSERT INTO console_config (uaa_endpoint, console_client, console_client_secret, console_admin_scope) VALUES ('TEST_UAA', 'TEST_CLIENT', 'TEST_SECRET', 'TEST_SCOPE')"
 		_, err = db.Exec(addMarker)
 		if err != nil {
 			t.Errorf("Failed to add data to the setup table: %v", err)
-		}
-
-		// Now apply the last migration
-		datastore.SetMigrations(migrationSteps)
-		conf := datastore.CreateFakeSQLiteGooseDriver()
-		err = datastore.ApplyMigrations(conf, db)
-		if err != nil {
-			t.Errorf("Failed to apply migrations: %v", err)
 		}
 
 		// Okay - now we can migrate the data
@@ -73,11 +42,16 @@ func TestConsoleSetup(t *testing.T) {
 			t.Errorf("Could not migrate config settings: %v", err)
 		}
 
+		// The old config should have been removed
+
 		// Read the console config and check we read it back correctly
 		old, err := configStore.GetConsoleConfig()
 		if err != nil {
 			t.Errorf("Could not get old config: %v", err)
 		}
+
+		// Old should be nil as we should have removed the row
+		So(old, ShouldBeNil)
 
 		console_config.InitializeConfEnvProvider(configStore)
 
@@ -86,12 +60,27 @@ func TestConsoleSetup(t *testing.T) {
 			t.Errorf("Could not get new config: %v", err)
 		}
 
-		So(old.UAAEndpoint.String(), ShouldEqual, newConfig.UAAEndpoint.String())
+		// New config should be 
+
+		So(newConfig.UAAEndpoint.String(), ShouldEqual, "TEST_UAA")
 		So(newConfig.AuthorizationEndpoint.String(), ShouldEqual, "TEST_UAA")
 
-		So(old.ConsoleClient, ShouldEqual, newConfig.ConsoleClient)
-		So(old.ConsoleClientSecret, ShouldEqual, newConfig.ConsoleClientSecret)
-		So(old.SkipSSLValidation, ShouldEqual, newConfig.SkipSSLValidation)
-		So(old.UseSSO, ShouldEqual, newConfig.UseSSO)
+		So(newConfig.ConsoleClient, ShouldEqual, "TEST_CLIENT")
+		So(newConfig.ConsoleClientSecret, ShouldEqual, "TEST_SECRET")
+		So(newConfig.ConsoleAdminScope, ShouldEqual, "TEST_SCOPE")
+		So(newConfig.SkipSSLValidation, ShouldEqual, false)
+		So(newConfig.UseSSO, ShouldEqual, false)
+
+		Convey("Check values stored in the db as patr of migratio", func() {
+			v, ok, err := configStore.GetValue("env", "UAA_ENDPOINT")
+			So(err, ShouldBeNil)
+			So(ok, ShouldBeTrue)
+			So(v, ShouldEqual, "TEST_UAA")
+
+			v, ok, err = configStore.GetValue("env", "SKIP_SSL_VALIDATION")
+			So(err, ShouldBeNil)
+			So(ok, ShouldBeFalse)
+			So(v, ShouldEqual, "")
+		})
 	})
 }
