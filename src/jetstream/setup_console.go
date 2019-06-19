@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 	"github.com/govau/cf-common/env"
@@ -15,6 +17,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
 const (
@@ -191,9 +194,38 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interfaces.ConsoleConfig, error) {
 	log.Debug("initialiseConsoleConfig")
 
+	log.Error("_________")
+
 	consoleConfig := &interfaces.ConsoleConfig{}
 	if err := config.Load(consoleConfig, envLookup.Lookup); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to load Console configuration. %v", err)
+	}
+
+	log.Info("============")
+	log.Infof("%v", consoleConfig)
+	if len(consoleConfig.AuthEndpointType) == 0 {
+		//return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
+		//Until front-end support is implemented, default to "remote" if AUTH_ENDPOINT_TYPE is not set
+		consoleConfig.AuthEndpointType = string(interfaces.Remote)
+	}
+
+	val, endpointTypeSupported := interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType]; 
+	if endpointTypeSupported {
+		if val == interfaces.Local {
+			//Auth endpoint type is set to "local", so load the local user config
+			err := initialiseLocalUsersConfiguration(consoleConfig, p)
+			if err != nil {
+				return consoleConfig, err
+			}
+		} else if val == interfaces.Remote {
+			// Auth endpoint type is set to "remote", so need to load local user config vars
+			// Nothing to do
+		} else {
+			//Auth endpoint type has been set to an invalid value
+			return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE must be set to either \"local\" or \"remote\"")
+		}
+	} else {
+		return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
 	}
 
 	// Default authorization endpoint to be UAA endpoint
@@ -204,6 +236,52 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 	}
 
 	return consoleConfig, nil
+}
+
+func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) (error) {
+
+	var err error
+	localUserName, found := p.Env().Lookup("LOCAL_USER")
+	if !found {
+		err = errors.New("LOCAL_USER not found")
+	}
+	localUserPassword, found := p.Env().Lookup("LOCAL_USER_PASSWORD")
+	if !found {
+		err = errors.New("LOCAL_USER_PASSWORD not found")
+	}
+	localUserScope, found := p.Env().Lookup("LOCAL_USER_SCOPE")
+	if !found {
+		err = errors.New("LOCAL_USER_SCOPE not found")
+	}
+	if err != nil {
+		return err
+	}
+	
+	consoleConfig.LocalUserScope = localUserScope
+	consoleConfig.LocalUser = localUserName
+	consoleConfig.LocalUserPassword = localUserPassword
+
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
+		return err
+	}
+	userGUID := uuid.NewV4().String()
+	password := localUserPassword
+	passwordHash, err := HashPassword(password)
+	if err != nil {
+		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
+		return err
+	}
+	scope    := localUserScope
+	email    := ""
+	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username:localUserName, Email: email, Scope: scope}
+	err = localUsersRepo.AddLocalUser(user)
+	if err != nil {
+		log.Errorf("Unable to add Stratos local user due to: %+v", err)
+	}
+
+	return err
 }
 
 var setupComplete = false

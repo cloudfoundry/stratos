@@ -92,6 +92,10 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 		return err
 	}
 
+	if err := migrateConfigSetting(portal.Env(), configStore, "AUTH_ENDPOINT_TYPE", config.AuthEndpointType, ""); err != nil {
+		return err
+	}
+
 	if err := migrateConfigSetting(portal.Env(), configStore, "SKIP_SSL_VALIDATION", strconv.FormatBool(config.SkipSSLValidation), "false"); err != nil {
 		return err
 	}

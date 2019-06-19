@@ -13,7 +13,7 @@ import (
 )
 
 // Legacy
-var getConsoleConfig = `SELECT uaa_endpoint, auth_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso FROM console_config`
+var getConsoleConfig = `SELECT auth_endpoint_type, uaa_endpoint, auth_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso FROM console_config`
 
 var deleteConsoleConfig = `DELETE FROM console_config`
 
@@ -168,7 +168,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 		}
 
 		consoleConfig = new(interfaces.ConsoleConfig)
-		err := rows.Scan(&uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
+		err := rows.Scan(&consoleConfig.AuthEndpointType, &uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
 			&consoleConfig.ConsoleClientSecret, &consoleConfig.SkipSSLValidation, &consoleConfig.UseSSO)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan config record: %v", err)
