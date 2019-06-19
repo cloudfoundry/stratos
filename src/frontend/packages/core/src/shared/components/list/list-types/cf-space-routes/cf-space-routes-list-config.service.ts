@@ -51,5 +51,10 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
     );
     this.getDataSource = () => this.dataSource;
     this.enableTextFilter = false;
+
+    const mappedAppsColumn = this.columns.find(column => column.columnId === CfRoutesListConfigBase.columnIdMappedApps);
+    mappedAppsColumn.cellConfig = {
+      breadcrumbs: 'space'
+    };
   }
 }

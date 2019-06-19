@@ -4,13 +4,22 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
-import { cfEntityFactory, organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  quotaDefinitionEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
+import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IOrganization } from '../../../../core/cf-api.types';
+import { IOrganization, IOrgQuotaDefinition } from '../../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -40,12 +49,13 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   orgSubscription: Subscription;
   currentStatus: string;
   originalName: string;
-  orgName: string;
   org$: Observable<IOrganization>;
   editOrgName: FormGroup;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
+  quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
+
   constructor(
     private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -55,17 +65,22 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
     this.editOrgName = new FormGroup({
-      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()])
+      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
+      quotaDefinition: new FormControl(),
       // toggleStatus: new FormControl(false),
     });
     this.org$ = this.cfOrgService.org$.pipe(
       map(o => o.entity.entity),
       take(1),
       tap(n => {
-        this.orgName = n.name;
         this.originalName = n.name;
         this.status = n.status === OrgStatus.ACTIVE ? true : false;
         this.currentStatus = n.status;
+
+        this.editOrgName.patchValue({
+          orgName: n.name,
+          quotaDefinition: n.quota_definition_guid,
+        });
       })
     );
 
@@ -97,25 +112,42 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
       tap((o) => this.allOrgsInEndpoint = o)
     );
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
+
+    const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
+      {
+        store: this.store,
+        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          quotaPaginationKey,
+          cfEntityFactory(quotaDefinitionEntityType)
+        )
+      },
+      true
+    ).entities$.pipe(
+      filter(o => !!o),
+    );
   }
 
   validate = (value: string = null) => {
     if (this.allOrgsInEndpoint) {
       return this.allOrgsInEndpoint
         .filter(o => o !== this.originalName)
-        .indexOf(value ? value : this.orgName) === -1;
+        .indexOf(value ? value : this.editOrgName.value.orgName) === -1;
     }
     return true;
   }
 
   submit: StepOnNextFunction = () => {
-    this.store.dispatch(new UpdateOrganization(this.orgGuid, this.cfGuid, {
-      name: this.orgName,
+    const action = new UpdateOrganization(this.orgGuid, this.cfGuid, {
+      name: this.editOrgName.value.orgName,
+      quota_definition_guid: this.editOrgName.value.quotaDefinition,
       status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
-    }));
+    });
+    this.store.dispatch(action);
 
     // Update action
-    return this.store.select(selectRequestInfo(organizationEntityType, this.orgGuid)).pipe(
+    return this.store.select(selectRequestInfo(action, this.orgGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
       map(o => o.updating[UpdateOrganization.UpdateExistingOrg]),
       map(o => ({

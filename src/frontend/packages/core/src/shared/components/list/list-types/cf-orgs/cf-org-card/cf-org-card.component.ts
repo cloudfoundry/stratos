@@ -21,7 +21,9 @@ import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
-import { createQuotaDefinition } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import {
+  createOrgQuotaDefinition,
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
@@ -130,7 +132,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   setValues = (role: string, apps: APIResource<IApp>[]) => {
     this.userRolesInOrg = role;
-    const quotaDefinition = this.row.entity.quota_definition || { entity: createQuotaDefinition(this.orgGuid), metadata: null };
+    const quotaDefinition = this.row.entity.quota_definition || { entity: createOrgQuotaDefinition(), metadata: null };
 
     if (apps) {
       this.setAppsDependentCounts(apps);

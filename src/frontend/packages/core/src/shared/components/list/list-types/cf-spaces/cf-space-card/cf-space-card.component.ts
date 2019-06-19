@@ -22,7 +22,7 @@ import {
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   CloudFoundryOrganizationService,
-  createQuotaDefinition,
+  createSpaceQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
@@ -143,7 +143,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   setValues = (roles: string, apps: APIResource<IApp>[]) => {
     this.userRolesInSpace = roles;
     const quotaDefinition = this.row.entity.space_quota_definition ?
-      this.row.entity.space_quota_definition.entity : createQuotaDefinition(this.orgGuid);
+      this.row.entity.space_quota_definition.entity : createSpaceQuotaDefinition(this.orgGuid);
     if (apps) {
       this.setAppsDependentCounts(apps);
       this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');

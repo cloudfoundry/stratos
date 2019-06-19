@@ -58,7 +58,7 @@ export interface ISpace {
   security_groups?: APIResource<ISecurityGroup>[];
   staging_security_groups_url: string;
   staging_security_groups?: APIResource<ISecurityGroup>[];
-  space_quota_definition?: APIResource<IQuotaDefinition>;
+  space_quota_definition?: APIResource<ISpaceQuotaDefinition>;
   routes?: APIResource<IRoute>[];
   cfGuid?: string;
   guid?: string;
@@ -177,7 +177,7 @@ export interface IOrganization<spaceT = APIResource<ISpace>[]> {
   cfGuid?: string;
   spaces?: spaceT;
   private_domains?: APIResource<IPrivateDomain>[];
-  quota_definition?: APIResource<IQuotaDefinition>;
+  quota_definition?: APIResource<IOrgQuotaDefinition>;
 }
 
 export interface IDomain {
@@ -241,16 +241,30 @@ export interface IPrivateDomain {
   cfGuid?: string;
 }
 
-export interface IQuotaDefinition {
+export interface IOrgQuotaDefinition extends IBaseQuotaDefinition {
+  trial_db_allowed: boolean;
+}
+
+export interface ISpaceQuotaDefinition extends IBaseQuotaDefinition {
+  organization_guid?: string;
+  organization_url?: string;
+  spaces_url?: string;
+}
+
+interface IBaseQuotaDefinition {
   memory_limit: number;
   app_instance_limit: number;
   instance_memory_limit: number;
   name: string;
-  organization_guid?: string;
   total_services?: number;
   total_routes?: number;
   total_private_domains?: number;
   non_basic_services_allowed?: boolean;
+  app_task_limit: number;
+  total_service_keys: number;
+  total_reserved_route_ports: number;
+  guid?: string;
+  cfGuid?: string;
 }
 
 export interface IUpdateSpace {
@@ -263,6 +277,7 @@ export interface IUpdateSpace {
   security_group_guids?: string[];
   allow_ssh?: boolean;
   isolation_segment_guid?: string;
+  space_quota_definition_guid?: string;
 }
 
 export interface IUpdateOrganization {

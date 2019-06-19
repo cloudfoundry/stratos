@@ -21,7 +21,7 @@ If you run into issues, please refer to the [Troubleshooting Guide](#troubleshoo
 
 > The console will pre-configure the host Cloud Foundry endpoint. No other CF instance should be registered unless the instructions in
  the section [Associate Cloud Foundry database service](#Associate-Cloud-Foundry-database-service) are followed.
- All other deployment methods (helm, docker-compose, docker all-in-one, etc) allow the registration of multiple CF instances by default.
+ All other deployment methods (helm, docker all-in-one, etc) allow the registration of multiple CF instances by default.
 
 Note:
 
@@ -117,8 +117,9 @@ Deploy Stratos using the [`splatform/stratos`](https://hub.docker.com/r/splatfor
 > **NOTE:** Your Cloud Foundry must have docker support [enabled](https://docs.cloudfoundry.org/adminguide/docker.html#enable).
 
 ```
-cf push -o splatform/stratos:stable -m 128M -k 384M
+cf push console -o splatform/stratos:stable -m 128M -k 384M
 ```
+> Note: You can replace `console` in the command above with a name of your choice for the application
 
 Alternatively cf push using a manifest
 

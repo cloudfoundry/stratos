@@ -1,14 +1,14 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
-
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 
 export interface ServiceTag {
   value: string;
@@ -20,8 +20,11 @@ export interface ServiceTag {
   styleUrls: ['./cf-service-card.component.scss']
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
-
   serviceEntity: APIResource<IService>;
+  cfOrgSpace: CfOrgSpaceLabelService;
+  extraInfo: IServiceExtra;
+  tags: AppChip<ServiceTag>[] = [];
+
   @Input() disableCardClick = false;
 
   @Input('row')
@@ -40,12 +43,13 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
           hideClearButton$: observableOf(true)
         });
       });
+
+      if (!this.cfOrgSpace) {
+        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.serviceEntity.entity.cfGuid);
+      }
     }
   }
 
-
-  extraInfo: IServiceExtra;
-  tags: AppChip<ServiceTag>[] = [];
   constructor(private store: Store<CFAppState>) {
     super();
   }
@@ -57,7 +61,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
     return this.serviceEntity.entity.label;
   }
 
-
   hasDocumentationUrl() {
     return !!(this.getDocumentationUrl());
   }
@@ -68,9 +71,12 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   hasSupportUrl() {
     return !!(this.getSupportUrl());
   }
+
   getSupportUrl() {
     return this.extraInfo && this.extraInfo.supportUrl;
   }
+
+  getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
   goToServiceInstances = () =>
     this.store.dispatch(new RouterNav({

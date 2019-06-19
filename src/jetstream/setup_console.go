@@ -157,6 +157,10 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 	if !found {
 		return consoleConfig, errors.New("UAA_Endpoint not found")
 	}
+	authEndpoint, found := p.Env().Lookup("AUTH_ENDPOINT")
+	if !found {
+		authEndpoint = uaaEndpoint
+	}
 
 	consoleClient, found := p.Env().Lookup("CONSOLE_CLIENT")
 	if !found {
@@ -181,6 +185,9 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 
 	if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
+	}
+	if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint); err != nil {
+		return consoleConfig, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
 	}
 
 	consoleConfig.ConsoleAdminScope = consoleAdminScope

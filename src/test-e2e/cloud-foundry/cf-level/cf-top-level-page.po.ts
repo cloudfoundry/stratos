@@ -1,7 +1,10 @@
 import { browser, by, element, promise, protractor } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
+import { Component } from '../../po/component.po';
+import { ConfirmDialogComponent } from '../../po/confirm-dialog';
 import { ListComponent } from '../../po/list.po';
+import { MetaCardTitleType } from '../../po/meta-card.po';
 import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 
 
@@ -41,6 +44,18 @@ export class CfTopLevelPage extends CFPage {
     return cardView;
   }
 
+  deleteOrg(orgName) {
+    const cardView = this.goToOrgView();
+
+    cardView.cards.findCardByTitle(orgName, MetaCardTitleType.CUSTOM, true).then(card => {
+      card.openActionMenu().then(menu => {
+        menu.clickItem('Delete');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', orgName);
+        card.waitUntilNotShown();
+      });
+    });
+  }
+
   isSummaryView(): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
       return url.startsWith(browser.baseUrl + this.navLink) && url.endsWith('/summary');
@@ -69,10 +84,30 @@ export class CfTopLevelPage extends CFPage {
     return comp;
   }
 
-  isUserInviteIsConfigured(isAdmin: boolean = true): promise.Promise<boolean> {
+  isUserInviteConfigured(isAdmin: boolean = true): promise.Promise<boolean> {
     return this.waitForMetaDataItemComponent('User Invitation Support').getValue().then(value =>
       isAdmin ? value.startsWith('Configured') : value.startsWith('Enabled')
     );
+  }
+
+  getInviteConfigureButton(): Component {
+    return new Component(element(by.cssContainingText('.user-invites button', 'Configure')));
+  }
+
+  getInviteDisableButton(): Component {
+    return new Component(element(by.cssContainingText('.user-invites button', 'Disable')));
+  }
+
+  canConfigureUserInvite(): promise.Promise<boolean> {
+    return this.waitForMetaDataItemComponent('User Invitation Support').getValue().then(value => value.endsWith('Configure'));
+  }
+
+  clickInviteConfigure(): promise.Promise<any> {
+    return this.getInviteConfigureButton().getComponent().click();
+  }
+
+  clickInviteDisable(): promise.Promise<any> {
+    return this.getInviteDisableButton().getComponent().click();
   }
 
   goToSummaryTab() {
@@ -113,6 +148,14 @@ export class CfTopLevelPage extends CFPage {
 
   goToSecurityGroupsTab() {
     return this.goToTab('Security Groups', 'security-groups');
+  }
+
+  clickOnOrg(orgName: string) {
+    const list = new ListComponent();
+    list.cards.findCardByTitle(orgName).then((card) => {
+      expect(card).toBeDefined();
+      card.click();
+    });
   }
 
   private goToTab(label: string, urlSuffix: string): promise.Promise<any> {

@@ -1,7 +1,8 @@
 import { Observable } from 'rxjs';
+
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 
 
 export interface EntityCatalogueEntityConfig {

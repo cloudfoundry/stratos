@@ -2,12 +2,7 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
-import {
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
 import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { GetOrganization } from '../../../actions/organization.actions';
 import { APIResponse } from '../../../actions/request.actions';
@@ -25,6 +20,12 @@ import {
   ValidateResultFetchingState,
 } from '../entity-relations.types';
 
+import {
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 /**
  * Add roles from (org|space)\[role\]\[user\] into user\[role\]
  */
@@ -76,13 +77,13 @@ export function orgSpacePostProcess(
   const existingUsers = allEntities[entityKey];
 
   const newUsers = {};
-  if (entityKey === EntityCatalogueHelpers.buildEntityKey(CF_ENDPOINT_TYPE, organizationEntityType)) {
+  if (entityKey === getCFEntityKey(organizationEntityType)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
-  } else if (entityKey === EntityCatalogueHelpers.buildEntityKey(CF_ENDPOINT_TYPE, spaceEntityType)) {
+  } else if (entityKey === getCFEntityKey(spaceEntityType)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);

@@ -2,6 +2,7 @@ import { StratosBaseCatalogueEntity } from '../src/core/entity-catalogue/entity-
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 
+
 export interface EntityCatalogueHelperConfig {
   catalogueEntities?: [EntityCatalogueEntityConfig, StratosBaseCatalogueEntity][];
 }
@@ -13,7 +14,7 @@ export class EntityCatalogueTestHelper {
       const key = this.stringifyEntityConfig(config);
       this.catalogueEntitiesMap.set(key, entity);
     });
-  };
+  }
   private fakeGetEntity = (
     endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
     entityType?: string,

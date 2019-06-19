@@ -1,5 +1,5 @@
+import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../types/api.types';
-import { IOrganization, ISpace, IQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 
 export const entityRelationMissingSpacesUrl = 'spaces_url';
 export const entityRelationMissingQuotaGuid = 'quota_guid';
@@ -50,7 +50,7 @@ export class EntityRelationSpecHelper {
     };
   }
 
-  createEmptyQuotaDefinition(guid: string, name: string): APIResource<IQuotaDefinition> {
+  createEmptyQuotaDefinition(guid: string, name: string): APIResource<IOrgQuotaDefinition> {
     return {
       entity: {
         memory_limit: 1,

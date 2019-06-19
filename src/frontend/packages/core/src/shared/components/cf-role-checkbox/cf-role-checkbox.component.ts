@@ -36,6 +36,8 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
   @Input() cfGuid: string;
   @Input() spaceGuid: string;
+  @Input() orgName: string;
+  @Input() spaceName: string;
   @Input() role: string;
   @Output() changed = new BehaviorSubject(false);
 
@@ -268,9 +270,9 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
         this.tooltip = '';
       }
       if (this.isOrgRole) {
-        this.store.dispatch(new UsersRolesSetOrgRole(this.orgGuid, this.role, checked));
+        this.store.dispatch(new UsersRolesSetOrgRole(this.orgGuid, this.orgName, this.role, checked));
       } else {
-        this.store.dispatch(new UsersRolesSetSpaceRole(this.orgGuid, this.spaceGuid, this.role, checked));
+        this.store.dispatch(new UsersRolesSetSpaceRole(this.orgGuid, this.orgName, this.spaceGuid, this.spaceName, this.role, checked));
       }
     });
   }

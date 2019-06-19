@@ -1,6 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import {
   applicationEntityType,
   appStatsEntityType,
@@ -12,8 +11,8 @@ import {
   spaceEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { BaseRequestDataState, IRequestState } from '../types/entity.types';
@@ -26,9 +25,11 @@ import { applicationAddRemoveReducer } from './application-add-remove-reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
 import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
+import { updateOrganizationQuotaReducer } from './organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
+import { updateSpaceQuotaReducer } from './space-quota.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
 
@@ -73,14 +74,9 @@ export function requestReducer(state: IRequestState, action: Action) {
   return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
-function getCFEntityKey(type: string) {
-  return EntityCatalogueHelpers.buildEntityKey(type, CF_ENDPOINT_TYPE);
-}
-
 function getInternalEntityKey(type: string) {
   return entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, type);
 }
-
 
 // TODO Add these reducers to the catalogue
 export function requestDataReducer(state: BaseRequestDataState, action: Action) {
@@ -98,11 +94,13 @@ export function requestDataReducer(state: BaseRequestDataState, action: Action) 
       endpointDisconnectApplicationReducer()
     ],
     [getCFEntityKey(spaceEntityType)]: [
+      updateSpaceQuotaReducer,
       endpointDisconnectApplicationReducer(),
       applicationAddRemoveReducer(),
       userSpaceOrgReducer(true)
     ],
     [getCFEntityKey(organizationEntityType)]: [
+      updateOrganizationQuotaReducer,
       updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)

@@ -1,22 +1,27 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { filter, first, map, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../store/src/actions/metrics.actions';
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { IRequestEntityTypeState, EndpointOnlyAppState } from '../../../store/src/app-state';
+import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { entityFactory } from '../../../store/src/helpers/entity-factory';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
+import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   endpointEntitiesSelector,
   endpointsEntityRequestDataSelector,
   endpointStatusSelector,
 } from '../../../store/src/selectors/endpoint.selectors';
+import { IMetrics } from '../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
-import { UserService } from './user.service';
+import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
+import { MetricQueryType } from '../shared/services/metrics-range-selector.types';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { BaseRequestDataState } from '../../../store/src/types/entity.types';
+import { UserService } from './user.service';
 
 
 
@@ -44,7 +49,7 @@ export class EndpointsService implements CanActivate {
     private store: Store<EndpointOnlyAppState>,
     private userService: UserService,
     private endpointHealthChecks: EndpointHealthChecks,
-
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
@@ -122,11 +127,41 @@ export class EndpointsService implements CanActivate {
       }));
   }
 
-  hasMetrics(endpointId: string) {
+  hasMetrics(endpointId: string): Observable<boolean> {
     return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
       filter(endpoint => !!endpoint),
       map(endpoint => endpoint.metricsAvailable),
       first()
+    );
+  }
+
+  hasCellMetrics(endpointId: string): Observable<boolean> {
+    return this.hasMetrics(endpointId).pipe(
+      switchMap(hasMetrics => {
+        if (!hasMetrics) {
+          return of(false);
+        }
+
+        // Check that we successfully retrieve some stats. If the metric is unknown an empty list is returned
+        const action = new FetchCFCellMetricsPaginatedAction(
+          endpointId,
+          endpointId,
+          new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
+          MetricQueryType.QUERY
+        );
+        return getPaginationObservables<IMetrics>({
+          store: this.store,
+          action,
+          paginationMonitor: this.paginationMonitorFactory.create(
+            action.paginationKey,
+            entityFactory(action.entityType)
+          )
+        }).entities$.pipe(
+          filter(entities => !!entities && !!entities.length),
+          map(entities => !!entities.find(entity => !!entity.data.result.length)),
+          first()
+        );
+      })
     );
   }
 

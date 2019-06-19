@@ -1,3 +1,4 @@
+import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import {
   IService,
   IServiceBinding,
@@ -14,9 +15,11 @@ import {
   IDomain,
   IFeatureFlag,
   IOrganization,
+  IOrgQuotaDefinition,
   IRoute,
   ISecurityGroup,
   ISpace,
+  ISpaceQuotaDefinition,
   IStack,
 } from '../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
@@ -32,6 +35,7 @@ import { UserProfileInfo } from './user-profile.types';
 import { CfUser } from './user.types';
 
 export interface BaseRequestDataState {
+  // TODO: Add `stratos` to types
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   // featureFlag: IRequestEntityTypeState<IFeatureFlag>;
@@ -59,7 +63,7 @@ export interface BaseRequestDataState {
   // [name: string]: IRequestEntityTypeState<any>;
 }
 
-
+// TODO: These should live in the cf module
 interface CFEntityValues {
   featureFlag: IRequestEntityTypeState<IFeatureFlag>;
   application: IRequestEntityTypeState<APIResource<IApp>>;
@@ -86,8 +90,9 @@ interface CFEntityValues {
   userProvidedServiceInstance: IRequestEntityTypeState<IUserProvidedServiceInstance>;
   cloudFoundryInfo: IRequestEntityTypeState<any>;
   private_domains: IRequestEntityTypeState<any>;
-  space_quota_definition: IRequestEntityTypeState<any>;
-  appSummaryEntityType: IRequestEntityTypeState<IAppSummary>;
+  quota_definition: IRequestEntityTypeState<APIResource<IOrgQuotaDefinition>>;
+  space_quota_definition: IRequestEntityTypeState<APIResource<ISpaceQuotaDefinition>>;
+  [appSummaryEntityType]: IRequestEntityTypeState<IAppSummary>;
 }
 export type ExtendedRequestState<T extends string | number | symbol, Y> = Record<T, Y>;
 
@@ -115,7 +120,7 @@ export interface IRequestState extends IRequestTypeState {
   userFavorites: IRequestEntityTypeState<RequestInfoState>;
 }
 
-
+// TODO: These should live in the cf module
 export const defaultCfEntitiesState = {
   // [applicationEntityType]: {},
   // [stackEntityType]: {},

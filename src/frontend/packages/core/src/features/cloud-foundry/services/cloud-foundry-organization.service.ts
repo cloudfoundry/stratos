@@ -18,7 +18,14 @@ import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { OrgUserRoleNames } from '../../../../../store/src/types/user.types';
-import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
+import {
+  IApp,
+  IOrganization,
+  IOrgQuotaDefinition,
+  IPrivateDomain,
+  ISpace,
+  ISpaceQuotaDefinition,
+} from '../../../core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -31,14 +38,30 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
-export const createQuotaDefinition = (orgGuid: string): IQuotaDefinition => ({
+export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,
   app_instance_limit: -1,
   instance_memory_limit: -1,
   name: 'None assigned',
-  organization_guid: orgGuid,
   total_services: -1,
-  total_routes: -1
+  total_routes: -1,
+  app_task_limit: -1,
+  total_reserved_route_ports: -1,
+  total_service_keys: -1,
+  trial_db_allowed: false
+});
+
+export const createSpaceQuotaDefinition = (orgGuid: string): ISpaceQuotaDefinition => ({
+  memory_limit: -1,
+  app_instance_limit: -1,
+  instance_memory_limit: -1,
+  name: 'None assigned',
+  total_services: -1,
+  total_routes: -1,
+  app_task_limit: -1,
+  total_reserved_route_ports: -1,
+  total_service_keys: -1,
+  organization_guid: orgGuid
 });
 
 @Injectable()
@@ -46,7 +69,7 @@ export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;
   userOrgRole$: Observable<string>;
-  quotaDefinition$: Observable<IQuotaDefinition>;
+  quotaDefinition$: Observable<IOrgQuotaDefinition>;
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;

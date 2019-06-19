@@ -1,4 +1,5 @@
 import { ActionHistoryState } from './reducers/action-history-reducer';
+import { RequestInfoState } from './reducers/api-request-reducer/types';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
@@ -7,7 +8,7 @@ import { CreateServiceInstanceState } from './types/create-service-instance.type
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
-import { ExtendedRequestState, CFRequestDataState, BaseRequestDataState } from './types/entity.types';
+import { BaseRequestDataState, CFRequestDataState, ExtendedRequestState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import { InternalEventsState } from './types/internal-events.types';
 import { PaginationEntityTypeState } from './types/pagination.types';
@@ -15,7 +16,6 @@ import { IRecentlyVisitedState } from './types/recently-visited.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
 import { UsersRolesState } from './types/users-roles.types';
-import { RequestInfoState } from './reducers/api-request-reducer/types';
 
 export interface IRequestTypeState {
   [entityKey: string]: any;
@@ -52,6 +52,7 @@ export interface GeneralRequestDataState {
 
 export interface GeneralAppRequestDataState extends BaseRequestDataState, GeneralRequestDataState { }
 
+// TODO: use these throughout app.component.ts
 export type EndpointOnlyAppState = AppState<Pick<BaseRequestDataState, 'endpoint'>>;
 export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;

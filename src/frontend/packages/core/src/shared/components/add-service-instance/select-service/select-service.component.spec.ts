@@ -22,6 +22,7 @@ import { ServiceIconComponent } from '../../service-icon/service-icon.component'
 import { CsiGuidsService } from '../csi-guids.service';
 import { SelectServiceComponent } from './select-service.component';
 import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
+import { CfOrgSpaceLinksComponent } from '../../cf-org-space-links/cf-org-space-links.component';
 
 describe('SelectServiceComponent', () => {
   let component: SelectServiceComponent;
@@ -31,6 +32,7 @@ describe('SelectServiceComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         SelectServiceComponent,
+        CfOrgSpaceLinksComponent,
         CardStatusComponent,
         CfServiceCardComponent,
         MetaCardComponent,
