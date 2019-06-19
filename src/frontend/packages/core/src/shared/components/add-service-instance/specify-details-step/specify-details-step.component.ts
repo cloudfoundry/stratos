@@ -26,6 +26,7 @@ import {
 } from 'rxjs/operators';
 
 import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import {
   SetCreateServiceInstanceOrg,
@@ -377,7 +378,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     if (!isEditMode) {
       return observableOf(null);
     }
-    const actionState = selectUpdateInfo(serviceInstancesEntityType,
+    const actionState = selectUpdateInfo(getCFEntityKey(serviceInstancesEntityType),
       newServiceInstanceGuid,
       UpdateServiceInstance.updateServiceInstance
     );
@@ -429,7 +430,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const checkUpdate$ = this.getUpdateObservable(isEditMode, newServiceInstanceGuid);
     const action = this.getAction(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr, isEditMode);
 
-    const create$ = this.store.select(selectRequestInfo(serviceInstancesEntityType, newServiceInstanceGuid));
+    const create$ = this.store.select(selectRequestInfo(action, newServiceInstanceGuid));
     const getIdFromResponse = this.getIdFromResponseGetter(cfGuid, newServiceInstanceGuid, isEditMode);
 
     this.store.dispatch(action);

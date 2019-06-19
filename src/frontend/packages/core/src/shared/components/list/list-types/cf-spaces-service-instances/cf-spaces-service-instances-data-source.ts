@@ -6,7 +6,7 @@ import {
   serviceBindingEntityType,
   serviceEntityType,
   serviceInstancesEntityType,
-  serviceInstancesWithspaceEntityType,
+  serviceInstancesWithSpaceEntityType,
   servicePlanEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
@@ -31,11 +31,11 @@ export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResour
       createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
       createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
     ], true, false);
-    action.entity = [cfEntityFactory(serviceInstancesWithspaceEntityType)];
+    action.entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
     super({
       store,
       action,
-      schema: cfEntityFactory(serviceInstancesWithspaceEntityType),
+      schema: cfEntityFactory(serviceInstancesWithSpaceEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       // This would normally be fetched inline, however some of the SI's children will be missing if the SI was fetched by the org

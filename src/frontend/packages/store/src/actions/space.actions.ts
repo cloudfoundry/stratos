@@ -8,7 +8,7 @@ import {
   routeEntityType,
   serviceEntityType,
   serviceInstancesEntityType,
-  serviceInstancesWithspaceEntityType,
+  serviceInstancesWithSpaceEntityType,
   servicePlanEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
@@ -273,7 +273,7 @@ export class GetServiceInstancesForSpace
     this.parentGuid = spaceGuid;
   }
   actions = getActions('Space', 'Get all service instances');
-  entity = [cfEntityFactory(serviceInstancesWithspaceEntityType)];
+  entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   entityType = serviceInstancesEntityType;
   options: RequestOptions;
   initialParams = {
