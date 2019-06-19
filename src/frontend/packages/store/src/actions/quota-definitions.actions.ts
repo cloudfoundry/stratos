@@ -2,11 +2,11 @@ import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 import {
-  entityFactory,
-  organizationSchemaKey,
-  quotaDefinitionSchemaKey,
-  spaceQuotaSchemaKey,
-} from '../helpers/entity-factory';
+  cfEntityFactory,
+  organizationEntityType,
+  quotaDefinitionEntityType,
+  spaceQuotaEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import { EntityInlineChildAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
@@ -44,8 +44,8 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
     GET_QUOTA_DEFINITIONS_SUCCESS,
     GET_QUOTA_DEFINITIONS_FAILED
   ];
-  entity = [entityFactory(quotaDefinitionSchemaKey)];
-  entityType = quotaDefinitionSchemaKey;
+  entity = [cfEntityFactory(quotaDefinitionEntityType)];
+  entityType = quotaDefinitionEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -75,9 +75,9 @@ export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implemen
     GET_SPACE_QUOTA_DEFINITIONS_SUCCESS,
     GET_SPACE_QUOTA_DEFINITIONS_FAILED
   ];
-  parentEntityConfig = new CFEntityConfig(organizationSchemaKey);
-  entity = [entityFactory(spaceQuotaSchemaKey)];
-  entityType = spaceQuotaSchemaKey;
+  parentEntityConfig = new CFEntityConfig(organizationEntityType);
+  entity = [cfEntityFactory(spaceQuotaEntityType)];
+  entityType = spaceQuotaEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -102,8 +102,8 @@ export class AssociateSpaceQuota extends CFStartAction implements ICFAction {
     ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
     ASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED
   ];
-  entity = [entityFactory(spaceQuotaSchemaKey)];
-  entityType = spaceQuotaSchemaKey;
+  entity = [cfEntityFactory(spaceQuotaEntityType)];
+  entityType = spaceQuotaEntityType;
   options: RequestOptions;
   updatingKey = AssociateSpaceQuota.UpdateExistingSpaceQuota;
   guid: string;
@@ -124,8 +124,8 @@ export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
     DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
     DISASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED
   ];
-  entity = [entityFactory(spaceQuotaSchemaKey)];
-  entityType = spaceQuotaSchemaKey;
+  entity = [cfEntityFactory(spaceQuotaEntityType)];
+  entityType = spaceQuotaEntityType;
   options: RequestOptions;
   updatingKey = AssociateSpaceQuota.UpdateExistingSpaceQuota;
   guid: string;

@@ -6,12 +6,16 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { organizationEntityType, quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  quotaDefinitionEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { CreateOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -82,7 +86,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
-          entityFactory(quotaDefinitionEntityType)
+          cfEntityFactory(quotaDefinitionEntityType)
         )
       },
       true

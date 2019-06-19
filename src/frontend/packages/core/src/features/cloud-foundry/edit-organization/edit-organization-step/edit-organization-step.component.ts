@@ -12,7 +12,7 @@ import {
 import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -120,7 +120,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
         action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
-          entityFactory(quotaDefinitionEntityType)
+          cfEntityFactory(quotaDefinitionEntityType)
         )
       },
       true
