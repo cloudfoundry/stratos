@@ -5,15 +5,15 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { AssociateSpaceQuota, DisassociateSpaceQuota } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { UpdateSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { AssociateSpaceQuota, DisassociateSpaceQuota } from '../../../../../../store/src/actions/quota-definitions.actions';
 
 
 @Component({
@@ -93,7 +93,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
         }
 
         if (this.originalSpaceQuotaGuid === spaceQuotaGuid ||
-            (!this.originalSpaceQuotaGuid && !spaceQuotaGuid)) {
+          (!this.originalSpaceQuotaGuid && !spaceQuotaGuid)) {
           return of({ success: true, redirect: true });
         }
 
@@ -110,7 +110,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     this.store.dispatch(updateAction);
 
     return this.store.select(selectRequestInfo(updateAction, this.spaceGuid)).pipe(
-      tap(console.log),
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map((state) => state.updating[UpdateSpace.UpdateExistingSpace])
     );

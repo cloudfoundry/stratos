@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfEntity } from '../../../../../../../cloud-foundry/src/selectors/api.selectors';
 import {
   CheckProjectExists,
   FetchBranchesForProject,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
@@ -157,7 +157,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private setDeployedCommitDetails() {
     const scmType = this.scm.getType();
     this.store.select(
-      selectEntity<APIResource<GitCommit>>(gitCommitEntityType, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
+      selectCfEntity<APIResource<GitCommit>>(gitCommitEntityType, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
       .pipe(
         filter(deployedCommit => !!deployedCommit),
         first(),

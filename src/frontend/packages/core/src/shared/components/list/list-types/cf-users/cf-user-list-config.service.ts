@@ -14,6 +14,7 @@ import { CfUser } from '../../../../../../../store/src/types/user.types';
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { EntityCatalogueHelpers } from '../../../../../core/entity-catalogue/entity-catalogue.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import {
   canUpdateOrgSpaceRoles,
@@ -37,7 +38,6 @@ import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-pe
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
 import { userHasRole, UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
-import { EntityCatalogueHelpers } from '../../../../../core/entity-catalogue/entity-catalogue.helper';
 
 const defaultUserHasSpaceRoles: (user: CfUser) => boolean = (user: CfUser): boolean => {
   return userHasRole(user, 'spaces') ||

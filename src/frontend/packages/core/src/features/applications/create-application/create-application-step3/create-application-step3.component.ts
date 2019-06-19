@@ -11,6 +11,7 @@ import {
   organizationEntityType,
   routeEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { AssociateRouteWithAppApplication } from '../../../../../../store/src/actions/application-service-routes.actions';
 import { CreateNewApplication } from '../../../../../../store/src/actions/application.actions';
 import { GetOrganization } from '../../../../../../store/src/actions/organization.actions';
@@ -20,7 +21,6 @@ import { CFAppState } from '../../../../../../store/src/app-state';
 import { selectNewAppState } from '../../../../../../store/src/effects/create-app-effects';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CreateNewApplicationState } from '../../../../../../store/src/types/create-application.types';
 import { IDomain } from '../../../../core/cf-api.types';
@@ -103,7 +103,7 @@ export class CreateApplicationStep3Component implements OnInit {
         space_guid: space
       }
     ));
-    return this.wrapObservable(this.store.select(selectRequestInfo(applicationEntityType, newAppGuid)), 'Could not create application');
+    return this.wrapObservable(this.store.select(selectCfRequestInfo(applicationEntityType, newAppGuid)), 'Could not create application');
   }
 
   createRoute(): Observable<RequestInfoState> {
@@ -125,7 +125,7 @@ export class CreateApplicationStep3Component implements OnInit {
           host: hostName
         }
       ));
-      return this.wrapObservable(this.store.select(selectRequestInfo(routeEntityType, newRouteGuid)),
+      return this.wrapObservable(this.store.select(selectCfRequestInfo(routeEntityType, newRouteGuid)),
         'Application created. Could not create route');
     }
     return observableOf({
@@ -136,7 +136,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
     this.store.dispatch(new AssociateRouteWithAppApplication(appGuid, routeGuid, endpointGuid));
-    return this.wrapObservable(this.store.select(selectRequestInfo(applicationEntityType, appGuid)),
+    return this.wrapObservable(this.store.select(selectCfRequestInfo(applicationEntityType, appGuid)),
       'Application and route created. Could not associated route with app');
   }
 

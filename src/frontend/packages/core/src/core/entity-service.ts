@@ -145,8 +145,6 @@ export class EntityService<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, updateKey = this.refreshKey) {
-    console.log(this.actionDispatch);
-    console.log(updateKey);
     return this.entityMonitor.poll(interval, () => this.actionDispatch(updateKey), compose(
       getUpdateSectionById(updateKey),
       getEntityUpdateSections

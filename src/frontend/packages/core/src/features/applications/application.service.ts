@@ -15,7 +15,7 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
+import { selectCfEntity } from '../../../../cloud-foundry/src/selectors/api.selectors';
 import {
   AppMetadataTypes,
   GetAppStatsAction,
@@ -35,7 +35,7 @@ import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectEntity, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { AppStat } from '../../../../store/src/types/app-metadata.types';
@@ -187,8 +187,7 @@ export class ApplicationService {
       switchMap(app => this.appSpace$.pipe(
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
-          const orgEntityKey = getCFEntityKey(organizationEntityType);
-          return this.store.select(selectEntity(orgEntityKey, orgGuid));
+          return this.store.select(selectCfEntity(organizationEntityType, orgGuid));
         }),
         filter(org => !!org)
       ))

@@ -11,7 +11,6 @@ import {
   organizationEntityType,
   quotaDefinitionEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { CreateOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
@@ -20,13 +19,13 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../core/cf-api.types';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 
 
 @Component({
@@ -119,8 +118,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       quota_definition_guid: this.quotaDefinition.value
     }));
 
-    const orgEntityType = getCFEntityKey(organizationEntityType);
-    return this.store.select(selectRequestInfo(orgEntityType, this.orgName.value)).pipe(
+    return this.store.select(selectCfRequestInfo(organizationEntityType, this.orgName.value)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.creating),
       map(requestInfo => ({
         success: !requestInfo.error,

@@ -32,6 +32,7 @@ import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-ap
 import { ISpace } from '../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { pathGet } from '../../core/utils.service';
 import { extractActualListEntity } from '../../shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';
