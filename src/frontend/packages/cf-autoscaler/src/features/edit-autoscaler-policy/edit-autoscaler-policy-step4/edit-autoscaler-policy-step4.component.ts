@@ -84,8 +84,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.store.dispatch(
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
-    let waitForAppAutoscalerUpdateStatus$: Observable<any>;
-    waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
+    const waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       filter(request => {
         if (request.message && request.message.indexOf('fetch policy') >= 0) {
           request.message = '';

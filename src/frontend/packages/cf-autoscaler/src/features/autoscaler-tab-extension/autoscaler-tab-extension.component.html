@@ -72,8 +72,8 @@
             </div>
           </mat-card-content>
           <mat-card-actions class="autoscaler-tab__actions">
-            <button mat-icon-button [disabled]="loading$ | async" (click)="loadLatestMetricsUponPolicy()">
-              <mat-icon class="refresh-icon" aria-label="Refresh list data">refresh</mat-icon>
+            <button mat-icon-button (click)="loadLatestMetricsUponPolicy()">
+              <refresh-icon></refresh-icon>
             </button>
             <button (click)="metricChartPage()" mat-icon-button>
               <mat-icon>launch</mat-icon>
@@ -248,11 +248,9 @@
             </div>
           </mat-card-content>
           <mat-card-actions class="autoscaler-tab__actions">
-            <button mat-icon-button [disabled]="loading$ | async" (click)="fetchScalingHistory()">
-              <mat-icon class="refresh-icon"
-                [ngClass]="{refreshing: (appAutoscalerScalingHistoryService.isFetchingEntity$ | async)}"
-                aria-label="Refresh list data">
-                refresh</mat-icon>
+            <button mat-icon-button (click)="fetchScalingHistory()">
+              <refresh-icon [isRefreshing$]="appAutoscalerScalingHistoryService.isFetchingEntity$">
+              </refresh-icon>
             </button>
             <button (click)="scaleHistoryPage()" mat-icon-button>
               <mat-icon>launch</mat-icon>

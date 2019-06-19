@@ -286,9 +286,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       if (Array.isArray(this.action)) {
         this.action.forEach(action => this.store.dispatch(action));
       } else {
-        // Metrics actions that rely on a time window will dispatch the same action with a stale time window. To fix this we could do
-        // something similar to CfAppAutoscalerEventsDataSource (currently avoided due to updated ctor leading to wide scale change,
-        // alternatively could make helper function required a static)
         this.store.dispatch(this.metricsAction || this.masterAction);
       }
     };

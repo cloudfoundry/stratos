@@ -1,0 +1,22 @@
+.refresh-icon {
+  animation: spin .4s infinite linear;
+  animation-play-state: paused;
+  margin-bottom: 2px;
+  transform: rotate(0deg);
+  transition: transform 1s linear;
+  vertical-align: middle;
+}
+
+.refreshing {
+  animation-play-state: running;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
+}
