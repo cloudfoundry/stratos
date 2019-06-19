@@ -188,3 +188,13 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 
 	return consoleConfig, nil
 }
+
+// DeleteConsoleConfig will delete all row(s) from the legacy config_config table
+func (c *ConsoleConfigRepository) DeleteConsoleConfig() error {
+	log.Debug("DeleteConsoleConfig")
+	if _, err := c.db.Exec(deleteConsoleConfig); err != nil {
+		return fmt.Errorf("Unable to delete all data from console_config: %v", err)
+	}
+
+	return nil
+}

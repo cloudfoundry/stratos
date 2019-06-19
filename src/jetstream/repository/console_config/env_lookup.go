@@ -104,6 +104,13 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 		return err
 	}
 
+	// Delete the content form the legacy table
+	err = configStore.DeleteConsoleConfig()
+	if err != nil {
+		log.Warnf("Unable to delete legacy console config data: %+v", err)
+		return err
+	}
+
 	// Delete the migration marker
 	err = configStore.DeleteValue(systemGroupName, configSetupNeededMarker)
 	if err != nil {

@@ -194,15 +194,11 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interfaces.ConsoleConfig, error) {
 	log.Debug("initialiseConsoleConfig")
 
-	log.Error("_________")
-
 	consoleConfig := &interfaces.ConsoleConfig{}
 	if err := config.Load(consoleConfig, envLookup.Lookup); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to load Console configuration. %v", err)
 	}
 
-	log.Info("============")
-	log.Infof("%v", consoleConfig)
 	if len(consoleConfig.AuthEndpointType) == 0 {
 		//return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
 		//Until front-end support is implemented, default to "remote" if AUTH_ENDPOINT_TYPE is not set
@@ -232,7 +228,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 	if consoleConfig.AuthorizationEndpoint == nil {
 		// No Authorization endpoint
 		consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
-		log.Error("Set Auth Endpoint to same value as UAA Endpoint")
+		log.Infof("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
 	}
 
 	return consoleConfig, nil
