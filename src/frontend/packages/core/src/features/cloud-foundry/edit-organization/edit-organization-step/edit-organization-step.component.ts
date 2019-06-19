@@ -25,7 +25,7 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 
 
 const enum OrgStatus {
@@ -147,7 +147,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.store.dispatch(action);
 
     // Update action
-    return this.store.select(selectCfRequestInfo(organizationEntityType, this.orgGuid)).pipe(
+    return this.store.select(selectRequestInfo(action, this.orgGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
       map(o => o.updating[UpdateOrganization.UpdateExistingOrg]),
       map(o => ({
