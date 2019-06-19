@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
@@ -18,7 +18,7 @@ export class SpaceQuotaHelper extends OrgSpaceQuotaHelper<ISpace> {
       cfEndpointService,
       emf,
       spaceGuid,
-      spaceSchemaKey,
+      spaceEntityType,
     );
   }
 

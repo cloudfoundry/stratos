@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { entityFactory, organizationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { cfEntityFactory, organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { IOrgFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
+import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import {
   getActionsFromExtensions,
@@ -13,15 +15,13 @@ import {
 } from '../../../../../core/extension/extension-service';
 import { getFavoriteFromCfEntity } from '../../../../../core/user-favorite-helpers';
 import { environment } from '../../../../../environments/environment.prod';
+import { FavoritesConfigMapper } from '../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { IPageSideNavTab } from '../../../../dashboard/page-side-nav/page-side-nav.component';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { FavoritesConfigMapper } from '../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { IOrgFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -71,10 +71,10 @@ export class CloudFoundryOrganizationBaseComponent {
     public cfOrgService: CloudFoundryOrganizationService,
     favoritesConfigMapper: FavoritesConfigMapper
   ) {
-    this.schema = entityFactory(organizationSchemaKey);
+    this.schema = cfEntityFactory(organizationEntityType);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),
-      map(org => getFavoriteFromCfEntity<IOrgFavMetadata>(org.entity, organizationSchemaKey, favoritesConfigMapper))
+      map(org => getFavoriteFromCfEntity<IOrgFavMetadata>(org.entity, organizationEntityType, favoritesConfigMapper))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),

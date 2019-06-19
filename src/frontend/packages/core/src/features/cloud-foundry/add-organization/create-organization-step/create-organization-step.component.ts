@@ -5,15 +5,13 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { organizationEntityType, quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { CreateOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import {
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  quotaDefinitionSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -21,6 +19,7 @@ import { getPaginationObservables } from '../../../../../../store/src/reducers/p
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../core/cf-api.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -66,7 +65,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(organizationSchemaKey)
+          entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType).getSchema()
         )
       },
       true
@@ -83,7 +82,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
-          entityFactory(quotaDefinitionSchemaKey)
+          entityFactory(quotaDefinitionEntityType)
         )
       },
       true
@@ -116,7 +115,8 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       quota_definition_guid: this.quotaDefinition.value
     }));
 
-    return this.store.select(selectRequestInfo(organizationSchemaKey, this.orgName.value)).pipe(
+    const orgEntityType = getCFEntityKey(organizationEntityType);
+    return this.store.select(selectRequestInfo(orgEntityType, this.orgName.value)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.creating),
       map(requestInfo => ({
         success: !requestInfo.error,

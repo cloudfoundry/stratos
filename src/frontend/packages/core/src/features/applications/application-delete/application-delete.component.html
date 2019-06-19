@@ -27,7 +27,7 @@
               and related entities</span>:</p>
           <h3>Application</h3>
           <app-action-monitor [columns]="appDeleteColumns" [data$]="selectedApplication$"
-            [entityKey]="applicationSchemaKey" [monitorState]="deletingState" [getId]="getId">
+            [entityKey]="applicationEntityType" [monitorState]="deletingState" [getId]="getId">
           </app-action-monitor>
           <ng-container *ngIf="selectedRoutes && selectedRoutes.length">
             <h3>Routes</h3>

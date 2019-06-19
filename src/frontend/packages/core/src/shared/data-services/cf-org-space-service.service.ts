@@ -13,10 +13,10 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizations } from '../../../../store/src/actions/organization.actions';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
@@ -144,7 +144,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public isLoading$: Observable<boolean>;
 
   public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
-    createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+    createEntityRelationKey(organizationEntityType, spaceEntityType),
   ]);
 
   /**
@@ -155,7 +155,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     action: this.paginationAction,
     paginationMonitor: this.paginationMonitorFactory.create(
       this.paginationAction.paginationKey,
-      entityFactory(this.paginationAction.entityType)
+      cfEntityFactory(this.paginationAction.entityType)
     )
   });
   private allOrgsLoading$ = this.allOrgs.pagination$.pipe(map(

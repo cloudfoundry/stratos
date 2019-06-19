@@ -4,18 +4,17 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
-import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
+import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../actions/users-roles.actions';
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../actions/users.actions';
 import { CFAppState } from '../app-state';
-import { organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';
 import { ICFAction, UpdateCfAction } from '../types/request.types';
 import { OrgUserRoleNames } from '../types/user.types';
 import { CfRoleChange } from '../types/users-roles.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -33,7 +32,7 @@ export class UsersRolesEffects {
       action.changedRoles.forEach(change => {
         const apiAction = {
           guid: change.spaceGuid ? change.spaceGuid : change.orgGuid,
-          entityType: change.spaceGuid ? spaceSchemaKey : organizationSchemaKey,
+          entityType: change.spaceGuid ? spaceEntityType : organizationEntityType,
           updatingKey: ChangeUserRole.generateUpdatingKey(change.role, change.userGuid),
           options: null,
           actions: []

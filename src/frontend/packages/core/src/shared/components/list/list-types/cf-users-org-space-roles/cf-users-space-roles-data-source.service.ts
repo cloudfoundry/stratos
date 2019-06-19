@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 
+import {
+  cfEntityFactory,
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+  spaceWithOrgEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  cfUserSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
@@ -27,15 +27,15 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
     store: Store<CFAppState>,
     userPerms: CurrentUserPermissionsService,
     listConfig?: IListConfig<APIResource>) {
-    const paginationKey = cfUserSchemaKey + '-' + orgGuid;
+    const paginationKey = cfUserEntityType + '-' + orgGuid;
     const action
-      = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)]);
-    action.entityType = spaceSchemaKey;
-    action.entity = entityFactory(spaceWithOrgKey);
+      = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)]);
+    action.entityType = spaceEntityType;
+    action.entity = cfEntityFactory(spaceWithOrgEntityType);
     super({
       store,
       action,
-      schema: entityFactory(spaceWithOrgKey),
+      schema: cfEntityFactory(spaceWithOrgEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

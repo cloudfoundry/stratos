@@ -13,7 +13,6 @@ import { APIResource } from '../../../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
-import { cfUserSchemaKey, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
 import {
   createEntityRelationPaginationKey,
@@ -21,6 +20,12 @@ import {
   ValidateResultFetchingState,
 } from '../entity-relations.types';
 
+import {
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 /**
  * Add roles from (org|space)\[role\]\[user\] into user\[role\]
  */
@@ -72,18 +77,18 @@ export function orgSpacePostProcess(
   const existingUsers = allEntities[entityKey];
 
   const newUsers = {};
-  if (entityKey === getCFEntityKey(organizationSchemaKey)) {
+  if (entityKey === getCFEntityKey(organizationEntityType)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
-  } else if (entityKey === getCFEntityKey(spaceSchemaKey)) {
+  } else if (entityKey === getCFEntityKey(spaceEntityType)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
-  const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserSchemaKey);
+  const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
   if (!Object.keys(newUsers).length) {
     return;
   }

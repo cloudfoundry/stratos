@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricQueryType } from '../../services/metrics-range-selector.types';
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-metrics-range-selector',
@@ -55,7 +55,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.guid,
       {
-        entityType: metricSchemaKey,
+        entityType: metricEntityType,
         endpointType: ''
       }
     );

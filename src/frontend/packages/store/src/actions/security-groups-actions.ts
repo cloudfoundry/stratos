@@ -1,6 +1,6 @@
 import { RequestOptions } from '@angular/http';
 
-import { entityFactory, securityGroupSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
+import { cfEntityFactory, securityGroupEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
@@ -11,7 +11,7 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
     public endpointGuid: string,
     public paginationKey: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(securityGroupSchemaKey, spaceSchemaKey)
+      createEntityRelationKey(securityGroupEntityType, spaceEntityType)
     ],
     public populateMissing = true
   ) {
@@ -21,8 +21,8 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
     this.options.method = 'get';
   }
   actions = getActions('Security Groups', 'Fetch all');
-  entity = [entityFactory(securityGroupSchemaKey)];
-  entityType = securityGroupSchemaKey;
+  entity = [cfEntityFactory(securityGroupEntityType)];
+  entityType = securityGroupEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,

@@ -1,22 +1,22 @@
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription, combineLatest } from 'rxjs';
-import { filter, switchMap, tap, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 
+import { cfEntityFactory, serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { SetCreateServiceInstanceServiceGuid } from '../../../../../../store/src/actions/create-service-instance.actions';
+import { CFAppState } from '../../../../../../store/src/app-state';
+import {
+  selectCreateServiceInstanceCfGuid,
+  selectCreateServiceInstanceSpaceGuid,
+} from '../../../../../../store/src/selectors/create-service-instance.selectors';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IService } from '../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../store/src/app-state';
-import {
-  selectCreateServiceInstanceCfGuid,
-  selectCreateServiceInstanceSpaceGuid
-} from '../../../../../../store/src/selectors/create-service-instance.selectors';
-import { entityFactory, serviceSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { SetCreateServiceInstanceServiceGuid } from '../../../../../../store/src/actions/create-service-instance.actions';
 
 @Component({
   selector: 'app-select-service',
@@ -51,7 +51,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       ).pipe(
         filter(([p, q]) => !!p && !!q)
       );
-    const schema = entityFactory(serviceSchemaKey);
+    const schema = cfEntityFactory(serviceEntityType);
     this.isFetching$ = cfSpaceGuid$.pipe(
       switchMap(([cfGuid, spaceGuid]) => {
         const paginationKey = this.servicesWallService.getSpaceServicePagKey(cfGuid, spaceGuid);

@@ -9,8 +9,10 @@ import {
   Subscription,
   timer as observableTimer,
 } from 'rxjs';
-import { catchError, filter, map, pairwise, startWith, switchMap, take, tap, withLatestFrom, first } from 'rxjs/operators';
+import { catchError, filter, first, map, pairwise, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import { gitBranchesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -21,7 +23,6 @@ import {
   SetDeployBranch,
 } from '../../../../../../store/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
@@ -40,8 +41,11 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { GitSCM } from '../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { DEPLOY_TYPES_IDS, getApplicationDeploySourceTypes, getAutoSelectedDeployType } from '../deploy-application-steps.types';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import {
+  DEPLOY_TYPES_IDS,
+  getApplicationDeploySourceTypes,
+  getAutoSelectedDeployType,
+} from '../deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -171,7 +175,7 @@ export class DeployApplicationStep2Component
               action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
                 fetchBranchesAction.paginationKey,
-                new CFEntityConfig(gitBranchesSchemaKey)
+                new CFEntityConfig(gitBranchesEntityType)
               )
             },
             true
@@ -183,7 +187,7 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(fetchBranches);
 
     const paginationAction = {
-      entityType: gitBranchesSchemaKey,
+      entityType: gitBranchesEntityType,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
@@ -201,7 +205,7 @@ export class DeployApplicationStep2Component
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
       paginationAction.paginationKey,
-      new CFEntityConfig(gitBranchesSchemaKey)
+      new CFEntityConfig(gitBranchesEntityType)
     );
 
     this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(

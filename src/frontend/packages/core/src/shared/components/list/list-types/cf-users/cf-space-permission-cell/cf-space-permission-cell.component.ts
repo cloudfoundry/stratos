@@ -4,10 +4,10 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { organizationSchemaKey, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../../../store/src/types/user.types';
@@ -76,7 +76,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
-    const orgEntityKey = getCFEntityKey(organizationSchemaKey);
+    const orgEntityKey = getCFEntityKey(organizationEntityType);
     const orgNames$ = orgGuids.length ? combineLatest(
       orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectEntity(orgEntityKey, orgGuid)).pipe(first()))
     ).pipe(
@@ -119,7 +119,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         row.metadata.guid
       );
       const catalogueEntity = entityCatalogue.getEntity({
-        entityType: spaceSchemaKey,
+        entityType: spaceEntityType,
         endpointType: CF_ENDPOINT_TYPE
       });
       return {

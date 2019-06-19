@@ -2,11 +2,11 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import {
-  entityFactory,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../../../store/src/helpers/entity-factory';
+  cfEntityFactory,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -44,7 +44,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
 
   private setup(row: APIResource<IUserProvidedServiceInstance>) {
     this.serviceInstanceEntity = row;
-    const schema = entityFactory(userProvidedServiceInstanceSchemaKey);
+    const schema = cfEntityFactory(userProvidedServiceInstanceEntityType);
     this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
     this.serviceInstanceTags = (row.entity.tags || []).map(t => ({
       value: t

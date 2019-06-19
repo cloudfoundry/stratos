@@ -3,9 +3,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { cfEntityFactory, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { entityFactory, spaceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import {
   getActionsFromExtensions,
@@ -18,6 +19,7 @@ import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-he
 import { environment } from '../../../../../../environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
+import { FavoritesConfigMapper } from '../../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
@@ -25,8 +27,6 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-import { FavoritesConfigMapper } from '../../../../../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -86,7 +86,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
 
-  public schema = entityFactory(spaceSchemaKey);
+  public schema = cfEntityFactory(spaceEntityType);
 
   private deleteRedirectSub: Subscription;
 
@@ -102,7 +102,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     favoritesConfigMapper: FavoritesConfigMapper
   ) {
     this.favorite$ = cfSpaceService.space$.pipe(
-      map(space => getFavoriteFromCfEntity<ISpaceFavMetadata>(space.entity, spaceSchemaKey, favoritesConfigMapper))
+      map(space => getFavoriteFromCfEntity<ISpaceFavMetadata>(space.entity, spaceEntityType, favoritesConfigMapper))
     );
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)

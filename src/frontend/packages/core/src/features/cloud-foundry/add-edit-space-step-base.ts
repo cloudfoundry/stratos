@@ -5,16 +5,16 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  spaceEntityType,
+  spaceQuotaEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organization.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import {
-  entityFactory,
-  organizationSchemaKey,
-  spaceQuotaSchemaKey,
-  spaceSchemaKey,
-} from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
@@ -51,7 +51,7 @@ export class AddEditSpaceStepBase {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          new CFEntityConfig(spaceSchemaKey)
+          new CFEntityConfig(spaceEntityType)
         )
       },
       true
@@ -62,14 +62,14 @@ export class AddEditSpaceStepBase {
     );
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
-    const quotaPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.orgGuid);
+    const quotaPaginationKey = createEntityRelationPaginationKey(organizationEntityType, this.orgGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<ISpaceQuotaDefinition>>(
       {
         store: this.store,
         action: new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, this.orgGuid, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
-          entityFactory(spaceQuotaSchemaKey)
+          cfEntityFactory(spaceQuotaEntityType)
         )
       },
       true

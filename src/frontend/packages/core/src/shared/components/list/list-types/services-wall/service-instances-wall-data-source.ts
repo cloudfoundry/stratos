@@ -1,13 +1,9 @@
 import { Store } from '@ngrx/store';
 
+import { serviceInstancesEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstances } from '../../../../../../../store/src/actions/service-instances.actions';
 import { GetAllUserProvidedServices } from '../../../../../../../store/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  serviceInstancesSchemaKey,
-  serviceInstancesWithSpaceSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -20,7 +16,7 @@ import { IListConfig } from '../../list.component.types';
 export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> {
 
   constructor(store: Store<CFAppState>, transformEntities: any[], listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey);
+    const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType);
     const marketplaceAction = new GetServiceInstances(null, paginationKey);
     const userProvidedAction = new GetAllUserProvidedServices();
     const actionSchemaConfigs = [

@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import { cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   FetchCFCellMetricsPaginatedAction,
   MetricQueryConfig,
 } from '../../../../../../../store/src/actions/metrics.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
@@ -32,7 +32,7 @@ export class CfCellsDataSource
     super({
       store,
       action,
-      schema: entityFactory(action.entityType),
+      schema: cfEntityFactory(action.entityType),
       getRowUniqueId: (row) => row.metric.bosh_job_id,
       paginationKey: action.paginationKey,
       isLocal: true,

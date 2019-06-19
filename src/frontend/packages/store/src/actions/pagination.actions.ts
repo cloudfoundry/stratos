@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { BasePaginatedAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';

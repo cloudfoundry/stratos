@@ -1,10 +1,21 @@
-import { getCfService } from './services-helper';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  serviceBrokerEntityType,
+  servicePlanVisibilityEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { GetServiceBrokers } from '../../../../store/src/actions/service-broker.actions';
+import { GetServicePlanVisibilities } from '../../../../store/src/actions/service-plan-visibility.actions';
+import { GetSpace } from '../../../../store/src/actions/space.actions';
+import { CFAppState } from '../../../../store/src/app-state';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
 import {
   IService,
   IServiceBroker,
@@ -17,23 +28,8 @@ import { ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getServiceInstancesInCf, getServicePlans } from './services-helper';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../store/src/app-state';
-import {
-  entityFactory,
-  servicePlanVisibilitySchemaKey,
-  serviceBrokerSchemaKey,
-  spaceSchemaKey
-} from '../../../../store/src/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetServicePlanVisibilities } from '../../../../store/src/actions/service-plan-visibility.actions';
-import { GetServiceBrokers } from '../../../../store/src/actions/service-broker.actions';
-import { GetSpace } from '../../../../store/src/actions/space.actions';
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -88,14 +84,14 @@ export class ServicesService {
   }
 
   getServicePlanVisibilities = () => {
-    const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, this.cfGuid);
+    const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
     return getPaginationObservables<APIResource<IServicePlanVisibility>>(
       {
         store: this.store,
         action: new GetServicePlanVisibilities(this.cfGuid, paginationKey),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          entityFactory(servicePlanVisibilitySchemaKey)
+          cfEntityFactory(servicePlanVisibilityEntityType)
         )
       },
       true
@@ -106,14 +102,14 @@ export class ServicesService {
   }
 
   private getServiceBrokers = () => {
-    const paginationKey = createEntityRelationPaginationKey(serviceBrokerSchemaKey, this.cfGuid);
+    const paginationKey = createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid);
     return getPaginationObservables<APIResource<IServiceBroker>>(
       {
         store: this.store,
         action: new GetServiceBrokers(this.cfGuid, paginationKey),
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          entityFactory(serviceBrokerSchemaKey)
+          cfEntityFactory(serviceBrokerEntityType)
         )
       },
       true

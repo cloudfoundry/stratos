@@ -3,15 +3,13 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
+import { GetSpace } from '../../../../../../store/src/actions/space.actions';
+import { CFAppState } from '../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceBroker } from '../../../../core/cf-api-svc.types';
 import { ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../store/src/app-state';
-import { spaceSchemaKey, entityFactory, spaceWithOrgKey } from '../../../../../../store/src/helpers/entity-factory';
-import { GetSpace } from '../../../../../../store/src/actions/space.actions';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Component({
   selector: 'app-service-broker-card',

@@ -3,15 +3,15 @@ import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { UsersRolesClearUpdateState } from '../../../../../../../store/src/actions/users-roles.actions';
 import { ChangeUserRole } from '../../../../../../../store/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  cfUserSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import {
   selectUsersRoles,
   selectUsersRolesChangedRoles,
@@ -73,7 +73,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     }
   ];
   changes$: Observable<CfRoleChangeWithNames[]>;
-  userSchemaKey = cfUserSchemaKey;
+  userSchemaKey = cfUserEntityType;
   monitorState = AppMonitorComponentTypes.UPDATE;
   private cfGuid$: Observable<string>;
   public orgName$: Observable<string>;
@@ -89,7 +89,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   public getCellConfig(row: CfRoleChangeWithNames): ITableCellRequestMonitorIconConfig {
     const isSpace = !!row.spaceGuid;
-    const schema = isSpace ? entityFactory(spaceSchemaKey) : entityFactory(organizationSchemaKey);
+    const schema = isSpace ? cfEntityFactory(spaceEntityType) : cfEntityFactory(organizationEntityType);
     const guid = isSpace ? row.spaceGuid : row.orgGuid;
     return {
       entityKey: schema.key,

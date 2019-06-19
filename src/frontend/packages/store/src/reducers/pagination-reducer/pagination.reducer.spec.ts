@@ -1,7 +1,7 @@
 import { RequestOptions } from '@angular/http';
 
+import { applicationEntityType, cfEntityFactory, CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { RequestTypes } from '../../actions/request.actions';
-import { applicationSchemaKey, entityFactory, CFEntitySchema } from '../../helpers/entity-factory';
 import { PaginatedAction } from '../../types/pagination.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../types/request.types';
 import { createPaginationReducer } from './pagination.reducer';
@@ -17,8 +17,8 @@ function getReducer() {
 class MockPagAction implements PaginatedAction {
   actions = ['ONE', 'TWO', 'THREE'];
   options = new RequestOptions();
-  entity = entityFactory(applicationSchemaKey);
-  entityType = applicationSchemaKey;
+  entity = cfEntityFactory(applicationEntityType);
+  entityType = applicationEntityType;
   endpointType: 'endpoint';
   paginationKey = 'PaginationKey';
   type = RequestTypes.START;
@@ -55,7 +55,7 @@ describe('PaginationReducer', () => {
       RequestTypes.SUCCESS,
       RequestTypes.FAILED
     ]);
-    const entityKey = applicationSchemaKey;
+    const entityKey = applicationEntityType;
     const paginationKey = 'PaginationKey';
     const apiAction = new MockPagAction();
     apiAction.entityType = entityKey;
@@ -64,7 +64,7 @@ describe('PaginationReducer', () => {
     const startApiAction = new StartRequestAction(apiAction, 'fetch');
     const newState = paginationReducer(
       {
-        [applicationSchemaKey]: {
+        [applicationEntityType]: {
           [paginationKey]: {
             pageCount: 0,
             currentPage: 1,
@@ -77,7 +77,7 @@ describe('PaginationReducer', () => {
         }
       }, startApiAction);
     const expectedNewState = {
-      [applicationSchemaKey]: {
+      [applicationEntityType]: {
         [paginationKey]: {
           pageCount: 0,
           currentPage: 1,
@@ -86,7 +86,7 @@ describe('PaginationReducer', () => {
             1: {
               busy: true, error: false, message: '',
               schemaKey: undefined,
-              entityKey: applicationSchemaKey,
+              entityKey: applicationEntityType,
               maxed: false
             }
           },

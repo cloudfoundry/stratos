@@ -1,34 +1,32 @@
-
-import { Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
+import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-
-import { IListAction } from '../../list.component.types';
-import { GithubCommitsDataSource } from './github-commits-data-source';
-import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
-  StoreCFSettings,
   CheckProjectExists,
+  FetchBranchesForProject,
   SetAppSourceDetails,
   SetDeployBranch,
   SetDeployCommit,
-  FetchBranchesForProject
+  StoreCFSettings,
 } from '../../../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { IListAction } from '../../list.component.types';
+import { GithubCommitsDataSource } from './github-commits-data-source';
+import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
+
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
@@ -159,7 +157,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private setDeployedCommitDetails() {
     const scmType = this.scm.getType();
     this.store.select(
-      selectEntity<APIResource<GitCommit>>(gitCommitSchemaKey, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
+      selectEntity<APIResource<GitCommit>>(gitCommitEntityType, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
       .pipe(
         filter(deployedCommit => !!deployedCommit),
         first(),

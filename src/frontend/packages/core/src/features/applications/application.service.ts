@@ -4,6 +4,17 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import {
+  appEnvVarsEntityType,
+  applicationEntityType,
+  appStatsEntityType,
+  domainEntityType,
+  organizationEntityType,
+  routeEntityType,
+  serviceBindingEntityType,
+  spaceEntityType,
+  stackEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import {
   AppMetadataTypes,
@@ -17,17 +28,6 @@ import {
 } from '../../../../store/src/actions/application.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import {
-  appEnvVarsSchemaKey,
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  domainSchemaKey,
-  organizationSchemaKey,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  spaceSchemaKey,
-  stackSchemaKey,
-} from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
@@ -63,12 +63,12 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-      createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
-      createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(applicationSchemaKey, stackSchemaKey),
-      createEntityRelationKey(applicationSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+      createEntityRelationKey(applicationEntityType, routeEntityType),
+      createEntityRelationKey(applicationEntityType, spaceEntityType),
+      createEntityRelationKey(applicationEntityType, stackEntityType),
+      createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
+      createEntityRelationKey(routeEntityType, domainEntityType),
+      createEntityRelationKey(spaceEntityType, organizationEntityType),
     ]
   );
 }
@@ -151,7 +151,7 @@ export class ApplicationService {
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      new CFEntityConfig(appStatsSchemaKey)
+      new CFEntityConfig(appStatsEntityType)
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
@@ -176,7 +176,7 @@ export class ApplicationService {
       switchMap(app => {
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           app.space_guid,
-          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)], true)
+          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)], true)
         ).waitForEntity$.pipe(
           map(entityInfo => entityInfo.entity)
         );
@@ -187,7 +187,7 @@ export class ApplicationService {
       switchMap(app => this.appSpace$.pipe(
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
-          const orgEntityKey = getCFEntityKey(organizationSchemaKey);
+          const orgEntityKey = getCFEntityKey(organizationEntityType);
           return this.store.select(selectEntity(orgEntityKey, orgGuid));
         }),
         filter(org => !!org)
@@ -211,7 +211,7 @@ export class ApplicationService {
     const factory = new EntityMonitorFactory(this.store);
     return factory.create<APIResource<IApp>>(
       this.appGuid,
-      new CFEntityConfig(appEnvVarsSchemaKey)
+      new CFEntityConfig(appEnvVarsEntityType)
     );
   }
 
@@ -223,7 +223,7 @@ export class ApplicationService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        new CFEntityConfig(appStatsSchemaKey)
+        new CFEntityConfig(appStatsEntityType)
       )
     }, true);
     // This will fail to fetch the app stats if the current app is not running but we're
@@ -324,7 +324,7 @@ export class ApplicationService {
     ));
 
     // Create an Observable that can be used to determine when the update completed
-    const actionState = selectUpdateInfo(applicationSchemaKey,
+    const actionState = selectUpdateInfo(applicationEntityType,
       this.appGuid,
       UpdateExistingApplication.updateKey);
     return this.store.select(actionState).pipe(filter(item => !item.busy));

@@ -3,10 +3,13 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -14,6 +17,7 @@ import { EndpointModel } from '../../../../../../store/src/types/endpoint.types'
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/entity-service';
 import {
   getActionsFromExtensions,
@@ -22,20 +26,16 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../core/extension/extension-service';
+import { getFavoriteFromCfEntity } from '../../../../core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ApplicationStateData } from '../../../../shared/components/application-state/application-state.service';
+import { FavoritesConfigMapper } from '../../../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
-import { getFavoriteFromCfEntity } from '../../../../core/user-favorite-helpers';
-import { FavoritesConfigMapper } from '../../../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -48,7 +48,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromCfEntity<IAppFavMetadata>(app.entity, applicationSchemaKey, this.favoritesConfigMapper))
+    map(app => getFavoriteFromCfEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean }>;
@@ -66,7 +66,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private favoritesConfigMapper: FavoritesConfigMapper,
 
   ) {
-    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationSchemaKey);
+    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     this.schema = catalogueEntity.getSchema();
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(

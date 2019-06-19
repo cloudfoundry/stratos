@@ -4,15 +4,15 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  quotaDefinitionEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import {
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  quotaDefinitionSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -102,7 +102,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(organizationSchemaKey)
+          cfEntityFactory(organizationEntityType)
         )
       },
       true
@@ -120,7 +120,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
         action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
-          entityFactory(quotaDefinitionSchemaKey)
+          entityFactory(quotaDefinitionEntityType)
         )
       },
       true

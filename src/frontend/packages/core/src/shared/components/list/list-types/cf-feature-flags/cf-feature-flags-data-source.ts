@@ -1,14 +1,13 @@
 import { Store } from '@ngrx/store';
 
+import { cfEntityFactory, featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { entityFactory, featureFlagSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export const FeatureFlagDescriptions = {
   user_org_creation: 'Any user can create an organization',
@@ -33,7 +32,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatur
     super({
       store,
       action,
-      schema: entityFactory(featureFlagSchemaKey),
+      schema: cfEntityFactory(featureFlagEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

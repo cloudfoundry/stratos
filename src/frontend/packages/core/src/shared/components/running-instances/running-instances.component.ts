@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
-import { CFAppState } from '../../../../../store/src/app-state';
+import { appStatsEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppStatsAction } from '../../../../../store/src/actions/app-metadata.actions';
-import { entityFactory, appStatsSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { CFAppState } from '../../../../../store/src/app-state';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-running-instances',
@@ -31,7 +31,7 @@ export class RunningInstancesComponent implements OnInit {
     const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);
     const paginationMonitor = this.paginationMonitorFactory.create(
       dummyAction.paginationKey,
-      entityFactory(appStatsSchemaKey)
+      cfEntityFactory(appStatsEntityType)
     );
     this.runningInstances$ =
       paginationMonitor.currentPage$

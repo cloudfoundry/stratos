@@ -5,11 +5,11 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import { applicationSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { selectApplicationSource, selectCfDetails } from '../../../../../store/src/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
 import { DeployApplicationSource, SourceType } from '../../../../../store/src/types/deploy-application.types';
@@ -42,7 +42,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
   ) {
-    this.entityKey = getCFEntityKey(applicationSchemaKey);
+    this.entityKey = getCFEntityKey(applicationEntityType);
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 

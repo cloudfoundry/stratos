@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, serviceBrokerSchemaKey } from '../helpers/entity-factory';
+import { cfEntityFactory, serviceBrokerEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction } from '../types/request.types';
 import { getActions } from './action.helper';
@@ -19,8 +19,8 @@ export class GetServiceBrokers extends CFStartAction implements PaginatedAction 
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Brokers', 'Get all');
-  entity = [entityFactory(serviceBrokerSchemaKey)];
-  entityType = serviceBrokerSchemaKey;
+  entity = [cfEntityFactory(serviceBrokerEntityType)];
+  entityType = serviceBrokerEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -44,7 +44,7 @@ export class GetServiceBroker extends CFStartAction implements IRequestAction {
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Brokers', 'Get specific by ID');
-  entity = [entityFactory(serviceBrokerSchemaKey)];
-  entityType = serviceBrokerSchemaKey;
+  entity = [cfEntityFactory(serviceBrokerEntityType)];
+  entityType = serviceBrokerEntityType;
   options: RequestOptions;
 }

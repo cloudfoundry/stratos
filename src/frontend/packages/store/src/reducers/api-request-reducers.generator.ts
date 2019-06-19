@@ -1,19 +1,19 @@
 import { Action } from '@ngrx/store';
 
+import {
+  applicationEntityType,
+  appStatsEntityType,
+  appSummaryEntityType,
+  cfUserEntityType,
+  organizationEntityType,
+  routeEntityType,
+  serviceInstancesEntityType,
+  spaceEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import {
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  appSummarySchemaKey,
-  cfUserSchemaKey,
-  organizationSchemaKey,
-  routeSchemaKey,
-  serviceInstancesSchemaKey,
-  spaceSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { BaseRequestDataState, IRequestState } from '../types/entity.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -69,7 +69,7 @@ function chainReducers(baseReducer, extraReducers) {
 export function requestReducer(state: IRequestState, action: Action) {
   const baseRequestReducer = requestReducerFactory(requestActions);
   const extraReducers = {
-    [appStatsSchemaKey]: [appStatsReducer]
+    [appStatsEntityType]: [appStatsReducer]
   };
   return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
@@ -83,23 +83,23 @@ export function requestDataReducer(state: BaseRequestDataState, action: Action) 
   const baseDataReducer = requestDataReducerFactory(requestActions);
 
   const extraReducers = {
-    [getCFEntityKey(cfUserSchemaKey)]: [userReducer, endpointDisconnectUserReducer],
-    [getCFEntityKey(routeSchemaKey)]: [routeReducer],
-    [getCFEntityKey(serviceInstancesSchemaKey)]: [serviceInstanceReducer],
-    [getCFEntityKey(userProvidedServiceInstanceSchemaKey)]: [serviceInstanceReducer],
+    [getCFEntityKey(cfUserEntityType)]: [userReducer, endpointDisconnectUserReducer],
+    [getCFEntityKey(routeEntityType)]: [routeReducer],
+    [getCFEntityKey(serviceInstancesEntityType)]: [serviceInstanceReducer],
+    [getCFEntityKey(userProvidedServiceInstanceEntityType)]: [serviceInstanceReducer],
     [getInternalEntityKey(endpointStoreNames.type)]: [systemEndpointsReducer],
-    [getCFEntityKey(appSummarySchemaKey)]: [updateAppSummaryRoutesReducer],
-    [getCFEntityKey(applicationSchemaKey)]: [
+    [getCFEntityKey(appSummaryEntityType)]: [updateAppSummaryRoutesReducer],
+    [getCFEntityKey(applicationEntityType)]: [
       updateApplicationRoutesReducer(),
       endpointDisconnectApplicationReducer()
     ],
-    [getCFEntityKey(spaceSchemaKey)]: [
+    [getCFEntityKey(spaceEntityType)]: [
       updateSpaceQuotaReducer,
       endpointDisconnectApplicationReducer(),
       applicationAddRemoveReducer(),
       userSpaceOrgReducer(true)
     ],
-    [getCFEntityKey(organizationSchemaKey)]: [
+    [getCFEntityKey(organizationEntityType)]: [
       updateOrganizationQuotaReducer,
       updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer(),

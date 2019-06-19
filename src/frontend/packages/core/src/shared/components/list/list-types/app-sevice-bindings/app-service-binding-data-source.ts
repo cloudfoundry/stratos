@@ -1,15 +1,15 @@
 import { Store } from '@ngrx/store';
 
+import {
+  applicationEntityType,
+  cfEntityFactory,
+  serviceBindingEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  servicePlanEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppServiceBindings } from '../../../../../../../store/src/actions/application-service-routes.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  serviceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -23,13 +23,13 @@ import { IListConfig } from '../../list.component.types';
 
 export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {
   static createGetAllServiceBindings(appGuid: string, cfGuid: string) {
-    const paginationKey = createEntityRelationPaginationKey(serviceBindingSchemaKey, appGuid);
+    const paginationKey = createEntityRelationPaginationKey(serviceBindingEntityType, appGuid);
     return new GetAppServiceBindings(
       appGuid, cfGuid, paginationKey, [
-        createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-        createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
-        createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+        createEntityRelationKey(serviceInstancesEntityType, serviceEntityType),
+        createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
+        createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
       ]);
   }
 
@@ -38,7 +38,7 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource<ISer
     super({
       store,
       action,
-      schema: entityFactory(serviceBindingSchemaKey),
+      schema: cfEntityFactory(serviceBindingEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

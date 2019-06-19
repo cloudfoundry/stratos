@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  spaceEntityType,
+  spaceQuotaEntityType,
+  spaceWithOrgEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  entityFactory,
-  organizationSchemaKey,
-  spaceQuotaSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -20,14 +20,14 @@ import { IListConfig } from '../../list.component.types';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid);
+    const paginationKey = createEntityRelationPaginationKey(organizationEntityType, orgGuid);
     const action = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [
-      createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
+      createEntityRelationKey(spaceEntityType, spaceQuotaEntityType),
     ]);
     super({
       store,
       action,
-      schema: entityFactory(spaceWithOrgKey),
+      schema: cfEntityFactory(spaceWithOrgEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

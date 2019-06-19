@@ -3,17 +3,17 @@ import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
+import {
+  applicationEntityType,
+  cfEntityFactory,
+  organizationEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../../../store/src/actions/application.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
@@ -27,9 +27,9 @@ import { IListConfig } from '../../list.component.types';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
   return new GetAllApplications(paginationKey, null, [
-    createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-    createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-    createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+    createEntityRelationKey(applicationEntityType, spaceEntityType),
+    createEntityRelationKey(spaceEntityType, organizationEntityType),
+    createEntityRelationKey(applicationEntityType, routeEntityType),
   ]);
 }
 
@@ -70,7 +70,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: entityFactory(applicationSchemaKey),
+      schema: cfEntityFactory(applicationEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,

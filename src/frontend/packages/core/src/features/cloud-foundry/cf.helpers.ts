@@ -4,11 +4,11 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { applicationEntityType, cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { applicationSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   getCurrentUserCFEndpointRolesState,
@@ -37,7 +37,6 @@ import { extractActualListEntity } from '../../shared/components/list/data-sourc
 import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
-
 
 export interface IUserRole<T> {
   string: string;
@@ -256,8 +255,8 @@ export const getActiveRouteCfCellProvider = {
 
 export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
   const appWallPagKey = 'applicationWall';
-  const entityKey = getCFEntityKey(applicationSchemaKey);
-  store.dispatch(new SetClientFilter(new CFEntityConfig(applicationSchemaKey), appWallPagKey,
+  const entityKey = getCFEntityKey(applicationEntityType);
+  store.dispatch(new SetClientFilter(new CFEntityConfig(applicationEntityType), appWallPagKey,
     {
       string: '',
       items: {
@@ -347,7 +346,7 @@ export function fetchTotalResults(
     action: newAction,
     paginationMonitor: paginationMonitorFactory.create(
       newAction.paginationKey,
-      entityFactory(newAction.entityType)
+      cfEntityFactory(newAction.entityType)
     )
   });
   // Ensure the request is made by sub'ing to the entities observable

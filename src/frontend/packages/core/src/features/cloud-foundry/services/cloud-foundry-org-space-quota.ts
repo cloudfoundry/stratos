@@ -1,15 +1,14 @@
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../../../cloud-foundry/cf-types';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { truthyIncludingZero } from '../../../core/utils.service';
 import { determineCardStatus } from '../../../shared/components/cards/card-status/card-status.component';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../shared/shared.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../cloud-foundry/cf-types';
 
 
 export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
@@ -18,11 +17,11 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
     protected cfEndpointService: CloudFoundryEndpointService,
     emf: EntityMonitorFactory,
     orgOrSpaceGuid: string,
-    orgOrSpaceSchemaKey: string,
+    orgOrspaceEntityType: string,
   ) {
     this.orgOrSpace$ = emf.create<APIResource<T>>(
       orgOrSpaceGuid,
-      new CFEntityConfig(orgOrSpaceSchemaKey),
+      new CFEntityConfig(orgOrspaceEntityType),
       false
     ).entity$.pipe(filter(orgOrSpace => !!orgOrSpace));
   }

@@ -2,25 +2,24 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import {
+  applicationEntityType,
+  cfEntityFactory,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
+import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { IApp } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
-import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
-import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export interface CfCellApp {
   metric: IMetricApplication;
@@ -51,7 +50,7 @@ export class CfCellAppsDataSource
     super({
       store,
       action,
-      schema: entityFactory(action.entityType),
+      schema: cfEntityFactory(action.entityType),
       getRowUniqueId: (row: CfCellApp) => row.appGuid,
       paginationKey: action.paginationKey,
       isLocal: true,
@@ -78,8 +77,8 @@ export class CfCellAppsDataSource
       this.appEntityServices[appGuid] = entityServiceFactory.create<APIResource<IApp>>(
         appGuid,
         new GetApplication(appGuid, cfGuid, [
-          createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-          createEntityRelationKey(spaceSchemaKey, organizationSchemaKey)
+          createEntityRelationKey(applicationEntityType, spaceEntityType),
+          createEntityRelationKey(spaceEntityType, organizationEntityType)
         ]),
         true
       ).waitForEntity$.pipe(

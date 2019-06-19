@@ -1,15 +1,15 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import {
-  applicationSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-} from '../helpers/entity-factory';
+  applicationEntityType,
+  cfEntityFactory,
+  organizationEntityType,
+  serviceBindingEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  servicePlanEntityType,
+  spaceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationKey } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
@@ -21,12 +21,12 @@ export class GetServicePlanServiceInstances extends CFStartAction implements Pag
     public endpointGuid: string,
     public paginationKey: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+      createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
+      createEntityRelationKey(spaceEntityType, organizationEntityType),
+      createEntityRelationKey(servicePlanEntityType, serviceEntityType),
+      createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
     ],
     public populateMissing = true
   ) {
@@ -37,8 +37,8 @@ export class GetServicePlanServiceInstances extends CFStartAction implements Pag
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Plan', 'Get service instances');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
-  entityType = serviceInstancesSchemaKey;
+  entity = [cfEntityFactory(serviceInstancesEntityType)];
+  entityType = serviceInstancesEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,

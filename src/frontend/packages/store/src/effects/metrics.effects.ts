@@ -4,6 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 
+import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import {
   METRIC_API_FAILED,
   METRIC_API_START,
@@ -11,7 +12,6 @@ import {
   MetricsAPIActionSuccess,
 } from '../actions/metrics-api.actions';
 import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
-import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
 import { CFAppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
@@ -46,7 +46,7 @@ export class MetricsEffect {
           return new WrapperRequestActionSuccess(
             {
               entities: {
-                [metricSchemaKey]: metricObject
+                [metricEntityType]: metricObject
               },
               result: [guid]
             },

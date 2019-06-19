@@ -4,16 +4,16 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrgUsers } from '../../../../store/src/actions/organization.actions';
 import { GetAllSpaceUsers } from '../../../../store/src/actions/space.actions';
 import { GetAllUsersAsAdmin, GetUser } from '../../../../store/src/actions/users.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import {
-  cfUserSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
   getPaginationObservables,
@@ -49,7 +49,6 @@ import {
   waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 
 @Injectable()
 export class CfUserService {
@@ -301,7 +300,7 @@ export class CfUserService {
                 action: allUsersAction,
                 paginationMonitor: this.paginationMonitorFactory.create(
                   allUsersAction.paginationKey,
-                  entityFactory(cfUserSchemaKey)
+                  cfEntityFactory(cfUserEntityType)
                 )
               }))
             );
@@ -380,7 +379,7 @@ export class CfUserService {
   private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction =>
     new GetAllOrgUsers(
       orgGuid,
-      createEntityRelationPaginationKey(organizationSchemaKey, orgGuid),
+      createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       cfGuid,
       isAdmin
     )
@@ -388,7 +387,7 @@ export class CfUserService {
   private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction =>
     new GetAllSpaceUsers(
       spaceGuid,
-      createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid),
+      createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       cfGuid,
       isAdmin
     )

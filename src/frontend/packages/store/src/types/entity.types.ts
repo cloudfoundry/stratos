@@ -1,3 +1,4 @@
+import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import {
   IService,
   IServiceBinding,
@@ -22,7 +23,6 @@ import {
   IStack,
 } from '../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
-import { appSummarySchemaKey } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { AppStats } from './app-metadata.types';
@@ -63,7 +63,7 @@ export interface BaseRequestDataState {
   // [name: string]: IRequestEntityTypeState<any>;
 }
 
-
+// TODO: These should live in the cf module
 interface CFEntityValues {
   featureFlag: IRequestEntityTypeState<IFeatureFlag>;
   application: IRequestEntityTypeState<APIResource<IApp>>;
@@ -92,7 +92,7 @@ interface CFEntityValues {
   private_domains: IRequestEntityTypeState<any>;
   quota_definition: IRequestEntityTypeState<APIResource<IOrgQuotaDefinition>>;
   space_quota_definition: IRequestEntityTypeState<APIResource<ISpaceQuotaDefinition>>;
-  appSummarySchemaKey: IRequestEntityTypeState<IAppSummary>;
+  [appSummaryEntityType]: IRequestEntityTypeState<IAppSummary>;
 }
 export type ExtendedRequestState<T extends string | number | symbol, Y> = Record<T, Y>;
 
@@ -120,34 +120,34 @@ export interface IRequestState extends IRequestTypeState {
   userFavorites: IRequestEntityTypeState<RequestInfoState>;
 }
 
-
+// TODO: These should live in the cf module
 export const defaultCfEntitiesState = {
-  // [applicationSchemaKey]: {},
-  // [stackSchemaKey]: {},
-  // [spaceSchemaKey]: {},
-  // [organizationSchemaKey]: {},
-  // [routeSchemaKey]: {},
-  // [appEventSchemaKey]: {},
+  // [applicationEntityType]: {},
+  // [stackEntityType]: {},
+  // [spaceEntityType]: {},
+  // [organizationEntityType]: {},
+  // [routeEntityType]: {},
+  // [appEventEntityType]: {},
   // [endpointSchemaKey]: {},
-  // [gitBranchesSchemaKey]: {},
-  // [gitCommitSchemaKey]: {},
-  // [cfUserSchemaKey]: {},
-  // [domainSchemaKey]: {},
-  // [appEnvVarsSchemaKey]: {},
-  // [appStatsSchemaKey]: {},
-  // [appSummarySchemaKey]: {},
-  // [serviceInstancesSchemaKey]: {},
-  // [servicePlanSchemaKey]: {},
-  // [serviceSchemaKey]: {},
-  // [serviceBindingSchemaKey]: {},
-  // [buildpackSchemaKey]: {},
-  // [securityGroupSchemaKey]: {},
-  // [featureFlagSchemaKey]: {},
-  // [privateDomainsSchemaKey]: {},
-  // [spaceQuotaSchemaKey]: {},
-  // [metricSchemaKey]: {},
-  // [servicePlanVisibilitySchemaKey]: {},
-  // [serviceBrokerSchemaKey]: {},
+  // [gitBranchesEntityType]: {},
+  // [gitCommitEntityType]: {},
+  // [cfUserEntityType]: {},
+  // [domainEntityType]: {},
+  // [appEnvVarsEntityType]: {},
+  // [appStatsEntityType]: {},
+  // [appSummaryEntityType]: {},
+  // [serviceInstancesEntityType]: {},
+  // [servicePlanEntityType]: {},
+  // [serviceEntityType]: {},
+  // [serviceBindingEntityType]: {},
+  // [buildpackEntityType]: {},
+  // [securityGroupEntityType]: {},
+  // [featureFlagEntityType]: {},
+  // [privateDomainsEntityType]: {},
+  // [spaceQuotaEntityType]: {},
+  // [metricEntityType]: {},
+  // [servicePlanVisibilityEntityType]: {},
+  // [serviceBrokerEntityType]: {},
   // [userFavoritesSchemaKey]: {},s
-  // [userProvidedServiceInstanceSchemaKey]: []
+  // [userProvidedServiceInstanceEntityType]: []
 };

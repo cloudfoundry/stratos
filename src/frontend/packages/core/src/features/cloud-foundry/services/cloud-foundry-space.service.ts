@@ -3,16 +3,16 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import {
+  applicationEntityType,
+  routeEntityType,
+  serviceBindingEntityType,
+  serviceInstancesEntityType,
+  spaceEntityType,
+  spaceQuotaEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetSpace } from '../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  spaceQuotaSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
@@ -102,19 +102,19 @@ export class CloudFoundrySpaceService {
     this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
-          createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
-          createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-          createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-          createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+          createEntityRelationKey(spaceEntityType, spaceQuotaEntityType),
+          createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
+          createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
+          createEntityRelationKey(spaceEntityType, routeEntityType),
         ];
         if (!isAdmin) {
           // We're only interested in fetching space roles via the space request for non-admins.
           // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
           // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
           relations.push(
-            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.DEVELOPER),
-            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.MANAGER),
-            createEntityRelationKey(spaceSchemaKey, SpaceUserRoleNames.AUDITOR),
+            createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.DEVELOPER),
+            createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.MANAGER),
+            createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.AUDITOR),
           );
         }
         const getSpaceAction = new GetSpace(this.spaceGuid, this.cfGuid, relations);

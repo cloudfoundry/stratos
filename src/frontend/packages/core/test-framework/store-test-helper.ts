@@ -1,15 +1,13 @@
 import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
+import { appSummaryEntityType, userProvidedServiceInstanceEntityType } from '../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../store/src/app-state';
-import {
-  userProvidedServiceInstanceSchemaKey, spaceQuotaSchemaKey, quotaDefinitionSchemaKey,
-} from '../../store/src/helpers/entity-factory';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../../store/src/types/user.types';
-import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
@@ -143,7 +141,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       message: ''
     },
     pagination: {
-      appSummarySchemaKey: {},
+      [appSummaryEntityType]: {},
       private_domains: {},
       userProfile: {},
       featureFlag: {},
@@ -622,7 +620,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       metrics: {},
       servicePlan: {},
       cloudFoundryInfo: {},
-      [userProvidedServiceInstanceSchemaKey]: {},
+      [userProvidedServiceInstanceEntityType]: {},
       quota_definition: {
         'endpoint-all': {
           pageCount: 1,
@@ -736,7 +734,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       }
     },
     request: {
-      appSummarySchemaKey: {},
+      [appSummaryEntityType]: {},
       gitRepo: {},
       userProfile: {},
       servicePlanVisibility: {},
@@ -3998,10 +3996,10 @@ function getDefaultInitialTestStoreState(): CFAppState {
       private_domains: {},
       quota_definition: {},
       space_quota_definition: {},
-      [userProvidedServiceInstanceSchemaKey]: {}
+      [userProvidedServiceInstanceEntityType]: {}
     },
     requestData: {
-      appSummarySchemaKey: {},
+      [appSummaryEntityType]: {},
       environmentVars: {},
       stats: {},
       gitRepo: {},
@@ -21896,7 +21894,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
         zoneId: '',
         origin: ''
       },
-      [userProvidedServiceInstanceSchemaKey]: {},
+      [userProvidedServiceInstanceEntityType]: {},
       quota_definition: {
         '037d050d-979e-4dbf-940d-51a8a90729c8': {
           entity: {
@@ -22023,7 +22021,7 @@ function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOv
       return {
         [entity]: dataOverride || {}
       };
-    };
+    }
     sections[entity.guid] = dataOverride || entity.data || {};
     return sections;
   }, {});
@@ -22071,7 +22069,7 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
         ...state.requestData,
         [entityKey]: getStoreSectionForIds(entities)
       }
-    }
+    };
   }, { request: {}, requestData: {} });
 
   return StoreModule.forRoot(
