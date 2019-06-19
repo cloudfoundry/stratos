@@ -1,21 +1,21 @@
 import { RequestOptions } from '@angular/http';
 
 import {
-  cfUserSchemaKey,
-  endpointSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../helpers/entity-factory';
+  cfEntityFactory,
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
 } from '../helpers/entity-relations/entity-relations.types';
+import { EntitySchema } from '../helpers/entity-schema';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction } from '../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 import { getActions } from './action.helper';
-import { EntitySchema } from '../helpers/entity-schema';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ALL = '[Users] Get all';
@@ -52,8 +52,8 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     this.options.method = 'get';
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
-  entity = [entityFactory(cfUserSchemaKey)];
-  entityType = cfUserSchemaKey;
+  entity = [cfEntityFactory(cfUserEntityType)];
+  entityType = cfUserEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -79,8 +79,8 @@ export class GetCFUser extends CFStartAction implements IRequestAction {
     this.options.method = 'get';
   }
   actions = [GET_CF_USER, GET_CF_USER_SUCCESS, GET_CF_USER_FAILED];
-  entity = entityFactory(cfUserSchemaKey);
-  entityType = cfUserSchemaKey;
+  entity = cfEntityFactory(cfUserEntityType);
+  entityType = cfUserEntityType;
   options: RequestOptions;
 }
 
@@ -103,8 +103,8 @@ export class ChangeUserRole extends CFStartAction implements IRequestAction {
     this.options = new RequestOptions();
     this.options.url = `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`;
     this.options.method = method;
-    this.entityType = isSpace ? spaceSchemaKey : organizationSchemaKey;
-    this.entity = entityFactory(this.entityType);
+    this.entityType = isSpace ? spaceEntityType : organizationEntityType;
+    this.entity = cfEntityFactory(this.entityType);
   }
 
   guid: string;
@@ -180,8 +180,8 @@ export class GetUser extends CFStartAction {
   // TODO: Stratos internal entity types don't need a endpoint type.
   // Should we create internal entity catalogue entries with a "fake" endpoint type?
   actions = getActions('Users', 'Fetch User');
-  entity = [entityFactory(cfUserSchemaKey)];
-  entityType = cfUserSchemaKey;
+  entity = [cfEntityFactory(cfUserEntityType)];
+  entityType = cfUserEntityType;
   options: RequestOptions;
 }
 

@@ -3,19 +3,17 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
 
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  serviceInstancesEntityType,
+  servicePlanEntityType,
+  spaceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceBroker } from '../../../../store/src/actions/service-broker.actions';
 import { GetServiceInstances } from '../../../../store/src/actions/service-instances.actions';
 import { GetService, GetServicePlansForService } from '../../../../store/src/actions/service.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import {
-  entityFactory,
-  organizationSchemaKey,
-  serviceBrokerSchemaKey,
-  serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-} from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
@@ -35,7 +33,6 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { StratosStatus } from '../../shared/shared.types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
@@ -81,11 +78,11 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
 };
 
 export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
-  const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
+  const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
   return getPaginationObservables<APIResource<IServiceInstance>>({
     store,
     action: new GetServiceInstances(cfGuid, paginationKey),
-    paginationMonitor: paginationMonitorFactory.create(paginationKey, entityFactory(serviceInstancesSchemaKey))
+    paginationMonitor: paginationMonitorFactory.create(paginationKey, cfEntityFactory(serviceInstancesEntityType))
   }, true).entities$;
 };
 
@@ -95,7 +92,7 @@ export const fetchServiceInstancesCount = (
   spaceGuid: string = null,
   store: Store<CFAppState>,
   paginationMonitorFactory: PaginationMonitorFactory): Observable<number> => {
-  const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
+  const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
   const uniqueKey = spaceGuid || orgGuid || cfGuid;
   const action = new GetServiceInstances(cfGuid, createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), [], false);
   action.initialParams.q = [];
@@ -121,13 +118,13 @@ export const getServicePlans = (
         return observableOf(service.entity.service_plans);
       } else {
         const guid = service.metadata.guid;
-        const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
+        const paginationKey = createEntityRelationPaginationKey(servicePlanEntityType, guid);
         const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
         // Could be a space-scoped service, make a request to fetch the plan
         return getPaginationObservables<APIResource<IServicePlan>>({
           store,
           action: getServicePlansAction,
-          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
+          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, cfEntityFactory(servicePlanEntityType))
         }, true)
           .entities$.pipe(share(), first());
       }

@@ -1,16 +1,20 @@
 import { Action } from '@ngrx/store';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import {
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  appSummarySchemaKey,
-  cfUserSchemaKey,
-  organizationSchemaKey,
-  routeSchemaKey,
-  serviceInstancesSchemaKey,
-  spaceSchemaKey,
-  userProvidedServiceInstanceSchemaKey
-} from '../helpers/entity-factory';
+  applicationEntityType,
+  appStatsEntityType,
+  appSummaryEntityType,
+  cfUserEntityType,
+  organizationEntityType,
+  routeEntityType,
+  serviceInstancesEntityType,
+  spaceEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
+import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { BaseRequestDataState, IRequestState } from '../types/entity.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -27,9 +31,6 @@ import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { userFavoritesEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -67,7 +68,7 @@ function chainReducers(baseReducer, extraReducers) {
 export function requestReducer(state: IRequestState, action: Action) {
   const baseRequestReducer = requestReducerFactory(requestActions);
   const extraReducers = {
-    [appStatsSchemaKey]: [appStatsReducer]
+    [appStatsEntityType]: [appStatsReducer]
   };
   return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
@@ -86,22 +87,22 @@ export function requestDataReducer(state: BaseRequestDataState, action: Action) 
   const baseDataReducer = requestDataReducerFactory(requestActions);
 
   const extraReducers = {
-    [getCFEntityKey(cfUserSchemaKey)]: [userReducer, endpointDisconnectUserReducer],
-    [getCFEntityKey(routeSchemaKey)]: [routeReducer],
-    [getCFEntityKey(serviceInstancesSchemaKey)]: [serviceInstanceReducer],
-    [getCFEntityKey(userProvidedServiceInstanceSchemaKey)]: [serviceInstanceReducer],
+    [getCFEntityKey(cfUserEntityType)]: [userReducer, endpointDisconnectUserReducer],
+    [getCFEntityKey(routeEntityType)]: [routeReducer],
+    [getCFEntityKey(serviceInstancesEntityType)]: [serviceInstanceReducer],
+    [getCFEntityKey(userProvidedServiceInstanceEntityType)]: [serviceInstanceReducer],
     [getInternalEntityKey(endpointStoreNames.type)]: [systemEndpointsReducer],
-    [getCFEntityKey(appSummarySchemaKey)]: [updateAppSummaryRoutesReducer],
-    [getCFEntityKey(applicationSchemaKey)]: [
+    [getCFEntityKey(appSummaryEntityType)]: [updateAppSummaryRoutesReducer],
+    [getCFEntityKey(applicationEntityType)]: [
       updateApplicationRoutesReducer(),
       endpointDisconnectApplicationReducer()
     ],
-    [getCFEntityKey(spaceSchemaKey)]: [
+    [getCFEntityKey(spaceEntityType)]: [
       endpointDisconnectApplicationReducer(),
       applicationAddRemoveReducer(),
       userSpaceOrgReducer(true)
     ],
-    [getCFEntityKey(organizationSchemaKey)]: [
+    [getCFEntityKey(organizationEntityType)]: [
       updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer(),
       userSpaceOrgReducer(false)

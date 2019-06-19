@@ -1,13 +1,13 @@
-import { EndpointAction } from '../../actions/endpoint.actions';
 import {
-  applicationSchemaKey,
-  cfUserSchemaKey,
-  organizationSchemaKey,
-  serviceInstancesSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../helpers/entity-factory';
+  applicationEntityType,
+  cfUserEntityType,
+  organizationEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  spaceEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { EndpointAction } from '../../actions/endpoint.actions';
 import { PaginationState } from '../../types/pagination.types';
 
 export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
@@ -35,13 +35,13 @@ export function clearEndpointEntities(state: PaginationState, action: EndpointAc
     return paginationClearAllTypes(
       state,
       [
-        applicationSchemaKey,
-        spaceSchemaKey,
-        organizationSchemaKey,
-        serviceSchemaKey,
-        cfUserSchemaKey,
-        serviceInstancesSchemaKey,
-        userProvidedServiceInstanceSchemaKey
+        applicationEntityType,
+        spaceEntityType,
+        organizationEntityType,
+        serviceEntityType,
+        cfUserEntityType,
+        serviceInstancesEntityType,
+        userProvidedServiceInstanceEntityType
       ],
       defaultPaginationEntityState
     );

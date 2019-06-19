@@ -5,8 +5,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { applicationEntityType, cfEntityFactory } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetApplication } from '../../../../../../store/src/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { TabNavService } from '../../../../../tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
@@ -45,7 +45,7 @@ describe('ApplicationTabsBaseComponent', () => {
       providers: [
         generateTestEntityServiceProvider(
           appId,
-          entityFactory(applicationSchemaKey),
+          cfEntityFactory(applicationEntityType),
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),

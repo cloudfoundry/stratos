@@ -25,6 +25,7 @@ import {
   tap,
 } from 'rxjs/operators';
 
+import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import {
   SetCreateServiceInstanceOrg,
@@ -38,7 +39,6 @@ import {
   UpdateServiceInstance,
 } from '../../../../../../store/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { selectRequestInfo, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import {
@@ -377,7 +377,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     if (!isEditMode) {
       return observableOf(null);
     }
-    const actionState = selectUpdateInfo(serviceInstancesSchemaKey,
+    const actionState = selectUpdateInfo(serviceInstancesEntityType,
       newServiceInstanceGuid,
       UpdateServiceInstance.updateServiceInstance
     );
@@ -429,7 +429,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const checkUpdate$ = this.getUpdateObservable(isEditMode, newServiceInstanceGuid);
     const action = this.getAction(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr, isEditMode);
 
-    const create$ = this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
+    const create$ = this.store.select(selectRequestInfo(serviceInstancesEntityType, newServiceInstanceGuid));
     const getIdFromResponse = this.getIdFromResponseGetter(cfGuid, newServiceInstanceGuid, isEditMode);
 
     this.store.dispatch(action);
@@ -444,7 +444,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
         const guid = getIdFromResponse(a.response as NormalizedResponse);
 
-        return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, guid)).pipe(
+        return this.store.select(selectRequestInfo(serviceInstancesEntityType, guid)).pipe(
           map(ri => ({
             ...ri,
             response: {
@@ -469,7 +469,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       params
     ));
 
-    return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
+    return this.store.select(selectRequestInfo(serviceBindingEntityType, guid));
   }
 
   addTag(event: MatChipInputEvent): void {

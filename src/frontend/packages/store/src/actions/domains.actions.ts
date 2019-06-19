@@ -1,6 +1,7 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { domainSchemaKey, endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { cfEntityFactory, domainEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
@@ -22,8 +23,8 @@ export class FetchDomain extends CFStartAction implements ICFAction {
         this.options.params = new URLSearchParams();
     }
     actions = [GET_DOMAIN, GET_DOMAIN_SUCCESS, GET_DOMAIN_FAILED];
-    entity = [entityFactory(domainSchemaKey)];
-    entityType = domainSchemaKey;
+    entity = [cfEntityFactory(domainEntityType)];
+    entityType = domainEntityType;
     options: RequestOptions;
 }
 export class FetchAllDomains extends CFStartAction implements PaginatedAction {
@@ -36,8 +37,8 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
         this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
     }
     actions = [GET_ALL_DOMAIN, GET_ALL_DOMAIN_SUCCESS, GET_ALL_DOMAIN_FAILED];
-    entity = [entityFactory(domainSchemaKey)];
-    entityType = domainSchemaKey;
+    entity = [cfEntityFactory(domainEntityType)];
+    entityType = domainEntityType;
     options: RequestOptions;
     paginationKey = 'all-domains';
     initialParams = {

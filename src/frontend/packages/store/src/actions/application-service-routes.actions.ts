@@ -1,13 +1,14 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 import {
-  applicationSchemaKey,
-  domainSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-} from '../helpers/entity-factory';
+  applicationEntityType,
+  cfEntityFactory,
+  domainEntityType,
+  routeEntityType,
+  serviceBindingEntityType,
+  serviceInstancesEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -16,13 +17,12 @@ import {
 } from '../helpers/entity-relations/entity-relations.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
 export const ASSIGN_ROUTE_FAILED = '[Application] Assign route failed';
 
-const applicationEntitySchema = entityFactory(applicationSchemaKey);
+const applicationEntitySchema = cfEntityFactory(applicationEntityType);
 
 export class GetAppRoutes extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
   constructor(
@@ -30,8 +30,8 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
     public endpointGuid: string,
     public paginationKey: string = null,
     public includeRelations: string[] = [
-      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+      createEntityRelationKey(routeEntityType, domainEntityType),
+      createEntityRelationKey(routeEntityType, applicationEntityType)
     ],
     public populateMissing = true
   ) {
@@ -41,7 +41,7 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.parentGuid = guid;
-    this.paginationKey = paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(applicationEntityType, guid);
   }
   actions = [
     '[Application Routes] Get all',
@@ -54,12 +54,12 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
     'order-direction': 'desc',
     'order-direction-field': 'route',
   };
-  entity = [entityFactory(routeSchemaKey)];
-  entityType = routeSchemaKey;
+  entity = [cfEntityFactory(routeEntityType)];
+  entityType = routeEntityType;
   options: RequestOptions;
   flattenPagination = true;
   parentGuid: string;
-  parentEntityConfig = new CFEntityConfig(applicationSchemaKey);
+  parentEntityConfig = new CFEntityConfig(applicationEntityType);
 }
 
 export class GetAppServiceBindings extends CFStartAction implements EntityInlineParentAction {
@@ -68,7 +68,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
     public endpointGuid: string,
     public paginationKey: string = null,
     public includeRelations: string[] = [
-      createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
+      createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
     ],
     public populateMissing = true
   ) {
@@ -77,7 +77,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
     this.options.url = `apps/${guid}/service_bindings`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-    this.paginationKey = paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(applicationEntityType, guid);
   }
   actions = getActions('Application Service Bindings', 'Get All');
   initialParams = {
@@ -86,8 +86,8 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
     'order-direction': 'asc',
     'order-direction-field': 'creation',
   };
-  entity = [entityFactory(serviceBindingSchemaKey)];
-  entityType = serviceBindingSchemaKey;
+  entity = [cfEntityFactory(serviceBindingEntityType)];
+  entityType = serviceBindingEntityType;
   options: RequestOptions;
 }
 
@@ -105,7 +105,7 @@ export class AssociateRouteWithAppApplication extends CFStartAction
   }
   actions = [ASSIGN_ROUTE, ASSIGN_ROUTE_SUCCESS, ASSIGN_ROUTE_FAILED];
   entity = [applicationEntitySchema];
-  entityType = applicationSchemaKey;
+  entityType = applicationEntityType;
   options: RequestOptions;
   updatingKey = 'Assigning-Route';
 }

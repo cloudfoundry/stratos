@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { appEventSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { appEventEntityType, cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { PaginatedAction, QParam } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 
@@ -27,8 +27,8 @@ export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
         AppGetAllEvents.GET_ALL_FAILED
     ];
 
-    entity = [entityFactory(appEventSchemaKey)];
-    entityType = appEventSchemaKey;
+    entity = [cfEntityFactory(appEventEntityType)];
+    entityType = appEventEntityType;
     options: RequestOptions;
     initialParams = {
         'order-direction': 'desc',

@@ -3,10 +3,12 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { AppVariablesDelete } from '../../../../../../../store/src/actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../../../../../store/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { applicationSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -15,8 +17,6 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -104,7 +104,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private getEntityMonitor() {
     const catalogueEntity = entityCatalogue.getEntity({
-      entityType: applicationSchemaKey,
+      entityType: applicationEntityType,
       endpointType: CF_ENDPOINT_TYPE
     });
     return catalogueEntity

@@ -1,21 +1,21 @@
 import { Store } from '@ngrx/store';
 
-import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import {
+  applicationEntityType,
+  domainEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
+  createEntityRelationKey,
   createEntityRelationPaginationKey,
-  createEntityRelationKey
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import {
-  applicationSchemaKey,
-  domainSchemaKey,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../../../store/src/helpers/entity-factory';
-import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IRoute } from '../../../../../core/cf-api.types';
+import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import { IListConfig } from '../../list.component.types';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 
 
@@ -27,10 +27,10 @@ export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements I
     spaceGuid: string,
     cfGuid: string
   ) {
-    const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
+    const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
     const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
-      createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
-      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeEntityType, applicationEntityType),
+      createEntityRelationKey(routeEntityType, domainEntityType),
     ], true, false);
     action.initialParams['order-direction-field'] = 'creation';
     super(store, listConfig, cfGuid, action, false);

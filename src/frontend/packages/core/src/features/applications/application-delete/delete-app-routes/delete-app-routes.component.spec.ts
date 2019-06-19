@@ -1,13 +1,15 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DeleteAppRoutesComponent } from './delete-app-routes.component';
+import { applicationEntityType, cfEntityFactory } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { GetApplication } from '../../../../../../store/src/actions/application.actions';
+import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';
-import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
-import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { DatePipe } from '@angular/common';
-import { entityFactory, applicationSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { GetApplication } from '../../../../../../store/src/actions/application.actions';
+import {
+  ApplicationEnvVarsHelper,
+} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { DeleteAppRoutesComponent } from './delete-app-routes.component';
 
 describe('DeleteAppRoutesComponent', () => {
   let component: DeleteAppRoutesComponent;
@@ -21,7 +23,7 @@ describe('DeleteAppRoutesComponent', () => {
       providers: [
         generateTestEntityServiceProvider(
           appId,
-          entityFactory(applicationSchemaKey),
+          cfEntityFactory(applicationEntityType),
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),

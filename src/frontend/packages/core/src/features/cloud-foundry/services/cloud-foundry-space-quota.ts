@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
 
+import { spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../shared/shared.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { OrgSpaceQuotaHelper } from './cloud-foundry-org-space-quota';
-import { spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { APIResource } from '../../../../../store/src/types/api.types';
 
 export class SpaceQuotaHelper extends OrgSpaceQuotaHelper<ISpace> {
   constructor(
@@ -18,7 +18,7 @@ export class SpaceQuotaHelper extends OrgSpaceQuotaHelper<ISpace> {
       cfEndpointService,
       emf,
       spaceGuid,
-      spaceSchemaKey,
+      spaceEntityType,
     );
   }
 

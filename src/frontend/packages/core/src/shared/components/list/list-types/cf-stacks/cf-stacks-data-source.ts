@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 
+import { cfEntityFactory, stackEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { GetAllStacks } from '../../../../../../../store/src/actions/stack.action';
+import { CFAppState } from '../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { GetAllStacks } from '../../../../../../../store/src/actions/stack.action';
-import { entityFactory, stackSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 export class CfStacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
@@ -14,7 +14,7 @@ export class CfStacksDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: entityFactory(stackSchemaKey),
+      schema: cfEntityFactory(stackEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

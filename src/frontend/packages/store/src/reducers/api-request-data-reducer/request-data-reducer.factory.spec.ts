@@ -1,8 +1,8 @@
-import { domainSchemaKey } from './../../helpers/entity-factory';
-import { requestDataReducerFactory } from './request-data-reducer.factory';
-import { ISuccessRequestAction, IRequestAction } from '../../types/request.types';
-import { APIResource } from '../../types/api.types';
+import { domainEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { IDomain } from '../../../../core/src/core/cf-api.types';
+import { APIResource } from '../../types/api.types';
+import { IRequestAction, ISuccessRequestAction } from '../../types/request.types';
+import { requestDataReducerFactory } from './request-data-reducer.factory';
 
 describe('RequestDataReducerFactory', () => {
   it('should create', () => {
@@ -11,7 +11,7 @@ describe('RequestDataReducerFactory', () => {
   });
   it('should create with add new entity', () => {
     const testEntityTypeUnused = 'test-unused';
-    const entityKey = domainSchemaKey;
+    const entityKey = domainEntityType;
     const guid = 'id123';
     const successType = 'SUCCESS_YO';
     const domain = {

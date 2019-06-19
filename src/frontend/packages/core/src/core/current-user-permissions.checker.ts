@@ -2,8 +2,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
+import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
+import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { featureFlagSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
@@ -27,7 +28,6 @@ import {
   PermissionValues,
   ScopeStrings,
 } from './current-user-permissions.config';
-import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 
 
 export interface IConfigGroups {
@@ -200,7 +200,7 @@ export class CurrentUserPermissionsChecker {
             key => new PaginationMonitor<APIResource<IFeatureFlag>>(
               this.store,
               key,
-              new CFEntityConfig(featureFlagSchemaKey)
+              new CFEntityConfig(featureFlagEntityType)
             ).currentPage$
           ));
       }),

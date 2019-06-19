@@ -1,17 +1,17 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import {
-  applicationSchemaKey,
-  entityFactory,
-  organizationSchemaKey,
-  serviceBindingNoBindingsSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  serviceInstancesWithSpaceSchemaKey,
-  servicePlanSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-} from '../helpers/entity-factory';
+  applicationEntityType,
+  cfEntityFactory,
+  organizationEntityType,
+  serviceBindingEntityType,
+  serviceBindingNoBindingsEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  serviceInstancesWithspaceEntityType,
+  servicePlanEntityType,
+  spaceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
@@ -20,12 +20,12 @@ import { getActions } from './action.helper';
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
 export const getServiceInstanceRelations = [
-  createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-  createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-  createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
-  createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
-  createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-  createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+  createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
+  createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+  createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
+  createEntityRelationKey(serviceInstancesEntityType, serviceEntityType),
+  createEntityRelationKey(spaceEntityType, organizationEntityType),
+  createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
 ];
 
 export class GetServiceInstances
@@ -43,8 +43,8 @@ export class GetServiceInstances
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get all');
-  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
-  entityType = serviceInstancesSchemaKey;
+  entity = [cfEntityFactory(serviceInstancesWithspaceEntityType)];
+  entityType = serviceInstancesEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -70,8 +70,8 @@ export class GetServiceInstance
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get particular instance');
-  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
-  entityType = serviceInstancesSchemaKey;
+  entity = [cfEntityFactory(serviceInstancesWithspaceEntityType)];
+  entityType = serviceInstancesEntityType;
   options: RequestOptions;
 }
 
@@ -88,10 +88,10 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
     this.options.headers = new Headers();
   }
   actions = getActions('Service Instances', 'Delete Service Instance');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
-  entityType = serviceInstancesSchemaKey;
+  entity = [cfEntityFactory(serviceInstancesEntityType)];
+  entityType = serviceInstancesEntityType;
   options: RequestOptions;
-  clearPaginationEntityKeys = [serviceBindingSchemaKey];
+  clearPaginationEntityKeys = [serviceBindingEntityType];
   removeEntityOnDelete = true;
 }
 export class CreateServiceInstance extends CFStartAction implements ICFAction {
@@ -119,8 +119,8 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
     };
   }
   actions = getActions('Service Instances', 'Create Service Instance');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
-  entityType = serviceInstancesSchemaKey;
+  entity = [cfEntityFactory(serviceInstancesEntityType)];
+  entityType = serviceInstancesEntityType;
   options: RequestOptions;
 }
 
@@ -152,8 +152,8 @@ export class ListServiceBindingsForInstance
     public serviceInstanceGuid: string,
     public paginationKey: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+      createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
+      createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
     ],
     public populateMissing = true
   ) {
@@ -164,8 +164,8 @@ export class ListServiceBindingsForInstance
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get all service bindings for instance');
-  entity = [entityFactory(serviceBindingNoBindingsSchemaKey)];
-  entityType = serviceBindingSchemaKey;
+  entity = [cfEntityFactory(serviceBindingNoBindingsEntityType)];
+  entityType = serviceBindingEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,

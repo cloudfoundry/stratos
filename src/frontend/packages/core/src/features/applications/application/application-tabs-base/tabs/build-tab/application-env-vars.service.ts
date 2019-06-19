@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { OverrideAppDetails } from '../../../../../../../../store/src/types/deploy-application.types';
+
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { GetAppEnvVarsAction } from '../../../../../../../../store/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 import {
-    PaginationObservables,
-    getPaginationObservables
+  getPaginationObservables,
+  PaginationObservables,
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { GetAppEnvVarsAction } from '../../../../../../../../store/src/actions/app-metadata.actions';
-import { appEnvVarsSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { OverrideAppDetails } from '../../../../../../../../store/src/types/deploy-application.types';
 import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 
 
 export interface EnvVarStratosProject {
@@ -39,7 +40,7 @@ export class ApplicationEnvVarsHelper {
     ) { }
 
     createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
-        const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsSchemaKey);
+        const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
         const action = new GetAppEnvVarsAction(appGuid, cfGuid);
         return getPaginationObservables<APIResource>({
             store: this.store,

@@ -4,9 +4,10 @@ import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
@@ -15,7 +16,6 @@ import { TableRowStateManager } from '../../list-table/table-row/table-row-state
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
-import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 
 export function syncPaginationSection(
   store: Store<CFAppState>,

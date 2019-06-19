@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import {
+  applicationEntityType,
+  appStatsEntityType,
+  cfEntityFactory,
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  entityFactory,
-} from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -25,14 +25,14 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
     appGuid: string,
     listConfig: IListConfig<ListAppInstance>
   ) {
-    const paginationKey = createEntityRelationPaginationKey(applicationSchemaKey, appGuid);
+    const paginationKey = createEntityRelationPaginationKey(applicationEntityType, appGuid);
     const action = new GetAppStatsAction(appGuid, cfGuid);
 
     super(
       {
         store,
         action,
-        schema: entityFactory(appStatsSchemaKey),
+        schema: cfEntityFactory(appStatsEntityType),
         getRowUniqueId: (row: ListAppInstance) => row.index.toString(),
         paginationKey,
         transformEntities: [{ type: 'filter', field: 'value.state' }],

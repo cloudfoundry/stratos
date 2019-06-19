@@ -1,6 +1,6 @@
+import { CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { fetchEntityTree } from './entity-relations.tree';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
-import { CFEntitySchema } from '../entity-factory';
 
 describe('Entity Relations - Tree', () => {
 

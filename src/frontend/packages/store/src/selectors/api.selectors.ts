@@ -1,8 +1,8 @@
 import { compose } from '@ngrx/store';
 
-import { IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState, AppState, GeneralEntityAppState } from '../app-state';
+import { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
-import { APIResource, APIResourceMetadata } from '../types/api.types';
+import { APIResource } from '../types/api.types';
 
 export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
@@ -100,17 +100,3 @@ export function getAPIRequestInfoState<T extends GeneralEntityAppState>(state: T
 export function getAPIRequestDataState<T extends GeneralEntityAppState>(state: T) {
   return state.requestData;
 }
-
-const getValueOrNull = (object, key) =>
-  object ? (object[key] ? object[key] : null) : null;
-export const getAPIResourceMetadata = (
-  resource: APIResource
-): APIResourceMetadata => getValueOrNull(resource, 'metadata');
-export const getAPIResourceEntity = (resource: APIResource): any =>
-  getValueOrNull(resource, 'entity');
-export const getMetadataGuid = (metadata: APIResourceMetadata): string =>
-  getValueOrNull(metadata, 'guid');
-export const getAPIResourceGuid = compose(
-  getMetadataGuid,
-  getAPIResourceMetadata
-);

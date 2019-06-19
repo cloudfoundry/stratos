@@ -1,9 +1,10 @@
+import { cfUserEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../actions/endpoint.actions';
 import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../actions/organization.actions';
+import { createDefaultUserRelations } from '../actions/user.actions.helpers';
 import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../actions/users.actions';
 import { IRequestEntityTypeState } from '../app-state';
-import { cfUserSchemaKey } from '../helpers/entity-factory';
 import { deepMergeState } from '../helpers/reducer.helper';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
@@ -16,7 +17,6 @@ import {
   OrgUserRoleNames,
   SpaceUserRoleNames,
 } from '../types/user.types';
-import { createDefaultUserRelations } from '../actions/user.actions.helpers';
 
 const properties = {
   org: {
@@ -150,7 +150,7 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
   // At this point in the flow the request flow (APISuccessOrFailedAction), the users may or may not be in the store yet
   // (via WrapperRequestActionSuccess). Therefore in order to avoid partial entities we need to stick the whole user set into the store
   // including `missingRoles`.
-  const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserSchemaKey];
+  const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserEntityType];
   if (!usersInResponse) {
     return users;
   }

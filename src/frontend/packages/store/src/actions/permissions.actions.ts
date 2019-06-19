@@ -1,8 +1,7 @@
-import { PaginatedAction } from '../types/pagination.types';
 import { RequestOptions } from '@angular/http';
-import { organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
-import { CFStartAction } from '../types/request.types';
 import { Action } from '@ngrx/store';
+
+import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { APIResource } from '../types/api.types';
 
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS = '[Current User] Get audited org Relations';
@@ -94,7 +93,7 @@ export class GetUserRelations implements Action {
         GET_AUDITED_ORG_CURRENT_USER_RELATIONS_SUCCESS,
         GET_AUDITED_ORG_CURRENT_USER_RELATIONS_FAILED
       ],
-      entityType: organizationSchemaKey
+      entityType: organizationEntityType
     },
     [UserRelationTypes.BILLING_MANAGED_ORGANIZATION]: {
       actions: [
@@ -102,7 +101,7 @@ export class GetUserRelations implements Action {
         GET_BILLING_MANAGED_ORG_CURRENT_USER_RELATIONS_SUCCESS,
         GET_BILLING_MANAGED_ORG_CURRENT_USER_RELATIONS_FAILED
       ],
-      entityType: organizationSchemaKey
+      entityType: organizationEntityType
     },
     [UserRelationTypes.MANAGED_ORGANIZATION]: {
       actions: [
@@ -110,11 +109,11 @@ export class GetUserRelations implements Action {
         GET_MANAGED_ORG_CURRENT_USER_RELATIONS_SUCCESS,
         GET_MANAGED_ORG_CURRENT_USER_RELATIONS_FAILED
       ],
-      entityType: organizationSchemaKey
+      entityType: organizationEntityType
     },
     [UserRelationTypes.ORGANIZATIONS]: {
       actions: [GET_ORG_CURRENT_USER_RELATIONS, GET_ORG_CURRENT_USER_RELATIONS_SUCCESS, GET_ORG_CURRENT_USER_RELATIONS_FAILED],
-      entityType: organizationSchemaKey
+      entityType: organizationEntityType
     },
     [UserRelationTypes.AUDITED_SPACES]: {
       actions: [
@@ -122,7 +121,7 @@ export class GetUserRelations implements Action {
         GET_AUDITED_SPACE_CURRENT_USER_RELATIONS_SUCCESS,
         GET_AUDITED_SPACE_CURRENT_USER_RELATIONS_FAILED
       ],
-      entityType: spaceSchemaKey
+      entityType: spaceEntityType
     },
     [UserRelationTypes.MANAGED_SPACES]: {
       actions: [
@@ -130,7 +129,7 @@ export class GetUserRelations implements Action {
         GET_MANAGED_SPACE_CURRENT_USER_RELATIONS_SUCCESS,
         GET_MANAGED_SPACE_CURRENT_USER_RELATIONS_FAILED
       ],
-      entityType: spaceSchemaKey
+      entityType: spaceEntityType
     },
     [UserRelationTypes.SPACES]: {
       actions: [
@@ -138,7 +137,7 @@ export class GetUserRelations implements Action {
         GET_SPACE_CURRENT_USER_RELATIONS_SUCCESS,
         GET_SPACE_CURRENT_USER_RELATIONS_SUCCESS
       ],
-      entityType: spaceSchemaKey
+      entityType: spaceEntityType
     }
   };
 }

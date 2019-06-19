@@ -4,6 +4,13 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import {
+  applicationEntityType,
+  routeEntityType,
+  serviceInstancesEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
 import { DeleteApplication, GetApplication } from '../../../../../store/src/actions/application.actions';
 import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
@@ -11,12 +18,6 @@ import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../../store/src/actions/user-provided-service.actions';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  routeSchemaKey,
-  serviceInstancesSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
@@ -52,9 +53,6 @@ import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../cloud-foundry/cf.helpers';
 import { ApplicationService } from '../application.service';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { CloudFoundryPackageModule } from '../../../../../cloud-foundry/src/cloud-foundry.module';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -159,10 +157,10 @@ export class ApplicationDeleteComponent<T> {
   public selectedUserServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   public fetchingApplicationData$: Observable<boolean>;
 
-  public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
-  public userProvidedServiceInstanceSchemaKey = userProvidedServiceInstanceSchemaKey;
-  public routeSchemaKey = routeSchemaKey;
-  public applicationSchemaKey = applicationSchemaKey;
+  public serviceInstancesEntityType = serviceInstancesEntityType;
+  public userProvidedServiceInstanceEntityType = userProvidedServiceInstanceEntityType;
+  public routeEntityType = routeEntityType;
+  public applicationEntityType = applicationEntityType;
   public deletingState = AppMonitorComponentTypes.DELETE;
   public routeMonitor: PaginationMonitor<APIResource<IRoute>>;
   public instanceMonitor: PaginationMonitor<APIResource<IServiceBinding>>;
@@ -226,7 +224,7 @@ export class ApplicationDeleteComponent<T> {
     return this.entityMonitorFactory.create<APIResource<IApp>>(
       this.applicationService.appGuid,
       {
-        entityType: applicationSchemaKey,
+        entityType: applicationEntityType,
         endpointType: CF_ENDPOINT_TYPE
       }
     );

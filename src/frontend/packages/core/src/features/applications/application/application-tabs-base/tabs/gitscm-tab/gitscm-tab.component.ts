@@ -5,6 +5,10 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
+import { FetchBranchesForProject, FetchCommit } from '../../../../../../../../store/src/actions/deploy-applications.actions';
+import { FetchGitHubRepoInfo } from '../../../../../../../../store/src/actions/github.actions';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { GitCommit, GitRepo } from '../../../../../../../../store/src/types/git.types';
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import {
@@ -15,17 +19,6 @@ import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.se
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { GitRepo, GitCommit } from '../../../../../../../../store/src/types/git.types';
-import {
-  gitRepoSchemaKey,
-  entityFactory,
-  gitCommitSchemaKey,
-  gitBranchesSchemaKey
-} from '../../../../../../../../store/src/helpers/entity-factory';
-import { FetchGitHubRepoInfo } from '../../../../../../../../store/src/actions/github.actions';
-import { FetchCommit, FetchBranchesForProject } from '../../../../../../../../store/src/actions/deploy-applications.actions';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 
 @Component({

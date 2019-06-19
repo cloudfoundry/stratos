@@ -3,23 +3,22 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
+import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../../../store/src/types/user.types';
 import { IOrganization } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { AppChip } from '../../../../chips/chips.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
-import { OrgUserRoleNames, CfUser, IUserPermissionInOrg } from '../../../../../../../../store/src/types/user.types';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
-import { organizationSchemaKey, } from '../../../../../../../../store/src/helpers/entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-org-user-permission-cell',
@@ -62,7 +61,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         row.metadata.guid
       );
       const catalogueEntity = entityCatalogue.getEntity({
-        entityType: organizationSchemaKey,
+        entityType: organizationEntityType,
         endpointType: CF_ENDPOINT_TYPE
       });
       return {
