@@ -110,7 +110,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     this.store.dispatch(updateAction);
 
     return this.store.select(selectRequestInfo(updateAction, this.spaceGuid)).pipe(
-      tap(console.log),
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map((state) => state.updating[UpdateSpace.UpdateExistingSpace])
     );
