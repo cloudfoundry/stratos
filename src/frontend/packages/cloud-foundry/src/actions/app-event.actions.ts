@@ -1,8 +1,8 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { appEventEntityType, cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
-import { PaginatedAction, QParam } from '../types/pagination.types';
-import { CFStartAction } from '../types/request.types';
+import { appEventEntityType, cfEntityFactory } from '../cf-entity-factory';
+import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
+import { CFStartAction } from '../../../store/src/types/request.types';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',
