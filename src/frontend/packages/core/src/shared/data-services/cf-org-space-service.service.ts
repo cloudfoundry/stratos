@@ -66,7 +66,8 @@ export const enum CfOrgSpaceSelectMode {
 }
 
 
-export const initCfOrgSpaceService = (store: Store<CFAppState>,
+export const initCfOrgSpaceService = (
+  store: Store<CFAppState>,
   cfOrgSpaceService: CfOrgSpaceDataService,
   entityKey: string,
   paginationKey: string): Observable<any> => {

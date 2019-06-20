@@ -104,7 +104,8 @@ export class CfUserService {
       }));
   }
 
-  private parseOrgRole(user: CfUser,
+  private parseOrgRole(
+    user: CfUser,
     processedOrgs: Set<string>,
     orgsToProcess: APIResource<IOrganization>[],
     result: IUserPermissionInOrg[]) {
@@ -143,7 +144,8 @@ export class CfUserService {
     return res;
   }
 
-  private parseSpaceRole(user: CfUser,
+  private parseSpaceRole(
+    user: CfUser,
     processedSpaces: Set<string>,
     spacesToProcess: APIResource<ISpace>[],
     result: IUserPermissionInSpace[]) {

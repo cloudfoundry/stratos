@@ -241,16 +241,6 @@ export interface IPrivateDomain {
   cfGuid?: string;
 }
 
-export interface IOrgQuotaDefinition extends IBaseQuotaDefinition {
-  trial_db_allowed: boolean;
-}
-
-export interface ISpaceQuotaDefinition extends IBaseQuotaDefinition {
-  organization_guid?: string;
-  organization_url?: string;
-  spaces_url?: string;
-}
-
 interface IBaseQuotaDefinition {
   memory_limit: number;
   app_instance_limit: number;
@@ -265,6 +255,16 @@ interface IBaseQuotaDefinition {
   total_reserved_route_ports: number;
   guid?: string;
   cfGuid?: string;
+}
+
+export interface IOrgQuotaDefinition extends IBaseQuotaDefinition {
+  trial_db_allowed: boolean;
+}
+
+export interface ISpaceQuotaDefinition extends IBaseQuotaDefinition {
+  organization_guid?: string;
+  organization_url?: string;
+  spaces_url?: string;
 }
 
 export interface IUpdateSpace {

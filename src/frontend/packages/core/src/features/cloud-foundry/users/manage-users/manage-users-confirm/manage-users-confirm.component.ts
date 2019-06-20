@@ -1,6 +1,7 @@
+/* tslint:disable:max-line-length */
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import {
@@ -19,7 +20,6 @@ import {
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
-import { IOrganization } from '../../../../../core/cf-api.types';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -35,6 +35,7 @@ import {
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 
+/* tslint:enable:max-line-length */
 
 @Component({
   selector: 'app-manage-users-confirm',

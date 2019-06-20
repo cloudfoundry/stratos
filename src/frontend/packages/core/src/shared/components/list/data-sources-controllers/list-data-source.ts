@@ -76,7 +76,7 @@ const services: {
 
 } = {
   entityCatalogue: null
-}
+};
 export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
 export abstract class ListDataSource<T, A = T> extends DataSource<T> implements IListDataSource<T> {
 

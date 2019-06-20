@@ -66,7 +66,7 @@ export interface IUserRelationTypes {
       string
     ];
     entityType: string;
-  }
+  };
 }
 
 export class GetUserCfRelations implements Action {
