@@ -6,7 +6,7 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
-import { AppMetadataTypes } from '../../../../../../store/src/actions/app-metadata.actions';
+import { AppMetadataTypes } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { StratosStatus } from '../../../shared.types';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',

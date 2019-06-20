@@ -12,7 +12,7 @@ import {
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,

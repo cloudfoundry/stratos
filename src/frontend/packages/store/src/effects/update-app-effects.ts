@@ -11,7 +11,7 @@ import {
   GetAppEnvVarsAction,
   GetAppStatsAction,
   GetAppSummaryAction,
-} from './../actions/app-metadata.actions';
+} from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from './../app-state';
 
 

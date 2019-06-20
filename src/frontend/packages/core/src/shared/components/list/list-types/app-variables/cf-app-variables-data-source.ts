@@ -6,7 +6,7 @@ import {
   applicationEntityType,
   cfEntityFactory,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppEnvVarsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppEnvVarsAction } from '../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../../../store/src/actions/app-variables.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {

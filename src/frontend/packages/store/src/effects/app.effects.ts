@@ -7,7 +7,7 @@ import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoin
 import {
   createAppInstancesMetricAction,
 } from '../../../core/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { GetAppSummaryAction } from '../actions/app-metadata.actions';
+import { GetAppSummaryAction } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { ASSIGN_ROUTE_SUCCESS } from '../actions/application-service-routes.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../app-state';

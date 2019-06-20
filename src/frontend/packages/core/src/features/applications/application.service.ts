@@ -20,7 +20,7 @@ import {
   AppMetadataTypes,
   GetAppStatsAction,
   GetAppSummaryAction,
-} from '../../../../store/src/actions/app-metadata.actions';
+} from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   GetApplication,
   UpdateApplication,

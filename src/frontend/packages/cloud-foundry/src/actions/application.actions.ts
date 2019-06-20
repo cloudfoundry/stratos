@@ -8,7 +8,7 @@ import { pick } from '../../../store/src/helpers/reducer.helper';
 import { ActionMergeFunction } from '../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
-import { AppMetadataTypes } from '../../../store/src/actions/app-metadata.actions';
+import { AppMetadataTypes } from './app-metadata.actions';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
