@@ -6,16 +6,20 @@ import { Action } from '@ngrx/store';
 export type BaseOrchestratedActionBuilderTypes = 'get' | 'delete' | 'update' | 'create' | 'getAll' | string;
 
 // A function that returns a ICFAction
-export type OrchestratedActionBuilder<T extends any[], Y extends IRequestAction | PaginatedAction> = (...args: T) => Y;
+// export type OrchestratedActionBuilder<T extends any[], Y extends IRequestAction | PaginatedAction> = (...args: T) => Y;
+export type OrchestratedActionBuilder<
+  T extends Record<keyof T, any>,
+  Y extends IRequestAction | PaginatedAction
+  > = (...args: T[keyof T]) => Y;
 
 // A list of functions that can be used get interface with the entity
 export interface OrchestratedActionBuilders {
-  get?: OrchestratedActionBuilder<[string, any], IRequestAction>;
-  delete?: OrchestratedActionBuilder<[string, any], IRequestAction>;
-  update?: OrchestratedActionBuilder<[string, any], IRequestAction>;
-  create?: OrchestratedActionBuilder<[any], IRequestAction>;
-  getAll?: OrchestratedActionBuilder<[], PaginatedAction>;
-  [actionType: string]: OrchestratedActionBuilder<any[], IRequestAction | PaginatedAction>;
+  get?: (guid: string, endpointGuid: string, data?: unknown) => IRequestAction;
+  delete?: (guid: string, endpointGuid: string, data?: unknown) => IRequestAction;
+  update?: (guid: string, endpointGuid: string, data?: unknown) => IRequestAction;
+  create?: (data?: unknown) => IRequestAction;
+  getAll?: () => PaginatedAction;
+  [actionType: string]: OrchestratedActionBuilder<any, IRequestAction | PaginatedAction>;
 }
 
 export class ActionOrchestrator {
