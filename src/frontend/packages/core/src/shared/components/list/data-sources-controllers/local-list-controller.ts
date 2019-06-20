@@ -57,9 +57,7 @@ export class LocalListController<T = any> {
           return { paginationEntity, entities: [] };
         }
         if (dataFunctions && dataFunctions.length) {
-          entities = dataFunctions.reduce((value, fn) => {
-            return fn(value, paginationEntity);
-          }, entities);
+          entities = dataFunctions.reduce((value, fn) => fn(value, paginationEntity), entities);
         }
         return { paginationEntity, entities };
       }),

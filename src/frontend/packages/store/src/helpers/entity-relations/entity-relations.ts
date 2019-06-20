@@ -524,7 +524,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           const catalogueEntity = entityCatalogue.getEntity(eicAction);
           const entityKey = catalogueEntity.entityKey;
           const normedEntities = entity.entity[paramName].reduce((normedEntities, entity) => {
-            const guid = typeof(entity) === 'string' ? entity : catalogueEntity.getGuidFromEntity(entity);
+            const guid = typeof (entity) === 'string' ? entity : catalogueEntity.getGuidFromEntity(entity);
             normedEntities[entityKey][guid] = entity;
             return normedEntities;
           }, { [entityKey]: {} });

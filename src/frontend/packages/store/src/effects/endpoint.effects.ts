@@ -4,6 +4,9 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
@@ -36,7 +39,7 @@ import { CFAppState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
+import { EndpointModel } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
@@ -44,9 +47,6 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { PaginatedAction } from './../types/pagination.types';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 
 
 @Injectable()

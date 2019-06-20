@@ -1,13 +1,13 @@
 import { Action } from '@ngrx/store';
 
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
 import { deepMergeState } from '../../helpers/reducer.helper';
 import { IFlatTree } from '../../helpers/schema-tree-traverse';
 import { BaseRequestDataState } from '../../types/entity.types';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { IRequestArray } from '../api-request-reducer/types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 
 
 export function requestDataReducerFactory(actions: IRequestArray) {
