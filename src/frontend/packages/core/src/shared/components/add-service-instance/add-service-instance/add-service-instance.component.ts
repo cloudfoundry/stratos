@@ -22,7 +22,7 @@ import {
   serviceInstancesEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetApplication } from '../../../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 import {
   ResetCreateServiceInstanceOrgAndSpaceState,
   ResetCreateServiceInstanceState,

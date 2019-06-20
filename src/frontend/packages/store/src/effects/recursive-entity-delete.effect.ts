@@ -3,7 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { DELETE_SUCCESS, DeleteApplication } from '../actions/application.actions';
+import { DELETE_SUCCESS, DeleteApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';

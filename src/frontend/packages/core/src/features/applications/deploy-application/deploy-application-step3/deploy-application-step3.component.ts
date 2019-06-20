@@ -22,7 +22,7 @@ import { CFAppState } from '../../../../../../store/src/app-state';
 import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { DeleteDeployAppSection } from '../../../../../../store/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GetApplication } from '../../../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 
 @Component({
   selector: 'app-deploy-application-step3',

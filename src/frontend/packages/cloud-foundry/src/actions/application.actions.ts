@@ -1,14 +1,14 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { applicationEntityType, appStatsEntityType, cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { applicationEntityType, appStatsEntityType, cfEntityFactory } from '../cf-entity-factory';
 import { IApp } from '../../../core/src/core/cf-api.types';
-import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
-import { pick } from '../helpers/reducer.helper';
-import { ActionMergeFunction } from '../types/api.types';
-import { PaginatedAction, PaginationParam } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { AppMetadataTypes } from './app-metadata.actions';
+import { EntityInlineParentAction } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { pick } from '../../../store/src/helpers/reducer.helper';
+import { ActionMergeFunction } from '../../../store/src/types/api.types';
+import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { AppMetadataTypes } from '../../../store/src/actions/app-metadata.actions';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';

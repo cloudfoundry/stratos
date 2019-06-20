@@ -13,7 +13,7 @@ import {
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { AssociateRouteWithAppApplication } from '../../../../../../store/src/actions/application-service-routes.actions';
-import { CreateNewApplication } from '../../../../../../store/src/actions/application.actions';
+import { CreateNewApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 import { GetOrganization } from '../../../../../../store/src/actions/organization.actions';
 import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';

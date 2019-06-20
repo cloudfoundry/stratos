@@ -25,7 +25,7 @@ import {
   GetApplication,
   UpdateApplication,
   UpdateExistingApplication,
-} from '../../../../store/src/actions/application.actions';
+} from '../../../../cloud-foundry/src/actions/application.actions';
 import { GetSpace } from '../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';

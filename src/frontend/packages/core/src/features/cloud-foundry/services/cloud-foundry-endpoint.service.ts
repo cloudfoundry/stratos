@@ -12,7 +12,7 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllApplications } from '../../../../../store/src/actions/application.actions';
+import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
