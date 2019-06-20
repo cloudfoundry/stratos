@@ -1,20 +1,19 @@
-import { ICFAction } from '../../../../../store/src/types/request.types';
-import { EntityCatalogueConfig } from '../entity-catalogue-entity';
+import { IRequestAction } from '../../../../../store/src/types/request.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 
 export type BaseOrchestratedActionBuilderTypes = 'get' | 'delete' | 'update' | 'create' | 'getAll' | string;
 
 // A function that returns a ICFAction
-export type OrchestratedActionBuilder<T extends any[], Y extends ICFAction | PaginatedAction> = (...args: T) => Y;
+export type OrchestratedActionBuilder<T extends any[], Y extends IRequestAction | PaginatedAction> = (...args: T) => Y;
 
 // A list of functions that can be used get interface with the entity
 export interface OrchestratedActionBuilders {
-  get?: OrchestratedActionBuilder<[string, any], ICFAction>;
-  delete?: OrchestratedActionBuilder<[string, any], ICFAction>;
-  update?: OrchestratedActionBuilder<[string, any], ICFAction>;
-  create?: OrchestratedActionBuilder<[any], ICFAction>;
+  get?: OrchestratedActionBuilder<[string, any], IRequestAction>;
+  delete?: OrchestratedActionBuilder<[string, any], IRequestAction>;
+  update?: OrchestratedActionBuilder<[string, any], IRequestAction>;
+  create?: OrchestratedActionBuilder<[any], IRequestAction>;
   getAll?: OrchestratedActionBuilder<[], PaginatedAction>;
-  [actionType: string]: OrchestratedActionBuilder<any[], ICFAction | PaginatedAction>;
+  [actionType: string]: OrchestratedActionBuilder<any[], IRequestAction | PaginatedAction>;
 }
 
 export class ActionOrchestrator {
