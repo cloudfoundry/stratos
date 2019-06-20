@@ -1,5 +1,7 @@
 import { IRequestAction } from '../../../../../store/src/types/request.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
+import { Action } from '@ngrx/store';
 
 export type BaseOrchestratedActionBuilderTypes = 'get' | 'delete' | 'update' | 'create' | 'getAll' | string;
 
@@ -17,6 +19,10 @@ export interface OrchestratedActionBuilders {
 }
 
 export class ActionOrchestrator {
+  public getEntityActionDispatcher(actionDispatcher: (action: Action) => void) {
+    return new EntityActionDispatcherManager(actionDispatcher, this);
+  }
+
   public getActionBuilder(actionType: BaseOrchestratedActionBuilderTypes) {
     return this.actionBuilders[actionType];
   }

@@ -1,8 +1,6 @@
 import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator';
 import { hasActions, getRequestAction, getPaginationAction } from './action-orchestrator.spec.helpers';
-import { ICFAction } from '../../../../../store/src/types/request.types';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-
+import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
 fdescribe('ActionOrchestrator', () => {
   it('should not have action builders', () => {
@@ -43,5 +41,20 @@ fdescribe('ActionOrchestrator', () => {
     } as OrchestratedActionBuilders;
     const actionOrchestrator = new ActionOrchestrator('BasePlusCustom', actionBuilders);
     hasActions(actionOrchestrator, ['get', 'delete', 'update', 'create', 'getAll', 'customAction101', 'customAction202']);
+  });
+
+  it('should get entity action dispatcher', () => {
+    const actionBuilders = {
+      get: guid => getRequestAction(),
+      delete: guid => getRequestAction(),
+      update: guid => getRequestAction(),
+      create: () => getRequestAction(),
+      getAll: () => getPaginationAction(),
+      customAction101: () => getPaginationAction(),
+      customAction202: guid => getRequestAction()
+    } as OrchestratedActionBuilders;
+    const actionOrchestrator = new ActionOrchestrator('BasePlusCustom', actionBuilders);
+    const dispatcher = actionOrchestrator.getEntityActionDispatcher(() => { });
+    expect(dispatcher instanceof EntityActionDispatcherManager).toBe(true);
   });
 });
