@@ -37,29 +37,18 @@ func init() {
 		createUpdateModifiedTrigger += "BEGIN UPDATE local_users SET last_updated = DATETIME('now') WHERE _rowid_ = new._rowid_; " 
 		createUpdateModifiedTrigger += "END;"
 		
-		//Postgres - specific trigger syntax
-		createPostgresUpdateModifiedTrigger :=  "CREATE TRIGGER update_trigger "
-		createPostgresUpdateModifiedTrigger +=	"AFTER UPDATE ON local_users FOR EACH ROW "
-		createPostgresUpdateModifiedTrigger +=	"EXECUTE PROCEDURE update_last_modified_time(); "
-
-		postgresTriggerFunction :=	"CREATE OR REPLACE FUNCTION update_last_modified_time() "
-		postgresTriggerFunction +=	"RETURNS trigger AS "
-	    postgresTriggerFunction +=	"$BODY$ "
-		postgresTriggerFunction +=	"BEGIN "
-		postgresTriggerFunction +=	"UPDATE local_users "
-		postgresTriggerFunction +=	"SET last_updated = CURRENT_TIMESTAMP WHERE new.user_guid = old.user_guid; "
-		postgresTriggerFunction +=	"RETURN NEW; END; $BODY$ "
-		postgresTriggerFunction +=	"LANGUAGE plpgsql VOLATILE COST 100;"
-
 		//Configure Postgres migration options 
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			createLocalUsers += " WITH (OIDS=FALSE);"
-			createUpdateModifiedTrigger = createPostgresUpdateModifiedTrigger
-			//Create postgres trigger function
-			_, err := txn.Exec(postgresTriggerFunction)
+
+			//Postgres requires a trigger function
+			//Create trigger function and generate trigger statement
+			postgresTrigger, err := setupPostgresTrigger(txn)
 			if err != nil {
 				return err
 			}
+			createUpdateModifiedTrigger = postgresTrigger
+
 		} else {
 			createLocalUsers += ";"
 		}
@@ -88,3 +77,27 @@ func init() {
 		return nil
 	})
 }
+
+func setupPostgresTrigger(txn *sql.Tx) (string, error) {
+	
+	createPostgresUpdateModifiedTrigger :=  "CREATE TRIGGER update_trigger "
+	createPostgresUpdateModifiedTrigger +=	"AFTER UPDATE ON local_users FOR EACH ROW "
+	createPostgresUpdateModifiedTrigger +=	"EXECUTE PROCEDURE update_last_modified_time(); "
+
+	postgresTriggerFunction :=	"CREATE OR REPLACE FUNCTION update_last_modified_time() "
+	postgresTriggerFunction +=	"RETURNS trigger AS "
+	postgresTriggerFunction +=	"$BODY$ "
+	postgresTriggerFunction +=	"BEGIN "
+	postgresTriggerFunction +=	"UPDATE local_users "
+	postgresTriggerFunction +=	"SET last_updated = CURRENT_TIMESTAMP WHERE new.user_guid = old.user_guid; "
+	postgresTriggerFunction +=	"RETURN NEW; END; $BODY$ "
+	postgresTriggerFunction +=	"LANGUAGE plpgsql VOLATILE COST 100;"
+
+	_, err := txn.Exec(postgresTriggerFunction)
+	if err != nil {
+		return "", err
+	}
+
+	return createPostgresUpdateModifiedTrigger, err
+}
+
