@@ -59,7 +59,7 @@ class EntityCatalogue {
     return new StratosBaseCatalogueEntity({
       ...parent,
       ...subtype
-    }, entity.builder);
+    }, { ...entity.builders });
   }
 
   private getConfig(

@@ -18,33 +18,34 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 
-export interface EntityCatalogueConfig<T extends IEntityMetadata = IEntityMetadata, Y = any> {
-  builder?: IStratosEntityBuilder<T, Y>;
-  actionOrchestrator?: OrchestratedActionBuilders;
+export interface EntityCatalogueBuilders<T extends IEntityMetadata = IEntityMetadata, Y = any> {
+  entityBuilder?: IStratosEntityBuilder<T, Y>;
+  actionBuilders?: OrchestratedActionBuilders;
 }
-
+type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
+  IStratosEndpointDefinition |
+  IStratosBaseEntityDefinition<EntityCatalogueSchemas>;
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   public readonly entityKey: string;
-  public readonly definition: IStratosEntityDefinition<EntityCatalogueSchemas> | IStratosEndpointDefinition | IStratosBaseEntityDefinition;
+  public readonly type: string;
+  public readonly definition: DefinitionTypes;
   public readonly isEndpoint: boolean;
-  // TODO we should do some typing magic to hide this from extensions - nj
-  // I don't think this is needed, worth checking.
-  public readonly isStratosType: boolean;
-  public readonly hasBuilder: boolean;
+  public readonly actionOrchestrator: OrchestratedActionBuilders;
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
-    public builder?: IStratosEntityBuilder<T, Y>
+    public readonly builders: EntityCatalogueBuilders<T, Y> = {}
   ) {
     this.definition = this.populateEntity(definition);
+    this.type = this.definition.type || this.definition.schema.default.entityType;
     const baseEntity = definition as IStratosEntityDefinition;
-    this.isEndpoint = !this.isStratosType && !baseEntity.endpoint;
-    this.hasBuilder = !!builder;
+    this.isEndpoint = !baseEntity.endpoint;
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
-      EntityCatalogueHelpers.buildEntityKey(baseEntity.type, this.isStratosType ? '' : baseEntity.endpoint.type);
+      EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
   }
 
-  private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition) {
+  private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
+    : DefinitionTypes {
     const schema = entity.schema instanceof EntitySchema ? {
       default: entity.schema
     } : entity.schema;
@@ -78,8 +79,11 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   }
 
   public getGuidFromEntity(entity: Y) {
-    const metadata = this.builder.getMetadata(entity);
-    return this.builder.getGuid(metadata);
+    if (!this.builders.entityBuilder || !this.builders.entityBuilder.getGuid || !this.builders.entityBuilder.getMetadata) {
+      return null;
+    }
+    const metadata = this.builders.entityBuilder.getMetadata(entity);
+    return this.builders.entityBuilder.getGuid(metadata);
   }
 
   public getEntityMonitor<Q extends AppState>(
@@ -107,9 +111,9 @@ export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata,
   public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
   constructor(
     entity: IStratosEntityDefinition,
-    builder?: IStratosEntityBuilder<T, Y>
+    config?: EntityCatalogueBuilders<T, Y>
   ) {
-    super(entity, builder);
+    super(entity, config);
   }
 }
 
@@ -144,8 +148,10 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
       }
     } as IStratosEndpointDefinition;
     super(fullEntity, {
-      ...StratosCatalogueEndpointEntity.baseEndpointRender,
-      getLink: getLink || StratosCatalogueEndpointEntity.baseEndpointRender.getLink
+      entityBuilder: {
+        ...StratosCatalogueEndpointEntity.baseEndpointRender,
+        getLink: getLink || StratosCatalogueEndpointEntity.baseEndpointRender.getLink
+      }
     });
   }
 }

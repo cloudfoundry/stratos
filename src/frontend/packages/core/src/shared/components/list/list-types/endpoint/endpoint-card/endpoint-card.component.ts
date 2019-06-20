@@ -42,7 +42,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public favorite: UserFavoriteEndpoint;
   public address: string;
   public cardMenu: MetaCardMenuItem[];
-  public endpointConfig: StratosCatalogueEndpointEntity;
+  public endpointCatalogueEntity: StratosCatalogueEndpointEntity;
   public hasDetails = true;
   public endpointLink: string = null;
   public endpointParentType: string;
@@ -68,13 +68,13 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.pRow = row;
 
-    this.endpointConfig = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type);
+    this.endpointCatalogueEntity = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    if (this.endpointConfig) {
-      const metadata = this.endpointConfig.builder.getMetadata(row);
-      this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.definition.unConnectable ?
-        this.endpointConfig.builder.getLink(metadata) : null;
+    if (this.endpointCatalogueEntity) {
+      const metadata = this.endpointCatalogueEntity.builders.entityBuilder.getMetadata(row);
+      this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogueEntity.definition.unConnectable ?
+        this.endpointCatalogueEntity.builders.entityBuilder.getLink(metadata) : null;
     }
     this.updateInnerComponent();
 
@@ -118,7 +118,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (favorite) {
       this.favorite = this.favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     }
-    const e = this.endpointConfig.definition;
+    const e = this.endpointCatalogueEntity.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
@@ -135,7 +135,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = this.endpointConfig.definition;
+    const e = this.endpointCatalogueEntity.definition;
     if (!e || !e.listDetailsComponent) {
       return;
     }

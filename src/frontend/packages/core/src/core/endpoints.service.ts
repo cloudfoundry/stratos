@@ -37,10 +37,10 @@ export class EndpointsService implements CanActivate {
     if (!endpoint) {
       return '';
     }
-    const ext = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-    const metadata = ext.builder.getMetadata(endpoint);
-    if (ext) {
-      return ext.builder.getLink(metadata);
+    const catalogueEntity = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogueEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogueEntity) {
+      return catalogueEntity.builders.entityBuilder.getLink(metadata);
     }
     return '';
   }
