@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
+import { selectCfEntity } from '../../../../cloud-foundry/src/selectors/api.selectors';
 import { CFAppState } from '../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
@@ -32,15 +32,13 @@ export class CfOrgSpaceLabelService {
     private orgGuid?: string,
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
-    const orgEntityKey = getCFEntityKey(organizationEntityType);
-    const spaceEntityKey = getCFEntityKey(spaceEntityType);
     // TODO We shouldn't have to expose STRATOS_ENDPOINT_TYPE - I'm not sure about that anymore, that's up to the extension.
     const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
 
     this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
 
-    this.org$ = this.store.select<APIResource<IOrganization>>(selectEntity(orgEntityKey, this.orgGuid));
-    this.space$ = this.store.select<APIResource<ISpace>>(selectEntity(spaceEntityKey, this.spaceGuid));
+    this.org$ = this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, this.orgGuid));
+    this.space$ = this.store.select<APIResource<ISpace>>(selectCfEntity(spaceEntityType, this.spaceGuid));
   }
 
   getLabel(): Observable<string> {

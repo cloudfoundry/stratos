@@ -45,6 +45,7 @@ export function selectUpdateInfo(
     selectRequestInfo(entityKey, entityGuid)
   );
 }
+
 export function selectDeletionInfo(entityKey: string, entityGuid: string) {
   return compose(
     getEntityDeleteSections,

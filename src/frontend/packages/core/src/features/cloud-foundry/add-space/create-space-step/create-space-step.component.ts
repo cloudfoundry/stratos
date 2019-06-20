@@ -6,15 +6,14 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 
 
 @Component({
@@ -83,9 +82,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       space_quota_definition_guid: this.quotaDefinition.value
     }));
 
-    const entityGuid = `${this.orgGuid}-${this.spaceName.value}`;
-    const entityType = getCFEntityKey(spaceEntityType);
-    return this.store.select(selectRequestInfo(entityType, entityGuid)).pipe(
+    return this.store.select(selectCfRequestInfo(spaceEntityType, `${this.orgGuid}-${this.spaceName.value}`)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),
       this.map('Failed to create space: ')
     );

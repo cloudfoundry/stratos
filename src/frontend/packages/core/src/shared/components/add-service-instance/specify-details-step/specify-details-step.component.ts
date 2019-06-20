@@ -26,7 +26,7 @@ import {
 } from 'rxjs/operators';
 
 import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../../../cloud-foundry/src/cf-entity-helpers';
+import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import {
   SetCreateServiceInstanceOrg,
@@ -41,7 +41,6 @@ import {
 } from '../../../../../../store/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { selectRequestInfo, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceSpaceGuid,
@@ -378,7 +377,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     if (!isEditMode) {
       return observableOf(null);
     }
-    const actionState = selectUpdateInfo(getCFEntityKey(serviceInstancesEntityType),
+    const actionState = selectCfUpdateInfo(serviceInstancesEntityType,
       newServiceInstanceGuid,
       UpdateServiceInstance.updateServiceInstance
     );
@@ -430,7 +429,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const checkUpdate$ = this.getUpdateObservable(isEditMode, newServiceInstanceGuid);
     const action = this.getAction(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr, isEditMode);
 
-    const create$ = this.store.select(selectRequestInfo(action, newServiceInstanceGuid));
+    const create$ = this.store.select(selectCfRequestInfo(serviceInstancesEntityType, newServiceInstanceGuid));
     const getIdFromResponse = this.getIdFromResponseGetter(cfGuid, newServiceInstanceGuid, isEditMode);
 
     this.store.dispatch(action);
@@ -445,7 +444,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
         const guid = getIdFromResponse(a.response as NormalizedResponse);
 
-        return this.store.select(selectRequestInfo(serviceInstancesEntityType, guid)).pipe(
+        return this.store.select(selectCfRequestInfo(serviceInstancesEntityType, guid)).pipe(
           map(ri => ({
             ...ri,
             response: {
@@ -470,7 +469,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       params
     ));
 
-    return this.store.select(selectRequestInfo(serviceBindingEntityType, guid));
+    return this.store.select(selectCfRequestInfo(serviceBindingEntityType, guid));
   }
 
   addTag(event: MatChipInputEvent): void {
