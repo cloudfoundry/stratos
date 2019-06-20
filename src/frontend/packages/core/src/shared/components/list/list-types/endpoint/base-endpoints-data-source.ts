@@ -31,13 +31,13 @@ export function syncPaginationSection(
 
 export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<CFAppState>;
-  endpointType: string;
+  cnsiType: string;
 
   constructor(
     store: Store<CFAppState>,
     listConfig: IListConfig<EndpointModel>,
     action: GetAllEndpoints,
-    endpointType: string = null,
+    cnsiType: string = null,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
@@ -69,9 +69,9 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       paginationKey: action.paginationKey,
       transformEntities: [
         (entities: EndpointModel[]) => {
-          return endpointType || onlyConnected ? entities.filter(endpoint => {
+          return cnsiType || onlyConnected ? entities.filter(endpoint => {
             return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
-              (!endpointType || endpoint.cnsi_type === endpointType);
+              (!cnsiType || endpoint.cnsi_type === cnsiType);
           }) : entities;
         },
         {
@@ -80,7 +80,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
         },
       ],
     });
-    this.endpointType = endpointType;
+    this.cnsiType = cnsiType;
   }
   // TODO Fix the typing
   static getEndpointConfig(
