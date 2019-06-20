@@ -8,7 +8,7 @@ import {
   IStratosBaseEntityDefinition
 } from './entity-catalogue.types';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AppState } from '../../../../store/src/app-state';
+import { AppState } from '../../../../store/src/app-state';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -16,6 +16,12 @@ import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers
 import { endpointEntitySchema } from '../../base-entity-schemas';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+
+export interface EntityCatalogueConfig<T extends IEntityMetadata = IEntityMetadata, Y = any> {
+  builder?: IStratosEntityBuilder<T, Y>;
+  actionOrchestrator?: OrchestratedActionBuilders;
+}
 
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   public readonly entityKey: string;
