@@ -14,6 +14,13 @@ func init() {
 			binaryDataType = "BLOB"
 		}
 
+		//Add auth_endpoint_type to console_config table - allows ability to enable local users.
+		addColumn := "ALTER TABLE console_config ADD auth_endpoint_type VARCHAR(255);"
+		_, err := txn.Exec(addColumn)
+		if err != nil {
+			return err
+		}
+
 		createLocalUsers := "CREATE TABLE IF NOT EXISTS local_users ("
 		createLocalUsers += "user_guid     VARCHAR(36) UNIQUE NOT NULL, "
 		createLocalUsers += "password_hash " + binaryDataType + "       NOT NULL, "
@@ -21,16 +28,48 @@ func init() {
 		createLocalUsers += "user_email    VARCHAR(36), "
 		createLocalUsers += "user_scope    VARCHAR(36), "
 		createLocalUsers += "last_login  TIMESTAMP, "
-		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);"
-		createLocalUsers += "CREATE TRIGGER update_last_updated AFTER UPDATE ON local_users BEGIN UPDATE local_users SET last_updated = DATETIME('now') WHERE _rowid_ = new._rowid_; END;"
+		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+		createLocalUsers += "PRIMARY KEY (user_guid) )"
 
+		//Trigger to update last_updated timestamp
+		createUpdateModifiedTrigger := "CREATE TRIGGER update_last_updated "
+		createUpdateModifiedTrigger += "AFTER UPDATE ON local_users " 
+		createUpdateModifiedTrigger += "BEGIN UPDATE local_users SET last_updated = DATETIME('now') WHERE _rowid_ = new._rowid_; " 
+		createUpdateModifiedTrigger += "END;"
+		
+		//Postgres - specific trigger syntax
+		createPostgresUpdateModifiedTrigger :=  "CREATE TRIGGER update_trigger "
+		createPostgresUpdateModifiedTrigger +=	"AFTER UPDATE ON local_users FOR EACH ROW "
+		createPostgresUpdateModifiedTrigger +=	"EXECUTE PROCEDURE update_last_modified_time(); "
+
+		postgresTriggerFunction :=	"CREATE OR REPLACE FUNCTION update_last_modified_time() "
+		postgresTriggerFunction +=	"RETURNS trigger AS "
+	    postgresTriggerFunction +=	"$BODY$ "
+		postgresTriggerFunction +=	"BEGIN "
+		postgresTriggerFunction +=	"UPDATE local_users "
+		postgresTriggerFunction +=	"SET last_updated = CURRENT_TIMESTAMP WHERE new.user_guid = old.user_guid; "
+		postgresTriggerFunction +=	"RETURN NEW; END; $BODY$ "
+		postgresTriggerFunction +=	"LANGUAGE plpgsql VOLATILE COST 100;"
+
+		//Configure Postgres migration options 
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			createLocalUsers += " WITH (OIDS=FALSE);"
+			createUpdateModifiedTrigger = createPostgresUpdateModifiedTrigger
+			//Create postgres trigger function
+			_, err := txn.Exec(postgresTriggerFunction)
+			if err != nil {
+				return err
+			}
 		} else {
 			createLocalUsers += ";"
 		}
 
-		_, err := txn.Exec(createLocalUsers)
+		_, err = txn.Exec(createLocalUsers)
+		if err != nil {
+			return err
+		}
+
+		_, err = txn.Exec(createUpdateModifiedTrigger)
 		if err != nil {
 			return err
 		}

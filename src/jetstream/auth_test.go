@@ -48,6 +48,7 @@ func TestLoginToUAA(t *testing.T) {
 		uaaURL, _ := url.Parse(mockUAA.URL)
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
+		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WillReturnRows(expectNoRows())
@@ -92,6 +93,8 @@ func TestLocalLogin(t *testing.T) {
 
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
+
+		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 
 		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
@@ -141,6 +144,8 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
+		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
+
 		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
@@ -186,6 +191,7 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 		//Configure the admin scope we expect the user to have
 		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
 		pp.Config.ConsoleConfig.LocalUserScope = "stratos.admin"
+		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 
 		//The user trying to log in has a non-admin scope
 		rows = sqlmock.NewRows([]string{"scope"}).AddRow(wrongScope)
@@ -227,6 +233,7 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 		uaaURL, _ := url.Parse(mockUAA.URL)
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
+		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
 
 		err := pp.loginToUAA(ctx)
 		Convey("Login to UAA should fail", func() {
@@ -267,6 +274,7 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		uaaURL, _ := url.Parse(mockUAA.URL)
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
+		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			// WithArgs(mockUserGUID).

@@ -10,7 +10,6 @@ import (
 func init() {
 	RegisterMigration(20170818162837, "SetupSchema", func(txn *sql.Tx, conf *goose.DBConf) error {
 		consoleConfigTable := "CREATE TABLE IF NOT EXISTS console_config ("
-		consoleConfigTable += "  auth_endpoint_type        VARCHAR(255)              NOT NULL, "
 		consoleConfigTable += "  uaa_endpoint              VARCHAR(255)              NOT NULL, "
 		consoleConfigTable += "  console_admin_scope       VARCHAR(255)              NOT NULL,"
 		consoleConfigTable += "  console_client            VARCHAR(255)              NOT NULL,"
