@@ -1,21 +1,22 @@
-import {
-  IEntityMetadata,
-  IStratosEntityDefinition,
-  EntityCatalogueSchemas,
-  IStratosEndpointDefinition,
-  IStratosEntityBuilder,
-  IStratosEndpointWithoutSchemaDefinition,
-  IStratosBaseEntityDefinition
-} from './entity-catalogue.types';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AppState } from '../../../../store/src/app-state';
-import { EntityCatalogueHelpers } from './entity-catalogue.helper';
-import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
-import { endpointEntitySchema } from '../../base-entity-schemas';
+
+import { AppState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
+import { endpointEntitySchema } from '../../base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { EntityCatalogueHelpers } from './entity-catalogue.helper';
+import {
+  EntityCatalogueSchemas,
+  IEntityMetadata,
+  IStratosBaseEntityDefinition,
+  IStratosEndpointDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
+  IStratosEntityBuilder,
+  IStratosEntityDefinition,
+} from './entity-catalogue.types';
 
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   public readonly entityKey: string;
@@ -63,7 +64,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       return catalogueSchema.default;
     }
     const entityCatalogue = this.definition as IStratosEntityDefinition;
-    const tempId = EntityCatalogueHelpers.buildEntityKey(entityCatalogue.endpoint.type, schemaKey);
+    const tempId = EntityCatalogueHelpers.buildEntityKey(schemaKey, entityCatalogue.endpoint.type);
     if (!catalogueSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogueSchema.default;

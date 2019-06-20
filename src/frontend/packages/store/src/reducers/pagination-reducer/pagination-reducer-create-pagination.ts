@@ -5,7 +5,7 @@ import { PaginationEntityState, PaginationState } from '../../types/pagination.t
 import { spreadClientPagination } from './pagination-reducer.helper';
 
 function getPaginationKey(entityConfig: EntityCatalogueEntityConfig) {
-  return EntityCatalogueHelpers.buildEntityKey(entityConfig.endpointType, entityConfig.entityType);
+  return EntityCatalogueHelpers.buildEntityKey(entityConfig.entityType, entityConfig.endpointType);
 }
 /**
  * Creates new pagination from default values or a seed pagination section.

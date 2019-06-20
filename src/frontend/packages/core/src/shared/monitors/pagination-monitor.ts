@@ -250,7 +250,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       map(([pagination]) => {
         return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
           const { entityConfig } = pageRequest;
-          const key = EntityCatalogueHelpers.buildEntityKey(entityConfig.endpointType, entityConfig.entityType);
+          const key = EntityCatalogueHelpers.buildEntityKey(entityConfig.entityType, entityConfig.endpointType);
           if (key && !entityKeys.includes(key)) {
             entityKeys.push(key);
           }
