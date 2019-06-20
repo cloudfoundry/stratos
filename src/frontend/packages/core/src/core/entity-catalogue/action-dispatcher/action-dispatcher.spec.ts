@@ -7,7 +7,7 @@ function actionDispatcher(action: Action) {
   // noop
 }
 
-fdescribe('ActionDispatcher', () => {
+describe('ActionDispatcher', () => {
   it('should not dispatch unknown action', () => {
     const actionOrchestrator = new ActionOrchestrator('Empty');
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);

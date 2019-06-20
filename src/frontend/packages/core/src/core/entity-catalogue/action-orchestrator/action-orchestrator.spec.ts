@@ -2,7 +2,7 @@ import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchest
 import { hasActions, getRequestAction, getPaginationAction } from './action-orchestrator.spec.helpers';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
-fdescribe('ActionOrchestrator', () => {
+describe('ActionOrchestrator', () => {
   it('should not have action builders', () => {
     const actionOrchestrator = new ActionOrchestrator('Empty');
     hasActions(actionOrchestrator);
