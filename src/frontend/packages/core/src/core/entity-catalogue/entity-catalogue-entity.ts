@@ -1,21 +1,22 @@
-import {
-  IEntityMetadata,
-  IStratosEntityDefinition,
-  EntityCatalogueSchemas,
-  IStratosEndpointDefinition,
-  IStratosEntityBuilder,
-  IStratosEndpointWithoutSchemaDefinition,
-  IStratosBaseEntityDefinition
-} from './entity-catalogue.types';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AppState } from '../../../../store/src/app-state';
-import { EntityCatalogueHelpers } from './entity-catalogue.helper';
-import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
-import { endpointEntitySchema } from '../../base-entity-schemas';
+
+import { AppState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
+import { endpointEntitySchema } from '../../base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { EntityCatalogueHelpers } from './entity-catalogue.helper';
+import {
+  EntityCatalogueSchemas,
+  IEntityMetadata,
+  IStratosBaseEntityDefinition,
+  IStratosEndpointDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
+  IStratosEntityBuilder,
+  IStratosEntityDefinition,
+} from './entity-catalogue.types';
 
 export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   public readonly entityKey: string;
@@ -56,6 +57,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
    * If no schemaKey is provided then the default schema will be returned
    */
   public getSchema(schemaKey?: string) {
+    // TODO: schemaKey - ensure wherever this is called it contains the correct schemaKey (with respect to any config
+    // EntityCatalogueEntityConfig that may use a schemeKey different than that provided by entityCatalogue.getEntity's)
     // TODO(NJ) We should do a better job at typeing schemax
     // schema always gets changed to a EntityCatalogueSchamas.
     const catalogueSchema = (this.definition.schema as EntityCatalogueSchemas);
