@@ -68,6 +68,8 @@ import {
 } from './cf-entity-factory';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
+import { applicationActionBuilder as applicationActionBuilders } from './entity-action-builders/application.action-builder';
+import { quotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -123,7 +125,9 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: IStratosEndpointDef
     schema: cfEntityFactory(quotaDefinitionEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition);
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
+    actionBuilders: quotaDefinitionActionBuilder
+  });
 }
 
 function generateCFAppEnvVarEntity(endpointDefinition: IStratosEndpointDefinition) {
@@ -542,8 +546,9 @@ function generateCfApplicationEntity(endpointDefinition: IStratosEndpointDefinit
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
-      }
-    }
+      },
+      actionBuilders: applicationActionBuilders
+    },
   );
 }
 function generateCfSpaceEntity(endpointDefinition: IStratosEndpointDefinition) {

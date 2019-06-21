@@ -171,7 +171,6 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
   entityType = applicationEntityType;
   options: RequestOptions;
 }
-
 export class DeleteApplicationInstance extends CFStartAction
   implements ICFAction {
   guid: string;

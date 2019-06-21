@@ -13,12 +13,12 @@ export type OrchestratedActionBuilder<
   > = (...args: T[keyof T]) => Y;
 
 // A list of functions that can be used get interface with the entity
-export interface OrchestratedActionBuilders {
-  get?: (guid: string, endpointGuid: string, data?: unknown) => IRequestAction;
-  delete?: (guid: string, endpointGuid: string, data?: unknown) => IRequestAction;
-  update?: (guid: string, endpointGuid: string, data?: unknown) => IRequestAction;
-  create?: (data?: unknown) => IRequestAction;
-  getAll?: () => PaginatedAction;
+export class OrchestratedActionBuilders {
+  get?: (guid: string, endpointGuid: string, ...args: any[]) => IRequestAction;
+  delete?: (guid: string, endpointGuid: string, ...args: any[]) => IRequestAction;
+  update?: (guid: string, endpointGuid: string, ...args: any[]) => IRequestAction;
+  create?: (endpointGuid: string, ...args: any[]) => IRequestAction;
+  getAll?: (paginationKey: string, endpointGuid: string, ...args: any[]) => PaginatedAction;
   [actionType: string]: OrchestratedActionBuilder<any, IRequestAction | PaginatedAction>;
 }
 
