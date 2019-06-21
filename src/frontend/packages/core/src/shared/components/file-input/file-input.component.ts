@@ -58,7 +58,9 @@ export class FileInputComponent implements OnInit, OnDestroy {
   get fileCount(): number { return this.files && this.files.length || 0; }
 
   onNativeInputFileSelect($event) {
-    const fs = $event.srcElement.files;
+    // Ensure we work on Firefox as well as Chrome etc
+    const target = $event.target || $event.srcElement;
+    const fs = target.files;
     if (fs.length > 0) {
       this.files = fs;
       this.onFileSelect.emit(this.files[0]);
