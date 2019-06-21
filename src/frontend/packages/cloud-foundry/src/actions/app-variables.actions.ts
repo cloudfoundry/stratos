@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { UpdateApplication } from '../../../cloud-foundry/src/actions/application.actions';
+import { UpdateApplication } from './application.actions';
 import { ListAppEnvVar } from '../../../core/src/shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 
 export const AppVariables = {
