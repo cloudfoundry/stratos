@@ -202,22 +202,21 @@ function executeCompare(val1: number, operator: string, val2: number): boolean {
   }
 }
 
-function getColor(trigger: AppScalingTrigger, value: any): string {
-  const color = AutoscalerConstants.normalColor;
-  if (!Number.isNaN(value)) {
-    for (let i = 0; trigger.upper && trigger.upper.length > 0 && i < trigger.upper.length; i++) {
-      if (executeCompare(value, trigger.upper[i].operator, trigger.upper[i].threshold)) {
-        return trigger.upper[i].color;
-      }
-    }
-    for (let i = 0; trigger.lower && trigger.lower.length > 0 && i < trigger.lower.length; i++) {
-      const index = trigger.lower.length - 1 - i;
-      if (executeCompare(value, trigger.lower[index].operator, trigger.lower[index].threshold)) {
-        return trigger.lower[index].color;
-      }
+function getColorCommon(triggerRules: AppScalingRule[], value: number, isLower?: boolean) {
+  for (let i = 0; triggerRules && triggerRules.length > 0 && i < triggerRules.length; i++) {
+    const index = isLower ? triggerRules.length - 1 - i : i;
+    if (executeCompare(value, triggerRules[index].operator, triggerRules[index].threshold)) {
+      return triggerRules[index].color;
     }
   }
-  return color;
+  return '';
+}
+
+function getColor(trigger: AppScalingTrigger, value: any): string {
+  if (Number.isNaN(value)) {
+    return AutoscalerConstants.normalColor;
+  }
+  return getColorCommon(trigger.upper, value) || getColorCommon(trigger.lower, value, true) || AutoscalerConstants.normalColor;
 }
 
 function getMetricBasicInfo(

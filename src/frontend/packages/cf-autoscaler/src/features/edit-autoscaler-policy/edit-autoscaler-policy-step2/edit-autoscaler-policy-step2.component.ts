@@ -9,14 +9,13 @@ import {
   getAdjustmentType,
   getScaleType,
   PolicyAlert,
-  deepClone,
 } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   getThresholdMax,
   getThresholdMin,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
@@ -66,7 +65,8 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
   }
 
   addTrigger = () => {
-    this.currentPolicy.scaling_rules_form.push(deepClone(AutoscalerConstants.PolicyDefaultTrigger));
+    const {...newTrigger} = AutoscalerConstants.PolicyDefaultTrigger;
+    this.currentPolicy.scaling_rules_form.push(newTrigger);
     this.editTrigger(this.currentPolicy.scaling_rules_form.length - 1);
   }
 
@@ -142,7 +142,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       }
       const metricType = this.editTriggerForm.get('metric_type').value;
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
-      const errors: any = {};
+      const errors: AppAutoscalerInvalidPolicyError = {};
       if (AutoscalerConstants.MetricPercentageTypes.indexOf(metricType) >= 0) {
         if (numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
           errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
@@ -163,7 +163,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
         return null;
       }
       this.editAdjustmentType = this.editTriggerForm.get('adjustment_type').value;
-      const errors: any = {};
+      const errors: AppAutoscalerInvalidPolicyError = {};
       const max = this.editAdjustmentType === 'value' ? this.currentPolicy.instance_max_count - 1 : Number.MAX_VALUE;
       if (numberWithFractionOrExceedRange(control.value, 1, max, true)) {
         errors.alertInvalidPolicyTriggerStepRange = {};

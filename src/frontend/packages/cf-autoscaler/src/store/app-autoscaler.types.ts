@@ -137,3 +137,19 @@ export interface AppAutoscalerFetchPolicyFailedResponse {
   noPolicy: boolean;
 }
 
+export interface AppAutoscalerInvalidPolicyError {
+  alertInvalidPolicyTriggerThreshold100?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyTriggerThresholdRange?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyTriggerStepRange?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyScheduleDateBeforeNow?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyScheduleEndDateBeforeStartDate?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyScheduleStartDateTimeBeforeNow?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyScheduleSpecificConflict?: AppAutoscalerInvalidPolicyErrorEntity;
+  alertInvalidPolicyScheduleEndDateTimeBeforeNow?: AppAutoscalerInvalidPolicyErrorEntity;
+}
+
+export interface AppAutoscalerInvalidPolicyErrorEntity {
+  value?: string | number;
+}
+

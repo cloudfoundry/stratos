@@ -12,14 +12,18 @@ import { ApplicationService } from '../../../../../core/src/features/application
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { AutoscalerConstants, PolicyAlert, deepClone } from '../../../core/autoscaler-helpers/autoscaler-util';
+import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppSpecificDate } from '../../../store/app-autoscaler.types';
+import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import {
+  AppAutoscalerPolicy,
+  AppAutoscalerPolicyLocal,
+  AppSpecificDate,
+  AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
 import { appAutoscalerPolicySchemaKey } from '../../../store/autoscaler.store.module';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
@@ -123,7 +127,8 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   addSpecificDate = () => {
-    this.currentPolicy.schedules.specific_date.push(deepClone(AutoscalerConstants.PolicyDefaultSpecificDate));
+    const {...newSchedule} = AutoscalerConstants.PolicyDefaultSpecificDate;
+    this.currentPolicy.schedules.specific_date.push(newSchedule);
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
 
@@ -178,7 +183,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       if (!this.editSpecificDateForm) {
         return null;
       }
-      const errors: any = {};
+      const errors: AppAutoscalerInvalidPolicyError = {};
       const newSchedule: AppSpecificDate = {
         instance_min_count: 0,
         instance_max_count: 0,
@@ -211,7 +216,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       if (!this.editSpecificDateForm) {
         return null;
       }
-      const errors: any = {};
+      const errors: AppAutoscalerInvalidPolicyError = {};
       const newSchedule = {
         instance_min_count: 0,
         instance_max_count: 0,

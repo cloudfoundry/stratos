@@ -6,16 +6,16 @@ import {
   AppScalingRule,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
-import { AutoscalerConstants, getScaleType, isEqual, deepClone } from './autoscaler-util';
+import { AutoscalerConstants, getScaleType, isEqual } from './autoscaler-util';
 
 export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
-  let newPolicy: AppAutoscalerPolicyLocal = {
+  const newPolicy: AppAutoscalerPolicyLocal = {
     ...policy,
     enabled: true,
     scaling_rules_map: {},
     scaling_rules_form: []
   };
-  newPolicy = initIfUndefined(newPolicy, 'scaling_rules', []) as AppAutoscalerPolicyLocal;
+  newPolicy.scaling_rules = newPolicy.scaling_rules || [];
   newPolicy.scaling_rules.map((trigger) => {
     pushAndSortTrigger(newPolicy.scaling_rules_map, trigger.metric_type, trigger);
   });
@@ -31,9 +31,9 @@ export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
     }
     buildFormUponMap(newPolicy, metricName);
   });
-  newPolicy = initIfUndefined(newPolicy, 'schedules', { timezone: moment.tz.guess() });
-  newPolicy.schedules = initIfUndefined(newPolicy.schedules, 'recurring_schedule', []);
-  newPolicy.schedules = initIfUndefined(newPolicy.schedules, 'specific_date', []);
+  newPolicy.schedules = newPolicy.schedules || { timezone: moment.tz.guess() };
+  newPolicy.schedules.recurring_schedule = newPolicy.schedules.recurring_schedule || [];
+  newPolicy.schedules.specific_date = newPolicy.schedules.specific_date || [];
   return newPolicy;
 }
 
@@ -116,8 +116,9 @@ function hasNamedSchedule(schedule: any) {
 
 function pushAndSortTrigger(map: { [metricName: string]: AppScalingTrigger }, metricName: string, newTrigger: AppScalingRule) {
   const scaleType = getScaleType(newTrigger.operator);
-  newTrigger = initIfUndefined(newTrigger, 'breach_duration_secs', AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default);
-  newTrigger = initIfUndefined(newTrigger, 'cool_down_secs', AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default);
+  newTrigger.breach_duration_secs =
+    newTrigger.breach_duration_secs || AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default;
+  newTrigger.cool_down_secs = newTrigger.cool_down_secs || AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default;
   if (!map[metricName]) {
     map[metricName] = {
       upper: [],
@@ -144,20 +145,6 @@ function buildFormUponMap(newPolicy: AppAutoscalerPolicyLocal, metricName: strin
       });
     }
   });
-}
-
-function initIfUndefined(fatherEntity: any, childName: string, defaultData: any) {
-  const entity = deepClone(fatherEntity);
-  if (entity[childName] === undefined || entity[childName] === '') {
-    entity[childName] = defaultData;
-  }
-  return entity;
-}
-
-function deleteIf(fatherEntity: any, childName: string, condition: boolean) {
-  if (condition) {
-    delete fatherEntity[childName];
-  }
 }
 
 export function isPolicyMapEqual(a: AppAutoscalerPolicyLocal, b: AppAutoscalerPolicyLocal) {

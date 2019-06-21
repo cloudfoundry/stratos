@@ -259,34 +259,3 @@ function getLeftOperator(operator: string): string {
 export function shiftArray(array: number[], step: number): number[] {
   return array.map(value => value + step);
 }
-
-export function deepClone(obj: any) {
-  let result = {};
-  const oClass = isClass(obj);
-  if (oClass === 'Object') {
-    result = {};
-  } else if (oClass === 'Array') {
-    result = [];
-  } else {
-    return obj;
-  }
-  Object.keys(obj).map((key, value) => {
-    const vClass = isClass(value);
-    if (vClass === 'Object' || vClass === 'Array') {
-      result[key] = deepClone(value);
-    } else {
-      result[key] = obj[key];
-    }
-  });
-  return result;
-}
-
-function isClass(o: any) {
-  if (o === null) {
-    return 'Null';
-  }
-  if (o === undefined) {
-    return 'Undefined';
-  }
-  return Object.prototype.toString.call(o).slice(8, -1);
-}

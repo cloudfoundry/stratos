@@ -5,14 +5,14 @@ import * as moment from 'moment-timezone';
 import { Observable } from 'rxjs';
 
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
-import { AutoscalerConstants, PolicyAlert, shiftArray, deepClone } from '../../../core/autoscaler-helpers/autoscaler-util';
+import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateIsAfter,
   numberWithFractionOrExceedRange,
   recurringSchedulesOverlapping,
   timeIsSameOrAfter,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
+import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import {
@@ -68,7 +68,8 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   addRecurringSchedule = () => {
-    this.currentPolicy.schedules.recurring_schedule.push(deepClone(AutoscalerConstants.PolicyDefaultRecurringSchedule));
+    const {...newSchedule} = AutoscalerConstants.PolicyDefaultRecurringSchedule;
+    this.currentPolicy.schedules.recurring_schedule.push(newSchedule);
     this.editRecurringSchedule(this.currentPolicy.schedules.recurring_schedule.length - 1);
   }
 
@@ -185,7 +186,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
       if (this.editEffectiveType === 'always') {
         return null;
       }
-      const errors: any = {};
+      const errors: AppAutoscalerInvalidPolicyError = {};
       if (dateIsAfter(moment().format(AutoscalerConstants.MomentFormateDate), control.value)) {
         errors.alertInvalidPolicyScheduleDateBeforeNow = { value: control.value };
       }

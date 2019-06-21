@@ -10,8 +10,6 @@ import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/aut
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 import { appAutoscalerPolicySchemaKey } from '../../store/autoscaler.store.module';
-import { deepClone } from '../../core/autoscaler-helpers/autoscaler-util';
-
 
 @Injectable()
 export class EditAutoscalerPolicyService {
@@ -54,8 +52,9 @@ export class EditAutoscalerPolicyService {
     }));
   }
 
-  setState(state: AppAutoscalerPolicy) {
-    this.stateSubject.next(deepClone(state));
+  setState(state: AppAutoscalerPolicyLocal) {
+    const {...newState} = state;
+    this.stateSubject.next(newState);
   }
 
   getState(): Observable<AppAutoscalerPolicyLocal> {
