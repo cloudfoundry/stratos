@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetAppRoutes } from '../../../../../../../store/src/actions/application-service-routes.actions';
+import { GetAppRoutes } from '../../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';

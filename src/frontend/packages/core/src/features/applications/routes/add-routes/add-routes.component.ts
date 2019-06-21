@@ -16,7 +16,7 @@ import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selecto
 import {
   AssociateRouteWithAppApplication,
   GetAppRoutes,
-} from '../../../../../../store/src/actions/application-service-routes.actions';
+} from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
 import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';

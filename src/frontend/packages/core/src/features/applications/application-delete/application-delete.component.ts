@@ -11,7 +11,7 @@ import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
+import { GetAppRoutes } from '../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { DeleteApplication, GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';

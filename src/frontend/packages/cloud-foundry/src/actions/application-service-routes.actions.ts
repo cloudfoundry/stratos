@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../cf-types';
 import {
   applicationEntityType,
   cfEntityFactory,
@@ -8,15 +8,15 @@ import {
   routeEntityType,
   serviceBindingEntityType,
   serviceInstancesEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
+} from '../cf-entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
-} from '../helpers/entity-relations/entity-relations.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { getActions } from './action.helper';
+} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
