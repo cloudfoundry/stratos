@@ -8,48 +8,81 @@ echo "================="
 echo "Checking docker version"
 
 docker version
-docker-compose version
 
 echo "Preparing for e2e tests..."
 
-curl -sLk -o ./secrets.yaml https://travis.capbristol.com/yaml
+wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
 
-# Move the node_modules folder - the docker build will remove it anyway
-mv ./node_modules /tmp/node_modules
+# Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
+CAPTURE_VIDEO=$1
 
-echo "Building images locally"
-./deploy/docker-compose/build.sh -n -l
-echo "Build Finished"
-docker images
+# If suite is set, use it else use default `e2e`
+SUITE=$2
+if [ -z "$SUITE" ]; then
+  SUITE="e2e"
+fi
 
-echo "Running Stratos in Docker Compose"
-pushd deploy/ci/travis
-docker-compose up -d
+# Test report folder name override
+TIMESTAMP=`date '+%Y%m%d-%H.%M.%S'`
+
+export E2E_REPORT_FOLDER="./e2e-reports/${TIMESTAMP}-Travis-Job-${TRAVIS_JOB_NUMBER}"
+mkdir -p "${E2E_REPORT_FOLDER}"
+
+if [ "$CAPTURE_VIDEO" == "video" ]; then
+  echo "Starting background install of ffmpeg"
+  sudo apt-get install -y ffmpeg > ${E2E_REPORT_FOLDER}/ffmpeg-install.log &
+  FFMPEG_INSTALL_PID=$!
+fi
+
+echo "Using local deployment for e2e tests"
+# Quick deploy locally
+# Start a local UAA - this will take a few seconds to come up in the background
+docker run -d -p 8080:8080 splatform/stratos-uaa
+
+# Get go
+curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+chmod +x ~/bin/gimme
+eval "$(gimme 1.12.4)"
+go version
+
+npm run build
+npm run build-backend
+# Copy travis config.properties file
+cp deploy/ci/travis/config.properties src/jetstream/
+pushd src/jetstream
+./jetstream > backend.log &
 popd
 
-# The build cleared node_modules, so move back the one we kept
-#npm install
-rm -rf ./node_modules
-mv /tmp/node_modules ./node_modules
+E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
+
+# Capture video if configured
+if [ "$CAPTURE_VIDEO" == "video" ]; then
+  echo "Waiting for ffmpeg install to complete..."
+  wait ${FFMPEG_INSTALL_PID}
+  echo "Starting video capture"
+  ffmpeg -video_size 1366x768 -framerate 25 -f x11grab -draw_mouse 0 -i :99.0 ${E2E_REPORT_FOLDER}/ScreenCapture.mp4 >/dev/null 2>&1 &
+  FFMPEG=$!
+fi
 
 set +e
 echo "Running e2e tests"
-npm run e2e-local
+npm run ${E2E_TARGET}
 RESULT=$?
 set -e
 
-pushd deploy/ci/travis
-# Uncomment to copy logs to the travis log
-#docker-compose stop
-#docker-compose logs mariadb
-#docker-compose logs goose
-#docker-compose logs proxy 
-docker-compose down
-popd
+# Copy the backend log to the test report folder if the tests failed
+if [ $RESULT -ne 0 ]; then
+  cp src/jetstream/backend.log ${E2E_REPORT_FOLDER}/jetstream.log
+fi
+
+if [ "$CAPTURE_VIDEO" == "video" ]; then
+  echo "Stopping video capture"
+  kill -INT $FFMPEG
+fi
 
 # Check environment variable that will ignore E2E failures
 if [ -n "${STRATOS_ALLOW_E2E_FAILURES}" ]; then

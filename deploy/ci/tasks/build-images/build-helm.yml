@@ -1,7 +1,7 @@
 ---
 platform: linux
 inputs:
-- name: stratos-ui
+- name: stratos
 - name: dev-certs-output
 image_resource:
   type: docker-image
@@ -19,7 +19,7 @@ run:
       start_docker
       # Move dev-certs
       ls .
-      mv dev-certs-output/dev-certs stratos-ui/dev-certs
+      mv dev-certs-output/dev-certs stratos/dev-certs
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
-      cd stratos-ui/deploy/kubernetes
+      cd stratos/deploy/kubernetes
       ./build.sh -t test -l

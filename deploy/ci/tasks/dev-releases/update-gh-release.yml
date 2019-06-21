@@ -7,7 +7,8 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository: splatform/ci-stratos-github-release
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
    tag: "latest"
 
 run:
@@ -17,10 +18,43 @@ run:
     - |
       # Create Github release
       ROOT_DIR=${PWD}
+      VERSION=$(cat image-tag/v2-version)
+      FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
+      GIT_TAG=$(cat image-tag/v2-tag) 
+      STRATOS=${ROOT_DIR}/stratos
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
+
+      # Check tagged release version is consistent with package.json version
+      TAG_RELEASE_VERSION=$(echo ${FULL_VERSION} | cut -d"-" -f1)
+      if [ "${TAG_RELEASE_VERSION}" != "${VERSION}" ]; then
+        echo "Package.json version is not consistent with tag release version! ${TAG_RELEASE_VERSION} != ${VERSION}"
+        exit 1
+      fi
       cd ${ROOT_DIR}/stratos
-      GIT_TAG=$(cat ../image-tag/v2-alpha-tag)
+
+      # Check that the release exists
+      set +e
+      github-release info -t ${GIT_TAG}
+      RETVAL=$?
+      set -e
+
+      # Delete the release if it already exists
+      if [ $RETVAL -eq 0 ]; then
+        github-release delete -t ${GIT_TAG}
+      fi
+
+      # Generate title for the release, based on the tag
+      # Sets RELEASE_TITLE and PRE_RELEASE_ARG
+      generateReleaseTitle ${GIT_TAG}
+
+      echo "Release Title - ${RELEASE_TITLE}"
+      echo "Release Arg   - ${PRE_RELEASE_ARG}"
+
+      # Create new release
+      github-release release -t ${GIT_TAG} --name "${RELEASE_TITLE}" ${PRE_RELEASE_ARG}
+
       cd ${ROOT_DIR}/helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
+
       # Upload Helm chart to release
-      github-release release -t ${GIT_TAG} --name "Stratos ${GIT_TAG} Preview release" --pre-release
-      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "console-helm-chart-${GIT_TAG}.tgz"
+      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "${CHART_PACKAGE}"

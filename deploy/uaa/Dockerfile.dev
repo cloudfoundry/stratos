@@ -25,10 +25,10 @@ RUN rm -rf /tomcat/webapps/*
 
 #ADD https://github.com/sequenceiq/uaa/releases/download/3.9.3/cloudfoundry-identity-uaa-3.9.3.war /tomcat/webapps/
 
-COPY ./tmp/cloudfoundry-identity-uaa-3.9.3.war /tomcat/webapps/cloudfoundry-identity-uaa-3.9.3.war
+COPY ./tmp/cloudfoundry-identity-uaa-4.19.0.war /tomcat/webapps/cloudfoundry-identity-uaa-4.19.0.war
 
 
-RUN mv /tomcat/webapps/cloudfoundry-identity-uaa-3.9.3.war /tomcat/webapps/ROOT.war
+RUN mv /tomcat/webapps/cloudfoundry-identity-uaa-4.19.0.war /tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 

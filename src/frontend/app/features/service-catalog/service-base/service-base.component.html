@@ -1,9 +1,0 @@
-<app-page-header>
-  {{ getServiceLabel() | async }}
-  <div class="page-header-right">
-    <button mat-icon-button name="add-service-instance" [routerLink]="addServiceInstanceLink()" [disabled]="!(hasVisiblePlans$ | async)">
-      <mat-icon [matTooltip]="toolTipText$ | async">add_box</mat-icon>
-    </button>
-  </div>
-</app-page-header>
-<router-outlet></router-outlet>

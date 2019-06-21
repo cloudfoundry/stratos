@@ -8,7 +8,7 @@ image_resource:
     insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 inputs:
-- name: stratos-ui
+- name: stratos
 outputs:
 - name: dev-certs-output
 run:
@@ -17,4 +17,4 @@ run:
   - -exc
   - |
     export CERTS_PATH=dev-certs-output/dev-certs
-    ./stratos-ui/deploy/tools/generate_cert.sh
+    ./stratos/deploy/tools/generate_cert.sh

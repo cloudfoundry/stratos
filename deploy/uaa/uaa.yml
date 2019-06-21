@@ -49,14 +49,16 @@ oauth:
       authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write,zone.admin,stratos.admin,stratos.user,stratos.publisher
       access-token-validity: 3600
       refresh-token-validity: 2592000
+      redirect-uri: https://127.0.0.1:4200/pp/v1/auth/**
     console:
       id: console
       override: true
-      authorized-grant-types: client_credentials,implicit,password,refresh_token
+      authorized-grant-types: client_credentials,implicit,password,refresh_token,authorization_code
       scope: scim.me,stratos.user,openid,profile,roles,notification_preferences.read user_attributes,uaa.user,notification_preferences.write,stratos.publisher,cloud_controller.read,password.write,approvals.me,cloud_controller.write,cloud_controller_service_permissions.read,stratos.admin,oauth.approvals
       authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write,zone.admin,stratos.admin,stratos.user,stratos.publisher
       access-token-validity: 3600
       refresh-token-validity: 2592000
+      redirect-uri: https://127.0.0.1:4200/pp/v1/auth/**
 login:
   serviceProviderKey: |
     -----BEGIN RSA PRIVATE KEY-----
@@ -110,6 +112,12 @@ zones:
     hostnames:
       - localhost
 #      - 10.4.21.242
+
+encryption:
+  active_key_label: stratos-uaa-key
+  encryption_keys:
+  - label: stratos-uaa-key
+    passphrase: changeme
 
 #The secret that an external login server will use to authenticate to the uaa using the id `login`
 LOGIN_SECRET: secret

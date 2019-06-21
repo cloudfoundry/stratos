@@ -1,4 +1,4 @@
 # abort script on any command that exits with a non zero value
 set -e
 
-cp -a ./stratos-ui/* ${BOSH_INSTALL_TARGET}
+cp -a ./stratos/* ${BOSH_INSTALL_TARGET}

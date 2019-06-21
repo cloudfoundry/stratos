@@ -7,8 +7,13 @@ DEFAULT_SPACE=pcfdev-space
 USER_NAME=admin
 # CF User password
 USER_PASS=admin
+# CF API Endpoint
+CF_API_ENDPOINT=https://api.local.pcfdev.io
 
-while getopts ":o:s:u:p:" opt ; do
+# Skip login - run against whatever target the cf CLI is configured for
+SKIP_LOGIN=false
+
+while getopts ":o:s:u:p:a:n" opt ; do
     case $opt in
         o)
             DEFAULT_ORG="${OPTARG}"
@@ -22,14 +27,18 @@ while getopts ":o:s:u:p:" opt ; do
         p)
             USER_PASS="${OPTARG}"
             ;;
+        a)
+            CF_API_ENDPOINT="${OPTARG}"
+            ;;
+        n)
+            SKIP_LOGIN="true"
+            ;;
     esac
 done
 
 function pushBrokerApp {
   local SERVICE=$1
   local APPNAME=$SERVICE-broker
-  local TMP_DIR=$(mktemp -d)
-  git clone https://github.com/irfanhabib/worlds-simplest-service-broker ${TMP_DIR}
   pushd ${TMP_DIR}
   cf push $APPNAME --no-start -m 128M -k 256M
   cf set-env $APPNAME BASE_GUID $(uuidgen)
@@ -39,6 +48,7 @@ function pushBrokerApp {
   cf set-env $APPNAME TAGS simple,shared
   cf env $APPNAME
   cf start $APPNAME
+  popd
 }
 
 function createService {
@@ -47,7 +57,7 @@ function createService {
   local ORG=$2
   local SPACE=$3
   export SERVICE_URL=$(cf app $APPNAME | grep routes: | awk '{print $2}')
-  let SPACE_ARGS=""
+  local SPACE_ARGS=""
   if [ ! -z $SPACE ]; then
     cf target -o $ORG -s $SPACE
     SPACE_ARGS="--space-scoped"
@@ -65,6 +75,14 @@ function addServiceVisibilities {
   local ORG=$2
   cf enable-service-access $SERVICE -o $ORG
 }
+
+if [ "${SKIP_LOGIN}" == "false" ]; then
+    cf login  --skip-ssl-validation -a ${CF_API_ENDPOINT} -u ${USER_NAME} -p ${USER_PASS} -o ${DEFAULT_ORG} -s ${DEFAULT_SPACE}
+fi
+
+# Only clone the repository once
+TMP_DIR=$(mktemp -d)
+git clone https://github.com/cf-stratos/worlds-simplest-service-broker ${TMP_DIR}
 
 # Create public service
 pushBrokerApp public-service;

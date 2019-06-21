@@ -23,6 +23,7 @@ The following guide details how to deploy Stratos in Kubernetes.
   * [Deploying Stratos with your own TLS certificates](#deploying-stratos-with-your-own-tls-certificates)
   * [Using with a Secure Image Repostiory](#using-with-a-secure-image-repository)
   * [Installing Nightly Release](#installing-a-nightly-release)
+  * [Configuring Stratos to use an Ingress controller](./ingress)
 <!-- /TOC -->
 
 ## Requirements
@@ -171,10 +172,10 @@ To login use the following credentials detailed [here](../../docs/access.md).
 
 ## Advanced Topics
 ### Using a Load Balancer
-If your Kubernetes deployment supports automatic configuration of a load balancer (e.g. Google Container Engine), specify the parameters `useLb=true` when installing.
+If your Kubernetes deployment supports automatic configuration of a load balancer (e.g. Google Container Engine), specify the parameters `console.service.type=LoadBalancer` when installing.
 
 ```
-helm install stratos/console --namespace=console --name my-console --set useLb=true
+helm install stratos/console --namespace=console --name my-console --set console.service.type=LoadBalancer
 ```
 
 ### Specifying an External IP
@@ -182,7 +183,7 @@ helm install stratos/console --namespace=console --name my-console --set useLb=t
 If the kubernetes cluster supports external IPs for services (see [ Service External IPs](https://kubernetes.io/docs/concepts/services-networking/service/#external-ips)), then the following arguments can be provided. In this following example the dashboard will be available at `https://192.168.100.100:5000`.
 
 ```
-helm install stratos/console --namespace=console --name my-console --set console.externalIP=192.168.100.100 console.port=5000
+helm install stratos/console --namespace=console --name my-console --set console.service.externalIPs={192.168.100.100} --set console.service.servicePort=5000
 ```
 
 ### Upgrading your deployment

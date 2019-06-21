@@ -4,21 +4,23 @@ resource_types:
   type: docker-image
   privileged: true
   source:
-    repository: ((docker-image-resource))
-    tag: ((docker-image-resource-tag))
-    
+    repository: ((docker-resource-image))
+    tag: ((docker-resource-image-tag))
 resources:
+# Stratos Git Repository
 - name: stratos
   type: git
   source:
-    uri: git@github.com:((github-organization))/((github-repository))
-    branch: ((stratos-branch))
+    uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
+    branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
-- name: stratos-master
+    # Match any Version 2 release (alpha, beta, rc) other than the actual release
+    tag_filter: "2*-*"
+- name: helm-repo
   type: git
   source:
-    uri: git@github.com:((github-organization))/((github-repository))
-    branch: master
+    uri: git@github.com:((helm-repo-github-organization))/((helm-repo-github-repository))
+    branch: ((helm-repo-branch))
     private_key: ((github-private-key))
 # Docker Images
 - name: jetstream-image
@@ -26,63 +28,87 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-jetstream
+    repository: ((docker-repository))/stratos-jetstream
 - name: postflight-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-postflight-job
+    repository: ((docker-repository))/stratos-postflight-job
 - name: mariadb-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-mariadb
+    repository: ((docker-repository))/stratos-mariadb
 - name: ui-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-mariadb
+    repository: ((docker-repository))/stratos-console
 
 # Artifacts
 - name: image-tag
   type: s3
   source:
-    bucket: concourse-stratos-ui
+    bucket: ((minio-bucket))
     endpoint: ((minio-server-endpoint))
-    regexp: temp-artifacts/v(.*).tar
+    regexp: temp-artifacts/release-(.*).tar
     access_key_id: ((minio-access-key))
     secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
 - name: helm-chart-tarball
   type: s3
   source:
-    bucket: concourse-stratos-ui
-    endpoint: {{minio-server-endpoint}}
+    bucket: ((minio-bucket))
+    endpoint: ((minio-server-endpoint))
     regexp: temp-artifacts/console-helm-chart-(?P<version>.*).tgz
-    access_key_id: {{minio-access-key}}
-    secret_access_key: {{minio-secret-access-key}}
+    access_key_id: ((minio-access-key))
+    secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
 jobs:
 - name: generate-tag-files
   plan:
   - get: stratos
+    trigger: true
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+      params:
+        TAG_SUFFIX: ((tag-suffix))
     - put: image-tag
       params:
         file: image-tag/*.tar
         acl: public-read
-- name: build-images
+- name: check-github
   plan:
   - get: stratos
     passed: [generate-tag-files]
     trigger: true
   - get: image-tag
-    passed: [generate-tag-files]
+    passed: [generate-tag-files] 
+    params:
+     unpack: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos/deploy/ci/tasks/dev-releases/check-gh-release.yml
+      params:
+        GITHUB_TOKEN: ((github-access-token))
+        GITHUB_USER: ((helm-repo-github-organization))
+        GITHUB_REPO: ((helm-repo-github-repository))
+        GIT_USER: ((concourse-user))
+        GIT_EMAIL: ((concourse-email))
+        GIT_PRIVATE_KEY: ((github-private-key))
+- name: build-images
+  plan:
+  - get: stratos
+    passed: [check-github]
+    trigger: true
+  - get: image-tag
+    passed: [check-github]
     params:
       unpack: true
   - aggregate:
@@ -93,29 +119,39 @@ jobs:
           build: stratos/
           target_name:  prod-build
           tag: image-tag/v2-alpha-tag
+          build_args_file: image-tag/build-args
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
       - put: postflight-image
         params:
           dockerfile: stratos/deploy/Dockerfile.bk
           build: stratos/
           target_name:  postflight-job
           tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
           tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
       - put: ui-image
         params:
           dockerfile: stratos/deploy/Dockerfile.ui
           build: stratos/
           target_name: prod-build
           tag: image-tag/v2-alpha-tag
+          build_args_file: image-tag/ui-build-args
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
 - name: create-chart
   plan:
   - get: stratos
     passed: [build-images]
     trigger: true
-  - get: stratos-master
+  - get: helm-repo
   - get: image-tag
     passed: [build-images]
     params:
@@ -128,11 +164,13 @@ jobs:
       params:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
-        GITHUB_ORG: ((github-organization))
-        GITHUB_REPO: ((github-repository))
+        GITHUB_ORG: ((helm-repo-github-organization))
+        GITHUB_REPO: ((helm-repo-github-repository))
         GIT_PRIVATE_KEY: ((github-private-key))
-        DOCKER_ORG: ((artifact-docker-organization))
-        DOCKER_REGISTRY: ((artifact-docker-registry))
+        DOCKER_ORG: ((docker-organization))
+        DOCKER_REGISTRY: ((docker-registry))
+        HELM_REPO_PATH: ((helm-repo-path))
+        HELM_REPO_BRANCH: ((helm-repo-branch))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
@@ -155,8 +193,8 @@ jobs:
       file: stratos/deploy/ci/tasks/dev-releases/update-gh-release.yml
       params:
         GITHUB_TOKEN: ((github-access-token))
-        GITHUB_USER: ((github-organization))
-        GITHUB_REPO: ((github-repository))
+        GITHUB_USER: ((helm-repo-github-organization))
+        GITHUB_REPO: ((helm-repo-github-repository))
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))

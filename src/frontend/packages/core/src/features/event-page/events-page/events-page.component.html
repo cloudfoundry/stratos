@@ -1,0 +1,26 @@
+<app-page-header>
+  <h1>Notifications</h1>
+  <div class="page-header-right">
+    <span>
+      <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async">
+        <mat-icon>close</mat-icon>
+      </button>
+    </span>
+  </div>
+</app-page-header>
+<div class="event-page">
+  <mat-list *ngIf="events$ | async as events; last as last ; else noEvents">
+    <mat-card class="event-page__event-row-card" *ngFor="let event of events">
+      <mat-list-item class="event-page__event-row">
+        <app-stateful-icon class="event-page__event-row-icon" [state]="event.stratosStatus">
+        </app-stateful-icon>
+        <span class="event-page__event-message">{{event.message}}</span>
+        <button class="event-page__event-row-link" *ngIf="event.link" color="primary" mat-flat-button
+          [routerLink]="event.link">View</button>
+      </mat-list-item>
+    </mat-card>
+  </mat-list>
+</div>
+<ng-template #noEvents>
+  <div>There are no events.</div>
+</ng-template>

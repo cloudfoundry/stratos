@@ -1,36 +1,39 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { ElementArrayFinder, browser, by, element } from 'protractor';
-import { protractor } from 'protractor/built';
+import { browser, by, element as protractorElement, ElementArrayFinder } from 'protractor';
+import { promise, protractor } from 'protractor/built';
 import { ElementFinder } from 'protractor/built/element';
-import * as request from 'request';
+
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
+
 
 export enum ConsoleUserType {
   admin = 1,
   user = 2
 }
 
-const DEBUG_LOGGING = false;
-
-
 export class E2EHelpers {
+
+  static e2eItemPrefix = 'acceptance.e2e.';
+  static customOrgSpaceLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
 
   secrets = new SecretsHelpers();
 
   constructor() { }
 
+  // This makes identification of acceptance test apps easier in case they leak
+  static createCustomName = (prefix: string, isoTime?: string) =>
+    prefix + '.' + (isoTime || (new Date()).toISOString().replace(/[-:.]+/g, ''))
+
   getHost(): string {
     return browser.baseUrl;
   }
-
 
   newBrowser() {
     return browser.forkNewDriverInstance(true);
   }
 
-  setupApp(loginUser?: ConsoleUserType, keepCookies?: boolean) {
+  setupApp(loginUser?: ConsoleUserType, keepCookies?: boolean): promise.Promise<any> {
+
     this.setBrowserNormal();
     if (!keepCookies) {
       browser.manage().deleteAllCookies();
@@ -38,6 +41,11 @@ export class E2EHelpers {
 
     browser.get('/').then(() => {
       browser.executeScript('window.sessionStorage.setItem("STRATOS_DISABLE_ANIMATIONS", true);');
+      // Allow GitHub API Url to be overridden
+      const gitHubUrl = this.secrets.getStratosGitHubApiUrl();
+      if (gitHubUrl) {
+        browser.executeScript('window.sessionStorage.setItem("STRATOS_GITHUB_API_URL", "' + gitHubUrl + '");');
+      }
     });
 
     if (loginUser) {
@@ -51,6 +59,8 @@ export class E2EHelpers {
       } else {
         return loginPage.login(this.secrets.getConsoleNonAdminUsername(), this.secrets.getConsoleNonAdminPassword());
       }
+    } else {
+      return promise.fulfilled(true);
     }
   }
 
@@ -74,7 +84,7 @@ export class E2EHelpers {
    * Form helpers
    */
   getForm(formName): ElementFinder {
-    return element(by.css('form[name="' + formName + '"]'));
+    return protractorElement(by.css('form[name="' + formName + '"]'));
   }
 
   getFormFields(formName): ElementArrayFinder {
@@ -92,164 +102,6 @@ export class E2EHelpers {
   getFieldType(field): ElementFinder {
     return this.getAttribute(field, 'type');
   }
-
-
-  /**
-   * Manage requests + sessions
-   */
-
-  /**
-   * @createReqAndSession
-   * @description
-   * @param {object?} optionalReq - convenience, wraps in promise as if req did not exist
-   */
-  createReqAndSession(optionalReq, username: string, password: string): Promise<any> {
-    let req;
-
-    if (!optionalReq) {
-      req = this.newRequest();
-
-      username = username || this.secrets.getConsoleAdminUsername();
-      password = password || this.secrets.getConsoleAdminPassword();
-
-      return this.createSession(req, username, password).then(() => {
-        return req;
-      });
-    } else {
-      return new Promise(() => optionalReq);
-    }
-  }
-
-  /**
-   * @newRequest
-   * @description Create a new request
-   */
-  newRequest() {
-    const cookieJar = request.jar();
-    const skipSSLValidation = browser.params.skipSSLValidation;
-    let ca;
-
-    if (skipSSLValidation) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    } else if (browser.params.caCert) {
-      let caCertFile = path.join(__dirname, '..', 'dev-ssl');
-      caCertFile = path.join(caCertFile, browser.params.caCert);
-      if (fs.existsSync(caCertFile)) {
-        ca = fs.readFileSync(caCertFile);
-      }
-    }
-
-    return request.defaults({
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      agentOptions: {
-        ca: ca
-      },
-      jar: cookieJar
-    });
-  }
-
-  debugLogRequest(log) {
-    if (DEBUG_LOGGING) {
-      console.log(log);
-    }
-  }
-
-  /**
-   * @sendRequest
-   * @description Send request
-   * @param {object} req - the request
-   * @param {object} options -
-   * @param {object?} body - the request body
-   * @param {object?} formData - the form data
-   */
-  sendRequest(req, options, body?, formData?): Promise<any> {
-
-    this.debugLogRequest('sendRequest');
-
-    return new Promise((resolve, reject) => {
-      options.url = this.getHost() + '/' + options.url;
-      if (body) {
-        options.body = JSON.stringify(body);
-      } else if (formData) {
-        options.formData = formData;
-      }
-
-      this.debugLogRequest('REQ: ' + options.method + ' ' + options.url);
-      this.debugLogRequest(options);
-
-      let data = '';
-      let rejected;
-      req(options)
-        .on('data', (responseData) => {
-          data += responseData;
-        })
-        .on('error', (error) => {
-          reject(`send request failed: ${error}`);
-        })
-        .on('response', (response) => {
-          if (response.statusCode > 399) {
-            this.debugLogRequest('ERROR');
-            this.debugLogRequest(response.statusCode);
-            reject('failed to send request: ' + JSON.stringify(response));
-            rejected = true;
-          }
-        })
-        .on('end', () => {
-          if (!rejected) {
-            this.debugLogRequest('OK');
-            resolve(data);
-          }
-        });
-    });
-  }
-
-  /**
-   * @createSession
-   * @description Create a session
-   * @param {object} req - the request
-   */
-  createSession(req, username: string, password: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const options = {
-        formData: {
-          username: username || 'dev',
-          password: password || 'dev'
-        }
-      };
-      req.post(this.getHost() + '/pp/v1/auth/login/uaa', options)
-        .on('error', reject)
-        .on('response', (response) => {
-          if (response.statusCode === 200) {
-            resolve(true);
-          } else {
-            console.log('Failed to create session. ' + JSON.stringify(response));
-            reject('Failed to create session');
-          }
-        });
-    });
-  }
-
-  // /**
-  //  * @isSetupMode
-  //  * @description Check if console is in setup mode
-  //  */
-  // isSetupMode(): Promise<any> {
-  //   const req = this.newRequest();
-  //   return new Promise((resolve, reject) => {
-  //     return req.post(this.getHost() + '/pp/v1/auth/login/uaa', {})
-  //       .on('error', reject)
-  //       .on('response', (response) => {
-  //         if (response.statusCode === 503) {
-  //           resolve();
-  //         } else {
-  //           reject();
-  //         }
-  //       });
-  //   });
-  // }
 
   /**
    * @forceDate
@@ -296,7 +148,7 @@ export class E2EHelpers {
       });
   }
 
-  scrollIntoView(element) {
+  scrollIntoView(element: ElementFinder) {
     return browser.controlFlow().execute(() => {
       browser.executeScript('arguments[0].scrollIntoView(true)', element.getWebElement());
     });
@@ -306,6 +158,29 @@ export class E2EHelpers {
     const until = protractor.ExpectedConditions;
     browser.wait(until.presenceOf(element), 10000);
     return element.click();
+  }
+
+  // Cloud Foundry
+  getCustomOrgSpaceLabel(isoTime, orgSpace) {
+    return E2EHelpers.customOrgSpaceLabel + '.' + orgSpace + '.' + (isoTime || (new Date()).toISOString());
+  }
+
+  getEndpointGuid(info, name: string): string {
+    expect(info).toBeDefined();
+    expect(info.endpoints).toBeDefined();
+
+    let endpointGuid = null;
+    Object.keys(info.endpoints).forEach((type) => {
+      const endpoints = info.endpoints[type];
+      Object.keys(endpoints).forEach((guid) => {
+        const endpoint = endpoints[guid];
+        if (endpoint.name === name && !endpointGuid) {
+          endpointGuid = guid;
+        }
+      });
+    });
+
+    return endpointGuid;
   }
 
 }

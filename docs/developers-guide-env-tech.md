@@ -205,7 +205,7 @@ Example settings
   * setTimeout
   * forcing change detecting
 * TRY TO USE
+  * observeOn(asapScheduler) in observable chain
   * ngAfterViewInit
-  * BehaviourSubject and .next() to store data to bind to
 * Generally
   * Avoid changing state in child components that will affect a binding in parent component/s
