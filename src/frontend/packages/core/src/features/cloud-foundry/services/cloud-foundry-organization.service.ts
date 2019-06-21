@@ -12,8 +12,8 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetOrganization } from '../../../../../store/src/actions/organization.actions';
-import { DeleteSpace } from '../../../../../store/src/actions/space.actions';
+import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
+import { DeleteSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';

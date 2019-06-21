@@ -9,7 +9,7 @@ import { Store } from '@ngrx/store';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { SetNewAppName } from '../../../../../../store/src/actions/create-applications-page.actions';
+import { SetNewAppName } from '../../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { AppNameUniqueChecking } from '../../../../shared/app-name-unique.directive/app-name-unique.directive';
 
 @Component({

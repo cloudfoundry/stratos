@@ -11,7 +11,7 @@ import {
   RESET_CREATE_SERVICE_INSTANCE_STATE,
   RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE,
   SetCreateServiceInstanceApp,
-} from '../actions/create-service-instance.actions';
+} from '../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
 

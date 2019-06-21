@@ -6,9 +6,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
-import { SaveAppOverrides } from '../../../../../../store/src/actions/deploy-applications.actions';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
-import { GetAllStacks } from '../../../../../../store/src/actions/stack.action';
+import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
+import { GetAllStacks } from '../../../../../../cloud-foundry/src/actions/stack.action';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCfDetails } from '../../../../../../store/src/selectors/deploy-application.selector';

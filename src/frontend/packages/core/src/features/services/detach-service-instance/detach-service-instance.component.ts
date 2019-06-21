@@ -7,7 +7,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { GetServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
+import { GetServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding, IServiceInstance } from '../../../core/cf-api-svc.types';

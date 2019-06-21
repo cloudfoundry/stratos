@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { cfEntityFactory, securityGroupEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllSecurityGroups } from '../../../../../../../store/src/actions/security-groups-actions';
+import { GetAllSecurityGroups } from '../../../../../../../cloud-foundry/src/actions/security-groups-actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import {

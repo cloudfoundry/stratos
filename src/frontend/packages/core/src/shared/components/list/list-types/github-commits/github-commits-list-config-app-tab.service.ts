@@ -14,7 +14,7 @@ import {
   SetDeployBranch,
   SetDeployCommit,
   StoreCFSettings,
-} from '../../../../../../../store/src/actions/deploy-applications.actions';
+} from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';

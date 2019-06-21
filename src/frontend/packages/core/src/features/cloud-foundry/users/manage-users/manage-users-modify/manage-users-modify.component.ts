@@ -26,7 +26,7 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { UsersRolesSetOrg } from '../../../../../../../store/src/actions/users-roles.actions';
+import { UsersRolesSetOrg } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   selectUsersRolesOrgGuid,

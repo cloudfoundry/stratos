@@ -1,9 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { cfEntityFactory, serviceBindingEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { PaginatedAction, PaginationParam } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { getActions } from './action.helper';
+import { cfEntityFactory, serviceBindingEntityType } from '../cf-entity-factory';
+import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 
 
 export const DELETE_SERVICE_BINDING_ACTION = '[ Service Instances ] Delete Service Binding';

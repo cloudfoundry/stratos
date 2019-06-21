@@ -17,10 +17,10 @@ import {
   AssociateRouteWithAppApplication,
   GetAppRoutes,
 } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
-import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
+import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
+import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GetSpace } from '../../../../../../store/src/actions/space.actions';
+import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';

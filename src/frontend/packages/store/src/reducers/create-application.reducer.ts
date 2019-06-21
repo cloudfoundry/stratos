@@ -4,7 +4,7 @@ import {
   NAME_TAKEN,
   SET_CF_DETAILS,
   SET_NAME,
-} from '../actions/create-applications-page.actions';
+} from '../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CreateNewApplicationState } from '../types/create-application.types';
 
 

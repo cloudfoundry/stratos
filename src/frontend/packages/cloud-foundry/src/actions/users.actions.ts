@@ -5,17 +5,17 @@ import {
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+} from '../cf-entity-factory';
+import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
-} from '../helpers/entity-relations/entity-relations.types';
-import { EntitySchema } from '../helpers/entity-schema';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, IRequestAction } from '../types/request.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
-import { getActions } from './action.helper';
+} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction, IRequestAction } from '../../../store/src/types/request.types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/src/types/user.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ALL = '[Users] Get all';

@@ -11,11 +11,11 @@ import {
   serviceInstancesWithspaceEntityType,
   servicePlanEntityType,
   spaceEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
-import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { getActions } from './action.helper';
+} from '../cf-entity-factory';
+import { createEntityRelationKey, EntityInlineParentAction } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];

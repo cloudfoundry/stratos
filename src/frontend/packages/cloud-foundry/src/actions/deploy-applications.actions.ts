@@ -1,12 +1,12 @@
 import { Action } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { gitBranchesEntityType, gitCommitEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-factory';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
-import { GitAppDetails, OverrideAppDetails, SourceType } from '../types/deploy-application.types';
-import { GitBranch, GitCommit } from '../types/git.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
+import { GitAppDetails, OverrideAppDetails, SourceType } from '../../../store/src/types/deploy-application.types';
+import { GitBranch, GitCommit } from '../../../store/src/types/git.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { IRequestAction } from '../../../store/src/types/request.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';

@@ -21,7 +21,7 @@ import {
   SetAppSourceDetails,
   SetBranch,
   SetDeployBranch,
-} from '../../../../../../store/src/actions/deploy-applications.actions';
+} from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {

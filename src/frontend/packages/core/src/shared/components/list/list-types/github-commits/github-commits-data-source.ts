@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
 import { CFEntitySchema, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
+import { FetchCommits } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';

@@ -1,17 +1,17 @@
 import { RequestOptions, URLSearchParams, RequestMethod } from '@angular/http';
 
-import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../cf-types';
 import {
   cfEntityFactory,
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
+} from '../cf-entity-factory';
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { getActions } from './action.helper';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ORGANIZATION = '[Organization] Get one';

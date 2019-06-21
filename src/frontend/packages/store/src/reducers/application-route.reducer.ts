@@ -1,5 +1,5 @@
 import { ASSIGN_ROUTE_SUCCESS, AssociateRouteWithAppApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { BaseRouteAction, RouteEvents } from '../actions/route.actions';
+import { BaseRouteAction, RouteEvents } from '../../../cloud-foundry/src/actions/route.actions';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 

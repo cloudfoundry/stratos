@@ -9,7 +9,7 @@ import {
   UsersRolesExecuteChanges,
   UsersRolesSetChanges,
   UsersRolesSetUsers,
-} from '../../../../../../store/src/actions/users-roles.actions';
+} from '../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectUsersRoles } from '../../../../../../store/src/selectors/users-roles.selector';
 import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../../../store/src/types/user.types';

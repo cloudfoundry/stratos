@@ -20,7 +20,7 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { DeleteDeployAppSection } from '../../../../../../store/src/actions/deploy-applications.actions';
+import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 

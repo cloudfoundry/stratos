@@ -1,8 +1,8 @@
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
-import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { APIResource } from '../types/api.types';
+import { organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { APIResource } from '../../../store/src/types/api.types';
 
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS = '[Current User] Get audited org Relations';
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS_SUCCESS = '[Current User] Get audited org Relations success';

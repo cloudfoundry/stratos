@@ -1,10 +1,10 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { cfEntityFactory, domainEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
+import { cfEntityFactory, domainEntityType } from '../cf-entity-factory';
+import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 
 export const GET_DOMAIN = '[domain] Get domain ';
 export const GET_DOMAIN_SUCCESS = '[domain] Get domain success';

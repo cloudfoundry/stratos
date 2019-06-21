@@ -7,7 +7,7 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
+import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { ApplicationService } from '../application.service';

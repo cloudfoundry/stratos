@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { CfUser } from '../types/user.types';
-import { CfRoleChange } from '../types/users-roles.types';
+import { CfUser } from '../../../store/src/types/user.types';
+import { CfRoleChange } from '../../../store/src/types/users-roles.types';
 
 export const UsersRolesActions = {
   SetUsers: '[Users Roles] Set users',

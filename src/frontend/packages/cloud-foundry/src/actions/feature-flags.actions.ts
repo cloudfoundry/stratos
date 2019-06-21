@@ -1,9 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { cfEntityFactory, featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, RequestEntityLocation } from '../types/request.types';
-import { getActions } from './action.helper';
+import { cfEntityFactory, featureFlagEntityType } from '../cf-entity-factory';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction, RequestEntityLocation } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 
 export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string, public paginationKey: string) {

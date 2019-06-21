@@ -1,4 +1,4 @@
-import { GetCurrentUserRelationsComplete } from '../../actions/permissions.actions';
+import { GetCurrentUserRelationsComplete } from '../../../../cloud-foundry/src/actions/permissions.actions';
 import { APIResource } from '../../types/api.types';
 import { getDefaultEndpointRoles, ICfRolesState, IOrgsRoleState } from '../../types/current-user-roles.types';
 import { isOrgRelation, isSpaceRelation } from './current-user-reducer.helpers';

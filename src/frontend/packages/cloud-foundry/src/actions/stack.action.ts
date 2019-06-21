@@ -1,13 +1,13 @@
 import { RequestOptions } from '@angular/http';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { stackEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { stackEntityType } from '../cf-entity-factory';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { createEntityRelationKey } from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { getActions } from './action.helper';
+import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 
 export const GET = '[Stack] Get one';
 export const GET_SUCCESS = '[Stack] Get one success';

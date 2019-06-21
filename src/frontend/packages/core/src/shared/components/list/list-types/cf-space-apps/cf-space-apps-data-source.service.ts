@@ -5,7 +5,7 @@ import {
   cfEntityFactory,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllAppsInSpace } from '../../../../../../../store/src/actions/space.actions';
+import { GetAllAppsInSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,

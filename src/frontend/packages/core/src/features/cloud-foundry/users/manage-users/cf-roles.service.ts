@@ -18,8 +18,8 @@ import {
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllOrganizations, GetOrganization } from '../../../../../../store/src/actions/organization.actions';
-import { UsersRolesSetChanges } from '../../../../../../store/src/actions/users-roles.actions';
+import { GetAllOrganizations, GetOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
+import { UsersRolesSetChanges } from '../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {

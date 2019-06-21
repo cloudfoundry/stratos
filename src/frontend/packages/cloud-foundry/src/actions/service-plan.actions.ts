@@ -9,11 +9,11 @@ import {
   serviceInstancesEntityType,
   servicePlanEntityType,
   spaceEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
-import { createEntityRelationKey } from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction } from '../types/request.types';
-import { getActions } from './action.helper';
+} from '../cf-entity-factory';
+import { createEntityRelationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 
 export class GetServicePlanServiceInstances extends CFStartAction implements PaginatedAction {
   constructor(

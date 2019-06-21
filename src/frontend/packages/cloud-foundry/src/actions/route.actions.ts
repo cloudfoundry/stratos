@@ -6,15 +6,15 @@ import {
   domainEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
+} from '../cf-entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
-} from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { getActions } from './action.helper';
+} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 
 
 export const CREATE_ROUTE = '[Route] Create start';

@@ -7,7 +7,7 @@ import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-f
 import { ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
-import { GetAllOrganizationSpaces } from '../../actions/organization.actions';
+import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { RequestTypes } from '../../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';

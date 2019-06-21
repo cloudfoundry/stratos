@@ -25,7 +25,7 @@ import {
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
-} from './../actions/auth.actions';
+} from '../actions/auth.actions';
 import { Store } from '@ngrx/store';
 import { CFAppState } from '../app-state';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';

@@ -7,7 +7,7 @@ import {
   organizationEntityType,
   spaceWithOrgEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllOrganizationSpaces } from '../../../../../../../store/src/actions/organization.actions';
+import { GetAllOrganizationSpaces } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';

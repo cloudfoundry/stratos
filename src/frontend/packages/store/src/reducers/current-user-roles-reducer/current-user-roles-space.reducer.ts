@@ -1,4 +1,4 @@
-import { UserRelationTypes } from '../../actions/permissions.actions';
+import { UserRelationTypes } from '../../../../cloud-foundry/src/actions/permissions.actions';
 import { APIResource } from '../../types/api.types';
 import { ISpaceRoleState } from '../../types/current-user-roles.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';

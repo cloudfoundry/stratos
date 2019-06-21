@@ -20,7 +20,7 @@ import {
   ProjectDoesntExist,
   ProjectExists,
   ProjectFetchFail,
-} from '../actions/deploy-applications.actions';
+} from '../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
 import { GitCommit } from '../types/git.types';

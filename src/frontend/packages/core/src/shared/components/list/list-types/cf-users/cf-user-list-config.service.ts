@@ -4,8 +4,8 @@ import { BehaviorSubject, combineLatest, Observable, of as observableOf } from '
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
-import { UsersRolesSetUsers } from '../../../../../../../store/src/actions/users-roles.actions';
-import { GetAllUsersAsAdmin } from '../../../../../../../store/src/actions/users.actions';
+import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
+import { GetAllUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';

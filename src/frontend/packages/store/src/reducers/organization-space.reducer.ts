@@ -1,6 +1,6 @@
 import { spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
-import { CREATE_SPACE_SUCCESS, CreateSpace, DELETE_SPACE_SUCCESS, DeleteSpace } from '../actions/space.actions';
+import { CREATE_SPACE_SUCCESS, CreateSpace, DELETE_SPACE_SUCCESS, DeleteSpace } from '../../../cloud-foundry/src/actions/space.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';

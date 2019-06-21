@@ -1,6 +1,6 @@
 import { IAppSummary, IRoute } from '../../../core/src/core/cf-api.types';
 import { ASSIGN_ROUTE_SUCCESS, AssociateRouteWithAppApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { DeleteRoute, RouteEvents, UnmapRoute } from '../actions/route.actions';
+import { DeleteRoute, RouteEvents, UnmapRoute } from '../../../cloud-foundry/src/actions/route.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';

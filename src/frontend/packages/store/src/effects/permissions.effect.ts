@@ -23,7 +23,7 @@ import {
   GetUserCfRelations,
   GetUserRelations,
   UserRelationTypes,
-} from '../actions/permissions.actions';
+} from '../../../cloud-foundry/src/actions/permissions.actions';
 import { CFAppState } from '../app-state';
 import { BaseHttpClientFetcher, flattenPagination, IPaginationFlattener } from '../helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';

@@ -31,14 +31,14 @@ import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions
 import {
   SetCreateServiceInstanceOrg,
   SetServiceInstanceGuid,
-} from '../../../../../../store/src/actions/create-service-instance.actions';
+} from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CreateServiceBinding } from '../../../../../../store/src/actions/service-bindings.actions';
+import { CreateServiceBinding } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import {
   CreateServiceInstance,
   GetServiceInstance,
   UpdateServiceInstance,
-} from '../../../../../../store/src/actions/service-instances.actions';
+} from '../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import {

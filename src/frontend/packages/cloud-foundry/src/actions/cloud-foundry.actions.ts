@@ -1,6 +1,6 @@
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { cfInfoEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { IRequestAction } from '../types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { cfInfoEntityType } from '../cf-entity-factory';
+import { IRequestAction } from '../../../store/src/types/request.types';
 
 export const GET_INFO = '[CF Endpoint] Get Info';
 

@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../cf-types';
 import {
   applicationEntityType,
   cfEntityFactory,
@@ -12,16 +12,16 @@ import {
   servicePlanEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
+} from '../cf-entity-factory';
 import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import {
   createEntityRelationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
-} from '../helpers/entity-relations/entity-relations.types';
-import { PaginatedAction, QParam } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { getActions } from './action.helper';
+} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
+import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { getActions } from '../../../store/src/actions/action.helper';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
