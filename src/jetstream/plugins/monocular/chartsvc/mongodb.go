@@ -2,7 +2,9 @@ package chartsvc
 
 import (
 	//"bytes"
+	"errors"
 	"fmt"
+
 	"github.com/globalsign/mgo/bson"
 	"github.com/helm/monocular/chartsvc/models"
 	"github.com/kubeapps/common/datastore"
@@ -85,4 +87,8 @@ func (m *MongoDBChartSvcDatastore) GetChartVersionReadme(chartID, version string
 
 	readme := []byte(files.Readme)
 	return readme, nil
+}
+
+func (m *MongoDBChartSvcDatastore) GetChartVersionValuesYaml(chartID, version string) ([]byte, error) {
+	return nil, errors.New("Not implemented")
 }

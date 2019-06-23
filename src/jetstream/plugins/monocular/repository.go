@@ -26,7 +26,7 @@ func (m *Monocular) ListRepos(c echo.Context) error {
 
 	repos := make([]HelmRepoInfo, 0)
 	for _, ep := range endpoints {
-		if ep.CNSIType == EndpointType {
+		if ep.CNSIType == helmEndpointType {
 			// Helm endpoint
 			repo := HelmRepoInfo{
 				ID:   ep.Name,

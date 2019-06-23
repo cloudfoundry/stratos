@@ -12,4 +12,5 @@ type ChartSvcDatastore interface {
 	GetChartVersion(chartID, version string) (models.Chart, error)
 	GetChartIcon(chartID string) ([]byte, error)
 	GetChartVersionReadme(chartID, version string) ([]byte, error)
+	GetChartVersionValuesYaml(chartID, version string) ([]byte, error)
 }

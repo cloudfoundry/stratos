@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	EndpointType = "helm"
+	helmEndpointType = "helm"
 )
 
 const prefix = "/pp/v1/chartsvc/"
@@ -45,19 +45,11 @@ func (m *Monocular) GetChartStore() chartsvc.ChartSvcDatastore {
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
 
-	return errors.New("Manually disabled")
-	// #150 - Uncomment to enable helm plugin
-	// ---------------------------------------
-	// m.ConfigureSQL()
-
-	// m.chartSvcRoutes = chartsvc.GetRoutes()
-
-	// m.InitSync()
-
-	// m.syncOnStartup()
-
-	// return nil
-	// ---------------------------------------
+	m.ConfigureSQL()
+	m.chartSvcRoutes = chartsvc.GetRoutes()
+	m.InitSync()
+	m.syncOnStartup()
+	return nil
 }
 
 func (m *Monocular) syncOnStartup() {
@@ -78,7 +70,7 @@ func (m *Monocular) syncOnStartup() {
 
 	helmRepos := make([]string, 0)
 	for _, ep := range endpoints {
-		if ep.CNSIType == "helm" {
+		if ep.CNSIType == helmEndpointType {
 			helmRepos = append(helmRepos, ep.Name)
 
 			// Is this an endpoint that we don't have charts for ?
@@ -96,7 +88,7 @@ func (m *Monocular) syncOnStartup() {
 			endpoint := &interfaces.CNSIRecord{
 				GUID:     repo,
 				Name:     repo,
-				CNSIType: "helm",
+				CNSIType: helmEndpointType,
 			}
 			m.Sync(interfaces.EndpointUnregisterAction, endpoint)
 		}
@@ -163,7 +155,7 @@ func (m *Monocular) ConfigureSQL() error {
 }
 
 func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
-	if endpoint.CNSIType == EndpointType {
+	if endpoint.CNSIType == helmEndpointType {
 		m.Sync(action, endpoint)
 	}
 }

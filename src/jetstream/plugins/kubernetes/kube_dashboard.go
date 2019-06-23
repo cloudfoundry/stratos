@@ -51,29 +51,9 @@ func (r *responder) Error(w http.ResponseWriter, req *http.Request, err error) {
 }
 
 // Get the config for the certificate authentication
-func getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
+func (k *KubernetesSpecification) getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
 	masterURL := cnsiRecord.APIEndpoint.String()
-	return GetConfigForEndpoint(masterURL, *tokenRecord)
-}
-
-// Get the config for the certificate authentication
-func __getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
-
-	config := rest.Config{}
-	config.Host = cnsiRecord.APIEndpoint.String()
-
-	// Only support certs for now
-	kubeAuthToken := &KubeCertAuth{}
-	err := json.NewDecoder(strings.NewReader(tokenRecord.AuthToken)).Decode(kubeAuthToken)
-	if err != nil {
-		return nil, err
-	}
-
-	config.TLSClientConfig = rest.TLSClientConfig{}
-	config.TLSClientConfig.CertData = []byte(kubeAuthToken.Certificate)
-	config.TLSClientConfig.KeyData = []byte(kubeAuthToken.CertificateKey)
-	config.TLSClientConfig.Insecure = true
-	return &config, nil
+	return k.GetConfigForEndpoint(masterURL, *tokenRecord)
 }
 
 // makeUpgradeTransport creates a transport that explicitly bypasses HTTP2 support
@@ -159,7 +139,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 	targetURL, _ := url.Parse(target)
 	targetURL = normalizeLocation(targetURL)
 
-	config, err := getConfig(&cnsiRecord, &tokenRec)
+	config, err := k.getConfig(&cnsiRecord, &tokenRec)
 	if err != nil {
 		return errors.New("Could not get config for this auth type")
 	}
@@ -169,7 +149,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 	log.Info("Making request")
 	req := c.Request()
 	w := c.Response().Writer
-	log.Info("%v+", req)
+	log.Infof("%v+", req)
 
 	// if h.tryUpgrade(w, req) {
 	// 	return
@@ -240,7 +220,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 		log.Debugf("%v+", response.Header)
 		response.Header.Del("X-FRAME-OPTIONS")
 		response.Header.Set("X-FRAME-OPTIONS", "sameorigin")
-		log.Debug("%v+", response)
+		log.Debugf("%v+", response)
 		return nil
 	}
 
