@@ -25,7 +25,6 @@ describe('Autoscaler -', () => {
   const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
   const testAppUrl = 'https://github.com/' + testApp;
   const testAppName = ApplicationE2eHelper.createApplicationName();
-  let defaultStack = '';
   const appDetails = {
     cfGuid: '',
     appGuid: ''
@@ -44,9 +43,7 @@ describe('Autoscaler -', () => {
     cfHelper = new CFHelpers(setup);
   });
 
-  beforeAll(() => {
-    return cfHelper.fetchDefaultStack(e2e.secrets.getDefaultCFEndpoint()).then(stack => defaultStack = stack);
-  });
+  beforeAll(() => applicationE2eHelper.cfHelper.updateDefaultCfOrgSpace());
 
   afterAll(() => {
     browser.waitForAngularEnabled(true);
@@ -58,12 +55,12 @@ describe('Autoscaler -', () => {
     beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(function () {
+    beforeEach(() => {
       originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
       jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
     });
 
-    afterEach(function () {
+    afterEach(() => {
       jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });
 
@@ -82,7 +79,7 @@ describe('Autoscaler -', () => {
         deployApp = baseCreateAppStep.selectDeployUrl();
       });
 
-      it('Check edit steps', () => {
+      it('Check deploy steps', () => {
         expect(deployApp.header.getTitleText()).toBe('Deploy from Public Git URL');
         // Check the steps
         e2e.debugLog(`${loggingPrefix} Checking Steps`);
@@ -220,6 +217,17 @@ describe('Autoscaler -', () => {
   describe('Autoscaler Attach Policy', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
     let createPolicy;
+    let originalTimeout = 40000;
+
+    // Might take a bit longer to edit the app policy than the global default timeout allows
+    beforeEach(() => {
+      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+    });
+
+    afterEach(() => {
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+    });
 
     beforeAll(() => {
       const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
@@ -227,7 +235,7 @@ describe('Autoscaler -', () => {
       createPolicy = appAutoscaler.cardStatus.clickAttachPolicy();
     });
 
-    it('Check deploy steps', () => {
+    it('Check edit steps', () => {
       expect(createPolicy.header.getTitleText()).toBe('Edit AutoScaler Policy: ' + testAppName);
       // Check the steps
       e2e.debugLog(`${loggingPrefix} Checking Steps`);
@@ -328,9 +336,9 @@ describe('Autoscaler -', () => {
       // createPolicy.stepper.getStepperForm().fill({ days_of_month: ['2', '3'] });
       // createPolicy.stepper.getStepperForm().fill({ start_time: '08:00AM'});
       // createPolicy.stepper.getStepperForm().fill({ end_time: '08:00PM'});
-      createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2'});
-      createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '5'});
-      createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10'});
+      createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
+      createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '5' });
+      createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
@@ -351,9 +359,9 @@ describe('Autoscaler -', () => {
       // Fill in form -- valid inputs
       // createPolicy.stepper.getStepperForm().fill({ start_date_time: '2098/01/01,08:00AM' });
       // createPolicy.stepper.getStepperForm().fill({ end_date_time: '2099/01/01,08:00PM' });
-      createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2'});
-      createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '5'});
-      createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10'});
+      createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
+      createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '5' });
+      createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
@@ -375,9 +383,219 @@ describe('Autoscaler -', () => {
           appDetails.appGuid = appAutoscaler.appGuid;
           expect(appAutoscaler.cardStatus.getStatusToggleInput()).toBe('true');
           expect(appAutoscaler.cardStatus.getStatusText()).toBe('Enabled');
+
+          expect(appAutoscaler.cardDefault.getRunningInstancesText()).toBe('1 / 1');
+          expect(appAutoscaler.cardDefault.getDefaultMinText()).toBe('1');
+          expect(appAutoscaler.cardDefault.getDefaultMaxText()).toBe('8');
+
+          expect(appAutoscaler.tableTriggers.getTableRowsCount()).toBe(2);
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 0)).toBe('memoryutil');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 1)).toBe('>= 20 for 60 secs.');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 2)).toBe('+2 instances');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 0)).toBe('throughput');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 1)).toBe('<= 10 for 120 secs.');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 2)).toBe('-10% instances');
+
+          expect(appAutoscaler.tableSchedules.getScheduleTableTitleText()).toBe('Scheduled Limit Rules in UTC');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(1);
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 0)).toBe('Always');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 1)).toBe('1,2,3 of the week');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 2)).toBe('10:00');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 3)).toBe('18:00');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 4)).toBe('5');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 5)).toBe('2');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 6)).toBe('10');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(1);
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 0)).toBe('2019-06-26T10:00');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 1)).toBe('2019-06-26T18:00');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 2)).toBe('5');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 3)).toBe('2');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 4)).toBe('10');
+
         }), 10000, 'Failed to wait for App Autoscaler Tab after attach policy'
       );
     });
+  });
+
+  describe('Autoscaler Edit Policy', () => {
+    const loggingPrefix = 'Edit AutoScaler Policy:';
+    let createPolicy;
+    let originalTimeout = 40000;
+
+    // Might take a bit longer to edit the app policy than the global default timeout allows
+    beforeEach(() => {
+      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+    });
+
+    afterEach(() => {
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+    });
+
+    describe('From autoscaler default card', () => {
+      beforeAll(() => {
+        const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
+        appAutoscaler.goToAutoscalerTab();
+        createPolicy = appAutoscaler.cardDefault.clickEditPolicy();
+      });
+
+      it('Check edit steps', () => {
+        expect(createPolicy.header.getTitleText()).toBe('Edit AutoScaler Policy: ' + testAppName);
+        // Check the steps
+        e2e.debugLog(`${loggingPrefix} Checking Steps`);
+        createPolicy.stepper.getStepNames().then(steps => {
+          expect(steps.length).toBe(4);
+          expect(steps[0]).toBe('Default Instance Limits');
+        });
+      });
+
+      it('Should pass DefaultInstanceLimits Step', () => {
+        createPolicy.stepper.getStepperForm().fill({ instance_max_count: '18' });
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass ScalingRules Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass RecurringSchedules Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass SpecificDates Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should go to App Autoscaler Tab', () => {
+        e2e.sleep(1000);
+        e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
+        // Should be app autoscaler tab
+        const appSummaryPage = new CFPage('/applications/');
+        appSummaryPage.waitForPageOrChildPage();
+        appSummaryPage.header.waitForTitleText(testAppName);
+        browser.wait(ApplicationPageAutoscalerTab.detect()
+          .then(appAutoscaler => {
+            expect(appAutoscaler.cardDefault.getDefaultMaxText()).toBe('18');
+          }), 10000, 'Failed to wait for App Autoscaler Tab after edit policy'
+        );
+      });
+    });
+
+    describe('From autoscaler trigger table', () => {
+      beforeAll(() => {
+        const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
+        appAutoscaler.goToAutoscalerTab();
+        createPolicy = appAutoscaler.tableTriggers.clickEditPolicy();
+      });
+
+      it('Check edit steps', () => {
+        expect(createPolicy.header.getTitleText()).toBe('Edit AutoScaler Policy: ' + testAppName);
+        createPolicy.stepper.getStepNames().then(steps => {
+          expect(steps.length).toBe(4);
+          expect(steps[1]).toBe('Scaling Rules');
+        });
+      });
+
+      it('Should pass DefaultInstanceLimits Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass ScalingRules Step', () => {
+        createPolicy.stepper.clickAddButton();
+        createPolicy.stepper.clickDoneButton();
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass RecurringSchedules Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass SpecificDates Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should go to App Autoscaler Tab', () => {
+        e2e.sleep(1000);
+        e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
+        // Should be app autoscaler tab
+        const appSummaryPage = new CFPage('/applications/');
+        appSummaryPage.waitForPageOrChildPage();
+        appSummaryPage.header.waitForTitleText(testAppName);
+        browser.wait(ApplicationPageAutoscalerTab.detect()
+          .then(appAutoscaler => {
+            expect(appAutoscaler.tableTriggers.getTableRowsCount()).toBe(3);
+            expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 0)).toBe('memoryused');
+            expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 1)).toBe('<= 10 for 120 secs.');
+            expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 2)).toBe('-1 instances');
+          }), 10000, 'Failed to wait for App Autoscaler Tab after edit policy'
+        );
+      });
+    });
+
+    describe('From autoscaler schedule table', () => {
+      beforeAll(() => {
+        const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
+        appAutoscaler.goToAutoscalerTab();
+        createPolicy = appAutoscaler.tableTriggers.clickEditPolicy();
+      });
+
+      it('Check edit steps', () => {
+        expect(createPolicy.header.getTitleText()).toBe('Edit AutoScaler Policy: ' + testAppName);
+        createPolicy.stepper.getStepNames().then(steps => {
+          expect(steps.length).toBe(4);
+          expect(steps[2]).toBe('Recurring Schedules');
+          expect(steps[3]).toBe('Specific Dates');
+        });
+      });
+
+      it('Should pass DefaultInstanceLimits Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass ScalingRules Step', () => {
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass RecurringSchedules Step', () => {
+        createPolicy.stepper.clickDeleteButton(0);
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should pass SpecificDates Step', () => {
+        createPolicy.stepper.clickDeleteButton(0);
+        expect(createPolicy.stepper.canNext()).toBeTruthy();
+        createPolicy.stepper.next();
+      });
+
+      it('Should go to App Autoscaler Tab', () => {
+        e2e.sleep(1000);
+        e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
+        // Should be app autoscaler tab
+        const appSummaryPage = new CFPage('/applications/');
+        appSummaryPage.waitForPageOrChildPage();
+        appSummaryPage.header.waitForTitleText(testAppName);
+        browser.wait(ApplicationPageAutoscalerTab.detect()
+          .then(appAutoscaler => {
+            expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(0);
+            expect(appAutoscaler.tableSchedules.getEmptyRecurringTableWarningText()).toBe('No recurring schedule.');
+            expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(0);
+            expect(appAutoscaler.tableSchedules.getEmptySpecificTableWarningText()).toBe('No specific date schedule.');
+          }), 10000, 'Failed to wait for App Autoscaler Tab after edit policy'
+        );
+      });
+    });
+
   });
 
   afterAll(() => applicationE2eHelper.deleteApplication(null, { appName: testAppName }));
