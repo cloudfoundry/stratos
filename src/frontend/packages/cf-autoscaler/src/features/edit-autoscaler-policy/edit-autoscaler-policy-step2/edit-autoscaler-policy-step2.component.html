@@ -10,8 +10,9 @@
           </mat-card-header>
           <mat-card-content class="autoscaler-policy-edit-trigger-item">
             <div *ngIf="editIndex!=index" class="autoscaler-policy-edit-trigger-item-desc">
-              If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}} for {{rule.breach_duration_secs}}
-              seconds, then {{rule.adjustment}} instances. Cooldown: {{rule.cool_down_secs}} seconds.
+              If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}} {{getMetricUnit(rule.metric_type)}}
+              for {{rule.breach_duration_secs}} seconds, then {{rule.adjustment}} instances. Cooldown:
+              {{rule.cool_down_secs}} seconds.
             </div>
             <div *ngIf="editIndex==index">
               <form [formGroup]="editTriggerForm" validate>
@@ -33,7 +34,7 @@
                 <mat-form-field>
                   <input matInput placeholder="Threshold" type="number" formControlName="threshold" required>
                 </mat-form-field>
-                for
+                {{getMetricUnit(rule.metric_type)}} for
                 <mat-form-field>
                   <input matInput placeholder="Breach Duration" type="number" formControlName="breach_duration_secs">
                 </mat-form-field>

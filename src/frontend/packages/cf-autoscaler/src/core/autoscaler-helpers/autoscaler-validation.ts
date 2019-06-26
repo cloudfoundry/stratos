@@ -110,6 +110,8 @@ export function getThresholdMin(policyTriggers: AppScalingRule[], metricType: st
       if (triggerIndex !== index && trigger.metric_type === metricType &&
         AutoscalerConstants.LowerOperators.indexOf(trigger.operator) >= 0) {
         return Math.max(trigger.threshold + 1, thresholdMin);
+      } else {
+        return thresholdMin;
       }
     }, 1);
   } else {
@@ -123,6 +125,8 @@ export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: st
       if (triggerIndex !== index && trigger.metric_type === metricType &&
         AutoscalerConstants.UpperOperators.indexOf(trigger.operator) >= 0) {
         return Math.min(trigger.threshold - 1, thresholdMax);
+      } else {
+        return thresholdMax;
       }
     }, Number.MAX_VALUE);
   } else {

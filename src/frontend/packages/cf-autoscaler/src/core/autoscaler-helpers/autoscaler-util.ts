@@ -88,6 +88,14 @@ export class AutoscalerConstants {
     }
   };
 
+  public static getMetricUnit(metricType: string) {
+    if (AutoscalerConstants.metricMap[metricType]) {
+      return AutoscalerConstants.metricMap[metricType].unit_internal;
+    } else {
+      return '';
+    }
+  }
+
   public static createMetricId(appGuid: string, metricType: string): string {
     return appGuid + ':' + metricType;
   }

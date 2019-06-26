@@ -326,4 +326,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.paramsHistory['end-time'] = (new Date()).getTime().toString() + '000000';
     this.store.dispatch(this.scalingHistoryAction);
   }
+
+  getMetricUnit(metricType: string) {
+    return AutoscalerConstants.getMetricUnit(metricType);
+  }
+
 }

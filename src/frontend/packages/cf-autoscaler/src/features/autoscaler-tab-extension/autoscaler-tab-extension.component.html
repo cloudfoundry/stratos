@@ -98,7 +98,8 @@
                   </ng-container>
                   <ng-container matColumnDef="condition">
                     <th mat-header-cell *matHeaderCellDef> Condition </th>
-                    <td mat-cell *matCellDef="let element"> {{element.operator}} {{element.threshold}} for
+                    <td mat-cell *matCellDef="let element">
+                      {{element.operator}}{{element.threshold}}{{getMetricUnit(element.metric_type)}} for
                       {{element.breach_duration_secs}} secs. </td>
                   </ng-container>
                   <ng-container matColumnDef="action">
@@ -167,7 +168,7 @@
                   <ng-container matColumnDef="effect">
                     <th mat-header-cell *matHeaderCellDef> Effective Duration </th>
                     <td mat-cell *matCellDef="let element"> {{ element.start_date? element.start_date + ' ~ ' +
-                          element.end_date : 'Aways'}}</td>
+                          element.end_date : 'Always'}}</td>
                   </ng-container>
                   <ng-container matColumnDef="repeat">
                     <th mat-header-cell *matHeaderCellDef> Repeats On </th>
