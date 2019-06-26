@@ -1,0 +1,6 @@
+<button mat-icon-button (click)="toggle()" [matTooltip]="pollEnabled ? 'Polling Enabled' : 'Polling Disabled'">
+  <mat-icon *ngIf="pollEnabled else noPoll" class="poll-icon" [ngClass]="{'poll-icon--spin': isPolling}">sync</mat-icon>
+  <ng-template #noPoll class=" poll-icon">
+    <mat-icon>sync_disabled</mat-icon>
+  </ng-template>
+</button>

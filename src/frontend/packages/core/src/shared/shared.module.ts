@@ -60,6 +60,7 @@ import {
   ServiceRecentInstancesCardComponent,
 } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
+import { CfAppPollComponent } from './components/cf-app-poll/cf-app-poll.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfOrgSpaceLinksComponent } from './components/cf-org-space-links/cf-org-space-links.component';
@@ -121,6 +122,7 @@ import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.compon
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
+import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
@@ -294,7 +296,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    CfOrgSpaceLinksComponent
+    CfOrgSpaceLinksComponent,
+    PollingIndicatorComponent,
+    CfAppPollComponent
   ],
   exports: [
     FormsModule,
@@ -406,7 +410,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
-    AppNameUniqueDirective
+    AppNameUniqueDirective,
+    PollingIndicatorComponent,
+    CfAppPollComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

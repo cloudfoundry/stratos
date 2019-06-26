@@ -30,6 +30,7 @@
         </div>
       </ng-container>
     </div>
+    <app-cf-app-poll></app-cf-app-poll>
     <a class="app-page-header__anchor" mat-icon-button [disabled]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'" href="{{applicationService.applicationUrl$ | async}}" target="_blank" matTooltip="Visit">
       <mat-icon>launch</mat-icon>
     </a>
