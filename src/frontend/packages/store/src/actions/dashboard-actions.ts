@@ -20,6 +20,8 @@ export const CLOSE_SIDE_HELP = '[Dashboard] Close side help';
 export const TIMEOUT_SESSION = '[Dashboard] Timeout Session';
 export const HYDRATE_DASHBOARD_STATE = '[Dashboard] Hydrate dashboard state';
 
+export const SET_PLUGIN_DASHBOARD_VALUE = '[Dashboard] Set Plugin Dashboard Value';
+
 export class OpenSideNav implements Action {
   constructor() { }
   type = OPEN_SIDE_NAV;
@@ -74,5 +76,10 @@ export class SetSessionTimeoutAction implements Action {
 export class HydrateDashboardStateAction implements Action {
   constructor(public dashboardState: DashboardState) { }
   type = HYDRATE_DASHBOARD_STATE;
+}
+
+export class SetPluginDashboardValue implements Action {
+  constructor(public plugin: string, public key: string, public value: any) { }
+  type = SET_PLUGIN_DASHBOARD_VALUE;
 }
 

@@ -60,7 +60,6 @@ import {
   ServiceRecentInstancesCardComponent,
 } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
-import { CfAppPollComponent } from './components/cf-app-poll/cf-app-poll.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfOrgSpaceLinksComponent } from './components/cf-org-space-links/cf-org-space-links.component';
@@ -298,7 +297,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     CfOrgSpaceLinksComponent,
     PollingIndicatorComponent,
-    CfAppPollComponent
   ],
   exports: [
     FormsModule,
@@ -412,7 +410,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective,
     PollingIndicatorComponent,
-    CfAppPollComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

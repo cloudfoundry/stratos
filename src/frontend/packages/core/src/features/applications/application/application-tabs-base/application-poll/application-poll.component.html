@@ -1,0 +1,1 @@
+<app-polling-indicator [pollEnabled]="appPollingService.isEnabled$ | async" [isPolling]="appPollingService.isPolling$ | async" (updatePollEnabled)="appPollingService.updateEnabled($event)"></app-polling-indicator>

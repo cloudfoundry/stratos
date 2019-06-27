@@ -6,7 +6,9 @@ import {
   ENABLE_SIDE_NAV_MOBILE_MODE,
   OPEN_SIDE_NAV,
   SET_HEADER_EVENT,
+  SET_PLUGIN_DASHBOARD_VALUE,
   SetHeaderEvent,
+  SetPluginDashboardValue,
   SHOW_SIDE_HELP,
   TOGGLE_HEADER_EVENT,
   TOGGLE_SIDE_NAV,
@@ -27,6 +29,9 @@ export interface DashboardState {
   headerEventMinimized: boolean;
   sideHelpOpen: boolean;
   sideHelpDocument: string;
+  plugin: {
+    [pluginId: string]: { [key: string]: any };
+  };
 }
 
 export const defaultDashboardState: DashboardState = {
@@ -37,7 +42,8 @@ export const defaultDashboardState: DashboardState = {
   sideNavPinned: true,
   headerEventMinimized: false,
   sideHelpOpen: false,
-  sideHelpDocument: null
+  sideHelpDocument: null,
+  plugin: {}
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action) {
@@ -81,10 +87,23 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
         timeoutSession: timeoutSessionAction.timeoutSession
       };
     case HYDRATE_DASHBOARD_STATE:
+      console.log('HYDRATE_DASHBOARD_STATE');
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
       return {
         ...state,
         ...hydrateDashboardStateAction.dashboardState
+      };
+    case SET_PLUGIN_DASHBOARD_VALUE:
+      const setPluginDashboardValue = action as SetPluginDashboardValue;
+      return {
+        ...state,
+        plugin: {
+          ...state.plugin,
+          [setPluginDashboardValue.plugin]: {
+            ...state.plugin[setPluginDashboardValue.plugin],
+            [setPluginDashboardValue.key]: setPluginDashboardValue.value
+          }
+        }
       };
     default:
       return state;

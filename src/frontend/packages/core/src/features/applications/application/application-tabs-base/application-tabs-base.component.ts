@@ -239,8 +239,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.appPollingService.start();
-
     this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
@@ -284,6 +282,5 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     safeUnsubscribe(this.appSub$, this.stratosProjectSub);
-    this.appPollingService.stop();
   }
 }

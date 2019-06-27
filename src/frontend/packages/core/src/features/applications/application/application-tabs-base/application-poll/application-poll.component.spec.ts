@@ -1,15 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CfAppPollComponent } from './cf-app-poll.component';
+import { ApplicationPollComponent } from './application-poll.component';
 
 
-describe('CfAppPollComponent', () => {
-  let component: CfAppPollComponent;
-  let fixture: ComponentFixture<CfAppPollComponent>;
+
+describe('ApplicationPollComponent', () => {
+  let component: ApplicationPollComponent;
+  let fixture: ComponentFixture<ApplicationPollComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfAppPollComponent]
+      declarations: [ApplicationPollComponent]
     })
       .compileComponents();
   }));
