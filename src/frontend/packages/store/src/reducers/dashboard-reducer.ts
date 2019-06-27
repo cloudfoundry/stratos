@@ -87,7 +87,6 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
         timeoutSession: timeoutSessionAction.timeoutSession
       };
     case HYDRATE_DASHBOARD_STATE:
-      console.log('HYDRATE_DASHBOARD_STATE');
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
       return {
         ...state,
