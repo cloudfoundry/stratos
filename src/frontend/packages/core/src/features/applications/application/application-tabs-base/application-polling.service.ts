@@ -60,7 +60,7 @@ export class ApplicationPollingService {
     }
   }
 
-  private start() {
+  public start() {
     if (this.pollingSub && !this.pollingSub.closed) {
       return;
     }
@@ -82,7 +82,7 @@ export class ApplicationPollingService {
     });
   }
 
-  private stop() {
+  public stop() {
     safeUnsubscribe(this.pollingSub);
   }
 }

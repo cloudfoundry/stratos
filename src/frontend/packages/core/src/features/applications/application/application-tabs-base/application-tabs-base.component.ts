@@ -282,5 +282,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     safeUnsubscribe(this.appSub$, this.stratosProjectSub);
+    this.appPollingService.stop();
   }
 }
