@@ -1,14 +1,18 @@
-import { ActionOrchestrator, OrchestratedActionBuilder } from '../action-orchestrator/action-orchestrator';
+import { ActionOrchestrator, OrchestratedActionBuilder, OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
 import { Action } from '@ngrx/store';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../../../store/src/types/request.types';
 type ActionDispatcher = (action: Action) => void;
-export class EntityActionDispatcher {
+export class EntityActionDispatcher<
+  T extends OrchestratedActionBuilder<Y, A> = OrchestratedActionBuilder<any[], any>,
+  Y extends any[] = any[],
+  A extends IRequestAction | PaginatedAction = IRequestAction | PaginatedAction
+  > {
   constructor(
     private actionDispatcher: ActionDispatcher,
-    private actionBuilder?: OrchestratedActionBuilder<any[], IRequestAction | PaginatedAction>
+    private actionBuilder?: T
   ) { }
-  public dispatch(...args: any[]) {
+  public dispatch(...args: Y) {
     if (this.actionBuilder) {
       const action = this.actionBuilder(...args);
       this.actionDispatcher(action);
@@ -17,11 +21,11 @@ export class EntityActionDispatcher {
     return false;
   }
 }
-export class EntityActionDispatcherManager {
-  constructor(private actionDispatcher: (action: Action) => void, private actionOrchestrator: ActionOrchestrator) { }
+export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
+  constructor(private actionDispatcher: (action: Action) => void, private actionOrchestrator: ActionOrchestrator<T>) { }
 
-  public getActionDispatcher(actionType: string) {
-    const actionBuilder = this.actionOrchestrator.getActionBuilder(actionType);
+  public getActionDispatcher(actionType: keyof T) {
+    const actionBuilder = this.actionOrchestrator.getActionBuilder('get');
     return new EntityActionDispatcher(
       this.actionDispatcher,
       actionBuilder
@@ -48,7 +52,7 @@ export class EntityActionDispatcherManager {
     return this.getActionDispatcher('getAll').dispatch();
   }
 
-  public dispatchAction(actionType: string, ...args: any[]) {
+  public dispatchAction(actionType: keyof T, ...args: any[]) {
     return this.getActionDispatcher(actionType).dispatch(...args);
   }
 }

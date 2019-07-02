@@ -24,6 +24,7 @@ describe('ActionDispatcher', () => {
     const actionOrchestrator = new ActionOrchestrator('Custom', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
     // By getting action dispatcher
+    const dipatcher = entityActionDispatcher.getActionDispatcher('custom');
     expect(entityActionDispatcher.getActionDispatcher('custom').dispatch(data)).toBe(true);
     expect(spy).toHaveBeenCalledWith(data);
     // By dispatching action directly

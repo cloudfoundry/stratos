@@ -13,9 +13,10 @@ import {
 import { IApp } from '../../../core/src/core/cf-api.types';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
 
-export class ApplicationActionBuilder extends OrchestratedActionBuilders {
+export class ApplicationActionBuilder implements OrchestratedActionBuilders {
+  [actionType: string]: import("../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator").OrchestratedActionBuilder<any, import("../../../store/src/types/request.types").IRequestAction | import("../../../store/src/types/pagination.types").PaginatedAction>;
   public get = (
-    guid: string,
+    guid,
     endpointGuid: string,
     includeRelations = [],
     populateMissing = true

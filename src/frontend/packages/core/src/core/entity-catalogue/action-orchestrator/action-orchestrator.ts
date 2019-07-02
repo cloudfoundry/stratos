@@ -8,32 +8,32 @@ export type BaseOrchestratedActionBuilderTypes = 'get' | 'delete' | 'update' | '
 // A function that returns a ICFAction
 // export type OrchestratedActionBuilder<T extends any[], Y extends IRequestAction | PaginatedAction> = (...args: T) => Y;
 export type OrchestratedActionBuilder<
-  T extends Record<keyof T, any>,
+  T extends any[],
   Y extends IRequestAction | PaginatedAction
-  > = (...args: T[keyof T]) => Y;
+  > = (...args: T) => Y;
 
 // A list of functions that can be used get interface with the entity
-export class OrchestratedActionBuilders {
-  get?: (guid: string, endpointGuid: string, ...args: any[]) => IRequestAction;
-  delete?: (guid: string, endpointGuid: string, ...args: any[]) => IRequestAction;
-  update?: (guid: string, endpointGuid: string, ...args: any[]) => IRequestAction;
-  create?: (endpointGuid: string, ...args: any[]) => IRequestAction;
-  getAll?: (paginationKey: string, endpointGuid: string, ...args: any[]) => PaginatedAction;
+export interface OrchestratedActionBuilders {
+  get?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
+  delete?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
+  update?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
+  create?(endpointGuid: string, ...args: any[]): IRequestAction;
+  getAll?(paginationKey: string, endpointGuid: string, ...args: any[]): PaginatedAction;
   [actionType: string]: OrchestratedActionBuilder<any, IRequestAction | PaginatedAction>;
 }
 
-export class ActionOrchestrator {
+export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   public getEntityActionDispatcher(actionDispatcher: (action: Action) => void) {
-    return new EntityActionDispatcherManager(actionDispatcher, this);
+    return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
 
-  public getActionBuilder(actionType: BaseOrchestratedActionBuilderTypes) {
+  public getActionBuilder(actionType: keyof T) {
     return this.actionBuilders[actionType];
   }
 
-  public hasActionBuilder(actionType: BaseOrchestratedActionBuilderTypes) {
+  public hasActionBuilder(actionType: keyof T) {
     return !!this.actionBuilders[actionType];
   }
 
-  constructor(public entityKey: string, private actionBuilders: OrchestratedActionBuilders = {}) { }
+  constructor(public entityKey: string, private actionBuilders: T = {} as T) { }
 }
