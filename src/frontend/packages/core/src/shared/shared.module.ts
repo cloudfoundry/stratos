@@ -130,6 +130,7 @@ import { ServiceIconComponent } from './components/service-icon/service-icon.com
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
+import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import {
   StackedInputActionComponent,
@@ -296,7 +297,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    CfOrgSpaceLinksComponent
+    CfOrgSpaceLinksComponent,
+    SnackBarReturnComponent
   ],
   exports: [
     FormsModule,
@@ -409,12 +411,13 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
-    AppNameUniqueDirective
+    AppNameUniqueDirective,
   ],
   entryComponents: [
     DialogConfirmComponent,
     EnvVarViewComponent,
     NoServicePlansComponent,
+    SnackBarReturnComponent
   ],
   providers: [
     ListConfig,

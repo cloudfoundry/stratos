@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
 export const SHOW_SNACK_BAR = '[SnackBar] Show';
-export const SHOWN_RETURN_SNACK_BAR = '[SnackBar] Show returns';
+export const SHOW_RETURN_SNACK_BAR = '[SnackBar] Show returns';
 export const HIDE_SNACK_BAR = '[SnackBar] Hide';
 
 export class ShowSnackBar implements Action {
@@ -16,10 +16,11 @@ export class ShowSnackBar implements Action {
 export class ShowReturnSnackBar implements Action {
   constructor(
     public message: string,
-    public returnRouterUrl: string
+    public returnRouterUrl: string,
+    public returnLabel: string
   ) {
   }
-  type = SHOWN_RETURN_SNACK_BAR;
+  type = SHOW_RETURN_SNACK_BAR;
 }
 
 export class HideSnackBar implements Action {
