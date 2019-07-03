@@ -3,16 +3,16 @@ import { Action } from '@ngrx/store';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../../../store/src/types/request.types';
 type ActionDispatcher = (action: Action) => void;
+
 export class EntityActionDispatcher<
-  T extends OrchestratedActionBuilder<Y, A> = OrchestratedActionBuilder<any[], any>,
-  Y extends any[] = any[],
-  A extends IRequestAction | PaginatedAction = IRequestAction | PaginatedAction
+  T extends OrchestratedActionBuilder<any[], IRequestAction | PaginatedAction> =
+  OrchestratedActionBuilder<any[], IRequestAction | PaginatedAction>,
   > {
   constructor(
     private actionDispatcher: ActionDispatcher,
     private actionBuilder?: T
   ) { }
-  public dispatch(...args: Y) {
+  public dispatch(...args: Parameters<T>) {
     if (this.actionBuilder) {
       const action = this.actionBuilder(...args);
       this.actionDispatcher(action);
@@ -24,35 +24,39 @@ export class EntityActionDispatcher<
 export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   constructor(private actionDispatcher: (action: Action) => void, private actionOrchestrator: ActionOrchestrator<T>) { }
 
-  public getActionDispatcher(actionType: keyof T) {
-    const actionBuilder = this.actionOrchestrator.getActionBuilder('get');
-    return new EntityActionDispatcher(
+  public getActionDispatcher<Y extends keyof T>(actionType: Y) {
+    const actionBuilder = this.getActionBuilder(actionType);
+    return new EntityActionDispatcher<T[Y]>(
       this.actionDispatcher,
       actionBuilder
     );
   }
 
-  public dispatchGet(guid: string) {
-    return this.getActionDispatcher('get').dispatch(guid);
+  public getActionBuilder<Y extends keyof T>(actionType: Y) {
+    return this.actionOrchestrator.getActionBuilder(actionType) as T[Y];
   }
 
-  public dispatchDelete(guid: string) {
-    return this.getActionDispatcher('delete').dispatch(guid);
+  public dispatchGet(...args: Parameters<T['get']>) {
+    return this.getActionDispatcher('get').dispatch(...args);
   }
 
-  public dispatchUpdate(guid: string) {
-    return this.getActionDispatcher('update').dispatch(guid);
+  public dispatchDelete(...args: Parameters<T['delete']>) {
+    return this.getActionDispatcher('delete').dispatch(...args);
   }
 
-  public dispatchCreate(...args: any[]) {
+  public dispatchUpdate(...args: Parameters<T['update']>) {
+    return this.getActionDispatcher('update').dispatch(...args);
+  }
+
+  public dispatchCreate(...args: Parameters<T['create']>) {
     return this.getActionDispatcher('create').dispatch(...args);
   }
 
-  public dispatchGetAll() {
-    return this.getActionDispatcher('getAll').dispatch();
+  public dispatchGetAll(...args: Parameters<T['getAll']>) {
+    return this.getActionDispatcher('getAll').dispatch(...args);
   }
 
-  public dispatchAction(actionType: keyof T, ...args: any[]) {
+  public dispatchAction<K extends keyof T>(actionType: K, ...args: Parameters<T[K]>) {
     return this.getActionDispatcher(actionType).dispatch(...args);
   }
 }

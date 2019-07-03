@@ -14,7 +14,7 @@ const fakeActions = [
   'myMadeUpAction2'
 ];
 
-function assertActions(actionOrchestrator: ActionOrchestrator, actionsNotToHave: string[], actionsToHave?: string[]) {
+function assertActions(actionOrchestrator: ActionOrchestrator<any>, actionsNotToHave: string[], actionsToHave?: string[]) {
   actionsNotToHave.forEach(action => expect(actionOrchestrator.hasActionBuilder(action)).toBe(false));
   if (actionsToHave) {
     actionsToHave.forEach(action => expect(actionOrchestrator.hasActionBuilder(action)).toBe(true));
@@ -25,7 +25,7 @@ export function getBaseActionKeys() {
   return [...BASE_ACTIONS];
 }
 
-export function hasActions(actionOrchestrator: ActionOrchestrator, expectToHave?: string[]) {
+export function hasActions<T extends ActionOrchestrator<any>>(actionOrchestrator: T, expectToHave?: string[]) {
   const baseActions = getBaseActionKeys();
   const baseActionsToNotHave = expectToHave ? getBaseActionKeys().reduce((actions, action) => {
     if (!expectToHave.find((expectAction) => expectAction === action)) {
