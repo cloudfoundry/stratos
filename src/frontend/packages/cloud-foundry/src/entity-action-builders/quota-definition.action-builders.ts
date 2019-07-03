@@ -6,31 +6,30 @@ import {
   DisassociateSpaceQuota
 } from '../actions/quota-definitions.actions';
 
-export class QuotaDefinitionActionBuilder extends OrchestratedActionBuilders {
-  getAll = (
+export const quotaDefinitionActionBuilder = {
+  getAll: (
     paginationKey: string,
     endpointGuid: string,
     includeRelations = [],
     populateMissing = false
-  ) => new GetQuotaDefinitions(paginationKey, endpointGuid, includeRelations, populateMissing);
-  associateSpaceQuota = (
+  ) => new GetQuotaDefinitions(paginationKey, endpointGuid, includeRelations, populateMissing),
+  associateSpaceQuota: (
     spaceGuid: string,
     endpointGuid: string,
     spaceQuotaGuid: string
-  ) => new AssociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid);
-  disassociateSpaceQuota = (
+  ) => new AssociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
+  disassociateSpaceQuota: (
     spaceGuid: string,
     endpointGuid: string,
     spaceQuotaGuid: string
   ) => new DisassociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
-  getOrganizationSpaceQuotaDefinitions = (
+  getOrganizationSpaceQuotaDefinitions: (
     paginationKey: string,
     orgGuid: string,
     endpointGuid: string,
     includeRelations: string[] = [],
     populateMissing = true
   ) => new GetOrganizationSpaceQuotaDefinitions(paginationKey, orgGuid, endpointGuid, includeRelations, populateMissing)
-}
-export const quotaDefinitionActionBuilder = new QuotaDefinitionActionBuilder();
+} as OrchestratedActionBuilders;
 
 

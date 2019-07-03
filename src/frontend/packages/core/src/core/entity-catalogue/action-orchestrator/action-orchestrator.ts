@@ -6,7 +6,6 @@ import { Action } from '@ngrx/store';
 export type BaseOrchestratedActionBuilderTypes = 'get' | 'delete' | 'update' | 'create' | 'getAll' | string;
 
 // A function that returns a ICFAction
-// export type OrchestratedActionBuilder<T extends any[], Y extends IRequestAction | PaginatedAction> = (...args: T) => Y;
 export type OrchestratedActionBuilder<
   T extends any[] = any[],
   Y extends IRequestAction | PaginatedAction = IRequestAction
@@ -15,14 +14,18 @@ export type OrchestratedActionBuilder<
 // A list of functions that can be used get interface with the entity
 export interface OrchestratedActionBuilders {
   get?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
-  delete?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
+  remove?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
   update?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
   create?(endpointGuid: string, ...args: any[]): IRequestAction;
   getAll?(paginationKey: string, endpointGuid: string, ...args: any[]): PaginatedAction;
   [actionType: string]: OrchestratedActionBuilder;
 }
 
-export class ActionOrchestrator<T extends OrchestratedActionBuilders> {
+export class OrchestratedActionBuildersClass implements OrchestratedActionBuilders {
+  [actionType: string]: OrchestratedActionBuilder<any[], IRequestAction>;
+}
+
+export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   public getEntityActionDispatcher(actionDispatcher: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }

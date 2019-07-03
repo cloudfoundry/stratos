@@ -61,7 +61,7 @@ describe('ActionDispatcher', () => {
     const guid = 'guid';
     const endpointGuid = 'guid';
     const actionBuilders = {
-      delete: getActionBuilder
+      remove: getActionBuilder
     } as OrchestratedActionBuilders;
     const spy = spyOn(actionBuilders, 'delete');
     const actionOrchestrator = new ActionOrchestrator('delete', actionBuilders);
