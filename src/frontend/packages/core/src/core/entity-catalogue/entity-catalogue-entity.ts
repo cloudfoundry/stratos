@@ -99,9 +99,9 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
 
 export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {
     public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
+    public reducers?;
     constructor(
         entity: IStratosEntityDefinition,
-        reducers?,
         builder?: IStratosEntityBuilder<T, Y>,
     ) {
         super(entity, builder);
