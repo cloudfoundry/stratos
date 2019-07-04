@@ -64,7 +64,8 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	for rows.Next() {
 		var (
 			uaaEndpoint  string
-			authEndpoint string
+			authEndpoint sql.NullString
+			authEndpointType sql.NullString
 		)
 		rowCount++
 		if rowCount > 1 {
@@ -72,7 +73,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 		}
 
 		consoleConfig = new(interfaces.ConsoleConfig)
-		err := rows.Scan(&consoleConfig.AuthEndpointType, &uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
+		err := rows.Scan(&authEndpointType, &uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
 			&consoleConfig.ConsoleClientSecret, &consoleConfig.SkipSSLValidation, &consoleConfig.UseSSO)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan config record: %v", err)
@@ -81,8 +82,19 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 		if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 			return nil, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
 		}
-		if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint); err != nil {
-			return nil, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
+
+		if authEndpointType.Valid {
+			if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint.String); err != nil {
+				return nil, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
+			}
+		} else {
+			consoleConfig.AuthorizationEndpoint =  consoleConfig.UAAEndpoint
+		}
+
+		if authEndpointType.Valid {
+			consoleConfig.AuthEndpointType = authEndpointType.String
+		} else {
+			consoleConfig.AuthEndpointType = "remote"
 		}
 	}
 
