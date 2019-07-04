@@ -3,7 +3,6 @@ import { PaginatedAction } from '../../../../../store/src/types/pagination.types
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 import { Action } from '@ngrx/store';
 
-export type BaseOrchestratedActionBuilderTypes = 'get' | 'delete' | 'update' | 'create' | 'getAll' | string;
 
 // A function that returns a ICFAction
 export type OrchestratedActionBuilder<
@@ -11,13 +10,19 @@ export type OrchestratedActionBuilder<
   Y extends IRequestAction | PaginatedAction = IRequestAction
   > = (...args: T) => Y;
 
+
+type KnownEntityActionBuilder<T extends any[] = any[]> = (guid: string, endpointGuid: string, ...args: T) => IRequestAction;
+type CreateActionBuilder<T extends any[] = any[]> = (endpointGuid: string, ...args: T) => IRequestAction;
+// paginationKey could be optional, we could give it a default value.
+type GetAllActionBuilder<T extends any[] = any[]> = (paginationKey: string, endpointGuid: string, ...args: T) => PaginatedAction;
+
 // A list of functions that can be used get interface with the entity
 export interface OrchestratedActionBuilders {
-  get?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
-  remove?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
-  update?(guid: string, endpointGuid: string, ...args: any[]): IRequestAction;
-  create?(endpointGuid: string, ...args: any[]): IRequestAction;
-  getAll?(paginationKey: string, endpointGuid: string, ...args: any[]): PaginatedAction;
+  get?: KnownEntityActionBuilder;
+  remove?: KnownEntityActionBuilder;
+  update?: KnownEntityActionBuilder;
+  create?: CreateActionBuilder;
+  getAll?: GetAllActionBuilder;
   [actionType: string]: OrchestratedActionBuilder;
 }
 
