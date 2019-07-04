@@ -37,7 +37,9 @@
     "customize-default": "gulp customize-default",
     "customize-reset": "gulp customize-reset",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "npm run customize && gulp dev-setup"
+    "postinstall": "npm run customize && gulp dev-setup",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -80,7 +82,8 @@
     "ts-md5": "^1.2.4",
     "web-animations-js": "^2.3.1",
     "xterm": "^3.12.0",
-    "zone.js": "~0.8.26"
+    "zone.js": "~0.8.26",
+    "snyk": "^1.190.0"
   },
   "engines": {
     "node": "8.11.2"
@@ -139,5 +142,6 @@
     "tslib": "^1.9.0",
     "tslint": "~5.13.0",
     "typescript": "~3.1.6"
-  }
+  },
+  "snyk": true
 }
