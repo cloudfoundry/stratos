@@ -58,11 +58,13 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
 export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implements PaginatedAction, EntityInlineChildAction {
   parentGuid: string;
 
-  constructor(public paginationKey: string,
-              public orgGuid: string,
-              public endpointGuid: string,
-              public includeRelations: string[] = [],
-              public populateMissing = true) {
+  constructor(
+    public paginationKey: string,
+    public orgGuid: string,
+    public endpointGuid: string,
+    public includeRelations: string[] = [],
+    public populateMissing = true
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organizations/${orgGuid}/space_quota_definitions`;

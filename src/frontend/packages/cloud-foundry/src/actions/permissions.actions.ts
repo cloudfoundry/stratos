@@ -72,7 +72,7 @@ export interface IUserRelationTypes {
 export class GetUserCfRelations implements Action {
   constructor(public cfGuid: string, public type: string) { }
 }
-
+// TODO what do we do with these actions?
 export class GetUserRelations implements Action {
   public type = GET_CURRENT_USER_RELATION;
   public actions: string[];

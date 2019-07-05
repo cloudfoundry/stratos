@@ -121,23 +121,6 @@ export class UnmapRoute extends BaseRouteAction {
   updatingKey = 'unmapping';
 }
 
-export class CheckRouteExists extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string, route: NewRoute) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = 'routes';
-    this.options.method = 'post';
-    this.options.body = {
-      generate_port: true,
-      ...route
-    };
-  }
-  actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
-  entity = [cfEntityFactory(routeEntityType)];
-  entityType = routeEntityType;
-  options: RequestOptions;
-}
-
 export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {
   paginationKey: string;
   endpointType = 'cf';

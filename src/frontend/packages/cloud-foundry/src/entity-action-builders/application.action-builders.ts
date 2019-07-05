@@ -23,7 +23,7 @@ export const applicationActionBuilder = {
     populateMissing = true
   ) => new GetApplication(guid, endpointGuid, includeRelations, populateMissing),
   remove: (guid: string, endpointGuid: string) => new DeleteApplication(guid, endpointGuid),
-  create: (endpointGuid: string, guid: string, application: IApp) => new CreateNewApplication(guid, endpointGuid, application),
+  create: (id: string, endpointGuid: string, application: IApp) => new CreateNewApplication(id, endpointGuid, application),
   update: (
     guid: string,
     endpointGuid: string,

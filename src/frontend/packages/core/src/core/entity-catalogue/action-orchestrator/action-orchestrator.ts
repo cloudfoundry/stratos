@@ -12,7 +12,9 @@ export type OrchestratedActionBuilder<
 
 
 type KnownEntityActionBuilder<T extends any[] = any[]> = (guid: string, endpointGuid: string, ...args: T) => IRequestAction;
-type CreateActionBuilder<T extends any[] = any[]> = (endpointGuid: string, ...args: T) => IRequestAction;
+// createTrackingId should be unique to the thing that's being created.
+// It is used to track the status of the entity creation.
+type CreateActionBuilder<T extends any[] = any[]> = (createTrackingId: string, endpointGuid: string, ...args: T) => IRequestAction;
 // paginationKey could be optional, we could give it a default value.
 type GetAllActionBuilder<T extends any[] = any[]> = (endpointGuid: string, paginationKey: string, ...args: T) => PaginatedAction;
 
