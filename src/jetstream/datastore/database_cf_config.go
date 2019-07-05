@@ -110,7 +110,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 			}
 		}
 
-		log.Infof("Applied Cloud Foundry database service config")
+		log.Infof("Applied Cloud Foundry database service config (provider: %s)", db.DatabaseProvider)
 		return true
 	}
 	return false
