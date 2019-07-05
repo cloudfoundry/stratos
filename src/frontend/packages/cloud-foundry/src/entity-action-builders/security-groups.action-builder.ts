@@ -1,9 +1,8 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { GetAllAppEvents } from '../actions/app-event.actions';
-import { FetchDomain, FetchAllDomains } from '../actions/domains.actions';
+import { FetchDomain } from '../actions/domains.actions';
 import { GetAllSecurityGroups } from '../actions/security-groups-actions';
 
-export const domainActionBuilders = {
+export const securityGroupBuilders = {
   get: (
     guid,
     endpointGuid
@@ -12,8 +11,8 @@ export const domainActionBuilders = {
   getAll: (
     endpointGuid,
     paginationKey?,
-    flatten?: boolean,
-  ) => new GetAllSecurityGroups(endpointGuid, flatten)
+    includeRelations?: string[]
+  ) => new GetAllSecurityGroups(endpointGuid, paginationKey, includeRelations)
 } as OrchestratedActionBuilders;
 
 
