@@ -1,10 +1,11 @@
 import { by, element, ElementFinder, promise } from 'protractor';
 
 import { Component } from '../../po/component.po';
+import { PageAutoscalerEventBase } from './page-autoscaler-event-base.po';
 
 export class TableAutoscalerEvents extends Component {
 
-  constructor(locator: ElementFinder = element(by.css('.autoscaler-tile-events'))) {
+  constructor(public cfGuid: string, public appGuid: string, locator: ElementFinder = element(by.css('.autoscaler-tile-events'))) {
     super(locator);
   }
 
@@ -14,6 +15,15 @@ export class TableAutoscalerEvents extends Component {
 
   getEmptyTableWarningText(): promise.Promise<string> {
     return this.getEmptyTableWarning().getText();
+  }
+
+  private getGotoButton(): ElementFinder {
+    return this.locator.element(by.tagName('mat-card-actions')).all(by.tagName('button')).get(1);
+  }
+
+  clickGotoEventPage() {
+    this.getGotoButton().click();
+    return new PageAutoscalerEventBase(this.cfGuid, this.appGuid);
   }
 
 }

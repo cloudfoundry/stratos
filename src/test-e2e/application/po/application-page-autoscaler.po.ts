@@ -4,6 +4,7 @@ import { ApplicationBasePage } from './application-page.po';
 import { CardAppInstances } from './card-app-instances.po';
 import { CardAutoscalerStatus } from './card-autoscaler-status.po';
 import { CardAutoscalerDefault } from './card-autoscaler-default.po';
+import { CardAutoscalerMetric } from './card-autoscaler-metric';
 import { TableAutoscalerEvents } from './table-autoscaler-events.po';
 import { TableAutoscalerTriggers } from './table-autoscaler-triggers';
 import { TableAutoscalerSchedules } from './table-autoscaler-schedules';
@@ -13,6 +14,7 @@ export class ApplicationPageAutoscalerTab extends ApplicationBasePage {
   cardInstances: CardAppInstances;
   cardStatus: CardAutoscalerStatus;
   cardDefault: CardAutoscalerDefault;
+  cardMetric: CardAutoscalerMetric;
   tableEvents: TableAutoscalerEvents;
   tableTriggers: TableAutoscalerTriggers;
   tableSchedules: TableAutoscalerSchedules;
@@ -22,7 +24,8 @@ export class ApplicationPageAutoscalerTab extends ApplicationBasePage {
     this.cardStatus = new CardAutoscalerStatus(cfGuid, appGuid);
     this.cardInstances = new CardAppInstances();
     this.cardDefault = new CardAutoscalerDefault(cfGuid, appGuid);
-    this.tableEvents = new TableAutoscalerEvents();
+    this.cardMetric = new CardAutoscalerMetric(cfGuid, appGuid);
+    this.tableEvents = new TableAutoscalerEvents(cfGuid, appGuid);
     this.tableTriggers = new TableAutoscalerTriggers(cfGuid, appGuid);
     this.tableSchedules = new TableAutoscalerSchedules(cfGuid, appGuid);
   }

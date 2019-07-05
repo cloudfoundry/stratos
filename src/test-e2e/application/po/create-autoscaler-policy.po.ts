@@ -6,7 +6,7 @@ export class CreateAutoscalerPolicy extends Page {
   public stepper = new CreateAutoscalerPolicyStep();
 
   constructor(public cfGuid: string, public appGuid: string) {
-    super(`autoscaler/${cfGuid}/${appGuid}/edit-autoscaler-policy`);
+    super(`/autoscaler/${cfGuid}/${appGuid}/edit-autoscaler-policy`);
   }
 
 }
