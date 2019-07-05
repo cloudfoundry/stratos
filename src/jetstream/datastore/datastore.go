@@ -94,7 +94,7 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, nil
 	}
 
-	// Database Config validation - check requried values and the SSL Mode
+	// Database Config validation - check required values and the SSL Mode
 
 	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
 	if err != nil {
