@@ -12,11 +12,13 @@ import {
 } from '../actions/application.actions';
 import { IApp } from '../../../core/src/core/cf-api.types';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
+import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
+import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 
 export const applicationActionBuilder = {
   get: (
     guid,
-    endpointGuid: string,
+    endpointGuid,
     includeRelations = [],
     populateMissing = true
   ) => new GetApplication(guid, endpointGuid, includeRelations, populateMissing),
@@ -30,12 +32,17 @@ export const applicationActionBuilder = {
     updateEntities?: AppMetadataTypes[]
   ) => new UpdateExistingApplication(guid, endpointGuid, updatedApplication, existingApplication, updateEntities),
   getAll: (
-    paginationKey: string,
     endpointGuid: string,
+    paginationKey: string,
     includeRelations = [],
     populateMissing = false
   ) => new GetAllApplications(paginationKey, endpointGuid, includeRelations, populateMissing),
   restage: (guid: string, endpointGuid: string) => new RestageApplication(guid, endpointGuid),
-} as OrchestratedActionBuilders;
+  assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => new AssignRouteToApplication(
+    endpointGuid,
+    routeGuid,
+    applicationGuid
+  )
+} as CFOrchestratedActionBuilders;
 
 

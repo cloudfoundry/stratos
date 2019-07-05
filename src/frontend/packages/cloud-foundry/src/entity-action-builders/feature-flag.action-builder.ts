@@ -1,10 +1,9 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { GetAllAppEvents } from '../actions/app-event.actions';
+import { GetAllFeatureFlags } from '../actions/feature-flags.actions';
 
-export const applicationEventActionBuilders = {
+export const featureFlagActionBuilders = {
   getAll: (
     endpointGuid,
     paginationKey,
-    applicationGuid,
-  ) => new GetAllAppEvents(paginationKey, endpointGuid, applicationGuid)
+  ) => new GetAllFeatureFlags(endpointGuid, paginationKey)
 } as OrchestratedActionBuilders;

@@ -1,4 +1,4 @@
-import { ASSIGN_ROUTE_SUCCESS, AssociateRouteWithAppApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { BaseRouteAction, RouteEvents } from '../../../cloud-foundry/src/actions/route.actions';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
@@ -7,7 +7,7 @@ export function updateApplicationRoutesReducer() {
   return (state: APIResource, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case ASSIGN_ROUTE_SUCCESS:
-        const assignAction: AssociateRouteWithAppApplication = action.apiAction as AssociateRouteWithAppApplication;
+        const assignAction: AssignRouteToApplication = action.apiAction as AssignRouteToApplication;
         return addApplicationRoutes(state, assignAction.guid, assignAction.routeGuid);
       case RouteEvents.DELETE_SUCCESS:
       case RouteEvents.UNMAP_ROUTE_SUCCESS:

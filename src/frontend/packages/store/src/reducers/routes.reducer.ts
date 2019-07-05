@@ -1,5 +1,5 @@
 import { IAppSummary, IRoute } from '../../../core/src/core/cf-api.types';
-import { ASSIGN_ROUTE_SUCCESS, AssociateRouteWithAppApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { DeleteRoute, RouteEvents, UnmapRoute } from '../../../cloud-foundry/src/actions/route.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
@@ -8,7 +8,7 @@ import { APISuccessOrFailedAction } from '../types/request.types';
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
     case ASSIGN_ROUTE_SUCCESS:
-      const mapRouteAction = action.apiAction as AssociateRouteWithAppApplication;
+      const mapRouteAction = action.apiAction as AssignRouteToApplication;
       const addAppRoute = state[mapRouteAction.routeGuid];
       return {
         ...state,

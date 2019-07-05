@@ -91,7 +91,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
   options: RequestOptions;
 }
 
-export class AssociateRouteWithAppApplication extends CFStartAction
+export class AssignRouteToApplication extends CFStartAction
   implements ICFAction {
   constructor(
     public guid: string,

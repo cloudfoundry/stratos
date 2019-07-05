@@ -16,7 +16,7 @@ describe('ActionDispatcher', () => {
   });
   it('should dispatch custom action', () => {
     interface CustomOrchestratedActionBuilders extends OrchestratedActionBuilders {
-      custom: OrchestratedActionBuilder<[string], IRequestAction>;
+      custom: (guid: string) => IRequestAction;
     }
     const actionBuilders = {
       custom: guid => getRequestAction(),
@@ -33,9 +33,10 @@ describe('ActionDispatcher', () => {
     const dipatcher2 = entityActionDispatcher.getActionDispatcher('customAarb');
     expect(entityActionDispatcher.getActionDispatcher('custom').dispatch(data)).toBe(true);
     expect(spy).toHaveBeenCalledWith(data);
+    expect(entityActionDispatcher.getActionDispatcher('customAarb').dispatch(data)).toBe(true);
     // By dispatching action directly
-    expect(entityActionDispatcher.dispatchAction('custom', data)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(data);
+    expect(entityActionDispatcher.dispatchAction('custom', data2)).toBe(true);
+    expect(spy).toHaveBeenCalledWith(data2);
   });
 
   it('should dispatch get action', () => {

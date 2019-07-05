@@ -12,7 +12,7 @@ import {
   routeEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
-import { AssociateRouteWithAppApplication } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { AssignRouteToApplication } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CreateNewApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 import { GetOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
@@ -135,7 +135,7 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
-    this.store.dispatch(new AssociateRouteWithAppApplication(appGuid, routeGuid, endpointGuid));
+    this.store.dispatch(new AssignRouteToApplication(appGuid, routeGuid, endpointGuid));
     return this.wrapObservable(this.store.select(selectCfRequestInfo(applicationEntityType, appGuid)),
       'Application and route created. Could not associated route with app');
   }

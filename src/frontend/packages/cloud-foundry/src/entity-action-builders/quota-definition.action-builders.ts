@@ -24,8 +24,8 @@ export const quotaDefinitionActionBuilder = {
     spaceQuotaGuid: string
   ) => new DisassociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
   getOrganizationSpaceQuotaDefinitions: (
-    paginationKey: string,
     orgGuid: string,
+    paginationKey: string,
     endpointGuid: string,
     includeRelations: string[] = [],
     populateMissing = true

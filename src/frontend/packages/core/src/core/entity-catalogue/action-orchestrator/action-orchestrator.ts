@@ -7,14 +7,14 @@ import { Action } from '@ngrx/store';
 // A function that returns a ICFAction
 export type OrchestratedActionBuilder<
   T extends any[] = any[],
-  Y extends IRequestAction | PaginatedAction = IRequestAction
+  Y extends Action = Action
   > = (...args: T) => Y;
 
 
 type KnownEntityActionBuilder<T extends any[] = any[]> = (guid: string, endpointGuid: string, ...args: T) => IRequestAction;
 type CreateActionBuilder<T extends any[] = any[]> = (endpointGuid: string, ...args: T) => IRequestAction;
 // paginationKey could be optional, we could give it a default value.
-type GetAllActionBuilder<T extends any[] = any[]> = (paginationKey: string, endpointGuid: string, ...args: T) => PaginatedAction;
+type GetAllActionBuilder<T extends any[] = any[]> = (endpointGuid: string, paginationKey: string, ...args: T) => PaginatedAction;
 
 // A list of functions that can be used get interface with the entity
 export interface OrchestratedActionBuilders {

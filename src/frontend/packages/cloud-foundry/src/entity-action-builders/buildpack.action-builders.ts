@@ -1,10 +1,11 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { GetAllAppEvents } from '../actions/app-event.actions';
+import { FetchAllBuildpacks } from '../actions/buildpack.action';
 
-export const applicationEventActionBuilders = {
+export const buildpackActionBuilders = {
   getAll: (
     endpointGuid,
     paginationKey,
-    applicationGuid,
-  ) => new GetAllAppEvents(paginationKey, endpointGuid, applicationGuid)
+  ) => new FetchAllBuildpacks(endpointGuid, paginationKey)
 } as OrchestratedActionBuilders;
+
+

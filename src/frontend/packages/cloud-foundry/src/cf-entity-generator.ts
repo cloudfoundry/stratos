@@ -462,8 +462,8 @@ function generateRouteEntity(endpointDefinition: IStratosEndpointDefinition) {
   const definition = {
     type: routeEntityType,
     schema: cfEntityFactory(routeEntityType),
-    label: 'Route',
-    labelPlural: 'Routes',
+    label: 'Application Route',
+    labelPlural: 'Application Routes',
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<IRoute>>(
