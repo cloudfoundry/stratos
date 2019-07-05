@@ -180,8 +180,8 @@ export class DeleteSpace extends BaseSpaceAction {
 }
 
 export class CreateSpace extends BaseSpaceAction {
-  constructor(public endpointGuid: string, orgGuid: string, createSpace: IUpdateSpace) {
-    super(`${orgGuid}-${createSpace.name}`, orgGuid, endpointGuid);
+  constructor(public endpointGuid: string, orgGuid: string, createSpace: IUpdateSpace, key = `${orgGuid}-${createSpace.name}`) {
+    super(key, orgGuid, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = `spaces`;
     this.options.method = 'post';

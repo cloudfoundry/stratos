@@ -1,6 +1,7 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAppRoutes } from '../actions/application-service-routes.actions';
 import { CreateRoute, NewRoute, DeleteRoute, UnmapRoute, GetAllRoutes } from '../actions/route.actions';
+import { GetSpaceRoutes } from '../actions/space.actions';
 
 export const routesActionBuilders = {
   create: (id, endpointGuid, route: NewRoute) => new CreateRoute(
@@ -50,5 +51,21 @@ export const routesActionBuilders = {
     endpointGuid,
     paginationKey,
     includeRelations
+  ),
+  getAllFromSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    includeRelations?: string[],
+    populateMissing?: boolean,
+    flattenPagination?: boolean
+
+  ) => new GetSpaceRoutes(
+    spaceGuid,
+    endpointGuid,
+    paginationKey,
+    includeRelations,
+    populateMissing,
+    flattenPagination
   )
 } as OrchestratedActionBuilders;

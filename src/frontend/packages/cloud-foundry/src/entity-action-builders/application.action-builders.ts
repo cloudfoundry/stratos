@@ -14,6 +14,7 @@ import { IApp } from '../../../core/src/core/cf-api.types';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
+import { GetAllAppsInSpace } from '../actions/space.actions';
 
 export const applicationActionBuilder = {
   get: (
@@ -42,6 +43,21 @@ export const applicationActionBuilder = {
     endpointGuid,
     routeGuid,
     applicationGuid
+  ),
+  getAllInSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    includeRelations?: string[],
+    populateMissing?: boolean,
+    flattenPagination?: boolean
+  ) => new GetAllAppsInSpace(
+    endpointGuid,
+    spaceGuid,
+    paginationKey,
+    includeRelations,
+    populateMissing,
+    flattenPagination
   )
 } as CFOrchestratedActionBuilders;
 

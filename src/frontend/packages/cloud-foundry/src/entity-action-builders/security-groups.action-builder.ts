@@ -10,9 +10,10 @@ export const securityGroupBuilders = {
   // TODO: This is good reason to remove pagination key
   getAll: (
     endpointGuid,
-    paginationKey?,
-    includeRelations?: string[]
-  ) => new GetAllSecurityGroups(endpointGuid, paginationKey, includeRelations)
+    paginationKey,
+    includeRelations?: string[],
+    flatten?: boolean,
+  ) => new GetAllSecurityGroups(endpointGuid, paginationKey, includeRelations, flatten)
 } as OrchestratedActionBuilders;
 
 

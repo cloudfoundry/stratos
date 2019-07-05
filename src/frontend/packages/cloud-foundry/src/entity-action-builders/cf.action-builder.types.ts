@@ -3,13 +3,13 @@ import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalo
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 
 export interface CFOrchestratedActionBuilders extends OrchestratedActionBuilders {
-  get(
+  get?(
     guid: string,
     endpointGuid: string,
     includeRelations?: string[],
     populateMissing?: boolean
   ): IRequestAction;
-  getAll(
+  getAll?(
     paginationKey: string,
     endpointGuid: string,
     includeRelations?: string[],
