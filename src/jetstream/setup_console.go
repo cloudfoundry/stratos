@@ -13,9 +13,11 @@ import (
 
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
 type setupMiddleware struct {
@@ -183,6 +185,32 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, errors.New("SKIP_SSL_VALIDATION not found")
 	}
 
+	authEndpointTypeVal, authEndpointTypeIsSet := p.Env().Lookup("AUTH_ENDPOINT_TYPE")
+	if !authEndpointTypeIsSet {
+		//return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
+		//Until front-end support is implemented, default to "remote" if AUTH_ENDPOINT_TYPE is not set
+		authEndpointTypeVal = string(interfaces.Remote)
+	}
+	val, endpointTypeSupported := interfaces.AuthEndpointTypes[authEndpointTypeVal]; 
+	if endpointTypeSupported {
+		if val == interfaces.Local {
+			consoleConfig.AuthEndpointType = string(val)
+			//Auth endpoint type is set to "local", so load the local user config
+			err = initialiseLocalUsersConfiguration(consoleConfig, p)
+			if err != nil {
+				return consoleConfig, err
+			}
+		} else if val == interfaces.Remote {
+			//Auth endpoint type is set to "remote", so need to load local user config vars
+			consoleConfig.AuthEndpointType = string(val)
+		} else {
+			//Auth endpoint type has been set to an invalid value
+			return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE must be set to either \"local\" or \"remote\"")
+		}
+	} else {
+		return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
+	}
+
 	if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 		return consoleConfig, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
 	}
@@ -203,6 +231,52 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, fmt.Errorf("Failed to save config due to:  %v", err)
 	}
 	return consoleConfig, nil
+}
+
+func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) (error) {
+
+	var err error
+	localUserName, found := p.Env().Lookup("LOCAL_USER")
+	if !found {
+		err = errors.New("LOCAL_USER not found")
+	}
+	localUserPassword, found := p.Env().Lookup("LOCAL_USER_PASSWORD")
+	if !found {
+		err = errors.New("LOCAL_USER_PASSWORD not found")
+	}
+	localUserScope, found := p.Env().Lookup("LOCAL_USER_SCOPE")
+	if !found {
+		err = errors.New("LOCAL_USER_SCOPE not found")
+	}
+	if err != nil {
+		return err
+	}
+	
+	consoleConfig.LocalUserScope = localUserScope
+	consoleConfig.LocalUser = localUserName
+	consoleConfig.LocalUserPassword = localUserPassword
+
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
+		return err
+	}
+	userGUID := uuid.NewV4().String()
+	password := localUserPassword
+	passwordHash, err := HashPassword(password)
+	if err != nil {
+		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
+		return err
+	}
+	scope    := localUserScope
+	email    := ""
+	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username:localUserName, Email: email, Scope: scope}
+	err = localUsersRepo.AddLocalUser(user)
+	if err != nil {
+		log.Errorf("Unable to add Stratos local user due to: %+v", err)
+	}
+
+	return err
 }
 
 func (p *portalProxy) SaveConsoleConfig(consoleConfig *interfaces.ConsoleConfig, consoleRepoInterface interface{}) error {

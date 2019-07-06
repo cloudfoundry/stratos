@@ -1,6 +1,7 @@
 package main
 
 import (
+
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -20,6 +21,9 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // LoginHookFunc - function that can be hooked into a successful user login
@@ -46,6 +50,8 @@ const XSRFTokenCookie = "XSRF-TOKEN"
 // XSRFTokenSessionName - XSRF Token Session name
 const XSRFTokenSessionName = "xsrf_token"
 
+//LogoutResponse is sent upon user logout.
+//It contains a flag to indicate whether or not the user was signed in with SSO
 type LogoutResponse struct {
 	IsSSO bool `json:"isSSO"`
 }
@@ -192,6 +198,15 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
+	
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"UAA Login is not enabled",
+			"UAA Login is not enabled")
+		return err
+	}
+
 	resp, err := p.doLoginToUAA(c)
 	if err != nil {
 		return err
@@ -268,6 +283,118 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 	return resp, nil
 }
 
+func (p *portalProxy) localLogin(c echo.Context) error {
+	log.Debug("localLogin")
+
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"Local Login is not enabled",
+			"Local Login is not enabled")
+		return err
+	}
+
+	//Perform the login and fetch session values if successful
+	userGUID, username, err := p.doLocalLogin(c)
+	if err != nil {
+		//Login failed, return response.
+		errMessage := err.Error()
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			errMessage,
+			"Login failed: %s: %v", errMessage, err)
+		return err
+	}
+
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = userGUID
+
+	// Ensure that login disregards cookies from the request
+	req := c.Request()
+	req.Header.Set("Cookie", "")
+	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return err
+	}
+
+	//Makes sure the client gets the right session expiry time
+	if err = p.handleSessionExpiryHeader(c); err != nil {
+		return err
+	}
+
+	resp := &interfaces.LoginRes{
+		Account:     username,
+		TokenExpiry: 0,
+		APIEndpoint: nil,
+		Admin:       true,
+	}
+
+	if jsonString, err := json.Marshal(resp); err == nil {
+		// Add XSRF Token
+		p.ensureXSRFToken(c)
+		c.Response().Header().Set("Content-Type", "application/json")
+		c.Response().Write(jsonString)
+	}
+
+	return err
+}
+
+func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
+	log.Debug("doLocalLogin")
+
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+	guid     := c.FormValue("guid")
+
+	if len(username) == 0 || len(password) == 0 || len(guid) == 0 {
+		return guid, username, errors.New("Needs username, password and guid")
+	}
+	
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return guid, username, err
+	}
+
+	var scopeOK bool
+	var hash []byte
+	var authError error
+	var localUserScope string
+	//Attempt to find the password has for the given user
+	if hash, authError = localUsersRepo.FindPasswordHash(guid); authError != nil {
+		authError = fmt.Errorf("User not found.")
+		//Check the password hash
+	} else if authError = CheckPasswordHash(password, hash); authError != nil {
+		authError = fmt.Errorf("Access Denied - Invalid username/password credentials")
+	} else {
+		//Ensure the local user has some kind of admin role configured and we check for it here
+		localUserScope, authError = localUsersRepo.FindUserScope(guid)
+		scopeOK = strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope)
+		if (authError != nil) || (!scopeOK) {
+			authError = fmt.Errorf("Access Denied - User scope invalid")
+		} else {
+			//Update the last login time here if login was successful
+			loginTime := time.Now()
+			if updateLoginTimeErr := localUsersRepo.UpdateLastLoginTime(guid, loginTime); updateLoginTimeErr != nil {
+				log.Errorf("Failed to update last login time for user: %s", guid)
+			}
+		}
+	}
+	return guid, username, authError
+}
+
+//HashPassword accepts a plaintext password string and generates a salted hash
+func HashPassword(password string) ([]byte, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return bytes, err
+}
+
+//CheckPasswordHash accepts a bcrypt salted hash and plaintext password.
+//It verifies the password against the salted hash
+func CheckPasswordHash(password string, hash []byte) error {
+	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
+	return err
+}
+
 // Start SSO flow for an Endpoint
 func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 	log.Debug("ssoLoginToCNSI")
@@ -331,10 +458,10 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 // Note, an admin user can connect an endpoint as a system endpoint to share it with others
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	log.Debug("loginToCNSI")
-	cnsiGuid := c.FormValue("cnsi_guid")
+	cnsiGUID := c.FormValue("cnsi_guid")
 	var systemSharedToken = false
 
-	if len(cnsiGuid) == 0 {
+	if len(cnsiGUID) == 0 {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
@@ -346,7 +473,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 		systemSharedToken = systemSharedValue == "true"
 	}
 
-	resp, err := p.DoLoginToCNSI(c, cnsiGuid, systemSharedToken)
+	resp, err := p.DoLoginToCNSI(c, cnsiGUID, systemSharedToken)
 	if err != nil {
 		return err
 	}
@@ -484,12 +611,12 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 			return err
 		}
 
-		uaaUrl, err := url.Parse(cnsiInfo.TokenEndpoint)
+		uaaURL, err := url.Parse(cnsiInfo.TokenEndpoint)
 		if err != nil {
 			return fmt.Errorf("invalid authorization endpoint URL %s %s", cnsiInfo.TokenEndpoint, err)
 		}
 
-		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
+		if uaaURL.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
 			uaaToken.LinkedGUID = uaaToken.TokenGUID
 			err = p.setCNSITokenRecord(theCNSIrecord.GUID, u.UserGUID, uaaToken)
 
@@ -500,13 +627,11 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 			}
 			// Return error from the login
 			return err
-		} else {
-			return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")
 		}
-	} else {
-		log.Warn("Could not find current user UAA token")
-		return err
+		return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")
 	}
+	log.Warn("Could not find current user UAA token")
+	return err
 }
 
 func santizeInfoForSystemSharedTokenUser(cnsiUser *interfaces.ConnectedUser, isSysystemShared bool) {
@@ -526,9 +651,9 @@ func (p *portalProxy) ConnectOAuth2(c echo.Context, cnsiRecord interfaces.CNSIRe
 	return &tokenRecord, nil
 }
 
-func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
+func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 
-	uaaRes, u, err := p.loginHttpBasic(c)
+	uaaRes, u, err := p.loginHTTPBasic(c)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -602,7 +727,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 		if !user.Admin {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Can not disconnect System Shared endpoint - user is not an administrator")
 		}
-		userGUID = tokens.SystemSharedUserGuid
+		userGUID = tokens.SystemSharedUserGuid	
 	}
 
 	// Clear the token
@@ -681,7 +806,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 	return uaaRes, u, nil
 }
 
-func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
+func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")
