@@ -17,7 +17,7 @@ export class FetchDomain extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `shared_domains/${guid}`;
+    this.options.url = `domains/${guid}`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }
@@ -30,7 +30,7 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string, public flattenPagination = true) {
     super();
     this.options = new RequestOptions();
-    this.options.url = 'shared_domains';
+    this.options.url = 'domains';
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
