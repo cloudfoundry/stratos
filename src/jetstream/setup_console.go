@@ -9,11 +9,10 @@ import (
 	"strconv"
 	"strings"
 
-	uuid "github.com/satori/go.uuid"
-	"github.com/labstack/echo"
-	log "github.com/sirupsen/logrus"
 	"github.com/govau/cf-common/env"
+	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -22,11 +21,11 @@ import (
 )
 
 const (
-	setupRequestRegex = "^/pp/v1/setup$"
+	setupRequestRegex       = "^/pp/v1/setup$"
 	setupUpdateRequestRegex = "^/pp/v1/setup/update$"
-	versionRequestRegex = "^/pp/v1/version$"
-	backendRequestRegex = "^/pp/v1/"
-	systemGroupName = "env"
+	versionRequestRegex     = "^/pp/v1/version$"
+	backendRequestRegex     = "^/pp/v1/"
+	systemGroupName         = "env"
 )
 
 func (p *portalProxy) setupConsole(c echo.Context) error {
@@ -206,7 +205,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 		consoleConfig.AuthEndpointType = string(interfaces.Remote)
 	}
 
-	val, endpointTypeSupported := interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType]; 
+	val, endpointTypeSupported := interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType]
 	if endpointTypeSupported {
 		if val == interfaces.Local {
 			//Auth endpoint type is set to "local", so load the local user config
@@ -235,7 +234,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 	return consoleConfig, nil
 }
 
-func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) (error) {
+func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) error {
 
 	var err error
 	localUserName, found := p.Env().Lookup("LOCAL_USER")
@@ -253,7 +252,7 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 	if err != nil {
 		return err
 	}
-	
+
 	consoleConfig.LocalUserScope = localUserScope
 	consoleConfig.LocalUser = localUserName
 	consoleConfig.LocalUserPassword = localUserPassword
@@ -270,9 +269,9 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
 		return err
 	}
-	scope    := localUserScope
-	email    := ""
-	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username:localUserName, Email: email, Scope: scope}
+	scope := localUserScope
+	email := ""
+	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: localUserName, Email: email, Scope: scope}
 	err = localUsersRepo.AddLocalUser(user)
 	if err != nil {
 		log.Errorf("Unable to add Stratos local user due to: %+v", err)

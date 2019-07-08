@@ -159,8 +159,8 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	var consoleConfig *interfaces.ConsoleConfig
 	for rows.Next() {
 		var (
-			uaaEndpoint  string
-			authndpoint sql.NullString
+			uaaEndpoint      string
+			authEndpoint     sql.NullString
 			authEndpointType sql.NullString
 		)
 		rowCount++
@@ -190,7 +190,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 			consoleConfig.AuthEndpointType = authEndpointType.String
 		} else {
 			consoleConfig.AuthEndpointType = "remote"
-		}		
+		}
 	}
 
 	return consoleConfig, nil

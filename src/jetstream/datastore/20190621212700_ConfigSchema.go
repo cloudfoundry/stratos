@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	RegisterMigration(20190521212700, "ConfigSchema", func(txn *sql.Tx, conf *goose.DBConf) error {
+	RegisterMigration(20190621212700, "ConfigSchema", func(txn *sql.Tx, conf *goose.DBConf) error {
 		configTable := "CREATE TABLE IF NOT EXISTS config ("
 		configTable += "  groupName         VARCHAR(255)              NOT NULL, "
 		configTable += "  name              VARCHAR(255)              NOT NULL, "
