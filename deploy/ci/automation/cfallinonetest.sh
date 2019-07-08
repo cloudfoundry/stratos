@@ -43,6 +43,8 @@ CONTAINER_ID=$(docker run \
 -e UAA_ENDPOINT="${UAA}" \
 -e SKIP_SSL_VALIDATION='true' \
 -e CONSOLE_ADMIN_SCOPE='cloud_controller.admin' \
+-e SMTP_HOST="${SMTP_HOST}" \
+-e SMTP_FROM_ADDRESS="${SMTP_FROM_ADDRESS}" \
 $IMAGE)
 
 # Need node modules to run the tests
