@@ -28,6 +28,7 @@ const (
 	SkipAutoRegister               = "SKIP_AUTO_REGISTER"
 	SQLiteProviderName             = "sqlite"
 	defaultSessionSecret           = "wheeee!"
+	userInviteTemplatesDirEnv = "TEMPLATES_DIR"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
@@ -125,6 +126,14 @@ func (ch *CFHosting) Init() error {
 		if ok {
 			ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
 			log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
+		}
+
+		// Set Templates directory if not set and the folder exists
+		if !ch.portalProxy.Env().IsSet(userInviteTemplatesDirEnv) {
+			if _, err := os.Stat("./templates"); !os.IsNotExist(err) {
+				log.Info("Set templates folder to ./templates")
+				os.Setenv(userInviteTemplatesDirEnv, "./templates")
+			}
 		}
 
 		// Need to run as HTTP on the port we were told to use
