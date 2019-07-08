@@ -9,9 +9,9 @@ import {
   spaceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
-import { GetOrganization } from '../../actions/organization.actions';
+import { GetOrganization } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { SetInitialParams } from '../../actions/pagination.actions';
-import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../actions/relation.actions';
+import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../../../cloud-foundry/src/actions/relation.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { CFAppState, IRequestTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';

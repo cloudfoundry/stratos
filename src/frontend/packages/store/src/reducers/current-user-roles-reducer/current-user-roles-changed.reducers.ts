@@ -1,4 +1,4 @@
-import { ChangeUserRole } from '../../actions/users.actions';
+import { ChangeUserRole } from '../../../../cloud-foundry/src/actions/users.actions';
 import { ICfRolesState, ICurrentUserRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';

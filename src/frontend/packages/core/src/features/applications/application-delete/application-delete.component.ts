@@ -11,12 +11,12 @@ import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
-import { DeleteApplication, GetApplication } from '../../../../../store/src/actions/application.actions';
-import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
+import { GetAppRoutes } from '../../../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { DeleteApplication, GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
+import { DeleteRoute } from '../../../../../cloud-foundry/src/actions/route.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
-import { DeleteUserProvidedInstance } from '../../../../../store/src/actions/user-provided-service.actions';
+import { DeleteServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
+import { DeleteUserProvidedInstance } from '../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';

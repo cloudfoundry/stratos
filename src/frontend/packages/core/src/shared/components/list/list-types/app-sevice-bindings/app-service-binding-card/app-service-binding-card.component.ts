@@ -5,8 +5,8 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { cfEntityFactory, serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceInstance } from '../../../../../../../../store/src/actions/service-instances.actions';
-import { GetUserProvidedService } from '../../../../../../../../store/src/actions/user-provided-service.actions';
+import { GetServiceInstance } from '../../../../../../../../cloud-foundry/src/actions/service-instances.actions';
+import { GetUserProvidedService } from '../../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { AppEnvVarsState } from '../../../../../../../../store/src/types/app-metadata.types';
 import {

@@ -6,7 +6,7 @@ import {
   appStatsEntityType,
   cfEntityFactory,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppStatsAction } from '../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,

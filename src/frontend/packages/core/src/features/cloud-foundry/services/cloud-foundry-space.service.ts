@@ -11,7 +11,7 @@ import {
   spaceEntityType,
   spaceQuotaEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetSpace } from '../../../../../store/src/actions/space.actions';
+import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';

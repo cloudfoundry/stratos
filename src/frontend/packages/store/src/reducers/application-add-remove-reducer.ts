@@ -1,5 +1,5 @@
 import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
-import { CREATE_SUCCESS, DELETE_SUCCESS } from '../actions/application.actions';
+import { CREATE_SUCCESS, DELETE_SUCCESS } from '../../../cloud-foundry/src/actions/application.actions';
 import { deepMergeState } from '../helpers/reducer.helper';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';

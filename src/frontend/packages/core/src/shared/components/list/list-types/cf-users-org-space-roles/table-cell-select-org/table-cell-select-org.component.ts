@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { UsersRolesSetOrg } from '../../../../../../../../store/src/actions/users-roles.actions';
+import { UsersRolesSetOrg } from '../../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { selectUsersRolesOrgGuid } from '../../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';

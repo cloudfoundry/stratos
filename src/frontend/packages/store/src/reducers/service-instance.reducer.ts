@@ -4,7 +4,7 @@ import {
   CreateServiceBinding,
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
-} from '../actions/service-bindings.actions';
+} from '../../../cloud-foundry/src/actions/service-bindings.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';

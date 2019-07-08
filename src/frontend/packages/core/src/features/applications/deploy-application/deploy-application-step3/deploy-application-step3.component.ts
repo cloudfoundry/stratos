@@ -19,10 +19,10 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
-import { DeleteDeployAppSection } from '../../../../../../store/src/actions/deploy-applications.actions';
+import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GetApplication } from '../../../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 
 @Component({
   selector: 'app-deploy-application-step3',

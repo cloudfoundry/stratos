@@ -20,13 +20,13 @@ import {
   AppMetadataTypes,
   GetAppStatsAction,
   GetAppSummaryAction,
-} from '../../../../store/src/actions/app-metadata.actions';
+} from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   GetApplication,
   UpdateApplication,
   UpdateExistingApplication,
-} from '../../../../store/src/actions/application.actions';
-import { GetSpace } from '../../../../store/src/actions/space.actions';
+} from '../../../../cloud-foundry/src/actions/application.actions';
+import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';

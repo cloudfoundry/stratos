@@ -10,9 +10,9 @@ import {
   organizationEntityType,
   spaceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllOrgUsers } from '../../../../store/src/actions/organization.actions';
-import { GetAllSpaceUsers } from '../../../../store/src/actions/space.actions';
-import { GetAllUsersAsAdmin, GetUser } from '../../../../store/src/actions/users.actions';
+import { GetAllOrgUsers } from '../../../../cloud-foundry/src/actions/organization.actions';
+import { GetAllSpaceUsers } from '../../../../cloud-foundry/src/actions/space.actions';
+import { GetAllUsersAsAdmin, GetUser } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {

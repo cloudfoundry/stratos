@@ -6,7 +6,7 @@ import { first, map } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { FetchAllServiceBindings } from '../../../../../../store/src/actions/service-bindings.actions';
+import { FetchAllServiceBindings } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,

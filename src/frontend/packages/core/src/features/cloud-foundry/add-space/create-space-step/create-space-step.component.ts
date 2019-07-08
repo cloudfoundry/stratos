@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CreateSpace } from '../../../../../../store/src/actions/space.actions';
+import { CreateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';

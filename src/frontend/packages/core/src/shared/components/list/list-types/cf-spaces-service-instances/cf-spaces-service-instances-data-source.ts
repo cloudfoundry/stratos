@@ -10,7 +10,7 @@ import {
   servicePlanEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceInstancesForSpace } from '../../../../../../../store/src/actions/space.actions';
+import { GetServiceInstancesForSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationKey,

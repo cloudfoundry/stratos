@@ -5,7 +5,7 @@ import { tap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 import { domainEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
+import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';

@@ -6,7 +6,7 @@ import {
   serviceInstancesEntityType,
   servicePlanEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServicePlansForService } from '../../../../../../../store/src/actions/service.actions';
+import { GetServicePlansForService } from '../../../../../../../cloud-foundry/src/actions/service.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationKey,

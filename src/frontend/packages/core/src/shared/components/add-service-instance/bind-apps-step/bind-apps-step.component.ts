@@ -3,7 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 
-import { SetCreateServiceInstanceApp } from '../../../../../../store/src/actions/create-service-instance.actions';
+import { SetCreateServiceInstanceApp } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../core/cf-api-svc.types';

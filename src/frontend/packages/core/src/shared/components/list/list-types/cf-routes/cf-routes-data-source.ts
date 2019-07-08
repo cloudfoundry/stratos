@@ -6,7 +6,7 @@ import { IListConfig } from '../../list.component.types';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CFAppState } from '../../../../../../../store/src/app-state';
-import { GetAllRoutes } from '../../../../../../../store/src/actions/route.actions';
+import { GetAllRoutes } from '../../../../../../../cloud-foundry/src/actions/route.actions';
 
 
 export class CfRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {

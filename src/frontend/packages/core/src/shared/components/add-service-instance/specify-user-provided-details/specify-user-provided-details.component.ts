@@ -12,11 +12,11 @@ import {
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppEnvVarsAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
-} from '../../../../../../store/src/actions/user-provided-service.actions';
+} from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';

@@ -15,7 +15,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { SetDeployCommit } from '../../../../../../store/src/actions/deploy-applications.actions';
+import { SetDeployCommit } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GitCommit } from '../../../../../../store/src/types/git.types';
 
 @Component({

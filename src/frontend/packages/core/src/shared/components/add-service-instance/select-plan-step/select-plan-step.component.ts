@@ -27,7 +27,7 @@ import {
 import {
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServicePlan,
-} from '../../../../../../store/src/actions/create-service-instance.actions';
+} from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';

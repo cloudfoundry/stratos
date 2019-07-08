@@ -10,8 +10,8 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppStatsAction } from '../../../../../../../store/src/actions/app-metadata.actions';
-import { GetAllApplications } from '../../../../../../../store/src/actions/application.actions';
+import { GetAppStatsAction } from '../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';

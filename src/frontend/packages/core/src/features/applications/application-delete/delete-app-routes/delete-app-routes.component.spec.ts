@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { applicationEntityType, cfEntityFactory } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetApplication } from '../../../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../test-framework/entity-service.helper';

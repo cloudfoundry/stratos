@@ -5,8 +5,8 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
-import { FetchBranchesForProject, FetchCommit } from '../../../../../../../../store/src/actions/deploy-applications.actions';
-import { FetchGitHubRepoInfo } from '../../../../../../../../store/src/actions/github.actions';
+import { FetchBranchesForProject, FetchCommit } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { FetchGitHubRepoInfo } from '../../../../../../../../cloud-foundry/src/actions/github.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { GitCommit, GitRepo } from '../../../../../../../../store/src/types/git.types';
 import { EntityService } from '../../../../../../core/entity-service';

@@ -6,7 +6,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { applicationEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetApplication } from '../../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { TabNavService } from '../../../../tab-nav.service';
 import {
   ApplicationServiceMock,

@@ -1,4 +1,4 @@
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../actions/application.actions';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { RequestInfoState } from './api-request-reducer/types';
 

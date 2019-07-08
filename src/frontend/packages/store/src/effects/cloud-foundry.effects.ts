@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../core/src/environments/environment.prod';
-import { GET_INFO, GetCFInfo } from '../actions/cloud-foundry.actions';
+import { GET_INFO, GetCFInfo } from '../../../cloud-foundry/src/actions/cloud-foundry.actions';
 import { NormalizedResponse } from '../types/api.types';
 import {
   StartRequestAction,

@@ -8,10 +8,10 @@ import {
   serviceInstancesEntityType,
   servicePlanVisibilityEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceInstances } from '../../../../../store/src/actions/service-instances.actions';
-import { GetServicePlanVisibilities } from '../../../../../store/src/actions/service-plan-visibility.actions';
-import { GetServicePlanServiceInstances } from '../../../../../store/src/actions/service-plan.actions';
-import { GetServiceInstancesForSpace } from '../../../../../store/src/actions/space.actions';
+import { GetServiceInstances } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
+import { GetServicePlanVisibilities } from '../../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
+import { GetServicePlanServiceInstances } from '../../../../../cloud-foundry/src/actions/service-plan.actions';
+import { GetServiceInstancesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

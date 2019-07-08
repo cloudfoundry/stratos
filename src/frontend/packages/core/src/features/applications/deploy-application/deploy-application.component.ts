@@ -7,7 +7,7 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
-import { DeleteDeployAppSection, StoreCFSettings } from '../../../../../store/src/actions/deploy-applications.actions';
+import { DeleteDeployAppSection, StoreCFSettings } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { selectApplicationSource, selectCfDetails } from '../../../../../store/src/selectors/deploy-application.selector';

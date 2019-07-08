@@ -12,7 +12,7 @@ import {
   FetchRelationAction,
   FetchRelationPaginatedAction,
   FetchRelationSingleAction,
-} from '../../actions/relation.actions';
+} from '../../../../cloud-foundry/src/actions/relation.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { GeneralEntityAppState } from '../../app-state';
 import { RequestInfoState } from '../../reducers/api-request-reducer/types';

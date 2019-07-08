@@ -19,7 +19,7 @@ import {
   getUserProvidedServiceInstanceRelations,
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
-} from '../../../../store/src/actions/user-provided-service.actions';
+} from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';

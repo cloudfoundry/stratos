@@ -23,14 +23,14 @@ import {
   GetUserCfRelations,
   GetUserRelations,
   UserRelationTypes,
-} from '../actions/permissions.actions';
+} from '../../../cloud-foundry/src/actions/permissions.actions';
 import { CFAppState } from '../app-state';
 import { BaseHttpClientFetcher, flattenPagination, IPaginationFlattener } from '../helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-
+// TODO: move these effects as they're cf effects
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 
   constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {

@@ -9,8 +9,8 @@ import {
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { UsersRolesClearUpdateState } from '../../../../../../../store/src/actions/users-roles.actions';
-import { ChangeUserRole } from '../../../../../../../store/src/actions/users.actions';
+import { UsersRolesClearUpdateState } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
+import { ChangeUserRole } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   selectUsersRoles,

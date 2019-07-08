@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { DeleteRoute, UnmapRoute } from '../../../../../../../store/src/actions/route.actions';
+import { DeleteRoute, UnmapRoute } from '../../../../../../../cloud-foundry/src/actions/route.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';

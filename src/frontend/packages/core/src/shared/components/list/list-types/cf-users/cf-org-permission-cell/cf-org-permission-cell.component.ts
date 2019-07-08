@@ -5,7 +5,7 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { RemoveUserRole } from '../../../../../../../../store/src/actions/users.actions';
+import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../../../store/src/types/user.types';

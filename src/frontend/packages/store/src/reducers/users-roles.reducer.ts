@@ -7,7 +7,7 @@ import {
   UsersRolesSetOrgRole,
   UsersRolesSetSpaceRole,
   UsersRolesSetUsers,
-} from '../actions/users-roles.actions';
+} from '../../../cloud-foundry/src/actions/users-roles.actions';
 import {
   createUserRoleInOrg,
   createUserRoleInSpace,

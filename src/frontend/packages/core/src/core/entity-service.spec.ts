@@ -4,7 +4,7 @@ import { MockBackend } from '@angular/http/testing';
 import { Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { GetApplication } from '../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralAppState } from '../../../store/src/app-state';
 import {

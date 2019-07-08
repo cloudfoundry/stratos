@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
 
 import { serviceInstancesEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceInstances } from '../../../../../../../store/src/actions/service-instances.actions';
-import { GetAllUserProvidedServices } from '../../../../../../../store/src/actions/user-provided-service.actions';
+import { GetServiceInstances } from '../../../../../../../cloud-foundry/src/actions/service-instances.actions';
+import { GetAllUserProvidedServices } from '../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,

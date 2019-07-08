@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { UpdateSpace } from '../../../../../../store/src/actions/space.actions';
+import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -13,7 +13,7 @@ import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { AssociateSpaceQuota, DisassociateSpaceQuota } from '../../../../../../store/src/actions/quota-definitions.actions';
+import { AssociateSpaceQuota, DisassociateSpaceQuota } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 
 
 @Component({

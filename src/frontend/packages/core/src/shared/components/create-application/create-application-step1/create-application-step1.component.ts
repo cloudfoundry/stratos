@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of as observableOf } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { SetCFDetails } from '../../../../../../store/src/actions/create-applications-page.actions';
+import { SetCFDetails } from '../../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   getSpacesFromOrgWithRole,
