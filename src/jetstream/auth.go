@@ -198,6 +198,15 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
+	
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"UAA Login is not enabled",
+			"UAA Login is not enabled")
+		return err
+	}
+
 	resp, err := p.doLoginToUAA(c)
 	if err != nil {
 		return err
@@ -276,6 +285,14 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 
 func (p *portalProxy) localLogin(c echo.Context) error {
 	log.Debug("localLogin")
+
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"Local Login is not enabled",
+			"Local Login is not enabled")
+		return err
+	}
 
 	//Perform the login and fetch session values if successful
 	userGUID, username, err := p.doLocalLogin(c)

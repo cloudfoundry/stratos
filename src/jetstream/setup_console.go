@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 	"github.com/govau/cf-common/env"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
