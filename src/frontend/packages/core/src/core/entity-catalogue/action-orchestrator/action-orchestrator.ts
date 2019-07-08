@@ -1,7 +1,8 @@
-import { IRequestAction } from '../../../../../store/src/types/request.types';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 import { Action } from '@ngrx/store';
+
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { IRequestAction } from '../../../../../store/src/types/request.types';
+import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
 
 // A function that returns a ICFAction
@@ -33,7 +34,7 @@ export class OrchestratedActionBuildersClass implements OrchestratedActionBuilde
 }
 
 export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
-  public getEntityActionDispatcher(actionDispatcher: (action: Action) => void) {
+  public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
 

@@ -1,22 +1,24 @@
-import {
-  IEntityMetadata,
-  IStratosEntityDefinition,
-  EntityCatalogueSchemas,
-  IStratosEndpointDefinition,
-  IStratosEntityBuilder,
-  IStratosEndpointWithoutSchemaDefinition,
-  IStratosBaseEntityDefinition
-} from './entity-catalogue.types';
 import { Store } from '@ngrx/store';
+
 import { AppState } from '../../../../store/src/app-state';
-import { EntityCatalogueHelpers } from './entity-catalogue.helper';
-import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
-import { endpointEntitySchema } from '../../base-entity-schemas';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
+import { endpointEntitySchema } from '../../base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
-import { OrchestratedActionBuilders, ActionOrchestrator } from './action-orchestrator/action-orchestrator';
+import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
+import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import { EntityCatalogueHelpers } from './entity-catalogue.helper';
+import {
+  EntityCatalogueSchemas,
+  IEntityMetadata,
+  IStratosBaseEntityDefinition,
+  IStratosEndpointDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
+  IStratosEntityBuilder,
+  IStratosEntityDefinition,
+} from './entity-catalogue.types';
 
 export interface EntityCatalogueBuilders<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
@@ -30,7 +32,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
   public readonly type: string;
   public readonly definition: DefinitionTypes;
   public readonly isEndpoint: boolean;
-  public readonly actionOrchestrator: ActionOrchestrator;
+  public readonly actionDispatcher: EntityActionDispatcherManager;
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
     public readonly builders: EntityCatalogueBuilders<T, Y> = {}
@@ -42,7 +44,9 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
-    this.actionOrchestrator = new ActionOrchestrator(this.entityKey, this.builders.actionBuilders);
+    // TODO: RC how to sort out typing's to allow actionDispatcher.customDispatchName()
+    const actionOrchestrator = new ActionOrchestrator(this.entityKey, this.builders.actionBuilders);
+    this.actionDispatcher = actionOrchestrator.getEntityActionDispatcher();
   }
 
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
@@ -106,6 +110,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       subType
     };
   }
+
 }
 
 export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {

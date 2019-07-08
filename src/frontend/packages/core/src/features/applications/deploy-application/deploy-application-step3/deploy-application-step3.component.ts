@@ -10,19 +10,18 @@ import {
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { appEnvVarsEntityType, applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { CFAppState } from '../../../../../../store/src/app-state';
+import { StratosBaseCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
-import {
-  CfAppsDataSource,
-  createGetAllAppAction,
-} from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
-import { CFAppState } from '../../../../../../store/src/app-state';
-import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -46,6 +45,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private errorSub: Subscription;
   private validSub: Subscription;
 
+  private appEnvVarCatalogueEntity: StratosBaseCatalogueEntity;
+  private appCatalogueEntity: StratosBaseCatalogueEntity;
+
   constructor(
     private store: Store<CFAppState>,
     private snackBar: MatSnackBar,
@@ -53,6 +55,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
   ) {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
+    this.appEnvVarCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    this.appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
   }
 
   private initDeployer() {
@@ -76,8 +80,18 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
     this.validSub = appGuid$.subscribe(guid => {
       this.appGuid = guid;
-      this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-      this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.deployer.cfGuid));
+
+      // Update the root app wall list
+      this.appCatalogueEntity.actionDispatcher.dispatchGetAll(
+        null,
+        CfAppsDataSource.paginationKey,
+        CfAppsDataSource.includeRelations,
+        true
+      );
+      // this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+      // Pre-fetch the app env vars
+      this.appEnvVarCatalogueEntity.actionDispatcher.dispatchGet(this.appGuid, this.deployer.cfGuid);
+      // this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.deployer.cfGuid));
     });
 
     this.closeable$ = observableCombineLatest(
@@ -149,9 +163,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // Take user to applications
     const { cfGuid } = this.deployer;
     if (this.appGuid) {
-      this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+      this.appEnvVarCatalogueEntity.actionDispatcher.dispatchGet(this.appGuid, cfGuid);
+      // this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+
       // Ensure the application package_state is correct
-      this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
+      this.appCatalogueEntity.actionDispatcher.dispatchGet(this.appGuid, cfGuid);
+      // this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
       this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }
   }
