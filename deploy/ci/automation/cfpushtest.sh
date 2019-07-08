@@ -127,9 +127,14 @@ date
 if [ $RET -ne 0 ]; then
   set +e
   echo "Push failed... showing recent log of the Stratos app"
-  cf logs console --recent
+  cf logs --recent console
   set -e
 else
+
+  # Show the recent logs just we can see startup settings
+  echo "Showing recent logs of the Stratos App"
+  cf logs --recent console | head -n 100
+
   # Push was okay, so we can prepare and run E2E tests
   rm -rf node_modules
   npm install
