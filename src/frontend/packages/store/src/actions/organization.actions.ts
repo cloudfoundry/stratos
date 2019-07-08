@@ -44,9 +44,9 @@ export const GET_ORGANIZATION_USERS_FAILED = '[Organization] Get all org users f
 
 export class GetOrganization extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string,
-    public endpointGuid: string,
-    public includeRelations: string[] = [],
-    public populateMissing = true) {
+              public endpointGuid: string,
+              public includeRelations: string[] = [],
+              public populateMissing = true) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organizations/${guid}`;
@@ -101,7 +101,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
   ) {
     super();
     if (!this.paginationKey) {
-      this.paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid)
+      this.paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid);
     }
     this.options = new RequestOptions();
     this.options.url = `organizations/${orgGuid}/domains`;
