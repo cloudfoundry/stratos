@@ -7,7 +7,7 @@ import {
   IStratosEndpointWithoutSchemaDefinition,
   IStratosBaseEntityDefinition
 } from './entity-catalogue.types';
-import { Store } from '@ngrx/store';
+import { Store, ActionReducer } from '@ngrx/store';
 import { AppState } from '../../../../store/src/app-state';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
@@ -20,6 +20,7 @@ import { OrchestratedActionBuilders, ActionOrchestrator } from './action-orchest
 
 export interface EntityCatalogueBuilders<T extends IEntityMetadata = IEntityMetadata, Y = any> {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
+  reducers?: ActionReducer<any>[];
   actionBuilders?: OrchestratedActionBuilders;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
@@ -110,7 +111,6 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
 
 export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {
   public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
-  public reducers?;
   constructor(
     entity: IStratosEntityDefinition,
     config?: EntityCatalogueBuilders<T, Y>

@@ -83,6 +83,11 @@ export function requestDataReducer(state: BaseRequestDataState, action: Action) 
   const baseDataReducer = requestDataReducerFactory(requestActions);
 
   const extraReducers = entityCatalogue.getAllEntityReducers();
+  extraReducers.set(getInternalEntityKey(endpointStoreNames.type), [systemEndpointsReducer]);
+  extraReducers.set(getInternalEntityKey(userFavoritesEntitySchema.entityType), [
+    addOrUpdateUserFavoriteMetadataReducer,
+    deleteUserFavoriteMetadataReducer
+  ]);
 
   /*     const extraReducers = {
           [getCFEntityKey(cfUserEntityType)]: [userReducer, endpointDisconnectUserReducer],

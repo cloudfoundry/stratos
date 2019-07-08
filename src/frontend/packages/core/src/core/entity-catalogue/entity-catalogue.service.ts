@@ -7,6 +7,7 @@ import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { StratosCatalogueEntity, StratosCatalogueEndpointEntity, StratosBaseCatalogueEntity } from './entity-catalogue-entity';
 import { GetAllEndpoints } from '../../../../store/src/actions/endpoint.actions';
+import { ActionReducer } from '@ngrx/store';
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
   private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
@@ -161,14 +162,12 @@ class EntityCatalogue {
 
   public getAllEntityReducers() {
     const entities = Array.from(this.entities.values());
-    const allEntityReducers = new Array();
-    entities.forEach(entity => {
-      allEntityReducers.push(entity.reducers);
-    });
-    return allEntityReducers;
+    return entities.reduce((allEntityReducers, entity) => {
+      allEntityReducers.set(entity.entityKey, entity.builders.reducers);
+      return allEntityReducers;
+    }, {} as Map<string, ActionReducer<any>[]>);
   }
 }
-
 
 // Only to be used for tests
 export class TestEntityCatalogue extends EntityCatalogue { }
