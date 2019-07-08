@@ -55,7 +55,7 @@ export const spaceActionBuilders = {
     includeRelations,
     populateMissing
   ),
-  getAllFromOrganization: (
+  getAllInOrganization: (
     orgGuid: string,
     endpointGuid: string,
     paginationKey: string,

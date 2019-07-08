@@ -52,7 +52,7 @@ export const routesActionBuilders = {
     paginationKey,
     includeRelations
   ),
-  getAllFromSpace: (
+  getAllInSpace: (
     spaceGuid: string,
     endpointGuid: string,
     paginationKey: string,

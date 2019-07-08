@@ -2,7 +2,7 @@ import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalo
 import { GetOrganizationSpaceQuotaDefinitions, AssociateSpaceQuota, DisassociateSpaceQuota } from '../actions/quota-definitions.actions';
 
 export const spaceQuotaDefinitionActionBuilders = {
-  getAllFromOrganization: (
+  getAllInOrganization: (
     orgGuid: string,
     endpointGuid: string,
     paginationKey: string,

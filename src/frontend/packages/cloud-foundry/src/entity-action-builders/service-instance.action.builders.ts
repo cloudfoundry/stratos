@@ -6,8 +6,9 @@ import {
   CreateServiceInstance,
   UpdateServiceInstance
 } from '../actions/service-instances.actions';
-import { getAPIRequestDataState } from '../../../store/src/selectors/api.selectors';
 import { GetServicePlanServiceInstances } from '../actions/service-plan.actions';
+import { GetServiceInstancesForSpace } from '../actions/space.actions';
+import { QParam } from '../../../store/src/types/pagination.types';
 
 export const serviceInstanceActionBuilders = {
   get: (
@@ -62,10 +63,10 @@ export const serviceInstanceActionBuilders = {
   getAll: (
     endpointGuid,
     paginationKey,
-    includeRelations?,
-    populateMissing?
+    includeRelations?: string[],
+    populateMissing?: boolean
   ) => new GetServiceInstances(endpointGuid, paginationKey, includeRelations, populateMissing),
-  getAllFromServicePlan: (
+  getAllInServicePlan: (
     servicePlanGuid: string,
     endpointGuid: string,
     paginationKey: string,
@@ -75,5 +76,13 @@ export const serviceInstanceActionBuilders = {
     endpointGuid,
     paginationKey,
     includeRelations
-  )
+  ),
+  getAllInSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    qParams: QParam[],
+    includeRelations?: string[],
+    populateMissing?: boolean
+  ) => new GetServiceInstancesForSpace(spaceGuid, endpointGuid, paginationKey, qParams, includeRelations, populateMissing)
 } as CFOrchestratedActionBuilders;
