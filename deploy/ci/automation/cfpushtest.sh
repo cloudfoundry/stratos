@@ -83,6 +83,15 @@ echo "    env:" >> $MANIFEST
 echo "      SKIP_AUTO_REGISTER: true" >> $MANIFEST
 echo "      FORCE_ENABLE_PERSISTENCE_FEATURES: true" >> $MANIFEST
 
+# Make sure we add invite users config if set
+if [ -n "${SMTP_HOST}" ]; then
+  echo "      SMTP_HOST: ${SMTP_HOST}" >> $MANIFEST
+fi
+
+if [ -n "${SMTP_FROM_ADDRESS}" ]; then
+  echo "      SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS}" >> $MANIFEST
+fi
+
 # SSO
 SUITE=""
 if [ "$2" == "sso" ] || [ "$3" == "sso" ] ; then
