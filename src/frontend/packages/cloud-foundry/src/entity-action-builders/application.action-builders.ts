@@ -13,6 +13,19 @@ import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
 
+export interface ApplicationActionBuilders extends CFOrchestratedActionBuilders {
+  restage: (guid: string, endpointGuid: string) => RestageApplication;
+  assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => AssignRouteToApplication;
+  getAllInSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    includeRelations?: string[],
+    populateMissing?: boolean,
+    flattenPagination?: boolean
+  ) => GetAllAppsInSpace;
+}
+
 export const applicationActionBuilder = {
   get: (
     guid,
@@ -56,6 +69,6 @@ export const applicationActionBuilder = {
     populateMissing,
     flattenPagination
   )
-} as CFOrchestratedActionBuilders;
+} as ApplicationActionBuilders;
 
 

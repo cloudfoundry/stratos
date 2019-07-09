@@ -79,7 +79,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.appGuid = guid;
 
       // Update the root app wall list
-      this.appCatalogueEntity.actionDispatcher.dispatchGetAll(
+      this.appCatalogueEntity.actionDispatchManager.dispatchGetAll(
         null,
         CfAppsDataSource.paginationKey,
         CfAppsDataSource.includeRelations,
@@ -87,7 +87,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       );
       // this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
       // Pre-fetch the app env vars
-      this.appEnvVarCatalogueEntity.actionDispatcher.dispatchGet(this.appGuid, this.deployer.cfGuid);
+      this.appEnvVarCatalogueEntity.actionDispatchManager.dispatchGet(this.appGuid, this.deployer.cfGuid);
       // this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.deployer.cfGuid));
     });
 
@@ -160,11 +160,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // Take user to applications
     const { cfGuid } = this.deployer;
     if (this.appGuid) {
-      this.appEnvVarCatalogueEntity.actionDispatcher.dispatchGet(this.appGuid, cfGuid);
+      this.appEnvVarCatalogueEntity.actionDispatchManager.dispatchGet(this.appGuid, cfGuid);
       // this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
 
       // Ensure the application package_state is correct
-      this.appCatalogueEntity.actionDispatcher.dispatchGet(this.appGuid, cfGuid);
+      this.appCatalogueEntity.actionDispatchManager.dispatchGet(this.appGuid, cfGuid);
+      this.appCatalogueEntity.actionDispatchManager.dispatchAction()
       // this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
       this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }

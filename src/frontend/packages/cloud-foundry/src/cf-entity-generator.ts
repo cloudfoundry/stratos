@@ -70,7 +70,7 @@ import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata }
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
-import { applicationActionBuilder } from './entity-action-builders/application.action-builders';
+import { applicationActionBuilder, ApplicationActionBuilders } from './entity-action-builders/application.action-builders';
 import { buildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
 import { domainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { featureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
@@ -83,6 +83,7 @@ import { serviceBindingActionBuilders } from './entity-action-builders/service-b
 import { spaceQuotaDefinitionActionBuilders } from './entity-action-builders/space-quota.action-builders';
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
+import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -582,6 +583,22 @@ function generateCfApplicationEntity(endpointDefinition: IStratosEndpointDefinit
     labelPlural: 'Applications',
     endpoint: endpointDefinition
   };
+  const a = new StratosCatalogueEntity(
+    applicationDefinition,
+    {
+      entityBuilder: {
+        getMetadata: (app: APIResource<IApp>) => ({
+          guid: app.metadata.guid,
+          cfGuid: app.entity.cfGuid,
+          name: app.entity.name,
+        } as IAppFavMetadata),
+        getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
+        getGuid: metadata => metadata.guid,
+      },
+      actionBuilders: applicationActionBuilder
+    },
+  );
+
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
     applicationDefinition,
     {

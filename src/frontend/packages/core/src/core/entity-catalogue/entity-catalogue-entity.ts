@@ -20,22 +20,29 @@ import {
   IStratosEntityDefinition,
 } from './entity-catalogue.types';
 
-export interface EntityCatalogueBuilders<T extends IEntityMetadata = IEntityMetadata, Y = any> {
+export interface EntityCatalogueBuilders<
+  T extends IEntityMetadata = IEntityMetadata, Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
-  actionBuilders?: OrchestratedActionBuilders;
+  actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
   IStratosEndpointDefinition |
   IStratosBaseEntityDefinition<EntityCatalogueSchemas>;
-export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
+export class StratosBaseCatalogueEntity<
+  T extends IEntityMetadata = IEntityMetadata,
+  Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  > {
   public readonly entityKey: string;
   public readonly type: string;
   public readonly definition: DefinitionTypes;
   public readonly isEndpoint: boolean;
-  public readonly actionDispatcher: EntityActionDispatcherManager;
+  public readonly actionDispatchManager: EntityActionDispatcherManager<AB>;
+  public readonly actionOrchestrator: ActionOrchestrator<AB>;
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
-    public readonly builders: EntityCatalogueBuilders<T, Y> = {}
+    public readonly builders: EntityCatalogueBuilders<T, Y, AB> = {}
   ) {
     this.definition = this.populateEntity(definition);
     this.type = this.definition.type || this.definition.schema.default.entityType;
@@ -45,8 +52,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
     // TODO: RC how to sort out typing's to allow actionDispatcher.customDispatchName()
-    const actionOrchestrator = new ActionOrchestrator(this.entityKey, this.builders.actionBuilders);
-    this.actionDispatcher = actionOrchestrator.getEntityActionDispatcher();
+    this.actionOrchestrator = new ActionOrchestrator<AB>(this.entityKey, this.builders.actionBuilders);
+    this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
 
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
@@ -115,11 +122,15 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
 
 }
 
-export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {
+export class StratosCatalogueEntity<
+  T extends IEntityMetadata = IEntityMetadata,
+  Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  > extends StratosBaseCatalogueEntity<T, Y, AB> {
   public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
   constructor(
     entity: IStratosEntityDefinition,
-    config?: EntityCatalogueBuilders<T, Y>
+    config?: EntityCatalogueBuilders<T, Y, AB>
   ) {
     super(entity, config);
   }
