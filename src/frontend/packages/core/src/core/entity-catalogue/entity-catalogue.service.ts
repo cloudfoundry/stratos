@@ -163,7 +163,7 @@ class EntityCatalogue {
   public getAllEntityReducers() {
     const entities = Array.from(this.entities.values());
     return entities.reduce((allEntityReducers, entity) => {
-      allEntityReducers.set(entity.entityKey, entity.builders.reducers);
+      allEntityReducers.set(entity.entityKey, entity.builders.dataReducer);
       return allEntityReducers;
     }, {} as Map<string, ActionReducer<any>[]>);
   }
