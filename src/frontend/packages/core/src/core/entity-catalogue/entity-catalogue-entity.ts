@@ -1,5 +1,18 @@
+<<<<<<< HEAD
+import {
+  IEntityMetadata,
+  IStratosEntityDefinition,
+  EntityCatalogueSchemas,
+  IStratosEndpointDefinition,
+  IStratosEntityBuilder,
+  IStratosEndpointWithoutSchemaDefinition,
+  IStratosBaseEntityDefinition
+} from './entity-catalogue.types';
+import { Store, ActionReducer } from '@ngrx/store';
+=======
 import { Store } from '@ngrx/store';
 
+>>>>>>> entity-catalogue-actions
 import { AppState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -24,6 +37,7 @@ export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata, Y = any,
   AB extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
+  reducers?: ActionReducer<any>[];
   actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
