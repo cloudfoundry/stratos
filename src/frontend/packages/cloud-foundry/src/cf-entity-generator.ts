@@ -70,11 +70,10 @@ import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata }
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
-import { applicationActionBuilder, ApplicationActionBuilders } from './entity-action-builders/application.action-builders';
+import { applicationActionBuilder } from './entity-action-builders/application.action-builders';
 import { buildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
 import { domainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { featureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
-import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 import { organizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { quotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
 import { routesActionBuilders } from './entity-action-builders/routes.action-builder';
