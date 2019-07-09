@@ -36,8 +36,8 @@ import { ServicePlanAccessibility } from './services.service';
 
 
 export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
-  serviceBroker: APIResource<IServiceBroker>,
-  allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
+                                   serviceBroker: APIResource<IServiceBroker>,
+                                   allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
   const svcAvailability = {
     isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
   };
@@ -79,6 +79,8 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
 
 export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
   const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
+  // TODO: schemaKey - Dispatches the action which has the correct schema key (SI with space), however uses incorrect schema to denormalise
+  // so entities$ does not contain space
   return getPaginationObservables<APIResource<IServiceInstance>>({
     store,
     action: new GetServiceInstances(cfGuid, paginationKey),

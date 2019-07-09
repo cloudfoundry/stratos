@@ -1,6 +1,6 @@
+import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { ResetPagination } from '../../actions/pagination.actions';
 import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
-import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 
 export const defaultClientPaginationPageSize = 9;
 

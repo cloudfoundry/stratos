@@ -40,13 +40,13 @@ export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org su
 
 export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   isGetAllUsersAsAdmin = true;
-  paginationKey: string;
   constructor(
     public endpointGuid: string,
     public includeRelations: string[] = createDefaultUserRelations(),
-    public populateMissing = true) {
+    public populateMissing = true,
+    public paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid)
+  ) {
     super();
-    this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';
@@ -67,7 +67,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     return !!action.isGetAllUsersAsAdmin;
   }
 }
-
+// TODO: Can we get rid of this?
 export class GetCFUser extends CFStartAction implements IRequestAction {
   constructor(
     public guid: string,
@@ -83,7 +83,8 @@ export class GetCFUser extends CFStartAction implements IRequestAction {
   entityType = cfUserEntityType;
   options: RequestOptions;
 }
-
+// TODO: Where do these action sit within the entity catalogue?
+// They are user role actions that have the entity type or either space of organization.
 export class ChangeUserRole extends CFStartAction implements IRequestAction {
   public endpointType = 'cf';
   constructor(

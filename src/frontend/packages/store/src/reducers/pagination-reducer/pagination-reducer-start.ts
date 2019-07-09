@@ -1,5 +1,5 @@
-import { PaginationEntityState } from '../../types/pagination.types';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { PaginationEntityState } from '../../types/pagination.types';
 
 export function paginationStart(state, action): PaginationEntityState {
   const page = action.apiAction.__forcedPageNumber__ || action.apiAction.pageNumber || state.currentPage;

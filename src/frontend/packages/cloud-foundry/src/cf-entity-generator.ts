@@ -58,7 +58,7 @@ import {
   serviceEntityType,
   serviceInstancesEntityType,
   serviceInstancesWithNoBindingsEntityType,
-  serviceInstancesWithspaceEntityType,
+  serviceInstancesWithSpaceEntityType,
   servicePlanEntityType,
   servicePlanVisibilityEntityType,
   spaceEntityType,
@@ -88,7 +88,6 @@ import { applicationActionBuilder } from './entity-action-builders/application.a
 import { buildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
 import { domainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { featureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
-import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 import { organizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { quotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
 import { routesActionBuilders } from './entity-action-builders/routes.action-builder';
@@ -97,6 +96,7 @@ import { serviceBindingActionBuilders } from './entity-action-builders/service-b
 import { spaceQuotaDefinitionActionBuilders } from './entity-action-builders/space-quota.action-builders';
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
+import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -365,7 +365,7 @@ function generateCFServiceInstanceEntity(endpointDefinition: IStratosEndpointDef
     type: serviceInstancesEntityType,
     schema: {
       default: cfEntityFactory(serviceInstancesEntityType),
-      [serviceInstancesWithspaceEntityType]: cfEntityFactory(serviceInstancesWithspaceEntityType),
+      [serviceInstancesWithSpaceEntityType]: cfEntityFactory(serviceInstancesWithSpaceEntityType),
       [serviceInstancesWithNoBindingsEntityType]: cfEntityFactory(serviceInstancesWithNoBindingsEntityType),
     },
     label: 'Marketplace Service Instance',
@@ -602,6 +602,22 @@ function generateCfApplicationEntity(endpointDefinition: IStratosEndpointDefinit
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
   };
+  const a = new StratosCatalogueEntity(
+    applicationDefinition,
+    {
+      entityBuilder: {
+        getMetadata: (app: APIResource<IApp>) => ({
+          guid: app.metadata.guid,
+          cfGuid: app.entity.cfGuid,
+          name: app.entity.name,
+        } as IAppFavMetadata),
+        getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
+        getGuid: metadata => metadata.guid,
+      },
+      actionBuilders: applicationActionBuilder
+    },
+  );
+
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
     applicationDefinition,
     {

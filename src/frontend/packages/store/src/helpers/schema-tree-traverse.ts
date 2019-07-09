@@ -17,6 +17,7 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
@@ -94,7 +95,7 @@ export class EntitySchemaTreeBuilder {
   public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
-    this.entityExcludes = this.excludes[schema.key] || [];
+    this.entityExcludes = this.excludes[schema.entityType] || [];
     return this.build(schema, denormed, undefined, true);
   }
 
@@ -102,7 +103,7 @@ export class EntitySchemaTreeBuilder {
     if (Array.isArray(schema)) {
       schema = schema[0];
     }
-    if (!schema || !entity || this.entityExcludes.includes(schema.key)) {
+    if (!schema || !entity || this.entityExcludes.includes(schema.entityType)) {
       return flatTree;
     }
     const keys = schema.definition ? Object.keys(schema.definition) : null;
@@ -125,11 +126,11 @@ export class EntitySchemaTreeBuilder {
     }
     const { definition } = schema;
     if (!schema.getId) {
-      return this.build(schema[schema.key], schema[schema.key], flatTree);
+      return this.build(schema[schema.entityType], schema[schema.entityType], flatTree);
     }
     // Don't add the root element to the tree to avoid duplication actions whe consuming tree
     if (!root) {
-      flatTree = this.addIdToTree(flatTree, schema.key, schema.getId(entity));
+      flatTree = this.addIdToTree(flatTree, schema.entityType, schema.getId(entity));
     }
     if (!keys) {
       return flatTree;
@@ -147,7 +148,7 @@ export class EntitySchemaTreeBuilder {
 
   private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
     const ids = flatTree[key] || new Set<string>();
-    flatTree[key] = ids.add(newId);
+    flatTree[getCFEntityKey(key)] = ids.add(newId);
     return flatTree;
   }
 

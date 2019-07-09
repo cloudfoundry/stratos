@@ -13,11 +13,12 @@ import {
   tap,
 } from 'rxjs/operators';
 
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
-import { GeneralEntityAppState, AppState } from '../../app-state';
+import { AppState, GeneralEntityAppState } from '../../app-state';
 import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
@@ -29,8 +30,6 @@ import {
   QParam,
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { _YAxis } from '@angular/cdk/scrolling';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -110,17 +109,23 @@ export function getAction(action): PaginatedAction {
   if (!action) {
     return null;
   }
-  if (action.entityConfig) {
-    return action.entityConfig;
-  }
   return action.apiAction ? action.apiAction : action;
 }
 
 // TODO We need types here. This might lead us to tidy up all of our actions.
-export function getActionPaginationEntityKey(action) {
+function getEntityConfigFromAction(action): PaginatedAction {
+  if (action && action.entityConfig) {
+    return action.entityConfig;
+  }
+  return getAction(action);
+}
+
+// TODO We need types here. This might lead us to tidy up all of our actions.
+export function getActionPaginationEntityKey(action): string {
   const apiAction = getAction(action);
-  const entityType = apiAction.proxyPaginationEntityKey || apiAction.entityType;
-  return entityCatalogue.getEntityKey(apiAction.endpointType, entityType);
+  const entityConfig = getEntityConfigFromAction(action);
+  const entityType = apiAction.proxyPaginationEntityKey || entityConfig.entityType;
+  return entityCatalogue.getEntityKey(entityConfig.endpointType, entityType);
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {

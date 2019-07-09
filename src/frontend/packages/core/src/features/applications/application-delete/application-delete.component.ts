@@ -5,18 +5,18 @@ import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { GetAppRoutes } from '../../../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { DeleteApplication, GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
+import { DeleteRoute } from '../../../../../cloud-foundry/src/actions/route.actions';
+import { DeleteServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
+import { DeleteUserProvidedInstance } from '../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import {
   applicationEntityType,
   routeEntityType,
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppRoutes } from '../../../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { DeleteApplication, GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
-import { DeleteRoute } from '../../../../../cloud-foundry/src/actions/route.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { DeleteServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
-import { DeleteUserProvidedInstance } from '../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
@@ -205,6 +205,8 @@ export class ApplicationDeleteComponent<T> {
       shareReplay(1),
       startWith(true)
     );
+
+
     this.store.dispatch(new GetApplication(applicationService.appGuid, applicationService.cfGuid));
   }
 

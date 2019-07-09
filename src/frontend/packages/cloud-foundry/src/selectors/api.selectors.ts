@@ -1,6 +1,5 @@
 import { compose } from '@ngrx/store';
 
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { RequestInfoState } from '../../../store/src/reducers/api-request-reducer/types';
 import {
   getAPIRequestDataState,
@@ -11,10 +10,10 @@ import {
   getUpdateSectionById,
 } from '../../../store/src/selectors/api.selectors';
 import { APIResource, APIResourceMetadata } from '../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { getCFEntityKey } from '../cf-entity-helpers';
 
 export function selectCfRequestInfo(entityType: string, entityGuid: string) {
-  const entityKey = entityCatalogue.getEntityKey(entityType, CF_ENDPOINT_TYPE);
+  const entityKey = getCFEntityKey(entityType);
   return compose(
     getEntityById<RequestInfoState>(entityGuid),
     getRequestEntityKey<RequestInfoState>(entityKey),
@@ -38,7 +37,7 @@ export function selectCfEntity<T = APIResource>(
   entityType: string,
   guid: string
 ) {
-  const entityKey = entityCatalogue.getEntityKey(entityType, CF_ENDPOINT_TYPE);
+  const entityKey = getCFEntityKey(entityType);
   return compose(
     getEntityById<T>(guid),
     getRequestEntityKey<T>(entityKey),

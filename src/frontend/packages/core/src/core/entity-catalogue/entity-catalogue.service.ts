@@ -1,13 +1,13 @@
-import {
-  IEntityMetadata,
-  EntityCatalogueEntityConfig,
-  IStratosBaseEntityDefinition,
-} from './entity-catalogue.types';
-import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
-import { StratosCatalogueEntity, StratosCatalogueEndpointEntity, StratosBaseCatalogueEntity } from './entity-catalogue-entity';
-import { GetAllEndpoints } from '../../../../store/src/actions/endpoint.actions';
+import {
+  StratosBaseCatalogueEntity,
+  StratosCatalogueEndpointEntity,
+  StratosCatalogueEntity,
+} from './entity-catalogue-entity';
+import { EntityCatalogueHelpers } from './entity-catalogue.helper';
+import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
 import { ActionReducer } from '@ngrx/store';
+
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
   private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();

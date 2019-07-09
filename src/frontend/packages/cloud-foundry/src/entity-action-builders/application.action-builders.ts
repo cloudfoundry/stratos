@@ -1,7 +1,4 @@
 import {
-  OrchestratedActionBuilders,
-} from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import {
   GetApplication,
   DeleteApplication,
   CreateNewApplication,
@@ -15,6 +12,19 @@ import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
+
+export interface ApplicationActionBuilders extends CFOrchestratedActionBuilders {
+  restage: (guid: string, endpointGuid: string) => RestageApplication;
+  assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => AssignRouteToApplication;
+  getAllInSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    includeRelations?: string[],
+    populateMissing?: boolean,
+    flattenPagination?: boolean
+  ) => GetAllAppsInSpace;
+}
 
 export const applicationActionBuilder = {
   get: (
@@ -59,6 +69,6 @@ export const applicationActionBuilder = {
     populateMissing,
     flattenPagination
   )
-} as CFOrchestratedActionBuilders;
+} as ApplicationActionBuilders;
 
 

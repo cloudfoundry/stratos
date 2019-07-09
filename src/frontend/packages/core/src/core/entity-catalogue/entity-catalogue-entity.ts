@@ -1,40 +1,48 @@
-import {
-  IEntityMetadata,
-  IStratosEntityDefinition,
-  EntityCatalogueSchemas,
-  IStratosEndpointDefinition,
-  IStratosEntityBuilder,
-  IStratosEndpointWithoutSchemaDefinition,
-  IStratosBaseEntityDefinition
-} from './entity-catalogue.types';
-import { Store, ActionReducer } from '@ngrx/store';
-import { AppState } from '../../../../store/src/app-state';
-import { EntityCatalogueHelpers } from './entity-catalogue.helper';
-import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
-import { endpointEntitySchema } from '../../base-entity-schemas';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { EntityMonitor } from '../../shared/monitors/entity-monitor';
-import { OrchestratedActionBuilders, ActionOrchestrator } from './action-orchestrator/action-orchestrator';
+import { Store } from '@ngrx/store';
 
-export interface EntityCatalogueBuilders<T extends IEntityMetadata = IEntityMetadata, Y = any> {
+import { AppState } from '../../../../store/src/app-state';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
+import { endpointEntitySchema } from '../../base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
+import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
+import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import { EntityCatalogueHelpers } from './entity-catalogue.helper';
+import {
+  EntityCatalogueSchemas,
+  IEntityMetadata,
+  IStratosBaseEntityDefinition,
+  IStratosEndpointDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
+  IStratosEntityBuilder,
+  IStratosEntityDefinition,
+} from './entity-catalogue.types';
+
+export interface EntityCatalogueBuilders<
+  T extends IEntityMetadata = IEntityMetadata, Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
-  reducers?: ActionReducer<any>[];
-  actionBuilders?: OrchestratedActionBuilders;
+  actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
   IStratosEndpointDefinition |
   IStratosBaseEntityDefinition<EntityCatalogueSchemas>;
-export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> {
+export class StratosBaseCatalogueEntity<
+  T extends IEntityMetadata = IEntityMetadata,
+  Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  > {
   public readonly entityKey: string;
   public readonly type: string;
   public readonly definition: DefinitionTypes;
   public readonly isEndpoint: boolean;
-  public readonly actionOrchestrator: ActionOrchestrator;
+  public readonly actionDispatchManager: EntityActionDispatcherManager<AB>;
+  public readonly actionOrchestrator: ActionOrchestrator<AB>;
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
-    public readonly builders: EntityCatalogueBuilders<T, Y> = {}
+    public readonly builders: EntityCatalogueBuilders<T, Y, AB> = {}
   ) {
     this.definition = this.populateEntity(definition);
     this.type = this.definition.type || this.definition.schema.default.entityType;
@@ -43,7 +51,9 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
-    this.actionOrchestrator = new ActionOrchestrator(this.entityKey, this.builders.actionBuilders);
+    // TODO: RC how to sort out typing's to allow actionDispatcher.customDispatchName()
+    this.actionOrchestrator = new ActionOrchestrator<AB>(this.entityKey, this.builders.actionBuilders);
+    this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
 
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
@@ -65,6 +75,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
    * If no schemaKey is provided then the default schema will be returned
    */
   public getSchema(schemaKey?: string) {
+    // TODO: schemaKey - ensure wherever this is called it contains the correct schemaKey (with respect to any config
+    // EntityCatalogueEntityConfig that may use a schemeKey different than that provided by entityCatalogue.getEntity's)
     // TODO(NJ) We should do a better job at typeing schemax
     // schema always gets changed to a EntityCatalogueSchamas.
     const catalogueSchema = (this.definition.schema as EntityCatalogueSchemas);
@@ -72,7 +84,7 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       return catalogueSchema.default;
     }
     const entityCatalogue = this.definition as IStratosEntityDefinition;
-    const tempId = EntityCatalogueHelpers.buildEntityKey(entityCatalogue.endpoint.type, schemaKey);
+    const tempId = EntityCatalogueHelpers.buildEntityKey(schemaKey, entityCatalogue.endpoint.type);
     if (!catalogueSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogueSchema.default;
@@ -107,13 +119,18 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
       subType
     };
   }
+
 }
 
-export class StratosCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any> extends StratosBaseCatalogueEntity<T, Y> {
+export class StratosCatalogueEntity<
+  T extends IEntityMetadata = IEntityMetadata,
+  Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  > extends StratosBaseCatalogueEntity<T, Y, AB> {
   public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
   constructor(
     entity: IStratosEntityDefinition,
-    config?: EntityCatalogueBuilders<T, Y>
+    config?: EntityCatalogueBuilders<T, Y, AB>
   ) {
     super(entity, config);
   }

@@ -3,6 +3,8 @@ import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
+import { GetAppStatsAction } from '../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import {
   applicationEntityType,
   cfEntityFactory,
@@ -10,8 +12,6 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppStatsAction } from '../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
@@ -25,17 +25,22 @@ import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-con
 import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../list.component.types';
 
-export function createGetAllAppAction(paginationKey): GetAllApplications {
-  return new GetAllApplications(paginationKey, null, [
-    createEntityRelationKey(applicationEntityType, spaceEntityType),
-    createEntityRelationKey(spaceEntityType, organizationEntityType),
-    createEntityRelationKey(applicationEntityType, routeEntityType),
-  ]);
-}
+// export function createGetAllAppAction(paginationKey): GetAllApplications {
+//   return new GetAllApplications(paginationKey, null, [
+//     createEntityRelationKey(applicationEntityType, spaceEntityType),
+//     createEntityRelationKey(spaceEntityType, organizationEntityType),
+//     createEntityRelationKey(applicationEntityType, routeEntityType),
+//   ]);
+// }
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
+  public static includeRelations = [
+    createEntityRelationKey(applicationEntityType, spaceEntityType),
+    createEntityRelationKey(spaceEntityType, organizationEntityType),
+    createEntityRelationKey(applicationEntityType, routeEntityType),
+  ];
   private subs: Subscription[];
   public action: GetAllApplications;
 
@@ -49,7 +54,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     startingCfGuid?: string
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
-    const action = createGetAllAppAction(paginationKey);
+    const action = new GetAllApplications(paginationKey, null, CfAppsDataSource.includeRelations);
     action.endpointGuid = startingCfGuid;
 
     const dispatchSequencer = new DispatchSequencer(store);

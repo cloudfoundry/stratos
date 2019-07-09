@@ -8,7 +8,7 @@ import {
   serviceBindingNoBindingsEntityType,
   serviceEntityType,
   serviceInstancesEntityType,
-  serviceInstancesWithspaceEntityType,
+  serviceInstancesWithSpaceEntityType,
   servicePlanEntityType,
   spaceEntityType,
 } from '../cf-entity-factory';
@@ -43,7 +43,7 @@ export class GetServiceInstances
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get all');
-  entity = [cfEntityFactory(serviceInstancesWithspaceEntityType)];
+  entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   entityType = serviceInstancesEntityType;
   options: RequestOptions;
   initialParams = {
@@ -70,7 +70,7 @@ export class GetServiceInstance
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get particular instance');
-  entity = [cfEntityFactory(serviceInstancesWithspaceEntityType)];
+  entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   entityType = serviceInstancesEntityType;
   options: RequestOptions;
 }

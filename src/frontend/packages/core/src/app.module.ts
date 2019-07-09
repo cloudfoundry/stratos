@@ -1,23 +1,28 @@
-import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
-import { debounceTime, withLatestFrom, filter } from 'rxjs/operators';
+import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+
 import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
-import { UpdateUserFavoriteMetadataAction } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
+import {
+  UpdateUserFavoriteMetadataAction,
+} from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
+import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { AppStoreModule } from '../../store/src/store.module';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
+import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
+import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -37,7 +42,6 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 
 
 // Create action for router navigation. See
@@ -117,6 +121,8 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
+    // TODO: RC Is this the best approach?
+    EntityActionDispatcher.initialize(this.store);
     eventService.addEventConfig<boolean>(
       {
         eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
