@@ -14,7 +14,7 @@ import { APIResource, APIResourceMetadata } from '../../../store/src/types/api.t
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 
 export function selectCfRequestInfo(entityType: string, entityGuid: string) {
-  const entityKey = entityCatalogue.getEntityKey(entityType, CF_ENDPOINT_TYPE);
+  const entityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, entityType);
   return compose(
     getEntityById<RequestInfoState>(entityGuid),
     getRequestEntityKey<RequestInfoState>(entityKey),
@@ -38,7 +38,7 @@ export function selectCfEntity<T = APIResource>(
   entityType: string,
   guid: string
 ) {
-  const entityKey = entityCatalogue.getEntityKey(entityType, CF_ENDPOINT_TYPE);
+  const entityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, entityType);
   return compose(
     getEntityById<T>(guid),
     getRequestEntityKey<T>(entityKey),

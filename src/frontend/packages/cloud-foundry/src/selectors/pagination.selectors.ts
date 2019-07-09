@@ -9,7 +9,7 @@ import {
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 
 export function selectCfPaginationState(entityType: string, paginationKey: string) {
-  const entityKey = entityCatalogue.getEntityKey(entityType, CF_ENDPOINT_TYPE);
+  const entityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, entityType);
   const state = compose(
     getPaginationKeyState(paginationKey),
     getPaginationEntityState(entityKey),
