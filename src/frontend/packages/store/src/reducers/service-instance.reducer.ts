@@ -41,7 +41,7 @@ export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResourc
 
 function handleCreateBinding(state: IRequestEntityTypeState<APIResource>, action: APISuccessOrFailedAction) {
   const bindingAction = action.apiAction as CreateServiceBinding;
-  // TODO: RC Check for possible entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, entityType) bug
+  // TODO: RC Check for possible getCFEntityKey(entityType) bug
   const newServiceBindingEntity = (action.response.entities.serviceBinding[action.response.result[0]] as APIResource<IServiceBinding>);
   const serviceInstanceGuid = bindingAction.serviceInstanceGuid;
   const serviceBindingGuid = newServiceBindingEntity.metadata.guid;
