@@ -17,6 +17,7 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
@@ -147,7 +148,7 @@ export class EntitySchemaTreeBuilder {
 
   private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
     const ids = flatTree[key] || new Set<string>();
-    flatTree[key] = ids.add(newId);
+    flatTree[getCFEntityKey(key)] = ids.add(newId);
     return flatTree;
   }
 
