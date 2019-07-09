@@ -3,16 +3,16 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { isEntityBlocked } from '../../../../core/src/core/entity-service';
-import { pathGet } from '../../../../core/src/core/utils.service';
-import { environment } from '../../../../core/src/environments/environment';
-import { SetInitialParams } from '../../actions/pagination.actions';
 import {
   FetchRelationAction,
   FetchRelationPaginatedAction,
   FetchRelationSingleAction,
 } from '../../../../cloud-foundry/src/actions/relation.actions';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { isEntityBlocked } from '../../../../core/src/core/entity-service';
+import { pathGet } from '../../../../core/src/core/utils.service';
+import { environment } from '../../../../core/src/environments/environment';
+import { SetInitialParams } from '../../actions/pagination.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { GeneralEntityAppState } from '../../app-state';
 import { RequestInfoState } from '../../reducers/api-request-reducer/types';
@@ -314,6 +314,7 @@ function associateChildWithParent(store: Store<GeneralEntityAppState>, action: E
       );
       if (apiResponse) {
         // Part of an api call. Assign to apiResponse which is added to store later
+        // TODO: RC Check for possible getCFEntityKey(entityType) bug
         apiResponse.response.entities[catalogueEntity.entityKey][action.parentGuid].entity[action.child.paramName] = value;
       } else {
         // Not part of an api call. We already have the entity in the store, so fire off event to link child with parent
@@ -524,7 +525,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           const catalogueEntity = entityCatalogue.getEntity(eicAction);
           const entityKey = catalogueEntity.entityKey;
           const normedEntities = entity.entity[paramName].reduce((normedEntities, entity) => {
-            const guid = typeof(entity) === 'string' ? entity : catalogueEntity.getGuidFromEntity(entity);
+            const guid = typeof (entity) === 'string' ? entity : catalogueEntity.getGuidFromEntity(entity);
             normedEntities[entityKey][guid] = entity;
             return normedEntities;
           }, { [entityKey]: {} });

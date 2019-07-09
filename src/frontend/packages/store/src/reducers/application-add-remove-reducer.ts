@@ -1,5 +1,5 @@
-import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
 import { CREATE_SUCCESS, DELETE_SUCCESS } from '../../../cloud-foundry/src/actions/application.actions';
+import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
 import { deepMergeState } from '../helpers/reducer.helper';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
@@ -18,6 +18,7 @@ export function applicationAddRemoveReducer() {
 }
 
 function addApplicationToSpace(state: APIResource, action: APISuccessOrFailedAction) {
+  // TODO: RC Check for possible getCFEntityKey(entityType) bug
   if (action.response && action.response.entities && action.response.entities.application) {
     const apps = action.response.entities.application;
     const updatedSpaces = {};

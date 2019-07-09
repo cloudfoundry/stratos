@@ -1,10 +1,10 @@
-import { IServiceBinding, IServiceInstance } from '../../../core/src/core/cf-api-svc.types';
 import {
   CREATE_SERVICE_BINDING_ACTION_SUCCESS,
   CreateServiceBinding,
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
 } from '../../../cloud-foundry/src/actions/service-bindings.actions';
+import { IServiceBinding, IServiceInstance } from '../../../core/src/core/cf-api-svc.types';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
@@ -41,6 +41,7 @@ export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResourc
 
 function handleCreateBinding(state: IRequestEntityTypeState<APIResource>, action: APISuccessOrFailedAction) {
   const bindingAction = action.apiAction as CreateServiceBinding;
+  // TODO: RC Check for possible entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, entityType) bug
   const newServiceBindingEntity = (action.response.entities.serviceBinding[action.response.result[0]] as APIResource<IServiceBinding>);
   const serviceInstanceGuid = bindingAction.serviceInstanceGuid;
   const serviceBindingGuid = newServiceBindingEntity.metadata.guid;

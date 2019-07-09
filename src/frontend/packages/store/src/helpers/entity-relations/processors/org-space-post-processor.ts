@@ -2,11 +2,16 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
+import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
+import {
+  cfUserEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
 import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { APIResponse } from '../../../actions/request.actions';
-import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { GeneralEntityAppState, GeneralRequestDataState, IRequestEntityTypeState } from '../../../app-state';
 import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
@@ -20,12 +25,6 @@ import {
   ValidateResultFetchingState,
 } from '../entity-relations.types';
 
-import {
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 /**
  * Add roles from (org|space)\[role\]\[user\] into user\[role\]
  */
@@ -71,6 +70,7 @@ export function orgSpacePostProcess(
   allEntities: GeneralRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
   const orgOrSpaceCatalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
+  // TODO: RC Check for possible getCFEntityKey(entityType) bug
   const { entityKey } = orgOrSpaceCatalogueEntity;
   const orgOrSpace = entities[entityKey][action.guid];
   const users = entities[entityKey];
@@ -101,6 +101,7 @@ export function orgSpacePostProcess(
     // The apiResponse will NOT make it into the store, as this is a general validation. So create a mock event to push to store
     const response = {
       entities: {
+        // TODO: RC Check for possible getCFEntityKey(entityType) bug
         [userCatalogueEntity.entityKey]: newUsers
       },
       result: Object.keys(newUsers)
