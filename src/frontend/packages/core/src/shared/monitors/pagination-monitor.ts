@@ -293,6 +293,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   }
 
   private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: GeneralRequestDataState) {
+    // TODO: schemaKey - the schema passed must come from a correct EntityCatalogueEntityConfig with schemaKey populated
     return page.length
       ? denormalize(page, [schema], allEntities).filter(ent => !!ent)
       : [];

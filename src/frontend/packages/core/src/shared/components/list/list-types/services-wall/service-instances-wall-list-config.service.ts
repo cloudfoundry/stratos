@@ -6,6 +6,7 @@ import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
@@ -38,8 +39,8 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   enableTextFilter = true;
   defaultView = 'cards' as ListView;
   cardComponent = new CardMultiActionComponents({
-    [serviceInstancesEntityType]: ServiceInstanceCardComponent,
-    [userProvidedServiceInstanceEntityType]: UserProvidedServiceInstanceCardComponent
+    [getCFEntityKey(serviceInstancesEntityType)]: ServiceInstanceCardComponent,
+    [getCFEntityKey(userProvidedServiceInstanceEntityType)]: UserProvidedServiceInstanceCardComponent
   });
   viewType = ListViewTypes.BOTH;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;

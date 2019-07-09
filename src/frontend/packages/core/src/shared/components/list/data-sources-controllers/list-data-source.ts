@@ -309,6 +309,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
     if (schema instanceof MultiActionConfig) {
       const { paginationAction } = schema.schemaConfigs[0];
+      // TODO: schemaKey - getSchema needs to accept an EntityCatalogueEntityConfig with the correct schemaKey
       const catalogueEntity = entityCatalogue.getEntity(paginationAction.endpointType, paginationAction.entityType);
       return catalogueEntity.getSchema(paginationAction.schemaKey);
     }

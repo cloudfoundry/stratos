@@ -57,6 +57,8 @@ export class StratosBaseCatalogueEntity<T extends IEntityMetadata = IEntityMetad
    * If no schemaKey is provided then the default schema will be returned
    */
   public getSchema(schemaKey?: string) {
+    // TODO: schemaKey - ensure wherever this is called it contains the correct schemaKey (with respect to any config
+    // EntityCatalogueEntityConfig that may use a schemeKey different than that provided by entityCatalogue.getEntity's)
     // TODO(NJ) We should do a better job at typeing schemax
     // schema always gets changed to a EntityCatalogueSchamas.
     const catalogueSchema = (this.definition.schema as EntityCatalogueSchemas);
