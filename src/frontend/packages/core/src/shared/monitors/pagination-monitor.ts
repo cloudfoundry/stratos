@@ -14,18 +14,17 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { GeneralEntityAppState, AppState, GeneralRequestDataState } from '../../../../store/src/app-state';
+import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../../../../store/src/app-state';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { ActionState, ListActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { BaseRequestDataState } from '../../../../store/src/types/entity.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { StratosBaseCatalogueEntity } from '../../core/entity-catalogue/entity-catalogue-entity';
+import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
   static getEntity(entity: MultiActionListEntity | any) {
@@ -79,7 +78,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       schemaKey = ''
     }: any
   ) {
-    // This is a static on the pagintion monitor rather than a member of StratosBaseCatalogueEntity due to 
+    // This is a static on the pagintion monitor rather than a member of StratosBaseCatalogueEntity due to
     // a circular dependency on entityFactory from the getPageInfo function below.
     const schema = catalogueEntity.getSchema(schemaKey);
     return new PaginationMonitor(store, paginationKey, schema, isLocal);
@@ -251,7 +250,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       map(([pagination]) => {
         return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
           const { entityConfig } = pageRequest;
-          const key = EntityCatalogueHelpers.buildEntityKey(entityConfig.endpointType, entityConfig.entityType);
+          const key = EntityCatalogueHelpers.buildEntityKey(entityConfig.entityType, entityConfig.endpointType);
           if (key && !entityKeys.includes(key)) {
             entityKeys.push(key);
           }

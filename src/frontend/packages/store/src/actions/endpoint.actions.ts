@@ -1,12 +1,12 @@
 import { Action } from '@ngrx/store';
 
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';

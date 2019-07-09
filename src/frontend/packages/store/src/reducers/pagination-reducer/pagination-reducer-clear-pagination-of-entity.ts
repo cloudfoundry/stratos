@@ -1,7 +1,7 @@
-import { ClearPaginationOfEntity } from '../../actions/pagination.actions';
-import { PaginationState, PaginationEntityState } from '../../types/pagination.types';
-import { spreadClientPagination } from './pagination-reducer.helper';
 import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { ClearPaginationOfEntity } from '../../actions/pagination.actions';
+import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import { spreadClientPagination } from './pagination-reducer.helper';
 
 export function paginationClearOfEntity(state: PaginationState, action: ClearPaginationOfEntity) {
   // Remove entities from a pagination list. Used for quickly showing the result of a delete

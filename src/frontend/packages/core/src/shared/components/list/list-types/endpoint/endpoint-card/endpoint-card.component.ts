@@ -16,19 +16,19 @@ import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashbo
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
+import { StratosCatalogueEndpointEntity } from '../../../../../../core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
-import { StratosCatalogueEndpointEntity } from '../../../../../../core/entity-catalogue/entity-catalogue-entity';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -88,7 +88,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   set dataSource(ds: BaseEndpointsDataSource) {
     this.pDs = ds;
     // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
-    if (ds && !ds.endpointType && !this.cardMenu) {
+    if (ds && !ds.dsEndpointType && !this.cardMenu) {
       this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
         label: endpointAction.label,
         action: () => endpointAction.action(this.pRow),
