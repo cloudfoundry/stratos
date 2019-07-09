@@ -9,8 +9,8 @@ import {
 
 type ActionDispatcher = (action: Action) => void;
 type a = [string, string, number];
-const list = ['a', 'b', 'c'] as const; // TS3.4 syntax
-type NeededUnionType = typeof list[0 | 2];
+// const list = ['a', 'b', 'c'] as const; // TS3.4 syntax
+// type NeededUnionType = typeof list[0 | 2];
 export class EntityActionDispatcher<
   T extends OrchestratedActionBuilder<any[], Action> =
   OrchestratedActionBuilder<any[], Action>,
