@@ -4,6 +4,8 @@ import {
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
 } from '../../../cloud-foundry/src/actions/service-bindings.actions';
+import { serviceBindingEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { IServiceBinding, IServiceInstance } from '../../../core/src/core/cf-api-svc.types';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
@@ -41,8 +43,10 @@ export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResourc
 
 function handleCreateBinding(state: IRequestEntityTypeState<APIResource>, action: APISuccessOrFailedAction) {
   const bindingAction = action.apiAction as CreateServiceBinding;
-  // TODO: RC Check for possible getCFEntityKey(entityType) bug
-  const newServiceBindingEntity = (action.response.entities.serviceBinding[action.response.result[0]] as APIResource<IServiceBinding>);
+  const cfServiceBindingEntityKey = getCFEntityKey(serviceBindingEntityType);
+  const newServiceBindingEntity = (
+    action.response.entities[cfServiceBindingEntityKey][action.response.result[0]] as
+    APIResource<IServiceBinding>);
   const serviceInstanceGuid = bindingAction.serviceInstanceGuid;
   const serviceBindingGuid = newServiceBindingEntity.metadata.guid;
   const serviceInstanceEntity = state[serviceInstanceGuid];
@@ -84,7 +88,7 @@ function removeBinding(bindings: any[], guid: string) {
   return bindings ? bindings.filter(b => b !== guid) : bindings;
 }
 
-function addBinding(bindings: any[], guid: string) {
-  return bindings ? bindings.filter(b => b !== guid) : bindings;
-}
+// function addBinding(bindings: any[], guid: string) {
+//   return bindings ? bindings.filter(b => b !== guid) : bindings;
+// }
 

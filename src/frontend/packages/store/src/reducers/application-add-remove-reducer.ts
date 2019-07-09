@@ -1,4 +1,6 @@
 import { CREATE_SUCCESS, DELETE_SUCCESS } from '../../../cloud-foundry/src/actions/application.actions';
+import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
 import { deepMergeState } from '../helpers/reducer.helper';
 import { APIResource } from '../types/api.types';
@@ -18,9 +20,9 @@ export function applicationAddRemoveReducer() {
 }
 
 function addApplicationToSpace(state: APIResource, action: APISuccessOrFailedAction) {
-  // TODO: RC Check for possible getCFEntityKey(entityType) bug
-  if (action.response && action.response.entities && action.response.entities.application) {
-    const apps = action.response.entities.application;
+  const cfApplicationEntityKey = getCFEntityKey(applicationEntityType);
+  if (action.response && action.response.entities && action.response.entities[cfApplicationEntityKey]) {
+    const apps = action.response.entities[cfApplicationEntityKey];
     const updatedSpaces = {};
     Object.keys(apps).forEach(appGuid => {
       const app = apps[appGuid] as APIResource<IApp>;

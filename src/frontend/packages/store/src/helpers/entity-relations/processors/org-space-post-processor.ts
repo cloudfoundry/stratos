@@ -69,40 +69,38 @@ export function orgSpacePostProcess(
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
-  const orgOrSpaceCatalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
-  // TODO: RC Check for possible getCFEntityKey(entityType) bug
-  const { entityKey } = orgOrSpaceCatalogueEntity;
-  const orgOrSpace = entities[entityKey][action.guid];
-  const users = entities[entityKey];
-  const existingUsers = allEntities[entityKey];
+  const { entityKey: cfOrgOrSpaceEntityKey } = entityCatalogue.getEntity(action.endpointType, action.entityType);
+  const orgOrSpace = entities[cfOrgOrSpaceEntityKey][action.guid];
+  const users = entities[cfOrgOrSpaceEntityKey];
+  const existingUsers = allEntities[cfOrgOrSpaceEntityKey];
 
   const newUsers = {};
-  if (entityKey === getCFEntityKey(organizationEntityType)) {
+  if (cfOrgOrSpaceEntityKey === getCFEntityKey(organizationEntityType)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
-  } else if (entityKey === getCFEntityKey(spaceEntityType)) {
+  } else if (cfOrgOrSpaceEntityKey === getCFEntityKey(spaceEntityType)) {
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
   const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+  const { entityKey: cfUserEntityKey } = userCatalogueEntity;
   if (!Object.keys(newUsers).length) {
     return;
   }
   if (apiResponse) {
     // The apiResponse will make it into the store, as this is an api.effect validation
-    apiResponse.response.entities = deepMergeState(apiResponse.response.entities, { [userCatalogueEntity.entityKey]: newUsers });
+    apiResponse.response.entities = deepMergeState(apiResponse.response.entities, { [cfUserEntityKey]: newUsers });
     return;
   } else {
 
     // The apiResponse will NOT make it into the store, as this is a general validation. So create a mock event to push to store
     const response = {
       entities: {
-        // TODO: RC Check for possible getCFEntityKey(entityType) bug
-        [userCatalogueEntity.entityKey]: newUsers
+        [cfUserEntityKey]: newUsers
       },
       result: Object.keys(newUsers)
     };
@@ -121,7 +119,7 @@ export function orgSpacePostProcess(
     const successAction = new WrapperRequestActionSuccess(response, paginatedAction, 'fetch', 1, 1);
     return {
       action: successAction,
-      fetchingState$: store.select(selectPaginationState(userCatalogueEntity.entityKey, paginatedAction.paginationKey)).pipe(
+      fetchingState$: store.select(selectPaginationState(cfUserEntityKey, paginatedAction.paginationKey)).pipe(
         map((state: PaginationEntityState) => {
           const res: ValidateResultFetchingState = {
             fetching: !state || !state.ids[1]

@@ -314,7 +314,6 @@ function associateChildWithParent(store: Store<GeneralEntityAppState>, action: E
       );
       if (apiResponse) {
         // Part of an api call. Assign to apiResponse which is added to store later
-        // TODO: RC Check for possible getCFEntityKey(entityType) bug
         apiResponse.response.entities[catalogueEntity.entityKey][action.parentGuid].entity[action.child.paramName] = value;
       } else {
         // Not part of an api call. We already have the entity in the store, so fire off event to link child with parent
