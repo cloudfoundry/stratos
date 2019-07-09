@@ -31,13 +31,19 @@ export function syncPaginationSection(
 
 export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<CFAppState>;
-  cnsiType: string;
+  /**
+   * Used to distinguish between data sources providing all endpoints or those that only provide endpoints matching this value.
+   * Value should match those of an endpoint's `cnsi_type`.
+   *
+   * Note - Should not be renamed to endpointType to avoid clash with ListDataSource endpointType
+   */
+  dsEndpointType: string;
 
   constructor(
     store: Store<CFAppState>,
     listConfig: IListConfig<EndpointModel>,
     action: GetAllEndpoints,
-    cnsiType: string = null,
+    dsEndpointType: string = null,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
@@ -69,9 +75,9 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       paginationKey: action.paginationKey,
       transformEntities: [
         (entities: EndpointModel[]) => {
-          return cnsiType || onlyConnected ? entities.filter(endpoint => {
+          return dsEndpointType || onlyConnected ? entities.filter(endpoint => {
             return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
-              (!cnsiType || endpoint.cnsi_type === cnsiType);
+              (!dsEndpointType || endpoint.cnsi_type === dsEndpointType);
           }) : entities;
         },
         {
@@ -80,7 +86,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
         },
       ],
     });
-    this.cnsiType = cnsiType;
+    this.dsEndpointType = dsEndpointType;
   }
   // TODO Fix the typing
   static getEndpointConfig(

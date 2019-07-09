@@ -88,7 +88,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   set dataSource(ds: BaseEndpointsDataSource) {
     this.pDs = ds;
     // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
-    if (ds && !ds.cnsiType && !this.cardMenu) {
+    if (ds && !ds.dsEndpointType && !this.cardMenu) {
       this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
         label: endpointAction.label,
         action: () => endpointAction.action(this.pRow),
