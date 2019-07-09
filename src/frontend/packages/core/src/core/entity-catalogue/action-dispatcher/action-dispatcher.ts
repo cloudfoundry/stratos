@@ -22,7 +22,7 @@ export class EntityActionDispatcher<
   }
 
   constructor(
-    private actionDispatcher: ActionDispatcher = EntityActionDispatcher.STORE.dispatch,
+    private actionDispatcher?: ActionDispatcher,
     private actionBuilder?: T
   ) { }
   public dispatch(...args: Parameters<T>) {
