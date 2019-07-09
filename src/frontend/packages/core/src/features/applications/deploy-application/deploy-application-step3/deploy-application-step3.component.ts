@@ -15,7 +15,6 @@ import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/acti
 import { appEnvVarsEntityType, applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
-import { StratosBaseCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
@@ -45,8 +44,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private errorSub: Subscription;
   private validSub: Subscription;
 
-  private appEnvVarCatalogueEntity: StratosBaseCatalogueEntity;
-  private appCatalogueEntity: StratosBaseCatalogueEntity;
+  private appEnvVarCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+  private appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
 
   constructor(
     private store: Store<CFAppState>,
@@ -55,8 +54,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
   ) {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
-    this.appEnvVarCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-    this.appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
   }
 
   private initDeployer() {
