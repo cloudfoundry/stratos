@@ -37,7 +37,7 @@ export const serviceBrokerEntityType = 'serviceBroker';
 export const userProvidedServiceInstanceEntityType = 'userProvidedServiceInstance';
 
 export const spaceWithOrgEntityType = 'spaceWithOrg';
-export const serviceInstancesWithspaceEntityType = 'serviceInstancesWithSpace';
+export const serviceInstancesWithSpaceEntityType = 'serviceInstancesWithSpace';
 export const serviceInstancesWithNoBindingsEntityType = 'serviceInstanceWithNoBindings';
 export const serviceBindingNoBindingsEntityType = 'serviceBindingNoBindings';
 
@@ -272,7 +272,7 @@ const ServiceInstancesWithSpaceSchema = new CFEntitySchema(serviceInstancesEntit
     service: ServiceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
-entityCache[serviceInstancesWithspaceEntityType] = ServiceInstancesWithSpaceSchema;
+entityCache[serviceInstancesWithSpaceEntityType] = ServiceInstancesWithSpaceSchema;
 
 const ServiceInstancesWithNoBindingsSchema = new CFEntitySchema(serviceInstancesEntityType, {
   entity: {

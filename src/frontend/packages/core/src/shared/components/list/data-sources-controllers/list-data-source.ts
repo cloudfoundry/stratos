@@ -28,6 +28,7 @@ import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.a
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   PaginatedAction,
@@ -35,6 +36,7 @@ import {
   PaginationParam,
   QParam,
 } from '../../../../../../store/src/types/pagination.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
@@ -49,8 +51,6 @@ import {
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { LocalPaginationHelpers } from './local-list.helpers';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -309,6 +309,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
     if (schema instanceof MultiActionConfig) {
       const { paginationAction } = schema.schemaConfigs[0];
+      // TODO: schemaKey - getSchema needs to accept an EntityCatalogueEntityConfig with the correct schemaKey
       const catalogueEntity = entityCatalogue.getEntity(paginationAction.endpointType, paginationAction.entityType);
       return catalogueEntity.getSchema(paginationAction.schemaKey);
     }

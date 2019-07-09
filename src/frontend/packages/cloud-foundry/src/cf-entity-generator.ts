@@ -57,7 +57,7 @@ import {
   serviceEntityType,
   serviceInstancesEntityType,
   serviceInstancesWithNoBindingsEntityType,
-  serviceInstancesWithspaceEntityType,
+  serviceInstancesWithSpaceEntityType,
   servicePlanEntityType,
   servicePlanVisibilityEntityType,
   spaceEntityType,
@@ -349,7 +349,7 @@ function generateCFServiceInstanceEntity(endpointDefinition: IStratosEndpointDef
     type: serviceInstancesEntityType,
     schema: {
       default: cfEntityFactory(serviceInstancesEntityType),
-      [serviceInstancesWithspaceEntityType]: cfEntityFactory(serviceInstancesWithspaceEntityType),
+      [serviceInstancesWithSpaceEntityType]: cfEntityFactory(serviceInstancesWithSpaceEntityType),
       [serviceInstancesWithNoBindingsEntityType]: cfEntityFactory(serviceInstancesWithNoBindingsEntityType),
     },
     label: 'Marketplace Service Instance',

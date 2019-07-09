@@ -7,6 +7,7 @@ import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 import { GetApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralAppState } from '../../../store/src/app-state';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import {
   completeApiRequest,
   failApiRequest,
@@ -15,18 +16,16 @@ import {
 import { RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
 import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
+import { EntityCatalogueTestHelper } from '../../test-framework/entity-catalogue-test-helpers';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
-import { EntityService } from './entity-service';
-import { EntityServiceFactory } from './entity-service-factory.service';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
-import { EntityCatalogueTestHelper } from '../../test-framework/entity-catalogue-test-helpers';
+import { EntityService } from './entity-service';
+import { EntityServiceFactory } from './entity-service-factory.service';
 
 const endpointType = 'endpoint1';
 const entitySchema = new EntitySchema('child2', endpointType);
