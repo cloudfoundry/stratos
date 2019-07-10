@@ -1,8 +1,9 @@
-import { EntityActionDispatcherManager } from './action-dispatcher';
 import { Action } from '@ngrx/store';
-import { ActionOrchestrator, OrchestratedActionBuilders, OrchestratedActionBuilder } from '../action-orchestrator/action-orchestrator';
-import { getRequestAction, getPaginationAction } from '../action-orchestrator/action-orchestrator.spec.helpers';
+
 import { IRequestAction } from '../../../../../store/src/types/request.types';
+import { ActionOrchestrator, OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
+import { getPaginationAction, getRequestAction } from '../action-orchestrator/action-orchestrator.spec.helpers';
+import { EntityActionDispatcherManager } from './action-dispatcher';
 
 function actionDispatcher(action: Action) {
   // noop
@@ -40,7 +41,7 @@ describe('ActionDispatcher', () => {
   });
 
   it('should dispatch get action', () => {
-    function getActionBuilder(guid: string) {
+    function getActionBuilder(g: string) {
       return getRequestAction();
     }
     const guid = 'guid';
@@ -56,7 +57,7 @@ describe('ActionDispatcher', () => {
   });
 
   it('should dispatch delete action', () => {
-    function getActionBuilder(guid: string) {
+    function getActionBuilder(g: string) {
       return getRequestAction();
     }
     const guid = 'guid';
@@ -72,7 +73,7 @@ describe('ActionDispatcher', () => {
   });
 
   it('should dispatch update action', () => {
-    function getActionBuilder(guid: string) {
+    function getActionBuilder(g: string) {
       return getRequestAction();
     }
     const guid = 'guid';
