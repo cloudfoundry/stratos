@@ -7,7 +7,7 @@ import { IRequestEntityTypeState } from '../app-state';
 
 export function updateApplicationRoutesReducer() {
   return (
-    state: IRequestEntityTypeState<APIResource<IApp>>,
+    state: IRequestEntityTypeState<APIResource<IApp<string>>>,
     action: APISuccessOrFailedAction
   ): IRequestEntityTypeState<APIResource<IApp>> => {
     switch (action.type) {
@@ -51,7 +51,7 @@ function addApplicationRoutes(state: IRequestEntityTypeState<APIResource<IApp>>,
   return applyNewRoutes(state, appGuid, routeGuid, [...oldRoutes, routeGuid]);
 }
 
-function removeApplicationRoute(state: IRequestEntityTypeState<APIResource<IApp>>, appGuid: string, routeGuid: string) {
+function removeApplicationRoute(state: IRequestEntityTypeState<APIResource<IApp<string>>>, appGuid: string, routeGuid: string) {
   if (!appGuid || !state[appGuid]) {
     return state;
   }

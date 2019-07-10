@@ -90,7 +90,7 @@ export interface IRule {
   ports?: string;
 }
 
-export interface IApp {
+export interface IApp<T = unknown> {
   name: string;
   production?: boolean;
   space_guid: string;
@@ -123,7 +123,7 @@ export interface IApp {
   allow_ssh?: boolean;
   ports?: number[];
   service_bindings?: APIResource<IServiceBinding>[];
-  routes?: APIResource<IRoute>[];
+  routes?: T extends string ? string[] : APIResource<IRoute>[];
   stack?: string | APIResource<IStack>;
   space?: string | APIResource<ISpace>;
   space_url?: string;
@@ -180,7 +180,7 @@ export interface IOrganization<T = unknown> {
   space_quota_definitions_url?: string;
   guid?: string;
   cfGuid?: string;
-  spaces?: T extends string ? T[] : APIResource<ISpace>;
+  spaces?: T extends string ? T[] : APIResource<ISpace>[];
   private_domains?: APIResource<IPrivateDomain>[];
   quota_definition?: T extends string ? T : APIResource<IOrgQuotaDefinition>;
 }
