@@ -130,7 +130,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   private dispatchDeleteAction(route: APIResource<ListCfRoute>) {
     const appGuids = (route.entity.apps || []).map(app => app.metadata.guid);
     const singleApp = appGuids.length === 1;
-    this.routeCatalogueEntity.actionDispatcher.dispatchDelete(
+    this.routeCatalogueEntity.actionDispatchManager.dispatchDelete(
       route.metadata.guid,
       this.cfGuid,
       // FIXME: The appGuid/appGuids params need merging
@@ -141,7 +141,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
 
   private dispatchUnmapAction(routeGuid: string, appGuids: string[]) {
     appGuids.forEach(appGuid => {
-      this.routeCatalogueEntity.actionDispatcher.dispatchAction('unmap',
+      this.routeCatalogueEntity.actionDispatchManager.dispatchAction('unmap',
         routeGuid,
         appGuid,
         this.cfGuid,

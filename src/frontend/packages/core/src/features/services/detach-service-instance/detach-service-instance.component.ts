@@ -5,12 +5,14 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { GetServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { GetServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding, IServiceInstance } from '../../../core/cf-api-svc.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import {
   AppMonitorComponentTypes,
@@ -29,7 +31,8 @@ export class DetachServiceInstanceComponent {
   cfGuid: string;
   selectedBindings: APIResource<IServiceBinding>[];
   deleteStarted: boolean;
-  serviceBindingEntityType = serviceBindingEntityType;
+  public siBindingCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+
   public confirmColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
     {
       headerCell: () => 'Name',

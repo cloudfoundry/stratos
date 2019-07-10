@@ -288,7 +288,10 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   return results;
 }
 
-function associateChildWithParent(store: Store<GeneralEntityAppState>, action: EntityInlineChildAction, apiResponse: APIResponse): Observable<boolean> {
+function associateChildWithParent(
+  store: Store<GeneralEntityAppState>,
+  action: EntityInlineChildAction,
+  apiResponse: APIResponse): Observable<boolean> {
   let childValue;
   // Fetch the child value to associate with parent. Will either be a guid or a list of guids
   if (action.child.isArray) {
@@ -523,10 +526,10 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           }
           const catalogueEntity = entityCatalogue.getEntity(eicAction);
           const entityKey = catalogueEntity.entityKey;
-          const normedEntities = entity.entity[paramName].reduce((normedEntities, entity) => {
-            const guid = typeof (entity) === 'string' ? entity : catalogueEntity.getGuidFromEntity(entity);
-            normedEntities[entityKey][guid] = entity;
-            return normedEntities;
+          const normedEntities = entity.entity[paramName].reduce((newNormedEntities, guidOrEntity) => {
+            const guid = typeof (guidOrEntity) === 'string' ? guidOrEntity : catalogueEntity.getGuidFromEntity(guidOrEntity);
+            newNormedEntities[entityKey][guid] = guidOrEntity;
+            return newNormedEntities;
           }, { [entityKey]: {} });
           // Yes? Let's create the action that will populate the pagination section with the value
           const config: HandleRelationsConfig = {

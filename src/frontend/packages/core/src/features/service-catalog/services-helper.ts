@@ -35,9 +35,10 @@ import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 
 
-export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
-                                   serviceBroker: APIResource<IServiceBroker>,
-                                   allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
+export const getSvcAvailability = (
+  servicePlan: APIResource<IServicePlan>,
+  serviceBroker: APIResource<IServiceBroker>,
+  allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
   const svcAvailability = {
     isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
   };

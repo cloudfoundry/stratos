@@ -1,16 +1,18 @@
+/* tslint:disable:max-line-length */
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { UsersRolesClearUpdateState } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
+import { ChangeUserRole } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import {
   cfEntityFactory,
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { UsersRolesClearUpdateState } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { ChangeUserRole } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   selectUsersRoles,
@@ -19,7 +21,7 @@ import {
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
-import { IOrganization } from '../../../../../core/cf-api.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -35,6 +37,7 @@ import {
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 
+/* tslint:enable:max-line-length */
 
 @Component({
   selector: 'app-manage-users-confirm',
@@ -74,7 +77,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     }
   ];
   changes$: Observable<CfRoleChangeWithNames[]>;
-  userSchemaKey = cfUserEntityType;
+  public userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+
   monitorState = AppMonitorComponentTypes.UPDATE;
   private cfGuid$: Observable<string>;
   public orgName$: Observable<string>;

@@ -21,6 +21,7 @@ import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -157,10 +158,6 @@ export class ApplicationDeleteComponent<T> {
   public selectedUserServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   public fetchingApplicationData$: Observable<boolean>;
 
-  public serviceInstancesEntityType = serviceInstancesEntityType;
-  public userProvidedServiceInstanceEntityType = userProvidedServiceInstanceEntityType;
-  public routeEntityType = routeEntityType;
-  public applicationEntityType = applicationEntityType;
   public deletingState = AppMonitorComponentTypes.DELETE;
   public routeMonitor: PaginationMonitor<APIResource<IRoute>>;
   public instanceMonitor: PaginationMonitor<APIResource<IServiceBinding>>;
@@ -169,13 +166,17 @@ export class ApplicationDeleteComponent<T> {
 
   public cancelUrl: string;
 
+  public appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+  public routeCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+  public siCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+  public upsiCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+
   constructor(
     private store: Store<GeneralEntityAppState>,
     private applicationService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,
-    private datePipe: DatePipe,
-
+    private datePipe: DatePipe
   ) {
     this.setupAppMonitor();
     this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;

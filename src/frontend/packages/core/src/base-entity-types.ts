@@ -1,7 +1,13 @@
+import {
+  endpointEntitySchema,
+  STRATOS_ENDPOINT_TYPE,
+  userFavoritesEntitySchema,
+  userProfileEntitySchema,
+} from './base-entity-schemas';
+import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
-import { endpointEntitySchema, userFavoritesEntitySchema, userProfileEntitySchema, STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
-import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from './core/entity-catalogue/entity-catalogue-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
+
 //
 // These types are used to represent the base stratos types.
 //
@@ -18,7 +24,7 @@ const stratosType = {
 
 /**
  * DefaultEndpointEntityType is used to represent a general endpoint
- * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the 
+ * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the
  */
 class DefaultEndpointCatalogueEntity extends StratosCatalogueEntity {
   constructor() {
