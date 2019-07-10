@@ -22,7 +22,6 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { getCFEntityKey } from './cf-entity-helpers';
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
@@ -74,10 +73,10 @@ import {
 } from '../../store/src/reducers/users.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from '../../store/src/reducers/routes.reducer';
 import { serviceInstanceReducer } from '../../store/src/reducers/service-instance.reducer';
-import { endpointDisconnectApplicationReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
+import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { updateApplicationRoutesReducer } from '../../store/src/reducers/application-route.reducer';
 import { updateSpaceQuotaReducer } from '../../store/src/reducers/space-quota.reducer';
-import { applicationAddRemoveReducer } from '../../store/src/reducers/application-add-remove-reducer';
+import { applicationAddRemoveReducer as spaceApplicationAddRemoveReducer } from '../../store/src/reducers/application-add-remove-reducer';
 import { updateOrganizationQuotaReducer } from '../../store/src/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from '../../store/src/reducers/organization-space.reducer';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
@@ -175,7 +174,7 @@ function generateCFAppSummaryEntity(endpointDefinition: IStratosEndpointDefiniti
     endpoint: endpointDefinition,
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
-    dataReducer: [updateAppSummaryRoutesReducer],
+    dataReducers: [updateAppSummaryRoutesReducer],
     actionBuilders: appSummaryActionBuilders
   });
 }
@@ -223,7 +222,9 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: IStrato
     definition,
     {
       // actionBuilders: quotaDefinitionActionBuilder, // TODO:
-      dataReducer: [serviceInstanceReducer],
+      dataReducers: [
+        serviceInstanceReducer
+      ],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name
@@ -376,7 +377,7 @@ function generateCFServiceInstanceEntity(endpointDefinition: IStratosEndpointDef
     definition,
     {
       // actionBuilders: quotaDefinitionActionBuilder, // TODO:
-      dataReducer: [serviceInstanceReducer],
+      dataReducers: [serviceInstanceReducer],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name
@@ -399,7 +400,7 @@ function generateCFUserEntity(endpointDefinition: IStratosEndpointDefinition) {
     definition,
     {
       actionBuilders: userActionBuilders,
-      dataReducer: [userReducer, endpointDisconnectUserReducer],
+      dataReducers: [userReducer, endpointDisconnectUserReducer],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.username || ent.entity.guid
@@ -533,7 +534,7 @@ function generateRouteEntity(endpointDefinition: IStratosEndpointDefinition) {
     definition,
     {
       actionBuilders: routesActionBuilders,
-      dataReducer: [routeReducer],
+      dataReducers: [routeReducer],
       entityBuilder: {
         getMetadata: app => ({
           guid: app.metadata.guid,
@@ -621,7 +622,10 @@ function generateCfApplicationEntity(endpointDefinition: IStratosEndpointDefinit
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
     applicationDefinition,
     {
-      dataReducer: [updateApplicationRoutesReducer, endpointDisconnectApplicationReducer],
+      dataReducers: [
+        updateApplicationRoutesReducer(),
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       entityBuilder: {
         getMetadata: app => ({
           guid: app.metadata.guid,
@@ -650,10 +654,12 @@ function generateCfSpaceEntity(endpointDefinition: IStratosEndpointDefinition) {
     spaceDefinition,
     {
       // actionBuilders: quotaDefinitionActionBuilder, //TODO:
-      dataReducer: [updateSpaceQuotaReducer,
-        endpointDisconnectApplicationReducer,
-        applicationAddRemoveReducer,
-        userSpaceOrgReducer],
+      dataReducers: [
+        updateSpaceQuotaReducer,
+        endpointDisconnectRemoveEntitiesReducer(),
+        spaceApplicationAddRemoveReducer(),
+        userSpaceOrgReducer(true)
+      ],
       entityBuilder: {
         getMetadata: space => ({
           guid: space.metadata.guid,
@@ -679,10 +685,12 @@ function generateCfOrgEntity(endpointDefinition: IStratosEndpointDefinition) {
     orgDefinition,
     {
       actionBuilders: organizationActionBuilders,
-      dataReducer: [updateOrganizationQuotaReducer,
-        updateOrganizationSpaceReducer,
-        endpointDisconnectApplicationReducer,
-        userSpaceOrgReducer],
+      dataReducers: [
+        updateOrganizationQuotaReducer,
+        updateOrganizationSpaceReducer(),
+        endpointDisconnectRemoveEntitiesReducer(),
+        userSpaceOrgReducer(false)
+      ],
       entityBuilder: {
         getMetadata: org => ({
           guid: org.metadata.guid,

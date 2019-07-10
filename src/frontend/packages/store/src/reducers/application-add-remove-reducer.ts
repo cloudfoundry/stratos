@@ -5,10 +5,11 @@ import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
 import { deepMergeState } from '../helpers/reducer.helper';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
+import { IRequestEntityTypeState } from '../app-state';
 
 
 export function applicationAddRemoveReducer() {
-  return (state: APIResource, action: APISuccessOrFailedAction) => {
+  return (state: IRequestEntityTypeState<APIResource<ISpace>>, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case CREATE_SUCCESS:
         return addApplicationToSpace(state, action);
@@ -19,7 +20,7 @@ export function applicationAddRemoveReducer() {
   };
 }
 
-function addApplicationToSpace(state: APIResource, action: APISuccessOrFailedAction) {
+function addApplicationToSpace(state: IRequestEntityTypeState<APIResource<ISpace>>, action: APISuccessOrFailedAction) {
   const cfApplicationEntityKey = getCFEntityKey(applicationEntityType);
   if (action.response && action.response.entities && action.response.entities[cfApplicationEntityKey]) {
     const apps = action.response.entities[cfApplicationEntityKey];
@@ -49,13 +50,13 @@ interface SpaceAsAppRefs {
   apps: string[];
 }
 
-function deleteApplicationFromSpace(state: APIResource, action: APISuccessOrFailedAction) {
+function deleteApplicationFromSpace(state: IRequestEntityTypeState<APIResource<ISpace>>, action: APISuccessOrFailedAction) {
   // GUID of the application that was deleted
   const appGuid = action.apiAction.guid;
   // We don't know ths space GUID, but app guids are unique, so look across all spaces
   const updatedSpaces = {};
   Object.keys(state).forEach(spaceGuid => {
-    const space = state[spaceGuid] as APIResource<SpaceAsAppRefs>;
+    const space = state[spaceGuid] as APIResource<ISpace> & APIResource<SpaceAsAppRefs>;
     const apps = space.entity.apps as string[];
     if (apps && apps.findIndex((value) => value === appGuid) >= 0) {
       const newSpaceEntity = {

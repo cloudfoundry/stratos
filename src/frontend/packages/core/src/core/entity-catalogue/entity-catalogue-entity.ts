@@ -17,15 +17,17 @@ import {
   IStratosEndpointDefinition,
   IStratosEntityBuilder,
   IStratosEntityDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
 } from './entity-catalogue.types';
 
 export interface EntityCatalogueBuilders<
-  T extends IEntityMetadata = IEntityMetadata, Y = any,
-  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders,
-  S extends IRequestEntityTypeState<any> = IRequestEntityTypeState<any>
+  T extends IEntityMetadata = IEntityMetadata,
+  Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
   > {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
-  dataReducer?: ActionReducer<S>[];
+  // Allows extensions to modify entities data in the store via none API Effect or unrelated actions.
+  dataReducers?: ActionReducer<IRequestEntityTypeState<Y>>[];
   actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |

@@ -21,17 +21,17 @@ import { requestDataReducerFactory } from './api-request-data-reducer/request-da
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { IRequestArray } from './api-request-reducer/types';
 import { appStatsReducer } from './app-stats-request.reducer';
+import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
 import { applicationAddRemoveReducer } from './application-add-remove-reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
-import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
-import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './favorite.reducer';
+import { endpointDisconnectRemoveEntitiesReducer } from './endpoint-disconnect-application.reducer';
 import { updateOrganizationQuotaReducer } from './organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { updateSpaceQuotaReducer } from './space-quota.reducer';
-import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './users.reducer';
+import { systemEndpointsReducer } from './system-endpoints.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create

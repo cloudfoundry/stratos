@@ -87,9 +87,9 @@ function updatePermission(
 }
 
 type StateEntity = ISpace | IOrganization;
-interface StateEntities<T> { [guid: string]: APIResource<StateEntity>; }
+type StateEntities<T> = IRequestEntityTypeState<APIResource<StateEntity>>;
 
-export function userSpaceOrgReducer<T extends StateEntity>(isSpace: boolean) {
+export function userSpaceOrgReducer<T = StateEntity>(isSpace: boolean) {
   return (state: StateEntities<T>, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case ADD_ROLE_SUCCESS:

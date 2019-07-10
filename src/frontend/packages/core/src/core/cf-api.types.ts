@@ -2,6 +2,11 @@ import { APIResource } from '../../../store/src/types/api.types';
 import { CfUser } from '../../../store/src/types/user.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
 
+export interface StratosCFEntity {
+  cfGuid: string;
+}
+
+
 export interface IRoute {
   host: string;
   path: string;
@@ -153,7 +158,7 @@ export interface IDeveloper {
   audited_spaces_url: string;
 }
 
-export interface IOrganization<spaceT = APIResource<ISpace>[]> {
+export interface IOrganization<T = unknown> {
   name: string;
   billing_enabled?: boolean;
   quota_definition_guid?: string;
@@ -175,9 +180,9 @@ export interface IOrganization<spaceT = APIResource<ISpace>[]> {
   space_quota_definitions_url?: string;
   guid?: string;
   cfGuid?: string;
-  spaces?: spaceT;
+  spaces?: T extends string ? T[] : APIResource<ISpace>;
   private_domains?: APIResource<IPrivateDomain>[];
-  quota_definition?: APIResource<IOrgQuotaDefinition>;
+  quota_definition?: T extends string ? T : APIResource<IOrgQuotaDefinition>;
 }
 
 export interface IDomain {

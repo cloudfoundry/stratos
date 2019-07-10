@@ -11,7 +11,7 @@ import { IRequestEntityTypeState } from '../app-state';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
-type entityOrgType = APIResource<IOrganization<string[]>>;
+type entityOrgType = APIResource<IOrganization<string>>;
 // Note - This reducer will be updated when we address general deletion of entities within inline lists (not paginated lists)
 export function updateOrganizationSpaceReducer() {
   return (state: IRequestEntityTypeState<entityOrgType>, action: APISuccessOrFailedAction<NormalizedResponse>) => {
@@ -33,7 +33,7 @@ function addSpaceToOrg(
   state: IRequestEntityTypeState<entityOrgType>,
   orgGuid: string,
   newSpace: APIResource<ISpace>
-) {
+): IRequestEntityTypeState<entityOrgType> {
   const orgToModify = getOrg(state, orgGuid);
 
   if (!orgToModify) {
@@ -56,7 +56,7 @@ function removeSpaceFromOrg(
   state: IRequestEntityTypeState<entityOrgType>,
   orgGuid: string,
   spaceGuid: string
-) {
+): IRequestEntityTypeState<entityOrgType> {
   const orgToModify = getOrg(state, orgGuid);
   const newSpaces = orgToModify.entity.spaces.reduce((spaceIds, spaceId) => {
     if (spaceId !== spaceGuid) {
