@@ -9,9 +9,9 @@ import {
   serviceBrokerEntityType,
   servicePlanVisibilityEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceBrokers } from '../../../../store/src/actions/service-broker.actions';
-import { GetServicePlanVisibilities } from '../../../../store/src/actions/service-plan-visibility.actions';
-import { GetSpace } from '../../../../store/src/actions/space.actions';
+import { GetServiceBrokers } from '../../../../cloud-foundry/src/actions/service-broker.actions';
+import { GetServicePlanVisibilities } from '../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
+import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

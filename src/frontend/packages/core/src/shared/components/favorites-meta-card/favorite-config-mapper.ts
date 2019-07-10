@@ -101,11 +101,11 @@ export class FavoritesConfigMapper {
         };
       }
       return {
-        lines: catalogueEntity.builder.getLines ? catalogueEntity.builder.getLines(entity) : null,
+        lines: catalogueEntity.builders.entityBuilder.getLines ? catalogueEntity.builders.entityBuilder.getLines(entity) : null,
         type: catalogueEntity.definition.type,
-        routerLink: catalogueEntity.builder.getLink(entity),
+        routerLink: catalogueEntity.builders.entityBuilder.getLink(entity),
         name: entity.name,
-        menuItems: catalogueEntity.builder.getActions ? catalogueEntity.builder.getActions(entity) : null
+        menuItems: catalogueEntity.builders.entityBuilder.getActions ? catalogueEntity.builders.entityBuilder.getActions(entity) : null
       };
     };
   }
@@ -130,7 +130,7 @@ export class FavoritesConfigMapper {
    */
   public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
     const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
-    return catalogueEntity ? catalogueEntity.builder.getMetadata(entity) : null;
+    return catalogueEntity ? catalogueEntity.builders.entityBuilder.getMetadata(entity) : null;
   }
 
   /**
@@ -152,8 +152,8 @@ export class FavoritesConfigMapper {
     const entityDefinition = catalogueEntity.definition as IStratosEntityDefinition;
     const endpointType = isEndpoint ? catalogueEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
     const entityType = isEndpoint ? EntityCatalogueHelpers.endpointType : entityDefinition.type;
-    const metadata = catalogueEntity.builder.getMetadata(entity);
-    const guid = isEndpoint ? null : catalogueEntity.builder.getGuid(metadata);
+    const metadata = catalogueEntity.builders.entityBuilder.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogueEntity.builders.entityBuilder.getGuid(metadata);
     return new UserFavorite<T>(
       endpointId,
       endpointType,

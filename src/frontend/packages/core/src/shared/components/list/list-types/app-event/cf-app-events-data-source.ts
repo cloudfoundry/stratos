@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { appEventEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllAppEvents } from '../../../../../../../store/src/actions/app-event.actions';
+import { GetAllAppEvents } from '../../../../../../../cloud-foundry/src/actions/app-event.actions';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { EntityInfo } from '../../../../../../../store/src/types/api.types';

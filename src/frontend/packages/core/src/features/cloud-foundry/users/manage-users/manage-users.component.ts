@@ -8,7 +8,7 @@ import {
   UsersRolesClear,
   UsersRolesExecuteChanges,
   UsersRolesSetUsers,
-} from '../../../../../../store/src/actions/users-roles.actions';
+} from '../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { selectUsersRoles, selectUsersRolesPicked } from '../../../../../../store/src/selectors/users-roles.selector';
 import { CfUser } from '../../../../../../store/src/types/user.types';

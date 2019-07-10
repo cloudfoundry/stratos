@@ -6,7 +6,7 @@ import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'r
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';

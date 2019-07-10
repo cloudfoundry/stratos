@@ -5,22 +5,23 @@ import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { GetAppRoutes } from '../../../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { DeleteApplication, GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
+import { DeleteRoute } from '../../../../../cloud-foundry/src/actions/route.actions';
+import { DeleteServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
+import { DeleteUserProvidedInstance } from '../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import {
   applicationEntityType,
   routeEntityType,
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppRoutes } from '../../../../../store/src/actions/application-service-routes.actions';
-import { DeleteApplication, GetApplication } from '../../../../../store/src/actions/application.actions';
-import { DeleteRoute } from '../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { DeleteServiceInstance } from '../../../../../store/src/actions/service-instances.actions';
-import { DeleteUserProvidedInstance } from '../../../../../store/src/actions/user-provided-service.actions';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -157,10 +158,6 @@ export class ApplicationDeleteComponent<T> {
   public selectedUserServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   public fetchingApplicationData$: Observable<boolean>;
 
-  public serviceInstancesEntityType = serviceInstancesEntityType;
-  public userProvidedServiceInstanceEntityType = userProvidedServiceInstanceEntityType;
-  public routeEntityType = routeEntityType;
-  public applicationEntityType = applicationEntityType;
   public deletingState = AppMonitorComponentTypes.DELETE;
   public routeMonitor: PaginationMonitor<APIResource<IRoute>>;
   public instanceMonitor: PaginationMonitor<APIResource<IServiceBinding>>;
@@ -169,13 +166,17 @@ export class ApplicationDeleteComponent<T> {
 
   public cancelUrl: string;
 
+  public appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+  public routeCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+  public siCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+  public upsiCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+
   constructor(
     private store: Store<GeneralEntityAppState>,
     private applicationService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,
-    private datePipe: DatePipe,
-
+    private datePipe: DatePipe
   ) {
     this.setupAppMonitor();
     this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;
@@ -205,6 +206,8 @@ export class ApplicationDeleteComponent<T> {
       shareReplay(1),
       startWith(true)
     );
+
+
     this.store.dispatch(new GetApplication(applicationService.appGuid, applicationService.cfGuid));
   }
 

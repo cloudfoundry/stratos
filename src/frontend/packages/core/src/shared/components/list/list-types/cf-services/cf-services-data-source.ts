@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllServices } from '../../../../../../../store/src/actions/service.actions';
+import { GetAllServices } from '../../../../../../../cloud-foundry/src/actions/service.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import {

@@ -8,7 +8,7 @@ import {
   REGISTER_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../actions/endpoint.actions';
-import { DELETE_ORGANIZATION_SUCCESS } from '../../actions/organization.actions';
+import { DELETE_ORGANIZATION_SUCCESS } from '../../../../cloud-foundry/src/actions/organization.actions';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
   GET_CURRENT_USER_CF_RELATIONS_FAILED,
@@ -19,9 +19,9 @@ import {
   GET_CURRENT_USER_RELATIONS_SUCCESS,
   GetCurrentUserRelationsComplete,
   GetUserCfRelations,
-} from '../../actions/permissions.actions';
-import { DELETE_SPACE_SUCCESS } from '../../actions/space.actions';
-import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../actions/users.actions';
+} from '../../../../cloud-foundry/src/actions/permissions.actions';
+import { DELETE_SPACE_SUCCESS } from '../../../../cloud-foundry/src/actions/space.actions';
+import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../../../cloud-foundry/src/actions/users.actions';
 import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { currentUserBaseCFRolesReducer } from './current-user-base-cf-role.reducer';

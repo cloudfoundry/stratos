@@ -7,20 +7,20 @@ import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/oper
 
 import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 import {
+  AssignRouteToApplication,
+  GetAppRoutes,
+} from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
+import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
+import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
+import {
   applicationEntityType,
   domainEntityType,
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
-import {
-  AssociateRouteWithAppApplication,
-  GetAppRoutes,
-} from '../../../../../../store/src/actions/application-service-routes.actions';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
-import { CreateRoute } from '../../../../../../store/src/actions/route.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GetSpace } from '../../../../../../store/src/actions/space.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
@@ -251,7 +251,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
-    this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, routeGuid, this.cfGuid));
+    this.store.dispatch(new AssignRouteToApplication(this.appGuid, routeGuid, this.cfGuid));
     return this.store.select(selectCfRequestInfo(applicationEntityType, this.appGuid)).pipe(
       pairwise(),
       filter(([oldApp, newApp]) => {
@@ -270,7 +270,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
     return this.selectedRoute$.pipe(
-      tap(route => this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, route.metadata.guid, this.cfGuid))),
+      tap(route => this.store.dispatch(new AssignRouteToApplication(this.appGuid, route.metadata.guid, this.cfGuid))),
       switchMap(() => this.appService.app$),
       map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),
       filter(requestInfo => !requestInfo.busy),

@@ -7,14 +7,14 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
+import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
 import {
   CloseSideHelp,
   CloseSideNav,
   DisableMobileNav,
   EnableMobileNav,
 } from '../../../../../store/src/actions/dashboard-actions';
-import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
+import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';

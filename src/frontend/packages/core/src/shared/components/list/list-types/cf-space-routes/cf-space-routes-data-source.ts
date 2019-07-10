@@ -6,7 +6,7 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetSpaceRoutes } from '../../../../../../../store/src/actions/space.actions';
+import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationKey,

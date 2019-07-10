@@ -1,5 +1,5 @@
 import { ISpacesRoleState, IOrgsRoleState } from '../../types/current-user-roles.types';
-import { GetCurrentUserRelationsComplete } from '../../actions/permissions.actions';
+import { GetCurrentUserRelationsComplete } from '../../../../cloud-foundry/src/actions/permissions.actions';
 import { currentUserOrgRoleReducer } from './current-user-roles-org.reducer';
 import { addNewRoles, removeOldRoles } from './current-user-reducer.helpers';
 

@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
-import { GetAllUsersAsAdmin } from '../../../../../../store/src/actions/users.actions';
+import { GetAllUsersAsAdmin } from '../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';

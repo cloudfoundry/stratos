@@ -9,8 +9,8 @@ import {
   organizationEntityType,
   quotaDefinitionEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { UpdateOrganization } from '../../../../../../store/src/actions/organization.actions';
-import { GetQuotaDefinitions } from '../../../../../../store/src/actions/quota-definitions.actions';
+import { UpdateOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
+import { GetQuotaDefinitions } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {

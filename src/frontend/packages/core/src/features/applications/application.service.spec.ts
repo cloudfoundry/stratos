@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { applicationEntityType, cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { GetApplication } from '../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../cloud-foundry/src/actions/application.actions';
 import { AppStoreModule } from '../../../../store/src/store.module';
 import { generateTestApplicationServiceProvider } from '../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../test-framework/entity-service.helper';

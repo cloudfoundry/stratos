@@ -6,8 +6,8 @@ import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/ope
 
 import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../actions/users-roles.actions';
-import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../actions/users.actions';
+import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../../cloud-foundry/src/actions/users-roles.actions';
+import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../app-state';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';

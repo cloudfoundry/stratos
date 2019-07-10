@@ -5,15 +5,15 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
+import { GetOrganizationSpaceQuotaDefinitions } from '../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import {
   cfEntityFactory,
   organizationEntityType,
   spaceEntityType,
   spaceQuotaEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllOrganizationSpaces } from '../../../../store/src/actions/organization.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { GetOrganizationSpaceQuotaDefinitions } from '../../../../store/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

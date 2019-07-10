@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
 
-import { GET_ORGANIZATION, GetOrganization } from '../../actions/organization.actions';
+import { GET_ORGANIZATION, GetOrganization } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { ApiActionTypes, APIResponse } from '../../actions/request.actions';
-import { GET_SPACE, GetSpace } from '../../actions/space.actions';
+import { GET_SPACE, GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../app-state';
 import { ICFAction, IRequestAction } from '../../types/request.types';
 import { ValidateEntityResult } from './entity-relations.types';

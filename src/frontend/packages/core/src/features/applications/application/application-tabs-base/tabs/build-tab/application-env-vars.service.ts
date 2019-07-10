@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAppEnvVarsAction } from '../../../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppEnvVarsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import {
   getPaginationObservables,

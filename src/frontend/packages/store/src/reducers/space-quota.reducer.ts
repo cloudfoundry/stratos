@@ -5,7 +5,7 @@ import {
   AssociateSpaceQuota,
   DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
   DisassociateSpaceQuota,
-} from '../actions/quota-definitions.actions';
+} from '../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';

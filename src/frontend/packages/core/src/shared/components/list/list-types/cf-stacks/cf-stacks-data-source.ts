@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { cfEntityFactory, stackEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllStacks } from '../../../../../../../store/src/actions/stack.action';
+import { GetAllStacks } from '../../../../../../../cloud-foundry/src/actions/stack.action';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';

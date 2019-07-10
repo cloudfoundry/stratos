@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { applicationEntityType, cfEntityFactory } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetApplication } from '../../../../../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../test-framework/entity-service.helper';
 import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';

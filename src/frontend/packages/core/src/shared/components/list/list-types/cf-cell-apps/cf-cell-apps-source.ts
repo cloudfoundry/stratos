@@ -8,7 +8,7 @@ import {
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
+import { GetApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';

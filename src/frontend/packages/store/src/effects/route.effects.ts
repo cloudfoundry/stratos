@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
-import { RouteEvents, UnmapRoute } from '../actions/route.actions';
+import { RouteEvents, UnmapRoute } from '../../../cloud-foundry/src/actions/route.actions';
 import { CFAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
 

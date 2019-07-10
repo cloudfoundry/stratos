@@ -7,7 +7,7 @@ import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from './entity
 import { TestEntityCatalogue } from './entity-catalogue.service';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { endpointEntitySchema } from '../../base-entity-schemas';
-describe('EntityCatalogueService', () => {
+fdescribe('EntityCatalogueService', () => {
   let entityCatalogue: TestEntityCatalogue;
   function getEndpointDefinition() {
     return {

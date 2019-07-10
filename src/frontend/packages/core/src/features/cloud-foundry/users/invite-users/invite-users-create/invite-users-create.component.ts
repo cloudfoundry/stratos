@@ -5,9 +5,9 @@ import { map } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../../../../cloud-foundry/cf-types';
 import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetOrganization } from '../../../../../../../store/src/actions/organization.actions';
+import { GetOrganization } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
-import { GetSpace } from '../../../../../../../store/src/actions/space.actions';
+import { GetSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';

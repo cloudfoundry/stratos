@@ -1,4 +1,4 @@
-import { UserRelationTypes } from '../../actions/permissions.actions';
+import { UserRelationTypes } from '../../../../cloud-foundry/src/actions/permissions.actions';
 import { IOrgRoleState } from '../../types/current-user-roles.types';
 
 export const defaultUserOrgRoleState: IOrgRoleState = {

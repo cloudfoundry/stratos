@@ -9,7 +9,7 @@ import {
   spaceWithOrgEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllUserProvidedServices } from '../../../../../../../store/src/actions/user-provided-service.actions';
+import { GetAllUserProvidedServices } from '../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationKey,

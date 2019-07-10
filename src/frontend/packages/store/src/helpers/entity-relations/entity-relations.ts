@@ -3,16 +3,16 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import {
+  FetchRelationAction,
+  FetchRelationPaginatedAction,
+  FetchRelationSingleAction,
+} from '../../../../cloud-foundry/src/actions/relation.actions';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { isEntityBlocked } from '../../../../core/src/core/entity-service';
 import { pathGet } from '../../../../core/src/core/utils.service';
 import { environment } from '../../../../core/src/environments/environment';
 import { SetInitialParams } from '../../actions/pagination.actions';
-import {
-  FetchRelationAction,
-  FetchRelationPaginatedAction,
-  FetchRelationSingleAction,
-} from '../../actions/relation.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { GeneralEntityAppState } from '../../app-state';
 import { RequestInfoState } from '../../reducers/api-request-reducer/types';

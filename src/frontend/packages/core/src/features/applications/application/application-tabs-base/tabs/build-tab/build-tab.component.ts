@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, tap } from 'rxjs/operators';
 
-import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../store/src/actions/app-metadata.actions';
-import { RestageApplication } from '../../../../../../../../store/src/actions/application.actions';
+import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { RestageApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';

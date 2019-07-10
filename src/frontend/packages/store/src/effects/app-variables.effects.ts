@@ -3,9 +3,9 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../actions/app-metadata.actions';
-import { AppVariables, AppVariablesUpdate } from '../actions/app-variables.actions';
-import { UpdateExistingApplication } from '../actions/application.actions';
+import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
+import { AppVariables, AppVariablesUpdate } from '../../../cloud-foundry/src/actions/app-variables.actions';
+import { UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../app-state';
 
 

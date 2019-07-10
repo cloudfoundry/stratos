@@ -12,11 +12,11 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllApplications } from '../../../../../store/src/actions/application.actions';
-import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import { FetchAllDomains } from '../../../../../store/src/actions/domains.actions';
+import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
+import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
+import { FetchAllDomains } from '../../../../../cloud-foundry/src/actions/domains.actions';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { DeleteOrganization, GetAllOrganizations } from '../../../../../store/src/actions/organization.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import {

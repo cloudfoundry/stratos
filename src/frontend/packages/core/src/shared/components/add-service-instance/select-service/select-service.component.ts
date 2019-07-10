@@ -5,7 +5,7 @@ import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscri
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { cfEntityFactory, serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { SetCreateServiceInstanceServiceGuid } from '../../../../../../store/src/actions/create-service-instance.actions';
+import { SetCreateServiceInstanceServiceGuid } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import {
   selectCreateServiceInstanceCfGuid,

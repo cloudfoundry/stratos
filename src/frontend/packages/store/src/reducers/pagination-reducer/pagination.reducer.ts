@@ -1,3 +1,4 @@
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
@@ -9,6 +10,7 @@ import {
   CLEAR_PAGES,
   CLEAR_PAGINATION_OF_ENTITY,
   CLEAR_PAGINATION_OF_TYPE,
+  ClearPaginationOfType,
   CREATE_PAGINATION,
   REMOVE_PARAMS,
   RESET_PAGINATION,
@@ -110,7 +112,8 @@ function paginate(action, state = getDefaultStateFromEntityCatalogue(), updatePa
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     // TODO we shouldn't be using a
-    const clearEntityType = action.entityType || 'application';
+    const clearAction = action as ClearPaginationOfType;
+    const clearEntityType = entityCatalogue.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
     return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
   }
 

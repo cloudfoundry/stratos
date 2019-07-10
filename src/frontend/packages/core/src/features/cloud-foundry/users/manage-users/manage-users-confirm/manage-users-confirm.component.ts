@@ -4,14 +4,15 @@ import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { UsersRolesClearUpdateState } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
+import { ChangeUserRole } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import {
   cfEntityFactory,
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { UsersRolesClearUpdateState } from '../../../../../../../store/src/actions/users-roles.actions';
-import { ChangeUserRole } from '../../../../../../../store/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   selectUsersRoles,
@@ -20,6 +21,7 @@ import {
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -75,7 +77,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     }
   ];
   changes$: Observable<CfRoleChangeWithNames[]>;
-  userSchemaKey = cfUserEntityType;
+  public userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+
   monitorState = AppMonitorComponentTypes.UPDATE;
   private cfGuid$: Observable<string>;
   public orgName$: Observable<string>;

@@ -1,4 +1,4 @@
-import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
+import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../../cloud-foundry/src/actions/permissions.actions';
 import {
   getDefaultEndpointRoles,
   getDefaultRolesRequestState,

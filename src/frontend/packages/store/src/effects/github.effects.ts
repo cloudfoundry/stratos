@@ -8,7 +8,7 @@ import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import { gitRepoEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { GitSCMService, GitSCMType } from '../../../core/src/shared/data-services/scm/scm.service';
-import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../actions/github.actions';
+import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../../cloud-foundry/src/actions/github.actions';
 import { CFAppState } from '../app-state';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';

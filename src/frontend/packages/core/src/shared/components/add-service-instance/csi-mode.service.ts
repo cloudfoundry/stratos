@@ -5,7 +5,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfRequestInfo } from '../../../../../cloud-foundry/src/selectors/api.selectors';
-import { CreateServiceBinding } from '../../../../../store/src/actions/service-bindings.actions';
+import { CreateServiceBinding } from '../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { SpaceScopedService } from '../../../features/service-catalog/services.service';

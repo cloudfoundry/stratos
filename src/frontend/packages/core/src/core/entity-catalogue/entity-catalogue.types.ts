@@ -32,7 +32,7 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
  * @export
  */
 export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogueSchemas> extends IStratosEntityWithIcons {
-  readonly type: string;
+  readonly type?: string;
   readonly schema: T;
   readonly label?: string;
   readonly labelPlural?: string;

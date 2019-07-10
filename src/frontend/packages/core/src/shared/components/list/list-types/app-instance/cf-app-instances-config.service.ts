@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
 
-import { DeleteApplicationInstance } from '../../../../../../../store/src/actions/application.actions';
+import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
