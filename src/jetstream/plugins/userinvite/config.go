@@ -56,7 +56,7 @@ const (
 	defaultPlainTextTemplate  = "user-invite-email.txt"
 	defaultSubject            = "You have been invited to join a Cloud Foundry"
 	vCapApplication           = "VCAP_APPLICATION"
-	userInviteTemplatesDirEnv = "TEMPLATES_DIR"
+	userInviteTemplatesDirEnv = "TEMPLATE_DIR"
 )
 
 // LoadConfig loads the configuration for inviting users
@@ -78,7 +78,7 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 		fullpath := path.Clean(path.Join(dir, t))
 		log.Info(fullpath)
 
-		if stat, err := os.Stat(fullpath); err != nil {
+		if stat, err := os.Stat(fullpath); err == nil {
 			log.Info("STAT OKAY")
 			log.Info(stat.Name())
 			log.Info(stat.Size())
@@ -89,7 +89,7 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 	// Set Templates directory if not set and the folder exists
 	if env.IsSet(vCapApplication) {
 		if !env.IsSet(userInviteTemplatesDirEnv) {
-			if _, err := os.Stat("./templates"); err != nil {
+			if _, err := os.Stat("./templates"); err == nil {
 				log.Info("Set templates folder to ./templates")
 				os.Setenv(userInviteTemplatesDirEnv, "./templates")
 			}
