@@ -5,6 +5,7 @@ import (
 	"fmt"
 	html "html/template"
 	"path"
+	"os"
 	text "text/template"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
@@ -50,16 +51,29 @@ type Config struct {
 }
 
 const (
-	defaultSMTPPort          = 25
-	defaultHTMLTemplate      = "user-invite-email.html"
-	defaultPlainTextTemplate = "user-invite-email.txt"
-	defaultSubject           = "You have been invited to join a Cloud Foundry"
+	defaultSMTPPort           = 25
+	defaultHTMLTemplate       = "user-invite-email.html"
+	defaultPlainTextTemplate  = "user-invite-email.txt"
+	defaultSubject            = "You have been invited to join a Cloud Foundry"
+	vCapApplication           = "VCAP_APPLICATION"
+	userInviteTemplatesDirEnv = "TEMPLATES_DIR"
 )
 
 // LoadConfig loads the configuration for inviting users
 func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 
 	c := &Config{}
+
+	// Check if running in Cloud Foundry
+	// Set Templates directory if not set and the folder exists
+	if env.IsSet(vCapApplication) {
+		if env.IsSet(userInviteTemplatesDirEnv) {
+			if _, err := os.Stat("./templates"); !os.IsNotExist(err) {
+				log.Info("Set templates folder to ./templates")
+				os.Setenv(userInviteTemplatesDirEnv, "./templates")
+			}
+		}
+	}
 
 	smtpConfig := &SMTPConfig{}
 	if err := config.Load(smtpConfig, env.Lookup); err != nil {

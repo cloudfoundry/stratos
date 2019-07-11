@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 
@@ -29,7 +28,6 @@ const (
 	SkipAutoRegister               = "SKIP_AUTO_REGISTER"
 	SQLiteProviderName             = "sqlite"
 	defaultSessionSecret           = "wheeee!"
-	userInviteTemplatesDirEnv      = "TEMPLATES_DIR"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
@@ -75,15 +73,6 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 			}
 		}
 	}
-
-	// Set Templates directory if not set and the folder exists
-	if envLookup.IsSet(userInviteTemplatesDirEnv) {
-		if _, err := os.Stat("./templates"); !os.IsNotExist(err) {
-			log.Info("Set templates folder to ./templates")
-			os.Setenv(userInviteTemplatesDirEnv, "./templates")
-		}
-	}
-
 }
 
 // Init creates a new CFHosting plugin
