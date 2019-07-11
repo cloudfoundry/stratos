@@ -75,6 +75,15 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 			}
 		}
 	}
+
+	// Set Templates directory if not set and the folder exists
+	if ch.portalProxy.Env().IsSet(userInviteTemplatesDirEnv) {
+		if _, err := os.Stat("./templates"); !os.IsNotExist(err) {
+			log.Info("Set templates folder to ./templates")
+			os.Setenv(userInviteTemplatesDirEnv, "./templates")
+		}
+	}
+
 }
 
 // Init creates a new CFHosting plugin
@@ -127,14 +136,6 @@ func (ch *CFHosting) Init() error {
 		if ok {
 			ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
 			log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
-		}
-
-		// Set Templates directory if not set and the folder exists
-		if !ch.portalProxy.Env().IsSet(userInviteTemplatesDirEnv) {
-			if _, err := os.Stat("./templates"); !os.IsNotExist(err) {
-				log.Info("Set templates folder to ./templates")
-				os.Setenv(userInviteTemplatesDirEnv, "./templates")
-			}
 		}
 
 		// Need to run as HTTP on the port we were told to use
