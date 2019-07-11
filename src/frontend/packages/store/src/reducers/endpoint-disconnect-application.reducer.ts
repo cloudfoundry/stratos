@@ -5,7 +5,6 @@ import { IApp, StratosCFEntity } from '../../../core/src/core/cf-api.types';
 
 export function endpointDisconnectRemoveEntitiesReducer<T = IApp>() {
   return (state: IRequestEntityTypeState<APIResource<T & StratosCFEntity>>, action: DisconnectEndpoint) => {
-    console.log('disconnecting');
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
       case UNREGISTER_ENDPOINTS_SUCCESS:

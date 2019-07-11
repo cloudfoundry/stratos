@@ -43,7 +43,6 @@ function getInternalEntityKey(type: string) {
 export function requestDataReducer() {
   const baseDataReducer = requestDataReducerFactory(requestActions);
   const extraReducers = entityCatalogue.getAllEntityRequestDataReducers();
-  console.log(extraReducers);
   extraReducers[getInternalEntityKey(endpointStoreNames.type)] = [systemEndpointsReducer];
   extraReducers[getInternalEntityKey(userFavoritesEntitySchema.entityType)] = [
     addOrUpdateUserFavoriteMetadataReducer,

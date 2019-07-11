@@ -11,13 +11,4 @@ registerCFEntities();
     CloudFoundryComponentsModule
   ],
 })
-export class CloudFoundryPackageModule {
-  constructor() {
-    console.log('register')
-    this.registerCfFavoriteEntities();
-  }
-  private registerCfFavoriteEntities() {
-
-  }
-
-}
+export class CloudFoundryPackageModule { }
