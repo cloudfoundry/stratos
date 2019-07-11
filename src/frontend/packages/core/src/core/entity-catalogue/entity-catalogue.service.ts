@@ -6,6 +6,10 @@ import {
 } from './entity-catalogue-entity';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
+import { ActionReducer } from '@ngrx/store';
+import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
+import { BaseRequestDataState } from '../../../../store/src/types/entity.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
@@ -157,6 +161,19 @@ class EntityCatalogue {
       }
       return allEndpoints;
     }, [] as StratosCatalogueEndpointEntity[]);
+  }
+
+  public getAllEntityRequestDataReducers() {
+    const entities = Array.from(this.entities.values());
+    return entities.reduce((allEntityReducers, entity) => {
+      if (entity.entityKey && entity.builders.dataReducers && entity.builders.dataReducers.length) {
+        return {
+          ...allEntityReducers,
+          [entity.entityKey]: entity.builders.dataReducers
+        };
+      }
+      return allEntityReducers;
+    }, {} as ExtraApiReducers<IRequestEntityTypeState<any>>);
   }
 }
 

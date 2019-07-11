@@ -1,19 +1,18 @@
-import { Action } from '@ngrx/store';
+import { Action, ActionReducer } from '@ngrx/store';
 
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
 import { deepMergeState } from '../../helpers/reducer.helper';
 import { IFlatTree } from '../../helpers/schema-tree-traverse';
-import { BaseRequestDataState } from '../../types/entity.types';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { IRequestArray } from '../api-request-reducer/types';
 
 
-export function requestDataReducerFactory(actions: IRequestArray) {
+export function requestDataReducerFactory(actions: IRequestArray): ActionReducer<Record<string, any>> {
   const successAction = actions[1];
-  const defaultState = getDefaultStateFromEntityCatalogue<BaseRequestDataState>();
-  return function entitiesReducer(state = defaultState, action: Action): BaseRequestDataState {
+  const defaultState = getDefaultStateFromEntityCatalogue<Record<string, any>>();
+  return function entitiesReducer(state = defaultState, action: Action): Record<string, any> {
     switch (action.type) {
       case successAction:
         const success = action as ISuccessRequestAction;
@@ -32,20 +31,20 @@ export function requestDataReducerFactory(actions: IRequestArray) {
   };
 }
 
-function cleanStateFromFlatTree(state: BaseRequestDataState, action: SetTreeDeleted): BaseRequestDataState {
+function cleanStateFromFlatTree(state: Record<string, any>, action: SetTreeDeleted): Record<string, any> {
   const { tree } = action;
   return Object.keys(tree).reduce(reduceTreeToState(tree), { ...state });
 }
 
 function reduceTreeToState(tree: IFlatTree) {
-  return (state: BaseRequestDataState, entityKey: string) => {
+  return (state: Record<string, any>, entityKey: string) => {
     const ids = tree[entityKey];
     return Array.from(ids).reduce(reduceIdsToState(entityKey), state);
   };
 }
 
 function reduceIdsToState(entityKey: string) {
-  return (state: BaseRequestDataState, id: string) => {
+  return (state: Record<string, any>, id: string) => {
     const {
       [id]: omit,
       ...newState
@@ -59,7 +58,7 @@ function reduceIdsToState(entityKey: string) {
 }
 
 function deleteEntity(state, entityKey, guid) {
-  const newState = {} as BaseRequestDataState;
+  const newState = {} as Record<string, any>;
   for (const entityTypeKey in state) {
     if (entityTypeKey === entityKey) {
       newState[entityTypeKey] = {};

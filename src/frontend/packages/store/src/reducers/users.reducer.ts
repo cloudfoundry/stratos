@@ -87,9 +87,9 @@ function updatePermission(
 }
 
 type StateEntity = ISpace | IOrganization;
-interface StateEntities<T> { [guid: string]: APIResource<StateEntity>; }
+type StateEntities<T> = IRequestEntityTypeState<APIResource<T>>;
 
-export function userSpaceOrgReducer<T extends StateEntity>(isSpace: boolean) {
+export function userSpaceOrgReducer<T = StateEntity>(isSpace: boolean) {
   return (state: StateEntities<T>, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case ADD_ROLE_SUCCESS:
@@ -103,8 +103,8 @@ export function userSpaceOrgReducer<T extends StateEntity>(isSpace: boolean) {
   };
 }
 
-function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: ChangeUserRole, add: boolean): StateEntities<T> {
-  const apiResource: APIResource<StateEntity> = state[action.guid];
+function newEntityState<T = StateEntity>(state: StateEntities<T>, action: ChangeUserRole, add: boolean): StateEntities<T> {
+  const apiResource: APIResource<T> = state[action.guid];
   if (!apiResource) {
     return state;
   }

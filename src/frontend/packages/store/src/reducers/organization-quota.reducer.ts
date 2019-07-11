@@ -4,7 +4,7 @@ import { IRequestEntityTypeState } from '../app-state';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
-type entityOrgType = APIResource<IOrganization<string[]>>;
+type entityOrgType = APIResource<IOrganization<string>>;
 export function updateOrganizationQuotaReducer(
   state: IRequestEntityTypeState<entityOrgType>,
   action: APISuccessOrFailedAction<NormalizedResponse>
@@ -25,7 +25,7 @@ function applyQuotaDefinition(
   state: IRequestEntityTypeState<entityOrgType>,
   org: entityOrgType,
   quotaDefinitionGuid: string
-) {
+): IRequestEntityTypeState<entityOrgType> {
   return {
     ...state,
     [org.metadata.guid]: {

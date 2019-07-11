@@ -2,9 +2,14 @@ import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../../cloud-f
 import { BaseRouteAction, RouteEvents } from '../../../cloud-foundry/src/actions/route.actions';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
+import { IApp } from '../../../core/src/core/cf-api.types';
+import { IRequestEntityTypeState } from '../app-state';
 
 export function updateApplicationRoutesReducer() {
-  return (state: APIResource, action: APISuccessOrFailedAction) => {
+  return (
+    state: IRequestEntityTypeState<APIResource<IApp<string>>>,
+    action: APISuccessOrFailedAction
+  ): IRequestEntityTypeState<APIResource<IApp>> => {
     switch (action.type) {
       case ASSIGN_ROUTE_SUCCESS:
         const assignAction: AssignRouteToApplication = action.apiAction as AssignRouteToApplication;
@@ -18,7 +23,7 @@ export function updateApplicationRoutesReducer() {
   };
 }
 
-function applyNewRoutes(state: APIResource, appGuid: string, routeGuid: string, newRoutes: any[]) {
+function applyNewRoutes(state: IRequestEntityTypeState<APIResource<IApp>>, appGuid: string, routeGuid: string, newRoutes: any[]) {
   const oldEntities = Object.values(state);
   const entities = {};
   oldEntities.forEach(app => {
@@ -38,7 +43,7 @@ function applyNewRoutes(state: APIResource, appGuid: string, routeGuid: string, 
   return entities;
 }
 
-function addApplicationRoutes(state: APIResource, appGuid: string, routeGuid: string) {
+function addApplicationRoutes(state: IRequestEntityTypeState<APIResource<IApp>>, appGuid: string, routeGuid: string) {
   if (!appGuid || !state[appGuid]) {
     return state;
   }
@@ -46,7 +51,7 @@ function addApplicationRoutes(state: APIResource, appGuid: string, routeGuid: st
   return applyNewRoutes(state, appGuid, routeGuid, [...oldRoutes, routeGuid]);
 }
 
-function removeApplicationRoute(state: APIResource, appGuid: string, routeGuid: string) {
+function removeApplicationRoute(state: IRequestEntityTypeState<APIResource<IApp<string>>>, appGuid: string, routeGuid: string) {
   if (!appGuid || !state[appGuid]) {
     return state;
   }

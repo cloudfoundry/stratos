@@ -6,12 +6,15 @@ import {
 } from '../../../cloud-foundry/src/actions/service-bindings.actions';
 import { serviceBindingEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
-import { IServiceBinding, IServiceInstance } from '../../../core/src/core/cf-api-svc.types';
+import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../core/src/core/cf-api-svc.types';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
-export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResource<IServiceInstance>>, action: APISuccessOrFailedAction) {
+export function serviceInstanceReducer<T extends IServiceInstance | IUserProvidedServiceInstance = IServiceInstance>(
+  state: IRequestEntityTypeState<APIResource<T>>,
+  action: APISuccessOrFailedAction
+): IRequestEntityTypeState<APIResource<T>> {
   switch (action.type) {
     case DELETE_SERVICE_BINDING_ACTION_SUCCESS:
       return handleDelete(state, action.apiAction as DeleteServiceBinding);
