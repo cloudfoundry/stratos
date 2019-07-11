@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	html "html/template"
-	"os"
 	"path"
 	text "text/template"
 
@@ -63,38 +62,6 @@ const (
 func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 
 	c := &Config{}
-
-	log.Info("***********")
-	log.Info(env.IsSet(vCapApplication))
-	log.Info(env.IsSet(userInviteTemplatesDirEnv))
-	log.Info(env.String(userInviteTemplatesDirEnv, "<NOT SET>"))
-
-	dir, _ := os.Getwd()
-	log.Info(dir)
-
-	if t, ok := env.Lookup(userInviteTemplatesDirEnv); ok {
-		log.Info("GOT Templates folder")
-		log.Info(t)
-		fullpath := path.Clean(path.Join(dir, t))
-		log.Info(fullpath)
-
-		if stat, err := os.Stat(fullpath); err == nil {
-			log.Info("STAT OKAY")
-			log.Info(stat.Name())
-			log.Info(stat.Size())
-		}
-	}
-
-	// Check if running in Cloud Foundry
-	// Set Templates directory if not set and the folder exists
-	if env.IsSet(vCapApplication) {
-		if !env.IsSet(userInviteTemplatesDirEnv) {
-			if _, err := os.Stat("./templates"); err == nil {
-				log.Info("Set templates folder to ./templates")
-				os.Setenv(userInviteTemplatesDirEnv, "./templates")
-			}
-		}
-	}
 
 	smtpConfig := &SMTPConfig{}
 	if err := config.Load(smtpConfig, env.Lookup); err != nil {
@@ -163,11 +130,8 @@ func (userinvite *UserInvite) loadTemplates(c *Config) error {
 		log.Warn(err)
 	}
 
-	log.Info(c.TemplateConfig.TemplateDir)
-
 	textFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.PlainTextTemplate)
 	log.Debugf("Loading plain text email template from: %s", textFile)
-	log.Infof("Loading plain text email template from: %s", textFile)
 	textTmpl, err := text.ParseFiles(textFile)
 	if err != nil {
 		log.Warn("User Invite failed to load Plain Text template")
