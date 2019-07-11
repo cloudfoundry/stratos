@@ -53,14 +53,17 @@ export class CFEntitySchema extends EntitySchema {
    * @param [options] As per schema.Entity ctor
    * @param [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
    * spaces, manager spaces, auditor space, etc
+   * @param [schemaKey] Override the schema fetched via the entityKey. For instance a spaceWithOrgEntityType should override the entityType
+   * of spaceEntityType
    */
   constructor(
     entityKey: string,
     definition?: Schema,
     options?: schema.EntityOptions,
-    relationKey?: string
+    relationKey?: string,
+    schemaKey?: string
   ) {
-    super(entityKey, CF_ENDPOINT_TYPE, definition, options, relationKey);
+    super(entityKey, CF_ENDPOINT_TYPE, definition, options, relationKey, schemaKey);
   }
 }
 
@@ -260,7 +263,7 @@ const SpaceWithOrgsEntitySchema = new CFEntitySchema(spaceEntityType, {
     apps: [ApplicationWithoutSpaceEntitySchema],
     organization: OrganizationsWithoutSpaces,
   }
-}, { idAttribute: getAPIResourceGuid }, spaceWithOrgEntityType);
+}, { idAttribute: getAPIResourceGuid }, spaceWithOrgEntityType, spaceWithOrgEntityType);
 entityCache[spaceWithOrgEntityType] = SpaceWithOrgsEntitySchema;
 
 
@@ -271,7 +274,7 @@ const ServiceInstancesWithSpaceSchema = new CFEntitySchema(serviceInstancesEntit
     space: SpaceSchema.withEmptyDefinition(),
     service: ServiceSchema
   }
-}, { idAttribute: getAPIResourceGuid });
+}, { idAttribute: getAPIResourceGuid }, null, serviceInstancesWithSpaceEntityType);
 entityCache[serviceInstancesWithSpaceEntityType] = ServiceInstancesWithSpaceSchema;
 
 const ServiceInstancesWithNoBindingsSchema = new CFEntitySchema(serviceInstancesEntityType, {
@@ -280,7 +283,7 @@ const ServiceInstancesWithNoBindingsSchema = new CFEntitySchema(serviceInstances
     service: [new CFEntitySchema(serviceEntityType, {}, { idAttribute: getAPIResourceGuid })],
     space: SpaceSchema
   }
-}, { idAttribute: getAPIResourceGuid });
+}, { idAttribute: getAPIResourceGuid }, null, serviceInstancesWithNoBindingsEntityType);
 entityCache[serviceInstancesWithNoBindingsEntityType] = ServiceInstancesWithNoBindingsSchema;
 
 const ServicePlanVisibilitySchema = new CFEntitySchema(servicePlanVisibilityEntityType, {
