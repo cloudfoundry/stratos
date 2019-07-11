@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-        "os"
+	"os"
 	"strconv"
 	"strings"
 
@@ -29,7 +29,7 @@ const (
 	SkipAutoRegister               = "SKIP_AUTO_REGISTER"
 	SQLiteProviderName             = "sqlite"
 	defaultSessionSecret           = "wheeee!"
-	userInviteTemplatesDirEnv = "TEMPLATES_DIR"
+	userInviteTemplatesDirEnv      = "TEMPLATES_DIR"
 )
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
@@ -77,7 +77,7 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 	}
 
 	// Set Templates directory if not set and the folder exists
-	if ch.portalProxy.Env().IsSet(userInviteTemplatesDirEnv) {
+	if envLookup.IsSet(userInviteTemplatesDirEnv) {
 		if _, err := os.Stat("./templates"); !os.IsNotExist(err) {
 			log.Info("Set templates folder to ./templates")
 			os.Setenv(userInviteTemplatesDirEnv, "./templates")
@@ -197,7 +197,6 @@ func (ch *CFHosting) Init() error {
 			log.Fatalf("Could not get the info for Cloud Foundry: %v+", err)
 			return nil
 		}
-
 
 		// Override the configuration to set the authorization endpoint
 		url, err := url.Parse(newCNSI.AuthorizationEndpoint)
