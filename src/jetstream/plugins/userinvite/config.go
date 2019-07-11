@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	html "html/template"
-	"path"
 	"os"
+	"path"
 	text "text/template"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
@@ -64,11 +64,27 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 
 	c := &Config{}
 
+	log.Info("***********")
+	log.Info(env.IsSet(vCapApplication))
+	log.Info(env.IsSet(userInviteTemplatesDirEnv))
+	log.Info(env.String(userInviteTemplatesDirEnv, "<NOT SET>"))
+
+	dir, _ := os.Getwd()
+	log.Info(dir)
+
+	if t, ok := env.Lookup(userInviteTemplatesDirEnv); ok {
+		if stat, err := os.Stat(t); err != nil {
+			log.Info("STAT OKAY")
+			log.Info(stat.Name())
+			log.Info(stat.Size())
+		}
+	}
+
 	// Check if running in Cloud Foundry
 	// Set Templates directory if not set and the folder exists
 	if env.IsSet(vCapApplication) {
-		if env.IsSet(userInviteTemplatesDirEnv) {
-			if _, err := os.Stat("./templates"); !os.IsNotExist(err) {
+		if !env.IsSet(userInviteTemplatesDirEnv) {
+			if _, err := os.Stat("./templates"); err != nil {
 				log.Info("Set templates folder to ./templates")
 				os.Setenv(userInviteTemplatesDirEnv, "./templates")
 			}
