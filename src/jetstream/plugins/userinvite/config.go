@@ -73,7 +73,12 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 	log.Info(dir)
 
 	if t, ok := env.Lookup(userInviteTemplatesDirEnv); ok {
-		if stat, err := os.Stat(t); err != nil {
+		log.Info("GOT Templates folder")
+		log.Info(t)
+		fullpath := path.Clean(path.Join(dir, t))
+		log.Info(fullpath)
+
+		if stat, err := os.Stat(fullpath); err != nil {
 			log.Info("STAT OKAY")
 			log.Info(stat.Name())
 			log.Info(stat.Size())
@@ -158,8 +163,11 @@ func (userinvite *UserInvite) loadTemplates(c *Config) error {
 		log.Warn(err)
 	}
 
+	log.Info(c.TemplateConfig.TemplateDir)
+
 	textFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.PlainTextTemplate)
 	log.Debugf("Loading plain text email template from: %s", textFile)
+	log.Infof("Loading plain text email template from: %s", textFile)
 	textTmpl, err := text.ParseFiles(textFile)
 	if err != nil {
 		log.Warn("User Invite failed to load Plain Text template")
