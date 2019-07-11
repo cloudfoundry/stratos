@@ -50,12 +50,10 @@ type Config struct {
 }
 
 const (
-	defaultSMTPPort           = 25
-	defaultHTMLTemplate       = "user-invite-email.html"
-	defaultPlainTextTemplate  = "user-invite-email.txt"
-	defaultSubject            = "You have been invited to join a Cloud Foundry"
-	vCapApplication           = "VCAP_APPLICATION"
-	userInviteTemplatesDirEnv = "TEMPLATE_DIR"
+	defaultSMTPPort          = 25
+	defaultHTMLTemplate      = "user-invite-email.html"
+	defaultPlainTextTemplate = "user-invite-email.txt"
+	defaultSubject           = "You have been invited to join a Cloud Foundry"
 )
 
 // LoadConfig loads the configuration for inviting users
