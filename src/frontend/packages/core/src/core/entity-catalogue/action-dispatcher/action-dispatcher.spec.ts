@@ -40,7 +40,7 @@ describe('ActionDispatcher', () => {
   });
 
   it('should dispatch get action', () => {
-    function getActionBuilder(guid: string) {
+    function getActionBuilder() {
       return getRequestAction();
     }
     const guid = 'guid';
@@ -56,7 +56,7 @@ describe('ActionDispatcher', () => {
   });
 
   it('should dispatch delete action', () => {
-    function getActionBuilder(guid: string) {
+    function getActionBuilder() {
       return getRequestAction();
     }
     const guid = 'guid';
@@ -72,7 +72,7 @@ describe('ActionDispatcher', () => {
   });
 
   it('should dispatch update action', () => {
-    function getActionBuilder(guid: string) {
+    function getActionBuilder() {
       return getRequestAction();
     }
     const guid = 'guid';

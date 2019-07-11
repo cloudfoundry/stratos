@@ -6,7 +6,12 @@ import { of as observableOf, throwError as observableThrowError } from 'rxjs';
 import { catchError, map, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { environment } from '../../../core/src/environments/environment.prod';
-import { AppNameFree, AppNameTaken, CHECK_NAME, IsNewAppNameFree } from '../../../cloud-foundry/src/actions/create-applications-page.actions';
+import {
+  AppNameFree,
+  AppNameTaken,
+  CHECK_NAME,
+  IsNewAppNameFree
+} from '../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
 import { CFAppState } from './../app-state';
