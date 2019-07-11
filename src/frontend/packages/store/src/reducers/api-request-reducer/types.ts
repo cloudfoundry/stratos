@@ -31,7 +31,7 @@ export interface DeleteActionState extends ActionState {
   deleted: boolean;
 }
 
-export const getDefaultActionState = () => ({
+export const getDefaultActionState = (): ActionState => ({
   busy: false,
   error: false,
   message: ''

@@ -7,6 +7,9 @@ import {
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
 import { ActionReducer } from '@ngrx/store';
+import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
+import { BaseRequestDataState } from '../../../../store/src/types/entity.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
@@ -160,12 +163,17 @@ class EntityCatalogue {
     }, [] as StratosCatalogueEndpointEntity[]);
   }
 
-  public getAllEntityReducers() {
+  public getAllEntityRequestDataReducers() {
     const entities = Array.from(this.entities.values());
     return entities.reduce((allEntityReducers, entity) => {
-      allEntityReducers.set(entity.entityKey, entity.builders.dataReducers);
+      if (entity.entityKey && entity.builders.dataReducers && entity.builders.dataReducers.length) {
+        return {
+          ...allEntityReducers,
+          [entity.entityKey]: entity.builders.dataReducers
+        };
+      }
       return allEntityReducers;
-    }, new Map<string, ActionReducer<any>[]>());
+    }, {} as ExtraApiReducers<IRequestEntityTypeState<any>>);
   }
 }
 

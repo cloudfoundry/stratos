@@ -61,6 +61,7 @@ export interface IRequestAction extends EntityCatalogueEntityConfig, RequestActi
 }
 
 export interface IUpdateRequestAction {
+  type: string;
   apiAction: IRequestAction | PaginatedAction;
   busy: boolean;
   error: string;
