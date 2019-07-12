@@ -1,10 +1,9 @@
-import { promise } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
 import { InviteUserStepperPo } from '../po/invite-users-stepper.po';
 import { StackedInputActionsPo } from '../po/stacked-input-actions.po';
@@ -22,7 +21,7 @@ export function setupInviteUserTests(
 
   const localLog = (message: string) => console.log(`${new Date()}: ${message}`);
 
-  extendE2ETestTime(100000);
+  // extendE2ETestTime(100000);
 
   beforeAll(() => {
     localLog('beforeAll: Started');
@@ -33,8 +32,6 @@ export function setupInviteUserTests(
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
       .connectAllEndpoints(ConsoleUserType.user);
-    // const page = new CFPage();
-    // page.sideNav.goto(SideNavMenuItem.CloudFoundry);
     cfHelper = new CFHelpers(setup);
     return navToOrgSpaceUsersList(cfHelper, defaultCf).then(() => {
       localLog('beforeAll: Finished');
@@ -51,7 +48,7 @@ export function setupInviteUserTests(
 
   it('Configure Client', () => {
     localLog('Configure Client: Started');
-    return navToCfSummary()
+    browser.wait(navToCfSummary()
       .then(() => CfTopLevelPage.detect())
       .then(cfPage => {
         cfPage.waitForPageOrChildPage();
@@ -66,7 +63,7 @@ export function setupInviteUserTests(
           }
           return navToOrgSpaceUsersList(cfHelper, defaultCf).then(() => localLog('Configure Client: Finished'));
         });
-      });
+      }));
   });
 
   describe('Stepper - ', () => {

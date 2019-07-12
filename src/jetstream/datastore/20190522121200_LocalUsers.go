@@ -33,10 +33,10 @@ func init() {
 
 		//Trigger to update last_updated timestamp
 		createUpdateModifiedTrigger := "CREATE TRIGGER update_last_updated "
-		createUpdateModifiedTrigger += "AFTER UPDATE ON local_users " 
-		createUpdateModifiedTrigger += "BEGIN UPDATE local_users SET last_updated = DATETIME('now') WHERE _rowid_ = new._rowid_; " 
+		createUpdateModifiedTrigger += "AFTER UPDATE ON local_users "
+		createUpdateModifiedTrigger += "BEGIN UPDATE local_users SET last_updated = DATETIME('now') WHERE _rowid_ = new._rowid_; "
 		createUpdateModifiedTrigger += "END;"
-		
+
 		//Configure Postgres migration options 
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			createLocalUsers += " WITH (OIDS=FALSE);"
@@ -49,7 +49,16 @@ func init() {
 			}
 			createUpdateModifiedTrigger = postgresTrigger
 
-		} else {
+		} else if strings.Contains(conf.Driver.Name, "mysql") {
+			// MySQL
+			createUpdateModifiedTrigger = "CREATE TRIGGER update_last_updated "
+			createUpdateModifiedTrigger += "AFTER UPDATE ON local_users "
+			createUpdateModifiedTrigger += "FOR EACH ROW BEGIN "
+			createUpdateModifiedTrigger += "UPDATE local_users SET last_updated = NOW() WHERE user_guid = NEW.user_guid; "
+			createUpdateModifiedTrigger += "END;"
+
+			createLocalUsers += ";"
+			} else {
 			createLocalUsers += ";"
 		}
 
