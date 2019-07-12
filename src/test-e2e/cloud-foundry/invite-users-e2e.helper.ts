@@ -69,8 +69,8 @@ export function setupInviteUserTests(
     const fieldTwo = 1;
     const usersToDelete = [];
 
-
-    beforeAll(() => {
+    it('Is ready', () => {
+      usersTable.waitUntilShown();
       usersTable.getInviteUserButtonComponent().waitUntilShown();
       usersTable.inviteUser();
       inviteUserStepper = new InviteUserStepperPo();
