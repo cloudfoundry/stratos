@@ -195,7 +195,6 @@ export function setupInviteUserTests(
     });
 
     afterAll(() => {
-      e2e.lg('invite users afterAll');
       return cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, usersToDelete));
     });
 
