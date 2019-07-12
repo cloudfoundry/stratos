@@ -11,7 +11,7 @@ import { ConfigInviteClientDialog } from './config-invite-client-dialog.po';
  * Test the invite user config process.
  * Note - We test non-admin disabled case in `src/test-e2e/cloud-foundry/cf-level/cf-top-level-e2e.spec.ts`
  */
-fdescribe('CF - Invite User Configuration - ', () => {
+describe('CF - Invite User Configuration - ', () => {
   let defaultCf: E2EConfigCloudFoundry = e2e.secrets.getDefaultCFEndpoint();
 
   let cfPage: CfTopLevelPage;
@@ -23,18 +23,22 @@ fdescribe('CF - Invite User Configuration - ', () => {
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
       .connectAllEndpoints(ConsoleUserType.user);
-    // There is only one CF endpoint registered (since that is what we setup)
-    const page = new CFPage();
-    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
-    return CfTopLevelPage.detect().then(p => {
-      cfPage = p;
-      cfPage.waitForPageOrChildPage();
-      cfPage.loadingIndicator.waitUntilNotShown();
-    });
   });
 
   describe('Configure - ', () => {
-    beforeAll(() => cfPage.isUserInviteConfigured().then(configured => {
+
+    beforeEach(() => {
+      // There is only one CF endpoint registered (since that is what we setup)
+      const page = new CFPage();
+      page.sideNav.goto(SideNavMenuItem.CloudFoundry);
+      return CfTopLevelPage.detect().then(p => {
+        cfPage = p;
+        cfPage.waitForPageOrChildPage();
+        cfPage.loadingIndicator.waitUntilNotShown();
+      });
+    });
+
+    beforeEach(() => cfPage.isUserInviteConfigured().then(configured => {
       if (configured) {
         cfPage.clickInviteDisable();
         return ConfirmDialogComponent.expectDialogAndConfirm('Disable', 'Disable User Invitations');
@@ -42,12 +46,10 @@ fdescribe('CF - Invite User Configuration - ', () => {
     })
     );
 
-    it('Initial State', () => {
+    it('Bad Creds', () => {
       expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
       expect(cfPage.canConfigureUserInvite()).toBeTruthy();
-    });
 
-    it('Bad Creds', () => {
       cfPage.clickInviteConfigure();
       const dialog = new ConfigInviteClientDialog();
       expect(dialog.canConfigure()).toBeFalsy();
@@ -64,6 +66,9 @@ fdescribe('CF - Invite User Configuration - ', () => {
     });
 
     it('Good Creds', () => {
+      expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
+      expect(cfPage.canConfigureUserInvite()).toBeTruthy();
+
       cfPage.clickInviteConfigure();
       const dialog = new ConfigInviteClientDialog();
       expect(dialog.canConfigure()).toBeFalsy();
@@ -76,21 +81,18 @@ fdescribe('CF - Invite User Configuration - ', () => {
   });
 
   describe('UnConfigure - ', () => {
-    it('Initial State', () => {
+    it('UnConfigure', () => {
+      // Initial state
       expect(cfPage.isUserInviteConfigured(true)).toBeTruthy();
       expect(cfPage.canConfigureUserInvite()).toBeFalsy();
-    });
 
-    it('UnConfigure', () => {
       cfPage.clickInviteDisable();
       ConfirmDialogComponent.expectDialogAndConfirm('Disable', 'Disable User Invitations');
-    });
 
-    it('End State', () => {
+      // End State
       expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
       expect(cfPage.canConfigureUserInvite()).toBeTruthy();
     });
   });
 
 });
-

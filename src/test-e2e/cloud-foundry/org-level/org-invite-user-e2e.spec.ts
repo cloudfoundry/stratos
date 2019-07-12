@@ -3,7 +3,7 @@ import { CFHelpers } from '../../helpers/cf-helpers';
 import { setupInviteUserTests } from '../invite-users-e2e.helper';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
 
-fdescribe('CF - Org - Invite User - ', () => {
+describe('CF - Org - Invite User - ', () => {
   let orgPage: CfOrgLevelPage;
 
   const navToOrgUserList = (cfHelper: CFHelpers, defaultCf: E2EConfigCloudFoundry) => {

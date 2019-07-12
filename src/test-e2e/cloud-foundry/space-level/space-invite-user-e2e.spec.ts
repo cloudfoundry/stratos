@@ -3,7 +3,7 @@ import { CFHelpers } from '../../helpers/cf-helpers';
 import { setupInviteUserTests } from '../invite-users-e2e.helper';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
 
-fdescribe('CF - Space - Invite User - ', () => {
+describe('CF - Space - Invite User - ', () => {
   let spacePage: CfSpaceLevelPage;
 
   const navToSpaceUserList = (cfHelper: CFHelpers, defaultCf: E2EConfigCloudFoundry) => {
