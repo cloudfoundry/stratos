@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
 import { EntityService } from './entity-service';
-import { IRequestAction } from '../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { TRequestTypeKeys, RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 
@@ -17,7 +17,7 @@ export class EntityServiceFactory {
   create<T>(
     // TODO Can we reliably get the ID from the action? NJ
     entityId: string,
-    action: IRequestAction,
+    action: EntityRequestAction,
     validateRelations = true,
     entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {

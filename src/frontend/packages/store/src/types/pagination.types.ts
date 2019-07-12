@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ListActionState } from '../reducers/api-request-reducer/types';
-import { IRequestAction } from './request.types';
+import { EntityRequestAction } from './request.types';
 
 export class QParam {
   constructor(
@@ -67,7 +67,7 @@ export interface BasePaginatedAction extends Action {
   paginationKey: string;
 }
 
-export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
+export interface PaginatedAction extends BasePaginatedAction, EntityRequestAction {
   actions: string[];
   /*
    * Fetch all pages and add them to a single page

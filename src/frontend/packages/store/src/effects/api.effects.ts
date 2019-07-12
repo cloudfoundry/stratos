@@ -29,7 +29,7 @@ import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
+import { APISuccessOrFailedAction, ICFAction, EntityRequestAction, RequestEntityLocation } from '../types/request.types';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { CFAppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
@@ -385,7 +385,7 @@ export class APIEffect {
   }
 
   getEntities(
-    apiAction: IRequestAction,
+    apiAction: EntityRequestAction,
     data,
     errorCheck: APIErrorCheck[],
   ): {
@@ -527,7 +527,7 @@ export class APIEffect {
 
   private handleMultiEndpoints(
     resData,
-    apiAction: IRequestAction,
+    apiAction: EntityRequestAction,
   ): {
     resData;
     entities;

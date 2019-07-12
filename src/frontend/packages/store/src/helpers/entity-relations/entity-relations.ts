@@ -21,7 +21,7 @@ import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../../types/api.types';
 import { BaseRequestDataState } from '../../types/entity.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
-import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
+import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import { EntitySchema } from '../entity-schema';
 import { pick } from '../reducer.helper';
 import { EntityTreeRelation } from './entity-relation-tree';
@@ -332,7 +332,7 @@ function associateChildWithParent(
           },
           result: [action.parentGuid]
         };
-        const parentAction: IRequestAction = {
+        const parentAction: EntityRequestAction = {
           endpointGuid: action.endpointGuid,
           entity: catalogueEntity.getSchema(action.parentEntityConfig.schemaKey),
           entityLocation: RequestEntityLocation.OBJECT,
@@ -360,7 +360,7 @@ function handleValidationLoopResults(
   store: Store<GeneralEntityAppState>,
   results: ValidateEntityResult[],
   apiResponse: APIResponse,
-  action: IRequestAction
+  action: EntityRequestAction
 ): ValidationResult {
   const paginationFinished = new Array<Promise<boolean>>();
   results.forEach(request => {
@@ -446,7 +446,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   return handleValidationLoopResults(store, results, config.apiResponse, action);
 }
 
-function getRelationAction(action: IRequestAction): EntityInlineParentAction {
+function getRelationAction(action: EntityRequestAction): EntityInlineParentAction {
   const pagAction = action as PaginatedAction;
   if (pagAction.__forcedPageEntityConfig__) {
     const entityConfig = pagAction.__forcedPageEntityConfig__;

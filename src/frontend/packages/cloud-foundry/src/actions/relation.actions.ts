@@ -5,7 +5,7 @@ import {
   EntityInlineParentAction,
 } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../../../store/src/types/request.types';
+import { CFStartAction, RequestActionEntity, RequestEntityLocation } from '../../../store/src/types/request.types';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { EntityTreeRelation } from '../../../store/src/helpers/entity-relations/entity-relation-tree';
 
@@ -29,7 +29,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     this.options.params = new URLSearchParams();
     this.parentEntityConfig = parent.entity;
   }
-  entity: IRequestActionEntity;
+  entity: RequestActionEntity;
   entityType: string;
   isId = relationActionId;
   actions = [

@@ -13,7 +13,7 @@ import {
 } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, IRequestAction } from '../../../store/src/types/request.types';
+import { CFStartAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/src/types/user.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { createDefaultUserRelations } from './user.actions.helpers';
@@ -68,7 +68,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   }
 }
 // TODO: Can we get rid of this?
-export class GetCFUser extends CFStartAction implements IRequestAction {
+export class GetCFUser extends CFStartAction implements EntityRequestAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
@@ -85,7 +85,7 @@ export class GetCFUser extends CFStartAction implements IRequestAction {
 }
 // TODO: Where do these action sit within the entity catalogue?
 // They are user role actions that have the entity type or either space of organization.
-export class ChangeUserRole extends CFStartAction implements IRequestAction {
+export class ChangeUserRole extends CFStartAction implements EntityRequestAction {
   public endpointType = 'cf';
   constructor(
     public endpointGuid: string,

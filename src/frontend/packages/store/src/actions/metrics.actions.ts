@@ -3,7 +3,7 @@ import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { environment } from '../../../core/src/environments/environment';
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
+import { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
@@ -40,7 +40,7 @@ export class MetricQueryConfig {
 }
 
 // TODO: How do we handle metrics across endpoint types?
-export class MetricsAction implements IRequestAction {
+export class MetricsAction implements EntityRequestAction {
   constructor(
     guid: string,
     public endpointGuid: string,

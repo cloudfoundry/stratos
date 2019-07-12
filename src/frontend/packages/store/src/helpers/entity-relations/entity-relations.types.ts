@@ -5,7 +5,7 @@ import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-ca
 import { getPaginationKey } from '../../actions/pagination.actions';
 import { APIResponse } from '../../actions/request.actions';
 import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../app-state';
-import { IRequestAction } from '../../types/request.types';
+import { EntityRequestAction } from '../../types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 
 export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = GeneralEntityAppState> {
@@ -31,7 +31,7 @@ export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = Gen
   /**
    * The action that has fetched the entity/entities
    */
-  action: IRequestAction;
+  action: EntityRequestAction;
   /**
    * Collection of entity (guids) whose children may be missing. For example a list of organizations that have missing spaces
    */
@@ -100,7 +100,7 @@ export function isEntityInlineChildAction(anything): EntityInlineChildAction {
  * @export
  * @extends {PaginatedAction}
  */
-export interface EntityInlineParentAction extends IRequestAction {
+export interface EntityInlineParentAction extends EntityRequestAction {
   includeRelations: string[];
   populateMissing: boolean;
 }

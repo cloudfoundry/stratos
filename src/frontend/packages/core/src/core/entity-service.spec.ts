@@ -15,7 +15,7 @@ import {
 } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
-import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
+import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityCatalogueTestHelper } from '../../test-framework/entity-catalogue-test-helpers';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
@@ -61,7 +61,7 @@ describe('EntityServiceService', () => {
     store: Store<GeneralAppState>,
     guid: string,
     schema: EntitySchema,
-    action: IRequestAction,
+    action: EntityRequestAction,
   ) {
 
     const entityMonitor = new EntityMonitor(store, guid, schema.key, schema);

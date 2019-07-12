@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { CFAppState } from '../app-state';
-import { IRequestAction } from '../types/request.types';
+import { EntityRequestAction } from '../types/request.types';
 import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from './../actions/system.actions';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 import { SystemInfo, systemStoreNames } from './../types/system.types';
@@ -27,7 +27,7 @@ export class SystemEffects {
         entityType: systemStoreNames.type,
         guid: SystemEffects.guid,
         type: action.type,
-      } as IRequestAction;
+      } as EntityRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       const { associatedAction } = action;
       const actionType = 'fetch';

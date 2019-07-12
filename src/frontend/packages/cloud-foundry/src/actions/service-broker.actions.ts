@@ -2,7 +2,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { cfEntityFactory, serviceBrokerEntityType } from '../cf-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, IRequestAction } from '../../../store/src/types/request.types';
+import { CFStartAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 
 export class GetServiceBrokers extends CFStartAction implements PaginatedAction {
@@ -30,7 +30,7 @@ export class GetServiceBrokers extends CFStartAction implements PaginatedAction 
   };
   flattenPagination = true;
 }
-export class GetServiceBroker extends CFStartAction implements IRequestAction {
+export class GetServiceBroker extends CFStartAction implements EntityRequestAction {
   constructor(
     public guid: string,
     public endpointGuid: string,

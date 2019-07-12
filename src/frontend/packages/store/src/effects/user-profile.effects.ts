@@ -17,7 +17,7 @@ import { CFAppState } from '../app-state';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo, userProfileStoreNames } from '../types/user-profile.types';
 import {
-  IRequestAction,
+  EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
@@ -47,7 +47,7 @@ export class UserProfileEffect {
         entityType: userProfileStoreNames.type,
         guid: UserProfileEffect.guid,
         type: action.type,
-      } as IRequestAction;
+      } as EntityRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get(`/pp/${proxyAPIVersion}/uaa/Users/${action.guid}`).pipe(
         mergeMap((info: UserProfileInfo) => {
@@ -72,7 +72,7 @@ export class UserProfileEffect {
         guid: UserProfileEffect.guid,
         type: action.type,
         updatingKey: rootUpdatingKey
-      } as IRequestAction;
+      } as EntityRequestAction;
       const actionType = 'update';
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const guid = action.profile.id;
@@ -105,7 +105,7 @@ export class UserProfileEffect {
         guid: UserProfileEffect.guid,
         type: action.type,
         updatingKey: userProfilePasswordUpdatingKey
-      } as IRequestAction;
+      } as EntityRequestAction;
       // Use the creating action for password change
       const actionType = 'update';
       this.store.dispatch(new StartRequestAction(apiAction, actionType));

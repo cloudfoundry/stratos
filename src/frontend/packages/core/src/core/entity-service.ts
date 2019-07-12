@@ -12,7 +12,7 @@ import {
 } from '../../../store/src/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
-import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
+import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
@@ -34,7 +34,7 @@ export class EntityService<T = any> {
   constructor(
     private store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
-    public action: IRequestAction,
+    public action: EntityRequestAction,
     public validateRelations = true,
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {

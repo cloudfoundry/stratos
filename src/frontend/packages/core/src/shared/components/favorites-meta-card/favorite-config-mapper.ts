@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { IRequestAction } from '../../../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import {
   IFavoriteMetadata,
   IFavoriteTypeInfo,
@@ -64,7 +64,7 @@ interface IFavoriteMappers {
   };
 }
 
-export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => IRequestAction;
+export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => EntityRequestAction;
 
 export type TEntityToMetadata<T, Q extends IFavoriteMetadata> = (entity: T) => Q;
 export interface IFavoriteActionGenerators {

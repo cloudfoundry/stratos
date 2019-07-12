@@ -4,13 +4,13 @@ import { GET_ORGANIZATION, GetOrganization } from '../../../../cloud-foundry/src
 import { ApiActionTypes, APIResponse } from '../../actions/request.actions';
 import { GET_SPACE, GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../app-state';
-import { ICFAction, IRequestAction } from '../../types/request.types';
+import { ICFAction, EntityRequestAction } from '../../types/request.types';
 import { ValidateEntityResult } from './entity-relations.types';
 import { orgSpacePostProcess } from './processors/org-space-post-processor';
 
 export function validationPostProcessor(
   store: Store<GeneralEntityAppState>,
-  action: IRequestAction,
+  action: EntityRequestAction,
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
@@ -20,7 +20,7 @@ export function validationPostProcessor(
 
 function apiAction(
   store: Store<GeneralEntityAppState>,
-  action: IRequestAction,
+  action: EntityRequestAction,
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {
   const cfAction = action as ICFAction;

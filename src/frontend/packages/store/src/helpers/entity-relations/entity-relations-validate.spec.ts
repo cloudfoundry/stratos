@@ -16,7 +16,7 @@ import { APIResponse } from '../../actions/request.actions';
 import { CFAppState, IRequestTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
 import { BaseRequestDataState } from '../../types/entity.types';
-import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
+import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validateEntityRelations } from './entity-relations';
 import {
@@ -400,7 +400,7 @@ describe('Entity Relations - validate', () => {
         type: '[Entity] Associate with parent',
         childEntityKey: 'quota_definition',
         endpointType: 'cf'
-      } as IRequestAction, 'fetch', 1, 1);
+      } as EntityRequestAction, 'fetch', 1, 1);
 
       inject([Store], (iStore: Store<CFAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();

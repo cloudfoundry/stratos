@@ -31,9 +31,9 @@ export enum RequestEntityLocation {
   OBJECT, // The response is the entity
 }
 
-export type IRequestActionEntity = EntitySchema | EntitySchema[];
-export interface IRequestAction extends EntityCatalogueEntityConfig, RequestAction {
-  entity?: IRequestActionEntity;
+export type RequestActionEntity = EntitySchema | EntitySchema[];
+export interface EntityRequestAction extends EntityCatalogueEntityConfig, RequestAction {
+  entity?: RequestActionEntity;
   /**
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section
@@ -62,20 +62,20 @@ export interface IRequestAction extends EntityCatalogueEntityConfig, RequestActi
 
 export interface IUpdateRequestAction {
   type: string;
-  apiAction: IRequestAction | PaginatedAction;
+  apiAction: EntityRequestAction | PaginatedAction;
   busy: boolean;
   error: string;
 }
 
 export interface IStartRequestAction {
-  apiAction: IRequestAction | PaginatedAction;
+  apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
 }
 
 export interface ISuccessRequestAction {
   type: string;
   response: NormalizedResponse;
-  apiAction: IRequestAction | PaginatedAction;
+  apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
   totalResults?: number;
 }
@@ -83,7 +83,7 @@ export interface ISuccessRequestAction {
 export interface IFailedRequestAction {
   type: string;
   message: string;
-  apiAction: IRequestAction | PaginatedAction;
+  apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
 }
 
@@ -111,7 +111,7 @@ export abstract class RequestUpdateAction implements Action {
 
 export class UpdateCfAction extends RequestUpdateAction implements IUpdateRequestAction {
   constructor(
-    public apiAction: IRequestAction,
+    public apiAction: EntityRequestAction,
     public busy: boolean,
     public error: string,
   ) {
@@ -119,7 +119,7 @@ export class UpdateCfAction extends RequestUpdateAction implements IUpdateReques
   }
 }
 
-export interface ICFAction extends IRequestAction {
+export interface ICFAction extends EntityRequestAction {
   options: RequestOptions;
   actions: string[];
   skipValidation?: boolean;
@@ -140,7 +140,7 @@ export class StartCFAction extends CFStartAction implements IStartRequestAction 
 
 export class StartRequestAction extends RequestAction {
   constructor(
-    public apiAction: IRequestAction | PaginatedAction,
+    public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch'
   ) {
     super();
@@ -150,7 +150,7 @@ export class StartRequestAction extends RequestAction {
 export class WrapperRequestActionSuccess<T = any> extends RequestSuccessAction implements ISuccessRequestAction {
   constructor(
     public response: NormalizedResponse<T>,
-    public apiAction: IRequestAction | PaginatedAction,
+    public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
     public totalResults?: number,
     public totalPages?: number,
@@ -170,7 +170,7 @@ export interface InternalEndpointError {
 export class WrapperRequestActionFailed extends RequestFailedAction implements IFailedRequestAction {
   constructor(
     public message: string,
-    public apiAction: IRequestAction | PaginatedAction,
+    public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
     public internalEndpointError?: InternalEndpointError
   ) {
