@@ -40,7 +40,7 @@ export const appReducers = {
   endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,
-  requestData: requestDataReducer,
+  requestData: requestDataReducer(),
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   deployApplication: deployAppReducer,

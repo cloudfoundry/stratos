@@ -1,8 +1,10 @@
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
 import { APIResource } from '../types/api.types';
+import { IRequestEntityTypeState } from '../app-state';
+import { IApp, StratosCFEntity } from '../../../core/src/core/cf-api.types';
 
-export function endpointDisconnectApplicationReducer() {
-  return (state: { [appGuid: string]: APIResource<{ cfGuid: string }> }, action: DisconnectEndpoint) => {
+export function endpointDisconnectRemoveEntitiesReducer<T = IApp>() {
+  return (state: IRequestEntityTypeState<APIResource<T & StratosCFEntity>>, action: DisconnectEndpoint) => {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
       case UNREGISTER_ENDPOINTS_SUCCESS:
@@ -12,7 +14,7 @@ export function endpointDisconnectApplicationReducer() {
   };
 }
 
-function deletionApplicationFromEndpoint(state: { [appGuid: string]: APIResource<{ cfGuid: string }> }, endpointGuid) {
+function deletionApplicationFromEndpoint<T extends StratosCFEntity>(state: IRequestEntityTypeState<APIResource<T>>, endpointGuid) {
   return Object.values(state).reduce((newEntities, app) => {
     if (app.entity.cfGuid !== endpointGuid && app.metadata.guid) {
       newEntities[app.metadata.guid] = app;

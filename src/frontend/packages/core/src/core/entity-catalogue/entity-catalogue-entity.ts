@@ -1,6 +1,6 @@
-import { Store } from '@ngrx/store';
+import { Store, ActionReducer } from '@ngrx/store';
 
-import { AppState } from '../../../../store/src/app-state';
+import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
@@ -15,15 +15,19 @@ import {
   IEntityMetadata,
   IStratosBaseEntityDefinition,
   IStratosEndpointDefinition,
-  IStratosEndpointWithoutSchemaDefinition,
   IStratosEntityBuilder,
   IStratosEntityDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
 } from './entity-catalogue.types';
 
 export interface EntityCatalogueBuilders<
-  T extends IEntityMetadata = IEntityMetadata, Y = any,
-  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
+  T extends IEntityMetadata = IEntityMetadata,
+  Y = any,
+  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  > {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
+  // Allows extensions to modify entities data in the store via none API Effect or unrelated actions.
+  dataReducers?: ActionReducer<IRequestEntityTypeState<Y>>[];
   actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |

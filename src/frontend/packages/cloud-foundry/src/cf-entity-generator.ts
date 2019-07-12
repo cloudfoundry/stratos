@@ -66,6 +66,19 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-factory';
+import {
+  endpointDisconnectUserReducer,
+  userReducer,
+  userSpaceOrgReducer
+} from '../../store/src/reducers/users.reducer';
+import { routeReducer, updateAppSummaryRoutesReducer } from '../../store/src/reducers/routes.reducer';
+import { serviceInstanceReducer } from '../../store/src/reducers/service-instance.reducer';
+import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
+import { updateApplicationRoutesReducer } from '../../store/src/reducers/application-route.reducer';
+import { updateSpaceQuotaReducer } from '../../store/src/reducers/space-quota.reducer';
+import { applicationAddRemoveReducer as spaceApplicationAddRemoveReducer } from '../../store/src/reducers/application-add-remove-reducer';
+import { updateOrganizationQuotaReducer } from '../../store/src/reducers/organization-quota.reducer';
+import { updateOrganizationSpaceReducer } from '../../store/src/reducers/organization-space.reducer';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
@@ -158,9 +171,10 @@ function generateCFAppSummaryEntity(endpointDefinition: IStratosEndpointDefiniti
   const definition = {
     type: appSummaryEntityType,
     schema: cfEntityFactory(appSummaryEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
+    dataReducers: [updateAppSummaryRoutesReducer],
     actionBuilders: appSummaryActionBuilders
   });
 }
@@ -202,12 +216,15 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: IStrato
     schema: cfEntityFactory(userProvidedServiceInstanceEntityType),
     label: 'User Provided Service Instance',
     labelPlural: 'User Provided Service Instances',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IUserProvidedServiceInstance>>(
     definition,
     {
       // actionBuilders: quotaDefinitionActionBuilder, // TODO:
+      dataReducers: [
+        serviceInstanceReducer
+      ],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name
@@ -354,12 +371,13 @@ function generateCFServiceInstanceEntity(endpointDefinition: IStratosEndpointDef
     },
     label: 'Marketplace Service Instance',
     labelPlural: 'Marketplace Service Instances',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IServiceInstance>>(
     definition,
     {
       // actionBuilders: quotaDefinitionActionBuilder, // TODO:
+      dataReducers: [serviceInstanceReducer],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name
@@ -376,12 +394,13 @@ function generateCFUserEntity(endpointDefinition: IStratosEndpointDefinition) {
     schema: cfEntityFactory(cfUserEntityType),
     label: 'User',
     labelPlural: 'Users',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<CfUser>>(
     definition,
     {
       actionBuilders: userActionBuilders,
+      dataReducers: [userReducer, endpointDisconnectUserReducer],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.username || ent.entity.guid
@@ -508,12 +527,14 @@ function generateRouteEntity(endpointDefinition: IStratosEndpointDefinition) {
     schema: cfEntityFactory(routeEntityType),
     label: 'Application Route',
     labelPlural: 'Application Routes',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+
   };
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<IRoute>>(
     definition,
     {
       actionBuilders: routesActionBuilders,
+      dataReducers: [routeReducer],
       entityBuilder: {
         getMetadata: app => ({
           guid: app.metadata.guid,
@@ -580,7 +601,7 @@ function generateCfApplicationEntity(endpointDefinition: IStratosEndpointDefinit
     schema: cfEntityFactory(applicationEntityType),
     label: 'Application',
     labelPlural: 'Applications',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
   };
   const a = new StratosCatalogueEntity(
     applicationDefinition,
@@ -601,6 +622,10 @@ function generateCfApplicationEntity(endpointDefinition: IStratosEndpointDefinit
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
     applicationDefinition,
     {
+      dataReducers: [
+        updateApplicationRoutesReducer(),
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       entityBuilder: {
         getMetadata: app => ({
           guid: app.metadata.guid,
@@ -623,12 +648,18 @@ function generateCfSpaceEntity(endpointDefinition: IStratosEndpointDefinition) {
     },
     label: 'Space',
     labelPlural: 'Spaces',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
   };
   return new StratosCatalogueEntity<ISpaceFavMetadata, APIResource<ISpace>>(
     spaceDefinition,
     {
       // actionBuilders: quotaDefinitionActionBuilder, //TODO:
+      dataReducers: [
+        updateSpaceQuotaReducer,
+        endpointDisconnectRemoveEntitiesReducer(),
+        spaceApplicationAddRemoveReducer(),
+        userSpaceOrgReducer(true)
+      ],
       entityBuilder: {
         getMetadata: space => ({
           guid: space.metadata.guid,
@@ -648,12 +679,18 @@ function generateCfOrgEntity(endpointDefinition: IStratosEndpointDefinition) {
     schema: cfEntityFactory(organizationEntityType),
     label: 'Organization',
     labelPlural: 'Organizations',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
   };
   return new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(
     orgDefinition,
     {
       actionBuilders: organizationActionBuilders,
+      dataReducers: [
+        updateOrganizationQuotaReducer,
+        updateOrganizationSpaceReducer(),
+        endpointDisconnectRemoveEntitiesReducer(),
+        userSpaceOrgReducer(false)
+      ],
       entityBuilder: {
         getMetadata: org => ({
           guid: org.metadata.guid,

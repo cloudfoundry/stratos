@@ -1,4 +1,4 @@
-import { IRequestTypeState } from '../../app-state';
+import { BaseRequestState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { IRequestAction, ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
 import {
@@ -6,11 +6,11 @@ import {
   getEntityRequestState,
   mergeObject,
   mergeUpdatingState,
-  setEntityRequestState,
+  setEntityRequestState
 } from './request-helpers';
-import { BaseRequestDataState } from '../../types/entity.types';
 
-export function succeedRequest(state: BaseRequestDataState, action: ISuccessRequestAction) {
+
+export function succeedRequest(state: BaseRequestState, action: ISuccessRequestAction) {
   if (action.apiAction.guid) {
     const apiAction = action.apiAction as IRequestAction;
     const successAction = action as WrapperRequestActionSuccess;

@@ -1,12 +1,10 @@
 import { RequestMethod } from '@angular/http';
-import { GeneralAppState } from '../../app-state';
+import { GeneralAppState, BaseRequestState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
-import { BaseRequestDataState } from '../../types/entity.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
   ICFAction,
-  IRequestAction,
   SingleEntityAction,
   StartRequestAction,
   APISuccessOrFailedAction,
@@ -14,21 +12,14 @@ import {
   WrapperRequestActionFailed,
   InternalEndpointError
 } from '../../types/request.types';
-import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
+import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { APIResponse } from '../../actions/request.actions';
 import { pathGet } from '../../../../core/src/core/utils.service';
 import { Store } from '@ngrx/store';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
-function getEntityKey(entityType: string, endpointType: string) {
-  const catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
-  // TODO: we need to fall back to entityType here for the none catalogue, internal entities (i.e userFavorites)
-  // We should add internal entities into the catalogue to remove the need for this.
-  return catalogueEntity ? catalogueEntity.entityKey : entityType;
-}
-
 export function getEntityRequestState(
-  state: BaseRequestDataState,
+  state: BaseRequestState,
   actionOrKey: SingleEntityAction | string,
   guid: string = (actionOrKey as SingleEntityAction).guid
 ): RequestInfoState {
@@ -41,7 +32,7 @@ export function getEntityRequestState(
 }
 
 export function setEntityRequestState(
-  state: BaseRequestDataState,
+  state: BaseRequestState,
   requestState,
   actionOrKey: SingleEntityAction | string,
   guid: string = (actionOrKey as SingleEntityAction).guid
@@ -64,7 +55,10 @@ function getKeyFromActionOrKey(actionOrKey: SingleEntityAction | string) {
   return entityCatalogue.getEntityKey(actionOrKey) || actionOrKey.entityType;
 }
 
-export function createRequestStateFromResponse(response: NormalizedResponse, state: BaseRequestDataState) {
+export function createRequestStateFromResponse(
+  response: NormalizedResponse,
+  state: BaseRequestState
+) {
   if (!response || !response.entities) {
     return state;
   }
@@ -152,13 +146,13 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
 export function generateDefaultState(keys: Array<string>, initialSections?: {
   [key: string]: string[];
 }) {
-  const defaultState = {} as BaseRequestDataState;
+  const defaultState = {} as BaseRequestState;
 
   keys.forEach(key => {
     defaultState[key] = {};
     if (initialSections && initialSections[key] && initialSections[key].length) {
       initialSections[key].forEach(sectionKey => {
-        defaultState[key][sectionKey] = getDefaultActionState();
+        defaultState[key][sectionKey] = getDefaultRequestState();
       });
     }
   });

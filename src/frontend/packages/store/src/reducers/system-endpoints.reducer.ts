@@ -29,6 +29,8 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case CONNECT_ENDPOINTS:
     case DISCONNECT_ENDPOINTS:
       return changeEndpointConnectionStatus(state, action, 'checking');
+
+    // TODO: Metrics? Does this need to be moved?
     case METRIC_API_SUCCESS:
       return updateMetricsInfo(state, action);
     default:
@@ -75,9 +77,13 @@ function endpointHasMetrics(endpoint: EndpointModel) {
   return !!endpoint.metadata.metrics;
 }
 
-function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
-  guid: string
-},                                      connectionStatus: endpointConnectionStatus) {
+function changeEndpointConnectionStatus(
+  state: IRequestEntityTypeState<EndpointModel>,
+  action: {
+    guid: string
+  },
+  connectionStatus: endpointConnectionStatus
+) {
   if (!action.guid) {
     return state;
   }
