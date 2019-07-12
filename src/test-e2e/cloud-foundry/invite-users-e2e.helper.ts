@@ -195,7 +195,13 @@ export function setupInviteUserTests(
     });
 
     afterAll(() => {
-      return cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, usersToDelete));
+      e2e.log('invite users afterAll');
+      return cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, usersToDelete))
+      .then(() => e2e.log('afeterAll delete users OK'))
+      .catch((e) => {
+        e2e.log('afterAll delete users ERROR');
+        e2e.log(e);
+      });
     });
 
   });
