@@ -6,7 +6,7 @@ import { storeFreeze } from 'ngrx-store-freeze';
 
 import { environment } from '../../core/src/environments/environment';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
-import { requestDataReducer, requestReducer } from './reducers/api-request-reducers.generator';
+import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
 import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
@@ -23,6 +23,7 @@ import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 import { getDashboardStateSessionId } from './helpers/store-helpers';
+import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -40,7 +41,7 @@ export const appReducers = {
   endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,
-  requestData: requestDataReducer(),
+  requestData: requestDataReducer,
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   deployApplication: deployAppReducer,
