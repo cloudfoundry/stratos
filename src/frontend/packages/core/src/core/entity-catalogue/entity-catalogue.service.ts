@@ -1,4 +1,7 @@
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEndpointEntity,
@@ -6,10 +9,6 @@ import {
 } from './entity-catalogue-entity';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
-import { ActionReducer } from '@ngrx/store';
-import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
-import { BaseRequestDataState } from '../../../../store/src/types/entity.types';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
@@ -34,16 +33,16 @@ class EntityCatalogue {
     }
   }
 
-  private getEntityOfType<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  private getEntityOfType(
     entityType: string,
     endpointType?: string
-  ): StratosBaseCatalogueEntity {
+  ) {
     const id = endpointType ? this.getEntityKey(endpointType, entityType) : entityType;
     // STRATOS_ENDPOINT_TYPE is a special case for internal entities.
     if (endpointType !== STRATOS_ENDPOINT_TYPE && entityType === EntityCatalogueHelpers.endpointType) {
       return this.endpoints.get(id);
     }
-    return this.entities.get(id) as StratosCatalogueEntity<T, Y>;
+    return this.entities.get(id);
   }
 
   private getEntitySubType(entity: StratosBaseCatalogueEntity, subtypeType: string) {
@@ -98,26 +97,27 @@ class EntityCatalogue {
       this.registerEntity(entity as StratosCatalogueEntity);
     }
   }
-
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  /* tslint:disable:max-line-length */
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     entityConfig: EntityCatalogueEntityConfig
-  ): StratosBaseCatalogueEntity;
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  ): StratosBaseCatalogueEntity<T, Y, AB>;
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     endpointType: string,
     entityType: string,
     subType?: string
-  ): StratosBaseCatalogueEntity;
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  ): StratosBaseCatalogueEntity<T, Y, AB>;
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
     entityType?: string,
     subType?: string
-  ): StratosBaseCatalogueEntity {
+  ): StratosBaseCatalogueEntity<T, Y, AB> {
+    /* tslint:enable:max-line-length */
     const config = this.getConfig(endpointTypeOrConfig, entityType, subType);
-    const entityOfType = this.getEntityOfType<T, Y>(config.entityType, config.endpointType);
+    const entityOfType = this.getEntityOfType(config.entityType, config.endpointType);
     if (subType) {
-      return this.getEntitySubType(entityOfType, subType);
+      return this.getEntitySubType(entityOfType, subType) as StratosBaseCatalogueEntity<T, Y, AB>;
     }
-    return entityOfType;
+    return entityOfType as StratosBaseCatalogueEntity<T, Y, AB>;
   }
 
   public getEntityKey(endpointType: string, entityType: string): string;

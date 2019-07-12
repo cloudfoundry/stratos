@@ -1,4 +1,4 @@
-import { Store, ActionReducer } from '@ngrx/store';
+import { ActionReducer, Store } from '@ngrx/store';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
@@ -15,9 +15,9 @@ import {
   IEntityMetadata,
   IStratosBaseEntityDefinition,
   IStratosEndpointDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
   IStratosEntityBuilder,
   IStratosEntityDefinition,
-  IStratosEndpointWithoutSchemaDefinition,
 } from './entity-catalogue.types';
 
 export interface EntityCatalogueBuilders<

@@ -9,6 +9,7 @@ import {
 import {
   IApp,
   IBuildpack,
+  ICfV2Info,
   IDomain,
   IFeatureFlag,
   IOrganization,
@@ -25,6 +26,17 @@ import {
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import {
+  applicationAddRemoveReducer as spaceApplicationAddRemoveReducer,
+} from '../../store/src/reducers/application-add-remove-reducer';
+import { updateApplicationRoutesReducer } from '../../store/src/reducers/application-route.reducer';
+import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
+import { updateOrganizationQuotaReducer } from '../../store/src/reducers/organization-quota.reducer';
+import { updateOrganizationSpaceReducer } from '../../store/src/reducers/organization-space.reducer';
+import { routeReducer, updateAppSummaryRoutesReducer } from '../../store/src/reducers/routes.reducer';
+import { serviceInstanceReducer } from '../../store/src/reducers/service-instance.reducer';
+import { updateSpaceQuotaReducer } from '../../store/src/reducers/space-quota.reducer';
+import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from '../../store/src/reducers/users.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';
@@ -66,36 +78,28 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-factory';
-import {
-  endpointDisconnectUserReducer,
-  userReducer,
-  userSpaceOrgReducer
-} from '../../store/src/reducers/users.reducer';
-import { routeReducer, updateAppSummaryRoutesReducer } from '../../store/src/reducers/routes.reducer';
-import { serviceInstanceReducer } from '../../store/src/reducers/service-instance.reducer';
-import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
-import { updateApplicationRoutesReducer } from '../../store/src/reducers/application-route.reducer';
-import { updateSpaceQuotaReducer } from '../../store/src/reducers/space-quota.reducer';
-import { applicationAddRemoveReducer as spaceApplicationAddRemoveReducer } from '../../store/src/reducers/application-add-remove-reducer';
-import { updateOrganizationQuotaReducer } from '../../store/src/reducers/organization-quota.reducer';
-import { updateOrganizationSpaceReducer } from '../../store/src/reducers/organization-space.reducer';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
 import { applicationActionBuilder } from './entity-action-builders/application.action-builders';
 import { buildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
+import {
+  CfInfoDefinitionActionBuilders,
+  cfInfoDefinitionActionBuilders,
+} from './entity-action-builders/cf-info.action-builders';
 import { domainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { featureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
+import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 import { organizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { quotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
 import { routesActionBuilders } from './entity-action-builders/routes.action-builder';
 import { securityGroupBuilders } from './entity-action-builders/security-groups.action-builder';
 import { serviceBindingActionBuilders } from './entity-action-builders/service-binding.action-builders';
+import { serviceInstanceActionBuilders } from './entity-action-builders/service-instance.action.builders';
 import { spaceQuotaDefinitionActionBuilders } from './entity-action-builders/space-quota.action-builders';
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -114,6 +118,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   } as IStratosEndpointDefinition;
   return [
     generateCfEndpointEntity(endpointDefinition),
+    generateCfEndpointInfoEntity(endpointDefinition),
     generateCfApplicationEntity(endpointDefinition),
     generateCfSpaceEntity(endpointDefinition),
     generateCfOrgEntity(endpointDefinition),
@@ -376,8 +381,8 @@ function generateCFServiceInstanceEntity(endpointDefinition: IStratosEndpointDef
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IServiceInstance>>(
     definition,
     {
-      // actionBuilders: quotaDefinitionActionBuilder, // TODO:
       dataReducers: [serviceInstanceReducer],
+      actionBuilders: serviceInstanceActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name
@@ -709,4 +714,27 @@ function getOrgStatus(org: APIResource<IOrganization>) {
     return 'Unknown';
   }
   return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
+}
+
+function generateCfEndpointInfoEntity(endpointDefinition: IStratosEndpointDefinition) {
+  const cfInfoDefinition = {
+    type: cfInfoEntityType,
+    schema: cfEntityFactory(cfInfoEntityType),
+    label: 'Cloud Foundry Info',
+    labelPlural: 'Cloud Foundry Infos',
+    endpoint: endpointDefinition
+  };
+  return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<ICfV2Info>, CfInfoDefinitionActionBuilders>(
+    cfInfoDefinition,
+    {
+      actionBuilders: cfInfoDefinitionActionBuilders,
+      entityBuilder: {
+        getMetadata: info => ({
+          guid: info.entity.name,
+          name: info.entity.name,
+        }),
+        getGuid: metadata => metadata.guid,
+      }
+    }
+  );
 }
