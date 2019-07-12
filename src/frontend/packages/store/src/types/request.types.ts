@@ -8,6 +8,7 @@ import { PaginatedAction } from './pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { EntitySchema } from '../helpers/entity-schema';
+import { HttpRequest } from '@angular/common/http';
 
 export interface SingleEntityAction {
   entityType: string;
@@ -58,6 +59,7 @@ export interface EntityRequestAction extends EntityCatalogueEntityConfig, Reques
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
    */
   removeEntityOnDelete?: boolean;
+  options: RequestOptions | HttpRequest<any>;
 }
 
 export interface IUpdateRequestAction {
