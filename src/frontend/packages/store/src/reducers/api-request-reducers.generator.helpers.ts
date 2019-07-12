@@ -1,5 +1,14 @@
 import { Action, ActionReducer } from '@ngrx/store';
 import { produce } from 'immer';
+import { RequestTypes } from '../actions/request.actions';
+import { IRequestArray } from './api-request-reducer/types';
+
+export const requestActions = [
+  RequestTypes.START,
+  RequestTypes.SUCCESS,
+  RequestTypes.FAILED,
+  RequestTypes.UPDATE
+] as IRequestArray;
 
 export interface ExtraApiReducers<T = any> {
   [entityKey: string]: ActionReducer<T>[];
