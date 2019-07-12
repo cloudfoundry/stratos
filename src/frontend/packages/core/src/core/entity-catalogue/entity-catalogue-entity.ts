@@ -1,4 +1,4 @@
-import { Store, ActionReducer } from '@ngrx/store';
+import { Store, ActionReducer, Action } from '@ngrx/store';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
@@ -19,6 +19,9 @@ import {
   IStratosEntityDefinition,
   IStratosEndpointWithoutSchemaDefinition,
 } from './entity-catalogue.types';
+import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { normalize } from 'normalizr';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -122,6 +125,20 @@ export class StratosBaseCatalogueEntity<
       type,
       subType
     };
+  }
+
+  public getRequestAction(actionString: 'start' | 'success' | 'failure', requestType: ApiRequestTypes): Action {
+    return {
+      type: `${this.definition.parentType ? this.definition.parentType + '/' : ''}${this.type} | ${actionString} - ${requestType}`
+    };
+  }
+
+  public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {
+    const schema = this.getSchema(schemaKey);
+    if (Array.isArray(entities)) {
+      return normalize(entities, [schema]);
+    }
+    return normalize(entities, schema);
   }
 
 }
