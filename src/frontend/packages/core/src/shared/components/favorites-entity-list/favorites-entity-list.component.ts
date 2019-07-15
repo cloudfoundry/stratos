@@ -1,17 +1,16 @@
-import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
-import { NgModel } from '@angular/forms';
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { map, scan, startWith } from 'rxjs/operators';
-
+import { Component, Input, OnInit } from '@angular/core';
+import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
+import { distinctUntilChanged, map, scan, startWith } from 'rxjs/operators';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
 import { favoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/favorite-config-mapper';
+
 
 @Component({
   selector: 'app-favorites-entity-list',
   templateUrl: './favorites-entity-list.component.html',
   styleUrls: ['./favorites-entity-list.component.scss']
 })
-export class FavoritesEntityListComponent implements AfterViewInit {
+export class FavoritesEntityListComponent implements OnInit {
 
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
@@ -44,8 +43,10 @@ export class FavoritesEntityListComponent implements AfterViewInit {
     }
   }
 
-  @ViewChild('nameChange') public nameChange: NgModel;
-
+  private searchValueSubject = new Subject<string>();
+  public set searchValue(searchValue: string) {
+    this.searchValueSubject.next(searchValue);
+  }
   public hasEntities = false;
   public typeSubject = new ReplaySubject<string>();
   private entitiesSubject = new ReplaySubject<IFavoriteEntity[]>();
@@ -94,7 +95,8 @@ export class FavoritesEntityListComponent implements AfterViewInit {
     return entity.favorite.guid;
   }
 
-  ngAfterViewInit() {
+  ngOnInit() {
+    const searchValue$ = this.searchValueSubject.pipe(startWith(''), distinctUntilChanged());
     const type$ = this.typeSubject.asObservable().pipe(startWith(null));
     const typesEntities$ = combineLatest(
       this.entities$,
@@ -109,7 +111,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
     );
     this.searchedEntities$ = combineLatest(
       typesEntities$,
-      this.nameChange.valueChanges.pipe(startWith('')),
+      searchValue$.pipe(startWith('')),
     ).pipe(
       map(([entities, nameSearch]) => {
         if (!nameSearch) {
@@ -129,11 +131,11 @@ export class FavoritesEntityListComponent implements AfterViewInit {
     );
 
     this.noResultsDueToFilter$ = combineLatest(
-      this.nameChange.valueChanges,
+      searchValue$,
       type$,
       this.limitedEntities$,
     ).pipe(
-      map(([nameSearch, type, entities]) => entities.length === 0 && (nameSearch || type))
+      map(([nameSearch, type, entities]) => entities.length === 0 && (!!nameSearch || !!type))
     );
   }
 }
