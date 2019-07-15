@@ -68,7 +68,11 @@ export class ApplicationPollingService {
   public poll(withApp = false) {
     const { cfGuid, appGuid } = this.applicationService;
     if (withApp) {
-      this.store.dispatch(this.entityService.action);
+      const updatingApp = {
+        ...this.entityService.action,
+        updatingKey: this.autoRefreshString
+      };
+      this.store.dispatch(updatingApp);
     }
     this.entityService.entityObs$.pipe(
       first(),
