@@ -137,7 +137,7 @@
             </button>
           </div>
           <app-polling-indicator id="app-list-refresh-button" *ngIf="dataSource.refresh"
-            [pollEnabled]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+            [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
             [isPolling]="(isRefreshing$ | async)">
           </app-polling-indicator>
         </div>
@@ -147,7 +147,7 @@
     <div class="refresh-button__no-header"
       *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
       <app-polling-indicator id="app-list-refresh-button" *ngIf="!(isAddingOrSelecting$ | async)"
-        [pollEnabled]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+        [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
         [isPolling]="(isRefreshing$ | async)" [fabButton]="true">
       </app-polling-indicator>
     </div>

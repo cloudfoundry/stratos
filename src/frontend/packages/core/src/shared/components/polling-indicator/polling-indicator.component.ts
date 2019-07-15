@@ -7,8 +7,20 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class PollingIndicatorComponent {
 
+  /**
+   * Is polling currently happening
+   */
   @Input() isPolling: boolean;
-  @Input() pollEnabled = false;
+  /**
+   * Can a manual poll be kicked off?
+   */
+  @Input() manualPoll = false;
+  /**
+   * Show the min-fab version of button
+   */
   @Input() fabButton = false;
+  /**
+   * User has kicked off a manual poll event
+   */
   @Output() poll = new EventEmitter<boolean>();
 }

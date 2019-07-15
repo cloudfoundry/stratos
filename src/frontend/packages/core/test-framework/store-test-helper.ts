@@ -702,7 +702,7 @@ function getDefaultInitialTestStoreState(): AppState {
       isMobile: false,
       isMobileNavOpen: false,
       sideNavPinned: false,
-      plugin: {}
+      pollingEnabled: true
     },
     createApplication: {
       cloudFoundryDetails: null,
