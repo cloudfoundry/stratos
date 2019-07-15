@@ -1,4 +1,3 @@
-import { first } from 'rxjs/operators';
 import { browser, by, element, Key, promise, protractor } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
@@ -61,6 +60,16 @@ export class ListTableComponent extends Component {
     });
   }
 
+  findRow(columnHeader: string, value: string): promise.Promise<number> {
+    return this.getTableData().then(data => {
+      const rowIndex = data.findIndex(row => row[columnHeader] === value);
+      if (rowIndex >= 0) {
+        return rowIndex;
+      }
+      throw new Error(`Could not find row with header ${columnHeader} and value ${value}`);
+    });
+  }
+
   selectRow(index: number, radioButton = true): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
@@ -106,7 +115,7 @@ export class ListTableComponent extends Component {
 
   openRowActionMenuByRow(row: ElementFinder): MenuComponent {
     row.element(by.css('app-table-cell-actions button')).click();
-    const menu = new MenuComponent()
+    const menu = new MenuComponent();
     menu.waitUntilShown();
     return menu;
   }
@@ -177,7 +186,7 @@ export class ListCardComponent extends Component {
   getCardsMetadata(): promise.Promise<CardMetadata[]> {
     return this.getCards().map((elem, index) => {
       return {
-        index: index,
+        index,
         title: elem.element(by.css('.meta-card__title')).getText(),
         click: elem.click,
       };

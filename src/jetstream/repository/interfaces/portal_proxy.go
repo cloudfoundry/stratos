@@ -76,8 +76,7 @@ type PortalProxy interface {
 
 	AddLoginHook(priority int, function LoginHookFunc) error
 	ExecuteLoginHooks(c echo.Context) error
-	
+
 	// Plugins
 	GetPlugin(name string) interface{}
-	
 }

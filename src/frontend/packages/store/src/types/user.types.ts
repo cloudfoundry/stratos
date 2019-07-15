@@ -111,6 +111,7 @@ export interface IUserPermissionInOrg {
 export interface IUserPermissionInSpace {
   name: string;
   orgGuid: string;
+  orgName: string;
   spaceGuid: string;
   permissions: UserRoleInSpace;
 }

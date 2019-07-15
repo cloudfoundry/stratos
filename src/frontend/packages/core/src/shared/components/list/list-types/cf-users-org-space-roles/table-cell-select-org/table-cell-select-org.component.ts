@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrg } from '../../../../../../../../store/src/actions/users-roles.actions';
 import { AppState } from '../../../../../../../../store/src/app-state';
@@ -43,7 +43,9 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
         map(orgs => orgs && orgs.length === 1 ? orgs[0] : null)
       );
     }
-    this.orgGuidChangedSub = this.store.select(selectUsersRolesOrgGuid).subscribe(orgGuid => this.selectedOrgGuid = orgGuid);
+    this.orgGuidChangedSub = this.store.select(selectUsersRolesOrgGuid).subscribe(orgGuid => {
+      this.selectedOrgGuid = orgGuid;
+    });
   }
 
   ngOnDestroy(): void {
@@ -52,10 +54,14 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     }
   }
 
-  updateOrg(orgGuid) {
+  updateOrg(orgGuid: string) {
     if (!orgGuid) {
       return;
     }
-    this.store.dispatch(new UsersRolesSetOrg(orgGuid));
+    this.organizations$.pipe(first()).subscribe(orgs => {
+      const org = orgs.find(o => o.metadata.guid === orgGuid);
+      this.store.dispatch(new UsersRolesSetOrg(org.metadata.guid, org.entity.name));
+    });
+
   }
 }
