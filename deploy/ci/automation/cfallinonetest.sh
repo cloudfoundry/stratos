@@ -47,6 +47,14 @@ CONTAINER_ID=$(docker run \
 -e SMTP_FROM_ADDRESS="${SMTP_FROM_ADDRESS}" \
 $IMAGE)
 
+# Show backend log - wait a few seconds for it to start up
+
+echo "Backend startup log ..."
+sleep 20
+docker logs ${CONTAINER_ID} | tail -n 100
+
+echo "Preparing E2E Tests..."
+
 # Need node modules to run the tests
 rm -rf node_modules
 npm install
