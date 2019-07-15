@@ -38,6 +38,8 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
   public isConnecting = false;
   private isDestroying = false;
 
+  public message = '';
+
   @ViewChild('terminal') container: ElementRef;
   private xterm: Terminal;
 
@@ -111,8 +113,11 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.msgSubscription = this.sshStream
       .subscribe(
         (data: string) => {
-          for (const c of data.split(' ')) {
-            this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+          // Check for a window title message
+          if (!this.isWindowTitle(data)) {
+            for (const c of data.split(' ')) {
+              this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+            }
           }
         },
         (err) => {
@@ -137,5 +142,21 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (!this.msgSubscription.closed && this.sshInput) {
       this.sshInput.next(JSON.stringify({ cols: size.cols, rows: size.rows }));
     }
+  }
+
+  private isWindowTitle(data: string): boolean {
+    const chars = data.split(' ');
+    if (chars.length > 4 &&
+      parseInt(chars[0], 16) === 27 &&
+      parseInt(chars[1], 16) === 93 &&
+      parseInt(chars[2], 16) === 50 &&
+      parseInt(chars[3], 16) === 59) {
+        let title = '';
+        for (let i = 4; i < chars.length - 1; i++) {
+          title += String.fromCharCode(parseInt(chars[i], 16));
+        }
+        this.message = title;
+      }
+    return false;
   }
 }

@@ -1,3 +1,4 @@
+import { KubeConsoleComponent } from './kube-console/kube-console.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -155,6 +156,13 @@ const kubernetes: Routes = [{
       }
     }
   ]
+},
+{
+  path: ':endpointId/console',
+  component: KubeConsoleComponent,
+  data: {
+    uiNoMargin: true
+  }
 }
 ];
 

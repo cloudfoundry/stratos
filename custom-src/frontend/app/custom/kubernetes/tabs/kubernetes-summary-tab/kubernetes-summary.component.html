@@ -4,6 +4,10 @@
       <mat-icon>dashboard</mat-icon>
       <span class="kube-details__button">View Dashboard</span>
     </button>
+    <button [routerLink]="kubeConsoleLink" mat-button>
+      <mat-icon>dashboard</mat-icon>
+      <span class="kube-details__button">Open Console</span>
+    </button>
   </app-page-sub-nav>
 
   <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving Kubernetes details'">

@@ -46,6 +46,7 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.3.0
 	github.com/spf13/cobra v0.0.3 // indirect
