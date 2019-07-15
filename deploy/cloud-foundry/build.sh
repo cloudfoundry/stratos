@@ -67,6 +67,9 @@ log "Building back-end" $CYAN
 # Copy backend executable here
 cp src/jetstream/jetstream .
 
+# Copy the user invite templates
+cp -R src/jetstream/templates ./templates
+
 # Back-end serves static resources from ui folder not dist
 mv dist ui
 

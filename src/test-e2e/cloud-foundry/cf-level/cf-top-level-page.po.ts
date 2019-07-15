@@ -1,6 +1,7 @@
 import { browser, by, element, promise, protractor } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
+import { Component } from '../../po/component.po';
 import { ConfirmDialogComponent } from '../../po/confirm-dialog';
 import { ListComponent } from '../../po/list.po';
 import { MetaCardTitleType } from '../../po/meta-card.po';
@@ -83,10 +84,30 @@ export class CfTopLevelPage extends CFPage {
     return comp;
   }
 
-  isUserInviteIsConfigured(isAdmin: boolean = true): promise.Promise<boolean> {
+  isUserInviteConfigured(isAdmin: boolean = true): promise.Promise<boolean> {
     return this.waitForMetaDataItemComponent('User Invitation Support').getValue().then(value =>
       isAdmin ? value.startsWith('Configured') : value.startsWith('Enabled')
     );
+  }
+
+  getInviteConfigureButton(): Component {
+    return new Component(element(by.cssContainingText('.user-invites button', 'Configure')));
+  }
+
+  getInviteDisableButton(): Component {
+    return new Component(element(by.cssContainingText('.user-invites button', 'Disable')));
+  }
+
+  canConfigureUserInvite(): promise.Promise<boolean> {
+    return this.waitForMetaDataItemComponent('User Invitation Support').getValue().then(value => value.endsWith('Configure'));
+  }
+
+  clickInviteConfigure(): promise.Promise<any> {
+    return this.getInviteConfigureButton().getComponent().click();
+  }
+
+  clickInviteDisable(): promise.Promise<any> {
+    return this.getInviteDisableButton().getComponent().click();
   }
 
   goToSummaryTab() {
