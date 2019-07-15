@@ -10,7 +10,8 @@ import {
   APISuccessOrFailedAction,
   WrapperRequestActionSuccess,
   WrapperRequestActionFailed,
-  InternalEndpointError
+  InternalEndpointError,
+  EntityRequestAction
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { APIResponse } from '../../actions/request.actions';
@@ -79,7 +80,7 @@ export function createRequestStateFromResponse(
 
 export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
-export function getRequestTypeFromMethod(action): ApiRequestTypes {
+export function getRequestTypeFromMethod(action: EntityRequestAction): ApiRequestTypes {
   let method = pathGet('options.method', action);
   if (typeof method === 'string') {
     method = method.toString().toLowerCase();

@@ -11,7 +11,7 @@ import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { environment } from '../../../core/src/environments/environment.prod';
-import { isJetStreamError } from '../../../core/src/jetstream.helpers';
+import { getJetStreamError } from '../../../core/src/jetstream.helpers';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { isEntityInlineParentAction } from '../helpers/entity-relations/entity-relation-tree.helpers';
@@ -157,7 +157,7 @@ export class APIEffect {
 
     return request.pipe(
       map(response => {
-        return this.handleMultiEndpoints(response, actionClone);
+        return this.handleMultiEndpoints(response, actionClone as EntityRequestAction);
       }),
       mergeMap(response => {
         const {
@@ -337,7 +337,7 @@ export class APIEffect {
     }
     return Object.keys(resData).map(cfGuid => {
       // Return list of guid+error objects for those endpoints with errors
-      const jetStreamError = isJetStreamError(resData ? resData[cfGuid] : null);
+      const jetStreamError = getJetStreamError(resData ? resData[cfGuid] : null);
       const succeeded = !jetStreamError || !jetStreamError.error;
       const errorCode =
         jetStreamError && jetStreamError.error
@@ -385,7 +385,7 @@ export class APIEffect {
   }
 
   getEntities(
-    apiAction: EntityRequestAction,
+    apiAction: EntityRequestAction | PaginatedAction,
     data,
     errorCheck: APIErrorCheck[],
   ): {

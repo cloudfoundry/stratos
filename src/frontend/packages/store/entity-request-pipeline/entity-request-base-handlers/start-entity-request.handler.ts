@@ -1,7 +1,7 @@
 import { StartRequestAction } from '../../src/types/request.types';
 import { StartEntityRequestHandler } from '../entity-request-pipeline.types';
 
-export const startEntityPipe: StartEntityRequestHandler = (
+export const startEntityHandler: StartEntityRequestHandler = (
   store,
   catalogueEntity,
   requestType,

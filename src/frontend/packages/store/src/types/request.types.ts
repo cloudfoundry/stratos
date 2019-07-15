@@ -59,7 +59,7 @@ export interface EntityRequestAction extends EntityCatalogueEntityConfig, Reques
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
    */
   removeEntityOnDelete?: boolean;
-  options: RequestOptions | HttpRequest<any>;
+  options?: RequestOptions | HttpRequest<any>;
 }
 
 export interface IUpdateRequestAction {
@@ -128,7 +128,7 @@ export interface ICFAction extends EntityRequestAction {
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {
-  constructor(public type, public apiAction: ICFAction | PaginatedAction, public response?: T) { }
+  constructor(public type, public apiAction: EntityRequestAction | PaginatedAction, public response?: T) { }
 }
 
 export class StartCFAction extends CFStartAction implements IStartRequestAction {

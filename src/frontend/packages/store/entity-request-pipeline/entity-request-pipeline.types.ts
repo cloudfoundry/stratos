@@ -6,6 +6,12 @@ import { NormalizedResponse } from '../src/types/api.types';
 import { EntityRequestAction } from '../src/types/request.types';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpRequest } from '@angular/common/http';
+import { PipelineConfig } from './entity-request-pipeline';
+import { JetStreamErrorResponse } from '../../core/src/jetstream.helpers';
+
+export interface JetstreamResponse<T = any> {
+  [endpointGuid: string]: T | JetStreamErrorResponse;
+}
 
 export type StartEntityRequestHandler = (
   store: Store<AppState>,
@@ -33,8 +39,8 @@ export type MakeEntityRequestPipe<
   T = any,
   > = (
     httpClient: HttpClient,
-    request: HttpRequest<any>
-  ) => Observable<T>;
+    request: HttpRequest<any> | Observable<HttpRequest<any>>
+  ) => Observable<JetstreamResponse<T>>;
 
 export type BuildEntityRequestPipe = (
   requestType: ApiRequestTypes,
@@ -52,16 +58,14 @@ export type NormalizeEntityRequestResponsePipe<
 export type EntityRequestHandler = (...args: any[]) => void;
 export type EntityRequestPipe = (...args: any[]) => any;
 
-export declare function EntityRequestPipeline(
-  startPipe: StartEntityRequestHandler,
-  requestPipeline: MakeEntityRequestPipe,
-  normalizePipeline: NormalizeEntityRequestResponsePipe,
-  endPipeline: EndEntityRequestPipe
-): void;
-export declare function EntityRequestPipeline(
-  startPipe: StartEntityRequestHandler,
-  requestPipeline: MakeEntityRequestPipe,
-  normalizePipeline: NormalizeEntityRequestResponsePipe,
-  normalizePipeline1: NormalizeEntityRequestResponsePipe,
-  endPipeline: EndEntityRequestPipe
-): void;
+export interface PipelineResult {
+  success: boolean;
+  errorMessage?: string;
+  response?: NormalizedResponse;
+}
+
+export type EntityRequestPipeline = (
+  store: Store<AppState>,
+  httpClient: HttpClient,
+  config: PipelineConfig
+) => Observable<PipelineResult>;

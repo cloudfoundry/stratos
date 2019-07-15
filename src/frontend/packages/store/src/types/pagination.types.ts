@@ -1,9 +1,10 @@
-import { RequestMethod } from '@angular/http';
+import { RequestMethod, RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
+import { HttpRequest } from '@angular/common/http';
 
 export class QParam {
   constructor(
@@ -79,12 +80,7 @@ export interface PaginatedAction extends BasePaginatedAction, EntityRequestActio
   flattenPaginationMax?: number;
   initialParams?: PaginationParam;
   pageNumber?: number;
-  options?: {
-    params?: {
-      paramsMap: any;
-    },
-    method?: RequestMethod | string | null
-  };
+  options?: RequestOptions | HttpRequest<any>;
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;
