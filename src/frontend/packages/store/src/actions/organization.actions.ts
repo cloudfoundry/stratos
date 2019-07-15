@@ -30,9 +30,9 @@ export const GET_ORGANIZATION_SPACES = '[Space] Get all org spaces';
 export const GET_ORGANIZATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
 export const GET_ORGANIZATION_SPACES_FAILED = '[Space] Get all org spaces failed';
 
-export const GET_ORGANIZATION_DOMAINS = '[Space] Get all org spaces';
-export const GET_ORGANIZATION_DOMAINS_SUCCESS = '[Space] Get all org spaces success';
-export const GET_ORGANIZATION_DOMAINS_FAILED = '[Space] Get all org spaces failed';
+export const GET_ORGANIZATION_DOMAINS = '[Organization] Get all org domains';
+export const GET_ORGANIZATION_DOMAINS_SUCCESS = '[Organization] Get all org domains success';
+export const GET_ORGANIZATION_DOMAINS_FAILED = '[Organization] Get all org domains failed';
 
 export const DELETE_ORGANIZATION = '[Organization] Delete organization';
 export const DELETE_ORGANIZATION_SUCCESS = '[Organization] Delete organization success';
