@@ -1,6 +1,10 @@
-<button mat-icon-button (click)="toggle()" [matTooltip]="pollEnabled ? 'Polling Enabled' : 'Polling Disabled'">
-  <mat-icon *ngIf="pollEnabled else noPoll" class="poll-icon" [ngClass]="{'poll-icon--spin': isPolling}">sync</mat-icon>
-  <ng-template #noPoll class=" poll-icon">
-    <mat-icon>sync_disabled</mat-icon>
-  </ng-template>
-</button>
+<ng-container *ngIf="!fabButton else fabButtonTemplate">
+  <button mat-icon-button [disabled]="!pollEnabled" (click)="poll.emit()">
+    <mat-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</mat-icon>
+  </button>
+</ng-container>
+<ng-template #fabButtonTemplate>
+  <button mat-icon-button [disabled]="!pollEnabled" (click)="poll.emit()" mat-mini-fab>
+    <mat-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</mat-icon>
+  </button>
+</ng-template>

@@ -9,10 +9,6 @@ export class PollingIndicatorComponent {
 
   @Input() isPolling: boolean;
   @Input() pollEnabled = false;
-  @Output() updatePollEnabled = new EventEmitter<boolean>();
-
-  toggle() {
-    this.pollEnabled = !this.pollEnabled;
-    this.updatePollEnabled.emit(this.pollEnabled);
-  }
+  @Input() fabButton = false;
+  @Output() poll = new EventEmitter<boolean>();
 }

@@ -1,11 +1,11 @@
 .poll-icon {
-  animation: spin 1.5s infinite linear;
+  animation: spin .4s infinite linear;
   animation-play-state: paused;
   transform: rotate(0deg);
   transition: transform 1s linear;
 }
 
-.poll-icon--spin {
+.polling {
   animation-play-state: running;
 }
 
@@ -15,6 +15,6 @@
   }
 
   to {
-    transform: rotate(-359deg);
+    transform: rotate(359deg);
   }
 }

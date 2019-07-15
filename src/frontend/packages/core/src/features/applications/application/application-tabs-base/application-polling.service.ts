@@ -8,6 +8,7 @@ import { SetPluginDashboardValue } from '../../../../../../store/src/actions/das
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IApp } from '../../../../core/cf-api.types';
 import { EntityService } from '../../../../core/entity-service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
@@ -32,7 +33,7 @@ export class ApplicationPollingService {
 
   constructor(
     public applicationService: ApplicationService,
-    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
+    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource<IApp>>,
     private store: Store<AppState>,
     private ngZone: NgZone,
   ) {
@@ -65,24 +66,31 @@ export class ApplicationPollingService {
       return;
     }
 
-    const { cfGuid, appGuid } = this.applicationService;
     // Auto refresh
     this.ngZone.runOutsideAngular(() => {
       this.pollingSub = this.entityService
         .poll(10000, this.autoRefreshString).pipe(
-          tap(({ resource }) => {
-            this.ngZone.run(() => {
-              this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-              if (resource && resource.entity && resource.entity.state === 'STARTED') {
-                this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-              }
-            });
-          }))
+          tap(() => this.ngZone.run(() => this.poll(false))))
         .subscribe();
     });
   }
 
   public stop() {
     safeUnsubscribe(this.pollingSub);
+  }
+
+  public poll(withApp = false) {
+    const { cfGuid, appGuid } = this.applicationService;
+    if (withApp) {
+      this.store.dispatch(this.entityService.action);
+    }
+    this.entityService.entityObs$.pipe(
+      first(),
+    ).subscribe(resource => {
+      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
+        this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+      }
+    });
   }
 }
