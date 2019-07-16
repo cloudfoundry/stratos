@@ -204,7 +204,7 @@ type Info struct {
 	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
 }
 
-// Extends CNSI Record and adds the user
+// EndpointDetail extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
 	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
@@ -237,19 +237,28 @@ var AuthEndpointTypes = map[string]AuthEndpointType{
 	"local":  Local,
 }
 
+// ConsoleConfig is essential configuration settings
 type ConsoleConfig struct {
-	UAAEndpoint           *url.URL `json:"uaa_endpoint"`
-	AuthorizationEndpoint *url.URL `json:"authorization_endpoint"`
-	ConsoleAdminScope     string   `json:"console_admin_scope"`
-	ConsoleClient         string   `json:"console_client"`
-	ConsoleClientSecret   string   `json:"console_client_secret"`
+	UAAEndpoint           *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
+	AuthorizationEndpoint *url.URL `json:"authorization_endpoint" configName:"AUTHORIZATION_ENDPOINT"`
+	ConsoleAdminScope     string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
+	ConsoleClient         string   `json:"console_client" configName:"CONSOLE_CLIENT"`
+	ConsoleClientSecret   string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`
 	LocalUser             string   `json:"local_user"`
 	LocalUserPassword     string   `json:"local_user_password"`
 	LocalUserScope        string   `json:"local_user_scope"`
-	AuthEndpointType      string   `json:"auth_endpoint_type"`
-	SkipSSLValidation     bool     `json:"skip_ssl_validation"`
-	IsSetupComplete       bool     `json:"is_setup_complete"`
-	UseSSO                bool     `json:"use_sso"`
+	AuthEndpointType      string   `json:"auth_endpoint_type" configName:"AUTH_ENDPOINT_TYPE"`
+	SkipSSLValidation     bool     `json:"skip_ssl_validation" configName:"SKIP_SSL_VALIDATION"`
+	UseSSO                bool     `json:"use_sso" configName:"SSO_LOGIN"`
+}
+
+// IsSetupComplete indicates if we have enough config
+func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+	if consoleConfig.UAAEndpoint == nil {
+		return false
+	}
+
+	return len(consoleConfig.UAAEndpoint.String()) > 0 && len(consoleConfig.ConsoleAdminScope) > 0
 }
 
 // CNSIRequest

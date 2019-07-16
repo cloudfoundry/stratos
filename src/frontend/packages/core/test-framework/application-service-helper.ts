@@ -1,18 +1,22 @@
 import { Store } from '@ngrx/store';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { AppStat } from '../../store/src/types/app-metadata.types';
-import {
-  EnvVarStratosProject,
-  ApplicationEnvVarsHelper
-} from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
-import { ISpace, IApp, IAppSummary } from '../src/core/cf-api.types';
-import { AppState } from '../../store/src/app-state';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { Observable, of as observableOf } from 'rxjs';
+
+import { AppState } from '../../store/src/app-state';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { AppStat } from '../../store/src/types/app-metadata.types';
+import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
+import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
+import {
+  ApplicationEnvVarsHelper,
+  EnvVarStratosProject,
+} from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import {
+  ApplicationStateData,
+  ApplicationStateService,
+} from '../src/shared/components/application-state/application-state.service';
+import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -77,6 +81,7 @@ export class ApplicationServiceMock {
   });
   appSpace$: Observable<APIResource<ISpace>> = observableOf(createEntity<ISpace>({} as ISpace));
   applicationRunning$: Observable<boolean> = observableOf(false);
+  orgDomains$: Observable<APIResource<IDomain>[]> = observableOf([]);
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {

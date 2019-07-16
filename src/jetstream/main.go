@@ -84,7 +84,10 @@ func getEnvironmentLookup() *env.VarSet {
 	// Make environment lookup
 	envLookup := env.NewVarSet()
 
-	// Environment variables directly set trump all others
+	// Config database store topmost priority
+	envLookup.AppendSource(console_config.ConfigLookup)
+
+	// Environment variables
 	envLookup.AppendSource(os.LookupEnv)
 
 	// If running in CloudFoundry, fallback to a user provided service (if set)
@@ -144,11 +147,14 @@ func main() {
 
 	if isUpgrading {
 		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
-		start(portalConfig, &portalProxy{env: envLookup}, &setupMiddleware{}, true)
+		start(portalConfig, &portalProxy{env: envLookup}, false, true)
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
 	log.Infof("Stratos Version: %s", portalConfig.ConsoleVersion)
+
+	// Initialize an empty config for the console - initially not setup
+	portalConfig.ConsoleConfig = new(interfaces.ConsoleConfig)
 
 	// Initialize the HTTP client
 	initializeHTTPClients(portalConfig.HTTPClientTimeoutInSecs, portalConfig.HTTPClientTimeoutMutatingInSecs, portalConfig.HTTPConnectionTimeoutInSecs)
@@ -242,7 +248,7 @@ func main() {
 	}()
 
 	// Initialise configuration
-	addSetupMiddleware, err := initialiseConsoleConfiguration(portalProxy)
+	needSetupMiddleware, err := initialiseConsoleConfiguration(portalProxy)
 	if err != nil {
 		log.Infof("Failed to initialise console config due to: %s", err)
 		return
@@ -274,7 +280,7 @@ func main() {
 	portalProxy.StoreDiagnostics()
 
 	// Start the back-end
-	if err := start(portalProxy.Config, portalProxy, addSetupMiddleware, false); err != nil {
+	if err := start(portalProxy.Config, portalProxy, needSetupMiddleware, false); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
 	log.Info("Unable to start Stratos JetStream backend")
@@ -292,79 +298,74 @@ func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
 	return plugin
 }
 
-func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware, error) {
+func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 
-	addSetupMiddleware := new(setupMiddleware)
+	addSetupMiddleware := false
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Unable to intialise Stratos backend config due to: %+v", err)
+		log.Errorf("Unable to initialize Stratos backend config due to: %+v", err)
 		return addSetupMiddleware, err
 	}
-	isInitialised, err := consoleRepo.IsInitialised()
 
-	if err != nil || !isInitialised {
-		// Exception occurred when trying to determine
-		// if its initialised or instance isn't initialised,
-		// will attempt to initialise it from the env vars.
+	// Do this BEFORE we load the config from the database, so env var lookup at this stage
+	// looks at environment variables etc but NOT the database
+	// Migrate data from old setup table to new config table (if needed)
+	err = console_config.MigrateSetupData(portalProxy, consoleRepo)
+	if err != nil {
+		log.Warnf("Unable to initialize config environment provider: %+v", err)
+	}
 
-		consoleConfig, err := portalProxy.initialiseConsoleConfig(consoleRepo)
-		if err != nil {
-			log.Warnf("Failed to initialise Stratos config due to: %+v", err)
+	// Load config stored in the database
+	err = console_config.InitializeConfEnvProvider(consoleRepo)
+	if err != nil {
+		log.Warnf("Unable to load configuration from database: %+v", err)
+	}
 
-			addSetupMiddleware.addSetup = true
-			addSetupMiddleware.consoleRepo = consoleRepo
-			log.Info("Will add `setup` route and middleware")
+	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
+	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
+	if err != nil {
+		// Could not read config - this should not happen - so abort if it does
+		log.Fatalf("Unable to load console config; %+v", err)
+	}
 
-		} else {
-			showStratosConfig(consoleConfig)
-			portalProxy.Config.ConsoleConfig = consoleConfig
-			setSSOFromConfig(portalProxy, consoleConfig)
-		}
-
-	} else if err == nil && isInitialised {
-		consoleConfig, err := consoleRepo.GetConsoleConfig()
-		if err != nil {
-			log.Infof("Instance is initialised, but console_config table may contain junk data! %+v", err)
-		}
+	// We dynamically determine if we need to enter setup mode based on the configuration
+	// We need: UAA Endpoint and Console Admin Scope
+	if !consoleConfig.IsSetupComplete() {
+		addSetupMiddleware = true
+		log.Info("Will add `setup` route and middleware")
+	} else {
 		showStratosConfig(consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
-		setSSOFromConfig(portalProxy, consoleConfig)
+		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 	}
 
 	return addSetupMiddleware, nil
 }
 
-func setSSOFromConfig(portalProxy *portalProxy, configuration *interfaces.ConsoleConfig) {
-	// For SSO, override the value loaded from the config file, so that this is what we use
-	if !portalProxy.Env().IsSet("SSO_LOGIN") {
-		portalProxy.Config.SSOLogin = configuration.UseSSO
-	}
-}
-
 func showStratosConfig(config *interfaces.ConsoleConfig) {
-	log.Infof("Stratos is intialised with the following setup:")
-	log.Infof("... Auth Endpoint Type  : %s", config.AuthEndpointType)
+	log.Infof("Stratos is initialized with the following setup:")
+	log.Infof("... Auth Endpoint Type      : %s", config.AuthEndpointType)
 	if val, found := interfaces.AuthEndpointTypes[config.AuthEndpointType]; found {
 		if val == interfaces.Local {
-			log.Infof("... Local User          		: %s", config.LocalUser)
-			log.Infof("... Local User Scope    		: %s", config.LocalUserScope)
+			log.Infof("... Local User              : %s", config.LocalUser)
+			log.Infof("... Local User Scope        : %s", config.LocalUserScope)
 		} else { //Auth type is set to remote
-			log.Infof("... UAA Endpoint        		: %s", config.UAAEndpoint)
-			log.Infof("... Authorization Endpoint 	: %s", config.AuthorizationEndpoint)
-			log.Infof("... Console Client      		: %s", config.ConsoleClient)
-			log.Infof("... Admin Scope         		: %s", config.ConsoleAdminScope)
-			log.Infof("... Use SSO Login       		: %t", config.UseSSO)
-		}
+			log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
+			log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
+			log.Infof("... Console Client          : %s", config.ConsoleClient)
+			log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
+			log.Infof("... Use SSO Login           : %t", config.UseSSO)
+				}
 	}
-	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
-	log.Infof("... Setup Complete      : %t", config.IsSetupComplete)
+	log.Infof("... Skip SSL Validation     : %t", config.SkipSSLValidation)
+	log.Infof("... Setup Complete          : %t", config.IsSetupComplete())
 }
 
 func showSSOConfig(portalProxy *portalProxy) {
 	// Show SSO Configuration
 	log.Infof("SSO Configuration:")
-	log.Infof("... SSO Enabled         : %t", portalProxy.Config.SSOLogin)
-	log.Infof("... SSO Options         : %s", portalProxy.Config.SSOOptions)
+	log.Infof("... SSO Enabled             : %t", portalProxy.Config.SSOLogin)
+	log.Infof("... SSO Options             : %s", portalProxy.Config.SSOOptions)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
@@ -641,7 +642,7 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 	httpClientMutatingSkipSSL.Timeout = time.Duration(timeoutMutating) * time.Second
 }
 
-func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
+func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
 	e.HideBanner = true
@@ -674,7 +675,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	e.Use(bindToEnv(retryAfterUpgradeMiddleware, p.Env()))
 
 	if !isUpgrade {
-		p.registerRoutes(e, addSetupMiddleware)
+		p.registerRoutes(e, needSetupMiddleware)
 	}
 
 	if isUpgrade {
@@ -698,7 +699,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
 		if !strings.Contains(engineErrStr, "Server closed") {
-			log.Warnf("Failed to start HTTP/S server: %v+", engineErr)
+			log.Warnf("Failed to start HTTP/S server: %+v", engineErr)
 		}
 	}
 
@@ -750,7 +751,7 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 	return client
 }
 
-func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMiddleware) {
+func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	log.Debug("registerRoutes")
 
 	for _, plugin := range p.Plugins {
@@ -770,9 +771,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	pp.Use(p.setSecureCacheContentMiddleware)
 
 	// Add middleware to block requests if unconfigured
-	if addSetupMiddleware.addSetup {
-		go p.SetupPoller(addSetupMiddleware)
-		e.Use(p.SetupMiddleware(addSetupMiddleware))
+	if needSetupMiddleware {
+		e.Use(p.SetupMiddleware())
 		pp.POST("/v1/setup", p.setupConsole)
 		pp.POST("/v1/setup/update", p.setupConsoleUpdate)
 	}
