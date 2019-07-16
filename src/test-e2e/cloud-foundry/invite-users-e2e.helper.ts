@@ -1,4 +1,4 @@
-import { promise } from 'protractor';
+import { promise, browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
@@ -22,7 +22,7 @@ export function setupInviteUserTests(
   let defaultCf: E2EConfigCloudFoundry = e2e.secrets.getDefaultCFEndpoint();
   let cfHelper: CFHelpers;
 
-  extendE2ETestTime(100000);
+  // extendE2ETestTime(100000);
 
   beforeAll(() => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
@@ -46,10 +46,10 @@ export function setupInviteUserTests(
 
   it('Configure Client', () => {
     navToCfSummary();
-    return CfTopLevelPage.detect().then(cfPage => {
+    browser.wait(CfTopLevelPage.detect().then(cfPage => {
       cfPage.waitForPageOrChildPage();
       cfPage.goToSummaryTab();
-      cfPage.isUserInviteConfigured().then(configured => {
+      return cfPage.isUserInviteConfigured().then(configured => {
         if (!configured) {
           cfPage.clickInviteConfigure();
           const dialog = new ConfigInviteClientDialog();
@@ -59,7 +59,7 @@ export function setupInviteUserTests(
         }
         return navToOrgSpaceUsersList(cfHelper, defaultCf);
       });
-    });
+    }));
   });
 
   describe('Stepper - ', () => {
@@ -69,8 +69,8 @@ export function setupInviteUserTests(
     const fieldTwo = 1;
     const usersToDelete = [];
 
-
-    beforeAll(() => {
+    it('Is ready', () => {
+      usersTable.waitUntilShown();
       usersTable.getInviteUserButtonComponent().waitUntilShown();
       usersTable.inviteUser();
       inviteUserStepper = new InviteUserStepperPo();

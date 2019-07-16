@@ -262,7 +262,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 		return nil, interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Failed to request user invite links",
-			"Failed to request user invite links: %v+",
+			"Failed to request user invite links: %+v",
 			err,
 		)
 	}

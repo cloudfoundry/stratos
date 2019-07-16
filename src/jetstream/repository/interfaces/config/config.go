@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -18,6 +19,8 @@ import (
 )
 
 const secretsDir = "/etc/secrets"
+
+var urlType *url.URL
 
 // Load the given pointer to struct with values from the environment and the
 // /etc/secrets/ directory.
@@ -118,7 +121,11 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 	case reflect.String:
 		newVal = val
 	default:
-		return fmt.Errorf("failed to decode value: unsupported type %q", kind.String())
+		if typ == reflect.TypeOf(urlType) {
+			newVal, err = url.Parse(val)
+		} else {
+			return fmt.Errorf("failed to decode value: unsupported type %q", kind.String())
+		}
 	}
 
 	if err != nil {
