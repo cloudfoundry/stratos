@@ -1,4 +1,4 @@
-import { NormalizedResponse } from '../../src/types/api.types';
+import { NormalizedResponse } from '../../types/api.types';
 
 export const multiEndpointResponseMergePipe = (
   normalizedData: NormalizedResponse[]

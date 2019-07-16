@@ -1,7 +1,7 @@
 import { compose, createSelector } from '@ngrx/store';
 
 import { InternalEventSeverity, InternalEventsState } from '../types/internal-events.types';
-import { CFAppState } from './../app-state';
+import { CFAppState } from '../app-state';
 
 
 // TODO: Confirm - should this be CFAppState?

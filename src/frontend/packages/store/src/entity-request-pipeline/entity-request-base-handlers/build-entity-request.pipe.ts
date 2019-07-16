@@ -1,7 +1,7 @@
 import { BuildEntityRequestPipe } from '../entity-request-pipeline.types';
 import { HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
-import { ApiRequestTypes } from '../../src/reducers/api-request-reducer/request-helpers';
-import { environment } from '../../../core/src/environments/environment';
+import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import { environment } from '../../../../core/src/environments/environment';
 import { RequestOptions } from '@angular/http';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -40,7 +40,7 @@ function getRequestFromLegacyOptions(options: RequestOptions, requestType: ApiRe
     url,
     options.body,
     {
-      headers: new HttpHeaders(options.headers.toJSON()),
+      headers: new HttpHeaders(options.headers ? options.headers.toJSON() : null),
       params: new HttpParams({
         fromObject: getHttpParams(options)
       })

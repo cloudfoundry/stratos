@@ -125,7 +125,7 @@ describe('PaginationReducer', () => {
         paginationKey,
         type: 'type',
         entity: {} as CFEntitySchema,
-        options: {},
+        options: {} as RequestOptions,
         actions: []
       },
       'fetch',

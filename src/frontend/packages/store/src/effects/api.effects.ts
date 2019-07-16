@@ -35,6 +35,8 @@ import { CFAppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
+import { baseRequestPipelineFactory, apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
+import { HttpClient } from '@angular/common/http';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -59,6 +61,7 @@ export class APIEffect {
     private http: Http,
     private actions$: Actions,
     private store: Store<CFAppState>,
+    private httpClient: HttpClient
   ) {
 
   }
@@ -68,6 +71,13 @@ export class APIEffect {
     ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
     withLatestFrom(this.store),
     mergeMap(([action, state]) => {
+      if (!(action as PaginatedAction).paginationKey) {
+        return apiRequestPipelineFactory(baseRequestPipelineFactory, {
+          store: this.store,
+          httpClient: this.httpClient,
+          action
+        });
+      }
       return this.doApiRequest(action, state);
     }),
   );

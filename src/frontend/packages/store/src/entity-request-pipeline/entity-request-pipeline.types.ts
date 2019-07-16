@@ -1,27 +1,27 @@
-import { Store } from '@ngrx/store';
-import { AppState } from '../src/app-state';
-import { StratosBaseCatalogueEntity } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { ApiRequestTypes } from '../src/reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from '../src/types/api.types';
-import { EntityRequestAction } from '../src/types/request.types';
+import { Store, Action } from '@ngrx/store';
+import { AppState } from '../app-state';
+import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../types/api.types';
+import { EntityRequestAction } from '../types/request.types';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpRequest } from '@angular/common/http';
 import { PipelineConfig } from './entity-request-pipeline';
-import { JetStreamErrorResponse } from '../../core/src/jetstream.helpers';
-
+import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
+type ActionDispatcher = (action: Action) => void;
 export interface JetstreamResponse<T = any> {
   [endpointGuid: string]: T | JetStreamErrorResponse;
 }
 
 export type StartEntityRequestHandler = (
-  store: Store<AppState>,
+  actionDispatcher: ActionDispatcher,
   catalogueEntity: StratosBaseCatalogueEntity,
   requestType: ApiRequestTypes,
   action: EntityRequestAction
 ) => void;
 
 export type SucceedOrFailEntityRequestHandler = (
-  store: Store<any>,
+  actionDispatcher: ActionDispatcher,
   catalogueEntity: StratosBaseCatalogueEntity,
   requestType: ApiRequestTypes
 ) => void;
@@ -29,7 +29,7 @@ export type SucceedOrFailEntityRequestHandler = (
 export type EndEntityRequestPipe<
   T = any,
   > = (
-    store: Store<T>,
+    actionDispatcher: ActionDispatcher,
     requestType: ApiRequestTypes,
     action: EntityRequestAction,
     data: NormalizedResponse<T>

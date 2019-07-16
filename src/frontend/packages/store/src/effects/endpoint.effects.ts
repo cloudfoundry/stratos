@@ -46,7 +46,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { PaginatedAction } from './../types/pagination.types';
+import { PaginatedAction } from '../types/pagination.types';
 
 
 @Injectable()

@@ -6,9 +6,9 @@ import { catchError, mergeMap } from 'rxjs/operators';
 
 import { CFAppState } from '../app-state';
 import { EntityRequestAction } from '../types/request.types';
-import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from './../actions/system.actions';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
-import { SystemInfo, systemStoreNames } from './../types/system.types';
+import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import { SystemInfo, systemStoreNames } from '../types/system.types';
 
 @Injectable()
 export class SystemEffects {

@@ -1,15 +1,15 @@
 import { EntityRequestHandler, EntityRequestPipeline } from './entity-request-pipeline.types';
 import { state } from '@angular/animations';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
 import { HttpClient } from '@angular/common/http';
-import { EntityRequestAction } from '../src/types/request.types';
-import { AppState } from '../src/app-state';
-import { getRequestTypeFromMethod, ApiRequestTypes } from '../src/reducers/api-request-reducer/request-helpers';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntityRequestAction } from '../types/request.types';
+import { AppState } from '../app-state';
+import { getRequestTypeFromMethod, ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
-import { StratosBaseCatalogueEntity } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { tap, map } from 'rxjs/operators';
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
 import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
@@ -38,7 +38,7 @@ export interface PipelineConfig {
   action: EntityRequestAction;
 }
 
-const baseRequestPipelineFactory: EntityRequestPipeline = (
+export const baseRequestPipelineFactory: EntityRequestPipeline = (
   store: Store<AppState>,
   httpClient: HttpClient,
   { action, requestType, catalogueEntity }: PipelineConfig
@@ -50,7 +50,7 @@ const baseRequestPipelineFactory: EntityRequestPipeline = (
   return makeRequestEntityPipe(httpClient, request).pipe(
     map(handleMultiEndpointsPipe),
     map(multiEndpointResponses => {
-      endpointErrorHandler(§
+      endpointErrorHandler(
         action,
         catalogueEntity,
         requestType,
@@ -71,19 +71,20 @@ const baseRequestPipelineFactory: EntityRequestPipeline = (
   );
 };
 
-const apiRequestPipelineFactory = (
+export const apiRequestPipelineFactory = (
   pipeline: EntityRequestPipeline,
   { store, httpClient, action }: PipelineFactoryConfig
 ) => {
+  const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const requestType = getRequestTypeFromMethod(action);
   const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
-  startEntityHandler(store, catalogueEntity, requestType, action);
-  pipeline(store, httpClient, {
+  startEntityHandler(actionDispatcher, catalogueEntity, requestType, action);
+  return pipeline(store, httpClient, {
     action,
     requestType,
     catalogueEntity
   }).pipe(
-    tap(() => successEntityHandler(store, catalogueEntity, requestType))
+    tap(() => successEntityHandler(actionDispatcher, catalogueEntity, requestType))
   );
 };
 // action: ICFAction | PaginatedAction, state: CFAppState

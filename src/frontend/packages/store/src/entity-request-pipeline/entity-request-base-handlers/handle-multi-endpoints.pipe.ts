@@ -1,6 +1,6 @@
-import { EntityRequestAction } from '../../src/types/request.types';
+import { EntityRequestAction } from '../../types/request.types';
 import { JetstreamResponse } from '../entity-request-pipeline.types';
-import { isJetStreamError, JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
+import { isJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 
 export class JetstreamError {
   constructor(

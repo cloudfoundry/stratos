@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
-import { AppState } from '../../src/app-state';
+import { AppState } from '../../app-state';
 import { JetstreamError } from './handle-multi-endpoints.pipe';
-import { SendEventAction } from '../../src/actions/internal-events.actions';
-import { endpointSchemaKey } from '../../src/helpers/entity-factory';
-import { InternalEventSeverity } from '../../src/types/internal-events.types';
-import { EntityRequestAction, APISuccessOrFailedAction } from '../../src/types/request.types';
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { ApiRequestTypes } from '../../src/reducers/api-request-reducer/request-helpers';
+import { SendEventAction } from '../../actions/internal-events.actions';
+import { endpointSchemaKey } from '../../helpers/entity-factory';
+import { InternalEventSeverity } from '../../types/internal-events.types';
+import { EntityRequestAction, APISuccessOrFailedAction } from '../../types/request.types';
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 
 export const endpointErrorsHandlerFactory = (store: Store<AppState>) => (
   action: EntityRequestAction,

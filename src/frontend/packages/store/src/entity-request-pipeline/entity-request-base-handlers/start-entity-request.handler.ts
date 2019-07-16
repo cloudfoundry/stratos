@@ -1,13 +1,13 @@
-import { StartRequestAction } from '../../src/types/request.types';
+import { StartRequestAction } from '../../types/request.types';
 import { StartEntityRequestHandler } from '../entity-request-pipeline.types';
 
 export const startEntityHandler: StartEntityRequestHandler = (
-  store,
+  actionDispatcher,
   catalogueEntity,
   requestType,
   action
 ) => {
   const entityAction = catalogueEntity.getRequestAction('start', requestType);
-  store.dispatch(new StartRequestAction(action, requestType));
-  store.dispatch(entityAction);
+  actionDispatcher(new StartRequestAction(action, requestType));
+  actionDispatcher(entityAction);
 };

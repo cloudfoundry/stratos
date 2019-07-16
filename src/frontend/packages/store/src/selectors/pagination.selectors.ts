@@ -2,7 +2,7 @@ import { compose } from '@ngrx/store';
 
 import { AppState } from '../app-state';
 import { PaginationEntityTypeState } from '../types/pagination.types';
-import { PaginationEntityState, PaginationState } from './../types/pagination.types';
+import { PaginationEntityState, PaginationState } from '../types/pagination.types';
 
 export function isIdInPagination(entityId: string, entityKey: string, paginationKey: string) {
   return compose(

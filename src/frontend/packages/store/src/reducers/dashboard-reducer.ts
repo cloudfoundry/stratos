@@ -16,7 +16,7 @@ import {
   HydrateDashboardStateAction,
   SetSessionTimeoutAction,
   TIMEOUT_SESSION,
-} from './../actions/dashboard-actions';
+} from '../actions/dashboard-actions';
 
 export interface DashboardState {
   timeoutSession: boolean;
