@@ -1,7 +1,13 @@
 import { StratosBaseCatalogueEntity } from '../src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
+import { registerBaseStratosTypes } from '../src/base-entity-types';
+import { userProfileEntitySchema } from '../src/base-entity-schemas';
 
+export function getTestCatalogueEntity() {
+  registerBaseStratosTypes();
+  return entityCatalogue.getEntity(userProfileEntitySchema);
+}
 
 export interface EntityCatalogueHelperConfig {
   catalogueEntities?: [EntityCatalogueEntityConfig, StratosBaseCatalogueEntity][];

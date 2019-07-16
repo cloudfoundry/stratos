@@ -129,7 +129,7 @@ export class StratosBaseCatalogueEntity<
 
   public getRequestAction(actionString: 'start' | 'success' | 'failure', requestType: ApiRequestTypes): Action {
     return {
-      type: `${this.definition.parentType ? this.definition.parentType + '/' : ''}${this.type} | ${actionString} - ${requestType}`
+      type: `[${this.entityKey}/${requestType}] ${actionString}`
     };
   }
 

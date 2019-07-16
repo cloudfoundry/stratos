@@ -13,7 +13,7 @@ import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalo
 import { tap, map } from 'rxjs/operators';
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
 import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
-import { handleMultiEndpoints } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
+import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { endpointErrorsHandlerFactory } from './entity-request-base-handlers/endpoint-errors.handler';
 import { multiEndpointResponseMergePipe } from './entity-request-base-handlers/merge-multi-endpoint-data.pipe';
 
@@ -43,10 +43,11 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
   httpClient: HttpClient,
   { action, requestType, catalogueEntity }: PipelineConfig
 ) => {
-  const request = buildRequestEntityPipe(requestType, action, catalogueEntity, store);
+  const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
+  const request = buildRequestEntityPipe(requestType, action.options);
   const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
-  const handleMultiEndpointsPipe = handleMultiEndpoints(action);
-  const endpointErrorHandler = endpointErrorsHandlerFactory(store);
+  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url);
+  const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   return makeRequestEntityPipe(httpClient, request).pipe(
     map(handleMultiEndpointsPipe),
     map(multiEndpointResponses => {

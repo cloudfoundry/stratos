@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpRequest } from '@angular/common/http';
 import { PipelineConfig } from './entity-request-pipeline';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
-type ActionDispatcher = (action: Action) => void;
+import { RequestOptions } from '@angular/http';
+export type ActionDispatcher = (action: Action) => void;
 export interface JetstreamResponse<T = any> {
   [endpointGuid: string]: T | JetStreamErrorResponse;
 }
@@ -44,7 +45,7 @@ export type MakeEntityRequestPipe<
 
 export type BuildEntityRequestPipe = (
   requestType: ApiRequestTypes,
-  action: EntityRequestAction,
+  requestOptions: RequestOptions | HttpRequest<any>,
   catalogueEntity: StratosBaseCatalogueEntity,
   store: Store<any>,
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;

@@ -26,6 +26,7 @@ function getHttpParams(options: RequestOptions) {
   if (!options.params) {
     return null;
   }
+  console.log(options.params.paramsMap)
   return Array.from(options.params.paramsMap.entries()).reduce((obj, [key, value]) => {
     obj[key] = value;
     return obj;
@@ -49,17 +50,19 @@ function getRequestFromLegacyOptions(options: RequestOptions, requestType: ApiRe
 }
 
 
-export const buildRequestEntityPipe: BuildEntityRequestPipe = (
-  requestType,
-  action
-) => {
-  const url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${action.options.url}`;
-  if (action.options instanceof HttpRequest) {
-    return action.options.clone({
+export const buildRequestEntityPipe = (
+  requestType: ApiRequestTypes,
+  requestOptions: RequestOptions | HttpRequest<any>
+): HttpRequest<any> => {
+  const url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${requestOptions.url}`;
+  if (requestOptions instanceof HttpRequest) {
+    return requestOptions.clone({
       url
     });
   }
-  return getRequestFromLegacyOptions({ ...action.options } as RequestOptions, requestType, url);
-}
+  return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType, url);
+};
+
+
 
 

@@ -128,7 +128,7 @@ export interface ICFAction extends EntityRequestAction {
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {
-  constructor(public type, public apiAction: EntityRequestAction | PaginatedAction, public response?: T) { }
+  constructor(public type: string, public apiAction: EntityRequestAction | PaginatedAction, public response?: T) { }
 }
 
 export class StartCFAction extends CFStartAction implements IStartRequestAction {

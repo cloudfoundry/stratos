@@ -26,4 +26,3 @@ export const multiEndpointResponseMergePipe = (
     result: []
   } as NormalizedResponse);
 };
-

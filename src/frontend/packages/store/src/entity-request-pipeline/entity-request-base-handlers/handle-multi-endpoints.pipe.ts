@@ -22,27 +22,37 @@ export interface HandledMultiEndpointResponse<T = any> {
   successes: T[];
 }
 
-export const handleMultiEndpoints = (entityRequestAction: EntityRequestAction) => (
-  resData: JetstreamResponse
-): HandledMultiEndpointResponse => {
-  const responses = mapResponses(resData, entityRequestAction);
-  if (!responses) {
+
+function mapResponses(jetstreamResponse: JetstreamResponse, requestUrl: string): HandledMultiEndpointResponse {
+  if (!jetstreamResponse) {
     return null;
   }
-  return Object.keys(responses).reduce((handledEndpointRequests, endpointGuid) => {
-    const jetstreamEndpointResponse = responses[endpointGuid];
-    // Return list of guid+error objects for those endpoints with errors
+  return Object.keys(jetstreamResponse).reduce((multiResponses, endpointGuid) => {
+    const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
     const jetStreamError = isJetStreamError(jetstreamEndpointResponse || null);
     if (jetStreamError) {
-      handledEndpointRequests.errors.push(buildJetstreamError(jetstreamEndpointResponse as JetStreamErrorResponse, entityRequestAction));
+      multiResponses.errors.push(
+        buildJetstreamError(jetstreamEndpointResponse as JetStreamErrorResponse, endpointGuid, requestUrl)
+      );
     } else {
-      handledEndpointRequests.successes.push(jetstreamEndpointResponse);
+      multiResponses.successes.push(jetstreamEndpointResponse);
     }
-    return handledEndpointRequests;
+    return multiResponses;
   }, {
       errors: [],
       successes: []
     });
+}
+
+
+export const handleMultiEndpointsPipeFactory = (requestUrl: string) => (
+  resData: JetstreamResponse
+): HandledMultiEndpointResponse => {
+  const responses = mapResponses(resData, requestUrl);
+  if (!responses || !responses.successes.length && !responses.successes.length) {
+    return null;
+  }
+  return responses;
 };
 
 function getJetstreamErrorInformation(jetstreamErrorResponse: JetStreamErrorResponse): JetStreamErrorInformation {
@@ -62,7 +72,8 @@ function getJetstreamErrorInformation(jetstreamErrorResponse: JetStreamErrorResp
 
 function buildJetstreamError(
   jetstreamErrorResponse: JetStreamErrorResponse,
-  entityAction: EntityRequestAction
+  endpointGuid: string,
+  requestUrl: string
 ) {
   const errorCode = jetstreamErrorResponse && jetstreamErrorResponse.error
     ? jetstreamErrorResponse.error.statusCode.toString()
@@ -70,25 +81,10 @@ function buildJetstreamError(
 
   return new JetstreamError(
     errorCode,
-    entityAction.endpointGuid,
-    entityAction.options.url,
+    endpointGuid,
+    requestUrl,
     getJetstreamErrorInformation(jetstreamErrorResponse),
   );
-}
-
-function mapResponses(jetstreamResponse: JetstreamResponse, action: EntityRequestAction): (JetstreamError | any)[] {
-  if (!jetstreamResponse) {
-    return null;
-  }
-  return Object.keys(jetstreamResponse).map(endpointGuid => {
-    const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
-    // Return list of guid+error objects for those endpoints with errors
-    const jetStreamError = isJetStreamError(jetstreamEndpointResponse || null);
-    if (jetStreamError) {
-      return buildJetstreamError(jetstreamEndpointResponse as JetStreamErrorResponse, action);
-    }
-    return jetstreamResponse[endpointGuid];
-  });
 }
 
     // function getEntities(
