@@ -13,11 +13,12 @@ describe('CF - Space - Invite User - ', () => {
       cfHelper.fetchDefaultCfGuid(true),
       cfHelper.fetchDefaultOrgGuid(true),
       cfHelper.fetchDefaultSpaceGuid(true)
-    ]).then(([cfGuid, orgGuid, spaceGuid]) => {
-      spacePage = CfSpaceLevelPage.forEndpoint(cfGuid, orgGuid, spaceGuid);
-      spacePage.navigateTo();
-      return spacePage.goToUsersTab();
-    });
+    ])
+      .then(([cfGuid, orgGuid, spaceGuid]) => {
+        spacePage = CfSpaceLevelPage.forEndpoint(cfGuid, orgGuid, spaceGuid);
+        return spacePage.navigateTo();
+      })
+      .then(() => spacePage.goToUsersTab());
   };
 
   const navToCfSummary = () => spacePage.breadcrumbs.getBreadcrumbs().then(breadcrumbs => breadcrumbs[0].click());
