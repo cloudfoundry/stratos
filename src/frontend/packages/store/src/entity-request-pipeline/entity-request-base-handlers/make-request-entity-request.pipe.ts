@@ -1,15 +1,27 @@
 import { MakeEntityRequestPipe } from '../entity-request-pipeline.types';
 import { HttpRequest } from '@angular/common/http';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 
 export const makeRequestEntityPipe: MakeEntityRequestPipe = (
   httpClient,
-  requestOrObservable
+  requestOrObservable,
+  endpointType,
+  endpointGuids
 ) => {
   if (requestOrObservable instanceof HttpRequest) {
-    return httpClient.request(requestOrObservable);
+    return httpClient.pipelineRequest(
+      requestOrObservable,
+      endpointType,
+      endpointGuids
+    ).pipe(
+      tap(console.log)
+    );
   }
   return requestOrObservable.pipe(
-    switchMap(request => httpClient.request(request))
+    switchMap(request => httpClient.pipelineRequest(
+      request,
+      endpointType,
+      endpointGuids
+    ))
   );
 };

@@ -13,15 +13,17 @@ export const endpointStatusSelector = (state: InternalAppState): EndpointState =
 const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
-export const cfEndpointEntitiesSelector = (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
-  const cf = {};
-  Object.values(endpoints).map(endpoint => {
-    if (endpoint.cnsi_type === 'cf') {
-      cf[endpoint.guid] = endpoint;
-    }
-  });
-  return cf;
-};
+export const endpointOfTypeSelector = (type: string) =>
+  (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
+    return Object.values(endpoints).reduce((endpointsOfType, endpoint) => {
+      if (endpoint.cnsi_type === type) {
+        endpointsOfType[endpoint.guid] = endpoint;
+      }
+      return endpointsOfType;
+    }, {});
+  };
+// TODO More this
+export const cfEndpointEntitiesSelector = endpointOfTypeSelector('cf');
 
 export const getRegisteredEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) => {
   const registered = {} as IRequestEntityTypeState<EndpointModel>;
@@ -36,6 +38,12 @@ export const getRegisteredEndpoints = (endpoints: IRequestEntityTypeState<Endpoi
 // All Registered  endpoint request data
 export const endpointsRegisteredEntitiesSelector = createSelector(
   endpointEntitiesSelector,
+  getRegisteredEndpoints
+);
+
+export const registeredEndpointsOfTypesSelector = (endpointType: string) => createSelector(
+  endpointEntitiesSelector,
+  endpointOfTypeSelector(endpointType),
   getRegisteredEndpoints
 );
 

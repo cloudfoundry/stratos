@@ -9,6 +9,7 @@ import { HttpClient, HttpRequest } from '@angular/common/http';
 import { PipelineConfig } from './entity-request-pipeline';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { RequestOptions } from '@angular/http';
+import { PipelineHttpClient } from './pipline-http-client.service';
 export type ActionDispatcher = (action: Action) => void;
 export interface JetstreamResponse<T = any> {
   [endpointGuid: string]: T | JetStreamErrorResponse;
@@ -39,8 +40,10 @@ export type EndEntityRequestPipe<
 export type MakeEntityRequestPipe<
   T = any,
   > = (
-    httpClient: HttpClient,
-    request: HttpRequest<any> | Observable<HttpRequest<any>>
+    httpClient: PipelineHttpClient,
+    request: HttpRequest<any> | Observable<HttpRequest<any>>,
+    endpointType: string,
+    endpointGuids: string | string[]
   ) => Observable<JetstreamResponse<T>>;
 
 export type BuildEntityRequestPipe = (
@@ -67,6 +70,6 @@ export interface PipelineResult {
 
 export type EntityRequestPipeline = (
   store: Store<AppState>,
-  httpClient: HttpClient,
+  httpClient: PipelineHttpClient,
   config: PipelineConfig
 ) => Observable<PipelineResult>;

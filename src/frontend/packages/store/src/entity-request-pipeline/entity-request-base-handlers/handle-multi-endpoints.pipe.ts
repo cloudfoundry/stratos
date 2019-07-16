@@ -48,6 +48,7 @@ function mapResponses(jetstreamResponse: JetstreamResponse, requestUrl: string):
 export const handleMultiEndpointsPipeFactory = (requestUrl: string) => (
   resData: JetstreamResponse
 ): HandledMultiEndpointResponse => {
+  console.log(resData);
   const responses = mapResponses(resData, requestUrl);
   if (!responses || !responses.successes.length && !responses.successes.length) {
     return null;

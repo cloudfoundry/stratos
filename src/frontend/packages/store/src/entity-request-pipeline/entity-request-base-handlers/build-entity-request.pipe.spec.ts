@@ -7,9 +7,7 @@ describe('build-entity-request-pipe', () => {
   it(' use HttpRequest', () => {
     const testUrl = 'testUrl';
     const request = buildRequestEntityPipe(
-      'fetch',
-      new HttpRequest<any>('GET', testUrl)
-    );
+      { requestType: { requestType: 'fetch', requestOptions: new HttpRequest<any>('GET', testUrl) } });
     const urlSplit = request.url.split('/');
     expect(urlSplit[urlSplit.length - 1]).toBe(testUrl);
     expect(request instanceof HttpRequest).toBe(true);
@@ -41,9 +39,7 @@ describe('build-entity-request-pipe', () => {
       body
     } as RequestOptions;
     const request = buildRequestEntityPipe(
-      'fetch',
-      options
-    );
+      { requestType: { requestType: 'fetch', requestOptions: options } });
     const urlSplit = request.url.split('/');
     expect(urlSplit[urlSplit.length - 1]).toBe(testUrl);
     expect(request.method).toBe('GET');

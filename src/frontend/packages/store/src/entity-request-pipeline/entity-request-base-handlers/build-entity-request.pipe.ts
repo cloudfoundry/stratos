@@ -3,6 +3,7 @@ import { HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { environment } from '../../../../core/src/environments/environment';
 import { RequestOptions } from '@angular/http';
+import { InternalAppState } from '../../app-state';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -26,7 +27,6 @@ function getHttpParams(options: RequestOptions) {
   if (!options.params) {
     return null;
   }
-  console.log(options.params.paramsMap)
   return Array.from(options.params.paramsMap.entries()).reduce((obj, [key, value]) => {
     obj[key] = value;
     return obj;
@@ -34,7 +34,11 @@ function getHttpParams(options: RequestOptions) {
 }
 
 // This will convert the old style RequestOptions into a new HttpRequest
-function getRequestFromLegacyOptions(options: RequestOptions, requestType: ApiRequestTypes, url: string) {
+function getRequestFromLegacyOptions(
+  options: RequestOptions,
+  requestType: ApiRequestTypes,
+  url: string
+) {
   const method = getRequestTypeFromRequestType(requestType);
   return new HttpRequest(
     method,

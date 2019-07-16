@@ -37,6 +37,7 @@ import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 import { baseRequestPipelineFactory, apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
 import { HttpClient } from '@angular/common/http';
+import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -61,7 +62,7 @@ export class APIEffect {
     private http: Http,
     private actions$: Actions,
     private store: Store<CFAppState>,
-    private httpClient: HttpClient
+    private httpClient: PipelineHttpClient
   ) {
 
   }
@@ -75,7 +76,8 @@ export class APIEffect {
         return apiRequestPipelineFactory(baseRequestPipelineFactory, {
           store: this.store,
           httpClient: this.httpClient,
-          action
+          action,
+          appState: state
         });
       }
       return this.doApiRequest(action, state);

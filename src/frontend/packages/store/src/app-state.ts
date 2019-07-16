@@ -64,7 +64,6 @@ export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseRequestDataState,
 // One stop shop for all of your app state needs
 
 // Care about the catalogue entities? Use this one.
-// This should only be used by internal stratos code
 export abstract class GeneralEntityAppState extends AppState<GeneralRequestDataState> { }
 
 // Only care about internal entities? Use this one.

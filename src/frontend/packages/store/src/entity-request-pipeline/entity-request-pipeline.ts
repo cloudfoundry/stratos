@@ -1,22 +1,21 @@
-import { EntityRequestHandler, EntityRequestPipeline } from './entity-request-pipeline.types';
 import { state } from '@angular/animations';
-import { Store, Action } from '@ngrx/store';
-import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
-import { HttpClient } from '@angular/common/http';
-import { EntityRequestAction } from '../types/request.types';
-import { AppState } from '../app-state';
-import { getRequestTypeFromMethod, ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
-import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
+import { Action, Store } from '@ngrx/store';
+import { map, tap } from 'rxjs/operators';
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { tap, map } from 'rxjs/operators';
-import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
-import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
-import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { AppState, InternalAppState } from '../app-state';
+import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { EntityRequestAction } from '../types/request.types';
+import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
 import { endpointErrorsHandlerFactory } from './entity-request-base-handlers/endpoint-errors.handler';
+import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
+import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { multiEndpointResponseMergePipe } from './entity-request-base-handlers/merge-multi-endpoint-data.pipe';
-
+import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
+import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
+import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
+import { EntityRequestHandler, EntityRequestPipeline } from './entity-request-pipeline.types';
+import { PipelineHttpClient } from './pipline-http-client.service';
 export function handlerPipe<T extends []>(handler: EntityRequestHandler) {
   return (
     ...args: T
@@ -26,21 +25,23 @@ export function handlerPipe<T extends []>(handler: EntityRequestHandler) {
   };
 }
 
-export interface PipelineFactoryConfig {
+export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
   store: Store<AppState>;
-  httpClient: HttpClient;
+  httpClient: PipelineHttpClient;
   action: EntityRequestAction;
+  appState: T;
 }
 
-export interface PipelineConfig {
+export interface PipelineConfig<T extends AppState = InternalAppState> {
   requestType: ApiRequestTypes;
   catalogueEntity: StratosBaseCatalogueEntity;
   action: EntityRequestAction;
+  appState: T;
 }
 
 export const baseRequestPipelineFactory: EntityRequestPipeline = (
   store: Store<AppState>,
-  httpClient: HttpClient,
+  httpClient: PipelineHttpClient,
   { action, requestType, catalogueEntity }: PipelineConfig
 ) => {
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
@@ -48,7 +49,12 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
   const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
   const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url);
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
-  return makeRequestEntityPipe(httpClient, request).pipe(
+  return makeRequestEntityPipe(
+    httpClient,
+    request,
+    action.endpointType,
+    action.endpointGuid
+  ).pipe(
     map(handleMultiEndpointsPipe),
     map(multiEndpointResponses => {
       endpointErrorHandler(
@@ -74,7 +80,7 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
 
 export const apiRequestPipelineFactory = (
   pipeline: EntityRequestPipeline,
-  { store, httpClient, action }: PipelineFactoryConfig
+  { store, httpClient, action, appState }: PipelineFactoryConfig
 ) => {
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const requestType = getRequestTypeFromMethod(action);
@@ -83,7 +89,8 @@ export const apiRequestPipelineFactory = (
   return pipeline(store, httpClient, {
     action,
     requestType,
-    catalogueEntity
+    catalogueEntity,
+    appState
   }).pipe(
     tap(() => successEntityHandler(actionDispatcher, catalogueEntity, requestType))
   );

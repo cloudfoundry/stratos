@@ -40,13 +40,13 @@ fdescribe('merge-multi-endpoint-data', () => {
     Object.keys(merged.entities).forEach(entityKey => {
       const entities = merged.entities[entityKey];
       const expectedEntitiesSet = expectedEntities[entityKey] as Set<string>;
-      Object.keys(entities).forEach(entityKey => {
-        expectedEntitiesSet.delete(entityKey);
+      Object.keys(entities).forEach(entityGuid => {
+        expectedEntitiesSet.delete(entityGuid);
       });
 
     });
     merged.result.forEach((key) => {
-      expectedResult.delete(key)
+      expectedResult.delete(key);
     });
     Object.values(expectedEntities).forEach(set => {
       expect(set.size).toBe(0);
