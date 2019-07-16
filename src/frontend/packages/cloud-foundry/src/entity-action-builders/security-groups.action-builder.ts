@@ -7,7 +7,6 @@ export const securityGroupBuilders = {
     guid,
     endpointGuid
   ) => new FetchDomain(guid, endpointGuid),
-  // TODO: This is good reason to remove pagination key
   getAll: (
     endpointGuid,
     paginationKey,

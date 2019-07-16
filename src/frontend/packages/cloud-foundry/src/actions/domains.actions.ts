@@ -29,19 +29,18 @@ export class FetchDomain extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 export class FetchAllDomains extends CFStartAction implements PaginatedAction {
-  constructor(public endpointGuid: string, public flattenPagination = true) {
+  constructor(public endpointGuid: string, public paginationKey: string = null, public flattenPagination = true) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'shared_domains';
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-    this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
   }
   actions = [GET_ALL_DOMAIN, GET_ALL_DOMAIN_SUCCESS, GET_ALL_DOMAIN_FAILED];
   entity = [cfEntityFactory(domainEntityType)];
   entityType = domainEntityType;
   options: RequestOptions;
-  paginationKey = 'all-domains';
   initialParams = {
     'results-per-page': 100,
   };

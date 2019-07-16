@@ -1,9 +1,10 @@
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { AppState, CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
@@ -12,6 +13,7 @@ import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factor
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from '../../list.helper';
@@ -88,14 +90,14 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     });
     this.dsEndpointType = dsEndpointType;
   }
-  // TODO Fix the typing
+
   static getEndpointConfig(
-    store,
-    action,
-    listConfig,
-    rowsState,
-    destroy,
-    refresh
+    store: Store<AppState>,
+    action: GetAllEndpoints,
+    listConfig: IListConfig<EndpointModel>,
+    rowsState: Observable<RowsState>,
+    destroy: () => void,
+    refresh: () => void
   ) {
     return {
       store,

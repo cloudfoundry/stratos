@@ -87,7 +87,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Store related
   public entityKey: string;
-  // TODO: this should not be default, all data sources should provide this.
+  // TODO: NJ this should not be default, all data sources should provide this.
   public endpointType: string;
 
   // Add item

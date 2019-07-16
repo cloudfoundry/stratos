@@ -5,7 +5,10 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
-import { FetchBranchesForProject, FetchCommit } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import {
+  FetchBranchesForProject,
+  FetchCommit,
+} from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../../../../../../../../cloud-foundry/src/actions/github.actions';
 import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { GitCommit, GitRepo } from '../../../../../../../../store/src/types/git.types';
@@ -87,7 +90,6 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const scm = this.scmService.getSCM(scmType as GitSCMType);
 
         // Ensure the SCM type is included in the key
-        // TODO Are we
         const repoEntityID = `${scmType}-${projectName}`;
         const commitEntityID = `${repoEntityID}-${commitId}`;
 

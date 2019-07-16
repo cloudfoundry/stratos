@@ -17,7 +17,6 @@ export interface EntityCatalogueSchemas {
 }
 export interface IStratosEntityWithIcons {
   icon?: string;
-  // TODO (nj): can we allow entity import custom icon fonts?
   iconFont?: string;
 }
 
