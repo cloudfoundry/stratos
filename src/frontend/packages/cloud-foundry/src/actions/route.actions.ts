@@ -1,5 +1,13 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { getActions } from '../../../store/src/actions/action.helper';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+  EntityInlineParentAction,
+} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { ICFAction } from '../../../store/src/types/request.types';
 import {
   applicationEntityType,
   cfEntityFactory,
@@ -7,15 +15,7 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../cf-entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
-import { getActions } from '../../../store/src/actions/action.helper';
-
+import { CFStartAction } from './cf-action.types';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';

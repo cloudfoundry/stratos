@@ -1,10 +1,11 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { cfEntityFactory, domainEntityType } from '../cf-entity-factory';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
+import { ICFAction } from '../../../store/src/types/request.types';
+import { cfEntityFactory, domainEntityType } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 
 export const GET_DOMAIN = '[domain] Get domain ';
 export const GET_DOMAIN_SUCCESS = '[domain] Get domain success';
