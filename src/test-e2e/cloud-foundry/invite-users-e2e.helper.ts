@@ -33,9 +33,14 @@ export function setupInviteUserTests(
       .connectAllEndpoints(ConsoleUserType.admin)
       .connectAllEndpoints(ConsoleUserType.user);
     cfHelper = new CFHelpers(setup);
-    return navToOrgSpaceUsersList(cfHelper, defaultCf).then(() => {
-      localLog('beforeAll: Finished');
-    });
+    return navToOrgSpaceUsersList(cfHelper, defaultCf)
+      .then(() => {
+        localLog('beforeAll: Finished');
+      })
+      .catch(err => {
+        localLog(`beforeAll: Failed! ${err}`);
+        throw err;
+      });
   });
 
   const usersTable = new CFUsersListComponent();
@@ -63,7 +68,12 @@ export function setupInviteUserTests(
           }
           return navToOrgSpaceUsersList(cfHelper, defaultCf).then(() => localLog('Configure Client: Finished'));
         });
-      }));
+      })
+      .catch(err => {
+        localLog(`Configure Client: Failed! ${err}`);
+        throw err;
+      })
+    );
   });
 
   describe('Stepper - ', () => {
@@ -208,7 +218,11 @@ export function setupInviteUserTests(
     afterAll(() => {
       localLog('afterAll: Started');
       return cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, usersToDelete))
-        .then(() => localLog('afterAll: Finished'));
+        .then(() => localLog('afterAll: Finished'))
+        .catch(err => {
+          localLog(`afterAll: Failed! ${err}`);
+          throw err;
+        });
     });
 
   });
