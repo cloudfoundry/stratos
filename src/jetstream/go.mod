@@ -15,7 +15,7 @@ require (
 	github.com/bmatcuk/doublestar v1.1.1 // indirect
 	github.com/cf-stratos/mysqlstore v0.0.0-20170822100912-304308519d13
 	github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1 // indirect
-	github.com/cloudfoundry-community/go-cfenv v1.17.0
+	github.com/cloudfoundry-community/go-cfenv v1.18.0
 	github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/bosh-cli v5.4.0+incompatible // indirect
 	github.com/cloudfoundry/bosh-utils v0.0.0-20190206192830-9a0affed2bf1 // indirect
