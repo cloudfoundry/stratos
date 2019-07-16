@@ -8,7 +8,7 @@ import { CreateServiceInstanceState } from './types/create-service-instance.type
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
-import { BaseRequestDataState, CFRequestDataState, ExtendedRequestState } from './types/entity.types';
+import { BaseEntityValues, CFRequestDataState, ExtendedRequestState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import { InternalEventsState } from './types/internal-events.types';
 import { PaginationEntityTypeState } from './types/pagination.types';
@@ -53,13 +53,13 @@ export interface GeneralRequestDataState {
   [name: string]: any;
 }
 
-export interface GeneralAppRequestDataState extends BaseRequestDataState, GeneralRequestDataState { }
+export interface GeneralAppRequestDataState extends BaseEntityValues, GeneralRequestDataState { }
 
-// TODO: use these throughout app.component.ts
-export type EndpointOnlyAppState = AppState<Pick<BaseRequestDataState, 'endpoint'>>;
+export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'endpoint'>>;
 export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;
-export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseRequestDataState, 'userFavorites'>>, 'userFavoritesGroups'>;
+export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
+export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'userFavorites'>>, 'userFavoritesGroups'>;
 
 // One stop shop for all of your app state needs
 
@@ -80,6 +80,6 @@ export type PickedInternalAppState<T extends keyof InternalAppState> = Pick<Inte
 export abstract class GeneralAppState extends AppState<GeneralAppRequestDataState> { }
 
 // Care about CF entities? Use this one.
-// This should be moved into the cf module
+// TODO: This should be moved into the cf module
 export abstract class CFAppState extends AppState<CFRequestDataState> { }
 

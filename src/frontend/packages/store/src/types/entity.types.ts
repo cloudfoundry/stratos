@@ -34,8 +34,8 @@ import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 import { UserProfileInfo } from './user-profile.types';
 import { CfUser } from './user.types';
 
-export interface BaseRequestDataState {
-  // TODO: Add `stratos` to types
+export interface BaseEntityValues {
+  // TODO: Add `stratos` to types. clean
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   // featureFlag: IRequestEntityTypeState<IFeatureFlag>;
@@ -100,8 +100,9 @@ export type ExtendedRequestDataState<E extends Record<keyof E, any>> = {
   [P in keyof E]: IRequestEntityTypeState<E[keyof E]>
 };
 
-export interface CFRequestDataState extends CFEntityValues, BaseRequestDataState { }
+export interface CFRequestDataState extends CFEntityValues, BaseEntityValues { }
 
+// TODO: Clean
 // class temp<T> {
 //   data: T;
 // }
@@ -114,6 +115,7 @@ export interface CFRequestDataState extends CFEntityValues, BaseRequestDataState
 // const e = new temp<AppState<CFRequestDataState>>();
 // e.data.pagination.;
 
+// TODO: Shouldn't this be the same as BaseEntityValues?
 export interface IRequestState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   userFavorites: IRequestEntityTypeState<RequestInfoState>;

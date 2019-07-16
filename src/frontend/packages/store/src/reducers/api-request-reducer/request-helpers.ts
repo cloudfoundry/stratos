@@ -1,22 +1,23 @@
 import { RequestMethod } from '@angular/http';
-import { GeneralAppState, BaseRequestState } from '../../app-state';
+import { Store } from '@ngrx/store';
+
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { pathGet } from '../../../../core/src/core/utils.service';
+import { APIResponse } from '../../actions/request.actions';
+import { BaseRequestState, GeneralAppState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
+  APISuccessOrFailedAction,
   ICFAction,
+  InternalEndpointError,
   SingleEntityAction,
   StartRequestAction,
-  APISuccessOrFailedAction,
-  WrapperRequestActionSuccess,
   WrapperRequestActionFailed,
-  InternalEndpointError
+  WrapperRequestActionSuccess,
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { APIResponse } from '../../actions/request.actions';
-import { pathGet } from '../../../../core/src/core/utils.service';
-import { Store } from '@ngrx/store';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export function getEntityRequestState(
   state: BaseRequestState,
@@ -185,8 +186,8 @@ export function completeApiRequest<T extends GeneralAppState = GeneralAppState>(
   ));
 }
 
-export function failApiRequest(
-  store: Store<GeneralAppState>,
+export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
+  store: Store<T>,
   apiAction: ICFAction | PaginatedAction,
   error,
   requestType: ApiRequestTypes = 'fetch',

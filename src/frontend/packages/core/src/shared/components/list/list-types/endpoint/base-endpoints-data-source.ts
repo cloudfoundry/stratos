@@ -4,7 +4,7 @@ import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState, CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
@@ -92,7 +92,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   }
 
   static getEndpointConfig(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     action: GetAllEndpoints,
     listConfig: IListConfig<EndpointModel>,
     rowsState: Observable<RowsState>,
