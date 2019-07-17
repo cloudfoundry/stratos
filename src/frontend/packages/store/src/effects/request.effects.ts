@@ -14,7 +14,7 @@ import {
   ValidateEntitiesStart,
 } from '../actions/request.actions';
 import { CFAppState } from '../app-state';
-import { validateEntityRelations } from '../helpers/entity-relations/entity-relations';
+import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
 import {
   completeApiRequest,
   getFailApiRequestActions,

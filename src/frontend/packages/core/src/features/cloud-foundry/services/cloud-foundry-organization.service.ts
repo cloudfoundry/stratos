@@ -15,7 +15,7 @@ import {
 import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { DeleteSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { OrgUserRoleNames } from '../../../../../store/src/types/user.types';
 import {

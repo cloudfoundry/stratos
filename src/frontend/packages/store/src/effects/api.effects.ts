@@ -14,9 +14,9 @@ import { environment } from '../../../core/src/environments/environment.prod';
 import { getJetStreamError } from '../../../core/src/jetstream.helpers';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
-import { isEntityInlineParentAction } from '../helpers/entity-relations/entity-relation-tree.helpers';
-import { listEntityRelations } from '../helpers/entity-relations/entity-relations';
-import { EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
+import { isEntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relation-tree.helpers';
+import { listEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
+import { EntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
 import {
   getFailApiRequestActions,

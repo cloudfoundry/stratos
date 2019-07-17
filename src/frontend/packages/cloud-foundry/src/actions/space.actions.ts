@@ -18,7 +18,7 @@ import {
   createEntityRelationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../entity-relations/entity-relations.types';
 import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';

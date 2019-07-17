@@ -1,24 +1,24 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
-import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
-import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { GetOrganization } from '../../actions/organization.actions';
+import { GetSpace } from '../../actions/space.actions';
 import {
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { APIResponse } from '../../../actions/request.actions';
-import { GeneralEntityAppState, GeneralRequestDataState, IRequestEntityTypeState } from '../../../app-state';
-import { selectPaginationState } from '../../../selectors/pagination.selectors';
-import { APIResource } from '../../../types/api.types';
-import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
-import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
-import { deepMergeState, mergeEntity } from '../../reducer.helper';
+} from '../../cf-entity-factory';
+import { getCFEntityKey } from '../../cf-entity-helpers';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { APIResponse } from '../../../../store/src/actions/request.actions';
+import { GeneralEntityAppState, GeneralRequestDataState, IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/src/types/user.types';
+import { deepMergeState, mergeEntity } from '../../../../store/src/helpers/reducer.helper';
 import {
   createEntityRelationPaginationKey,
   ValidateEntityResult,

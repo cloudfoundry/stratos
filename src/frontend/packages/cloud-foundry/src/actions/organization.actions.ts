@@ -8,7 +8,7 @@ import {
   spaceEntityType,
 } from '../cf-entity-factory';
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';

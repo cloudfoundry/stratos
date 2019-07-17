@@ -13,7 +13,7 @@ import {
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../store/src/app-state';
-import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
 import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../core/cf-api.types';

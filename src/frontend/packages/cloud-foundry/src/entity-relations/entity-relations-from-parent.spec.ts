@@ -2,17 +2,17 @@ import { async, inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
-import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-foundry.module';
-import { ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
-import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
-import { RequestTypes } from '../../actions/request.actions';
-import { AppState, IRequestEntityTypeState } from '../../app-state';
-import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
-import { APIResource } from '../../types/api.types';
-import { WrapperRequestActionSuccess } from '../../types/request.types';
+import { organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { CloudFoundryPackageModule } from '../cloud-foundry.module';
+import { ISpace } from '../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../core/test-framework/store-test-helper';
+import { GetAllOrganizationSpaces } from '../actions/organization.actions';
+import { RequestTypes } from '../../../store/src/actions/request.actions';
+import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { getDefaultRequestState } from '../../../store/src/reducers/api-request-reducer/types';
+import { APIResource } from '../../../store/src/types/api.types';
+import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
 import { populatePaginationFromParent } from './entity-relations';
 import { EntityRelationSpecHelper } from './entity-relations.spec';
 

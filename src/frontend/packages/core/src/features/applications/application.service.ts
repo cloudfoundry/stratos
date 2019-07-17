@@ -28,7 +28,7 @@ import {
 } from '../../../../cloud-foundry/src/actions/application.actions';
 import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getCurrentPageRequestInfo,
@@ -233,7 +233,7 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$.pipe(
       combineLatest(this.store.select(endpointEntitiesSelector)),
-      filter(([{ entity }, endpoints]: [EntityInfo, any]) => {
+      filter(([{ entity }]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
       }),
       map(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]): ApplicationData => {

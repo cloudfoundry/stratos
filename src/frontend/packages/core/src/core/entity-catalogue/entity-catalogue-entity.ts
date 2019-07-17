@@ -148,7 +148,7 @@ export class StratosCatalogueEntity<
   Y = any,
   AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
   > extends StratosBaseCatalogueEntity<T, Y, AB> {
-  public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
+  public definition: IStratosEntityDefinition<EntityCatalogueSchemas, Y>;
   constructor(
     entity: IStratosEntityDefinition,
     config?: EntityCatalogueBuilders<T, Y, AB>

@@ -1,6 +1,6 @@
-import { EntityRequestAction } from '../../types/request.types';
 import { JetstreamResponse } from '../entity-request-pipeline.types';
 import { isJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
+import { SuccessfulApiRequestDataMapper } from '../entity-request-pipeline';
 
 export class JetstreamError {
   constructor(
@@ -23,7 +23,11 @@ export interface HandledMultiEndpointResponse<T = any> {
 }
 
 
-function mapResponses(jetstreamResponse: JetstreamResponse, requestUrl: string): HandledMultiEndpointResponse {
+function mapResponses(
+  jetstreamResponse: JetstreamResponse,
+  requestUrl: string,
+  postSuccessDataMapper?: SuccessfulApiRequestDataMapper
+): HandledMultiEndpointResponse {
   const baseResponse = {
     errors: [],
     successes: []
@@ -39,22 +43,26 @@ function mapResponses(jetstreamResponse: JetstreamResponse, requestUrl: string):
         buildJetstreamError(jetstreamEndpointResponse as JetStreamErrorResponse, endpointGuid, requestUrl)
       );
     } else {
-      multiResponses.successes.push(jetstreamEndpointResponse);
+      if (postSuccessDataMapper) {
+        multiResponses.successes.push(postSuccessDataMapper(jetstreamEndpointResponse, endpointGuid));
+      } else {
+        multiResponses.successes.push(jetstreamEndpointResponse);
+      }
     }
     return multiResponses;
   }, baseResponse);
 }
 
 
-export const handleMultiEndpointsPipeFactory = (requestUrl: string) => (
+export const handleMultiEndpointsPipeFactory = (
+  requestUrl: string,
+  postSuccessDataMapper?: SuccessfulApiRequestDataMapper
+) => (
   resData: JetstreamResponse
 ): HandledMultiEndpointResponse => {
-  const responses = mapResponses(resData, requestUrl);
-  // if (!responses || !responses.successes.length && !responses.successes.length) {
-  //   return null;
-  // }
-  return responses;
-};
+    const responses = mapResponses(resData, requestUrl, postSuccessDataMapper);
+    return responses;
+  };
 
 function getJetstreamErrorInformation(jetstreamErrorResponse: JetStreamErrorResponse): JetStreamErrorInformation {
   const errorResponse =

@@ -5,7 +5,7 @@ import { GetServiceInstances } from '../../../../../../../cloud-foundry/src/acti
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';

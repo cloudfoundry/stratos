@@ -26,7 +26,7 @@ import {
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import { APIResource } from '../../store/src/types/api.types';
+import { APIResource, NormalizedResponse } from '../../store/src/types/api.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
@@ -97,6 +97,7 @@ import { spaceQuotaDefinitionActionBuilders } from './entity-action-builders/spa
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
+import { addRelationParams } from './cf-entity-relations.getters';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -112,6 +113,19 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
+    globalPreRequest: (request, action, catalogueEntity) => {
+      return addRelationParams(request, action);
+    },
+    globalSuccessfulRequestDataMapper: (data, endpointGuid) => {
+      if (data) {
+        if (data.entity) {
+          data.entity.cfGuid = endpointGuid;
+        } else {
+          data.cfGuid = endpointGuid;
+        }
+      }
+      return data;
+    }
   } as IStratosEndpointDefinition;
   return [
     generateCfEndpointEntity(endpointDefinition),

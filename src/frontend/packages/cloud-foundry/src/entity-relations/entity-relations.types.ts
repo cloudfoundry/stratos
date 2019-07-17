@@ -1,11 +1,11 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { getPaginationKey } from '../../actions/pagination.actions';
-import { APIResponse } from '../../actions/request.actions';
-import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../app-state';
-import { EntityRequestAction } from '../../types/request.types';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { getPaginationKey } from '../../../store/src/actions/pagination.actions';
+import { APIResponse } from '../../../store/src/actions/request.actions';
+import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../../store/src/app-state';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 
 export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = GeneralEntityAppState> {

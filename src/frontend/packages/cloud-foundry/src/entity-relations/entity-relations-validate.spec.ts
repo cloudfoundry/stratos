@@ -7,16 +7,16 @@ import {
   quotaDefinitionEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
-import { GetOrganization } from '../../../../cloud-foundry/src/actions/organization.actions';
-import { SetInitialParams } from '../../actions/pagination.actions';
-import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../../../cloud-foundry/src/actions/relation.actions';
-import { APIResponse } from '../../actions/request.actions';
-import { CFAppState, IRequestTypeState } from '../../app-state';
-import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
-import { BaseRequestDataState } from '../../types/entity.types';
-import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
+} from '../cf-entity-factory';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../../core/test-framework/store-test-helper';
+import { GetOrganization } from '../actions/organization.actions';
+import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
+import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
+import { APIResponse } from '../../../store/src/actions/request.actions';
+import { CFAppState, IRequestTypeState } from '../../../store/src/app-state';
+import { getDefaultRequestState } from '../../../store/src/reducers/api-request-reducer/types';
+import { BaseRequestDataState } from '../../../store/src/types/entity.types';
+import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validateEntityRelations } from './entity-relations';
 import {

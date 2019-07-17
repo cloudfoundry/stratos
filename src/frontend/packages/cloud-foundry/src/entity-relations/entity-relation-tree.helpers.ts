@@ -1,11 +1,11 @@
-import { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
-import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
+import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { Observable } from 'rxjs';
 import { ValidateResultFetchingState } from './entity-relations.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { map } from 'rxjs/operators';
-import { ActionState } from '../../reducers/api-request-reducer/types';
-import { getPaginationKey } from '../../actions/pagination.actions';
+import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
+import { getPaginationKey } from '../../../store/src/actions/pagination.actions';
 
 export function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
   Observable<ValidateResultFetchingState> {

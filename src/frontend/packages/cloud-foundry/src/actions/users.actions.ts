@@ -10,7 +10,7 @@ import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../entity-relations/entity-relations.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, EntityRequestAction } from '../../../store/src/types/request.types';

@@ -19,7 +19,7 @@ import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.a
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../store/src/app-state';
 import { selectNewAppState } from '../../../../../../store/src/effects/create-app-effects';
-import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CreateNewApplicationState } from '../../../../../../store/src/types/create-application.types';

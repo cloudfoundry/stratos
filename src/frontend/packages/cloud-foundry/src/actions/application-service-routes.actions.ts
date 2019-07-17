@@ -14,7 +14,7 @@ import {
   createEntityRelationPaginationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../entity-relations/entity-relations.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 

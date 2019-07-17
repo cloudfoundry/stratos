@@ -14,7 +14,7 @@ import { GetAllOrgUsers } from '../../../../cloud-foundry/src/actions/organizati
 import { GetAllSpaceUsers } from '../../../../cloud-foundry/src/actions/space.actions';
 import { GetAllUsersAsAdmin, GetUser } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   getPaginationObservables,
   PaginationObservables,

@@ -1,6 +1,6 @@
 import { GetAllFeatureFlags } from '../../../../../../../cloud-foundry/src/actions/feature-flags.actions';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 export function createCfFeatureFlagFetchAction(cfGuid: string) {
   const paginationKey = createCFFeatureFlagPaginationKey(cfGuid);

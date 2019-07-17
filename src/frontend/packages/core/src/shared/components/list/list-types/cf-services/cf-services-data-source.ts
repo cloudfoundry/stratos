@@ -7,7 +7,7 @@ import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';

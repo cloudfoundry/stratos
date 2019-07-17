@@ -15,7 +15,7 @@ import {
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { ISpaceQuotaDefinition } from '../../core/cf-api.types';

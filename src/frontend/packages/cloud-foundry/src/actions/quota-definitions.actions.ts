@@ -7,7 +7,7 @@ import {
   quotaDefinitionEntityType,
   spaceQuotaEntityType,
 } from '../cf-entity-factory';
-import { EntityInlineChildAction } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { EntityInlineChildAction } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 

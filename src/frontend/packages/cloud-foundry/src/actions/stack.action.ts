@@ -4,7 +4,7 @@ import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { stackEntityType } from '../cf-entity-factory';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';

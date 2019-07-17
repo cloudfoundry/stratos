@@ -22,7 +22,7 @@ import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-facto
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   getPaginationObservables,
   PaginationObservables,

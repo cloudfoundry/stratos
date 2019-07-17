@@ -7,7 +7,7 @@ import {
   appSummaryEntityType,
   cfEntityFactory,
 } from '../cf-entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction, RequestEntityLocation } from '../../../store/src/types/request.types';
 

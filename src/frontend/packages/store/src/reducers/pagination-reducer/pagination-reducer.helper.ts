@@ -19,7 +19,7 @@ import { PaginationMonitor } from '../../../../core/src/shared/monitors/paginati
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
-import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
+import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import {

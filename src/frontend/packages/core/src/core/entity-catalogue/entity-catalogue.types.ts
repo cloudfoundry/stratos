@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
+import { SuccessfulApiRequestDataMapper, PreApiRequest } from '../../../../store/src/entity-request-pipeline/entity-request-pipeline';
 
 
 export interface EntityCatalogueEntityConfig {
@@ -58,6 +59,12 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   readonly urlValidationRegexString?: string;
   readonly authTypes: EndpointAuthTypeConfig[];
   readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
+  // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
+  // This will be used for all entities with this endpoint type.
+  readonly globalSuccessfulRequestDataMapper?: SuccessfulApiRequestDataMapper;
+  // Allows an entity to manipulate the request object before it's sent.
+  // This will be used for all entities with this endpoint type.
+  readonly globalPreRequest?: PreApiRequest;
 }
 
 export interface IStratosEndpointWithoutSchemaDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
@@ -67,9 +74,15 @@ export interface IStratosEndpointWithoutSchemaDefinition extends Omit<IStratosEn
  *
  * @export
  */
-export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSchemas> extends IStratosBaseEntityDefinition<T> {
+export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSchemas, E = any> extends IStratosBaseEntityDefinition<T> {
   readonly endpoint: IStratosEndpointDefinition;
   readonly subTypes?: Omit<IStratosEntityDefinition, 'schema' | 'subTypes' | 'endpoint'>[];
+  // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
+  // This will override any globalSuccessfulRequestDataMapper found in the endpoint.
+  readonly successfulRequestDataMapper?: SuccessfulApiRequestDataMapper<E>;
+  // Allows an entity to manipulate the request object before it's sent.
+  // This will override any globalPreRequest found in the endpoint.
+  readonly preRequest?: PreApiRequest;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {

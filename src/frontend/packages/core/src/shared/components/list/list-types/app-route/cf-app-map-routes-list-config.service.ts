@@ -8,7 +8,7 @@ import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/s
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';

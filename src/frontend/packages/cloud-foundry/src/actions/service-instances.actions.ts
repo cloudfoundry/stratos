@@ -12,7 +12,7 @@ import {
   servicePlanEntityType,
   spaceEntityType,
 } from '../cf-entity-factory';
-import { createEntityRelationKey, EntityInlineParentAction } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';

@@ -1,10 +1,10 @@
 import { Store } from '@ngrx/store';
 
-import { GET_ORGANIZATION, GetOrganization } from '../../../../cloud-foundry/src/actions/organization.actions';
-import { ApiActionTypes, APIResponse } from '../../actions/request.actions';
-import { GET_SPACE, GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
-import { GeneralEntityAppState, GeneralRequestDataState } from '../../app-state';
-import { ICFAction, EntityRequestAction } from '../../types/request.types';
+import { GET_ORGANIZATION, GetOrganization } from '../actions/organization.actions';
+import { ApiActionTypes, APIResponse } from '../../../store/src/actions/request.actions';
+import { GET_SPACE, GetSpace } from '../actions/space.actions';
+import { GeneralEntityAppState, GeneralRequestDataState } from '../../../store/src/app-state';
+import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { ValidateEntityResult } from './entity-relations.types';
 import { orgSpacePostProcess } from './processors/org-space-post-processor';
 

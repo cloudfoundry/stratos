@@ -17,7 +17,7 @@ import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../
 import { GetAllOrganizations } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,

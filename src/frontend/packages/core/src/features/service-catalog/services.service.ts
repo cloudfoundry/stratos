@@ -13,7 +13,7 @@ import { GetServiceBrokers } from '../../../../cloud-foundry/src/actions/service
 import { GetServicePlanVisibilities } from '../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
 import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import {

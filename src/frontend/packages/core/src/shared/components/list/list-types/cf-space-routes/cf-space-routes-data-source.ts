@@ -11,7 +11,7 @@ import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IRoute } from '../../../../../core/cf-api.types';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
