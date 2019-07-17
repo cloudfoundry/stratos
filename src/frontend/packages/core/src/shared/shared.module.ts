@@ -121,6 +121,7 @@ import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.compon
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
+import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
@@ -294,7 +295,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    CfOrgSpaceLinksComponent
+    CfOrgSpaceLinksComponent,
+    PollingIndicatorComponent,
   ],
   exports: [
     FormsModule,
@@ -406,7 +408,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
-    AppNameUniqueDirective
+    AppNameUniqueDirective,
+    PollingIndicatorComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
