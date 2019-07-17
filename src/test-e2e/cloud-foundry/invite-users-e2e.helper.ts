@@ -1,14 +1,11 @@
-import { promise, browser } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { extendE2ETestTime } from '../helpers/extend-test-helpers';
-import { CFPage } from '../po/cf-page.po';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
 import { InviteUserStepperPo } from '../po/invite-users-stepper.po';
-import { SideNavMenuItem } from '../po/side-nav.po';
 import { StackedInputActionsPo } from '../po/stacked-input-actions.po';
 import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 import { ConfigInviteClientDialog } from './cf-level/config-invite-client-dialog.po';
@@ -22,44 +19,61 @@ export function setupInviteUserTests(
   let defaultCf: E2EConfigCloudFoundry = e2e.secrets.getDefaultCFEndpoint();
   let cfHelper: CFHelpers;
 
+  const localLog = (message: string) => console.log(`${new Date()}: ${message}`);
+
   // extendE2ETestTime(100000);
 
   beforeAll(() => {
+    localLog('beforeAll: Started');
+
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
     const setup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
       .connectAllEndpoints(ConsoleUserType.user);
-    const page = new CFPage();
-    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
     cfHelper = new CFHelpers(setup);
-    return navToOrgSpaceUsersList(cfHelper, defaultCf);
+    return navToOrgSpaceUsersList(cfHelper, defaultCf)
+      .then(() => {
+        localLog('beforeAll: Finished');
+      })
+      .catch(err => {
+        localLog(`beforeAll: Failed! ${err}`);
+        throw err;
+      });
   });
 
   const usersTable = new CFUsersListComponent();
 
   it('Not configured - No Button', () => {
+    localLog('Not configured - No Button: Started');
     usersTable.waitUntilShown();
     usersTable.getInviteUserButtonComponent().waitUntilNotShown();
   });
 
   it('Configure Client', () => {
-    navToCfSummary();
-    browser.wait(CfTopLevelPage.detect().then(cfPage => {
-      cfPage.waitForPageOrChildPage();
-      cfPage.goToSummaryTab();
-      return cfPage.isUserInviteConfigured().then(configured => {
-        if (!configured) {
-          cfPage.clickInviteConfigure();
-          const dialog = new ConfigInviteClientDialog();
-          dialog.form.fill({ clientid: defaultCf.invite.clientId, clientsecret: defaultCf.invite.clientSecret });
-          dialog.configure();
-          dialog.waitUntilNotShown();
-        }
-        return navToOrgSpaceUsersList(cfHelper, defaultCf);
-      });
-    }));
+    localLog('Configure Client: Started');
+    browser.wait(navToCfSummary()
+      .then(() => CfTopLevelPage.detect())
+      .then(cfPage => {
+        cfPage.waitForPageOrChildPage();
+        cfPage.goToSummaryTab();
+        return cfPage.isUserInviteConfigured().then(configured => {
+          if (!configured) {
+            cfPage.clickInviteConfigure();
+            const dialog = new ConfigInviteClientDialog();
+            dialog.form.fill({ clientid: defaultCf.invite.clientId, clientsecret: defaultCf.invite.clientSecret });
+            dialog.configure();
+            dialog.waitUntilNotShown();
+          }
+          return navToOrgSpaceUsersList(cfHelper, defaultCf).then(() => localLog('Configure Client: Finished'));
+        });
+      })
+      .catch(err => {
+        localLog(`Configure Client: Failed! ${err}`);
+        throw err;
+      })
+    );
   });
 
   describe('Stepper - ', () => {
@@ -69,7 +83,9 @@ export function setupInviteUserTests(
     const fieldTwo = 1;
     const usersToDelete = [];
 
+
     it('Is ready', () => {
+      localLog('Is ready: Started');
       usersTable.waitUntilShown();
       usersTable.getInviteUserButtonComponent().waitUntilShown();
       usersTable.inviteUser();
@@ -78,6 +94,7 @@ export function setupInviteUserTests(
     });
 
     it('Initial state', () => {
+      localLog('Initial state: Started');
       expect(inviteUserStepper.hasPrevious()).toBeFalsy();
       expect(inviteUserStepper.canCancel()).toBeTruthy();
       expect(inviteUserStepper.canNext()).toBeFalsy();
@@ -86,6 +103,7 @@ export function setupInviteUserTests(
     });
 
     it('Add/Remove', () => {
+      localLog('Add/Remove: Started');
       expect(stackedActions.getInputCount()).toBe(1);
       stackedActions.setInput({ [fieldOne]: '0' });
       stackedActions.addInput();
@@ -98,6 +116,7 @@ export function setupInviteUserTests(
     });
 
     it('Validation', () => {
+      localLog('Validation: Started');
       const validEmail = 'a@b.com';
       const invalidEmail = 'i\'m not an email address';
 
@@ -133,6 +152,7 @@ export function setupInviteUserTests(
     });
 
     it('One bad email address', () => {
+      localLog('One bad email address: Started');
       const validEmail = 'a@b.com';
       const slightlyValidEmail = 'a@b'; // Exploit difference between angular email validation and uaa (passes locally, fails remotely)
       stackedActions.addInput();
@@ -173,6 +193,7 @@ export function setupInviteUserTests(
     }
 
     it('Invite two users', () => {
+      localLog('Invite two users: Started');
       stackedActions.addInput();
       expect(stackedActions.getInputCount()).toBe(2);
 
@@ -195,7 +216,13 @@ export function setupInviteUserTests(
     });
 
     afterAll(() => {
-      return cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, usersToDelete));
+      localLog('afterAll: Started');
+      return cfHelper.fetchDefaultCfGuid().then(cfGuid => cfHelper.deleteUsers(cfGuid, defaultCf.testOrg, usersToDelete))
+        .then(() => localLog('afterAll: Finished'))
+        .catch(err => {
+          localLog(`afterAll: Failed! ${err}`);
+          throw err;
+        });
     });
 
   });
