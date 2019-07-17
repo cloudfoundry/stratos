@@ -448,7 +448,7 @@ export class APIEffect {
       });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
-    // TODO This need tidying up.
+    // TODO NJ This need tidying up.
     let entityArray;
     const pagAction = apiAction as PaginatedAction;
     if (pagAction.__forcedPageEntityConfig__) {
@@ -580,7 +580,7 @@ export class APIEffect {
       }
     }
   }
-  // TODO We need to be able to pass schema keys here
+  // TODO NJ We need to be able to pass schema keys here
   private getEntityRelations(action: any) {
     if (action.__forcedPageEntityConfig__) {
       const entityConfig = action.__forcedPageEntityConfig__ as EntityCatalogueEntityConfig;

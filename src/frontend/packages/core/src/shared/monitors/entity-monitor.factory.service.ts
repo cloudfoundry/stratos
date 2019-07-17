@@ -6,8 +6,6 @@ import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.se
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { EntityMonitor } from './entity-monitor';
 
-// TODO: !!!!!!!! RC New CI to find uses of CFAppState outside of cf module
-
 @Injectable()
 export class EntityMonitorFactory {
 

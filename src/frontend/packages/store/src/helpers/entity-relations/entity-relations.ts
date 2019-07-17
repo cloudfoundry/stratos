@@ -37,7 +37,6 @@ import {
   ValidationResult,
 } from './entity-relations.types';
 
-// TODO This 1 needs a tidy up and 2 only works with CF entities.
 interface ValidateResultFetchingState {
   fetching: boolean;
 }

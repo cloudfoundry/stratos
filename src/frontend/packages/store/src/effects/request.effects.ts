@@ -152,7 +152,7 @@ export class RequestEffect {
           (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
-          // TODO Do we need to clear the proxy pagination?
+          // TODO NJ Do we need to clear the proxy pagination?
           const entityType = apiAction.proxyPaginationEntityKey || apiAction.entityType;
           if (apiAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(apiAction, apiAction.guid));

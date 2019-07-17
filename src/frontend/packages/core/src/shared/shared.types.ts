@@ -16,7 +16,6 @@ export enum StratosStatus {
   BUSY = 'busy'
 }
 
-// TODO: !!!!!!!!!!!! RC Fix
 export type PartialAppState = Partial<CFAppState>;
 
 export type PickAppState = keyof CFAppState;
