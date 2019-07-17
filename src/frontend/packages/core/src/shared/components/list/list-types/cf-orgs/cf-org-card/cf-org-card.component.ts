@@ -144,7 +144,9 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.memoryLimit = truthyIncludingZeroString(quotaDefinition.entity.memory_limit);
   }
 
-  ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());
+  ngOnDestroy() {
+    this.subscriptions.forEach(p => p.unsubscribe());
+  }
 
   edit = () => {
     this.store.dispatch(

@@ -227,7 +227,7 @@ export class CloudFoundryEndpointService {
         )
       },
       true
-    ).entities$.subscribe();
+    ).entities$.pipe(first()).subscribe();
   }
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {

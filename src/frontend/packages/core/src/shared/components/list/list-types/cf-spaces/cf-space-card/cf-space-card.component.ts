@@ -153,7 +153,9 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.memoryLimit = truthyIncludingZeroString(quotaDefinition.memory_limit);
   }
 
-  ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());
+  ngOnDestroy() {
+    this.subscriptions.forEach(p => p.unsubscribe());
+  }
 
   edit = () => {
     this.store.dispatch(
