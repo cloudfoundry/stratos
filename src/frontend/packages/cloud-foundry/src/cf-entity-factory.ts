@@ -13,11 +13,11 @@ export const routeEntityType = 'route';
 export const domainEntityType = 'domain';
 export const organizationEntityType = 'organization';
 export const quotaDefinitionEntityType = 'quota_definition';
-export const appEventEntityType = 'event';
+export const appEventEntityType = 'applicationEvent';
 export const cfInfoEntityType = 'cloudFoundryInfo';
 export const cfUserEntityType = 'user';
-export const appSummaryEntityType = 'summary';
-export const appStatsEntityType = 'stats';
+export const appSummaryEntityType = 'applicationSummary';
+export const appStatsEntityType = 'applicationStats';
 export const appEnvVarsEntityType = 'environmentVars';
 export const gitBranchesEntityType = 'gitBranches';
 export const gitRepoEntityType = 'gitRepo';
@@ -64,7 +64,7 @@ export class CFEntitySchema extends EntitySchema {
   }
 }
 
-const AppSummarySchema = new CFEntitySchema(appSummaryEntityType, {}, { idAttribute: getAPIResourceGuid });
+const AppSummarySchema = new CFEntitySchema(appSummaryEntityType, {}, { idAttribute: 'guid' });
 entityCache[appSummaryEntityType] = AppSummarySchema;
 
 const AppStatSchema = new CFEntitySchema(appStatsEntityType, {}, { idAttribute: getAPIResourceGuid });

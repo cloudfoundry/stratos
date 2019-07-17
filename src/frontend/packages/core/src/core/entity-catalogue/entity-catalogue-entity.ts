@@ -127,9 +127,9 @@ export class StratosBaseCatalogueEntity<
     };
   }
 
-  public getRequestAction(actionString: 'start' | 'success' | 'failure', requestType: ApiRequestTypes): Action {
+  public getRequestAction(actionString: 'start' | 'success' | 'failure' | 'complete', requestType: ApiRequestTypes): Action {
     return {
-      type: `[${this.entityKey}/${requestType}] ${actionString}`
+      type: `@stratos/${this.entityKey}/${requestType}/${actionString}`
     };
   }
 

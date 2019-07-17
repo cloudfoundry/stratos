@@ -82,7 +82,7 @@ export class BuildTabComponent implements OnInit {
       combineLatest(
         this.applicationService.appSummary$
       ),
-      map(([app, appSummary]: [ApplicationData, EntityInfo<APIResource<IAppSummary>>]) => {
+      map(([app, appSummary]: [ApplicationData, EntityInfo<IAppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
 

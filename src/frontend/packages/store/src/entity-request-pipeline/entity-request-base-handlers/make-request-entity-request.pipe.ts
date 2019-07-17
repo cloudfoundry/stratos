@@ -13,8 +13,6 @@ export const makeRequestEntityPipe: MakeEntityRequestPipe = (
       requestOrObservable,
       endpointType,
       endpointGuids
-    ).pipe(
-      tap(console.log)
     );
   }
   return requestOrObservable.pipe(

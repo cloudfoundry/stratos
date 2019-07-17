@@ -5,7 +5,7 @@ import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers
 import { NormalizedResponse } from '../types/api.types';
 import { EntityRequestAction } from '../types/request.types';
 import { Observable } from 'rxjs';
-import { HttpClient, HttpRequest } from '@angular/common/http';
+import { HttpRequest } from '@angular/common/http';
 import { PipelineConfig } from './entity-request-pipeline';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { RequestOptions } from '@angular/http';
@@ -25,7 +25,9 @@ export type StartEntityRequestHandler = (
 export type SucceedOrFailEntityRequestHandler = (
   actionDispatcher: ActionDispatcher,
   catalogueEntity: StratosBaseCatalogueEntity,
-  requestType: ApiRequestTypes
+  requestType: ApiRequestTypes,
+  action: EntityRequestAction,
+  response: NormalizedResponse,
 ) => void;
 
 export type EndEntityRequestPipe<

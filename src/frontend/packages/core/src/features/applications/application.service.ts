@@ -84,7 +84,7 @@ export interface ApplicationData {
 export class ApplicationService {
 
   private appEntityService: EntityService<APIResource<IApp>>;
-  private appSummaryEntityService: EntityService<APIResource<IAppSummary>>;
+  private appSummaryEntityService: EntityService<IAppSummary>;
 
   constructor(
     @Inject(CF_GUID) public cfGuid: string,
@@ -99,7 +99,7 @@ export class ApplicationService {
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
     );
-    this.appSummaryEntityService = this.entityServiceFactory.create<APIResource<IAppSummary>>(
+    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
       false
@@ -125,7 +125,7 @@ export class ApplicationService {
 
   app$: Observable<EntityInfo<APIResource<IApp>>>;
   waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
-  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>>;
+  appSummary$: Observable<EntityInfo<IAppSummary>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
@@ -287,13 +287,13 @@ export class ApplicationService {
     this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
       map(({ entity }) => entity),
       filter(app => !!app),
-      map(app => {
-        const routes = app.entity.routes ? app.entity.routes : [];
-        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p.entity.port));
+      map(applicationSummary => {
+        const routes = applicationSummary.routes ? applicationSummary.routes : [];
+        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p.port));
         return nonTCPRoutes[0] || null;
       }),
-      map(entRoute => !!entRoute && !!entRoute.entity && !!entRoute.entity.domain ?
-        getRoute(entRoute.entity.port, entRoute.entity.host, entRoute.entity.path, true, false, entRoute.entity.domain.name) :
+      map(entRoute => !!entRoute && !!entRoute && !!entRoute.domain ?
+        getRoute(entRoute.port, entRoute.host, entRoute.path, true, false, entRoute.domain.name) :
         null
       )
     );

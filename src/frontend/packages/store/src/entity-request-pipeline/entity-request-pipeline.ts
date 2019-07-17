@@ -16,6 +16,7 @@ import { startEntityHandler } from './entity-request-base-handlers/start-entity-
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
 import { EntityRequestHandler, EntityRequestPipeline } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
+import { failedEntityHandler } from './entity-request-base-handlers/fail-entity-request.handler';
 export function handlerPipe<T extends []>(handler: EntityRequestHandler) {
   return (
     ...args: T
@@ -92,7 +93,14 @@ export const apiRequestPipelineFactory = (
     catalogueEntity,
     appState
   }).pipe(
-    tap(() => successEntityHandler(actionDispatcher, catalogueEntity, requestType))
+    tap((response) => {
+      if (response.success) {
+        successEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response);
+      } else {
+        failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response);
+      }
+    }),
+    map(() => catalogueEntity.getRequestAction('complete', requestType))
   );
 };
 // action: ICFAction | PaginatedAction, state: CFAppState

@@ -295,7 +295,7 @@ export interface IUpdateOrganization {
 export interface IAppSummary {
   guid: string;
   name: string;
-  routes: APIResource<IAppSummaryRoute>[];
+  routes: IAppSummaryRoute[];
   running_instances: number;
   services: IService[];
   available_domains: IDomain[];

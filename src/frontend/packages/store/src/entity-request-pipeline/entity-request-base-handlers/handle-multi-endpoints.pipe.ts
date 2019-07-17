@@ -24,8 +24,12 @@ export interface HandledMultiEndpointResponse<T = any> {
 
 
 function mapResponses(jetstreamResponse: JetstreamResponse, requestUrl: string): HandledMultiEndpointResponse {
+  const baseResponse = {
+    errors: [],
+    successes: []
+  };
   if (!jetstreamResponse) {
-    return null;
+    return baseResponse;
   }
   return Object.keys(jetstreamResponse).reduce((multiResponses, endpointGuid) => {
     const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
@@ -38,21 +42,17 @@ function mapResponses(jetstreamResponse: JetstreamResponse, requestUrl: string):
       multiResponses.successes.push(jetstreamEndpointResponse);
     }
     return multiResponses;
-  }, {
-      errors: [],
-      successes: []
-    });
+  }, baseResponse);
 }
 
 
 export const handleMultiEndpointsPipeFactory = (requestUrl: string) => (
   resData: JetstreamResponse
 ): HandledMultiEndpointResponse => {
-  console.log(resData);
   const responses = mapResponses(resData, requestUrl);
-  if (!responses || !responses.successes.length && !responses.successes.length) {
-    return null;
-  }
+  // if (!responses || !responses.successes.length && !responses.successes.length) {
+  //   return null;
+  // }
   return responses;
 };
 

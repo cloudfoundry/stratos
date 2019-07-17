@@ -16,6 +16,7 @@ import {
   ISecurityGroup,
   ISpace,
   IStack,
+  IAppSummary,
 } from '../../core/src/core/cf-api.types';
 import {
   StratosBaseCatalogueEntity,
@@ -173,9 +174,16 @@ function generateCFAppSummaryEntity(endpointDefinition: IStratosEndpointDefiniti
     schema: cfEntityFactory(appSummaryEntityType),
     endpoint: endpointDefinition,
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
+  return new StratosCatalogueEntity<IFavoriteMetadata, IAppSummary>(definition, {
     dataReducers: [updateAppSummaryRoutesReducer],
-    actionBuilders: appSummaryActionBuilders
+    actionBuilders: appSummaryActionBuilders,
+    entityBuilder: {
+      getMetadata: ent => ({
+        name: ent.name,
+        guid: ent.guid
+      }),
+      getGuid: metadata => metadata.guid,
+    }
   });
 }
 

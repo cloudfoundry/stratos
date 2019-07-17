@@ -7,26 +7,24 @@ import { registeredEndpointsOfTypesSelector } from '../selectors/endpoint.select
 import { first, mergeMap, last, tap, filter, map } from 'rxjs/operators';
 
 @Injectable()
-export class PipelineHttpClient extends HttpClient {
+export class PipelineHttpClient {
 
   static readonly EndpointHeader = 'x-cap-cnsi-list';
 
   constructor(
-    handler: HttpHandler,
+    public httpClient: HttpClient,
     private store: Store<InternalAppState>,
-  ) {
-    super(handler);
-  }
+  ) { }
   private getRequest<R>(hr: HttpRequest<any>, endpointType: string, endpointGuids: string | string[] = null) {
     if (endpointGuids && endpointGuids.length) {
       const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
-      return this.request<R>(hr.clone({ headers, reportProgress: false }));
+      return this.httpClient.request<R>(hr.clone({ headers, reportProgress: false }));
     } else {
       return this.store.select(registeredEndpointsOfTypesSelector(endpointType)).pipe(
         first(),
         mergeMap(endpoints => {
           const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, Object.keys(endpoints.map));
-          return this.request<R>(hr.clone({ headers, reportProgress: false }));
+          return this.httpClient.request<R>(hr.clone({ headers, reportProgress: false }));
         })
       );
     }

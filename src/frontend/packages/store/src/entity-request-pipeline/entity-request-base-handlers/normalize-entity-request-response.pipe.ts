@@ -2,6 +2,7 @@ import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-cat
 
 export const normalizeEntityPipeFactory = (catalogueEntity: StratosBaseCatalogueEntity, schemaKey?: string) => {
   return (responseData: any) => {
+    console.log(catalogueEntity.entityKey, catalogueEntity.getNormalizedEntityData(responseData, schemaKey))
     return catalogueEntity.getNormalizedEntityData(responseData, schemaKey);
   };
 };

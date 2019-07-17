@@ -22,8 +22,7 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   return entityRequestInfo.fetching ||
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
-    entityRequestInfo.deleting.deleted ||
-    entityRequestInfo.updating._root_.busy;
+    entityRequestInfo.deleting.deleted;
 }
 
 /**
@@ -133,6 +132,10 @@ export class EntityService<T = any> {
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
+    const isBlocked = isEntityBlocked(entityRequestInfo);
+    if (isBlocked) {
+      console.log(entity, entityRequestInfo, 'blocked')
+    }
     return entity && !isEntityBlocked(entityRequestInfo);
   }
 
