@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';

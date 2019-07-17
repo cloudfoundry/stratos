@@ -3,9 +3,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { appStatsEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { appStatsEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 @Component({

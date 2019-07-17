@@ -8,7 +8,7 @@ import {
   spaceWithOrgEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizationSpaces } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

@@ -6,7 +6,7 @@ import { asapScheduler, Observable, of as observableOf } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { SetCFDetails } from '../../../../../../cloud-foundry/src/actions/create-applications-page.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   getSpacesFromOrgWithRole,
 } from '../../../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';

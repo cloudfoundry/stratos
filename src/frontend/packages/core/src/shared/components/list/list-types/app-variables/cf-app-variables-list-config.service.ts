@@ -4,10 +4,10 @@ import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
-import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { AppVariablesDelete } from '../../../../../../../cloud-foundry/src/actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';

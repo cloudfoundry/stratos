@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';

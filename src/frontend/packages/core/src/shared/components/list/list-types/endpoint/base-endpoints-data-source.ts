@@ -2,9 +2,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';

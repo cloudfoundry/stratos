@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { TableCellCustom } from '../../../list.types';
-import { BREADCRUMB_URL_PARAM } from '../../../../page-header/page-header.types';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
+
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../store/src/types/routing.type';
+import { BREADCRUMB_URL_PARAM } from '../../../../page-header/page-header.types';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-app-name',

@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';

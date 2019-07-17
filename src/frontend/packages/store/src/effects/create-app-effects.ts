@@ -11,10 +11,10 @@ import {
   CHECK_NAME,
   IsNewAppNameFree,
 } from '../../../cloud-foundry/src/actions/create-applications-page.actions';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
-import { CFAppState } from './../app-state';
 
 
 

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { fromEvent, interval, Subscription } from 'rxjs';
 import { debounceTime, delay, filter, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { selectSideNavState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { getScrollBarWidth } from '../../../core/helper-classes/dom-helpers';
 import { ISubHeaderTabs } from './page-subheader.types';

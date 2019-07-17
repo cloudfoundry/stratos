@@ -10,7 +10,7 @@ import {
   FetchCommit,
 } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../../../../../../../../cloud-foundry/src/actions/github.actions';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { GitCommit, GitRepo } from '../../../../../../../../store/src/types/git.types';
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';

@@ -5,14 +5,6 @@ import { debounceTime, filter, map } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import {
-  organizationEntityType,
-  serviceEntityType,
-  serviceInstancesEntityType,
-  spaceEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../cloud-foundry/src/selectors/api.selectors';
-import {
   CreateUserProvidedServiceInstance,
   GetAllUserProvidedServices,
   GetUserProvidedService,
@@ -20,7 +12,15 @@ import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import {
+  organizationEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  spaceEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfRequestInfo } from '../../../../cloud-foundry/src/selectors/api.selectors';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

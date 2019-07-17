@@ -6,7 +6,7 @@ import {
   FetchCFCellMetricsPaginatedAction,
   MetricQueryConfig,
 } from '../../../../../../../store/src/actions/metrics.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';

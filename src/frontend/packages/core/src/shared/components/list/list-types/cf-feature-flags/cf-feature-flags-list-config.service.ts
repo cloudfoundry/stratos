@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ITableColumn } from '../../list-table/table.types';
@@ -8,9 +11,6 @@ import { ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfFeatureFlagsDataSource, FeatureFlagDescriptions } from './cf-feature-flags-data-source';
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state/table-cell-feature-flag-state.component';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResource<IFeatureFlag>> {

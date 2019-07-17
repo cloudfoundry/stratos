@@ -13,10 +13,10 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizations } from '../../../../cloud-foundry/src/actions/organization.actions';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import {
   getCurrentPageRequestInfo,

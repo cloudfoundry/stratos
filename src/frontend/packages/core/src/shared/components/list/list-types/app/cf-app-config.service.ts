@@ -4,9 +4,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { IApp } from '../../../../../core/cf-api.types';

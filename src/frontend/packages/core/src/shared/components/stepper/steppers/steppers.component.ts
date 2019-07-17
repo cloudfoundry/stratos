@@ -9,18 +9,18 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { IRouterNavPayload, RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
 import { LoggerService } from '../../../../core/logger.service';
+import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
-import { ActivatedRoute } from '@angular/router';
-import { BASE_REDIRECT_QUERY } from '../stepper.types';
 
 
 

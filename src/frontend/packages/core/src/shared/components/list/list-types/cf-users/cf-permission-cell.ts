@@ -11,7 +11,7 @@ import { ConfirmationDialogService } from '../../../confirmation-dialog.service'
 import { TableCellCustom } from '../../list.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser } from '../../../../../../../store/src/types/user.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
 import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 

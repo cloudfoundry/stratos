@@ -5,7 +5,7 @@ import { NEVER, Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, first, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';

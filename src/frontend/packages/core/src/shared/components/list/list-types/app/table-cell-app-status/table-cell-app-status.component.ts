@@ -1,14 +1,12 @@
-import { CFAppState } from './../../../../../../../../store/src/app-state';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { TableCellCustom } from '../../../list.types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-table-cell-app-status',

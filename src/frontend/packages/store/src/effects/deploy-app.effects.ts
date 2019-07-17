@@ -5,9 +5,6 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { gitBranchesEntityType, gitCommitEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { parseHttpPipeError } from '../../../core/src/core/utils.service';
 import {
   CHECK_PROJECT_EXISTS,
   CheckProjectExists,
@@ -21,6 +18,10 @@ import {
   ProjectExists,
   ProjectFetchFail,
 } from '../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { LoggerService } from '../../../core/src/core/logger.service';
+import { parseHttpPipeError } from '../../../core/src/core/utils.service';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
 import { GitCommit } from '../types/git.types';
@@ -30,7 +31,6 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { CFAppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
 
 export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {

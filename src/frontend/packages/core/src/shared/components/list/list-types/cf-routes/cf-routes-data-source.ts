@@ -5,7 +5,7 @@ import { IListDataSource } from '../../data-sources-controllers/list-data-source
 import { IListConfig } from '../../list.component.types';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { GetAllRoutes } from '../../../../../../../cloud-foundry/src/actions/route.actions';
 
 

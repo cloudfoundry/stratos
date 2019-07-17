@@ -5,11 +5,14 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import {
+  DeleteDeployAppSection,
+  StoreCFSettings,
+} from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
-import { DeleteDeployAppSection, StoreCFSettings } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { selectApplicationSource, selectCfDetails } from '../../../../../store/src/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
 import { DeployApplicationSource, SourceType } from '../../../../../store/src/types/deploy-application.types';

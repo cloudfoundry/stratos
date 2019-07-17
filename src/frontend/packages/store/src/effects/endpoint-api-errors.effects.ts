@@ -3,9 +3,9 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { RequestTypes } from '../actions/request.actions';
-import { CFAppState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { WrapperRequestActionFailed } from '../types/request.types';

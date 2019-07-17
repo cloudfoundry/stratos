@@ -3,7 +3,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import { CFAppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { IRequestEntityTypeState } from '../../../../../store/src/app-state';
 import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { SessionData } from '../../../../../store/src/types/auth.types';

@@ -1,8 +1,8 @@
 import { compose } from '@ngrx/store';
 
-import { CFAppState } from '../app-state';
-import { UsersRolesState } from '../types/users-roles.types';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { IUserPermissionInOrg } from '../types/user.types';
+import { UsersRolesState } from '../types/users-roles.types';
 
 export const selectUsersRoles = (state: CFAppState): UsersRolesState => state.manageUsersRoles;
 

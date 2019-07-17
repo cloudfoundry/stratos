@@ -4,6 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { UserFavoriteManager } from '../../../core/src/core/user-favorite-manager';
@@ -27,7 +28,6 @@ import {
   UpdateUserFavoriteMetadataAction,
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { CFAppState } from '../app-state';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { WrapperRequestActionSuccess } from '../types/request.types';

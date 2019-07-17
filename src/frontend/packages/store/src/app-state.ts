@@ -8,7 +8,7 @@ import { CreateServiceInstanceState } from './types/create-service-instance.type
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
-import { BaseEntityValues, CFRequestDataState, ExtendedRequestState } from './types/entity.types';
+import { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import { InternalEventsState } from './types/internal-events.types';
 import { PaginationEntityTypeState } from './types/pagination.types';
@@ -78,8 +78,3 @@ export type PickedInternalAppState<T extends keyof InternalAppState> = Pick<Inte
 // Care about internal entities and catalogue entities? Use this one.
 // This should only be used by internal stratos code
 export abstract class GeneralAppState extends AppState<GeneralAppRequestDataState> { }
-
-// Care about CF entities? Use this one.
-// TODO: This should be moved into the cf module
-export abstract class CFAppState extends AppState<CFRequestDataState> { }
-

@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../../../store/src/selectors/recently-visitied.selectors';

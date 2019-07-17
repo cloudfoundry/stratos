@@ -5,9 +5,9 @@ import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../../../../../../cloud-foundry/cf-types';
-import { domainEntityType } from '../../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { FetchAllDomains } from '../../../../../../../../../cloud-foundry/src/actions/domains.actions';
-import { CFAppState } from '../../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../../cloud-foundry/src/cf-app-state';
+import { domainEntityType } from '../../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   getPaginationObservables,
 } from '../../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

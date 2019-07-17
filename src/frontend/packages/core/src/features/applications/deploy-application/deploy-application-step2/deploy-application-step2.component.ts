@@ -12,7 +12,6 @@ import {
 import { catchError, filter, first, map, pairwise, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
-import { gitBranchesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -22,7 +21,8 @@ import {
   SetBranch,
   SetDeployBranch,
 } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { gitBranchesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,

@@ -2,9 +2,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfEntity } from '../../../../cloud-foundry/src/selectors/api.selectors';
-import { CFAppState } from '../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';

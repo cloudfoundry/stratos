@@ -3,9 +3,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import {
   ChartSeries,
   IMetrics,

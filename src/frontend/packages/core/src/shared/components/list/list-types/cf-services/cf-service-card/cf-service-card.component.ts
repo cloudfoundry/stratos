@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
