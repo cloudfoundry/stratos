@@ -1,11 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../tab-nav.service';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { testSCFGuid } from '../../../../test-framework/store-test-helper';
 import { QuotaDefinitionComponent } from './quota-definition.component';
 
 describe('QuotaDefinitionComponent', () => {
@@ -16,8 +17,19 @@ describe('QuotaDefinitionComponent', () => {
     TestBed.configureTestingModule({
       declarations: [QuotaDefinitionComponent],
       imports: [...BaseTestModules],
-      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), TabNavService]
-
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: { cfGuid: testSCFGuid },
+              params: { quotaId: 'guid' }
+            }
+          }
+        },
+        generateTestCfEndpointServiceProvider(),
+        TabNavService
+      ]
     })
       .compileComponents();
   }));

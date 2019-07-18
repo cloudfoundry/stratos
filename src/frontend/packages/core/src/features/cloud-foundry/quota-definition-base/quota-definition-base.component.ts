@@ -33,7 +33,7 @@ export class QuotaDefinitionBaseComponent {
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     protected activatedRoute: ActivatedRoute,
   ) {
-    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid || activatedRoute.snapshot.queryParams.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid || activatedRoute.snapshot.queryParams.orgGuid;
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || activatedRoute.snapshot.queryParams.spaceGuid;
     this.quotaGuid = activatedRoute.snapshot.params.quotaId || activatedRoute.snapshot.queryParams.quotaGuid;
