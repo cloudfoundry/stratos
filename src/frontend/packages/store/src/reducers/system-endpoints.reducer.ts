@@ -29,8 +29,7 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case CONNECT_ENDPOINTS:
     case DISCONNECT_ENDPOINTS:
       return changeEndpointConnectionStatus(state, action, 'checking');
-
-    // TODO: Metrics? Does this need to be moved?
+    // TODO: Metrics - Where should it live?. Does this need to be moved?
     case METRIC_API_SUCCESS:
       return updateMetricsInfo(state, action);
     default:

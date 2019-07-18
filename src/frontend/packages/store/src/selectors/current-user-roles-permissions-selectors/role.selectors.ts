@@ -4,6 +4,7 @@ import {
   PermissionStrings,
   PermissionValues,
   ScopeStrings,
+  StratosPermissionTypes,
 } from '../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserRolesAppState } from '../../app-state';
 import {
@@ -21,8 +22,14 @@ import {
 export const selectCurrentUserRolesState = (state: CurrentUserRolesAppState) => state.currentUserRoles;
 
 export const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => state.internal;
-// TODO This looks like it's wrong, typescript seems to think it's going to return any type.
-export const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: IStratosRolesState) => state[role] || false;
+export const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: IStratosRolesState) => {
+  // TODO: RC !!!!!!!!!!!! check that when we check for permission to change password it works (looks like it couldn't before)
+  // aka just `return state[role] || false;`
+  if (role === StratosPermissionTypes.ADMIN) {
+    return state.isAdmin;
+  }
+  return !!state.scopes[role] || false;
+};
 
 export const selectEntityWithRole = (role: PermissionStrings, type: RoleEntities) => (state: ICfRolesState) => {
   const entityType = state[type];

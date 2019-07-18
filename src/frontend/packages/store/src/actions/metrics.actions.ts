@@ -39,7 +39,7 @@ export class MetricQueryConfig {
   ) { }
 }
 
-// TODO: NJ How do we handle metrics across endpoint types?
+// TODO: Metrics - Where should it live?. How do we handle metrics across endpoint types?
 export class MetricsAction implements IRequestAction {
   constructor(
     guid: string,
