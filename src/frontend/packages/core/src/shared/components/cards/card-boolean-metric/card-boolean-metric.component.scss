@@ -1,4 +1,4 @@
-.number-metric-card {
+.boolean-metric-card {
   height: 100%;
   &__anchor {
     cursor: pointer;
@@ -8,18 +8,9 @@
     display: flex;
     flex-direction: row;
     padding: 12px;
-    &-inner {
-      display: flex;
+    > div {
       flex: 1;
-      flex-direction: column;
     }
-    &-inner-reverse {
-      flex-direction: column-reverse;
-    }
-  }
-  &__limit,
-  &__usage-count  {
-    white-space: nowrap;
   }
   &__icon {
     flex: 0 0 40px;
@@ -33,9 +24,6 @@
   }
   &__value {
     font-size: 23px;
-    &--unlimited {
-      opacity: .3;
-    }
   }
   &__limit {
     font-size: 18px;

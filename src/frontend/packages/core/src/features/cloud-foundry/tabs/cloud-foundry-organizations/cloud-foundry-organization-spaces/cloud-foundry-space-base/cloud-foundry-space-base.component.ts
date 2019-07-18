@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
@@ -89,6 +89,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   private deleteRedirectSub: Subscription;
 
+  private quotaLinkSub: Subscription;
+
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
   public favorite$: Observable<UserFavorite<ISpaceFavMetadata>>;
 
@@ -127,7 +129,22 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     ).subscribe();
 
     // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
+    this.setupLinks();
+  }
+
+  private setupLinks() {
+    this.quotaLinkSub = this.cfSpaceService.space$.pipe(
+      tap((space) => {
+        this.tabLinks.push({
+          link: 'space-quota',
+          label: 'Quota',
+          matIcon: 'data_usage',
+          hidden: of(!space.entity.entity.space_quota_definition)
+        });
+        this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
+      }),
+      first()
+    ).subscribe();
   }
 
   private setUpBreadcrumbs(
@@ -165,6 +182,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.deleteRedirectSub.unsubscribe();
+    this.quotaLinkSub.unsubscribe();
   }
 
   deleteSpaceWarn = () => {

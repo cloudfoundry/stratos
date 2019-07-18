@@ -49,6 +49,11 @@ export class CloudFoundryOrganizationBaseComponent {
       link: 'users',
       label: 'Users',
       matIcon: 'people'
+    },
+    {
+      link: 'quota',
+      label: 'Quota',
+      matIcon: 'data_usage'
     }
   ];
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
