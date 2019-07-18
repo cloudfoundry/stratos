@@ -31,7 +31,6 @@
             value="{{ quotaDefinition.entity?.instance_memory_limit }}">
           </app-card-number-metric>
         </app-tile>
-        <app-tile></app-tile>
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Application</h4>
@@ -46,7 +45,6 @@
             value="{{ quotaDefinition.entity?.app_task_limit }}">
           </app-card-number-metric>
         </app-tile>
-        <app-tile></app-tile>
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Service</h4>
@@ -61,7 +59,6 @@
             value="{{ quotaDefinition.entity?.total_service_keys }}">
           </app-card-number-metric>
         </app-tile>
-        <app-tile></app-tile>
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Routes & Domains</h4>
@@ -76,11 +73,14 @@
             label="Maximum Reserved Route Ports" value="{{ quotaDefinition.entity?.total_reserved_route_ports }}">
           </app-card-number-metric>
         </app-tile>
+      </app-tile-group>
+      <app-tile-group>
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="domain" label="Maximum Private Domains"
             value="{{ quotaDefinition.entity?.total_private_domains }}">
           </app-card-number-metric>
         </app-tile>
+        <app-tile></app-tile>
       </app-tile-group>
     </app-tile-grid>
   </app-loading-page>
