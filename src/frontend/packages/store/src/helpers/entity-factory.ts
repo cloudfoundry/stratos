@@ -1,5 +1,6 @@
 import { EntitySchema } from './entity-schema';
 
+// TODO: RC where's user favourites?
 export const endpointSchemaKey = 'endpoint';
 export const userProfileSchemaKey = 'userProfile';
 

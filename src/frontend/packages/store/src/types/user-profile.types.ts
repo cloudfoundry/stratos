@@ -1,5 +1,3 @@
-import { TRequestTypeKeys, RequestSectionKeys } from '../reducers/api-request-reducer/types';
-
 // UAA User Info
 export interface UserProfileInfo {
   id: string;
@@ -35,13 +33,13 @@ export interface UserProfileInfoEmail {
   value: string;
 }
 
-export const userProfileStoreNames: {
-  section: TRequestTypeKeys,
-  type: string
-} = {
-    section: RequestSectionKeys.Other,
-    type: 'userProfile'
-  };
+// export const userProfileStoreNames: {
+//   section: TRequestTypeKeys,
+//   type: string
+// } = {
+//   section: RequestSectionKeys.Other,
+//   type: this.stratosUserConfig.entityKey
+// };
 
 export interface UserProfilePasswordUpdate {
   oldPassword: string;

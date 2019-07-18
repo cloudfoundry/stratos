@@ -11,6 +11,8 @@ class StratosEntitySchema extends EntitySchema {
 
 const userFavoritesEntityType = 'userFavorites';
 
+// TODO: !!!! RC favourites is broken (fav an endpoint, get an exception). Should also be 'stratosFav..'
 export const userFavoritesEntitySchema = new StratosEntitySchema(userFavoritesEntityType);
+// TODO: !!!! RC Check that anywhere that accesses this uses '<stratos>Endpoint'
 export const endpointEntitySchema = new StratosEntitySchema(entityFactory(endpointSchemaKey).entityType);
 export const userProfileEntitySchema = new StratosEntitySchema(entityFactory(userProfileSchemaKey).entityType);
