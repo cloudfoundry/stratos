@@ -61,11 +61,16 @@ jobs:
   - name: Helm Chart Unit Tests
     script:
     - "./deploy/ci/travis/helm-chart-unit-tests.sh"
-  - name: E2E Tests - Long Suite
+  - name: E2E Tests - Long Suite 1
     before_script:
     - "./deploy/ci/travis/job-e2e-before_script.sh"
     script:
     - "./deploy/ci/travis/job-e2e-script.sh longSuite"
+  - name: E2E Tests - Long Suite 2
+    before_script:
+    - "./deploy/ci/travis/job-e2e-before_script.sh true"
+    script:
+    - "./deploy/ci/travis/job-e2e-script.sh longSuite2"
   - name: E2E Tests - All Other Suite
     before_script:
     - "./deploy/ci/travis/job-e2e-before_script.sh"

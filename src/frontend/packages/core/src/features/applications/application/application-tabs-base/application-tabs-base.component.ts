@@ -1,9 +1,8 @@
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
-import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { applicationSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
@@ -32,11 +31,13 @@ import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+import { ApplicationPollingService } from './application-polling.service';
 
 @Component({
   selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
-  styleUrls: ['./application-tabs-base.component.scss']
+  styleUrls: ['./application-tabs-base.component.scss'],
+  providers: [ApplicationPollingService]
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public schema = entityFactory(applicationSchemaKey);
@@ -64,7 +65,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private endpointsService: EndpointsService,
     private ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    scmService: GitSCMService
+    scmService: GitSCMService,
+    private appPollingService: ApplicationPollingService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -147,13 +149,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   applicationActions$: Observable<string[]>;
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
-  entityServiceAppRefresh$: Subscription;
   stratosProjectSub: Subscription;
-  autoRefreshString = 'auto-refresh';
-
-  autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
-    update => update[this.autoRefreshString] || { busy: false }
-  ));
 
   tabLinks: IPageSideNavTab[];
 
@@ -243,22 +239,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const { cfGuid, appGuid } = this.applicationService;
-    // Auto refresh
-    this.ngZone.runOutsideAngular(() => {
-      this.entityServiceAppRefresh$ = this.entityService
-        .poll(10000, this.autoRefreshString).pipe(
-          tap(({ resource }) => {
-            this.ngZone.run(() => {
-              this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-              if (resource && resource.entity && resource.entity.state === 'STARTED') {
-                this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-              }
-            });
-          }))
-        .subscribe();
-    });
-
     this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
@@ -291,9 +271,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.summaryDataChanging$ = observableCombineLatest(
       initialFetch$,
       this.applicationService.isUpdatingApp$,
-      this.autoRefreshing$
-    ).pipe(map(([isFetchingApp, isUpdating, autoRefresh]) => {
-      if (autoRefresh.busy) {
+      this.appPollingService.isPolling$
+    ).pipe(map(([isFetchingApp, isUpdating, isPolling]) => {
+      if (isPolling) {
         return false;
       }
       return !!(isFetchingApp || isUpdating);
@@ -301,6 +281,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$, this.stratosProjectSub);
+    safeUnsubscribe(this.appSub$, this.stratosProjectSub);
+    this.appPollingService.stop();
   }
 }

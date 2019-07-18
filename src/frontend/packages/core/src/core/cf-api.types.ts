@@ -182,8 +182,11 @@ export interface IOrganization<spaceT = APIResource<ISpace>[]> {
 
 export interface IDomain {
   name: string;
-  router_group_guid?: any;
-  router_group_type?: any;
+  router_group_guid?: string;
+  router_group_type?: string;
+  owning_organization_guid?: string;
+  owning_organization_url?: string;
+  shared_organizations_url?: string;
 }
 
 export interface ICfV2Info {

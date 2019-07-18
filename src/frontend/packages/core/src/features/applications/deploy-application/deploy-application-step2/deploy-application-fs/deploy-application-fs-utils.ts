@@ -29,16 +29,14 @@ export class DeployApplicationFsUtils {
       for (const item of items) {
         const filePath = item.webkitRelativePath.split('/');
         // First part is the root folder name
-        if (filePath.length === 2 && !rootFolderName) {
+        if (filePath.length > 1 && !rootFolderName) {
           rootFolderName = filePath[0];
         }
-        if (filePath.length > 2) {
-          // Don't traverse below the 1st level of files (could take a while)
-          break;
-        }
+
         if (!cfIgnoreFile && filePath.length === 2 && filePath[1] === CF_IGNORE_FILE) {
           cfIgnoreFile = item;
         }
+
         if (filePath.length === 2 && filePath[1] === CF_MANIFEST_FILE) {
           manifestFile = item;
         }
