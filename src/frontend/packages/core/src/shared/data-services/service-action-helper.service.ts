@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
 import { DeleteServiceBinding } from '../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { DeleteServiceInstance } from '../../../../cloud-foundry/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../core/cf-api-svc.types';
 import {

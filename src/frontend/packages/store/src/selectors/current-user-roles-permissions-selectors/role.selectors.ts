@@ -5,7 +5,7 @@ import {
   PermissionValues,
   ScopeStrings,
 } from '../../../../core/src/core/current-user-permissions.config';
-import { PickedInternalAppState } from '../../app-state';
+import { CurrentUserRolesAppState } from '../../app-state';
 import {
   IAllCfRolesState,
   ICfRolesState,
@@ -18,8 +18,7 @@ import {
 } from '../../types/current-user-roles.types';
 
 
-
-export const selectCurrentUserRolesState = (state: PickedInternalAppState<'currentUserRoles'>) => state.currentUserRoles;
+export const selectCurrentUserRolesState = (state: CurrentUserRolesAppState) => state.currentUserRoles;
 
 export const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => state.internal;
 // TODO This looks like it's wrong, typescript seems to think it's going to return any type.

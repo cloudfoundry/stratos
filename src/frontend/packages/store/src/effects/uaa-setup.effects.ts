@@ -4,7 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../app-state';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import {
   SetUAAScope,
   SETUP_UAA,

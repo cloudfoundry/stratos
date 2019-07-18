@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ITableColumn } from '../../list-table/table.types';
 import {
   CfSecurityGroupsCardComponent,
 } from '../../list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfSecurityGroupsDataSource } from './cf-security-groups-data-source';
-import { ITableColumn } from '../../list-table/table.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResource> {

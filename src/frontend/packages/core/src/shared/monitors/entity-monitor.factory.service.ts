@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
-import { CFAppState } from './../../../../store/src/app-state';
 import { EntityMonitor } from './entity-monitor';
 
 @Injectable()

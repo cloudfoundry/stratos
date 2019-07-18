@@ -1,5 +1,5 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { GetServiceBrokers, GetServiceBroker } from '../actions/service-broker.actions';
+import { GetServiceBroker, GetServiceBrokers } from '../actions/service-broker.actions';
 
 export const serviceBrokerActionBuilders = {
   get: (
@@ -13,7 +13,6 @@ export const serviceBrokerActionBuilders = {
     includeRelations,
     populateMissing
   ),
-  // TODO: This is good reason to remove pagination key
   getAll: (
     endpointGuid,
     paginationKey,

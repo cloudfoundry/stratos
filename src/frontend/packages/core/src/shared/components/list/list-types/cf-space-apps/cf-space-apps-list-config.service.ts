@@ -2,10 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ISpaceFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { IApp } from '../../../../../core/cf-api.types';

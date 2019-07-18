@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import {
   getActionsFromExtensions,

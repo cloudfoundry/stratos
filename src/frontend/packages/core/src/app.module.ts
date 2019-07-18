@@ -121,7 +121,6 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
-    // TODO: RC Is this the best approach?
     EntityActionDispatcher.initialize(this.store);
     eventService.addEventConfig<boolean>(
       {

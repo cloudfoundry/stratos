@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../../core/cf-api.types';
 import { CfOrgSpaceLabelService } from '../../../../services/cf-org-space-label.service';

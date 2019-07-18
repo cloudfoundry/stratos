@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from '../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
 import { waitForCFPermissions } from '../features/cloud-foundry/cf.helpers';
-import { CFAppState } from '../../../store/src/app-state';
 
 @Directive({
   selector: '[appUserPermission]'

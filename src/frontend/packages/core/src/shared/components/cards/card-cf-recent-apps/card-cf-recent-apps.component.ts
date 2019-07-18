@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../core/cf-api.types';
 import {

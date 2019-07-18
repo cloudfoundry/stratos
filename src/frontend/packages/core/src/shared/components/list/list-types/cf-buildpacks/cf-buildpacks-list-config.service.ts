@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IBuildpack } from '../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfBuildpackCardComponent } from './cf-buildpack-card/cf-buildpack-card.component';
 import { CfBuildpacksDataSource } from './cf-buildpacks-data-source';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<IBuildpack>> {

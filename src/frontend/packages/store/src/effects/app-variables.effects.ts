@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { AppVariables, AppVariablesUpdate } from '../../../cloud-foundry/src/actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../app-state';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 
 
 

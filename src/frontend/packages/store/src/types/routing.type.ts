@@ -1,5 +1,4 @@
-import { RoutesRecognized } from '@angular/router';
-import { CFAppState } from '../app-state';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 
 export interface RoutingEvent {
   id: number;

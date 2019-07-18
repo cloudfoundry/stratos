@@ -1,13 +1,12 @@
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
+import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { EntitySchema } from '../helpers/entity-schema';
 
 export interface SingleEntityAction {
   entityType: string;
@@ -91,11 +90,6 @@ export abstract class StartAction implements Action {
   type = ApiActionTypes.API_REQUEST_START;
 }
 
-// TODO This needs to be moved.
-export abstract class CFStartAction extends StartAction implements Action {
-  public endpointType = CF_ENDPOINT_TYPE;
-}
-
 export abstract class RequestAction implements Action {
   type = RequestTypes.START;
 }
@@ -127,15 +121,6 @@ export interface ICFAction extends IRequestAction {
 
 export class APISuccessOrFailedAction<T = any> implements Action {
   constructor(public type, public apiAction: ICFAction | PaginatedAction, public response?: T) { }
-}
-
-export class StartCFAction extends CFStartAction implements IStartRequestAction {
-  constructor(
-    public apiAction: ICFAction | PaginatedAction,
-    public requestType: ApiRequestTypes = 'fetch'
-  ) {
-    super();
-  }
 }
 
 export class StartRequestAction extends RequestAction {

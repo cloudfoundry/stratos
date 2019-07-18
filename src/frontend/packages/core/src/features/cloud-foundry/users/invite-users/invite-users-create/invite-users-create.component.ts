@@ -4,11 +4,11 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../../../../cloud-foundry/cf-types';
-import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetOrganization } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
-import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { GetSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
 import { UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';

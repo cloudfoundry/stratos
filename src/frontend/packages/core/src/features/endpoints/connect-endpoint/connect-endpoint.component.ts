@@ -21,7 +21,7 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
 import { BaseEndpointAuth } from '../endpoint-auth';
 
-// TODO: Indentation
+// TODO: NJ Indentation
 @Component({
   selector: 'app-connect-endpoint',
   templateUrl: './connect-endpoint.component.html',

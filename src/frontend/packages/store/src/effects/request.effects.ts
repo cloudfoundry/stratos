@@ -4,6 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { UtilsService } from '../../../core/src/core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
@@ -13,7 +14,6 @@ import {
   EntitiesPipelineCompleted,
   ValidateEntitiesStart,
 } from '../actions/request.actions';
-import { CFAppState } from '../app-state';
 import { validateEntityRelations } from '../helpers/entity-relations/entity-relations';
 import {
   completeApiRequest,
@@ -152,7 +152,7 @@ export class RequestEffect {
           (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
-          // TODO Do we need to clear the proxy pagination?
+          // TODO NJ Do we need to clear the proxy pagination?
           const entityType = apiAction.proxyPaginationEntityKey || apiAction.entityType;
           if (apiAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(apiAction, apiAction.guid));

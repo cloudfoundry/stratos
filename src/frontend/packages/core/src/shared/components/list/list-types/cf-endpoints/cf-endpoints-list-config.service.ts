@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
@@ -9,8 +9,8 @@ import { PaginationMonitorFactory } from '../../../../monitors/pagination-monito
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointCardComponent } from '../endpoint/endpoint-card/endpoint-card.component';
-import { CFEndpointsDataSource } from './cf-endpoints-data-source';
 import { EndpointsListConfigService } from '../endpoint/endpoints-list-config.service';
+import { CFEndpointsDataSource } from './cf-endpoints-data-source';
 
 
 @Injectable()

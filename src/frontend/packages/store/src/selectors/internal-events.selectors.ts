@@ -1,7 +1,7 @@
 import { compose, createSelector } from '@ngrx/store';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { InternalEventSeverity, InternalEventsState } from '../types/internal-events.types';
-import { CFAppState } from './../app-state';
 
 
 // TODO: Confirm - should this be CFAppState?

@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { ListStateActionTypes, ListView, SetListViewAction } from '../actions/list.actions';
-import { CFAppState } from '../app-state';
 import { mergeState } from '../helpers/reducer.helper';
 
 export class ListsState {

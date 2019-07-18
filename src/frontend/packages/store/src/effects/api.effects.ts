@@ -6,6 +6,7 @@ import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -31,7 +32,7 @@ import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { APISuccessOrFailedAction, ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
-import { CFAppState, IRequestEntityTypeState } from './../app-state';
+import { IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
@@ -447,7 +448,7 @@ export class APIEffect {
       });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
-    // TODO This need tidying up.
+    // TODO NJ This need tidying up.
     let entityArray;
     const pagAction = apiAction as PaginatedAction;
     if (pagAction.__forcedPageEntityConfig__) {
@@ -579,7 +580,7 @@ export class APIEffect {
       }
     }
   }
-  // TODO We need to be able to pass schema keys here
+  // TODO NJ We need to be able to pass schema keys here
   private getEntityRelations(action: any) {
     if (action.__forcedPageEntityConfig__) {
       const entityConfig = action.__forcedPageEntityConfig__ as EntityCatalogueEntityConfig;

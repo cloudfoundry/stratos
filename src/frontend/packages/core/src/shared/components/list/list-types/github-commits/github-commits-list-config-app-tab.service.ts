@@ -16,7 +16,7 @@ import {
   StoreCFSettings,
 } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';

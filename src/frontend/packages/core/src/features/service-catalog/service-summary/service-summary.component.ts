@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceInstance, IServicePlan } from '../../../core/cf-api-svc.types';
 import { ServicesService } from '../services.service';
-import { map } from 'rxjs/operators';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../store/src/app-state';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-service-summary',

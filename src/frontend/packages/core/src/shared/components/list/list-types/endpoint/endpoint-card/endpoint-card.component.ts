@@ -12,8 +12,8 @@ import { Store } from '@ngrx/store';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, startWith } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashboard-actions';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { StratosCatalogueEndpointEntity } from '../../../../../../core/entity-catalogue/entity-catalogue-entity';
