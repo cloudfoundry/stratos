@@ -1,6 +1,7 @@
 import { entityCatalogue } from './entity-catalogue.service';
 
-// TODO !!!!!!!!!! RC NJ Move these into the entity catalogue
+// TODO: NJ Move these into the entity catalogue
+// TODO: !!!!!!!!!! RC Are these used? I've removed userProfile as covered by stratosUserProfile
 const baseEntities = [
   'user',
   'system'

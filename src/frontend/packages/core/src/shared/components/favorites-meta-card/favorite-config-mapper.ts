@@ -1,22 +1,19 @@
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IRequestAction } from '../../../../../store/src/types/request.types';
 import {
   IFavoriteMetadata,
   IFavoriteTypeInfo,
   UserFavorite,
-  UserFavoriteEndpoint
+  UserFavoriteEndpoint,
 } from '../../../../../store/src/types/user-favorites.types';
-import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { Injectable } from '@angular/core';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import {
-  IEntityMetadata,
-  IStratosEntityDefinition
-} from '../../../core/entity-catalogue/entity-catalogue.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
 import { StratosBaseCatalogueEntity } from '../../../core/entity-catalogue/entity-catalogue-entity';
+import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata, IStratosEntityDefinition } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 
 
 export interface IFavoriteTypes {
@@ -55,21 +52,13 @@ export class FavoriteConfig<T, Q extends IFavoriteMetadata> implements IFavorite
 
 export type TFavoriteMapperFunction<T extends IFavoriteMetadata> = (entity: T) => IFavoritesMetaCardConfig;
 
-interface IFavoriteMappers {
-  [key: string]: {
-    mapper: TFavoriteMapperFunction<IFavoriteMetadata>,
-    prettyName: string,
-    entityToMetadata: TEntityToMetadata<any, any>,
-    favoriteInfo: IFavoriteTypeInfo
-  };
-}
-
 export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => IRequestAction;
 
 export type TEntityToMetadata<T, Q extends IFavoriteMetadata> = (entity: T) => Q;
 export interface IFavoriteActionGenerators {
   [key: string]: TFavoriteActionGenerator<IFavoriteMetadata>;
 }
+
 /**
  * Stores the config used to hydrator and render favorites.
  */

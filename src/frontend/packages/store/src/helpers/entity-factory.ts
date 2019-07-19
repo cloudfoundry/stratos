@@ -1,6 +1,6 @@
 import { EntitySchema } from './entity-schema';
 
-// TODO: RC where's user favourites?
+export const userFavouritesSchemaKey = 'userFavorites';
 export const endpointSchemaKey = 'endpoint';
 export const userProfileSchemaKey = 'userProfile';
 
@@ -10,6 +10,8 @@ export const entityCache: {
 
 // Note - The cache entry is added as a secondary step. This helps keep the child entity definition's clear and easier to spot circular
 // dependencies which would otherwise be hidden (if we assigned directly to entityCache and references via entityCache in other entities)
+const UserFavouritesSchema = new EntitySchema(userFavouritesSchemaKey, null, {}, { idAttribute: 'id' });
+entityCache[userFavouritesSchemaKey] = UserFavouritesSchema;
 
 const EndpointSchema = new EntitySchema(endpointSchemaKey, null, {}, { idAttribute: 'guid' });
 entityCache[endpointSchemaKey] = EndpointSchema;
