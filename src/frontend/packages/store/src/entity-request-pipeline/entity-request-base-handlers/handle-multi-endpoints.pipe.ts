@@ -1,6 +1,5 @@
-import { JetstreamResponse } from '../entity-request-pipeline.types';
+import { JetstreamResponse, SuccessfulApiRequestDataMapper } from '../entity-request-pipeline.types';
 import { isJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
-import { SuccessfulApiRequestDataMapper } from '../entity-request-pipeline';
 
 export class JetstreamError {
   constructor(

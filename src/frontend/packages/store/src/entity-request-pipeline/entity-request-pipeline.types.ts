@@ -1,15 +1,15 @@
 import { Store, Action } from '@ngrx/store';
-import { AppState } from '../app-state';
+import { AppState, InternalAppState } from '../app-state';
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
 import { EntityRequestAction } from '../types/request.types';
 import { Observable } from 'rxjs';
 import { HttpRequest } from '@angular/common/http';
-import { PipelineConfig } from './entity-request-pipeline';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { RequestOptions } from '@angular/http';
 import { PipelineHttpClient } from './pipline-http-client.service';
+import { PaginatedAction } from '../types/pagination.types';
 export type ActionDispatcher = (action: Action) => void;
 export interface JetstreamResponse<T = any> {
   [endpointGuid: string]: T | JetStreamErrorResponse;
@@ -19,7 +19,7 @@ export type StartEntityRequestHandler = (
   actionDispatcher: ActionDispatcher,
   catalogueEntity: StratosBaseCatalogueEntity,
   requestType: ApiRequestTypes,
-  action: EntityRequestAction
+  action: EntityRequestAction | PaginatedAction
 ) => void;
 
 export type SucceedOrFailEntityRequestHandler = (
@@ -70,8 +70,27 @@ export interface PipelineResult {
   response?: NormalizedResponse;
 }
 
-export type EntityRequestPipeline = (
+export type EntityRequestPipeline<> = (
   store: Store<AppState>,
   httpClient: PipelineHttpClient,
-  config: PipelineConfig
+  config: BasePipelineConfig
 ) => Observable<PipelineResult>;
+
+
+export type SuccessfulApiRequestDataMapper<D = any> = (
+  normalizedEntities: D,
+  endpointGuid: string
+) => D;
+
+export type PreApiRequest = (
+  request: HttpRequest<any>,
+  action: EntityRequestAction,
+  catalogueEntity: StratosBaseCatalogueEntity
+) => HttpRequest<any> | Observable<HttpRequest<any>>;
+
+export interface BasePipelineConfig<T extends AppState = InternalAppState> {
+  requestType: ApiRequestTypes;
+  catalogueEntity: StratosBaseCatalogueEntity;
+  action: EntityRequestAction;
+  appState: T;
+}

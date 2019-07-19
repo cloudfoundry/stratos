@@ -21,16 +21,6 @@ import { HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 
-export type SuccessfulApiRequestDataMapper<D = any> = (
-  normalizedEntities: D,
-  endpointGuid: string
-) => D;
-
-export type PreApiRequest = (
-  request: HttpRequest<any>,
-  action: EntityRequestAction,
-  catalogueEntity: StratosCatalogueEntity
-) => HttpRequest<any> | Observable<HttpRequest<any>>;
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
   store: Store<AppState>;
@@ -41,52 +31,13 @@ export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
 
 export interface PipelineConfig<T extends AppState = InternalAppState> {
   requestType: ApiRequestTypes;
-  catalogueEntity: StratosCatalogueEntity;
+  catalogueEntity: StratosBaseCatalogueEntity;
   action: EntityRequestAction;
   appState: T;
   postSuccessDataMapper?: SuccessfulApiRequestDataMapper;
   preRequest?: PreApiRequest;
 }
 
-export const baseRequestPipelineFactory: EntityRequestPipeline = (
-  store: Store<AppState>,
-  httpClient: PipelineHttpClient,
-  { action, requestType, catalogueEntity, postSuccessDataMapper, preRequest }: PipelineConfig
-) => {
-  const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
-  const baseRequest = buildRequestEntityPipe(requestType, action.options)
-  const request = preRequest ? preRequest(baseRequest, action, catalogueEntity) : baseRequest;
-  const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
-  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url, postSuccessDataMapper);
-  const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
-  return makeRequestEntityPipe(
-    httpClient,
-    request,
-    action.endpointType,
-    action.endpointGuid
-  ).pipe(
-    map(handleMultiEndpointsPipe),
-    map(multiEndpointResponses => {
-      endpointErrorHandler(
-        action,
-        catalogueEntity,
-        requestType,
-        multiEndpointResponses.errors
-      );
-      if (!multiEndpointResponses.successes || !multiEndpointResponses.successes.length) {
-        return {
-          success: false,
-          errorMessage: 'Request Failed'
-        };
-      } else {
-        return {
-          success: true,
-          response: multiEndpointResponseMergePipe(multiEndpointResponses.successes.map(normalizeEntityPipe))
-        };
-      }
-    })
-  );
-};
 
 function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
   const definition = catalogueEntity.definition as IStratosEntityDefinition;

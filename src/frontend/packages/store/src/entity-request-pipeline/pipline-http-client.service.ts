@@ -23,7 +23,7 @@ export class PipelineHttpClient {
       return this.store.select(registeredEndpointsOfTypesSelector(endpointType)).pipe(
         first(),
         mergeMap(endpoints => {
-          const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, Object.keys(endpoints.map));
+          const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, Object.keys(endpoints));
           return this.httpClient.request<R>(hr.clone({ headers, reportProgress: false }));
         })
       );

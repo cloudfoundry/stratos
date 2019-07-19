@@ -6,7 +6,7 @@ import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/reque
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { JetstreamError } from './handle-multi-endpoints.pipe';
 
-describe('endpoint-error-handler', () => {
+fdescribe('endpoint-error-handler', () => {
   it('correct actions are fried', (done) => {
     const entity = getTestCatalogueEntity();
     const endpointGuid = '123GUID';

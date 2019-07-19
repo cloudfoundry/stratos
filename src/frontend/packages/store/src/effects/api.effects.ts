@@ -5,7 +5,9 @@ import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
 import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
-
+import { isEntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relation-tree.helpers';
+import { listEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
+import { EntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -13,31 +15,26 @@ import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catal
 import { environment } from '../../../core/src/environments/environment.prod';
 import { getJetStreamError } from '../../../core/src/jetstream.helpers';
 import { SendEventAction } from '../actions/internal-events.actions';
+import { apiRequestPipelineFactory } from '../entity-request-pipeline/entity-pagination-request-pipeline';
+import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
 import { endpointSchemaKey } from '../helpers/entity-factory';
-import { isEntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relation-tree.helpers';
-import { listEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
-import { EntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
-import {
-  getFailApiRequestActions,
-  getRequestTypeFromMethod,
-  startApiRequest,
-} from '../reducers/api-request-reducer/request-helpers';
+import { getFailApiRequestActions, getRequestTypeFromMethod, startApiRequest } from '../reducers/api-request-reducer/request-helpers';
 import { qParamKeyFromString, qParamToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { APISuccessOrFailedAction, ICFAction, EntityRequestAction, RequestEntityLocation } from '../types/request.types';
+import { APISuccessOrFailedAction, EntityRequestAction, ICFAction, RequestEntityLocation } from '../types/request.types';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { CFAppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
-import { baseRequestPipelineFactory, apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
-import { HttpClient } from '@angular/common/http';
-import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
+import { baseRequestPipelineFactory } from '../entity-request-pipeline/base-single-entity-request.pipeline';
+import { basePaginatedRequestPipelineFactory } from '../entity-request-pipeline/base-paginated-entity-request.pipeline';
+
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 export const endpointHeader = 'x-cap-cnsi-list';
@@ -80,7 +77,12 @@ export class APIEffect {
           appState: state
         });
       }
-      return this.doApiRequest(action, state);
+      return apiRequestPipelineFactory(basePaginatedRequestPipelineFactory, {
+        store: this.store,
+        httpClient: this.httpClient,
+        action,
+        appState: state
+      });
     }),
   );
 

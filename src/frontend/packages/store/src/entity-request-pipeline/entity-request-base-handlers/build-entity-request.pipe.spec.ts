@@ -3,11 +3,10 @@ import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Headers, URLSearchParams } from '@angular/http';
 
-describe('build-entity-request-pipe', () => {
+fdescribe('build-entity-request-pipe', () => {
   it(' use HttpRequest', () => {
     const testUrl = 'testUrl';
-    const request = buildRequestEntityPipe(
-      { requestType: { requestType: 'fetch', requestOptions: new HttpRequest<any>('GET', testUrl) } });
+    const request = buildRequestEntityPipe('fetch', new HttpRequest<any>('GET', testUrl));
     const urlSplit = request.url.split('/');
     expect(urlSplit[urlSplit.length - 1]).toBe(testUrl);
     expect(request instanceof HttpRequest).toBe(true);
@@ -38,8 +37,7 @@ describe('build-entity-request-pipe', () => {
       params,
       body
     } as RequestOptions;
-    const request = buildRequestEntityPipe(
-      { requestType: { requestType: 'fetch', requestOptions: options } });
+    const request = buildRequestEntityPipe('fetch', options);
     const urlSplit = request.url.split('/');
     expect(urlSplit[urlSplit.length - 1]).toBe(testUrl);
     expect(request.method).toBe('GET');

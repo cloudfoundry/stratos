@@ -2,7 +2,7 @@ import { handleMultiEndpointsPipeFactory, JetstreamError } from './handle-multi-
 import { JetstreamResponse } from '../entity-request-pipeline.types';
 import { JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 
-describe('handle-multi-endpoint-pipe', () => {
+fdescribe('handle-multi-endpoint-pipe', () => {
   it(' should handle error and success', () => {
     const url = 'url123';
     const endpoint1Guid = 'endpoint1';

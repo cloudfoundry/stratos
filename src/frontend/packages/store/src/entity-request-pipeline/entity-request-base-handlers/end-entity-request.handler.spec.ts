@@ -1,7 +1,7 @@
 import { endEntityHandler } from './end-entity-request.handler';
 import { EntityRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
 
-describe('end-entity-request', () => {
+fdescribe('end-entity-request', () => {
   it(' should dispatch end action', (done) => {
     const testAction = { type: 'test' } as EntityRequestAction;
     const requestType = 'fetch';
