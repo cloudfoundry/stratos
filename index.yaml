@@ -267,7 +267,7 @@ entries:
     - https://github.com/SUSE/stratos-metrics
     urls:
     - https://github.com/cloudfoundry-incubator/stratos/releases/download/1.1.0-rc.2/metrics-helm-chart-1.1.0-rc.2-054dddd.tgz
-    version: 1.1.0
+    version: 1.1.0-rc.2
   - apiVersion: v1
     appVersion: "1"
     created: 2018-11-01T20:17:41.728556672Z
