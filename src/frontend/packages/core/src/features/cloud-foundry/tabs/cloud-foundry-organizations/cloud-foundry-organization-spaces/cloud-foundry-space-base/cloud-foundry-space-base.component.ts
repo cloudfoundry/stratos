@@ -138,8 +138,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
         this.tabLinks.push({
           link: 'space-quota',
           label: 'Quota',
-          matIcon: 'data_usage',
-          hidden: of(!space.entity.entity.space_quota_definition)
+          icon: 'data_usage',
+          hidden$: of(!space.entity.entity.space_quota_definition)
         });
         this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
       }),
