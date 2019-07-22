@@ -1,11 +1,6 @@
 import { RequestOptions } from '@angular/http';
 
-import {
-  cfEntityFactory,
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../cf-entity-factory';
+import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
@@ -15,7 +10,7 @@ import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, IRequestAction } from '../../../store/src/types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/src/types/user.types';
-import { getActions } from '../../../store/src/actions/action.helper';
+import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ALL = '[Users] Get all';
@@ -67,24 +62,8 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     return !!action.isGetAllUsersAsAdmin;
   }
 }
-// TODO: Can we get rid of this?
-export class GetCFUser extends CFStartAction implements IRequestAction {
-  constructor(
-    public guid: string,
-    public endpointGuid: string,
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `users/${guid}/summary`;
-    this.options.method = 'get';
-  }
-  actions = [GET_CF_USER, GET_CF_USER_SUCCESS, GET_CF_USER_FAILED];
-  entity = cfEntityFactory(cfUserEntityType);
-  entityType = cfUserEntityType;
-  options: RequestOptions;
-}
-// TODO: Where do these action sit within the entity catalogue?
-// They are user role actions that have the entity type or either space of organization.
+// TODO: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
+// a flag somewhere to handle that - https://jira.capbristol.com/browse/STRAT-119
 export class ChangeUserRole extends CFStartAction implements IRequestAction {
   public endpointType = 'cf';
   constructor(

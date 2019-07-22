@@ -1,14 +1,15 @@
 import { Store } from '@ngrx/store';
 
+import { GetAllOrganizationSpaces, GetAllOrganizationSpacesWithOrgs } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import {
   cfEntityFactory,
   cfUserEntityType,
-  spaceEntityType,
   organizationEntityType,
+  spaceEntityType,
   spaceWithOrgEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllOrganizationSpaces } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
+import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { ISpace } from '../../../../../core/cf-api.types';
@@ -17,7 +18,6 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { CfRolesService } from '../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
   constructor(
@@ -28,14 +28,16 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
     userPerms: CurrentUserPermissionsService,
     listConfig?: IListConfig<APIResource>) {
     const paginationKey = cfUserEntityType + '-' + orgGuid;
-    const action
-      = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)]);
-    action.entityType = spaceEntityType;
-    action.entity = cfEntityFactory(spaceWithOrgEntityType);
+    const action = new GetAllOrganizationSpacesWithOrgs(
+      paginationKey,
+      orgGuid,
+      cfGuid,
+      [createEntityRelationKey(spaceEntityType, organizationEntityType)]
+    );
     super({
       store,
       action,
-      schema: cfEntityFactory(spaceWithOrgEntityType),
+      schema: action.entity,
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

@@ -27,7 +27,7 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: cfEntityFactory(spaceWithOrgEntityType),
+      schema: cfEntityFactory(spaceEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

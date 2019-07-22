@@ -7,8 +7,13 @@ registerCFEntities();
 
 @NgModule({
   imports: [
-    // TODO split out anything lazy loaded into seperate module
-    CloudFoundryComponentsModule
+    // TODO: NJ split out anything lazy loaded into seperate module
+    CloudFoundryComponentsModule,
+    // TODO: RC causes no cf store entities
+    // EffectsModule.forRoot([
+    //   PermissionsEffects,
+    //   PermissionEffects
+    // ])
   ],
 })
 export class CloudFoundryPackageModule { }

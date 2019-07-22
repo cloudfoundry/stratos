@@ -151,7 +151,7 @@ export class ApplicationService {
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      new CFEntityConfig(appStatsEntityType)
+      dummyAction
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {

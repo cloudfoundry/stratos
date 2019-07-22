@@ -31,7 +31,6 @@ export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResour
       createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
       createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
     ], true, false);
-    action.entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
     super({
       store,
       action,

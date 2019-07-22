@@ -1,8 +1,8 @@
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
-import { organizationEntityType, spaceEntityType } from '../cf-entity-factory';
 import { APIResource } from '../../../store/src/types/api.types';
+import { organizationEntityType, spaceEntityType } from '../cf-entity-factory';
 
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS = '[Current User] Get audited org Relations';
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS_SUCCESS = '[Current User] Get audited org Relations success';
@@ -72,7 +72,10 @@ export interface IUserRelationTypes {
 export class GetUserCfRelations implements Action {
   constructor(public cfGuid: string, public type: string) { }
 }
-// TODO what do we do with these actions?
+
+/**
+ * Used in conjunction with `permissions.effects.ts` to fetch roles of a user connected to a cf that power the permissions model
+ */
 export class GetUserRelations implements Action {
   public type = GET_CURRENT_USER_RELATION;
   public actions: string[];

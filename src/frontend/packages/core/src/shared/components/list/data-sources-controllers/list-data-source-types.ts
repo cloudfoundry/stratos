@@ -7,6 +7,7 @@ import { MetricsAction } from '../../../../../../store/src/actions/metrics.actio
 import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 import { EntityCatalogueEntityConfig } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 export interface IEntitySelectItem {
   page: number;
@@ -76,9 +77,8 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
     paginationState: PaginationEntityState
   ) => T[])[];
   action: PaginatedAction | PaginatedAction[];
-  endpointType: string;
-  entityType: string;
   entityKey: string;
+  sourceScheme: EntitySchema;
   paginationKey: string;
 
   page$: Observable<T[]>;

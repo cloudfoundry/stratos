@@ -9,7 +9,17 @@ import { LoggerService } from '../../../core/src/core/logger.service';
 import {
   createCfFeatureFlagFetchAction,
 } from '../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
-import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
+import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../store/src/actions/endpoint.actions';
+import { CFAppState } from '../../../store/src/app-state';
+import {
+  BaseHttpClientFetcher,
+  flattenPagination,
+  IPaginationFlattener,
+} from '../../../store/src/helpers/paginated-request-helpers';
+import { createPaginationCompleteWatcher } from '../../../store/src/helpers/store-helpers';
+import { endpointsRegisteredCFEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
+import { CFResponse } from '../../../store/src/types/api.types';
+import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../store/src/types/endpoint.types';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
   GET_CURRENT_USER_CF_RELATIONS_FAILED,
@@ -23,14 +33,8 @@ import {
   GetUserCfRelations,
   GetUserRelations,
   UserRelationTypes,
-} from '../../../cloud-foundry/src/actions/permissions.actions';
-import { CFAppState } from '../app-state';
-import { BaseHttpClientFetcher, flattenPagination, IPaginationFlattener } from '../helpers/paginated-request-helpers';
-import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
-import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
-import { CFResponse } from '../types/api.types';
-import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-// TODO: move these effects as they're cf effects
+} from '../actions/permissions.actions';
+
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 
   constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {

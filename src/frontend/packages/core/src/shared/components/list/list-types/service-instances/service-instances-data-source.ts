@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { cfEntityFactory, serviceInstancesEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory, serviceInstancesEntityType, serviceInstancesWithSpaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstances } from '../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
@@ -20,7 +20,7 @@ export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: cfEntityFactory(serviceInstancesEntityType),
+      schema: cfEntityFactory(serviceInstancesWithSpaceEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
