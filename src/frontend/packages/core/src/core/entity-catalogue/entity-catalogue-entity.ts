@@ -60,19 +60,32 @@ export class StratosBaseCatalogueEntity<
     this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
 
+  private populateEntitySchemaKey(entitySchemas: EntityCatalogueSchemas): EntityCatalogueSchemas {
+    return Object.keys(entitySchemas).reduce((newSchema, schemaKey) => {
+      if (schemaKey !== 'default') {
+        // New schema must be instance of `schema.Entity` (and not a spread of one) else normalize will ignore
+        newSchema[schemaKey] = entitySchemas[schemaKey].clone();
+        newSchema[schemaKey].schemaKey = schemaKey;
+      }
+      return newSchema;
+    }, {
+        default: entitySchemas.default
+      });
+  }
+
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
     : DefinitionTypes {
     // For cases where `entity.schema` is a EntityCatalogueSchemas just pass original object through (with it's default)
-    const schema = entity.schema instanceof EntitySchema ? {
+    const entitySchemas = entity.schema instanceof EntitySchema ? {
       default: entity.schema
-    } : entity.schema;
+    } : this.populateEntitySchemaKey(entity.schema);
 
     return {
       ...entity,
-      type: entity.type || schema.default.entityType,
+      type: entity.type || entitySchemas.default.entityType,
       label: entity.label || 'Unknown',
       labelPlural: entity.labelPlural || entity.label || 'Unknown',
-      schema
+      schema: entitySchemas
     };
   }
   /**
