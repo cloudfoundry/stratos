@@ -77,10 +77,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         this.cfOrgSpace = new CfOrgSpaceLabelService(
           this.store,
           this.cfGuid,
-          // TODO: schemaKey - `space` is null due to the incorrect schema used when fetching the service instance
-          // (see service instance wall data source)
-          // row.entity.space.entity.organization_guid,
-          'junk',
+          row.entity.space.entity.organization_guid,
           row.entity.space_guid);
       }
     }

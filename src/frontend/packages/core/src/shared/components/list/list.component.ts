@@ -292,9 +292,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
-      const catalogueEntity = entityCatalogue.getEntity(this.dataSource.endpointType, this.dataSource.entityType);
-      const schema = catalogueEntity.getSchema();
-      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
+      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(this.dataSource.sourceScheme, this.dataSource);
     }
     this.multiFilterManagers = this.getMultiFilterManagers();
 

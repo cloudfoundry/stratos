@@ -32,6 +32,7 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
       = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)]);
     action.entityType = spaceEntityType;
     action.entity = cfEntityFactory(spaceWithOrgEntityType);
+    action.schemaKey = spaceWithOrgEntityType;
     super({
       store,
       action,
