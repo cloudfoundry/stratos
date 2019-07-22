@@ -29,10 +29,14 @@ export class PipelineHttpClient {
       );
     }
   }
-  public pipelineRequest<R>(hr: HttpRequest<any>, endpointType: string, endpointGuids: string | string[] = null): Observable<HttpEvent<R>> {
+  public pipelineRequest<R>(
+    hr: HttpRequest<any>,
+    endpointType: string,
+    endpointGuids: string | string[] = null
+  ): Observable<R> {
     return this.getRequest<R>(hr, endpointType, endpointGuids).pipe(
       filter(event => event instanceof HttpResponse),
-      map((response: HttpResponse<any>) => response.body)
+      map((response: HttpResponse<R>) => response.body)
     );
   }
 

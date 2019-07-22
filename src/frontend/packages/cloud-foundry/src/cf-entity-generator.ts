@@ -26,7 +26,7 @@ import {
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import { APIResource, NormalizedResponse } from '../../store/src/types/api.types';
+import { APIResource, CFResponse } from '../../store/src/types/api.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
@@ -98,6 +98,7 @@ import { userActionBuilders } from './entity-action-builders/user.action-builder
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 import { addRelationParams } from './cf-entity-relations.getters';
+import { HttpParams } from '@angular/common/http';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -125,6 +126,11 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
         }
       }
       return data;
+    },
+    paginationPageIteratorConfig: {
+      getEntitiesFromResponse: (response: CFResponse) => response.resources,
+      getTotalPages: (response: CFResponse) => response.total_pages,
+      getPaginationParameters: (page: number, response: CFResponse) => new HttpParams({ fromObject: { page: page + '' } })
     }
   } as IStratosEndpointDefinition;
   return [

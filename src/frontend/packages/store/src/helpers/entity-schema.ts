@@ -3,6 +3,22 @@ import { Schema, schema } from 'normalizr';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
+function wrapSchema(definition: Schema) {
+  return {
+    metadata: {},
+    entity: definition
+  };
+}
+
+export class StratosEntitySchema extends schema.Entity {
+  constructor(
+    public definition?: Schema
+  ) {
+    super('stratosWrappedEntity', wrapSchema(definition));
+  }
+}
+
+
 /**
  * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
  *

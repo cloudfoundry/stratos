@@ -1,15 +1,9 @@
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
-import {
-  StratosBaseCatalogueEntity,
-  StratosCatalogueEndpointEntity,
-  StratosCatalogueEntity,
-} from './entity-catalogue-entity';
+import { StratosBaseCatalogueEntity, StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
-import { ActionReducer } from '@ngrx/store';
-import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
-import { BaseRequestDataState } from '../../../../store/src/types/entity.types';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
@@ -99,6 +93,13 @@ class EntityCatalogue {
     }
   }
 
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    entityConfig: EntityCatalogueEntityConfig
+  ): StratosBaseCatalogueEntity;
+  public getEntity(
+    endpointType: string,
+    entityType: 'endpoint',
+  ): StratosCatalogueEndpointEntity;
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     entityConfig: EntityCatalogueEntityConfig
   ): StratosBaseCatalogueEntity;

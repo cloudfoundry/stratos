@@ -15,7 +15,6 @@ import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catal
 import { environment } from '../../../core/src/environments/environment.prod';
 import { getJetStreamError } from '../../../core/src/jetstream.helpers';
 import { SendEventAction } from '../actions/internal-events.actions';
-import { apiRequestPipelineFactory } from '../entity-request-pipeline/entity-pagination-request-pipeline';
 import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
@@ -33,7 +32,8 @@ import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../typ
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 import { baseRequestPipelineFactory } from '../entity-request-pipeline/base-single-entity-request.pipeline';
-import { basePaginatedRequestPipelineFactory } from '../entity-request-pipeline/base-paginated-entity-request.pipeline';
+import { apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
+import { basePaginatedRequestPipeline } from '../entity-request-pipeline/entity-pagination-request-pipeline';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -77,7 +77,7 @@ export class APIEffect {
           appState: state
         });
       }
-      return apiRequestPipelineFactory(basePaginatedRequestPipelineFactory, {
+      return apiRequestPipelineFactory(basePaginatedRequestPipeline, {
         store: this.store,
         httpClient: this.httpClient,
         action,
@@ -159,7 +159,7 @@ export class APIEffect {
         entityCatalogue.getEntityKey(paginatedAction.__forcedPageEntityConfig__) :
         null;
       request = flattenPagination(
-        this.store,
+        pagAction => this.store.dispatch(pagAction),
         request,
         new CfAPIFlattener(this.http, options as RequestOptions),
         paginatedAction.flattenPaginationMax,

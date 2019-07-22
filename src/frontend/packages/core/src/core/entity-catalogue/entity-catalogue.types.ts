@@ -4,6 +4,7 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { SuccessfulApiRequestDataMapper, PreApiRequest } from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { PaginationPageIteratorConfig } from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -41,6 +42,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly listDetailsComponent?: any;
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
+  readonly paginationPageIteratorConfig?: PaginationPageIteratorConfig;
 }
 
 

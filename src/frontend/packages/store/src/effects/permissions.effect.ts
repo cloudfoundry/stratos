@@ -25,16 +25,16 @@ import {
   UserRelationTypes,
 } from '../../../cloud-foundry/src/actions/permissions.actions';
 import { CFAppState } from '../app-state';
-import { BaseHttpClientFetcher, flattenPagination, IPaginationFlattener } from '../helpers/paginated-request-helpers';
+import { BaseHttpClientFetcher, flattenPagination, PaginationFlattener } from '../helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { CFResponse } from '../types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 // TODO: move these effects as they're cf effects
-class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
+class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
 
   constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {
-    super(httpClient, requestOptions, url, 'page');
+    super(httpClient, url, requestOptions, 'page');
   }
   public getTotalPages = (res: CFResponse) => res.total_pages;
 
@@ -80,7 +80,11 @@ function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, htt
     url,
     params
   );
-  return flattenPagination(store, get$, new PermissionFlattener(httpClient, url, params)).pipe(
+  return flattenPagination(
+    (flatAction: Action) => this.store.dispatch(flatAction),
+    get$,
+    new PermissionFlattener(httpClient, url, params)
+  ).pipe(
     map(data => {
       store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
       return true;

@@ -1,26 +1,16 @@
 import { Action, Store } from '@ngrx/store';
 import { map, tap } from 'rxjs/operators';
-import { StratosBaseCatalogueEntity, StratosCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { EntityRequestAction } from '../types/request.types';
-import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
-import { endpointErrorsHandlerFactory } from './entity-request-base-handlers/endpoint-errors.handler';
 import { failedEntityHandler } from './entity-request-base-handlers/fail-entity-request.handler';
-import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
-import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
-import { multiEndpointResponseMergePipe } from './entity-request-base-handlers/merge-multi-endpoint-data.pipe';
-import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
 import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
-import { EntityRequestPipeline } from './entity-request-pipeline.types';
+import { EntityRequestPipeline, PreApiRequest, SuccessfulApiRequestDataMapper } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { HttpRequest } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
   store: Store<AppState>;

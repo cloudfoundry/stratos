@@ -1,15 +1,17 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 import { Http, Request, RequestOptions, Response } from '@angular/http';
-import { Store } from '@ngrx/store';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
-
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { CFAppState } from '../app-state';
+import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
 import { CFResponse } from '../types/api.types';
 
+export interface PaginationFlattenerConfig<T = any, C = any> extends Pick<
+  PaginationFlattener<T, C>,
+  'getTotalPages' | 'getTotalResults' | 'mergePages' | 'clearResults'
+  > { }
 
-export interface IPaginationFlattener<T, C> {
+export interface PaginationFlattener<T = any, C = any> {
   getTotalPages: (res: C) => number;
   getTotalResults: (res: C) => number;
   mergePages: (res: T[]) => T;
@@ -21,7 +23,7 @@ export interface IPaginationFlattener<T, C> {
 export class BaseHttpClientFetcher<T> {
   constructor(
     private httpClient: HttpClient,
-    public url,
+    public url: string,
     public requestOptions: { [key: string]: any },
     private pageUrlParam: string
   ) { }
@@ -71,16 +73,18 @@ export class BaseHttpFetcher {
   }
 }
 
-export class CfAPIFlattener extends BaseHttpFetcher implements IPaginationFlattener<CFResponse, { [cfGuid: string]: CFResponse }> {
+export class CfAPIFlattener extends BaseHttpFetcher implements PaginationFlattener<CFResponse, { [cfGuid: string]: CFResponse }> {
 
   constructor(http: Http, requestOptions: RequestOptions) {
     super(http, requestOptions, 'page');
   }
+
   public getTotalPages = res =>
     Object.keys(res).reduce((max, endpointGuid) => {
       const endpoint = res[endpointGuid];
       return max < endpoint.total_pages ? endpoint.total_pages : max;
     }, 0)
+
   public mergePages = (responses: CFResponse[]) => {
     // Merge all responses into the first page
     const newResData = responses[0];
@@ -116,9 +120,9 @@ export class CfAPIFlattener extends BaseHttpFetcher implements IPaginationFlatte
 
 
 export function flattenPagination<T, C>(
-  store: Store<CFAppState>,
+  actionDispatcher: ActionDispatcher,
   firstRequest: Observable<C>,
-  flattener: IPaginationFlattener<T, C>,
+  flattener: PaginationFlattener<T, C>,
   maxCount?: number,
   entityType?: string,
   endpointType?: string,
@@ -130,7 +134,7 @@ export function flattenPagination<T, C>(
     mergeMap(firstResData => {
       const allResults = flattener.getTotalResults(firstResData);
       if (maxCount) {
-        store.dispatch(new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey));
+        actionDispatcher(new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey));
         if (allResults > maxCount) {
           // If we have too many results only return basic first page information
           return forkJoin([flattener.clearResults(firstResData, allResults)]);

@@ -88,9 +88,11 @@ export type PreApiRequest = (
   catalogueEntity: StratosBaseCatalogueEntity
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
 
-export interface BasePipelineConfig<T extends AppState = InternalAppState> {
+export interface BasePipelineConfig<T extends AppState = InternalAppState, Y extends Action = Action> {
   requestType: ApiRequestTypes;
   catalogueEntity: StratosBaseCatalogueEntity;
-  action: EntityRequestAction;
+  action: Y;
   appState: T;
+  preRequest: PreApiRequest;
+  postSuccessDataMapper: SuccessfulApiRequestDataMapper;
 }
