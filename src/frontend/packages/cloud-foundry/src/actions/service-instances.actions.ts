@@ -49,6 +49,7 @@ export class GetServiceInstances
   actions = getActions('Service Instances', 'Get all');
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   entityType = serviceInstancesEntityType;
+  schemaKey = serviceInstancesWithSpaceEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -75,6 +76,7 @@ export class GetServiceInstance
   }
   actions = getActions('Service Instances', 'Get particular instance');
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
+  schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
   options: RequestOptions;
 }

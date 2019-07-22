@@ -16,10 +16,12 @@ export function paginationStart(state, action): PaginationEntityState {
         baseEntityConfig: {
           entityType: action.apiAction.entityType,
           endpointType: action.apiAction.endpointType,
+          schemaKey: action.apiAction.schemaKey
         },
         entityConfig: entityConfig ? {
           entityType: entityConfig.entityType,
           endpointType: entityConfig.endpointType,
+          schemaKey: entityConfig.schemaKey
         } : null,
         maxed: false
       }

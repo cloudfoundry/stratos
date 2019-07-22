@@ -9,8 +9,8 @@ import {
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
-import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
+import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType, spaceWithOrgEntityType } from '../cf-entity-factory';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
@@ -56,6 +56,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
 }
 
 export class GetAllOrganizationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
+  public schemaKey: string;
   constructor(
     public paginationKey: string,
     public orgGuid: string,
@@ -81,6 +82,12 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
   };
   parentGuid: string;
   parentEntityConfig = new CFEntityConfig(organizationEntityType);
+}
+
+export class GetAllOrganizationSpacesWithOrgs extends GetAllOrganizationSpaces {
+  entity = cfEntityFactory(spaceWithOrgEntityType);
+  entityType = spaceEntityType;
+  schemaKey = spaceWithOrgEntityType;
 }
 
 export class GetAllOrganizations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
