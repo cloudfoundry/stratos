@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-
-import { Observable } from 'rxjs';
-
-import { UserProfileService } from '../user-profile.service';
-import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
-import { map, first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { SetPollingEnabledAction, SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
-import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import { UserProfileService } from '../user-profile.service';
 
 @Component({
   selector: 'app-profile-info',
@@ -21,6 +20,10 @@ export class ProfileInfoComponent implements OnInit {
 
   public timeoutSession$ = this.store.select(selectDashboardState).pipe(
     map(dashboardState => dashboardState.timeoutSession ? 'true' : 'false')
+  );
+
+  public pollingEnabled$ = this.store.select(selectDashboardState).pipe(
+    map(dashboardState => dashboardState.pollingEnabled ? 'true' : 'false'),
   );
 
   userProfile$: Observable<UserProfileInfo>;
@@ -44,6 +47,10 @@ export class ProfileInfoComponent implements OnInit {
 
   private setSessionTimeout(timeoutSession: boolean) {
     this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
+  }
+
+  public setPollingEnabled(pollingEnabled: boolean) {
+    this.store.dispatch(new SetPollingEnabledAction(pollingEnabled));
   }
 
   constructor(

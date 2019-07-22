@@ -198,7 +198,7 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
-	
+
 	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusNotFound,
@@ -348,7 +348,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
 	if len(username) == 0 || len(password) == 0 || len(guid) == 0 {
 		return guid, username, errors.New("Needs username, password and guid")
 	}
-	
+
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
@@ -665,7 +665,7 @@ func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 }
 
 func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
-	endpoint := cnsiRecord.TokenEndpoint
+	endpoint := cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
@@ -727,7 +727,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 		if !user.Admin {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Can not disconnect System Shared endpoint - user is not an administrator")
 		}
-		userGUID = tokens.SystemSharedUserGuid	
+		userGUID = tokens.SystemSharedUserGuid
 	}
 
 	// Clear the token

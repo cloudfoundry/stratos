@@ -1,5 +1,5 @@
+import { IOrganization, IQuotaDefinition, ISpace } from '../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../types/api.types';
-import { IOrganization, ISpace, IQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 
 export const entityRelationMissingSpacesUrl = 'spaces_url';
 export const entityRelationMissingQuotaGuid = 'quota_guid';
@@ -57,6 +57,8 @@ export class EntityRelationSpecHelper {
         app_instance_limit: 2,
         instance_memory_limit: 3,
         name,
+        total_routes: -1,
+        total_services: -1,
       },
       metadata: {
         guid,
