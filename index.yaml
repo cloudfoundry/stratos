@@ -258,7 +258,7 @@ entries:
   metrics:
   - apiVersion: v1
     appVersion: 1.4.1
-    created: 2019-07-22T13:42:57.322613439Z
+    created: 2019-07-22T15:06:33.094504693Z
     description: A Helm chart for Stratos Metrics
     digest: 5eb0060e1a09671f3ec822a7912df440032ae56c4d270243753092c476696f1e
     icon: https://raw.githubusercontent.com/SUSE/stratos-metrics/master/icon.svg
@@ -289,4 +289,4 @@ entries:
     urls:
     - https://github.com/SUSE/stratos-metrics/releases/download/1.0.0/console-metrics-helm-chart-v1.0.0-ddbf0c5.tgz
     version: 1.0.0
-generated: 2019-07-22T13:42:57.317194604Z
+generated: 2019-07-22T15:06:33.091231165Z
