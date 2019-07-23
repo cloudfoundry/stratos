@@ -37,12 +37,11 @@ export interface IRequestAction extends EntityCatalogueEntityConfig, RequestActi
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section
    */
-  // TODO this should be of type entityConfig
-  proxyPaginationEntityKey?: string;
+  proxyPaginationEntityConfig?: EntityCatalogueEntityConfig;
 
   /**
    * For a delete action, clear the pagination section for the given keys.
-   * if proxyPaginationEntityKey isn't set, pagination sections for the entityKey will also be deleted.
+   * if proxyPaginationEntityConfig isn't set, pagination sections for the entityKey will also be deleted.
    */
   clearPaginationEntityKeys?: string[];
   endpointGuid?: string;
