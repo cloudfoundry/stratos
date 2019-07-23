@@ -1,5 +1,5 @@
 import { MetricsConfig } from './metrics-chart.component';
-import { IMetricsData, ChartSeries } from '../../../../../store/src/types/base-metric.types';
+import { IMetricsData, ChartSeries } from '../../../../../cloud-foundry/src/store/types/base-metric.types';
 
 function dateLessThanUnix(date: Date, unix: number) {
   const unixDate = date.getTime() / 1000;

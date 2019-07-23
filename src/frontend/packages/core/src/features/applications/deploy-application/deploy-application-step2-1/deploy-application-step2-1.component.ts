@@ -14,7 +14,7 @@ import { first, map, tap } from 'rxjs/operators';
 import { SetDeployCommit } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { GitCommit } from '../../../../../../store/src/types/git.types';
+import { GitCommit } from '../../../../../../cloud-foundry/src/store/types/git.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 

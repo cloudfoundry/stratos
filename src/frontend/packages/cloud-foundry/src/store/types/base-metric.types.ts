@@ -1,5 +1,5 @@
-import { MetricQueryConfig } from '../actions/metrics.actions';
-import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
+import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
+import { MetricQueryType } from '../../../../core/src/shared/services/metrics-range-selector.types';
 
 export enum MetricResultTypes {
   MATRIX = 'matrix',

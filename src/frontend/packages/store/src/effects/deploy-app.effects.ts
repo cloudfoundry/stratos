@@ -24,7 +24,7 @@ import { LoggerService } from '../../../core/src/core/logger.service';
 import { parseHttpPipeError } from '../../../core/src/core/utils.service';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
-import { GitCommit } from '../types/git.types';
+import { GitCommit } from '../../../cloud-foundry/src/store/types/git.types';
 import {
   ICFAction,
   StartRequestAction,

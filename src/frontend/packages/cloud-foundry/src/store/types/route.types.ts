@@ -1,5 +1,5 @@
-import { IApp } from '../../../core/src/core/cf-api.types';
-import { APIResource } from './api.types';
+import { IApp } from '../../../../core/src/core/cf-api.types';
+import { APIResource } from '../../../../store/src/types/api.types';
 
 
 export class Route {

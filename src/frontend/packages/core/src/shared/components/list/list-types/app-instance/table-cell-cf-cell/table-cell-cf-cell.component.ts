@@ -5,8 +5,8 @@ import { filter, map, tap } from 'rxjs/operators';
 import { EntityService } from '../../../../../../core/entity-service';
 import { TableCellCustom } from '../../../list.types';
 import { ListAppInstance } from '../app-instance-types';
-import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
-import { IMetrics, IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../../cloud-foundry/src/store/types/metric.types';
+import { IMetrics, IMetricMatrixResult } from '../../../../../../../../cloud-foundry/src/store/types/base-metric.types';
 
 @Component({
   selector: 'app-table-cell-cf-cell-usage',

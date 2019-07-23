@@ -13,7 +13,7 @@ import {
   MetricsAPIActionSuccess,
 } from '../actions/metrics-api.actions';
 import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
-import { IMetricsResponse } from '../types/base-metric.types';
+import { IMetricsResponse } from '../../../cloud-foundry/src/store/types/base-metric.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 @Injectable()

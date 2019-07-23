@@ -13,8 +13,8 @@ import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../..
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
+import { IMetrics, IMetricVectorResult } from '../../../../../../../cloud-foundry/src/store/types/base-metric.types';
+import { IMetricApplication } from '../../../../../../../cloud-foundry/src/store/types/metric.types';
 import { IApp } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';

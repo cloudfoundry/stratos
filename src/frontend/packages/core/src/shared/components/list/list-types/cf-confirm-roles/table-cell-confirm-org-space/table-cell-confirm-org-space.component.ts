@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 
 import { AppChip } from '../../../../chips/chips.component';
 import { TableCellCustom } from '../../../list.types';
-import { CfRoleChangeWithNames } from '../../../../../../../../store/src/types/users-roles.types';
+import { CfRoleChangeWithNames } from '../../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 
 @Component({
   selector: 'app-table-cell-confirm-org-space',

@@ -35,7 +35,7 @@ import {
 } from '../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../../../store/src/types/user.types';
-import { CfRoleChange, CfUserRolesSelected } from '../../../../../../store/src/types/users-roles.types';
+import { CfRoleChange, CfUserRolesSelected } from '../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';

@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { AppStat } from '../../store/src/types/app-metadata.types';
+import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
 import {
   EnvVarStratosProject,
   ApplicationEnvVarsHelper

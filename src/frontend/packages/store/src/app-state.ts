@@ -3,10 +3,10 @@ import { RequestInfoState } from './reducers/api-request-reducer/types';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
-import { CreateNewApplicationState } from './types/create-application.types';
-import { CreateServiceInstanceState } from './types/create-service-instance.types';
+import { CreateNewApplicationState } from '../../cloud-foundry/src/store/types/create-application.types';
+import { CreateServiceInstanceState } from '../../cloud-foundry/src/store/types/create-service-instance.types';
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
-import { DeployApplicationState } from './types/deploy-application.types';
+import { DeployApplicationState } from '../../cloud-foundry/src/store/types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
 import { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
@@ -15,7 +15,7 @@ import { PaginationEntityTypeState } from './types/pagination.types';
 import { IRecentlyVisitedState } from './types/recently-visited.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
-import { UsersRolesState } from './types/users-roles.types';
+import { UsersRolesState } from '../../cloud-foundry/src/store/types/users-roles.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: any;

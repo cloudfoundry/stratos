@@ -1,7 +1,7 @@
 import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
+import { IMetrics } from '../../../../../cloud-foundry/src/store/types/base-metric.types';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricQueryType } from '../../services/metrics-range-selector.types';

@@ -12,7 +12,7 @@ import { TableCellCustom } from '../../list.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfUser } from '../../../../../../../store/src/types/user.types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
+import { UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 
 

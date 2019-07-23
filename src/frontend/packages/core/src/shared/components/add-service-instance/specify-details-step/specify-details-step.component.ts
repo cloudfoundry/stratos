@@ -46,7 +46,7 @@ import {
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../../../store/src/selectors/create-service-instance.selectors';
 import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
-import { CreateServiceInstanceState } from '../../../../../../store/src/types/create-service-instance.types';
+import { CreateServiceInstanceState } from '../../../../../../cloud-foundry/src/store/types/create-service-instance.types';
 import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
 import { pathGet, safeStringToObj } from '../../../../core/utils.service';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';

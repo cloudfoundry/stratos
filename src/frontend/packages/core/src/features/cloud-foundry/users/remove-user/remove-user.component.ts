@@ -13,7 +13,7 @@ import {
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectUsersRoles } from '../../../../../../store/src/selectors/users-roles.selector';
 import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../../../store/src/types/user.types';
-import { CfRoleChange } from '../../../../../../store/src/types/users-roles.types';
+import { CfRoleChange } from '../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { CurrentUserPermissions } from '../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { LoggerService } from '../../../../core/logger.service';

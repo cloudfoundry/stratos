@@ -3,8 +3,8 @@ import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../cloud-foundry/src/store/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../cloud-foundry/src/store/types/metric.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { MetricsConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../shared/components/metrics-chart/metrics-chart.types';

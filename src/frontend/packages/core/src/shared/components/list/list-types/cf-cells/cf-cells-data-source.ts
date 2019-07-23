@@ -7,8 +7,8 @@ import {
   MetricQueryConfig,
 } from '../../../../../../../store/src/actions/metrics.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { IMetrics, IMetricVectorResult } from '../../../../../../../cloud-foundry/src/store/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../cloud-foundry/src/store/types/metric.types';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';

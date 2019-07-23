@@ -11,7 +11,7 @@ import {
   IMetrics,
   MetricResultTypes,
   MetricsFilterSeries,
-} from '../../../../../store/src/types/base-metric.types';
+} from '../../../../../cloud-foundry/src/store/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';

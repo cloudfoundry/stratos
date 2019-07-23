@@ -1,6 +1,6 @@
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { IMetrics } from './base-metric.types';
+import { IMetrics } from '../../../cloud-foundry/src/store/types/base-metric.types';
 import { EndpointModel } from './endpoint.types';
 import { SystemInfo } from './system.types';
 import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';

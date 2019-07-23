@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as moment from 'moment';
 import { ITimeRange, StoreMetricTimeRange, MetricQueryType } from './metrics-range-selector.types';
 import { MetricsAction, MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
-import { IMetrics } from '../../../../store/src/types/base-metric.types';
+import { IMetrics } from '../../../../cloud-foundry/src/store/types/base-metric.types';
 
 @Injectable()
 export class MetricsRangeSelectorService {

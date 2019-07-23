@@ -14,7 +14,7 @@ import {
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
-import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
+import { CreateNewApplicationState, NewAppCFDetails } from '../../../cloud-foundry/src/store/types/create-application.types';
 
 
 

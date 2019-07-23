@@ -4,8 +4,8 @@ import { map } from 'rxjs/operators';
 import { cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { IMetricMatrixResult, IMetrics } from '../../../../../../../cloud-foundry/src/store/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../cloud-foundry/src/store/types/metric.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 

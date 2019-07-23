@@ -15,7 +15,7 @@ import {
   endpointsEntityRequestDataSelector,
   endpointStatusSelector,
 } from '../../../store/src/selectors/endpoint.selectors';
-import { IMetrics } from '../../../store/src/types/base-metric.types';
+import { IMetrics } from '../../../cloud-foundry/src/store/types/base-metric.types';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';

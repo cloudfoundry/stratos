@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
-import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { IMetricVectorResult } from '../../../../../../../cloud-foundry/src/store/types/base-metric.types';
+import { IMetricCell } from '../../../../../../../cloud-foundry/src/store/types/metric.types';
 import { CfCellsDataSource } from './cf-cells-data-source';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { ListViewTypes } from '../../list.component.types';

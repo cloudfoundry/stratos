@@ -5,7 +5,7 @@ import {
   SET_CF_DETAILS,
   SET_NAME,
 } from '../../actions/create-applications-page.actions';
-import { CreateNewApplicationState } from '../../../../store/src/types/create-application.types';
+import { CreateNewApplicationState } from '../types/create-application.types';
 
 
 const defaultState: CreateNewApplicationState = {

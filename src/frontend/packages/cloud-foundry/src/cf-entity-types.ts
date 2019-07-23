@@ -23,9 +23,9 @@ import {
 } from '../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState } from '../../store/src/app-state';
 import { APIResource } from '../../store/src/types/api.types';
-import { AppStats } from '../../store/src/types/app-metadata.types';
+import { AppStats } from './store/types/app-metadata.types';
 import { BaseEntityValues } from '../../store/src/types/entity.types';
-import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from '../../store/src/types/user.types';
 import { appSummaryEntityType } from './cf-entity-factory';
 

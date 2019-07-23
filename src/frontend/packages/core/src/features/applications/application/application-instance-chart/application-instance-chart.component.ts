@@ -3,8 +3,8 @@ import { MetricsLineChartConfig } from '../../../../shared/components/metrics-ch
 import { MetricsConfig } from '../../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsChartHelpers } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../shared/services/metrics-range-selector.types';
-import { IMetricMatrixResult } from '../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../store/src/types/metric.types';
+import { IMetricMatrixResult } from '../../../../../../cloud-foundry/src/store/types/base-metric.types';
+import { IMetricApplication } from '../../../../../../cloud-foundry/src/store/types/metric.types';
 import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../store/src/actions/metrics.actions';
 
 @Component({

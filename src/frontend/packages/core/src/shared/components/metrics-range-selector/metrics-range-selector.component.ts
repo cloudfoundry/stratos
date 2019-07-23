@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
+import { IMetrics } from '../../../../../cloud-foundry/src/store/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';

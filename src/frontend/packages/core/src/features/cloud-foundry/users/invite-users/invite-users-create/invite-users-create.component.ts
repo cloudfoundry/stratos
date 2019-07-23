@@ -11,7 +11,7 @@ import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-enti
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
-import { UserRoleLabels } from '../../../../../../../store/src/types/users-roles.types';
+import { UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import {
