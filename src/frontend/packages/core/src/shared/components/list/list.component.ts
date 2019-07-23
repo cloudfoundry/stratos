@@ -665,7 +665,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       const catalogueEntity = entityCatalogue.getEntity(entityConfig);
       const entityMonitor = catalogueEntity.getEntityMonitor(
         this.store,
-        dataSource.getRowUniqueId(row)
+        dataSource.getRowUniqueId(row),
+        {
+          schemaKey: entityConfig.schemaKey
+        }
       );
       return entityMonitor.entityRequest$.pipe(
         distinctUntilChanged(),

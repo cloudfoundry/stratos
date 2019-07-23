@@ -82,7 +82,7 @@ export class APIEffect {
     const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
     if (this.shouldRecursivelyDelete(requestType, apiAction)) {
       this.store.dispatch(
-        new RecursiveDelete(apiAction.guid, catalogueEntity.getSchema()),
+        new RecursiveDelete(apiAction.guid, catalogueEntity.getSchema(action.schemaKey)),
       );
     }
 
@@ -201,7 +201,7 @@ export class APIEffect {
               new RecursiveDeleteFailed(
                 apiAction.guid,
                 apiAction.endpointGuid,
-                catalogueEntity.getSchema()
+                catalogueEntity.getSchema(apiAction.schemaKey)
               ),
             );
           }
@@ -227,7 +227,7 @@ export class APIEffect {
             new RecursiveDeleteComplete(
               apiAction.guid,
               apiAction.endpointGuid,
-              catalogueEntity.getSchema(),
+              catalogueEntity.getSchema(apiAction.schemaKey),
             ),
           );
         }
@@ -267,7 +267,7 @@ export class APIEffect {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
             apiAction.endpointGuid,
-            catalogueEntity.getSchema(),
+            catalogueEntity.getSchema(apiAction.schemaKey),
           ));
         }
         return errorActions;
