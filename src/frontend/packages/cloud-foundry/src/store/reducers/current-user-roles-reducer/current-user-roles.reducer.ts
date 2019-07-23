@@ -1,14 +1,14 @@
 import { Action } from '@ngrx/store';
 
-import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
+import { SESSION_VERIFIED, VerifiedSession } from '../../../../../store/src/actions/auth.actions';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
   EndpointActionComplete,
   REGISTER_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../../actions/endpoint.actions';
-import { DELETE_ORGANIZATION_SUCCESS } from '../../../../cloud-foundry/src/actions/organization.actions';
+} from '../../../../../store/src/actions/endpoint.actions';
+import { DELETE_ORGANIZATION_SUCCESS } from '../../../actions/organization.actions';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
   GET_CURRENT_USER_CF_RELATIONS_FAILED,
@@ -19,19 +19,27 @@ import {
   GET_CURRENT_USER_RELATIONS_SUCCESS,
   GetCurrentUserRelationsComplete,
   GetUserCfRelations,
-} from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { DELETE_SPACE_SUCCESS } from '../../../../cloud-foundry/src/actions/space.actions';
-import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../../../cloud-foundry/src/actions/users.actions';
-import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
-import { APISuccessOrFailedAction } from '../../types/request.types';
+} from '../../../actions/permissions.actions';
+import { DELETE_SPACE_SUCCESS } from '../../../actions/space.actions';
+import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../../actions/users.actions';
+import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../../../../store/src/types/current-user-roles.types';
+import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
 import { currentUserBaseCFRolesReducer } from './current-user-base-cf-role.reducer';
 import {
   currentUserCfRolesRequestStateReducer,
   currentUserRolesRequestStateReducer,
 } from './current-user-request-state.reducers';
-import { roleInfoFromSessionReducer, updateNewlyConnectedEndpoint } from './current-user-role-session.reducer';
+import {
+  roleInfoFromSessionReducer,
+  updateNewlyConnectedEndpoint
+} from '../../../../../store/src/reducers/current-user-roles-reducer/current-user-role-session.reducer';
 import { updateAfterRoleChange } from './current-user-roles-changed.reducers';
-import { addEndpoint, removeEndpointRoles, removeOrgRoles, removeSpaceRoles } from './current-user-roles-clear.reducers';
+import {
+  addEndpoint,
+  removeEndpointRoles,
+  removeOrgRoles,
+  removeSpaceRoles
+} from '../../../../../store/src/reducers/current-user-roles-reducer/current-user-roles-clear.reducers';
 
 const getDefaultState = () => ({
   internal: {

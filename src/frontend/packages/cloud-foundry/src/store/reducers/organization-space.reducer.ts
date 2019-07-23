@@ -3,13 +3,13 @@ import {
   CreateSpace,
   DELETE_SPACE_SUCCESS,
   DeleteSpace,
-} from '../../../cloud-foundry/src/actions/space.actions';
-import { spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
-import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
-import { IRequestEntityTypeState } from '../app-state';
-import { APIResource, NormalizedResponse } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
+} from '../../actions/space.actions';
+import { spaceEntityType } from '../../cf-entity-factory';
+import { getCFEntityKey } from '../../cf-entity-helpers';
+import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
 type entityOrgType = APIResource<IOrganization<string>>;
 // Note - This reducer will be updated when we address general deletion of entities within inline lists (not paginated lists)

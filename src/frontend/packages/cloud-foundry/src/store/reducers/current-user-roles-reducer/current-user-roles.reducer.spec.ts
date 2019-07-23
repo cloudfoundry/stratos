@@ -1,4 +1,4 @@
-import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../../cloud-foundry/src/actions/permissions.actions';
+import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../actions/permissions.actions';
 import {
   getDefaultEndpointRoles,
   getDefaultRolesRequestState,
@@ -7,7 +7,7 @@ import {
   IOrgRoleState,
   ISpaceRoleState,
   RoleEntities,
-} from '../../types/current-user-roles.types';
+} from '../../../../../store/src/types/current-user-roles.types';
 import { createOrgRoleStateState } from './current-user-roles-org.reducer';
 import { currentUserRolesReducer } from './current-user-roles.reducer';
 

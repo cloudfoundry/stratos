@@ -1,7 +1,7 @@
-import { UserRelationTypes } from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { APIResource } from '../../types/api.types';
-import { ISpaceRoleState } from '../../types/current-user-roles.types';
-import { ISpace } from '../../../../core/src/core/cf-api.types';
+import { UserRelationTypes } from '../../../actions/permissions.actions';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { ISpaceRoleState } from '../../../../../store/src/types/current-user-roles.types';
+import { ISpace } from '../../../../../core/src/core/cf-api.types';
 
 export const defaultUserSpaceRoleState: ISpaceRoleState = {
   orgId: null,

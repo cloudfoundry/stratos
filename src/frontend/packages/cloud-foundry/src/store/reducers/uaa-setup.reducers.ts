@@ -1,6 +1,5 @@
-import { SETUP_UAA, SETUP_UAA_FAILED, SETUP_UAA_SCOPE, SETUP_UAA_SUCCESS } from './../actions/setup.actions';
-import { Action } from '@ngrx/store';
-import { UAASetupState } from '../types/uaa-setup.types';
+import { SETUP_UAA, SETUP_UAA_FAILED, SETUP_UAA_SCOPE, SETUP_UAA_SUCCESS } from '../../../../store/src/actions/setup.actions';
+import { UAASetupState } from '../../../../store/src/types/uaa-setup.types';
 
 const defaultState = {
   payload: null,

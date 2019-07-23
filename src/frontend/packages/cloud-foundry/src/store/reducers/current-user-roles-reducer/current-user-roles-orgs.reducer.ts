@@ -1,5 +1,5 @@
-import { GetCurrentUserRelationsComplete } from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { IOrgsRoleState } from '../../types/current-user-roles.types';
+import { GetCurrentUserRelationsComplete } from '../../../actions/permissions.actions';
+import { IOrgsRoleState } from '../../../../../store/src/types/current-user-roles.types';
 import { addNewRoles, removeOldRoles } from './current-user-reducer.helpers';
 import { currentUserOrgRoleReducer } from './current-user-roles-org.reducer';
 

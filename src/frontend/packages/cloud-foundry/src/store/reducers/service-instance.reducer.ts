@@ -3,13 +3,13 @@ import {
   CreateServiceBinding,
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
-} from '../../../cloud-foundry/src/actions/service-bindings.actions';
-import { serviceBindingEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
-import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../core/src/core/cf-api-svc.types';
-import { IRequestEntityTypeState } from '../app-state';
-import { APIResource } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
+} from '../../actions/service-bindings.actions';
+import { serviceBindingEntityType } from '../../cf-entity-factory';
+import { getCFEntityKey } from '../../cf-entity-helpers';
+import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
 export function serviceInstanceReducer<T extends IServiceInstance | IUserProvidedServiceInstance = IServiceInstance>(
   state: IRequestEntityTypeState<APIResource<T>>,

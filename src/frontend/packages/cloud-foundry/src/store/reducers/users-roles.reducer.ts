@@ -7,15 +7,15 @@ import {
   UsersRolesSetOrgRole,
   UsersRolesSetSpaceRole,
   UsersRolesSetUsers,
-} from '../../../cloud-foundry/src/actions/users-roles.actions';
+} from '../../actions/users-roles.actions';
 import {
   createUserRoleInOrg,
   createUserRoleInSpace,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
-} from '../types/user.types';
-import { UsersRolesState } from '../types/users-roles.types';
+} from '../../../../store/src/types/user.types';
+import { UsersRolesState } from '../../../../store/src/types/users-roles.types';
 
 export function createDefaultOrgRoles(orgGuid: string, orgName: string): IUserPermissionInOrg {
   return {

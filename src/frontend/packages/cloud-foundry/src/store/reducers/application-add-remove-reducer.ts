@@ -1,11 +1,11 @@
-import { CREATE_SUCCESS, DELETE_SUCCESS } from '../../../cloud-foundry/src/actions/application.actions';
-import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
-import { IApp, ISpace } from '../../../core/src/core/cf-api.types';
-import { deepMergeState } from '../helpers/reducer.helper';
-import { APIResource } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
-import { IRequestEntityTypeState } from '../app-state';
+import { CREATE_SUCCESS, DELETE_SUCCESS } from '../../actions/application.actions';
+import { applicationEntityType } from '../../cf-entity-factory';
+import { getCFEntityKey } from '../../cf-entity-helpers';
+import { IApp, ISpace } from '../../../../core/src/core/cf-api.types';
+import { deepMergeState } from '../../../../store/src/helpers/reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 
 
 export function applicationAddRemoveReducer() {

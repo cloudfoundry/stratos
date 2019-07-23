@@ -1,7 +1,11 @@
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
-import { APIResource } from '../types/api.types';
-import { IRequestEntityTypeState } from '../app-state';
-import { IApp, StratosCFEntity } from '../../../core/src/core/cf-api.types';
+import {
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  DisconnectEndpoint,
+  UNREGISTER_ENDPOINTS_SUCCESS
+} from '../../../../store/src/actions/endpoint.actions';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { IApp, StratosCFEntity } from '../../../../core/src/core/cf-api.types';
 
 export function endpointDisconnectRemoveEntitiesReducer<T = IApp>() {
   return (state: IRequestEntityTypeState<APIResource<T & StratosCFEntity>>, action: DisconnectEndpoint) => {

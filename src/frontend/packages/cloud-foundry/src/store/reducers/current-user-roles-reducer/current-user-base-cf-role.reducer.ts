@@ -1,6 +1,6 @@
-import { GetCurrentUserRelationsComplete } from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { getDefaultEndpointRoles, IAllCfRolesState } from '../../types/current-user-roles.types';
+import { GetCurrentUserRelationsComplete } from '../../../actions/permissions.actions';
 import { currentUserCFRolesReducer } from './current-user-cf-roles.reducer';
+import { IAllCfRolesState, getDefaultEndpointRoles } from '../../../../../store/src/types/current-user-roles.types';
 
 export function currentUserBaseCFRolesReducer(state: IAllCfRolesState = {}, action: GetCurrentUserRelationsComplete): IAllCfRolesState {
   if (!state[action.endpointGuid]) {
