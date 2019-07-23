@@ -33,14 +33,6 @@ export interface UserProfileInfoEmail {
   value: string;
 }
 
-// export const userProfileStoreNames: {
-//   section: TRequestTypeKeys,
-//   type: string
-// } = {
-//   section: RequestSectionKeys.Other,
-//   type: this.stratosUserConfig.entityKey
-// };
-
 export interface UserProfilePasswordUpdate {
   oldPassword: string;
   password: string;
