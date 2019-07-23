@@ -4,11 +4,11 @@ import { combineLatest as observableCombineLatest, Observable, Subscription } fr
 import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';

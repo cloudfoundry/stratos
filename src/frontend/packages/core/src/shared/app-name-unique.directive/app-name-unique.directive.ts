@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { selectNewAppState } from '../../../../store/src/effects/create-app-effects';
 import { environment } from '../../environments/environment.prod';
 

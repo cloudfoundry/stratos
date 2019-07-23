@@ -3,8 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import {
   CFEndpointsListConfigService,
 } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';

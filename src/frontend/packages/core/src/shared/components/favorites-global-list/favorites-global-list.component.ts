@@ -3,12 +3,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   errorFetchingFavoritesSelector,
   fetchingFavoritesSelector,
 } from '../../../../../store/src/selectors/favorite-groups.selectors';
-import { LoggerService } from '../../../core/logger.service';
 import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
 
 

@@ -1,10 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CFAppState } from '../../../../../store/src/app-state';
+
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
-import { getApplicationDeploySourceTypes, AUTO_SELECT_DEPLOY_TYPE_URL_PARAM } from '../deploy-application/deploy-application-steps.types';
+import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
+import {
+  AUTO_SELECT_DEPLOY_TYPE_URL_PARAM,
+  getApplicationDeploySourceTypes,
+} from '../deploy-application/deploy-application-steps.types';
+
 interface IAppTileData extends ITileData {
   type: string;
   subType?: string;

@@ -3,12 +3,15 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { userProvidedServiceInstanceEntityType, servicePlanEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import {
+  servicePlanEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../../core/cf-api-svc.types';
 import { TableCellCustom } from '../../../list.types';
-import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/selectors/api.selectors';
 
 @Component({
   selector: 'app-table-cell-service-plan',

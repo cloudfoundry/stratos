@@ -7,6 +7,7 @@ import { filter, map, tap } from 'rxjs/operators';
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   organizationEntityType,
@@ -14,7 +15,6 @@ import {
   spaceQuotaEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';

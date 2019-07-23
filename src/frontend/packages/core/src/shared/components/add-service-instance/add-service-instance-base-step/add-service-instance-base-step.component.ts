@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { BASE_REDIRECT_QUERY } from '../../stepper/stepper.types';
 import { TileConfigManager } from '../../tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from './../../tile/tile-selector.types';
 import { SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
-import { BASE_REDIRECT_QUERY } from '../../stepper/stepper.types';
 
 interface ICreateServiceTilesData extends ITileData {
   type: string;

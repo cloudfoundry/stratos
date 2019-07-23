@@ -13,6 +13,7 @@ import {
 import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
 import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
 import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
@@ -21,7 +22,6 @@ import {
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

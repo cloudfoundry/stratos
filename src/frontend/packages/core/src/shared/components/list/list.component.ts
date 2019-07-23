@@ -41,6 +41,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   ListFilter,
   ListPagination,
@@ -49,7 +50,6 @@ import {
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
 import { SetPage } from '../../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';

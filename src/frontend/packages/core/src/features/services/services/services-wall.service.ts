@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { cfEntityFactory, serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllServices } from '../../../../../cloud-foundry/src/actions/service.actions';
 import { GetAllServicesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { cfEntityFactory, serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';

@@ -4,11 +4,11 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType, cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   getCurrentUserCFEndpointRolesState,
@@ -32,7 +32,6 @@ import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-ap
 import { ISpace } from '../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { pathGet } from '../../core/utils.service';
 import { extractActualListEntity } from '../../shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { MultiActionListEntity } from '../../shared/monitors/pagination-monitor';

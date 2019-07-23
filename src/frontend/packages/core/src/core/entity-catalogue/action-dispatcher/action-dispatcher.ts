@@ -33,8 +33,7 @@ export class EntityActionDispatcher<
       } else if (EntityActionDispatcher.STORE && EntityActionDispatcher.STORE.dispatch) {
         EntityActionDispatcher.STORE.dispatch(action);
       } else {
-        // TODO: RC
-        console.error('Failed to find dispatcher');
+        console.error('Failed to find dispatcher: ', this.actionBuilder);
         return false;
       }
       return true;
@@ -82,7 +81,7 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
   }
 }
 
-// TODO: RC Not currently used, commented out due to compile errors
+// TODO: NJ Can this be removed?
 // export class PopulatedEntityActionDispatcherManager<
 //   T extends OrchestratedActionBuilders =
 //   OrchestratedActionBuilders

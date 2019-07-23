@@ -8,7 +8,7 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { GitCommit } from '../../../../../../../store/src/types/git.types';
 
 @Injectable()

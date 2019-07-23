@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
-import { CFAppState } from './../../../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-table-cell-app-cforgspace-header',

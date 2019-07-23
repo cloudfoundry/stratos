@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map, pairwise, skipWhile } from 'rxjs/operators';
 
-import { CFAppState } from '../app-state';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { BasePaginatedAction, PaginationEntityState } from '../types/pagination.types';

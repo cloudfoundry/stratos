@@ -147,7 +147,6 @@ import {
 } from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
-import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
 import { GitSCMService } from './data-services/scm/scm.service';
@@ -416,7 +415,6 @@ import { UserPermissionDirective } from './user-permission.directive';
   providers: [
     ListConfig,
     ApplicationStateService,
-    CfOrgSpaceDataService,
     CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,

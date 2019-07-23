@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';

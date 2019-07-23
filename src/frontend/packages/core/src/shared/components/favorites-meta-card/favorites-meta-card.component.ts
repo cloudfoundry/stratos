@@ -3,19 +3,19 @@ import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   RemoveUserFavoriteAction,
 } from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { userFavoritesEntitySchema } from '../../../base-entity-schemas';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { StratosStatus, ComponentEntityMonitorConfig } from '../../shared.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
-import { userFavoritesEntitySchema } from '../../../base-entity-schemas';
 
 
 @Component({

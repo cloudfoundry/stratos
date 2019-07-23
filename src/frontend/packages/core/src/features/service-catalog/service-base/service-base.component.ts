@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ServicesService } from '../services.service';
-import { CFAppState } from '../../../../../store/src/app-state';
 
 
 

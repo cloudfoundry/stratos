@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { LoggerService } from '../../../../../../core/logger.service';
 import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {

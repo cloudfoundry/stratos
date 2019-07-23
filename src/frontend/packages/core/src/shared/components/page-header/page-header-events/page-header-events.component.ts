@@ -5,13 +5,13 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { endpointEntitySchema } from '../../../../base-entity-schemas';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { endpointEntitySchema } from '../../../../base-entity-schemas';
 
 
 @Component({

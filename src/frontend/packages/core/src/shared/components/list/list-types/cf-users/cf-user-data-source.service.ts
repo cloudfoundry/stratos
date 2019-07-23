@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { cfEntityFactory, cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { CfUser } from '../../../../../../../store/src/types/user.types';

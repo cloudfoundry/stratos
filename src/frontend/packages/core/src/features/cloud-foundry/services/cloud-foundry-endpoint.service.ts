@@ -3,6 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
+import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
+import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
+import { FetchAllDomains } from '../../../../../cloud-foundry/src/actions/domains.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../../../../cloud-foundry/src/actions/organization.actions';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   domainEntityType,
@@ -12,12 +17,7 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
-import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
-import { FetchAllDomains } from '../../../../../cloud-foundry/src/actions/domains.actions';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { DeleteOrganization, GetAllOrganizations } from '../../../../../cloud-foundry/src/actions/organization.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -227,7 +227,7 @@ export class CloudFoundryEndpointService {
         )
       },
       true
-    ).entities$.subscribe();
+    ).entities$.pipe(first()).subscribe();
   }
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { PaginationMonitor } from './pagination-monitor';

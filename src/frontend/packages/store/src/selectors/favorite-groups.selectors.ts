@@ -1,9 +1,10 @@
 import { compose } from '@ngrx/store';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { deriveEndpointFavoriteFromFavorite } from '../../../core/src/core/user-favorite-helpers';
-import { CFAppState, IRequestEntityTypeState } from '../app-state';
+import { IRequestEntityTypeState } from '../app-state';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 

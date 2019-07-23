@@ -10,7 +10,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllUserProvidedServices } from '../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

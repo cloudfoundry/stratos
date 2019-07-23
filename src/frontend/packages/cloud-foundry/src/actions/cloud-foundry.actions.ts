@@ -3,7 +3,7 @@ import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { cfInfoEntityType } from '../cf-entity-factory';
 
 export const GET_CF_INFO = '[CF Endpoint] Get Info';
-// TODO Where do these go?
+
 export class GetCFInfo implements IRequestAction {
   constructor(public cfGuid: string) { }
   type = GET_CF_INFO;

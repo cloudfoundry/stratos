@@ -7,7 +7,7 @@ import {
   cfEntityFactory,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppStatsAction } from '../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';

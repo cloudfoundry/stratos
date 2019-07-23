@@ -6,11 +6,10 @@ import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { DELETE_SUCCESS, DeleteApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
+import { EntitySchema } from '../helpers/entity-schema';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { BaseRequestDataState } from '../types/entity.types';
 import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
-import { EntitySchema } from '../helpers/entity-schema';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';
