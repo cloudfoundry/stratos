@@ -10,9 +10,9 @@ import {
   UsersRolesExecuteChanges,
 } from '../../../cloud-foundry/src/actions/users-roles.actions';
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../../../cloud-foundry/src/actions/users.actions';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CFAppState } from '../app-state';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';

@@ -6,7 +6,7 @@ import {
   CfAppRoutesListConfigServiceBase
 } from './cf-app-routes-list-config-base';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';

@@ -10,7 +10,6 @@ import {
   createCfFeatureFlagFetchAction,
 } from '../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../store/src/actions/endpoint.actions';
-import { CFAppState } from '../../../store/src/app-state';
 import {
   BaseHttpClientFetcher,
   flattenPagination,
@@ -34,6 +33,7 @@ import {
   GetUserRelations,
   UserRelationTypes,
 } from '../actions/permissions.actions';
+import { CFAppState } from '../cf-app-state';
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 
@@ -69,7 +69,7 @@ interface IEndpointConnectionInfo {
 const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
 
-function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
+function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, httpClient: HttpClient): Observable < boolean > {
   const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
   const params = {
     headers: {
@@ -224,12 +224,12 @@ export class PermissionEffects {
     private store: Store<CFAppState>
   ) { }
 
-  @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
-    ofType<GetUserRelations>(GET_CURRENT_USER_RELATION),
-    map(action => {
-      return fetchCfUserRole(this.store, action, this.httpClient).pipe(
-        map((success) => ({ type: action.actions[1] }))
-      );
-    })
-  );
+@Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
+  ofType<GetUserRelations>(GET_CURRENT_USER_RELATION),
+  map(action => {
+    return fetchCfUserRole(this.store, action, this.httpClient).pipe(
+      map((success) => ({ type: action.actions[1] }))
+    );
+  })
+);
 }

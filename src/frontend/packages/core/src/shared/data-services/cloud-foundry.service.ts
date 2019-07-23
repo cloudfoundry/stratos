@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { endpointListKey, EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { PaginationMonitor } from '../monitors/pagination-monitor';
 import { endpointEntitySchema } from '../../base-entity-schemas';
+import { PaginationMonitor } from '../monitors/pagination-monitor';
 
 @Injectable()
 export class CloudFoundryService {

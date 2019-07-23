@@ -4,15 +4,18 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
@@ -21,9 +24,6 @@ import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 
 interface EndpointDetailsContainerRefs {
   componentRef: ComponentRef<EndpointListDetailsComponent>;

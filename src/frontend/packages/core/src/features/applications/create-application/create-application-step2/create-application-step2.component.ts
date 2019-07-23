@@ -1,16 +1,15 @@
-
-import { of as observableOf, Observable } from 'rxjs';
-
-import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { SetNewAppName } from '../../../../../../cloud-foundry/src/actions/create-applications-page.actions';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { AppNameUniqueChecking } from '../../../../shared/app-name-unique.directive/app-name-unique.directive';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+
 
 @Component({
   selector: 'app-create-application-step2',

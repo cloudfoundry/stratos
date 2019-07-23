@@ -4,7 +4,7 @@ import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetAppRoutes } from '../../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';

@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { ServicesService } from '../services.service';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { CFAppState } from '../../../../../store/src/app-state';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
+import { ServicesService } from '../services.service';
 
 @Component({
   selector: 'app-service-tabs-base',

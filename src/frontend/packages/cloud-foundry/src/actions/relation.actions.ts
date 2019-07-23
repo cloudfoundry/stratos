@@ -1,13 +1,14 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityTreeRelation } from '../../../store/src/helpers/entity-relations/entity-relation-tree';
 import {
   EntityInlineChildAction,
   EntityInlineParentAction,
 } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../../../store/src/types/request.types';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { EntityTreeRelation } from '../../../store/src/helpers/entity-relations/entity-relation-tree';
+import { IRequestActionEntity, RequestEntityLocation } from '../../../store/src/types/request.types';
+import { CFStartAction } from './cf-action.types';
 
 const relationActionId = 'FetchRelationAction';
 

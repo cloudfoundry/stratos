@@ -9,7 +9,7 @@ import {
   servicePlanEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAppServiceBindings } from '../../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

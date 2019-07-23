@@ -1,16 +1,8 @@
-import {
-  applicationEntityType,
-  cfUserEntityType,
-  organizationEntityType,
-  serviceEntityType,
-  serviceInstancesEntityType,
-  spaceEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EndpointAction } from '../../actions/endpoint.actions';
-import { PaginationState } from '../../types/pagination.types';
+import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 
-export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
+export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState: PaginationEntityState) {
   return entityKeys.reduce((prevState, entityKey) => {
     if (prevState[entityKey]) {
       const entityState = state[entityKey];
@@ -29,33 +21,14 @@ export function paginationClearAllTypes(state: PaginationState, entityKeys: stri
   }, state);
 }
 
-export function clearEndpointEntities(state: PaginationState, action: EndpointAction, defaultPaginationEntityState) {
-  // TODO This should come from the entity catalogue
-  if (action.endpointType === 'cf') {
+export function clearEndpointEntities(state: PaginationState, action: EndpointAction, defaultPaginationEntityState: PaginationEntityState) {
+  const entityKeys = entityCatalogue.getAllEntitiesForEndpointType(action.endpointType).map(entity => entity.entityKey);
+  if (entityKeys.length > 0) {
     return paginationClearAllTypes(
       state,
-      [
-        applicationEntityType,
-        spaceEntityType,
-        organizationEntityType,
-        serviceEntityType,
-        cfUserEntityType,
-        serviceInstancesEntityType,
-        userProvidedServiceInstanceEntityType
-      ],
+      entityKeys,
       defaultPaginationEntityState
     );
   }
-
-  // Check extensions
-  // TODO Drive this from the catalogue
-  // const entityKeys = getEndpointSchemeKeys(action.endpointType);
-  // if (entityKeys.length > 0) {
-  //   return paginationClearAllTypes(
-  //     state,
-  //     entityKeys,
-  //     defaultPaginationEntityState
-  //   );
-  // }
   return state;
 }

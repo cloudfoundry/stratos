@@ -11,7 +11,7 @@ import { DatePipe } from '@angular/common';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 
 @Injectable()

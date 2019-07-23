@@ -3,14 +3,14 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
+import { GetAppSummaryAction } from '../../../cloud-foundry/src/actions/app-metadata.actions';
+import { ASSIGN_ROUTE_SUCCESS } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
 import {
   createAppInstancesMetricAction,
 } from '../../../core/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { GetAppSummaryAction } from '../../../cloud-foundry/src/actions/app-metadata.actions';
-import { ASSIGN_ROUTE_SUCCESS } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
 

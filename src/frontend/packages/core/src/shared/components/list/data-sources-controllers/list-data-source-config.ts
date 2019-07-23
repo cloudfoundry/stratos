@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 
 /**

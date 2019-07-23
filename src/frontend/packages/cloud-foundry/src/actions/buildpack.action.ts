@@ -1,9 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { buildpackEntityType, cfEntityFactory } from '../cf-entity-factory';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { buildpackEntityType, cfEntityFactory } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 
 export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string, public paginationKey: string) {

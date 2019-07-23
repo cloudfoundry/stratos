@@ -67,7 +67,7 @@ export function createEntityRelationPaginationKey(parentSchemaKey: string, paren
   return key;
 }
 
-// TODO Does this need the entity key or type?
+// TODO: !!!!!!!!!!!!!!!!!!! RC Does this need the entity key or type?
 // TODO: See createEntityRelationKey in entity-relations.tree.ts
 export const createEntityRelationKey = (parentEntityType: string, childEntityType: string) => `${parentEntityType}-${childEntityType}`;
 
@@ -85,8 +85,7 @@ export interface EntityInlineChildAction {
   endpointGuid: string;
 }
 
-// TODO Work
-export function isEntityInlineChildAction(anything): EntityInlineChildAction {
+export function isEntityInlineChildAction(anything: any): EntityInlineChildAction {
   const inlineChildAction = anything as EntityInlineChildAction;
   return inlineChildAction &&
     !!inlineChildAction.parentGuid &&

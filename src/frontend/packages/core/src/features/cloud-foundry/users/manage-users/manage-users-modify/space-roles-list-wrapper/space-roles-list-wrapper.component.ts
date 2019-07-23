@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import {
   CfUsersSpaceRolesListConfigService,
 } from '../../../../../../shared/components/list/list-types/cf-users-org-space-roles/cf-users-space-roles-list-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
-import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-space-roles-list-wrapper',

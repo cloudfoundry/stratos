@@ -1,7 +1,7 @@
-import { entityCatalogue } from './entity-catalogue.service';
 import { userProfileSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { entityCatalogue } from './entity-catalogue.service';
 
-// TODO Move these into the entity catalogue
+// TODO NJ Move these into the entity catalogue
 const baseEntities = [
   userProfileSchemaKey,
   'user',

@@ -24,10 +24,10 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
@@ -82,7 +82,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Store related
   public entityKey: string;
-  // TODO: this should not be default, all data sources should provide this.
+  // TODO: NJ this should not be default, all data sources should provide this.
   public endpointType: string;
 
   // Add item

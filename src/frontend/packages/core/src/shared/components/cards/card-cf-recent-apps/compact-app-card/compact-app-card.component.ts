@@ -3,16 +3,12 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../../../application-state/application-state.service';
-import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { StratosStatus } from '../../../../shared.types';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { ApplicationStateData, ApplicationStateService } from '../../../application-state/application-state.service';
+import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 
 
 @Component({

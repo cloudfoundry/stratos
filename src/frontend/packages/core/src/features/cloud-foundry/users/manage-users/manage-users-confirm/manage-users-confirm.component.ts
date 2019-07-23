@@ -7,13 +7,13 @@ import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } fr
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { UsersRolesClearUpdateState } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { ChangeUserRole } from '../../../../../../../cloud-foundry/src/actions/users.actions';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import {
   selectUsersRoles,
   selectUsersRolesChangedRoles,
@@ -36,6 +36,7 @@ import {
   TableCellConfirmRoleAddRemComponent,
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+
 
 /* tslint:enable:max-line-length */
 

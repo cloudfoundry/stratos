@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   routeEntityType,
@@ -11,8 +13,6 @@ import {
   spaceEntityType,
   spaceQuotaEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../store/src/types/user.types';

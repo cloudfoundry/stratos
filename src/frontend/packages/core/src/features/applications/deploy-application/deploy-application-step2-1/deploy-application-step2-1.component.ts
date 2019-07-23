@@ -11,12 +11,12 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { SetDeployCommit } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { GitCommit } from '../../../../../../store/src/types/git.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../store/src/app-state';
-import { SetDeployCommit } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { GitCommit } from '../../../../../../store/src/types/git.types';
 
 @Component({
   selector: 'app-deploy-application-step2-1',

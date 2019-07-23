@@ -1,5 +1,8 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { getActions } from '../../../store/src/actions/action.helper';
+import { createEntityRelationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import {
   cfEntityFactory,
   organizationEntityType,
@@ -7,10 +10,7 @@ import {
   servicePlanVisibilityEntityType,
   spaceEntityType,
 } from '../cf-entity-factory';
-import { createEntityRelationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction } from '../../../store/src/types/request.types';
-import { getActions } from '../../../store/src/actions/action.helper';
+import { CFStartAction } from './cf-action.types';
 
 export class GetServicePlanVisibilities extends CFStartAction implements PaginatedAction {
   constructor(

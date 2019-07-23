@@ -1,3 +1,4 @@
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import {
   LOGIN,
   LOGIN_FAILED,
@@ -10,7 +11,6 @@ import {
 } from '../actions/auth.actions';
 import { RouterActions, RouterNav } from '../actions/router.actions';
 import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
-import { CFAppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
 import { RouterRedirect } from './routing.reducer';
 

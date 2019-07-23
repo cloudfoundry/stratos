@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceBroker } from '../../../../core/cf-api-svc.types';
 import { ISpace } from '../../../../core/cf-api.types';

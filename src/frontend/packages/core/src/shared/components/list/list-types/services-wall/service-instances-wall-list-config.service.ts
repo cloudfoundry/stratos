@@ -8,7 +8,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity-helpers';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';

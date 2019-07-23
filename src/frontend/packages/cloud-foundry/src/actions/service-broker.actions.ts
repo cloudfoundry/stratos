@@ -1,9 +1,10 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { cfEntityFactory, serviceBrokerEntityType } from '../cf-entity-factory';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, IRequestAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { IRequestAction } from '../../../store/src/types/request.types';
+import { cfEntityFactory, serviceBrokerEntityType } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 
 export class GetServiceBrokers extends CFStartAction implements PaginatedAction {
   constructor(

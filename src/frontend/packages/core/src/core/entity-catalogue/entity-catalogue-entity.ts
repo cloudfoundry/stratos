@@ -55,7 +55,6 @@ export class StratosBaseCatalogueEntity<
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
-    // TODO: RC how to sort out typing's to allow actionDispatcher.customDispatchName()
     this.actionOrchestrator = new ActionOrchestrator<AB>(this.entityKey, this.builders.actionBuilders);
     this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
@@ -95,9 +94,7 @@ export class StratosBaseCatalogueEntity<
   public getSchema(schemaKey?: string) {
     // TODO: schemaKey - ensure wherever this is called it contains the correct schemaKey (with respect to any object of type
     // EntityCatalogueEntityConfig that may use a schemeKey different than that provided by entityCatalogue.getEntity's)
-    // TODO(NJ) We should do a better job at typeing schemax
-    // schema always gets changed to a EntityCatalogueSchamas.
-    const catalogueSchema = (this.definition.schema as EntityCatalogueSchemas);
+    const catalogueSchema = this.definition.schema;
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }

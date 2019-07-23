@@ -5,11 +5,11 @@ import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { GET_CF_INFO, GetCFInfo } from '../../../cloud-foundry/src/actions/cloud-foundry.actions';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
-import { CFAppState } from './../app-state';
 
 @Injectable()
 export class CloudFoundryEffects {

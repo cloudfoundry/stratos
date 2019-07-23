@@ -8,9 +8,10 @@ import {
 } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, IRequestAction } from '../../../store/src/types/request.types';
+import { IRequestAction } from '../../../store/src/types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/src/types/user.types';
 import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ALL = '[Users] Get all';
@@ -62,7 +63,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     return !!action.isGetAllUsersAsAdmin;
   }
 }
-// TODO: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
+// FIXME: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
 // a flag somewhere to handle that - https://jira.capbristol.com/browse/STRAT-119
 export class ChangeUserRole extends CFStartAction implements IRequestAction {
   public endpointType = 'cf';
@@ -157,8 +158,6 @@ export class GetUser extends CFStartAction {
     this.options.url = 'users/' + userGuid;
     this.options.method = 'get';
   }
-  // TODO: Stratos internal entity types don't need a endpoint type.
-  // Should we create internal entity catalogue entries with a "fake" endpoint type?
   actions = getActions('Users', 'Fetch User');
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;

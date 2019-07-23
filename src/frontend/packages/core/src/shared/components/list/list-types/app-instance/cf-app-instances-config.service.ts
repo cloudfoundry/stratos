@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { EndpointsService } from '../../../../../core/endpoints.service';

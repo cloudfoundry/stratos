@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { CFAppState } from '../app-state';
 import { CFResponse } from '../types/api.types';
 
 

@@ -3,10 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
 
+import { CreateServiceBinding } from '../../../../../cloud-foundry/src/actions/service-bindings.actions';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfRequestInfo } from '../../../../../cloud-foundry/src/selectors/api.selectors';
-import { CreateServiceBinding } from '../../../../../cloud-foundry/src/actions/service-bindings.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { SpaceScopedService } from '../../../features/service-catalog/services.service';
 
