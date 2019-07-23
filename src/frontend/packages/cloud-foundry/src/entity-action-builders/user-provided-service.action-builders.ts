@@ -1,3 +1,4 @@
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { DeleteApplication } from '../actions/application.actions';
 import {
   GetAllUserProvidedServices,
@@ -19,12 +20,12 @@ export const userProvidedServiceActionBuilder = {
     guid: string,
     endpointGuid: string,
     existingUserProvidedServiceInstance?: Partial<IUserProvidedServiceInstanceData>,
-    proxyPaginationEntityKey?: string
+    proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
   ) => new UpdateUserProvidedServiceInstance(
     endpointGuid,
     guid,
     existingUserProvidedServiceInstance,
-    proxyPaginationEntityKey
+    proxyPaginationEntityConfig
   ),
   getAll: (
     endpointGuid: string,
