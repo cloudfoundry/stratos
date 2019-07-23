@@ -80,39 +80,3 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
     return this.getActionDispatcher(actionType).dispatch(...args);
   }
 }
-
-// TODO: NJ Can this be removed?
-// export class PopulatedEntityActionDispatcherManager<
-//   T extends OrchestratedActionBuilders =
-//   OrchestratedActionBuilders
-//   > extends EntityActionDispatcherManager<T> {
-//   constructor(
-//     public endpointGuid: string,
-//     public entityGuid: string,
-//     actionDispatcher: (action: Action) => void,
-//     actionOrchestrator: ActionOrchestrator<T>
-//   ) {
-//     super(actionDispatcher, actionOrchestrator);
-//   }
-
-//   public dispatchGet<Y>(...args: Y[]) {
-//     const dispatchArgs: Parameters<T['get']> = [this.endpointGuid, this.entityGuid, ...args];
-//     return this.getActionDispatcher('get').dispatch(...dispatchArgs);
-//   }
-
-//   public dispatchDelete(...args: Parameters<T['delete']>) {
-//     return this.getActionDispatcher('delete').dispatch(endpointGuid, ...args);
-//   }
-
-//   public dispatchUpdate(...args: Parameters<T['update']>) {
-//     return this.getActionDispatcher('update').dispatch(...args);
-//   }
-
-//   public dispatchCreate(...args: Parameters<T['create']>) {
-//     return this.getActionDispatcher('create').dispatch(...args);
-//   }
-
-//   public dispatchGetAll(...args: Parameters<T['getAll']>) {
-//     return this.getActionDispatcher('getAll').dispatch(...args);
-//   }
-// }

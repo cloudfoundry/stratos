@@ -61,34 +61,3 @@ interface CFEntityValues {
 }
 
 export interface CFRequestDataState extends CFEntityValues, BaseEntityValues { }
-
-export const defaultCfEntitiesState = {
-  // [applicationEntityType]: {},
-  // [stackEntityType]: {},
-  // [spaceEntityType]: {},
-  // [organizationEntityType]: {},
-  // [routeEntityType]: {},
-  // [appEventEntityType]: {},
-  // [endpointSchemaKey]: {},
-  // [gitBranchesEntityType]: {},
-  // [gitCommitEntityType]: {},
-  // [cfUserEntityType]: {},
-  // [domainEntityType]: {},
-  // [appEnvVarsEntityType]: {},
-  // [appStatsEntityType]: {},
-  // [appSummaryEntityType]: {},
-  // [serviceInstancesEntityType]: {},
-  // [servicePlanEntityType]: {},
-  // [serviceEntityType]: {},
-  // [serviceBindingEntityType]: {},
-  // [buildpackEntityType]: {},
-  // [securityGroupEntityType]: {},
-  // [featureFlagEntityType]: {},
-  // [privateDomainsEntityType]: {},
-  // [spaceQuotaEntityType]: {},
-  // [metricEntityType]: {},
-  // [servicePlanVisibilityEntityType]: {},
-  // [serviceBrokerEntityType]: {},
-  // [userFavoritesSchemaKey]: {},s
-  // [userProvidedServiceInstanceEntityType]: []
-};

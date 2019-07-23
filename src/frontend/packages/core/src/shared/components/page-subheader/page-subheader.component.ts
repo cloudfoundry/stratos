@@ -74,8 +74,7 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit() {
-    // TODO: NJ Doing this timeout to fix https://github.com/angular/angular/issues/21788
-    // Remove this when we're happy with the fix - NJ
+    // FIXME: Retest if this is still needed - `NJ Doing this timeout to fix https://github.com/angular/angular/issues/21788` - STRAT-153
     setTimeout(() => {
       this.checkNavOverflow(false);
     });

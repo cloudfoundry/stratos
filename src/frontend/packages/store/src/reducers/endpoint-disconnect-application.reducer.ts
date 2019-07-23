@@ -1,8 +1,9 @@
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
-import { APIResource } from '../types/api.types';
-import { IRequestEntityTypeState } from '../app-state';
 import { IApp, StratosCFEntity } from '../../../core/src/core/cf-api.types';
+import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
+import { IRequestEntityTypeState } from '../app-state';
+import { APIResource } from '../types/api.types';
 
+// #3704 - These can be removed after this ticket is completed
 export function endpointDisconnectRemoveEntitiesReducer<T = IApp>() {
   return (state: IRequestEntityTypeState<APIResource<T & StratosCFEntity>>, action: DisconnectEndpoint) => {
     switch (action.type) {
