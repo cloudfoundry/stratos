@@ -72,9 +72,8 @@
             </div>
           </mat-card-content>
           <mat-card-actions class="autoscaler-tab__actions">
-            <button mat-icon-button (click)="loadLatestMetricsUponPolicy()">
-              <refresh-icon></refresh-icon>
-            </button>
+            <app-polling-indicator [manualPoll]="true" (poll)="loadLatestMetricsUponPolicy()">
+            </app-polling-indicator>
             <button (click)="metricChartPage()" mat-icon-button>
               <mat-icon>launch</mat-icon>
             </button>
@@ -249,10 +248,10 @@
             </div>
           </mat-card-content>
           <mat-card-actions class="autoscaler-tab__actions">
-            <button mat-icon-button (click)="fetchScalingHistory()">
-              <refresh-icon [isRefreshing$]="appAutoscalerScalingHistoryService.isFetchingEntity$">
-              </refresh-icon>
-            </button>
+            <app-polling-indicator (poll)="fetchScalingHistory()"
+              [manualPoll]="!(appAutoscalerScalingHistoryService.isFetchingEntity$ | async)"
+              [isPolling]="(appAutoscalerScalingHistoryService.isFetchingEntity$ | async)">
+            </app-polling-indicator>
             <button (click)="scaleHistoryPage()" mat-icon-button>
               <mat-icon>launch</mat-icon>
             </button>

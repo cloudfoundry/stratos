@@ -122,7 +122,6 @@ import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.compon
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
-import { RefreshIconComponent } from './components/refresh-icon/refresh-icon.component';
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
@@ -295,7 +294,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     SimpleUsageChartComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,
-    RefreshIconComponent,
     PageSubNavSectionComponent,
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
@@ -403,7 +401,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MultilineTitleComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,
-    RefreshIconComponent,
     PageSubNavSectionComponent,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,

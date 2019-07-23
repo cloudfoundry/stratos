@@ -9,12 +9,12 @@ import { ApplicationStateIconPipe } from '../../application-state/application-st
 import { StatefulIconComponent } from '../../../../core/stateful-icon/stateful-icon.component';
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
-import { RefreshIconComponent } from '../../refresh-icon/refresh-icon.component';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { PollingIndicatorComponent } from '../../polling-indicator/polling-indicator.component';
 
 describe('CardCfRecentAppsComponent', () => {
   let component: CardCfRecentAppsComponent;
@@ -26,7 +26,7 @@ describe('CardCfRecentAppsComponent', () => {
         CardCfRecentAppsComponent,
         ApplicationStateIconComponent,
         CompactAppCardComponent,
-        RefreshIconComponent,
+        PollingIndicatorComponent,
         ApplicationStateIconPipe
       ],
       imports: [...BaseTestModulesNoShared],
