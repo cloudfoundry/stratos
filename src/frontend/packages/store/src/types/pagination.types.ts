@@ -6,17 +6,10 @@ import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
 import { HttpRequest } from '@angular/common/http';
 
-export class QParam {
-  constructor(
-    public key: string,
-    public value: string | string[],
-    public joiner: '>=' | '<=' | '<' | '>' | ' IN ' | ':' | '=' = ':'
-  ) { }
-}
+
 
 export interface PaginationParam {
-  q?: QParam[];
-  [entityKey: string]: any;
+  [entityKey: string]: string | string[] | number;
 }
 
 export interface PaginationClientFilter {

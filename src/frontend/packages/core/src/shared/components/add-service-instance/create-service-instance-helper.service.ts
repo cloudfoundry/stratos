@@ -16,7 +16,6 @@ import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { QParam } from '../../../../../store/src/types/pagination.types';
 import {
   IService,
   IServiceBroker,
@@ -28,6 +27,7 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
 import { CF_GUID } from '../../entity.tokens';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 
 export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -186,7 +186,7 @@ export class CreateServiceInstanceHelper {
     let paginationKey;
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, `${spaceGuid}-${servicePlanGuid}`);
-      const q = [new QParam('service_plan_guid', servicePlanGuid, ':')];
+      const q = [new QParam('service_plan_guid', servicePlanGuid, QParamJoiners.colon).toString()];
       action = new GetServiceInstancesForSpace(spaceGuid, cfGuid, paginationKey, q);
     } else if (servicePlanGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, servicePlanGuid);

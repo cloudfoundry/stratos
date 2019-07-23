@@ -1,8 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { appEventEntityType, cfEntityFactory } from '../cf-entity-factory';
-import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction } from '../../../store/src/types/request.types';
+import { QParam } from '../../../store/src/q-param';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',
@@ -34,7 +35,7 @@ export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
     'order-direction': 'desc',
     'order-direction-field': GetAllAppEvents.sortField,
     q: [
-      new QParam('actee', this.appGuid),
+      new QParam('actee', this.appGuid).toString(),
     ]
   };
 }

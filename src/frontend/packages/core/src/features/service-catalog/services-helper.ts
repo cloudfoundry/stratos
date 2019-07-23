@@ -17,7 +17,6 @@ import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { QParam } from '../../../../store/src/types/pagination.types';
 import {
   IService,
   IServiceBroker,
@@ -33,6 +32,7 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { StratosStatus } from '../../shared/shared.types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
+import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 
 
 export const getSvcAvailability = (
@@ -100,10 +100,10 @@ export const fetchServiceInstancesCount = (
   const action = new GetServiceInstances(cfGuid, createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), [], false);
   action.initialParams.q = [];
   if (orgGuid) {
-    action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
+    action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
   }
   if (spaceGuid) {
-    action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
+    action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
   }
   return fetchTotalResults(action, store, paginationMonitorFactory);
 };

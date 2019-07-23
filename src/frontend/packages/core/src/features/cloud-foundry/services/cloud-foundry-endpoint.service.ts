@@ -30,7 +30,6 @@ import {
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { CfApplicationState } from '../../../../../store/src/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
-import { QParam } from '../../../../../store/src/types/pagination.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
@@ -38,6 +37,7 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
+import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -104,14 +104,13 @@ export class CloudFoundryEndpointService {
     const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
     const action = new GetAllApplications(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid);
-    action.initialParams = {
-      q: []
-    };
+    action.initialParams = {};
+    action.initialParams.q = [];
     if (orgGuid) {
-      action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
     }
     if (spaceGuid) {
-      action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
+      action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
     }
     return fetchTotalResults(action, store, pmf);
   }

@@ -13,7 +13,6 @@ import {
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { QParam } from '../../../../../../store/src/types/pagination.types';
 import { IServiceBinding } from '../../../../core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../core/current-user-permissions.service';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
@@ -24,6 +23,7 @@ import {
 import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
+import { QParam } from '../../../../../../store/src/q-param';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
@@ -38,7 +38,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     );
     action.initialParams['results-per-page'] = 1;
     action.initialParams.q = [
-      new QParam('service_instance_guid', serviceInstanceGuid),
+      new QParam('service_instance_guid', serviceInstanceGuid).toString(),
     ];
     return action;
   }

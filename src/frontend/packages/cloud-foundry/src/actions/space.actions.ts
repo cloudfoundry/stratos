@@ -19,12 +19,13 @@ import {
   EntityInlineChildAction,
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
-import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
+import { QParam } from '../../../store/src/q-param';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';

@@ -16,7 +16,7 @@ import {
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
-import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
+import { SetInitialParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
 import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
@@ -26,8 +26,7 @@ import {
   PaginatedAction,
   PaginationClientPagination,
   PaginationEntityState,
-  PaginationParam,
-  QParam,
+  PaginationParam
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 
@@ -46,49 +45,6 @@ export interface PaginationObservables<T> {
    * Equate to current page fetching observable
    */
   fetchingEntities$: Observable<boolean>;
-}
-
-export function qParamsToString(params: QParam[]): string[] {
-  return params.map(qParamToString);
-}
-
-export function qParamToString(q: QParam): string {
-  return `${q.key}${q.joiner}${(q.value as string[]).join ? (q.value as string[]).join(',') : q.value}`;
-}
-
-export function qParamKeyFromString(qParamString: string): string {
-  const match = qParamString.match(/(>=|<=|<|>| IN |,|:|=)/);
-  return match.index >= 0 ? qParamString.substring(0, match.index) : null;
-}
-
-export function getUniqueQParams(action: AddParams | SetParams, state) {
-  let qStatePrams: QParam[] = [].concat(state.params.q || []);
-  const qActionPrams: QParam[] = [].concat(action.params.q || []);
-
-  // Update existing q params
-  for (const actionParam of qActionPrams) {
-    const existingParamIndex = qStatePrams.findIndex((stateParam: QParam) => stateParam.key === actionParam.key);
-    if (existingParamIndex >= 0) {
-      qStatePrams[existingParamIndex] = { ...actionParam };
-    } else {
-      qStatePrams.push(actionParam);
-    }
-  }
-
-  //  Ensure q params are unique
-  if (action.params.q) {
-    qStatePrams = qStatePrams.concat(qActionPrams)
-      .filter((q, index, self) => self.findIndex(
-        (qs) => {
-          return qs.key === q.key;
-        }
-      ) === index)
-      .filter((q: QParam) => {
-        // Filter out empties
-        return !!q.value;
-      });
-  }
-  return qStatePrams;
 }
 
 export function removeEmptyParams(params: PaginationParam) {
@@ -207,12 +163,7 @@ function paginationParamsString(params: PaginationParam): string {
   const clone = {
     ...params,
   };
-  delete clone.q;
-  const res1 = sortStringify(clone) + params.q ? sortStringify(params.q.reduce((res, q) => {
-    res[q.key] = q.value + q.joiner;
-    return res;
-  }, {})) : '';
-  return res1;
+  return sortStringify(clone);
 }
 
 function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
@@ -365,15 +316,5 @@ export function spreadClientPagination(pag: PaginationClientPagination): Paginat
         ...pag.filter.items
       }
     }
-  };
-}
-
-export function spreadPaginationParams(params: PaginationParam): PaginationParam {
-  return {
-    ...params,
-    q: params.q ? params.q.reduce((newQ, qP) => {
-      newQ.push({ ...qP });
-      return newQ;
-    }, []) : null
   };
 }

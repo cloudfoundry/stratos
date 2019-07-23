@@ -24,6 +24,7 @@ import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
 import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../list.component.types';
+import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 
 // export function createGetAllAppAction(paginationKey): GetAllApplications {
 //   return new GetAllApplications(paginationKey, null, [
@@ -33,7 +34,7 @@ import { IListConfig } from '../../list.component.types';
 //   ]);
 // }
 
-export class CfAppsDataSource extends ListDataSource<APIResource> {
+export class CfAppsDataSource extends CFListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
   public static includeRelations = [

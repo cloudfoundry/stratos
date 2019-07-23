@@ -8,7 +8,7 @@ import {
 } from '../actions/service-instances.actions';
 import { GetServicePlanServiceInstances } from '../actions/service-plan.actions';
 import { GetServiceInstancesForSpace } from '../actions/space.actions';
-import { QParam } from '../../../store/src/types/pagination.types';
+import { QParam } from '../../../store/src/q-param';
 
 export const serviceInstanceActionBuilders = {
   get: (

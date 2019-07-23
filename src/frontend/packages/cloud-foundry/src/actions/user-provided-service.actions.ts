@@ -15,9 +15,10 @@ import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
-import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 import { getActions } from '../../../store/src/actions/action.helper';
+import { QParam } from '../../../store/src/q-param';
 
 export const getUserProvidedServiceInstanceRelations = [
   createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
@@ -42,7 +43,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     if (spaceGuid) {
-      this.initialParams.q = [new QParam('space_guid', spaceGuid, ' IN ')];
+      this.initialParams.q = [new QParam('space_guid', spaceGuid, ' IN ').toString()];
     }
   }
   actions = getActions('User Provided Services', 'Get all User Provided Services');

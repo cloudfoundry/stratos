@@ -1,10 +1,19 @@
-import { PaginatedAction, PaginationParam } from '../../types/pagination.types';
+import { PaginatedAction, PaginationParam, PaginationEntityState } from '../../types/pagination.types';
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { InternalAppState } from '../../app-state';
 import { HttpParams } from '@angular/common/http';
 import { qParamToString, qParamKeyFromString } from '../../reducers/pagination-reducer/pagination-reducer.helper';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { resultPerPageParam, resultPerPageParamDefault } from '../../reducers/pagination-reducer/pagination-reducer.types';
+
+function getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
+  return paginationState
+    ? {
+      ...paginationState.params,
+      page: paginationState.currentPage.toString(),
+    }
+    : {};
+}
 
 function setRequestParams(
   requestParams: HttpParams,
@@ -16,7 +25,7 @@ function setRequestParams(
 
     // Clear `requestParams` `q` and start afresh
     const initialQParams = requestParams.getAll('q');
-    requestParams.delete('q');
+    const clearParams = requestParams.delete('q');
 
     // Loop through all the NEW params that we wish to keep
     params.q.forEach(qParam => {
@@ -61,7 +70,7 @@ export function fetchUrlParamsFromStore(
     catalogueEntity.entityKey,
     action.paginationKey,
   )(appState);
-  const paginationParams = this.getPaginationParams(paginationState);
+  const paginationParams = getPaginationParams(paginationState);
   action.pageNumber = paginationState
     ? paginationState.currentPage
     : 1;

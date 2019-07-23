@@ -14,10 +14,10 @@ import { getRoute, isTCPRoute } from '../../../../../features/applications/route
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ListPaginationMultiFilterChange, RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
+import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 
 export interface ListCfRoute extends IRoute {
   url: string;
@@ -30,7 +30,7 @@ function isListCfRoute(anything: any): boolean {
   return !!anything.url && !!anything.isTCPRoute;
 }
 
-export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
+export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
 
   cfGuid: string;
   appGuid: string;

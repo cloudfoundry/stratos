@@ -25,12 +25,12 @@ import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { QParam } from '../../../../store/src/types/pagination.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { fetchTotalResults } from '../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 
 
 @Injectable()
@@ -72,10 +72,10 @@ export class CloudFoundryUserProvidedServicesService {
     const action = new GetAllUserProvidedServices(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid, [], false);
     action.initialParams.q = [];
     if (orgGuid) {
-      action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
     }
     if (spaceGuid) {
-      action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
+      action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
     }
     return fetchTotalResults(action, this.store, this.paginationMonitorFactory);
   }

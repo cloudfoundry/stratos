@@ -20,18 +20,25 @@ import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
-  getPaginationObservables,
-  spreadPaginationParams,
+  getPaginationObservables
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { PaginatedAction, PaginationParam, QParam } from '../../../../store/src/types/pagination.types';
+import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
 import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+
+export function spreadPaginationParams(params: PaginationParam): PaginationParam {
+  return {
+    ...params
+  };
+}
+
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
   return {
@@ -92,32 +99,34 @@ export const initCfOrgSpaceService = (
 export const createCfOrSpaceMultipleFilterFn = (
   store: Store<CFAppState>,
   action: PaginatedAction,
-  setQParam: (setQ: QParam, qs: QParam[]) => boolean) => {
+  setQParam: (setQ: QParam, qs: QParam[]) => boolean
+) => {
   return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
     if (!changes.length) {
       return;
     }
+    const qParamStrings = (params.q || []) as string[];
 
     const startingCfGuid = valueOrCommonFalsy(action.endpointGuid);
-    const startingOrgGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'organization_guid'), {}).value;
-    const startingSpaceGuid = valueOrCommonFalsy(params.q.find((q: QParam) => q.key === 'space_guid'), {}).value;
+    const startingOrgGuid = valueOrCommonFalsy(qParamStrings.find((q: string) => q.startsWith('organization_guid')), {}).value;
+    const startingSpaceGuid = valueOrCommonFalsy(qParamStrings.find((q: string) => q.startsWith('space_guid')), {}).value;
 
     const qChanges = changes.reduce((qs: QParam[], change) => {
       switch (change.key) {
         case 'cf':
           action.endpointGuid = change.value;
-          setQParam(new QParam('organization_guid', '', ' IN '), qs);
-          setQParam(new QParam('space_guid', '', ' IN '), qs);
+          setQParam(new QParam('organization_guid', '', QParamJoiners.in), qs);
+          setQParam(new QParam('space_guid', '', QParamJoiners.in), qs);
           break;
         case 'org':
-          setQParam(new QParam('organization_guid', change.value, ' IN '), qs);
+          setQParam(new QParam('organization_guid', change.value, QParamJoiners.in), qs);
           break;
         case 'space':
-          setQParam(new QParam('space_guid', change.value, ' IN '), qs);
+          setQParam(new QParam('space_guid', change.value, QParamJoiners.in), qs);
           break;
       }
       return qs;
-    }, spreadPaginationParams(params).q || []);
+    }, QParam.fromStrings(qParamStrings));
 
     const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
     const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
@@ -128,7 +137,7 @@ export const createCfOrSpaceMultipleFilterFn = (
       store.dispatch(new ResetPagination(action, action.paginationKey));
     } else if (orgChanged || spaceChanged) {
       const newParams = spreadPaginationParams(params);
-      newParams.q = qChanges;
+      newParams.q = qChanges.map(qChange => qChange.toString());
       store.dispatch(new SetParams(action, action.paginationKey, newParams, true, true));
     }
   };
