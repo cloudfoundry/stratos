@@ -72,11 +72,6 @@ export function distinctPageUntilChanged(dataSource) {
     return oldPageKeys === newPageKeys;
   };
 }
-const services: {
-
-} = {
-  entityCatalogue: null
-};
 export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
 export abstract class ListDataSource<T, A = T> extends DataSource<T> implements IListDataSource<T> {
 
@@ -87,7 +82,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Store related
   public entityKey: string;
-  // TODO: NJ this should not be default, all data sources should provide this.
   public endpointType: string;
 
   // Add item
@@ -120,7 +114,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   protected store: Store<CFAppState>;
   public action: PaginatedAction | PaginatedAction[];
   public masterAction: PaginatedAction;
-  protected sourceScheme: EntitySchema;
+  public sourceScheme: EntitySchema;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
@@ -148,7 +142,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const paginationMonitor = new PaginationMonitor(
       this.store,
       this.paginationKey,
-      this.sourceScheme,
+      this.masterAction,
       this.isLocal
     );
     const { pagination$, entities$ } = getPaginationObservables({

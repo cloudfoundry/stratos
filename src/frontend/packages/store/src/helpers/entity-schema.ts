@@ -11,6 +11,7 @@ import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catal
  */
 export class EntitySchema extends schema.Entity implements EntityCatalogueEntityConfig {
   schema: Schema;
+  schemaKey: string;
   public getId: (input, parent?, key?) => string;
   /**
    * @param entityKey As per schema.Entity ctor
@@ -18,8 +19,6 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
    * @param [options] As per schema.Entity ctor
    * @param [relationKey] Allows multiple children of the same type within a single parent entity. For instance user with developer
    * spaces, manager spaces, auditor space, etc
-   * @param [schemaKey] Override the schema fetched via the entityKey. For instance a spaceWithOrgEntityType should override the entityType
-   * of spaceEntityType
    */
   constructor(
     public entityType: string,
@@ -27,16 +26,26 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string,
-    public schemaKey?: string
+    schemaKey?: string
   ) {
     super(endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
     this.schema = definition || {};
+    this.schemaKey = schemaKey;
   }
   public withEmptyDefinition() {
     return new EntitySchema(
       this.entityType,
       this.endpointType,
       {},
+      this.options,
+      this.relationKey
+    );
+  }
+  public clone() {
+    return new EntitySchema(
+      this.entityType,
+      this.endpointType,
+      this.definition,
       this.options,
       this.relationKey,
       this.schemaKey

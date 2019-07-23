@@ -6,6 +6,8 @@ export const domainActionBuilders = {
     guid,
     endpointGuid
   ) => new FetchDomain(guid, endpointGuid),
+  // FIXME: Remove pagination key from get all requests. This might need some investigation regarding places where we use different keys
+  // for lists of same type - #STRAT-149
   getAll: (
     endpointGuid,
     paginationKey?,

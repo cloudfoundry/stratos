@@ -39,7 +39,7 @@ export class MetricQueryConfig {
   ) { }
 }
 
-// TODO: Metrics - Where should it live?. How do we handle metrics across endpoint types?
+// FIXME: Final solution for Metrics - STRAT-152
 export class MetricsAction implements IRequestAction {
   constructor(
     guid: string,

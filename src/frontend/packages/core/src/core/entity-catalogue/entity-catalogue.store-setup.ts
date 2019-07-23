@@ -1,7 +1,6 @@
 import { entityCatalogue } from './entity-catalogue.service';
 
-// TODO: NJ Move these into the entity catalogue
-// TODO: !!!!!!!!!! RC Are these used? I've removed userProfile as covered by stratosUserProfile
+// FIXME: These should be removed/come from the entity catalogue - STRAT-151
 const baseEntities = [
   'user',
   'system'

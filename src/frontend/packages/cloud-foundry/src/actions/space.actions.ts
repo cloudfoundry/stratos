@@ -79,6 +79,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
   entity = [cfEntityFactory(spaceWithOrgEntityType)];
+  schemaKey = spaceWithOrgEntityType;
   entityType = spaceEntityType;
   options: RequestOptions;
   initialParams = {
@@ -275,6 +276,7 @@ export class GetServiceInstancesForSpace
   }
   actions = getActions('Space', 'Get all service instances');
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
+  schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
   options: RequestOptions;
   initialParams = {

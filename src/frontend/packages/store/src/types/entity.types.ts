@@ -7,7 +7,7 @@ import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 import { UserProfileInfo } from './user-profile.types';
 
 export interface BaseEntityValues {
-  // TODO: Add `stratos` to types. clean
+  // FIXME: Should come from catalogue/start with stratos - STRAT-151
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   // featureFlag: IRequestEntityTypeState<IFeatureFlag>;
@@ -42,7 +42,8 @@ export type ExtendedRequestDataState<E extends Record<keyof E, any>> = {
 };
 
 
-// TODO: Shouldn't this be the same as BaseEntityValues?
+// TODO: NJ RC Shouldn't this be the same as BaseEntityValues?
+// FIXME: These should also come from catalogue? - STRAT-151
 export interface IRequestState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   userFavorites: IRequestEntityTypeState<RequestInfoState>;
