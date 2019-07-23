@@ -15,6 +15,10 @@
   .autoscaler-tab-table-no-record {
     margin-top: .5em;
   }
+
+  &__latest-metrics {
+    min-height: 200px;
+  }
 }
 
 .app-metadata {
@@ -44,26 +48,6 @@ table {
   width: 100%;
   td {
     padding-left: .5em;
-  }
-}
-
-.autoscaler-tab-policy {
-  margin-bottom: 24px;
-}
-
-.autoscaler-tab-policy-left {
-  flex: 0 0 40%;
-}
-
-.autoscaler-tab-tile {
-  &-1of2 {
-    flex: 0 0 50%;
-  }
-  &-1of3 {
-    flex: 0 0 30%;
-  }
-  &-1of6 {
-    flex: 0 0 16.78%;
   }
 }
 

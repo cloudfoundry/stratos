@@ -45,10 +45,10 @@
       <app-tile *ngIf="!policy.enabled">
         <app-card-app-instances></app-card-app-instances>
       </app-tile>
-      <app-tile *ngIf="policy.enabled" class="autoscaler-tab-tile-1of3">
+      <app-tile *ngIf="policy.enabled">
         <app-card-autoscaler-default [onUpdate]="updatePolicyPage"></app-card-autoscaler-default>
       </app-tile>
-      <app-tile *ngIf="policy.enabled" class="autoscaler-tab-tile-1of2">
+      <app-tile *ngIf="policy.enabled" class="autoscaler-tab__latest-metrics">
         <app-card-app-usage *ngIf="policy.scaling_rules.length == 0"></app-card-app-usage>
         <mat-card *ngIf="policy.scaling_rules.length > 0">
           <mat-card-header>
@@ -83,7 +83,7 @@
     </app-tile-group>
     <div *ngIf="appAutoscalerPolicy$ | async as policy" class="autoscaler-tab-policy">
       <app-tile-group *ngIf="policy.enabled">
-        <app-tile class="autoscaler-tab-policy-left">
+        <app-tile>
           <mat-card>
             <mat-card-header>
               <mat-card-title>Scaling Rules </mat-card-title>
