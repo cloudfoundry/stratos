@@ -27,6 +27,7 @@ export class StratosEntitySchema extends schema.Entity {
  */
 export class EntitySchema extends schema.Entity implements EntityCatalogueEntityConfig {
   schema: Schema;
+  schemaKey: string;
   public getId: (input, parent?, key?) => string;
   /**
    * @param entityKey As per schema.Entity ctor
@@ -40,10 +41,12 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
     public endpointType: string,
     public definition?: Schema,
     private options?: schema.EntityOptions,
-    public relationKey?: string
+    public relationKey?: string,
+    schemaKey?: string
   ) {
     super(endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
     this.schema = definition || {};
+    this.schemaKey = schemaKey;
   }
   public withEmptyDefinition() {
     return new EntitySchema(
@@ -52,6 +55,16 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
       {},
       this.options,
       this.relationKey
+    );
+  }
+  public clone() {
+    return new EntitySchema(
+      this.entityType,
+      this.endpointType,
+      this.definition,
+      this.options,
+      this.relationKey,
+      this.schemaKey
     );
   }
 }

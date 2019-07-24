@@ -16,12 +16,6 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import {
-  applicationEntityType,
-  cfEntityFactory,
-  serviceInstancesEntityType,
-  spaceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 import {
   ResetCreateServiceInstanceOrgAndSpaceState,
@@ -34,7 +28,13 @@ import {
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import {
+  applicationEntityType,
+  cfEntityFactory,
+  serviceInstancesEntityType,
+  spaceEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

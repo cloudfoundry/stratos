@@ -15,9 +15,9 @@ import {
   IEntityMetadata,
   IStratosBaseEntityDefinition,
   IStratosEndpointDefinition,
+  IStratosEndpointWithoutSchemaDefinition,
   IStratosEntityBuilder,
   IStratosEntityDefinition,
-  IStratosEndpointWithoutSchemaDefinition,
 } from './entity-catalogue.types';
 import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
@@ -58,23 +58,36 @@ export class StratosBaseCatalogueEntity<
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
-    // TODO: RC how to sort out typing's to allow actionDispatcher.customDispatchName()
     this.actionOrchestrator = new ActionOrchestrator<AB>(this.entityKey, this.builders.actionBuilders);
     this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
 
+  private populateEntitySchemaKey(entitySchemas: EntityCatalogueSchemas): EntityCatalogueSchemas {
+    return Object.keys(entitySchemas).reduce((newSchema, schemaKey) => {
+      if (schemaKey !== 'default') {
+        // New schema must be instance of `schema.Entity` (and not a spread of one) else normalize will ignore
+        newSchema[schemaKey] = entitySchemas[schemaKey].clone();
+        newSchema[schemaKey].schemaKey = schemaKey;
+      }
+      return newSchema;
+    }, {
+        default: entitySchemas.default
+      });
+  }
+
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
     : DefinitionTypes {
-    const schema = entity.schema instanceof EntitySchema ? {
+    // For cases where `entity.schema` is a EntityCatalogueSchemas just pass original object through (with it's default)
+    const entitySchemas = entity.schema instanceof EntitySchema ? {
       default: entity.schema
-    } : entity.schema;
+    } : this.populateEntitySchemaKey(entity.schema);
 
     return {
       ...entity,
-      type: entity.type || schema.default.entityType,
+      type: entity.type || entitySchemas.default.entityType,
       label: entity.label || 'Unknown',
       labelPlural: entity.labelPlural || entity.label || 'Unknown',
-      schema
+      schema: entitySchemas
     };
   }
   /**
@@ -82,11 +95,7 @@ export class StratosBaseCatalogueEntity<
    * If no schemaKey is provided then the default schema will be returned
    */
   public getSchema(schemaKey?: string) {
-    // TODO: schemaKey - ensure wherever this is called it contains the correct schemaKey (with respect to any config
-    // EntityCatalogueEntityConfig that may use a schemeKey different than that provided by entityCatalogue.getEntity's)
-    // TODO(NJ) We should do a better job at typeing schemax
-    // schema always gets changed to a EntityCatalogueSchamas.
-    const catalogueSchema = (this.definition.schema as EntityCatalogueSchemas);
+    const catalogueSchema = this.definition.schema;
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }

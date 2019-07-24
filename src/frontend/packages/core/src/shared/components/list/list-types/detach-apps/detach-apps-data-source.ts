@@ -6,7 +6,7 @@ import {
   serviceBindingNoBindingsEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ListServiceBindingsForInstance } from '../../../../../../../cloud-foundry/src/actions/service-instances.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';

@@ -12,7 +12,6 @@ import {
 import { GetServiceBrokers } from '../../../../cloud-foundry/src/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
 import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
@@ -30,6 +29,7 @@ import { EntityServiceFactory } from '../../core/entity-service-factory.service'
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;

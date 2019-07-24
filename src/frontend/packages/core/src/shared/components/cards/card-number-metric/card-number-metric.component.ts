@@ -2,8 +2,8 @@ import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../store/src/app-state';
 import { UtilsService } from '../../../../core/utils.service';
 import { StratosStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';

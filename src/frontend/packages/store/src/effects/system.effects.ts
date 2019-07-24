@@ -4,18 +4,18 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { CFAppState } from '../app-state';
 import { EntityRequestAction } from '../types/request.types';
 import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { SystemInfo, systemStoreNames } from '../types/system.types';
+import { InternalAppState } from '../app-state';
 
 @Injectable()
 export class SystemEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<InternalAppState>
   ) { }
 
   static guid = 'info';

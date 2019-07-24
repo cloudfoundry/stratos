@@ -26,13 +26,14 @@ import { InternalEventSeverity } from '../types/internal-events.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { APISuccessOrFailedAction, EntityRequestAction, ICFAction, RequestEntityLocation } from '../types/request.types';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
-import { CFAppState, IRequestEntityTypeState } from './../app-state';
+import { IRequestEntityTypeState, InternalAppState } from './../app-state';
 import { APIResource, instanceOfAPIResource, NormalizedResponse } from './../types/api.types';
 import { WrapperRequestActionFailed } from './../types/request.types';
 import { RecursiveDelete, RecursiveDeleteComplete, RecursiveDeleteFailed } from './recursive-entity-delete.effect';
 import { baseRequestPipelineFactory } from '../entity-request-pipeline/base-single-entity-request.pipeline';
 import { apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
 import { basePaginatedRequestPipeline } from '../entity-request-pipeline/entity-pagination-request-pipeline';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -57,7 +58,7 @@ export class APIEffect {
   constructor(
     private http: Http,
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store<InternalAppState>,
     private httpClient: PipelineHttpClient
   ) {
 
@@ -67,20 +68,20 @@ export class APIEffect {
   apiRequest$ = this.actions$.pipe(
     ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
     withLatestFrom(this.store),
-    mergeMap(([action, state]) => {
+    mergeMap(([action, appState]) => {
       if (!(action as PaginatedAction).paginationKey) {
         return apiRequestPipelineFactory(baseRequestPipelineFactory, {
           store: this.store,
           httpClient: this.httpClient,
           action,
-          appState: state
+          appState
         });
       }
       return apiRequestPipelineFactory(basePaginatedRequestPipeline, {
         store: this.store,
         httpClient: this.httpClient,
         action,
-        appState: state
+        appState
       });
     }),
   );
@@ -94,11 +95,11 @@ export class APIEffect {
     const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
     if (this.shouldRecursivelyDelete(requestType, apiAction)) {
       this.store.dispatch(
-        new RecursiveDelete(apiAction.guid, catalogueEntity.getSchema()),
+        new RecursiveDelete(apiAction.guid, catalogueEntity.getSchema(action.schemaKey)),
       );
     }
 
-    startApiRequest(this.store, action, requestType);
+    // startApiRequest(this.store, action, requestType);
 
     // Apply the params from the store
     if (paginatedAction.paginationKey) {
@@ -213,7 +214,7 @@ export class APIEffect {
               new RecursiveDeleteFailed(
                 apiAction.guid,
                 apiAction.endpointGuid,
-                catalogueEntity.getSchema()
+                catalogueEntity.getSchema(apiAction.schemaKey)
               ),
             );
           }
@@ -239,7 +240,7 @@ export class APIEffect {
             new RecursiveDeleteComplete(
               apiAction.guid,
               apiAction.endpointGuid,
-              catalogueEntity.getSchema(),
+              catalogueEntity.getSchema(apiAction.schemaKey),
             ),
           );
         }
@@ -279,7 +280,7 @@ export class APIEffect {
           this.store.dispatch(new RecursiveDeleteFailed(
             apiAction.guid,
             apiAction.endpointGuid,
-            catalogueEntity.getSchema(),
+            catalogueEntity.getSchema(apiAction.schemaKey),
           ));
         }
         return errorActions;
@@ -460,7 +461,7 @@ export class APIEffect {
       });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
 
-    // TODO This need tidying up.
+    // TODO NJ This need tidying up.
     let entityArray;
     const pagAction = apiAction as PaginatedAction;
     if (pagAction.__forcedPageEntityConfig__) {
@@ -592,7 +593,7 @@ export class APIEffect {
       }
     }
   }
-  // TODO We need to be able to pass schema keys here
+  // TODO NJ We need to be able to pass schema keys here
   private getEntityRelations(action: any) {
     if (action.__forcedPageEntityConfig__) {
       const entityConfig = action.__forcedPageEntityConfig__ as EntityCatalogueEntityConfig;

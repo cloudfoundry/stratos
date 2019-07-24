@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 
 import { cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';

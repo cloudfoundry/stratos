@@ -188,8 +188,6 @@ const RouteNoAppsSchema = new CFEntitySchema(routeEntityType, {
     domain: DomainSchema,
   }
 }, { idAttribute: getAPIResourceGuid });
-// TODO(NJ): Are we intentionally overriding the schema?
-entityCache[routeEntityType] = RouteSchema;
 
 const QuotaDefinitionSchema = new CFEntitySchema(quotaDefinitionEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[quotaDefinitionEntityType] = QuotaDefinitionSchema;

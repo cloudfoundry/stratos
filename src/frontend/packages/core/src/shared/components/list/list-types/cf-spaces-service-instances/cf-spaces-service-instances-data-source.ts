@@ -11,7 +11,7 @@ import {
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstancesForSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -31,7 +31,6 @@ export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResour
       createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
       createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
     ], true, false);
-    action.entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
     super({
       store,
       action,

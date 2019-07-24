@@ -1,5 +1,8 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { getActions } from '../../../store/src/actions/action.helper';
+
+import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
 import {
   applicationEntityType,
@@ -9,14 +12,13 @@ import {
   serviceBindingEntityType,
   serviceInstancesEntityType,
 } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 import {
   createEntityRelationKey,
-  createEntityRelationPaginationKey,
-  EntityInlineChildAction,
   EntityInlineParentAction,
+  EntityInlineChildAction,
+  createEntityRelationPaginationKey
 } from '../entity-relations/entity-relations.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
-import { getActions } from '../../../store/src/actions/action.helper';
 
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';

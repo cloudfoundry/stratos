@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory, serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
@@ -77,10 +77,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         this.cfOrgSpace = new CfOrgSpaceLabelService(
           this.store,
           this.cfGuid,
-          // TODO: schemaKey - `space` is null due to the incorrect schema used when fetching the service instance
-          // (see service instance wall data source)
-          // row.entity.space.entity.organization_guid,
-          'junk',
+          row.entity.space.entity.organization_guid,
           row.entity.space_guid);
       }
     }

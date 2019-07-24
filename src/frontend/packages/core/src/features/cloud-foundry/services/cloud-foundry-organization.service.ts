@@ -14,7 +14,6 @@ import {
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { DeleteSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { OrgUserRoleNames } from '../../../../../store/src/types/user.types';
@@ -37,6 +36,7 @@ import { fetchServiceInstancesCount } from '../../service-catalog/services-helpe
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,

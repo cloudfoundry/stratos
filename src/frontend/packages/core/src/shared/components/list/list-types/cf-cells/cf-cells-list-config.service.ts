@@ -12,7 +12,7 @@ import {
 } from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
 import { ITableColumn } from '../../list-table/table.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 
 

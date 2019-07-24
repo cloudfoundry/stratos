@@ -1,18 +1,12 @@
-import {
-  DeleteApplication,
-  UpdateApplication,
-  RestageApplication,
-} from '../actions/application.actions';
-import { AppMetadataTypes } from '../actions/app-metadata.actions';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
-import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { DeleteApplication } from '../actions/application.actions';
 import {
   GetAllUserProvidedServices,
   GetUserProvidedService,
-  CreateUserProvidedServiceInstance,
   IUserProvidedServiceInstanceData,
-  UpdateUserProvidedServiceInstance
+  UpdateUserProvidedServiceInstance,
 } from '../actions/user-provided-service.actions';
+import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
 export const userProvidedServiceActionBuilder = {
   get: (
@@ -26,12 +20,12 @@ export const userProvidedServiceActionBuilder = {
     guid: string,
     endpointGuid: string,
     existingUserProvidedServiceInstance?: Partial<IUserProvidedServiceInstanceData>,
-    proxyPaginationEntityKey?: string
+    proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
   ) => new UpdateUserProvidedServiceInstance(
     endpointGuid,
     guid,
     existingUserProvidedServiceInstance,
-    proxyPaginationEntityKey
+    proxyPaginationEntityConfig
   ),
   getAll: (
     endpointGuid: string,

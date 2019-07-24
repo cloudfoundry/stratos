@@ -3,15 +3,15 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { cfEntityFactory, serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllServices } from '../../../../../cloud-foundry/src/actions/service.actions';
 import { GetAllServicesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IService } from '../../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { serviceEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 
 @Injectable()
 export class ServicesWallService {

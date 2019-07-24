@@ -5,6 +5,18 @@ import { combineLatest, filter, first, map, publishReplay, refCount, startWith, 
 
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import {
+  AppMetadataTypes,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from '../../../../cloud-foundry/src/actions/app-metadata.actions';
+import {
+  GetApplication,
+  UpdateApplication,
+  UpdateExistingApplication,
+} from '../../../../cloud-foundry/src/actions/application.actions';
+import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import {
   appEnvVarsEntityType,
   applicationEntityType,
   appStatsEntityType,
@@ -16,19 +28,6 @@ import {
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfEntity } from '../../../../cloud-foundry/src/selectors/api.selectors';
-import {
-  AppMetadataTypes,
-  GetAppStatsAction,
-  GetAppSummaryAction,
-} from '../../../../cloud-foundry/src/actions/app-metadata.actions';
-import {
-  GetApplication,
-  UpdateApplication,
-  UpdateExistingApplication,
-} from '../../../../cloud-foundry/src/actions/application.actions';
-import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../store/src/app-state';
-import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getCurrentPageRequestInfo,
@@ -56,6 +55,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 
 
@@ -151,7 +151,7 @@ export class ApplicationService {
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      new CFEntityConfig(appStatsEntityType)
+      dummyAction
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {

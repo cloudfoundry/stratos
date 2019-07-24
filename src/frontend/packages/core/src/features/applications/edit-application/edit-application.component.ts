@@ -8,10 +8,13 @@ import { filter, map, take } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import {
+  AppNameUniqueChecking,
+  AppNameUniqueDirective,
+} from '../../../shared/app-name-unique.directive/app-name-unique.directive';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { ApplicationService } from '../application.service';
-import { AppNameUniqueDirective, AppNameUniqueChecking } from '../../../shared/app-name-unique.directive/app-name-unique.directive';
 
 
 @Component({

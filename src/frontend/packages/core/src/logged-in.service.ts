@@ -1,4 +1,3 @@
-import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material';
@@ -6,12 +5,13 @@ import { Store } from '@ngrx/store';
 import { fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
+import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { VerifySession } from '../../store/src/actions/auth.actions';
-import { CFAppState } from '../../store/src/app-state';
 import { AuthState } from '../../store/src/reducers/auth.reducer';
+import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
+import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
-import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
 
 @Injectable()
 export class LoggedInService {

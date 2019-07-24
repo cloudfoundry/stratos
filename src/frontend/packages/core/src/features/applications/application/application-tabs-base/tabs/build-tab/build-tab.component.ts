@@ -6,8 +6,8 @@ import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith
 
 import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { RestageApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../core/cf-api.types';

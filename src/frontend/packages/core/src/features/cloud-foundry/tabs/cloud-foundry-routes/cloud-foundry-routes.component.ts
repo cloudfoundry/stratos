@@ -4,6 +4,7 @@ import {
   CfRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/cf-routes/cf-routes-list-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-cloud-foundry-routes',
@@ -13,7 +14,8 @@ import { ListConfig } from '../../../../shared/components/list/list.component.ty
     {
       provide: ListConfig,
       useClass: CfRoutesListConfigService
-    }
+    },
+    CfOrgSpaceDataService
   ]
 })
 export class CloudFoundryRoutesComponent { }

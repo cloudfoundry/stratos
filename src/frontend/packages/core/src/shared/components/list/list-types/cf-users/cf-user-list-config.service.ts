@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
-import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
 import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { GetAllUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';

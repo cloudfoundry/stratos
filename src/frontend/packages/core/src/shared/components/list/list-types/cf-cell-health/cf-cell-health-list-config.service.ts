@@ -10,7 +10,7 @@ import {
   TableCellBooleanIndicatorComponent
 } from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CloudFoundryCellService
 } from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';

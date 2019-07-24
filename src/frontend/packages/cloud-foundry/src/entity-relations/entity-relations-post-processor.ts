@@ -25,8 +25,6 @@ function apiAction(
   allEntities: GeneralRequestDataState): ValidateEntityResult {
   const cfAction = action as ICFAction;
   const actions = cfAction.actions || [];
-  // TODO This need to be moved
-  // What is this used for and how can it be put into the entity catalogue?
   switch (actions[0]) {
     case GET_ORGANIZATION:
       return orgSpacePostProcess(store, action as GetOrganization, apiResponse, allEntities);

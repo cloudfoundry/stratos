@@ -1,13 +1,14 @@
 import { RequestOptions } from '@angular/http';
 
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { stackEntityType } from '../cf-entity-factory';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
-import { getActions } from '../../../store/src/actions/action.helper';
+import { ICFAction } from '../../../store/src/types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { stackEntityType } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 
 export const GET = '[Stack] Get one';
 export const GET_SUCCESS = '[Stack] Get one success';

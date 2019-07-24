@@ -4,15 +4,15 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap } from 'rxjs/operators';
 
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { WrapperRequestActionSuccess } from '../types/request.types';
 import {
   AppMetadataTypes,
   GetAppEnvVarsAction,
   GetAppStatsAction,
   GetAppSummaryAction,
 } from '../../../cloud-foundry/src/actions/app-metadata.actions';
-import { CFAppState } from './../app-state';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { WrapperRequestActionSuccess } from '../types/request.types';
 
 
 

@@ -19,7 +19,6 @@ import { RequestInfoState } from '../../../store/src/reducers/api-request-reduce
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
-import { BaseRequestDataState } from '../../../store/src/types/entity.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
@@ -38,7 +37,6 @@ import {
   ValidationResult,
 } from './entity-relations.types';
 
-// TODO This 1 needs a tidy up and 2 only works with CF entities.
 interface ValidateResultFetchingState {
   fetching: boolean;
 }
@@ -507,7 +505,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
       store.select(selectEntity<any>(parentEntityKey, parentGuid)),
       store.select(getAPIRequestDataState),
     ),
-    map(([entityInfo, entity, allEntities]: [RequestInfoState, any, BaseRequestDataState]) => {
+    map(([entityInfo, entity, allEntities]: [RequestInfoState, any, GeneralEntityAppState]) => {
       if (!entity) {
         return;
       }

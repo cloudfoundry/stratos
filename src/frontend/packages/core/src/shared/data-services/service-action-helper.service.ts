@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import { DeleteServiceBinding } from '../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { DeleteServiceInstance } from '../../../../cloud-foundry/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../store/src/app-state';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../core/cf-api-svc.types';
+import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import {
   SERVICE_INSTANCE_TYPES,
 } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
@@ -61,7 +63,11 @@ export class ServiceActionHelperService {
     endpointGuid: string,
     userProvided = false
   ) => {
-    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesEntityType) :
+    const serviceInstancesEntityConfig: EntityCatalogueEntityConfig = {
+      endpointType: CF_ENDPOINT_TYPE,
+      entityType: serviceInstancesEntityType
+    };
+    const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesEntityConfig) :
       new DeleteServiceInstance(endpointGuid, serviceInstanceGuid);
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',

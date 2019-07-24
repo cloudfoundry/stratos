@@ -4,7 +4,7 @@ import { map, switchMap, tap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { cfEntityFactory, routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { IRoute } from '../../../../../core/cf-api.types';

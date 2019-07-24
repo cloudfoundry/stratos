@@ -13,10 +13,9 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizations } from '../../../../cloud-foundry/src/actions/organization.actions';
+import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
@@ -28,10 +27,12 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
+import { safeUnsubscribe } from '../../core/utils.service';
 import { ListPaginationMultiFilterChange } from '../components/list/data-sources-controllers/list-data-source-types';
 import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/list-pagination-controller';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
@@ -144,6 +145,9 @@ export const createCfOrSpaceMultipleFilterFn = (
 };
 
 
+/**
+ * This service relies on OnDestroy, so must be `provided` by a component
+ */
 @Injectable()
 export class CfOrgSpaceDataService implements OnDestroy {
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
@@ -338,8 +342,13 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subs.forEach(sub => {
-      sub.unsubscribe();
-    });
+    this.destroy();
+  }
+
+  destroy() {
+    // OnDestroy will be called when the component the service is provided at is destroyed. In theory this should not need to be called
+    // separately, if you see error's first ensure the service is provided at a component that will be destroyed
+    // Should be called in the OnDestroy of the component where it's provided
+    safeUnsubscribe(...this.subs);
   }
 }

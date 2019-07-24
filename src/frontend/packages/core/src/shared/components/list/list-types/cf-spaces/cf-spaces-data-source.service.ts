@@ -8,7 +8,7 @@ import {
   spaceWithOrgEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllOrganizationSpaces } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -27,7 +27,7 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: cfEntityFactory(spaceWithOrgEntityType),
+      schema: cfEntityFactory(spaceEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

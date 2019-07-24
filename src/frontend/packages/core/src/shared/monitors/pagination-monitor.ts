@@ -64,8 +64,6 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   public isMultiAction$: Observable<boolean>;
   public schema: EntitySchema;
 
-
-
   /**
    * Returns a pagination monitor for a given catalogue entity and pagination key.
    */
@@ -78,7 +76,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       schemaKey = ''
     }: any
   ) {
-    // This is a static on the pagintion monitor rather than a member of StratosBaseCatalogueEntity due to
+    // This is a static on the pagination monitor rather than a member of StratosBaseCatalogueEntity due to
     // a circular dependency on entityFactory from the getPageInfo function below.
     const schema = catalogueEntity.getSchema(schemaKey);
     return new PaginationMonitor(store, paginationKey, schema, isLocal);
@@ -293,7 +291,6 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   }
 
   private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: GeneralRequestDataState) {
-    // TODO: schemaKey - the schema passed must come from a correct EntityCatalogueEntityConfig with schemaKey populated
     return page.length
       ? denormalize(page, [schema], allEntities).filter(ent => !!ent)
       : [];

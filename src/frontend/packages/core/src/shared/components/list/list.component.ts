@@ -41,6 +41,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   ListFilter,
   ListPagination,
@@ -49,7 +50,6 @@ import {
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
 import { SetPage } from '../../../../../store/src/actions/pagination.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
@@ -292,9 +292,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
-      const catalogueEntity = entityCatalogue.getEntity(this.dataSource.endpointType, this.dataSource.entityType);
-      const schema = catalogueEntity.getSchema();
-      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
+      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(this.dataSource.sourceScheme, this.dataSource);
     }
     this.multiFilterManagers = this.getMultiFilterManagers();
 
@@ -667,7 +665,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       const catalogueEntity = entityCatalogue.getEntity(entityConfig);
       const entityMonitor = catalogueEntity.getEntityMonitor(
         this.store,
-        dataSource.getRowUniqueId(row)
+        dataSource.getRowUniqueId(row),
+        {
+          schemaKey: entityConfig.schemaKey
+        }
       );
       return entityMonitor.entityRequest$.pipe(
         distinctUntilChanged(),

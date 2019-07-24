@@ -1,13 +1,14 @@
-
-import { of as observableOf, Observable } from 'rxjs';
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
-import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
+import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { map, filter } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
+import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
+
 
 @Component({
   selector: 'app-deploy-application-step-source-upload',
@@ -20,8 +21,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 
   public valid$: Observable<boolean>;
 
-  constructor(store: Store<CFAppState>,
-              public cfOrgSpaceService: CfOrgSpaceDataService,
+  constructor(store: Store<CFAppState>, public cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
     this.valid$ = this.deployer.fileTransferStatus$.pipe(

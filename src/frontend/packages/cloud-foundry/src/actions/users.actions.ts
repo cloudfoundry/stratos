@@ -1,11 +1,6 @@
 import { RequestOptions } from '@angular/http';
 
-import {
-  cfEntityFactory,
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../cf-entity-factory';
+import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
@@ -13,10 +8,11 @@ import {
 } from '../entity-relations/entity-relations.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/src/types/user.types';
-import { getActions } from '../../../store/src/actions/action.helper';
+import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -67,24 +63,8 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     return !!action.isGetAllUsersAsAdmin;
   }
 }
-// TODO: Can we get rid of this?
-export class GetCFUser extends CFStartAction implements EntityRequestAction {
-  constructor(
-    public guid: string,
-    public endpointGuid: string,
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `users/${guid}/summary`;
-    this.options.method = 'get';
-  }
-  actions = [GET_CF_USER, GET_CF_USER_SUCCESS, GET_CF_USER_FAILED];
-  entity = cfEntityFactory(cfUserEntityType);
-  entityType = cfUserEntityType;
-  options: RequestOptions;
-}
-// TODO: Where do these action sit within the entity catalogue?
-// They are user role actions that have the entity type or either space of organization.
+// FIXME: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
+// a flag somewhere to handle that - https://jira.capbristol.com/browse/STRAT-119
 export class ChangeUserRole extends CFStartAction implements EntityRequestAction {
   public endpointType = 'cf';
   constructor(
@@ -178,8 +158,6 @@ export class GetUser extends CFStartAction {
     this.options.url = 'users/' + userGuid;
     this.options.method = 'get';
   }
-  // TODO: Stratos internal entity types don't need a endpoint type.
-  // Should we create internal entity catalogue entries with a "fake" endpoint type?
   actions = getActions('Users', 'Fetch User');
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;

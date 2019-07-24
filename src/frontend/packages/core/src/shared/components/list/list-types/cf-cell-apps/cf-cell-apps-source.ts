@@ -10,7 +10,6 @@ import {
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
@@ -20,6 +19,7 @@ import { EntityServiceFactory } from '../../../../../core/entity-service-factory
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 
 export interface CfCellApp {
   metric: IMetricApplication;

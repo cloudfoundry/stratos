@@ -5,14 +5,6 @@ import { debounceTime, filter, map } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import {
-  organizationEntityType,
-  serviceEntityType,
-  serviceInstancesEntityType,
-  spaceEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../cloud-foundry/src/selectors/api.selectors';
-import {
   CreateUserProvidedServiceInstance,
   GetAllUserProvidedServices,
   GetUserProvidedService,
@@ -20,22 +12,34 @@ import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { fetchTotalResults } from '../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import {
+  serviceInstancesEntityType,
+  spaceEntityType,
+  organizationEntityType,
+  userProvidedServiceInstanceEntityType
+} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { selectCfRequestInfo } from '../../../../cloud-foundry/src/selectors/api.selectors';
 
 
 @Injectable()
 export class CloudFoundryUserProvidedServicesService {
 
+  private serviceInstancesEntityConfig: EntityCatalogueEntityConfig = {
+    endpointType: CF_ENDPOINT_TYPE,
+    entityType: serviceInstancesEntityType
+  };
 
   constructor(
     private store: Store<CFAppState>,
@@ -96,7 +100,7 @@ export class CloudFoundryUserProvidedServicesService {
     guid: string,
     data: IUserProvidedServiceInstanceData
   ): Observable<RequestInfoState> {
-    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data, serviceInstancesEntityType);
+    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
     const create$ = this.store.select(selectCfRequestInfo(userProvidedServiceInstanceEntityType, guid));
     this.store.dispatch(action);
     return create$.pipe(
@@ -110,12 +114,7 @@ export class CloudFoundryUserProvidedServicesService {
     guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
   ): Observable<RequestInfoState> {
-    const updateAction = new UpdateUserProvidedServiceInstance(
-      cfGuid,
-      guid,
-      data,
-      serviceEntityType
-    );
+    const updateAction = new UpdateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
     const catalogueEntity = entityCatalogue.getEntity({
       entityType: userProvidedServiceInstanceEntityType,
       endpointType: CF_ENDPOINT_TYPE

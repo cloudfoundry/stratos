@@ -6,7 +6,7 @@ import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, filter, share } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
 import { ApplicationService } from '../../../../application.service';

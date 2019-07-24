@@ -3,9 +3,10 @@ import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms'
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
-import { CFAppState } from '../../../../../store/src/app-state';
-import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
+
 import { CheckProjectExists } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
 import { GitSCMService, GitSCMType } from '../../../shared/data-services/scm/scm.service';
 
 

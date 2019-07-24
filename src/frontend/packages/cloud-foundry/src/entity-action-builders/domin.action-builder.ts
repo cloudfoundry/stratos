@@ -1,18 +1,18 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { GetAllAppEvents } from '../actions/app-event.actions';
-import { FetchDomain, FetchAllDomains } from '../actions/domains.actions';
+import { FetchAllDomains, FetchDomain } from '../actions/domains.actions';
 
 export const domainActionBuilders = {
   get: (
     guid,
     endpointGuid
   ) => new FetchDomain(guid, endpointGuid),
-  // TODO: This is good reason to remove pagination key
+  // FIXME: Remove pagination key from get all requests. This might need some investigation regarding places where we use different keys
+  // for lists of same type - #STRAT-149
   getAll: (
     endpointGuid,
     paginationKey?,
     flatten?: boolean,
-  ) => new FetchAllDomains(endpointGuid, flatten)
+  ) => new FetchAllDomains(endpointGuid, paginationKey, flatten)
 } as OrchestratedActionBuilders;
 
 

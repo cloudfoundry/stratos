@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
@@ -153,7 +153,9 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.memoryLimit = truthyIncludingZeroString(quotaDefinition.memory_limit);
   }
 
-  ngOnDestroy = () => this.subscriptions.forEach(p => p.unsubscribe());
+  ngOnDestroy() {
+    this.subscriptions.forEach(p => p.unsubscribe());
+  }
 
   edit = () => {
     this.store.dispatch(

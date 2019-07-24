@@ -2,8 +2,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { CfUser, CfUserMissingRoles } from '../../../../../../../store/src/types/user.types';
@@ -18,7 +18,6 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { ListRowSateHelper, ListRowStateSetUpManager } from '../../list.helper';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
-import { EntityCatalogueEntityConfig } from '../../../../../core/entity-catalogue/entity-catalogue.types';
 
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;

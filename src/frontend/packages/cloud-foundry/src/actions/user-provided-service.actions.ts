@@ -1,5 +1,11 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { getActions } from '../../../store/src/actions/action.helper';
+import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { ICFAction } from '../../../store/src/types/request.types';
 import {
   applicationEntityType,
   cfEntityFactory,
@@ -9,16 +15,13 @@ import {
   spaceWithOrgEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../cf-entity-factory';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { CFStartAction } from './cf-action.types';
 import {
   createEntityRelationKey,
-  createEntityRelationPaginationKey,
   EntityInlineParentAction,
+  createEntityRelationPaginationKey
 } from '../entity-relations/entity-relations.types';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
-import { getActions } from '../../../store/src/actions/action.helper';
-import { QParam, QParamJoiners } from '../../../store/src/q-param';
+import { QParamJoiners, QParam } from '../../../store/src/q-param';
 
 export const getUserProvidedServiceInstanceRelations = [
   createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
@@ -96,7 +99,7 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     public endpointGuid: string,
     public guid: string,
     data: IUserProvidedServiceInstanceData,
-    public proxyPaginationEntityKey?: string
+    public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
   ) {
     super();
     this.options = new RequestOptions();
@@ -132,7 +135,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     public endpointGuid: string,
     public guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
-    public proxyPaginationEntityKey?: string
+    public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
   ) {
     super();
     this.options = new RequestOptions();
@@ -173,7 +176,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
 }
 
 export class DeleteUserProvidedInstance extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public guid: string, public proxyPaginationEntityKey?: string) {
+  constructor(public endpointGuid: string, public guid: string, public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig) {
     super();
     this.options = new RequestOptions();
     this.options.url = `user_provided_service_instances/${guid}`;

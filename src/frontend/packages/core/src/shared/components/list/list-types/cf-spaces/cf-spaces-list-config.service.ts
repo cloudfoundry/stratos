@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../core/cf-api.types';
 import {

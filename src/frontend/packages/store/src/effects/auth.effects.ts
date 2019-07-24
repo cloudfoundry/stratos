@@ -1,12 +1,11 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { catchError, map, mergeMap, switchMap, tap, filter, first } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
-import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
-import { GetSystemInfo } from '../actions/system.actions';
-import { SessionData } from '../types/auth.types';
 import {
   InvalidSession,
   LOGIN,
@@ -26,10 +25,11 @@ import {
   VERIFY_SESSION,
   VerifySession,
 } from '../actions/auth.actions';
-import { Store } from '@ngrx/store';
-import { CFAppState } from '../app-state';
-import { getDashboardStateSessionId } from '../helpers/store-helpers';
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
+import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
+import { GetSystemInfo } from '../actions/system.actions';
+import { getDashboardStateSessionId } from '../helpers/store-helpers';
+import { SessionData } from '../types/auth.types';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';

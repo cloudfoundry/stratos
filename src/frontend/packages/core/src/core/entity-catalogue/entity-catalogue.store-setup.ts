@@ -1,9 +1,7 @@
 import { entityCatalogue } from './entity-catalogue.service';
-import { userProfileSchemaKey } from '../../../../store/src/helpers/entity-factory';
 
-// TODO Move these into the entity catalogue
+// FIXME: These should be removed/come from the entity catalogue - STRAT-151
 const baseEntities = [
-  userProfileSchemaKey,
   'user',
   'system'
 ];

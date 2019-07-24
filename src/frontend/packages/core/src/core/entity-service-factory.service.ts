@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+
 import { GeneralEntityAppState } from '../../../store/src/app-state';
 import { EntityService } from './entity-service';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
@@ -15,7 +16,9 @@ export class EntityServiceFactory {
   ) { }
 
   create<T>(
-    // TODO Can we reliably get the ID from the action? NJ
+    // TODO NJ Can we reliably get the ID from the action? RC - IRequestAction covers request to single and lists of entities. For single
+    // there should always be a guid. We should split IRequestAction into single with guid and list without
+    // Also we should bump this into the catalogue https://jira.capbristol.com/browse/STRAT-141
     entityId: string,
     action: EntityRequestAction,
     validateRelations = true,

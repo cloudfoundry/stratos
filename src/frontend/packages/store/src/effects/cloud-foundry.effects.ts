@@ -4,16 +4,12 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
-import { environment } from '../../../core/src/environments/environment.prod';
-import { GET_INFO, GetCFInfo } from '../../../cloud-foundry/src/actions/cloud-foundry.actions';
-import { NormalizedResponse } from '../types/api.types';
-import {
-  StartRequestAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess,
-} from '../types/request.types';
-import { CFAppState } from './../app-state';
+import { GET_CF_INFO, GetCFInfo } from '../../../cloud-foundry/src/actions/cloud-foundry.actions';
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { environment } from '../../../core/src/environments/environment.prod';
+import { NormalizedResponse } from '../types/api.types';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 
 @Injectable()
 export class CloudFoundryEffects {
@@ -23,16 +19,15 @@ export class CloudFoundryEffects {
     private actions$: Actions,
     private store: Store<CFAppState>
   ) { }
-  // TODO(nj): do we need this?
+
   @Effect()
   fetchInfo$ = this.actions$.pipe(
-    ofType<GetCFInfo>(GET_INFO),
+    ofType<GetCFInfo>(GET_CF_INFO),
     flatMap(action => {
       const actionType = 'fetch';
-      const apiAction = new GetCFInfo(action.cfGuid);
-      const catalogueEntity = entityCatalogue.getEntity(apiAction.endpointType, apiAction.entityType);
+      const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
       const cfInfoKey = catalogueEntity.entityKey;
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(action, actionType));
       const headers = new Headers({ 'x-cap-cnsi-list': action.cfGuid });
       const requestArgs = {
         headers
@@ -55,11 +50,11 @@ export class CloudFoundryEffects {
             };
             mappedData.result.push(id);
             return [
-              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
           catchError(error => [
-            new WrapperRequestActionFailed(error.message, apiAction, actionType, {
+            new WrapperRequestActionFailed(error.message, action, actionType, {
               endpointIds: [action.cfGuid],
               url: error.url || url,
               eventCode: error.status ? error.status + '' : '500',

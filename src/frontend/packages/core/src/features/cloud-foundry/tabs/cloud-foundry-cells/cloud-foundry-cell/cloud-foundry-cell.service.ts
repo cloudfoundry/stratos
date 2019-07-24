@@ -107,7 +107,7 @@ export class CloudFoundryCellService {
     if (metric === CellMetrics.HEALTHY) {
       this.healthyMetricId = action.guid;
     }
-    // TODO: Metrics entityType type??
+    // FIXME: Final solution for Metrics - STRAT-152
     return this.entityServiceFactory.create<IMetrics<IMetricVectorResult<IMetricCell>>>(
       action.guid,
       action,

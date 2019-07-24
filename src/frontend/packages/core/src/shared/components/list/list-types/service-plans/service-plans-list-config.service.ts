@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../core/cf-api-svc.types';
 import { getServicePlanName } from '../../../../../features/service-catalog/services-helper';

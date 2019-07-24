@@ -3,6 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
 
+import { GetServiceBroker } from '../../../../cloud-foundry/src/actions/service-broker.actions';
+import { GetServiceInstances } from '../../../../cloud-foundry/src/actions/service-instances.actions';
+import { GetService, GetServicePlansForService } from '../../../../cloud-foundry/src/actions/service.actions';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   organizationEntityType,
@@ -10,11 +14,6 @@ import {
   servicePlanEntityType,
   spaceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceBroker } from '../../../../cloud-foundry/src/actions/service-broker.actions';
-import { GetServiceInstances } from '../../../../cloud-foundry/src/actions/service-instances.actions';
-import { GetService, GetServicePlansForService } from '../../../../cloud-foundry/src/actions/service.actions';
-import { CFAppState } from '../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import {
@@ -33,6 +32,7 @@ import { StratosStatus } from '../../shared/shared.types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 
 export const getSvcAvailability = (
@@ -80,12 +80,11 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
 
 export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
   const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
-  // TODO: schemaKey - Dispatches the action which has the correct schema key (SI with space), however uses incorrect schema to denormalise
-  // so entities$ does not contain space
+  const action = new GetServiceInstances(cfGuid, paginationKey);
   return getPaginationObservables<APIResource<IServiceInstance>>({
     store,
-    action: new GetServiceInstances(cfGuid, paginationKey),
-    paginationMonitor: paginationMonitorFactory.create(paginationKey, cfEntityFactory(serviceInstancesEntityType))
+    action,
+    paginationMonitor: paginationMonitorFactory.create(paginationKey, action)
   }, true).entities$;
 };
 

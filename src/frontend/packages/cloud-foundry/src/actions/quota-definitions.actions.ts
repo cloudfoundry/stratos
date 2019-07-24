@@ -1,5 +1,7 @@
 import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
 import {
   cfEntityFactory,
@@ -7,9 +9,8 @@ import {
   quotaDefinitionEntityType,
   spaceQuotaEntityType,
 } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 import { EntityInlineChildAction } from '../entity-relations/entity-relations.types';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
 
 export const GET_QUOTA_DEFINITIONS = '[QuotaDefinitions] Get all';
 export const GET_QUOTA_DEFINITIONS_SUCCESS = '[QuotaDefinitions] Get all success';

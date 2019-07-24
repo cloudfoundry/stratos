@@ -1,5 +1,9 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
+import { getActions } from '../../../store/src/actions/action.helper';
+
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { ICFAction } from '../../../store/src/types/request.types';
 import {
   applicationEntityType,
   cfEntityFactory,
@@ -12,10 +16,8 @@ import {
   servicePlanEntityType,
   spaceEntityType,
 } from '../cf-entity-factory';
+import { CFStartAction } from './cf-action.types';
 import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
-import { getActions } from '../../../store/src/actions/action.helper';
 
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
@@ -45,6 +47,7 @@ export class GetServiceInstances
   actions = getActions('Service Instances', 'Get all');
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   entityType = serviceInstancesEntityType;
+  schemaKey = serviceInstancesWithSpaceEntityType;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -71,6 +74,7 @@ export class GetServiceInstance
   }
   actions = getActions('Service Instances', 'Get particular instance');
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
+  schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
   options: RequestOptions;
 }

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
@@ -9,8 +11,6 @@ import { TableCellEventActionComponent } from './table-cell-event-action/table-c
 import { TableCellEventDetailComponent } from './table-cell-event-detail/table-cell-event-detail.component';
 import { TableCellEventTimestampComponent } from './table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { TableCellEventTypeComponent } from './table-cell-event-type/table-cell-event-type.component';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../store/src/app-state';
 
 @Injectable()
 export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {

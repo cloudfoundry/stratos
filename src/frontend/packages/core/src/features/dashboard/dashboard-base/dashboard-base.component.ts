@@ -7,23 +7,29 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
+import { cfInfoEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  CfInfoDefinitionActionBuilders,
+} from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';
 import {
   CloseSideHelp,
   CloseSideNav,
   DisableMobileNav,
   EnableMobileNav,
 } from '../../../../../store/src/actions/dashboard-actions';
-import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
+import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 
 
 @Component({
@@ -140,7 +146,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       this.tabNavService.tabSubNav$
     );
     this.endpointsService.registerHealthCheck(
-      new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
+      new EndpointHealthCheck('cf', (endpoint) => {
+        entityCatalogue.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
+          .actionDispatchManager.dispatchGet(endpoint.guid);
+      })
     );
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());

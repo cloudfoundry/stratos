@@ -9,7 +9,7 @@ import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators'
 import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
 import { GetAllStacks } from '../../../../../../cloud-foundry/src/actions/stack.action';
-import { CFAppState } from '../../../../../../store/src/app-state';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCfDetails } from '../../../../../../store/src/selectors/deploy-application.selector';
 import { APIResource } from '../../../../../../store/src/types/api.types';

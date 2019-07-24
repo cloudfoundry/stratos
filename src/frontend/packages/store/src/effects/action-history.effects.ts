@@ -3,8 +3,8 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map, take } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { ActionHistoryActions, ActionHistoryDump } from '../actions/action-history.actions';
-import { CFAppState } from '../app-state';
 
 
 

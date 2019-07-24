@@ -3,8 +3,8 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { SET_CLIENT_FILTER, SetClientFilter, SetClientPage } from '../actions/pagination.actions';
-import { CFAppState } from '../app-state';
 
 
 

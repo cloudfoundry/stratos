@@ -1,5 +1,10 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
+import { getActions } from '../../../store/src/actions/action.helper';
+
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
 import {
   applicationEntityType,
@@ -13,19 +18,12 @@ import {
   spaceEntityType,
   spaceWithOrgEntityType,
 } from '../cf-entity-factory';
-import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
-import {
-  createEntityRelationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../entity-relations/entity-relations.types';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CFStartAction, ICFAction } from '../../../store/src/types/request.types';
-import { getActions } from '../../../store/src/actions/action.helper';
+import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
 import { QParam } from '../../../store/src/q-param';
+import { EntityInlineParentAction, EntityInlineChildAction, createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -79,6 +77,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
   entity = [cfEntityFactory(spaceWithOrgEntityType)];
+  schemaKey = spaceWithOrgEntityType;
   entityType = spaceEntityType;
   options: RequestOptions;
   initialParams = {
@@ -275,6 +274,7 @@ export class GetServiceInstancesForSpace
   }
   actions = getActions('Space', 'Get all service instances');
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
+  schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
   options: RequestOptions;
   initialParams = {
