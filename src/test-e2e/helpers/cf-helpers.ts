@@ -12,7 +12,7 @@ import {
 import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
 import { CfUser } from '../../frontend/packages/store/src/types/user.types';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
-import { CfOrgLevelPage } from '../cloud-foundry/org-level/cf-org-level-page.po';
+import { CfOrgLevelPage ../../frontend/packages/cloud-foundry/src/store/types/user.typesge.po';
 import { CfSpaceLevelPage } from '../cloud-foundry/space-level/cf-space-level-page.po';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';

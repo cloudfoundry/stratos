@@ -16,7 +16,7 @@ import {
   getDefaultCfUserMissingRoles,
   OrgUserRoleNames,
   SpaceUserRoleNames,
-} from '../../../../store/src/types/user.types';
+} from '../types/user.types';
 
 const properties = {
   org: {

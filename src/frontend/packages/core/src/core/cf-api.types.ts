@@ -1,5 +1,5 @@
 import { APIResource } from '../../../store/src/types/api.types';
-import { CfUser } from '../../../store/src/types/user.types';
+import { CfUser } from '../../../cloud-foundry/src/store/types/user.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
 
 export interface StratosCFEntity {

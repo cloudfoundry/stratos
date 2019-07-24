@@ -26,7 +26,7 @@ import {
   SpaceUserRoleNames,
   UserRoleInOrg,
   UserRoleInSpace,
-} from '../../../../store/src/types/user.types';
+} from '../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../cloud-foundry/src/store/types/users-roles.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { ISpace } from '../../core/cf-api.types';

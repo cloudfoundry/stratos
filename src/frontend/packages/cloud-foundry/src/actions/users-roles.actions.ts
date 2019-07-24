@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { CfUser } from '../../../store/src/types/user.types';
+import { CfUser } from '../store/types/user.types';
 import { CfRoleChange } from '../store/types/users-roles.types';
 
 export const UsersRolesActions = {

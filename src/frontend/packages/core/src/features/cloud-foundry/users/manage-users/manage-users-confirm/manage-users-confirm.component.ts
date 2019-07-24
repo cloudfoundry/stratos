@@ -19,7 +19,7 @@ import {
   selectUsersRolesChangedRoles,
 } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
+import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import {

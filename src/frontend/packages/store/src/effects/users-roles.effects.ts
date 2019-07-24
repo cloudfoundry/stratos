@@ -17,7 +17,7 @@ import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';
 import { ICFAction, UpdateCfAction } from '../types/request.types';
-import { OrgUserRoleNames } from '../types/user.types';
+import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
 import { CfRoleChange } from '../../../cloud-foundry/src/store/types/users-roles.types';
 
 

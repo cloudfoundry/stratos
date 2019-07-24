@@ -14,7 +14,7 @@ import {
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
-} from '../../../../store/src/types/user.types';
+} from '../types/user.types';
 import { UsersRolesState } from '../types/users-roles.types';
 
 export function createDefaultOrgRoles(orgGuid: string, orgName: string): IUserPermissionInOrg {

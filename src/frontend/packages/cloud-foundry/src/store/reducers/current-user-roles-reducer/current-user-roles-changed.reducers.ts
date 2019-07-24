@@ -1,7 +1,7 @@
 import { ChangeUserRole } from '../../../actions/users.actions';
 import { ICfRolesState, ICurrentUserRolesState, IOrgRoleState, ISpaceRoleState } from '../../../../../store/src/types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/src/types/user.types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
 import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
 import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
 import { PermissionStrings } from '../../../../../core/src/core/current-user-permissions.config';
