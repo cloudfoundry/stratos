@@ -19,9 +19,6 @@ const defaultState: CreateNewApplicationState = {
 };
 
 export function createAppReducer(state: CreateNewApplicationState = defaultState, action) {
-  console.log('create App Reducers');
-  console.log(defaultState);
-  console.log(action);
   switch (action.type) {
     case SET_CF_DETAILS:
       return {
