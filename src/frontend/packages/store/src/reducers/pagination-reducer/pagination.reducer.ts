@@ -111,7 +111,6 @@ function paginate(action, state = getDefaultStateFromEntityCatalogue(), updatePa
   }
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-    // TODO we shouldn't be using a
     const clearAction = action as ClearPaginationOfType;
     const clearEntityType = entityCatalogue.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
     return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());

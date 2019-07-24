@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -13,17 +14,13 @@ import {
 } from '../../../store/src/selectors/favorite-groups.selectors';
 import { isFavorite } from '../../../store/src/selectors/favorite.selectors';
 import { IUserFavoritesGroups } from '../../../store/src/types/favorite-groups.types';
+import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import {
-  IEndpointFavMetadata,
-  IFavoriteMetadata,
-  UserFavorite,
-} from '../../../store/src/types/user-favorites.types';
-import {
-  TFavoriteMapperFunction, FavoritesConfigMapper,
+  FavoritesConfigMapper,
+  TFavoriteMapperFunction,
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { LoggerService } from './logger.service';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { Injectable } from '@angular/core';
+import { LoggerService } from './logger.service';
 
 export interface IFavoriteEntity {
   type: string;
