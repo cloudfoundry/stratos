@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../store/src/actions/app-metadata.actions';
+import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';

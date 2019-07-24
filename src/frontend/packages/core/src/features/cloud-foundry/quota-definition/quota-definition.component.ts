@@ -4,12 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { GetQuotaDefinition } from '../../../../../store/src/actions/quota-definitions.actions';
+import { GetQuotaDefinition } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory, quotaDefinitionSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { IOrganization, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
+import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -26,7 +25,7 @@ import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-def
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
+  quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
   org$: Observable<APIResource<IOrganization>>;
   space$: Observable<APIResource<ISpace>>;
   cfGuid: string;
@@ -50,9 +49,7 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.org$.pipe(map(org => org.entity.quota_definition_guid));
     const entityInfo$ = quotaGuid$.pipe(
       first(),
-      switchMap(quotaGuid => this.entityServiceFactory.create<APIResource<IQuotaDefinition>>(
-        quotaDefinitionSchemaKey,
-        entityFactory(quotaDefinitionSchemaKey),
+      switchMap(quotaGuid => this.entityServiceFactory.create<APIResource<IOrgQuotaDefinition>>(
         quotaGuid,
         new GetQuotaDefinition(quotaGuid, this.cfGuid),
       ).entityObs$)

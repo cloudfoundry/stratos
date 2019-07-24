@@ -4,12 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { GetSpaceQuotaDefinition } from '../../../../../store/src/actions/quota-definitions.actions';
+import { GetSpaceQuotaDefinition } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory, spaceQuotaSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { IOrganization, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
+import { IOrganization, ISpace, ISpaceQuotaDefinition } from '../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -26,7 +25,7 @@ import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-def
 })
 export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  spaceQuotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
+  spaceQuotaDefinition$: Observable<APIResource<ISpaceQuotaDefinition>>;
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
@@ -48,12 +47,11 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.space$.pipe(map(space => space.entity.space_quota_definition_guid));
     const entityInfo$ = quotaGuid$.pipe(
       first(),
-      switchMap(quotaGuid => this.entityServiceFactory.create<APIResource<IQuotaDefinition>>(
-        spaceQuotaSchemaKey,
-        entityFactory(spaceQuotaSchemaKey),
+      switchMap(quotaGuid => this.entityServiceFactory.create<APIResource<ISpaceQuotaDefinition>>(
         quotaGuid,
-        new GetSpaceQuotaDefinition(quotaGuid, this.cfGuid),
-      ).entityObs$)
+        new GetSpaceQuotaDefinition(quotaGuid, this.cfGuid)
+      ).entityObs$
+      )
     );
 
     this.quotaDefinition$ = entityInfo$.pipe(
