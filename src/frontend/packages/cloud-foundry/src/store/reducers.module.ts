@@ -5,7 +5,7 @@ import { createAppReducer } from './reducers/create-application.reducer';
 import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { deployAppReducer } from './reducers/deploy-app.reducer';
-import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
+import { uaaSetupReducer } from '../../../store/src/reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
 export const appReducers = {
