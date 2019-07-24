@@ -7,10 +7,9 @@ registerCFEntities();
 
 @NgModule({
   imports: [
-    // TODO: NJ split out anything lazy loaded into seperate module
-    // FIXME: Ensure that anything lazy loaded is not included here RC CI
+    // FIXME: Ensure that anything lazy loaded is not included here - #3675
     CloudFoundryComponentsModule,
-    // FIXME: STRAT-155 - Move cf effects into cf module
+    // FIXME: Move cf effects into cf module - #3675
     // EffectsModule.forRoot([
     //   PermissionsEffects,
     //   PermissionEffects

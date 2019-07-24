@@ -5,6 +5,7 @@ import {
   PermissionValues,
   ScopeStrings,
 } from '../../../../core/src/core/current-user-permissions.config';
+import { Omit } from '../../../../core/src/core/utils.service';
 import { CurrentUserRolesAppState } from '../../app-state';
 import {
   IAllCfRolesState,
@@ -16,9 +17,6 @@ import {
   IStratosRolesState,
   RoleEntities,
 } from '../../types/current-user-roles.types';
-
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export const selectCurrentUserRolesState = (state: CurrentUserRolesAppState) => state.currentUserRoles;
 

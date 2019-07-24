@@ -4,7 +4,6 @@ import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { InternalEventSeverity, InternalEventsState } from '../types/internal-events.types';
 
 
-// TODO: Confirm - should this be CFAppState? RC CI search for references
 export const internalEventStateSelector = (state: CFAppState) => state.internalEvents;
 
 export const internalEventTypeSelector = (type: string) => compose(
