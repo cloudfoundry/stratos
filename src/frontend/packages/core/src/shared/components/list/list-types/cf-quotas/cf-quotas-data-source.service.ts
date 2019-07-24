@@ -37,6 +37,10 @@ export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
       listConfig
     });
 
+    this.setGetRowState();
+  }
+
+  setGetRowState() {
     this.getRowState = (row) => {
       if (!this.sourceScheme || !row) {
         return of(getDefaultRowState());

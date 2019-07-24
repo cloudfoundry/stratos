@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 import { CreateQuotaStepComponent } from './create-quota-step.component';
 
 describe('CreateQuotaStepComponent', () => {
@@ -10,7 +11,7 @@ describe('CreateQuotaStepComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CreateQuotaStepComponent],
+      declarations: [CreateQuotaStepComponent, QuotaDefinitionFormComponent],
       imports: [...BaseTestModules],
       providers: [PaginationMonitorFactory]
     })

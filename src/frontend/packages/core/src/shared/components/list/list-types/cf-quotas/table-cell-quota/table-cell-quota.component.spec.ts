@@ -24,7 +24,19 @@ describe('TableCellQuotaComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellQuotaComponent);
     component = fixture.componentInstance;
+    component.config = {
+      baseUrl: [
+        '/cloud-foundry',
+        'cfGuid',
+        'organizations',
+        'orgGuid',
+        'space-quota-definitions'
+      ]
+    },
     component.row = {
+      metadata: {
+        guid: '',
+      },
       entity: {
         guid: '',
         name: 'test0',

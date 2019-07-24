@@ -29,7 +29,7 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    // TODO: change permission to quota
-    this.canAddQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+    const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
+    this.canAddQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_CREATE, cfGuid, orgGuid);
   }
 }

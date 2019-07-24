@@ -3,6 +3,7 @@ import { by, element, promise, protractor } from 'protractor';
 import { e2e } from '../../e2e';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
 import { SpaceQuotaFormPage } from './space-quota-form-page.po';
 
@@ -44,6 +45,9 @@ describe('Manage Space Quota', () => {
   });
 
   describe('#create', () => {
+    const timeout = 100000;
+    extendE2ETestTime(timeout);
+
     beforeEach(() => {
       quotaFormPage = new SpaceQuotaFormPage(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/add-space-quota`);
       quotaFormPage.navigateTo();
@@ -70,7 +74,7 @@ describe('Manage Space Quota', () => {
       quotaFormPage.stepper.setTotalRoutes('10');
       quotaFormPage.stepper.setMemoryLimit('1024');
       quotaFormPage.stepper.setInstanceMemoryLimit('1');
-      quotaFormPage.stepper.setTotalReservedRoutePorts('1');
+      quotaFormPage.stepper.setTotalReservedRoutePorts('0');
       quotaFormPage.stepper.setAppInstanceLimit('1');
       quotaFormPage.submit();
       quotaFormPage.stepper.waitUntilNotShown();

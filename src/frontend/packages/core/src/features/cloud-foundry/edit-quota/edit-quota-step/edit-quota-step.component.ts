@@ -1,32 +1,19 @@
-import { Component, OnDestroy } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, first, map, tap } from 'rxjs/operators';
 
-import {
-  GetQuotaDefinition,
-  GetQuotaDefinitions,
-  UpdateQuotaDefinition,
-} from '../../../../../../store/src/actions/quota-definitions.actions';
+import { GetQuotaDefinition, UpdateQuotaDefinition } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import {
-  endpointSchemaKey,
-  entityFactory,
-  quotaDefinitionSchemaKey,
-} from '../../../../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { entityFactory, quotaDefinitionSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 
 
 @Component({
@@ -36,62 +23,24 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 })
 export class EditQuotaStepComponent implements OnDestroy {
 
-  quotasSubscription: Subscription;
-  quotaSubscription: Subscription;
   cfGuid: string;
   quotaGuid: string;
-  allQuotas: string[];
-  quotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
   quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
-  quotaForm: FormGroup;
+  quotaSubscription: Subscription;
   quota: IQuotaDefinition;
+
+  @ViewChild('form')
+  form: QuotaDefinitionFormComponent;
 
   constructor(
     private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
     private entityServiceFactory: EntityServiceFactory
   ) {
     this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
     this.quotaGuid = this.activatedRoute.snapshot.params.quotaId;
 
-    this.setupForm();
     this.fetchQuotaDefinition();
-    this.fetchQuotasDefinitions();
-  }
-
-  setupForm() {
-    this.quotaForm = new FormGroup({
-      name: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      totalServices: new FormControl(),
-      totalRoutes: new FormControl(),
-      memoryLimit: new FormControl(),
-      instanceMemoryLimit: new FormControl(),
-      nonBasicServicesAllowed: new FormControl(false),
-      totalReservedRoutePorts: new FormControl(),
-      appInstanceLimit: new FormControl(),
-    });
-  }
-
-  fetchQuotasDefinitions() {
-    const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    this.quotaDefinitions$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
-        paginationMonitor: this.paginationMonitorFactory.create(
-          quotaPaginationKey,
-          entityFactory(quotaDefinitionSchemaKey)
-        )
-      },
-      true
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allQuotas = o)
-    );
-
-    this.quotasSubscription = this.quotaDefinitions$.subscribe();
   }
 
   fetchQuotaDefinition() {
@@ -101,56 +50,27 @@ export class EditQuotaStepComponent implements OnDestroy {
       this.quotaGuid,
       new GetQuotaDefinition(this.quotaGuid, this.cfGuid),
     ).waitForEntity$.pipe(
+      first(),
       map(data => data.entity),
-      tap((resource) => {
-        const quota = resource.entity;
-        this.quota = quota;
-
-        this.quotaForm.patchValue({
-          name: quota.name,
-          totalServices: quota.total_services,
-          totalRoutes: quota.total_routes,
-          memoryLimit: quota.memory_limit,
-          instanceMemoryLimit: quota.instance_memory_limit,
-          nonBasicServicesAllowed: quota.non_basic_services_allowed,
-          totalReservedRoutePorts: quota.total_reserved_route_ports,
-          appInstanceLimit: quota.app_instance_limit,
-        });
-      })
+      tap((resource) => this.quota = resource.entity)
     );
 
     this.quotaSubscription = this.quotaDefinition$.subscribe();
   }
 
-
-  nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
-      if (!this.validateNameTaken(formField.value)) {
-        return { nameTaken: { value: formField.value } };
-      }
-
-      return null;
-    };
-  }
-
-  validateNameTaken = (value: string = null) => {
-    if (this.allQuotas) {
-      return this.allQuotas.indexOf(value || this.quotaForm.value.name) === -1;
-    }
-
-    return true;
-  }
-
-  validate = () => !!this.quotaForm && this.quotaForm.valid;
+  validate = () => this.form && this.form.valid();
 
   submit: StepOnNextFunction = () => {
-    const formValues = this.quotaForm.value;
+    const formValues = this.form.formGroup.value;
 
     this.store.dispatch(new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, {
       name: formValues.name,
       total_services: formValues.totalServices,
       total_routes: formValues.totalRoutes,
       memory_limit: formValues.memoryLimit,
+      app_task_limit: formValues.appTasksLimit,
+      total_private_domains: formValues.totalPrivateDomains,
+      total_service_keys: formValues.totalServiceKeys,
       instance_memory_limit: formValues.instanceMemoryLimit,
       non_basic_services_allowed: formValues.nonBasicServicesAllowed,
       total_reserved_route_ports: formValues.totalReservedRoutePorts,
@@ -169,6 +89,6 @@ export class EditQuotaStepComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(this.quotasSubscription, this.quotaSubscription);
+    safeUnsubscribe(this.quotaSubscription);
   }
 }

@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../tab-nav.service';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { QuotaDefinitionFormComponent } from '../quota-definition-form/quota-definition-form.component';
 import { EditQuotaStepComponent } from './edit-quota-step/edit-quota-step.component';
 import { EditQuotaComponent } from './edit-quota.component';
 
@@ -11,7 +12,7 @@ describe('EditQuotaComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EditQuotaComponent, EditQuotaStepComponent],
+      declarations: [EditQuotaComponent, EditQuotaStepComponent, QuotaDefinitionFormComponent],
       imports: [...BaseTestModules],
       providers: [TabNavService]
     })

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../../../core/cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({
@@ -13,7 +12,7 @@ import { TableCellCustom } from '../../../list.types';
 export class TableCellQuotaComponent extends TableCellCustom<APIResource<IQuotaDefinition>> implements OnInit {
   quotaUrl: string[];
 
-  constructor(private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace)  {
+  constructor()  {
     super();
   }
 

@@ -36,6 +36,10 @@ export class CfOrgSpaceQuotasDataSourceService extends ListDataSource<APIResourc
       listConfig
     });
 
+    this.setGetRowState();
+  }
+
+  setGetRowState() {
     this.getRowState = (row) => {
       if (!this.sourceScheme || !row) {
         return of(getDefaultRowState());

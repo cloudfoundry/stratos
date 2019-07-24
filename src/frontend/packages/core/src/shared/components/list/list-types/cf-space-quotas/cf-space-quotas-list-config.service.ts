@@ -25,6 +25,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
   dataSource: CfOrgSpaceQuotasDataSourceService;
   deleteSubscription: Subscription;
   canEdit: Observable<boolean>;
+  canDelete: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
@@ -35,8 +36,9 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
   ) {
     super();
     this.dataSource = new CfOrgSpaceQuotasDataSourceService(this.store, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.cfGuid, this);
-    // TODO: change permission to quota
-    this.canEdit = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.activeRouteCfOrgSpace.cfGuid);
+    const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
+    this.canEdit = this.currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
+    this.canDelete = this.currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_DELETE, cfGuid, orgGuid);
   }
 
   enableTextFilter = true;
@@ -83,7 +85,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
     action: (item: APIResource) => this.deleteSingleQuota(item),
     label: 'Delete',
     description: 'Delete space quota',
-    createVisible: () => this.canEdit
+    createVisible: () => this.canDelete
   };
 
   private listActionEdit: IListAction<APIResource<IQuotaDefinition>> = {

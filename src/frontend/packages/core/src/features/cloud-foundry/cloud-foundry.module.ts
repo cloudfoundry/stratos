@@ -35,9 +35,11 @@ import { EditSpaceQuotaStepComponent } from './edit-space-quota/edit-space-quota
 import { EditSpaceQuotaComponent } from './edit-space-quota/edit-space-quota.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
+import { QuotaDefinitionFormComponent } from './quota-definition-form/quota-definition-form.component';
 import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
+import { SpaceQuotaDefinitionFormComponent } from './space-quota-definition-form/space-quota-definition-form.component';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
 import { CfAdminAddUserWarningComponent } from './tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
@@ -158,6 +160,8 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     EditSpaceQuotaComponent,
     EditSpaceQuotaStepComponent,
     AddSpaceQuotaComponent,
+    QuotaDefinitionFormComponent,
+    SpaceQuotaDefinitionFormComponent,
     UsersRolesComponent,
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,

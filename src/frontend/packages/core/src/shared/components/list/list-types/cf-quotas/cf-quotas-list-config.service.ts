@@ -25,6 +25,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
   dataSource: CfQuotasDataSourceService;
   deleteSubscription: Subscription;
   canEdit: Observable<boolean>;
+  canDelete: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
@@ -35,9 +36,10 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
   ) {
     super();
     this.dataSource = new CfQuotasDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
-    // TODO: change permission to quota
-    this.canEdit = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.activeRouteCfOrgSpace.cfGuid);
+    this.canEdit = this.currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_EDIT, this.activeRouteCfOrgSpace.cfGuid);
+    this.canDelete = this.currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_DELETE, this.activeRouteCfOrgSpace.cfGuid);
   }
+
 
   enableTextFilter = true;
   text = {
@@ -81,7 +83,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
     action: (item: APIResource) => this.deleteSingleQuota(item),
     label: 'Delete',
     description: 'Delete quota',
-    createVisible: () => this.canEdit
+    createVisible: () => this.canDelete
   };
 
   private listActionEdit: IListAction<APIResource<IQuotaDefinition>> = {

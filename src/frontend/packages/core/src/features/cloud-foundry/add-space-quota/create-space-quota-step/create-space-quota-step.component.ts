@@ -1,26 +1,17 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
-import {
-  CreateSpaceQuotaDefinition,
-  GetOrganizationSpaceQuotaDefinitions,
-} from '../../../../../../store/src/actions/quota-definitions.actions';
+import { CreateSpaceQuotaDefinition } from '../../../../../../store/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory, spaceQuotaSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { spaceQuotaSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
-import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 
 
 @Component({
@@ -28,92 +19,45 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
   templateUrl: './create-space-quota-step.component.html',
   styleUrls: ['./create-space-quota-step.component.scss']
 })
-export class CreateSpaceQuotaStepComponent implements OnInit, OnDestroy {
+export class CreateSpaceQuotaStepComponent {
 
   quotasSubscription: Subscription;
   cfGuid: string;
   orgGuid: string;
-  allQuotas: string[];
   spaceQuotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
-  quotaForm: FormGroup;
+
+  @ViewChild('form')
+  form: SpaceQuotaDefinitionFormComponent;
 
   constructor(
     private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }
 
-  ngOnInit() {
-    this.quotaForm = new FormGroup({
-      name: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      totalServices: new FormControl(),
-      totalRoutes: new FormControl(),
-      memoryLimit: new FormControl(),
-      instanceMemoryLimit: new FormControl(),
-      nonBasicServicesAllowed: new FormControl(false),
-      totalReservedRoutePorts: new FormControl(),
-      appInstanceLimit: new FormControl(),
-    });
-
-    const spaceQuotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    this.spaceQuotaDefinitions$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action: new GetOrganizationSpaceQuotaDefinitions(spaceQuotaPaginationKey, this.orgGuid, this.cfGuid),
-        paginationMonitor: this.paginationMonitorFactory.create(
-          spaceQuotaPaginationKey,
-          entityFactory(spaceQuotaSchemaKey)
-        )
-      },
-      true
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allQuotas = o)
-    );
-
-    this.quotasSubscription = this.spaceQuotaDefinitions$.subscribe();
-  }
-
-  nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
-      if (!this.validateNameTaken(formField.value)) {
-        return { nameTaken: { value: formField.value } };
-      }
-
-      return null;
-    };
-  }
-
-  validateNameTaken = (value: string = null) => {
-    if (this.allQuotas) {
-      return this.allQuotas.indexOf(value || this.quotaForm.value.name) === -1;
-    }
-
-    return true;
-  }
-
-  validate = () => !!this.quotaForm && this.quotaForm.valid;
+  validate = () => !!this.form && this.form.valid();
 
   submit: StepOnNextFunction = () => {
-    const formValues = this.quotaForm.value;
+    const formValues = this.form.formGroup.value;
+    const UNLIMITED = -1;
 
     this.store.dispatch(new CreateSpaceQuotaDefinition(this.cfGuid, {
       name: formValues.name,
       organization_guid: this.orgGuid,
-      total_services: formValues.totalServices,
-      total_routes: formValues.totalRoutes,
+      total_services: formValues.totalServices || UNLIMITED,
+      total_service_keys: formValues.totalServiceKeys,
+      total_routes: formValues.totalRoutes || UNLIMITED,
       memory_limit: formValues.memoryLimit,
       instance_memory_limit: formValues.instanceMemoryLimit,
       non_basic_services_allowed: formValues.nonBasicServicesAllowed,
       total_reserved_route_ports: formValues.totalReservedRoutePorts,
-      app_instance_limit: formValues.appInstanceLimit
+      app_instance_limit: formValues.appInstanceLimit,
+      app_task_limit: formValues.appTasksLimit,
     }));
 
-    return this.store.select(selectRequestInfo(spaceQuotaSchemaKey, this.quotaForm.value.name)).pipe(
+    return this.store.select(selectRequestInfo(spaceQuotaSchemaKey, formValues.name)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.creating),
       map(requestInfo => ({
         success: !requestInfo.error,
@@ -121,9 +65,5 @@ export class CreateSpaceQuotaStepComponent implements OnInit, OnDestroy {
         message: requestInfo.error ? `Failed to create space quota: ${requestInfo.message}` : ''
       }))
     );
-  }
-
-  ngOnDestroy() {
-    safeUnsubscribe(this.quotasSubscription);
   }
 }

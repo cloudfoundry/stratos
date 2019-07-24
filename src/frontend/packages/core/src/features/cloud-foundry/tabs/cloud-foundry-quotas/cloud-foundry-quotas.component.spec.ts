@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../tab-nav.service';
@@ -15,7 +16,7 @@ describe('CloudFoundryQuotasComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryQuotasComponent],
-      providers: [CfOrgsListConfigService, generateTestCfEndpointServiceProvider(), TabNavService],
+      providers: [CfOrgsListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
       imports: [...BaseTestModules]
     })
       .compileComponents();

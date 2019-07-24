@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
 import {
@@ -9,7 +10,7 @@ import { CfSpaceQuotasListConfigService } from './cf-space-quotas-list-config.se
 describe('CfSpaceQuotasListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [...generateTestCfEndpointServiceProvider(), CfSpaceQuotasListConfigService],
+      providers: [...generateTestCfEndpointServiceProvider(), CfSpaceQuotasListConfigService, DatePipe],
       imports: [
         ...BaseTestModules
       ]

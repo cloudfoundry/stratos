@@ -27,7 +27,6 @@ export class CloudFoundryQuotasComponent {
     public cfEndpointService: CloudFoundryEndpointService,
     currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    // TODO: change permission to quota
-    this.canAddQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+    this.canAddQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_CREATE, this.cfEndpointService.cfGuid);
   }
 }

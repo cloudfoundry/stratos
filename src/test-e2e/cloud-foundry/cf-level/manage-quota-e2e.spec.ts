@@ -3,6 +3,7 @@ import { by, element, promise, protractor } from 'protractor';
 import { e2e } from '../../e2e';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 import { QuotaFormPage } from './quota-form-page.po';
 
@@ -44,6 +45,9 @@ describe('Manage Quota', () => {
   });
 
   describe('#create', () => {
+    const timeout = 100000;
+    extendE2ETestTime(timeout);
+
     beforeEach(() => {
       quotaFormPage = new QuotaFormPage(`/cloud-foundry/${cfGuid}/add-quota`);
       quotaFormPage.navigateTo();
