@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ActionReducerMap, StoreModule, ActionReducer, Store } from '@ngrx/store';
+import { createAppReducer } from './reducers/create-application.reducer';
+import { deployAppReducer } from './reducers/deploy-app.reducer';
 
 const appReducers = {
   // auth: authReducer,
@@ -24,7 +26,8 @@ const appReducers = {
 
 @NgModule({
   imports: [
-    StoreModule.forFeature('cloud-foundry', appReducers)
+    StoreModule.forFeature('createApplication', createAppReducer),
+    StoreModule.forFeature('deployApplication', deployAppReducer),
   ]
 })
 export class CloudFoundryReducersModule { }

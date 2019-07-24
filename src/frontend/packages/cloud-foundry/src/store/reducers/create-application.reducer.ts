@@ -4,8 +4,8 @@ import {
   NAME_TAKEN,
   SET_CF_DETAILS,
   SET_NAME,
-} from '../../../cloud-foundry/src/actions/create-applications-page.actions';
-import { CreateNewApplicationState } from '../types/create-application.types';
+} from '../../actions/create-applications-page.actions';
+import { CreateNewApplicationState } from '../../../../store/src/types/create-application.types';
 
 
 const defaultState: CreateNewApplicationState = {
@@ -19,6 +19,9 @@ const defaultState: CreateNewApplicationState = {
 };
 
 export function createAppReducer(state: CreateNewApplicationState = defaultState, action) {
+  console.log('create App Reducers');
+  console.log(defaultState);
+  console.log(action);
   switch (action.type) {
     case SET_CF_DETAILS:
       return {

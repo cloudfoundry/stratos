@@ -12,7 +12,7 @@ import { LoggerService } from '../../../core/src/core/logger.service';
 import { GitSCMService, GitSCMType } from '../../../core/src/shared/data-services/scm/scm.service';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
-import { createFailedGithubRequestMessage } from './deploy-app.effects';
+import { createFailedGithubRequestMessage } from '../../../cloud-foundry/src/store/effects/deploy-app.effects';
 
 
 @Injectable()

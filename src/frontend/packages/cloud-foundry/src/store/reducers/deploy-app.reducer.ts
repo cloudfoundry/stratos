@@ -12,8 +12,8 @@ import {
   SET_DEPLOY_CF_SETTINGS,
   SET_DEPLOY_COMMIT,
   PROJECT_FETCH_FAILED,
-} from '../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { DeployApplicationState } from '../types/deploy-application.types';
+} from '../../actions/deploy-applications.actions';
+import { DeployApplicationState } from '../../../../store/src/types/deploy-application.types';
 
 
 const defaultState: DeployApplicationState = {

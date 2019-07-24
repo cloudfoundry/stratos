@@ -17,21 +17,21 @@ import {
   ProjectDoesntExist,
   ProjectExists,
   ProjectFetchFail,
-} from '../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { gitBranchesEntityType, gitCommitEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { parseHttpPipeError } from '../../../core/src/core/utils.service';
-import { selectDeployAppState } from '../selectors/deploy-application.selector';
-import { NormalizedResponse } from '../types/api.types';
-import { GitCommit } from '../types/git.types';
+} from '../../actions/deploy-applications.actions';
+import { CFAppState } from '../../cf-app-state';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-factory';
+import { LoggerService } from '../../../../core/src/core/logger.service';
+import { parseHttpPipeError } from '../../../../core/src/core/utils.service';
+import { selectDeployAppState } from '../../../../store/src/selectors/deploy-application.selector';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { GitCommit } from '../../../../store/src/types/git.types';
 import {
   ICFAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-} from '../types/request.types';
-import { PaginatedAction } from './../types/pagination.types';
+} from '../../../../store/src/types/request.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 
 export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {
   const response = parseHttpPipeError(error, logger);

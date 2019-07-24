@@ -10,8 +10,7 @@ import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
-import { CreateAppPageEffects } from '../../cloud-foundry/src/store/effects/create-app-effects';
-import { DeployAppEffects } from './effects/deploy-app.effects';
+import { DeployAppEffects } from '../../cloud-foundry/src/store/effects/deploy-app.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
 import { GithubEffects } from './effects/github.effects';
@@ -30,6 +29,8 @@ import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
+
+import { CloudFoundryStoreModule } from './../../cloud-foundry/src/store/cloud-foundry.store.module';
 
 @NgModule({
   imports: [
@@ -51,7 +52,7 @@ import { AppReducersModule } from './reducers.module';
       SystemEffects,
       SnackBarEffects,
       SetClientFilterEffect,
-      DeployAppEffects,
+      // DeployAppEffects,
       GithubEffects,
       CloudFoundryEffects,
       MetricsEffect,
@@ -65,7 +66,7 @@ import { AppReducersModule } from './reducers.module';
       // FIXME: STRAT-155 - Move cf effects into cf module
       PermissionsEffects,
       PermissionEffects
-    ])
+    ]),
   ]
 })
 export class AppStoreModule { }

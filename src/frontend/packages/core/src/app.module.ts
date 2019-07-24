@@ -44,7 +44,7 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-
+import { CloudFoundryStoreModule } from '../../cloud-foundry/src/store/cloud-foundry.store.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -88,6 +88,7 @@ export class CustomRouterStateSerializer
     AppStoreExtensionsModule,
     CloudFoundryPackageModule,
     AppStoreModule,
+    CloudFoundryStoreModule,
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
