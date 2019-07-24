@@ -123,9 +123,8 @@ function getEntityConfigFromAction(action): PaginatedAction {
 // TODO We need types here. This might lead us to tidy up all of our actions.
 export function getActionPaginationEntityKey(action): string {
   const apiAction = getAction(action);
-  const entityConfig = getEntityConfigFromAction(action);
-  const entityType = apiAction.proxyPaginationEntityKey || entityConfig.entityType;
-  return entityCatalogue.getEntityKey(entityConfig.endpointType, entityType);
+  const entityConfig = apiAction.proxyPaginationEntityConfig || getEntityConfigFromAction(action);
+  return entityCatalogue.getEntityKey(entityConfig);
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {

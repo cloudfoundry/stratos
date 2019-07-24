@@ -32,7 +32,7 @@ export class CfOrgSpaceLabelService {
     private orgGuid?: string,
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
-    // TODO NJ We shouldn't have to expose STRATOS_ENDPOINT_TYPE - I'm not sure about that anymore, that's up to the extension.
+    // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
     const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
 
     this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));

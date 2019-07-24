@@ -88,7 +88,6 @@ export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;
-  // TODO this should be of type entityConfig
   __forcedPageEntityConfig__?: EntityCatalogueEntityConfig;
 }
 
