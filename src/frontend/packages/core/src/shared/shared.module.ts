@@ -414,6 +414,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
     AppNameUniqueDirective,
+    RunningInstancesComponent,
+    CardAppUsageComponent,
     PollingIndicatorComponent
   ],
   entryComponents: [

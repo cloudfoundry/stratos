@@ -38,22 +38,22 @@ export class CloudFoundryOrganizationBaseComponent {
     {
       link: 'summary',
       label: 'Summary',
-      matIcon: 'description'
+      icon: 'description'
     },
     {
       link: 'spaces',
       label: 'Spaces',
-      matIcon: 'language'
+      icon: 'language'
     },
     {
       link: 'users',
       label: 'Users',
-      matIcon: 'people'
+      icon: 'people'
     },
     {
       link: 'quota',
       label: 'Quota',
-      matIcon: 'data_usage'
+      icon: 'data_usage'
     }
   ];
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

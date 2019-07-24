@@ -1,9 +1,5 @@
-import { IRequestAction, IFailedRequestAction } from '../../types/request.types';
-import {
-  getEntityRequestState,
-  mergeUpdatingState,
-  setEntityRequestState,
-} from './request-helpers';
+import { IFailedRequestAction, IRequestAction } from '../../types/request.types';
+import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 
 export function failRequest(state, action: IFailedRequestAction) {
   if (action.apiAction.guid) {
@@ -32,6 +28,7 @@ export function failRequest(state, action: IFailedRequestAction) {
       requestFailedState.error = true;
       requestFailedState.creating = false;
       requestFailedState.message = action.message;
+      requestFailedState.response = action.response;
     }
     return setEntityRequestState(state, requestFailedState, apiAction);
   }

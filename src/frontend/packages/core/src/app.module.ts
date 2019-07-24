@@ -55,6 +55,7 @@ import { FavoriteConfig, favoritesConfigMapper } from './shared/components/favor
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
+import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -111,7 +112,8 @@ export class CustomRouterStateSerializer
     AboutModule,
     CustomImportModule,
     XSRFModule,
-    CloudFoundryModule
+    CloudFoundryModule,
+    CfAutoscalerModule
   ],
   providers: [
     TabNavService,

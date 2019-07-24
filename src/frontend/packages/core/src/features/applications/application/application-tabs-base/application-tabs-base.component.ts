@@ -94,13 +94,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     );
 
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', matIcon: 'description' },
-      { link: 'instances', label: 'Instances', matIcon: 'library_books' },
-      { link: 'routes', label: 'Routes', matIconFont: 'stratos-icons', matIcon: 'network_route' },
-      { link: 'log-stream', label: 'Log Stream', matIcon: 'featured_play_list' },
-      { link: 'services', label: 'Services', matIconFont: 'stratos-icons', matIcon: 'service' },
-      { link: 'variables', label: 'Variables', matIcon: 'list', hidden: appDoesNotHaveEnvVars$ },
-      { link: 'events', label: 'Events', matIcon: 'watch_later' }
+      { link: 'summary', label: 'Summary', icon: 'description' },
+      { link: 'instances', label: 'Instances', icon: 'library_books' },
+      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'network_route' },
+      { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
+      { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
+      { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },
+      { link: 'events', label: 'Events', icon: 'watch_later' }
     ];
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
@@ -110,14 +110,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           {
             link: 'metrics',
             label: 'Metrics',
-            matIcon: 'equalizer'
+            icon: 'equalizer'
           }
         ];
       }
     });
 
     // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
+    const tabs = getTabsFromExtensions(StratosTabType.Application);
+    tabs.map((extensionTab) => {
+      this.tabLinks.push(extensionTab);
+    });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
     this.stratosProjectSub = this.applicationService.applicationStratProject$
@@ -133,11 +136,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           // Add tab or update existing tab
           const tab = this.tabLinks.find(t => t.link === 'gitscm');
           if (!tab) {
-            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel(), matIconFont: iconInfo.fontName, matIcon: iconInfo.iconName });
+            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName });
           } else {
             tab.label = scm.getLabel();
-            tab.matIconFont = iconInfo.fontName;
-            tab.matIcon = iconInfo.iconName;
+            tab.iconFont = iconInfo.fontName;
+            tab.icon = iconInfo.iconName;
           }
           this.tabLinks = [...this.tabLinks];
         }

@@ -42,6 +42,8 @@ export class MetricsRangeSelectorManagerService {
 
   private pollIndex: number;
 
+  public pollInterval = 10000;
+
   constructor(public metricRangeService: MetricsRangeSelectorService) { }
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
@@ -63,8 +65,6 @@ export class MetricsRangeSelectorManagerService {
           this.startEnd[0],
           this.startEnd[1]
         ];
-        this.start = null;
-        this.end = null;
         this.commitAction(action);
       };
     }
@@ -141,8 +141,8 @@ export class MetricsRangeSelectorManagerService {
   private startWindowPoll(timeWindow: ITimeRange) {
     this.endWindowPoll();
     this.pollIndex = window.setInterval(
-      () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow)),
-      10000
+      () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value)),
+      this.pollInterval
     );
   }
 
@@ -157,7 +157,7 @@ export class MetricsRangeSelectorManagerService {
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
-    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow));
+    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
     if (timeWindow.value) {
       this.startWindowPoll(timeWindow);
     }

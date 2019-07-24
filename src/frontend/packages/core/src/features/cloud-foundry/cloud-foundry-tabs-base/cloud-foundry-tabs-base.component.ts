@@ -69,31 +69,31 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', matIcon: 'description' },
-      { link: 'organizations', label: 'Organizations', matIcon: 'organization', matIconFont: 'stratos-icons' },
+      { link: 'summary', label: 'Summary', icon: 'description' },
+      { link: 'organizations', label: 'Organizations', icon: 'organization', iconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
-        matIcon: 'select_all',
-        hidden: cellsHidden$
+        icon: 'select_all',
+        hidden$: cellsHidden$
       },
-      { link: 'routes', label: 'Routes', matIcon: 'network_route', matIconFont: 'stratos-icons', },
+      { link: 'routes', label: 'Routes', icon: 'network_route', iconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
-        hidden: usersHidden$,
-        matIcon: 'people'
+        hidden$: usersHidden$,
+        icon: 'people'
       },
       {
         link: CloudFoundryTabsBaseComponent.firehose,
         label: 'Firehose',
-        hidden: firehoseHidden$,
-        matIcon: 'featured_play_list'
+        hidden$: firehoseHidden$,
+        icon: 'featured_play_list'
       },
-      { link: 'feature-flags', label: 'Feature Flags', matIcon: 'flag' },
-      { link: 'build-packs', label: 'Build Packs', matIcon: 'build' },
-      { link: 'stacks', label: 'Stacks', matIcon: 'code' },
-      { link: 'security-groups', label: 'Security Groups', matIcon: 'security' },
+      { link: 'feature-flags', label: 'Feature Flags', icon: 'flag' },
+      { link: 'build-packs', label: 'Build Packs', icon: 'build' },
+      { link: 'stacks', label: 'Stacks', icon: 'code' },
+      { link: 'security-groups', label: 'Security Groups', icon: 'security' },
       ...getTabsFromExtensions(StratosTabType.CloudFoundry)
     ];
   }
