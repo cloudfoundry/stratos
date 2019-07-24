@@ -94,7 +94,7 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, nil
 	}
 
-	// Database Config validation - check requried values and the SSL Mode
+	// Database Config validation - check required values and the SSL Mode
 
 	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
 	if err != nil {
@@ -152,15 +152,31 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 // GetSQLLiteConnection returns an SQLite DB Connection
 func GetSQLLiteConnection(sqliteKeepDB bool) (*sql.DB, error) {
+	return GetSQLLiteConnectionWithPath(SQLiteDatabaseFile, sqliteKeepDB)
+}
+
+// GetSQLLiteConnectionWithPath returns an SQLite DB Connection
+func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.DB, error) {
 	if !sqliteKeepDB {
-		os.Remove(SQLiteDatabaseFile)
+		os.Remove(databaseFile)
 	}
 
-	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
+	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
 		return nil, err
 	}
 
+	conf := CreateFakeSQLiteGooseDriver()
+	err = ApplyMigrations(conf, db)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+// CreateFakeSQLiteGooseDriver creates a fake Goose Driver for SQLite
+func CreateFakeSQLiteGooseDriver() *goose.DBConf {
 	// Create fake goose db conf object for SQLite
 	d := goose.DBDriver{
 		Name:    "sqlite3",
@@ -171,13 +187,7 @@ func GetSQLLiteConnection(sqliteKeepDB bool) (*sql.DB, error) {
 	conf := &goose.DBConf{
 		Driver: d,
 	}
-
-	err = ApplyMigrations(conf, db)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return conf
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
