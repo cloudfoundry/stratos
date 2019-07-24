@@ -63,7 +63,11 @@ export enum PermissionTypes {
   STRATOS_SCOPE = 'internal-scope'
 }
 
-export type PermissionValues = ScopeStrings | CFFeatureFlagTypes | PermissionStrings;
+export enum StratosPermissionTypes {
+  ADMIN = 'isAdmin'
+}
+
+export type PermissionValues = StratosPermissionTypes | ScopeStrings | CFFeatureFlagTypes | PermissionStrings;
 export class PermissionConfig {
   constructor(
     public type: PermissionTypes,

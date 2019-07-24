@@ -11,7 +11,7 @@ import {
 } from '../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { selectUsersRoles, selectUsersRolesPicked } from '../../../../../../store/src/selectors/users-roles.selector';
-import { CfUser } from '../../../../../../store/src/types/user.types';
+import { CfUser } from '../../../../../../cloud-foundry/src/store/types/user.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';

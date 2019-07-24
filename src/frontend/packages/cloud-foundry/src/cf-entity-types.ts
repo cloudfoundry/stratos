@@ -26,7 +26,7 @@ import { APIResource } from '../../store/src/types/api.types';
 import { AppStats } from './store/types/app-metadata.types';
 import { BaseEntityValues } from '../../store/src/types/entity.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
-import { CfUser } from '../../store/src/types/user.types';
+import { CfUser } from './store/types/user.types';
 import { appSummaryEntityType } from './cf-entity-factory';
 
 interface CFEntityValues {

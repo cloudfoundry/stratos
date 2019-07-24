@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellConfirmRoleAddRemComponent } from './table-cell-confirm-role-add-rem.component';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { MDAppModule } from '../../../../../../core/md.module';
-import { OrgUserRoleNames } from '../../../../../../../../store/src/types/user.types';
+import { OrgUserRoleNames } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 
 describe('TableCellConfirmRoleAddRemComponent', () => {
   let component: TableCellConfirmRoleAddRemComponent;

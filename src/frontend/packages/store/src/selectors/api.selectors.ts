@@ -54,7 +54,7 @@ export function selectDeletionInfo(entityKey: string, entityGuid: string) {
 }
 
 export function selectRequestInfo(entityKeyOrConfig: string | EntityCatalogueEntityConfig, entityGuid: string) {
-  // TODO: Temp to get working
+  // TODO: NJ Temp to get working
   const entityKey = typeof (entityKeyOrConfig) === 'string' ?
     entityKeyOrConfig :
     EntityCatalogueHelpers.buildEntityKey(entityKeyOrConfig.entityType, entityKeyOrConfig.endpointType);

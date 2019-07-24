@@ -45,7 +45,7 @@ import { APIResource } from '../../store/src/types/api.types';
 import { AppStats } from './store/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
-import { CfUser } from '../../store/src/types/user.types';
+import { CfUser } from './store/types/user.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import {
   appEnvVarsEntityType,
