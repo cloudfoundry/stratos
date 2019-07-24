@@ -1,6 +1,7 @@
-import { CfAPIResource } from '../../../store/src/types/api.types';
+import { CfAPIResource } from '../../../cloud-foundry/src/store/types/api.types';
+
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
-import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from '../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { IEntityMetadata } from './entity-catalogue/entity-catalogue.types';
 import { FavoritesConfigMapper } from '../shared/components/favorites-meta-card/favorite-config-mapper';
 

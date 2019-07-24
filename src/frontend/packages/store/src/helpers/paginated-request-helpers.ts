@@ -6,7 +6,7 @@ import { first, map, mergeMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { CFResponse } from '../types/api.types';
+import { CFResponse } from '../../../cloud-foundry/src/store/types/api.types';
 
 
 export interface IPaginationFlattener<T, C> {

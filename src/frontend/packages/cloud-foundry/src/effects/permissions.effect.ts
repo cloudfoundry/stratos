@@ -17,7 +17,8 @@ import {
 } from '../../../store/src/helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../../../store/src/helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { CFResponse } from '../../../store/src/types/api.types';
+import { CFResponse } from '../../../cloud-foundry/src/store/types/api.types';
+
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../store/src/types/endpoint.types';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
