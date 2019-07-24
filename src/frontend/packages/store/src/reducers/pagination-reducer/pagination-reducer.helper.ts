@@ -104,7 +104,7 @@ export function removeEmptyParams(params: PaginationParam) {
 export function getActionType(action) {
   return action.type;
 }
-// TODO We need types here. This might lead us to tidy up all of our actions.
+// FIXME: Add typings, shouldbe done with #1477
 export function getAction(action): PaginatedAction {
   if (!action) {
     return null;
@@ -112,7 +112,7 @@ export function getAction(action): PaginatedAction {
   return action.apiAction ? action.apiAction : action;
 }
 
-// TODO We need types here. This might lead us to tidy up all of our actions.
+// FIXME: Add typings, shouldbe done with #1477
 function getEntityConfigFromAction(action): PaginatedAction {
   if (action && action.entityConfig) {
     return action.entityConfig;
@@ -120,7 +120,7 @@ function getEntityConfigFromAction(action): PaginatedAction {
   return getAction(action);
 }
 
-// TODO We need types here. This might lead us to tidy up all of our actions.
+// FIXME: Add typings, shouldbe done with #1477
 export function getActionPaginationEntityKey(action): string {
   const apiAction = getAction(action);
   const entityConfig = apiAction.proxyPaginationEntityConfig || getEntityConfigFromAction(action);

@@ -80,12 +80,11 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
 
 export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
   const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
-  // TODO: schemaKey - Dispatches the action which has the correct schema key (SI with space), however uses incorrect schema to denormalise
-  // so entities$ does not contain space
+  const action = new GetServiceInstances(cfGuid, paginationKey);
   return getPaginationObservables<APIResource<IServiceInstance>>({
     store,
-    action: new GetServiceInstances(cfGuid, paginationKey),
-    paginationMonitor: paginationMonitorFactory.create(paginationKey, cfEntityFactory(serviceInstancesEntityType))
+    action,
+    paginationMonitor: paginationMonitorFactory.create(paginationKey, action)
   }, true).entities$;
 };
 

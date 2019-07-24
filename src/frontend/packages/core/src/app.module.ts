@@ -12,6 +12,7 @@ import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
+import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
@@ -20,6 +21,7 @@ import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favo
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
+import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
 import { CoreModule } from './core/core.module';
 import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
 import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
@@ -200,7 +202,13 @@ export class AppModule {
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
     if (favorite) {
-      const entityKey = entityCatalogue.getEntityKey(favorite);
+      // TODO: NJ RC Review the isEndpoint condition for finding entityKey (see comment below)
+      const isEndpoint = (favorite.entityType === endpointSchemaKey);
+      // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
+      const entityKey = isEndpoint ? entityCatalogue.getEntityKey({
+        ...favorite,
+        endpointType: STRATOS_ENDPOINT_TYPE
+      }) : entityCatalogue.getEntityKey(favorite);
       const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
         const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);

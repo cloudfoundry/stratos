@@ -5,6 +5,8 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,
@@ -15,7 +17,7 @@ import {
   UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
-import { UserProfileInfo, userProfileStoreNames } from '../types/user-profile.types';
+import { UserProfileInfo } from '../types/user-profile.types';
 import {
   IRequestAction,
   StartRequestAction,
@@ -34,6 +36,10 @@ export class UserProfileEffect {
 
   public static guid = 'userProfile';
 
+  stratosUserConfig = entityCatalogue.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
+  private stratosUserEntityType = userProfileEntitySchema.entityType;
+  private stratosUserEndpointType = userProfileEntitySchema.endpointType;
+
   constructor(
     private actions$: Actions,
     private store: Store<CFAppState>,
@@ -44,7 +50,8 @@ export class UserProfileEffect {
     ofType<FetchUserProfileAction>(GET_USERPROFILE),
     mergeMap(action => {
       const apiAction = {
-        entityType: userProfileStoreNames.type,
+        entityType: this.stratosUserEntityType,
+        endpointType: this.stratosUserEndpointType,
         guid: UserProfileEffect.guid,
         type: action.type,
       } as IRequestAction;
@@ -53,7 +60,7 @@ export class UserProfileEffect {
         mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
-              entities: { [userProfileStoreNames.type]: { [UserProfileEffect.guid]: info } },
+              entities: { [this.stratosUserConfig.entityKey]: { [UserProfileEffect.guid]: info } },
               result: [UserProfileEffect.guid]
             }, apiAction)
           ];
@@ -68,7 +75,8 @@ export class UserProfileEffect {
     ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE),
     mergeMap(action => {
       const apiAction = {
-        entityType: userProfileStoreNames.type,
+        entityType: this.stratosUserEntityType,
+        endpointType: this.stratosUserEndpointType,
         guid: UserProfileEffect.guid,
         type: action.type,
         updatingKey: rootUpdatingKey
@@ -86,7 +94,7 @@ export class UserProfileEffect {
         mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
-              entities: { [userProfileStoreNames.type]: { [UserProfileEffect.guid]: info } },
+              entities: { [this.stratosUserConfig.entityKey]: { [UserProfileEffect.guid]: info } },
               result: [UserProfileEffect.guid]
             }, apiAction)
           ];
@@ -101,7 +109,8 @@ export class UserProfileEffect {
     ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD),
     mergeMap(action => {
       const apiAction = {
-        entityType: userProfileStoreNames.type,
+        entityType: this.stratosUserEntityType,
+        endpointType: this.stratosUserEndpointType,
         guid: UserProfileEffect.guid,
         type: action.type,
         updatingKey: userProfilePasswordUpdatingKey
