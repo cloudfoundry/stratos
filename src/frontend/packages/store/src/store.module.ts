@@ -62,7 +62,7 @@ import { AppReducersModule } from './reducers.module';
       AppEffects,
       RouteEffect,
       UserFavoritesEffect,
-      // TODO: RC move to cf
+      // FIXME: STRAT-155 - Move cf effects into cf module
       PermissionsEffects,
       PermissionEffects
     ])

@@ -92,8 +92,6 @@ export class StratosBaseCatalogueEntity<
    * If no schemaKey is provided then the default schema will be returned
    */
   public getSchema(schemaKey?: string) {
-    // TODO: schemaKey - ensure wherever this is called it contains the correct schemaKey (with respect to any object of type
-    // EntityCatalogueEntityConfig that may use a schemeKey different than that provided by entityCatalogue.getEntity's)
     const catalogueSchema = this.definition.schema;
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;

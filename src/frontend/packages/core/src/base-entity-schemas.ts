@@ -1,4 +1,9 @@
-import { endpointSchemaKey, entityFactory, userProfileSchemaKey } from '../../store/src/helpers/entity-factory';
+import {
+  endpointSchemaKey,
+  entityFactory,
+  userFavouritesSchemaKey,
+  userProfileSchemaKey,
+} from '../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
@@ -9,8 +14,6 @@ class StratosEntitySchema extends EntitySchema {
   }
 }
 
-const userFavoritesEntityType = 'userFavorites';
-
-export const userFavoritesEntitySchema = new StratosEntitySchema(userFavoritesEntityType);
+export const userFavoritesEntitySchema = new StratosEntitySchema(entityFactory(userFavouritesSchemaKey).entityType);
 export const endpointEntitySchema = new StratosEntitySchema(entityFactory(endpointSchemaKey).entityType);
 export const userProfileEntitySchema = new StratosEntitySchema(entityFactory(userProfileSchemaKey).entityType);

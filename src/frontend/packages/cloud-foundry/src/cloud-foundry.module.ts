@@ -10,10 +10,10 @@ registerCFEntities();
   imports: [
     // TODO: NJ split out anything lazy loaded into seperate module
     CloudFoundryComponentsModule,
-
+    
     CloudFoundryReducersModule,
-
-    // TODO: RC causes no cf store entities
+    
+    // FIXME: STRAT-155 - Move cf effects into cf module
     // EffectsModule.forRoot([
     //   PermissionsEffects,
     //   PermissionEffects

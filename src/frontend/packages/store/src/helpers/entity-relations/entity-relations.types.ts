@@ -67,8 +67,6 @@ export function createEntityRelationPaginationKey(parentSchemaKey: string, paren
   return key;
 }
 
-// TODO: !!!!!!!!!!!!!!!!!!! RC Does this need the entity key or type?
-// TODO: See createEntityRelationKey in entity-relations.tree.ts
 export const createEntityRelationKey = (parentEntityType: string, childEntityType: string) => `${parentEntityType}-${childEntityType}`;
 
 /**
