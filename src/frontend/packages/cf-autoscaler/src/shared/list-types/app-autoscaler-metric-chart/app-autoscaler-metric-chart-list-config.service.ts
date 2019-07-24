@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { BaseCfListConfig } from '../../../../../core/src/shared/components/list/list-types/base-cf/base-cf-list-config';
@@ -9,7 +10,6 @@ import { ListViewTypes } from '../../../../../core/src/shared/components/list/li
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { ITimeRange, MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { AutoscalerConstants } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { AppScalingTrigger } from '../../../store/app-autoscaler.types';
@@ -79,7 +79,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     metricsRangeService: MetricsRangeSelectorService) {
     super();

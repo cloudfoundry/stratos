@@ -11,7 +11,6 @@ import { EntityServiceFactory } from '../../../../../core/src/core/entity-servic
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
@@ -20,11 +19,11 @@ import {
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
+  AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
-  AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
-import { appAutoscalerPolicySchemaKey } from '../../../store/autoscaler.store.module';
+} from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
@@ -70,8 +69,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   ngOnInit() {
     super.ngOnInit();
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
       false
@@ -127,7 +124,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   addSpecificDate = () => {
-    const {...newSchedule} = AutoscalerConstants.PolicyDefaultSpecificDate;
+    const { ...newSchedule } = AutoscalerConstants.PolicyDefaultSpecificDate;
     this.currentPolicy.schedules.specific_date.push(newSchedule);
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }

@@ -5,11 +5,9 @@ import { map, publishReplay, refCount } from 'rxjs/operators';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { ApplicationService } from '../../../../core/src/features/applications/application.service';
-import { entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
-import { appAutoscalerPolicySchemaKey } from '../../store/autoscaler.store.module';
 
 
 @Component({
@@ -37,8 +35,6 @@ export class CardAutoscalerDefaultComponent implements OnInit {
 
   ngOnInit() {
     this.appAutoscalerPolicyService = this.entityServiceFactory.create<APIResource<AppAutoscalerPolicyLocal>>(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
       false

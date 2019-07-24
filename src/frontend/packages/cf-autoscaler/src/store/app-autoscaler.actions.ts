@@ -1,18 +1,20 @@
 import { RequestOptions } from '@angular/http';
 
-import { applicationSchemaKey, entityFactory } from '../../../store/src/helpers/entity-factory';
+import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../store/src/types/request.types';
 import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
 import {
-  appAutoscalerAppMetricSchemaKey,
-  appAutoscalerHealthSchemaKey,
-  appAutoscalerPolicySchemaKey,
-  appAutoscalerPolicyTriggerSchemaKey,
-  appAutoscalerScalingHistorySchemaKey,
-} from './autoscaler.store.module';
+  appAutoscalerAppMetricEntityType,
+  appAutoscalerHealthEntityType,
+  appAutoscalerPolicyEntityType,
+  appAutoscalerPolicyTriggerEntityType,
+  appAutoscalerScalingHistoryEntityType,
+  AUTOSCALER_ENDPOINT_TYPE,
+  autoscalerEntityFactory,
+} from './autoscaler-entity-factory';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -55,8 +57,9 @@ export class GetAppAutoscalerHealthAction implements IRequestAction {
   ) {
   }
   type = APP_AUTOSCALER_HEALTH;
-  entity = entityFactory(appAutoscalerHealthSchemaKey);
-  entityKey = appAutoscalerHealthSchemaKey;
+  entity = autoscalerEntityFactory(appAutoscalerHealthEntityType);
+  entityType = appAutoscalerHealthEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
 export class GetAppAutoscalerPolicyAction implements IRequestAction {
@@ -65,8 +68,9 @@ export class GetAppAutoscalerPolicyAction implements IRequestAction {
     public endpointGuid: string,
   ) { }
   type = APP_AUTOSCALER_POLICY;
-  entity = entityFactory(appAutoscalerPolicySchemaKey);
-  entityKey = appAutoscalerPolicySchemaKey;
+  entity = autoscalerEntityFactory(appAutoscalerPolicyEntityType);
+  entityType = appAutoscalerPolicyEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
 export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
@@ -77,7 +81,8 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
     public policy: AppAutoscalerPolicyLocal,
   ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY;
-  entityKey = appAutoscalerPolicySchemaKey;
+  entityType = appAutoscalerPolicyEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
 export class DetachAppAutoscalerPolicyAction implements IRequestAction {
@@ -87,8 +92,9 @@ export class DetachAppAutoscalerPolicyAction implements IRequestAction {
     public endpointGuid: string,
   ) { }
   type = DETACH_APP_AUTOSCALER_POLICY;
-  entityKey = appAutoscalerPolicySchemaKey;
+  entityType = appAutoscalerPolicyEntityType;
   requestType: ApiRequestTypes = 'delete';
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
 export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
@@ -98,7 +104,7 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
     public endpointGuid: string,
     public normalFormat?: boolean
   ) {
-    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationEntityType, guid);
   }
   actions = [
     AppAutoscalerPolicyTriggerEvents.GET_APP_AUTOSCALER_POLICY,
@@ -106,8 +112,9 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
     AppAutoscalerPolicyTriggerEvents.GET_APP_AUTOSCALER_POLICY_FAILED
   ];
   type = APP_AUTOSCALER_POLICY_TRIGGER;
-  entity = [entityFactory(appAutoscalerPolicyTriggerSchemaKey)];
-  entityKey = appAutoscalerPolicyTriggerSchemaKey;
+  entity = [autoscalerEntityFactory(appAutoscalerPolicyTriggerEntityType)];
+  entityType = appAutoscalerPolicyTriggerEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
   options: RequestOptions;
   query: AutoscalerQuery = {
     metric: 'policy'
@@ -141,7 +148,7 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
     public normalFormat?: boolean,
     public params?: AutoscalerPaginationParams,
   ) {
-    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid);
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationEntityType, guid);
   }
   actions = [
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY,
@@ -149,8 +156,9 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY_FAILED
   ];
   type = APP_AUTOSCALER_SCALING_HISTORY;
-  entity = [entityFactory(appAutoscalerScalingHistorySchemaKey)];
-  entityKey = appAutoscalerScalingHistorySchemaKey;
+  entity = [autoscalerEntityFactory(appAutoscalerScalingHistoryEntityType)];
+  entityType = appAutoscalerScalingHistoryEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
   options: RequestOptions;
   initialParams: AutoscalerPaginationParams = {
     'order-direction-field': GetAppAutoscalerScalingHistoryAction.sortField,
@@ -174,7 +182,7 @@ export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
     public trigger: AppScalingTrigger,
     public params: AutoscalerPaginationParams,
   ) {
-    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationSchemaKey, guid, metricName);
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(applicationEntityType, guid, metricName);
   }
   actions = [
     AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC,
@@ -183,7 +191,8 @@ export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
   ];
   url: string;
   type = FETCH_APP_AUTOSCALER_METRIC;
-  entityKey: string;
+  entityType: string;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
   paginationKey: string;
   initialParams = this.params;
 }
@@ -200,5 +209,5 @@ export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricActio
     super(guid, endpointGuid, metricName, skipFormat, trigger, params);
     this.url = `apps/${guid}/metric/${metricName}`;
   }
-  entityKey = appAutoscalerAppMetricSchemaKey;
+  entityType = appAutoscalerAppMetricEntityType;
 }

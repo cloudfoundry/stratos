@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
+import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
@@ -17,7 +18,6 @@ import { ConfirmationDialogService } from '../../../../core/src/shared/component
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { applicationSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -41,15 +41,15 @@ import {
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import {
-  appAutoscalerAppMetricSchemaKey,
-  appAutoscalerPolicySchemaKey,
-  appAutoscalerScalingHistorySchemaKey,
-} from '../../store/autoscaler.store.module';
+  appAutoscalerAppMetricEntityType,
+  appAutoscalerPolicyEntityType,
+  autoscalerEntityFactory,
+} from '../../store/autoscaler-entity-factory';
 
 const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
   // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
   const action = new GetAppAutoscalerPolicyAction(appGuid, endpointGuid);
-  const entityService = esf.create<AppAutoscalerPolicy>(action.entityKey, action.entity, action.guid, action);
+  const entityService = esf.create<AppAutoscalerPolicy>(action.guid, action);
   return entityService.entityObs$.pipe(
     filter(entityInfo =>
       !!entityInfo && !!entityInfo.entityRequestInfo && !!entityInfo.entityRequestInfo.response &&
@@ -147,8 +147,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
       false
@@ -171,15 +169,13 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     );
 
     this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
-      createEntityRelationPaginationKey(applicationSchemaKey, this.applicationService.appGuid, 'latest'),
+      createEntityRelationPaginationKey(applicationEntityType, this.applicationService.appGuid, 'latest'),
       this.applicationService.appGuid,
       this.applicationService.cfGuid,
       true,
       this.paramsHistory
     );
     this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
-      appAutoscalerScalingHistorySchemaKey,
-      entityFactory(appAutoscalerScalingHistorySchemaKey),
       this.applicationService.appGuid,
       this.scalingHistoryAction,
       false
@@ -201,7 +197,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        entityFactory(appAutoscalerAppMetricSchemaKey)
+        autoscalerEntityFactory(appAutoscalerAppMetricEntityType)
       )
     }, false).entities$;
   }
@@ -283,7 +279,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.store.dispatch(
       new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
-    const actionState = selectUpdateInfo(appAutoscalerPolicySchemaKey,
+    const actionState = selectUpdateInfo(appAutoscalerPolicyEntityType,
       this.applicationService.appGuid,
       UpdateAppAutoscalerPolicyAction.updateKey);
     return this.store.select(actionState).pipe(filter(item => !!item));

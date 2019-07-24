@@ -4,12 +4,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
-import { appAutoscalerPolicySchemaKey } from '../../store/autoscaler.store.module';
+import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
 @Injectable()
 export class EditAutoscalerPolicyService {
@@ -32,8 +30,6 @@ export class EditAutoscalerPolicyService {
 
   updateFromStore(appGuid: string, cfGuid: string) {
     const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicyLocal>>(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       appGuid,
       new GetAppAutoscalerPolicyAction(appGuid, cfGuid),
       false
@@ -53,7 +49,7 @@ export class EditAutoscalerPolicyService {
   }
 
   setState(state: AppAutoscalerPolicyLocal) {
-    const {...newState} = state;
+    const { ...newState } = state;
     this.stateSubject.next(newState);
   }
 
