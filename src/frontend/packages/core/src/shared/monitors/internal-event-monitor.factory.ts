@@ -7,13 +7,14 @@ import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { internalEventStateSelector } from '../../../../store/src/selectors/internal-events.selectors';
 import { InternalEventsState } from '../../../../store/src/types/internal-events.types';
 import { InternalEventMonitor } from './internal-event.monitor';
+import { InternalAppState } from '../../../../store/src/app-state';
 
 @Injectable()
 export class InternalEventMonitorFactory {
 
   private events$: Observable<InternalEventsState>;
 
-  constructor(private store: Store<CFAppState>, private ngZone: NgZone) {
+  constructor(store: Store<InternalAppState>, private ngZone: NgZone) {
 
     this.events$ = store.select(internalEventStateSelector).pipe(
       distinctUntilChanged(),

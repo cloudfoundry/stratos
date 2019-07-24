@@ -15,6 +15,7 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { CfRolesService } from '../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
   constructor(
