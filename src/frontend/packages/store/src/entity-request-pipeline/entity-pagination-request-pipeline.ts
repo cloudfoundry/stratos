@@ -12,9 +12,10 @@ import { makeRequestEntityPipe } from './entity-request-base-handlers/make-reque
 import { multiEndpointResponseMergePipe } from './entity-request-base-handlers/merge-multi-endpoint-data.pipe';
 import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
 import { BasePipelineConfig, EntityRequestPipeline } from './entity-request-pipeline.types';
-import { fetchUrlParamsFromStore } from './pagination-request-base-handlers/fetch-params-from-store.pipe';
+import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
 import { PipelineHttpClient } from './pipline-http-client.service';
+import { getSuccessMapper } from './pipeline-helpers';
 
 function getRequestObservable(
   httpClient: PipelineHttpClient,
@@ -43,19 +44,20 @@ export interface PaginatedRequestPipelineConfig<T extends AppState = InternalApp
 export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   store: Store<AppState>,
   httpClient: PipelineHttpClient,
-  { action, requestType, catalogueEntity, appState, pageFlattenerConfig }: PaginatedRequestPipelineConfig
+  { action, requestType, catalogueEntity, appState }: PaginatedRequestPipelineConfig
 ) => {
+  const postSuccessDataMapper = getSuccessMapper(catalogueEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const entity = catalogueEntity as StratosCatalogueEntity;
   const flattenerConfig = entity.definition.paginationPageIteratorConfig ||
     entity.definition.endpoint ? entity.definition.endpoint.paginationPageIteratorConfig : null;
-  const paramsFromStore = fetchUrlParamsFromStore(action, catalogueEntity, appState);
+  const paramsFromStore = getPaginationParamsPipe(action, catalogueEntity, appState);
   const requestFromAction = buildRequestEntityPipe(requestType, action.options);
   const request = requestFromAction.clone({
     params: paramsFromStore
   });
   const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
-  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url);
+  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url, postSuccessDataMapper);
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   const pageIterator = flattenerConfig ? new PaginationPageIterator(httpClient, request, action, flattenerConfig) : null;
   return getRequestObservable(

@@ -129,10 +129,12 @@ export class LocalListController<T = any> {
   }
 
   private getPaginationCompareString(paginationEntity: PaginationEntityState) {
+
+    // TODO we should type params for cf entities.
     // Unique string excluding local pagination (watched elsewhere)
     return paginationEntity.totalResults
-      + (paginationEntity.params['order-direction-field'] || '') + ','
-      + (paginationEntity.params['order-direction'] || '') + ','
+      + (paginationEntity.params['order-direction-field'] as string || '') + ','
+      + (paginationEntity.params['order-direction'] as string || '') + ','
       + paginationEntity.clientPagination.filter.string + ','
       + paginationEntity.forcedLocalPage
       + Object.values(paginationEntity.clientPagination.filter.items);

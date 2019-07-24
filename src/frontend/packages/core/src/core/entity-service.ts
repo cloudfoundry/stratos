@@ -133,9 +133,6 @@ export class EntityService<T = any> {
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
     const isBlocked = isEntityBlocked(entityRequestInfo);
-    if (isBlocked) {
-      console.log(entity, entityRequestInfo, 'blocked')
-    }
     return entity && !isEntityBlocked(entityRequestInfo);
   }
 

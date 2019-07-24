@@ -155,12 +155,7 @@ export class ApplicationService {
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
-        const appInstances = [].concat.apply([], Object.values(appInstancesPages))
-          .filter(apiResource => !!apiResource)
-          .map(apiResource => {
-            return apiResource.entity;
-          });
-        return appStateService.get(app, appInstances);
+        return appStateService.get(app, appInstancesPages);
       })
     ).pipe(publishReplay(1), refCount());
   }

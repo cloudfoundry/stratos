@@ -19,7 +19,6 @@ import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-clie
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
 import { getFailApiRequestActions, getRequestTypeFromMethod, startApiRequest } from '../reducers/api-request-reducer/request-helpers';
-import { qParamKeyFromString, qParamToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
@@ -107,7 +106,7 @@ export class APIEffect {
 
       // Set initial params
       if (paginatedAction.initialParams) {
-        this.setRequestParams(options.params, paginatedAction.initialParams);
+        // this.setRequestParams(options.params, paginatedAction.initialParams);
       }
 
       // Set params from store
@@ -119,7 +118,7 @@ export class APIEffect {
       paginatedAction.pageNumber = paginationState
         ? paginationState.currentPage
         : 1;
-      this.setRequestParams(options.params, paginationParams);
+      // this.setRequestParams(options.params, paginationParams);
       if (!options.params.has(resultPerPageParam)) {
         options.params.set(
           resultPerPageParam,
@@ -518,7 +517,7 @@ export class APIEffect {
       ? {
         ...paginationState.params,
         q: [
-          ...(paginationState.params.q || [])
+          ...(paginationState.params.q as string[] || [])
         ],
         page: paginationState.currentPage.toString(),
       }
@@ -612,43 +611,43 @@ export class APIEffect {
     );
   }
 
-  private setRequestParams(
-    requestParams: URLSearchParams,
-    params: PaginationParam,
-  ) {
-    if (params.hasOwnProperty('q')) {
-      // We need to create a series of q values that contain all from `requestParams` and `params`. Any that exist in `requestParams` should
-      // be overwritten in `params`
+  // private setRequestParams(
+  //   requestParams: URLSearchParams,
+  //   params: PaginationParam,
+  // ) {
+  //   if (params.hasOwnProperty('q')) {
+  //     // We need to create a series of q values that contain all from `requestParams` and `params`. Any that exist in `requestParams` should
+  //     // be overwritten in `params`
 
-      // Clear `requestParams` `q` and start afresh
-      const initialQParams = requestParams.getAll('q');
-      requestParams.delete('q');
+  //     // Clear `requestParams` `q` and start afresh
+  //     const initialQParams = requestParams.getAll('q');
+  //     requestParams.delete('q');
 
-      // Loop through all the NEW params that we wish to keep
-      params.q.forEach(qParam => {
-        // Add new param we wish to keep
-        requestParams.append('q', qParamToString(qParam));
-        // Remove any initial params that have been `overwritten`. This won't be added again later on
-        const haveInitialParam = initialQParams.findIndex(qParamStr => qParam.key === qParamKeyFromString(qParamStr));
-        if (haveInitialParam >= 0) {
-          initialQParams.splice(haveInitialParam, 1);
-        }
-      });
+  //     // Loop through all the NEW params that we wish to keep
+  //     params.q.forEach(qParam => {
+  //       // Add new param we wish to keep
+  //       requestParams.append('q', qParamToString(qParam));
+  //       // Remove any initial params that have been `overwritten`. This won't be added again later on
+  //       const haveInitialParam = initialQParams.findIndex(qParamStr => qParam.key === qParamKeyFromString(qParamStr));
+  //       if (haveInitialParam >= 0) {
+  //         initialQParams.splice(haveInitialParam, 1);
+  //       }
+  //     });
 
-      // Add the rest of the initial params
-      initialQParams.forEach(qParamStr => requestParams.append('q', qParamStr));
+  //     // Add the rest of the initial params
+  //     initialQParams.forEach(qParamStr => requestParams.append('q', qParamStr));
 
-      // Remove from q from `params` so it's not added again below
-      delete params.qString;
-      delete params.q;
-    }
-    // Assign other params
-    for (const key in params) {
-      if (params.hasOwnProperty(key)) {
-        requestParams.set(key, params[key] as string);
-      }
-    }
-  }
+  //     // Remove from q from `params` so it's not added again below
+  //     delete params.qString;
+  //     delete params.q;
+  //   }
+  //   // Assign other params
+  //   for (const key in params) {
+  //     if (params.hasOwnProperty(key)) {
+  //       requestParams.set(key, params[key] as string);
+  //     }
+  //   }
+  // }
   private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
     return requestType === 'delete' && !apiAction.updatingKey;
   }

@@ -9,7 +9,7 @@ import { EntityRequestAction } from '../types/request.types';
 import { failedEntityHandler } from './entity-request-base-handlers/fail-entity-request.handler';
 import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
-import { EntityRequestPipeline, PreApiRequest, SuccessfulApiRequestDataMapper } from './entity-request-pipeline.types';
+import { EntityRequestPipeline, PreApiRequest, SuccessfulApiResponseDataMapper } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
@@ -24,7 +24,7 @@ export interface PipelineConfig<T extends AppState = InternalAppState> {
   catalogueEntity: StratosBaseCatalogueEntity;
   action: EntityRequestAction;
   appState: T;
-  postSuccessDataMapper?: SuccessfulApiRequestDataMapper;
+  postSuccessDataMapper?: SuccessfulApiResponseDataMapper;
   preRequest?: PreApiRequest;
 }
 

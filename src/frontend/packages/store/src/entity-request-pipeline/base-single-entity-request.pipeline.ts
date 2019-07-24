@@ -12,15 +12,10 @@ import { normalizeEntityPipeFactory } from './entity-request-base-handlers/norma
 import { BasePipelineConfig, EntityRequestPipeline } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
 import { EntityRequestAction } from '../types/request.types';
-
+import { getSuccessMapper } from './pipeline-helpers';
 
 export interface SingleRequestPipelineConfig<T extends AppState = InternalAppState> extends BasePipelineConfig<T> {
   action: EntityRequestAction;
-}
-
-function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
-  const definition = catalogueEntity.definition as IStratosEntityDefinition;
-  return definition.successfulRequestDataMapper || definition.endpoint.globalSuccessfulRequestDataMapper || null;
 }
 
 function getPreRequestFunction(catalogueEntity: StratosBaseCatalogueEntity) {

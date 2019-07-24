@@ -11,8 +11,8 @@ import { RequestOptions } from '@angular/http';
 import { PipelineHttpClient } from './pipline-http-client.service';
 import { PaginatedAction } from '../types/pagination.types';
 export type ActionDispatcher = (action: Action) => void;
-export interface JetstreamResponse<T = any> {
-  [endpointGuid: string]: T | JetStreamErrorResponse;
+export interface JetstreamResponse<T = JetStreamErrorResponse> {
+  [endpointGuid: string]: T;
 }
 
 export type StartEntityRequestHandler = (
@@ -77,8 +77,8 @@ export type EntityRequestPipeline<> = (
 ) => Observable<PipelineResult>;
 
 
-export type SuccessfulApiRequestDataMapper<D = any> = (
-  normalizedEntities: D,
+export type SuccessfulApiResponseDataMapper<D = any> = (
+  response: D,
   endpointGuid: string
 ) => D;
 
@@ -94,5 +94,5 @@ export interface BasePipelineConfig<T extends AppState = InternalAppState, Y ext
   action: Y;
   appState: T;
   preRequest: PreApiRequest;
-  postSuccessDataMapper: SuccessfulApiRequestDataMapper;
+  postSuccessDataMapper: SuccessfulApiResponseDataMapper;
 }

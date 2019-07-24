@@ -24,7 +24,7 @@ import {
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { IStratosEndpointDefinition, IStratosEntityDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { APIResource, CFResponse } from '../../store/src/types/api.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
@@ -99,6 +99,7 @@ import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-deta
 import { githubRepoActionBuilders } from './entity-action-builders/github-action-builder';
 import { addRelationParams } from './cf-entity-relations.getters';
 import { HttpParams } from '@angular/common/http';
+import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -129,8 +130,10 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     },
     paginationPageIteratorConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
-      getTotalPages: (response: CFResponse) => response.total_pages,
-      getPaginationParameters: (page: number, response: CFResponse) => new HttpParams({ fromObject: { page: page + '' } })
+      getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
+        return max < response.total_pages ? response.total_pages : max;
+      }, 0),
+      getPaginationParameters: (page: number) => new HttpParams({ fromObject: { page: page + '' } })
     }
   } as IStratosEndpointDefinition;
   return [
@@ -267,9 +270,21 @@ function generateCFAppStatsEntity(endpointDefinition: IStratosEndpointDefinition
   const definition = {
     type: appStatsEntityType,
     schema: cfEntityFactory(appStatsEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<AppStats>>(definition, {
+    endpoint: endpointDefinition,
+    successfulRequestDataMapper: (data, endpointGuid) => {
+      if (data) {
+        return Object.keys(data).reduce((newStats, instanceKey) => {
+          newStats[instanceKey] = {
+            ...data[instanceKey],
+            cfGuid: endpointGuid
+          };
+          return newStats;
+        }, {} as AppStats);
+      }
+      return data;
+    },
+  } as IStratosEntityDefinition<any, AppStats>;
+  return new StratosCatalogueEntity<IFavoriteMetadata, AppStats>(definition, {
     actionBuilders: appStatsActionBuilders
   });
 }

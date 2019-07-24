@@ -3,8 +3,10 @@ import { Observable } from 'rxjs';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
-import { SuccessfulApiRequestDataMapper, PreApiRequest } from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import { PaginationPageIteratorConfig } from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
+import { SuccessfulApiResponseDataMapper, PreApiRequest } from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import {
+  PaginationPageIteratorConfig
+} from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -62,7 +64,7 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
   // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
   // This will be used for all entities with this endpoint type.
-  readonly globalSuccessfulRequestDataMapper?: SuccessfulApiRequestDataMapper;
+  readonly globalSuccessfulRequestDataMapper?: SuccessfulApiResponseDataMapper;
   // Allows an entity to manipulate the request object before it's sent.
   // This will be used for all entities with this endpoint type.
   readonly globalPreRequest?: PreApiRequest;
@@ -80,7 +82,8 @@ export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSche
   readonly subTypes?: Omit<IStratosEntityDefinition, 'schema' | 'subTypes' | 'endpoint'>[];
   // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
   // This will override any globalSuccessfulRequestDataMapper found in the endpoint.
-  readonly successfulRequestDataMapper?: SuccessfulApiRequestDataMapper<E>;
+  // TODO We should wrap this and the global version with immer to make them immutable.
+  readonly successfulRequestDataMapper?: SuccessfulApiResponseDataMapper<E>;
   // Allows an entity to manipulate the request object before it's sent.
   // This will override any globalPreRequest found in the endpoint.
   readonly preRequest?: PreApiRequest;
