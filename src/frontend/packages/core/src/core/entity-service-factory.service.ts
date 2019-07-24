@@ -19,6 +19,7 @@ export class EntityServiceFactory {
     // TODO NJ Can we reliably get the ID from the action? RC - IRequestAction covers request to single and lists of entities. For single
     // there should always be a guid. We should split IRequestAction into single with guid and list without
     // Also we should bump this into the catalogue https://jira.capbristol.com/browse/STRAT-141
+    // RC CI should get entiyId from action.
     entityId: string,
     action: IRequestAction,
     validateRelations = true,
