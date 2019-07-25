@@ -11,8 +11,8 @@ import {
   RESET_CREATE_SERVICE_INSTANCE_STATE,
   RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE,
   SetCreateServiceInstanceApp,
-} from '../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CreateServiceInstanceState } from '../types/create-service-instance.types';
+} from '../../actions/create-service-instance.actions';
+import { CreateServiceInstanceState } from '../../../../store/src/types/create-service-instance.types';
 
 
 const defaultState: CreateServiceInstanceState = {

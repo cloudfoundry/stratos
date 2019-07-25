@@ -1,9 +1,9 @@
-import { IAppSummary, IRoute } from '../../../core/src/core/cf-api.types';
-import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { DeleteRoute, RouteEvents, UnmapRoute } from '../../../cloud-foundry/src/actions/route.actions';
-import { IRequestEntityTypeState } from '../app-state';
-import { APIResource } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
+import { IAppSummary, IRoute } from '../../../../core/src/core/cf-api.types';
+import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/application-service-routes.actions';
+import { DeleteRoute, RouteEvents, UnmapRoute } from '../../actions/route.actions';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>, action: APISuccessOrFailedAction) {
   switch (action.type) {

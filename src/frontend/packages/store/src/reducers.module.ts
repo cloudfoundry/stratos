@@ -8,7 +8,6 @@ import { environment } from '../../core/src/environments/environment';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
-import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
@@ -19,7 +18,6 @@ import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
-import { UsersRolesReducer } from './reducers/users-roles.reducer';
 import { getDashboardStateSessionId } from './helpers/store-helpers';
 import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 
@@ -41,11 +39,9 @@ export const appReducers = {
   request: requestReducer,
   requestData: requestDataReducer,
   dashboard: dashboardReducer,
-  createServiceInstance: createServiceInstanceReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,
-  manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,
