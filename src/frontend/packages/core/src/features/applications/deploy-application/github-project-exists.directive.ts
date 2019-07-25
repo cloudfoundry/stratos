@@ -6,7 +6,7 @@ import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
 
 import { CheckProjectExists } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { selectDeployAppState } from '../../../../../cloud-foundry/src/selectors/deploy-application.selector';
+import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { GitSCMService, GitSCMType } from '../../../shared/data-services/scm/scm.service';
 
 

@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   CheckProjectExists,
   FetchBranchesForProject,

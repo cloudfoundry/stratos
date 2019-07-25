@@ -4,8 +4,8 @@ import {
   getPaginationEntityState,
   getPaginationKeyState,
   getPaginationState,
-} from '../../../store/src/selectors/pagination.selectors';
-import { getCFEntityKey } from '../cf-entity-helpers';
+} from '../../../../store/src/selectors/pagination.selectors';
+import { getCFEntityKey } from '../../cf-entity-helpers';
 
 export function selectCfPaginationState(entityType: string, paginationKey: string) {
   const entityKey = getCFEntityKey(entityType);

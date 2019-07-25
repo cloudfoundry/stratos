@@ -4,17 +4,23 @@ import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { GeneralEntityAppState } from '../../../store/src/app-state';
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
   getCurrentUserCFGlobalState,
+} from '../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
+import {
+  IOrgRoleState,
+  ISpaceRoleState,
+  ISpacesRoleState,
+} from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
+import { GeneralEntityAppState } from '../../../store/src/app-state';
+import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-} from '../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
+} from '../../../store/src/selectors/current-user-role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../store/src/types/api.types';
-import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
   createCFFeatureFlagPaginationKey,

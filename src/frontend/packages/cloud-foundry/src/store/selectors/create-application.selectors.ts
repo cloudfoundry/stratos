@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { CFAppState } from '../cf-app-state';
-import { CreateNewApplicationState } from '../store/types/create-application.types';
+import { CFAppState } from '../../cf-app-state';
+import { CreateNewApplicationState } from '../types/create-application.types';
 
 const selectNewAppDetails = (state: CFAppState) => state.createApplication;
 

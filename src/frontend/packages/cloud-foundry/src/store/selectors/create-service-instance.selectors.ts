@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { CFAppState } from '../cf-app-state';
-import { CreateServiceInstanceState } from '../store/types/create-service-instance.types';
+import { CFAppState } from '../../cf-app-state';
+import { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
 export const selectCreateServiceInstance = (state: CFAppState) => state.createServiceInstance;
 
