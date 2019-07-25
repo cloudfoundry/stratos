@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
 import { organizationSchemaKey, spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations.spec';
+import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { TabNavService } from '../../../../tab-nav.service';
 import {
   BaseTestModules,

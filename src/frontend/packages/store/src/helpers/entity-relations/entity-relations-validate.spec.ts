@@ -1,6 +1,13 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { GetOrganization } from '../../../../cloud-foundry/src/actions/organization.actions';
+import {
+  FetchRelationPaginatedAction,
+  FetchRelationSingleAction,
+} from '../../../../cloud-foundry/src/actions/relation.actions';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   organizationEntityType,
@@ -8,14 +15,13 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { CFRequestDataState } from '../../../../cloud-foundry/src/cf-entity-types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
-import { GetOrganization } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { SetInitialParams } from '../../actions/pagination.actions';
-import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../../../../cloud-foundry/src/actions/relation.actions';
 import { APIResponse } from '../../actions/request.actions';
-import { CFAppState, IRequestTypeState } from '../../app-state';
+import { IRequestTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
-import { BaseRequestDataState } from '../../types/entity.types';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validateEntityRelations } from './entity-relations';
@@ -24,22 +30,26 @@ import {
   entityRelationMissingQuotaUrl,
   entityRelationMissingSpacesUrl,
   EntityRelationSpecHelper,
-} from './entity-relations.spec';
+} from './entity-relations-spec-helper';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from './entity-relations.types';
 
-describe('Entity Relations - validate', () => {
+describe('Entity Relations - validate -', () => {
 
   const helper = new EntityRelationSpecHelper();
 
-  const pagKey = 'validateEntityRelations-pagKey';
   const cfGuid = 'validateEntityRelations-cf';
   const orgGuid = 'validateEntityRelations-org';
   const spaceGuid = 'validateEntityRelations-space';
 
   let store: CFAppState;
-  let allEntities: BaseRequestDataState;
+  let allEntities: CFRequestDataState;
   let apiResponse: APIResponse;
   let newEntities: IRequestTypeState;
+
+  const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+  const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+  const quotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+
 
   function noOp(iStore: Store<CFAppState>, includeRelations: string[], done: () => void) {
     const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
@@ -55,7 +65,6 @@ describe('Entity Relations - validate', () => {
       store: iStore
     });
     expect(res.started).toBeFalsy();
-
 
     expect(res.completed.then(completedRes => {
       if (apiResponse) {
@@ -93,15 +102,11 @@ describe('Entity Relations - validate', () => {
       entityRelationMissingSpacesUrl
     );
     const setSpacesParamsActions = new SetInitialParams(
-      {
-        entityType: spaceEntityType,
-        endpointType: 'cf'
-      },
+      getSpacesAction,
       getSpacesAction.paginationKey,
       getSpacesAction.initialParams,
       true
     );
-
 
     inject([Store], (iStore: Store<CFAppState>) => {
       const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
@@ -191,8 +196,8 @@ describe('Entity Relations - validate', () => {
   describe('validate from store - ', () => {
     beforeEach(() => {
       store = getInitialTestStoreState();
-      store.requestData[organizationEntityType][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-      store.request[organizationEntityType][orgGuid] = getDefaultRequestState();
+      store.requestData[orgEntity.entityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
+      store.request[orgEntity.entityKey][orgGuid] = getDefaultRequestState();
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -212,14 +217,14 @@ describe('Entity Relations - validate', () => {
     });
 
     it('List exists, list required', (done) => {
-      store.requestData[organizationEntityType][orgGuid].entity.spaces = [
+      store.requestData[orgEntity.entityKey][orgGuid].entity.spaces = [
         helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid)
       ];
       testListExistsListRequired(done);
     });
 
     it('List exists, list not required', (done) => {
-      store.requestData[organizationEntityType][orgGuid].entity.spaces = [
+      store.requestData[orgEntity.entityKey][orgGuid].entity.spaces = [
         helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid)
       ];
       testListExistsListNotRequired(done);
@@ -232,7 +237,7 @@ describe('Entity Relations - validate', () => {
     it('child has missing required relation', (done) => {
       const space = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
       space.entity.routes_url = 'routes_url';
-      store.requestData[organizationEntityType][orgGuid].entity.spaces = [space];
+      store.requestData[orgEntity.entityKey][orgGuid].entity.spaces = [space];
 
       const getOrgAction = new GetOrganization(
         orgGuid,
@@ -253,7 +258,7 @@ describe('Entity Relations - validate', () => {
       const childSpaceToOrgRelation = new EntityTreeRelation(cfEntityFactory(spaceEntityType), true, 'spaces', 'entity.spaces', [
         childRoutesToSpaceRelation
       ]);
-      const parentOrgToSpaceRelation = new EntityTreeRelation(getOrgAction.entity[0], true, null, '', [childSpaceToOrgRelation]);
+      // const parentOrgToSpaceRelation = new EntityTreeRelation(getOrgAction.entity[0], true, null, '', [childSpaceToOrgRelation]);
 
       const getSpaceRoutesAction = new FetchRelationPaginatedAction(
         cfGuid,
@@ -266,10 +271,7 @@ describe('Entity Relations - validate', () => {
         space.entity.routes_url
       );
       const setSpaceRoutesParamsActions = new SetInitialParams(
-        {
-          entityType: routeEntityType,
-          endpointType: 'cf'
-        },
+        getSpaceRoutesAction,
         getSpaceRoutesAction.paginationKey,
         getSpaceRoutesAction.initialParams,
         true
@@ -373,10 +375,10 @@ describe('Entity Relations - validate', () => {
 
     it('Have missing relation in store, associate it with parent', (done) => {
       const quotaDefinition = helper.createEmptyQuotaDefinition('quota_guid', 'missing but in store');
-      store.requestData[quotaDefinitionEntityType] = {
+      store.requestData[quotaEntity.entityKey] = {
         [quotaDefinition.metadata.guid]: quotaDefinition
       };
-      const org = store.requestData[organizationEntityType][orgGuid];
+      const org = store.requestData[orgEntity.entityKey][orgGuid];
       org.entity.quota_definition_guid = quotaDefinition.metadata.guid;
 
 
@@ -388,7 +390,7 @@ describe('Entity Relations - validate', () => {
 
       const associateAction = new WrapperRequestActionSuccess({
         entities: {
-          [organizationEntityType]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
+          [orgEntity.entityKey]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
         },
         result: [org.metadata.guid]
       }, {
@@ -398,8 +400,8 @@ describe('Entity Relations - validate', () => {
         guid: orgGuid,
         entityType: organizationEntityType,
         type: '[Entity] Associate with parent',
-        childEntityKey: 'quota_definition',
-        endpointType: 'cf'
+        childEntityKey: quotaEntity.entityKey,
+        endpointType: CF_ENDPOINT_TYPE
       } as IRequestAction, 'fetch', 1, 1);
 
       inject([Store], (iStore: Store<CFAppState>) => {
@@ -433,7 +435,7 @@ describe('Entity Relations - validate', () => {
     beforeEach(() => {
       store = getInitialTestStoreState();
 
-      store.request[organizationEntityType][orgGuid] = getDefaultRequestState();
+      store.request[orgEntity.entityKey][orgGuid] = getDefaultRequestState();
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -443,7 +445,7 @@ describe('Entity Relations - validate', () => {
       apiResponse = {
         response: {
           entities: {
-            [organizationEntityType]: {
+            [orgEntity.entityKey]: {
               [orgGuid]: helper.createEmptyOrg(orgGuid, 'org-name')
             }
           },
@@ -465,15 +467,15 @@ describe('Entity Relations - validate', () => {
 
     it('List exists, list required', (done) => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
-      apiResponse.response.entities[organizationEntityType][orgGuid].entity.spaces = [newSpace];
-      apiResponse.response.entities[spaceEntityType] = { [spaceGuid]: newSpace };
+      apiResponse.response.entities[orgEntity.entityKey][orgGuid].entity.spaces = [newSpace];
+      apiResponse.response.entities[spaceEntity.entityKey] = { [spaceGuid]: newSpace };
       testListExistsListRequired(done);
     });
 
     it('List exists, list not required', (done) => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
-      apiResponse.response.entities[organizationEntityType][orgGuid].entity.spaces = [newSpace];
-      apiResponse.response.entities[spaceEntityType] = { [spaceGuid]: newSpace };
+      apiResponse.response.entities[orgEntity.entityKey][orgGuid].entity.spaces = [newSpace];
+      apiResponse.response.entities[spaceEntity.entityKey] = { [spaceGuid]: newSpace };
       testListExistsListNotRequired(done);
     });
 

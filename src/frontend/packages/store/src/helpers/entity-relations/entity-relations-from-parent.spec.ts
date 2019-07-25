@@ -2,44 +2,45 @@ import { async, inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { CloudFoundryPackageModule } from '../../../../cloud-foundry/src/cloud-foundry.module';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../core/test-framework/store-test-helper';
-import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { RequestTypes } from '../../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from '../../app-state';
 import { getDefaultRequestState } from '../../reducers/api-request-reducer/types';
 import { APIResource } from '../../types/api.types';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
 import { populatePaginationFromParent } from './entity-relations';
-import { EntityRelationSpecHelper } from './entity-relations.spec';
+import { EntityRelationSpecHelper } from './entity-relations-spec-helper';
 
 interface SpaceState {
   space: IRequestEntityTypeState<APIResource<ISpace>>;
 }
 describe('Entity Relations - populate from parent', () => {
-  const entityKey = entityCatalogue.getEntityKey('cf', organizationEntityType);
-  const spaceEntityKey = entityCatalogue.getEntityKey('cf', spaceEntityType);
+  const orgEntityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, organizationEntityType);
+  const spaceEntityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
 
   const helper = new EntityRelationSpecHelper();
 
   const pagKey = 'populatePaginationFromParent-pagKey';
   const cfGuid = 'populatePaginationFromParent-cf';
   const orgGuid = 'populatePaginationFromParent-org';
-  const spaceGuid = 'populatePaginationFromParent-space';
+  // const spaceGuid = 'populatePaginationFromParent-space';
 
   let store;
 
   beforeEach(() => {
     store = getInitialTestStoreState();
-    store.requestData[entityKey] = {};
-    store.request[entityKey] = {};
+    store.requestData[orgEntityKey] = {};
+    store.request[orgEntityKey] = {};
     store.requestData[spaceEntityKey] = {};
     store.request[spaceEntityKey] = {};
-    store.requestData[entityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-    store.request[entityKey][orgGuid] = getDefaultRequestState();
+    store.requestData[orgEntityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
+    store.request[orgEntityKey][orgGuid] = getDefaultRequestState();
     TestBed.configureTestingModule({
       imports: [
         CloudFoundryPackageModule,
@@ -69,9 +70,9 @@ describe('Entity Relations - populate from parent', () => {
     const spaceGuids = spaces.map(space => space.metadata.guid);
 
     spaces.forEach(space => {
-      store.requestData.space[space.metadata.guid] = space;
+      store.requestData[spaceEntityKey][space.metadata.guid] = space;
     });
-    store.requestData[entityKey][orgGuid].entity.spaces = spaces;
+    store.requestData[orgEntityKey][orgGuid].entity.spaces = spaces;
 
     inject([Store], (iStore: Store<AppState>) => {
       populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true))

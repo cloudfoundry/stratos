@@ -7,7 +7,13 @@ import { EntitySchema } from '../entity-schema';
  * @export
  */
 export class EntityTreeRelation {
+  /**
+   * Where does this entity go into the store? (does contain endpointType)
+   */
   public entityKey: string;
+  /**
+   * What is the core entity type (does not contain endpointType)
+   */
   public entityType: string;
 
   /**
