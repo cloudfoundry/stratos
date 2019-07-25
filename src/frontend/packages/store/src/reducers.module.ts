@@ -41,8 +41,6 @@ export const appReducers = {
   request: requestReducer,
   requestData: requestDataReducer,
   dashboard: dashboardReducer,
-  //createApplication: createAppReducer,
-  // deployApplication: deployAppReducer,
   createServiceInstance: createServiceInstanceReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,

@@ -6,6 +6,7 @@ import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
 
+// TODO: Remove commented effects once all CF effects are moved accross (leaving them here helps with tracking)
 @NgModule({
   imports: [
     CloudFoundryReducersModule,
