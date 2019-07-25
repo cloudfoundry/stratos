@@ -13,7 +13,7 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { DeployAppEffects } from '../../cloud-foundry/src/store/effects/deploy-app.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
-import { GithubEffects } from './effects/github.effects';
+import { GithubEffects } from '../../cloud-foundry/src/store/effects/github.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
@@ -43,7 +43,7 @@ import { CloudFoundryStoreModule } from './../../cloud-foundry/src/store/cloud-f
       AuthEffect,
       UAASetupEffect,
       EndpointsEffect,
-      //CreateAppPageEffects,
+      // CreateAppPageEffects,
       UpdateAppEffects,
       PaginationEffects,
       ActionHistoryEffect,
@@ -53,7 +53,7 @@ import { CloudFoundryStoreModule } from './../../cloud-foundry/src/store/cloud-f
       SnackBarEffects,
       SetClientFilterEffect,
       // DeployAppEffects,
-      GithubEffects,
+      // GithubEffects,
       CloudFoundryEffects,
       MetricsEffect,
       RequestEffect,

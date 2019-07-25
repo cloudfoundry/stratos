@@ -4,6 +4,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
+import { GithubEffects } from './effects/github.effects';
 
 @NgModule({
   imports: [
@@ -26,7 +27,7 @@ import { DeployAppEffects } from './effects/deploy-app.effects';
       // SnackBarEffects,
       // SetClientFilterEffect,
       DeployAppEffects,
-      // GithubEffects,
+      GithubEffects,
       // CloudFoundryEffects,
       // MetricsEffect,
       // RequestEffect,
