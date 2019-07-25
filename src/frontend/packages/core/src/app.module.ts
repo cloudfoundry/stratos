@@ -86,9 +86,8 @@ export class CustomRouterStateSerializer
   imports: [
     // This need to be first to initialize the entityCatalogue
     AppStoreExtensionsModule,
-    CloudFoundryPackageModule,
     AppStoreModule,
-    CloudFoundryStoreModule,
+    CloudFoundryPackageModule,
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
