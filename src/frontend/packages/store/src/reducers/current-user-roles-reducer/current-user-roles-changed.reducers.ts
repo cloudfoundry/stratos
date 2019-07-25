@@ -2,8 +2,8 @@ import { ChangeUserRole } from '../../../../cloud-foundry/src/actions/users.acti
 import { ICfRolesState, ICurrentUserRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
-import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
-import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
+import { defaultUserOrgRoleState } from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-org.reducer';
+import { defaultUserSpaceRoleState } from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-space.reducer';
 import { PermissionStrings } from '../../../../core/src/core/current-user-permissions.config';
 
 export function updateAfterRoleChange(
