@@ -5,7 +5,7 @@ import { PageAutoscalerMetricBase } from './page-autoscaler-metric-base.po';
 
 export class CardAutoscalerMetric extends Component {
 
-  constructor(public cfGuid: string, public appGuid: string, locator: ElementFinder = element(by.css('.autoscaler-tab-tile-metric'))) {
+  constructor(public cfGuid: string, public appGuid: string, locator: ElementFinder = element(by.css('.autoscaler-tab__latest-metrics'))) {
     super(locator);
   }
 

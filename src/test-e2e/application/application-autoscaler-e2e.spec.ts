@@ -595,6 +595,44 @@ describe('Autoscaler -', () => {
 
   });
 
+  describe('Autoscaler Event Page - ', () => {
+    const loggingPrefix = 'AutoScaler Event Table:';
+    let eventPageBase: PageAutoscalerEventBase;
+    describe('From autoscaler event card', () => {
+      beforeAll(() => {
+        const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
+        appAutoscaler.goToAutoscalerTab();
+        eventPageBase = appAutoscaler.tableEvents.clickGotoEventPage();
+      });
+
+      it('Go to events page', () => {
+        e2e.sleep(1000);
+        e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Event Page`);
+        eventPageBase.waitForPage();
+        expect(eventPageBase.list.empty.getDefault().isPresent()).toBeFalsy();
+        expect(eventPageBase.list.empty.getDefault().getComponent().isPresent()).toBeFalsy();
+        expect(eventPageBase.list.empty.getCustom().getComponent().isDisplayed()).toBeTruthy();
+        expect(eventPageBase.list.empty.getCustomLineOne()).toBe('This application has no routes');
+        eventPageBase.header.clickIconButton('clear');
+      });
+
+      it('Should go to App Autoscaler Tab', () => {
+        e2e.sleep(1000);
+        e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
+        // Should be app autoscaler tab
+        const appSummaryPage = new CFPage('/applications/');
+        appSummaryPage.waitForPageOrChildPage();
+        appSummaryPage.header.waitForTitleText(testAppName);
+        browser.wait(ApplicationPageAutoscalerTab.detect()
+          .then(appAutoscaler => {
+            expect(appAutoscaler.cardStatus.getStatusToggleInput()).toBe('false');
+            expect(appAutoscaler.cardStatus.getStatusText()).toBe('Disabled');
+          }), 10000, 'Failed to wait for App Autoscaler Tab after view scaling events'
+        );
+      });
+    });
+  });
+
   describe('Autoscaler Metric Page -', () => {
     const loggingPrefix = 'AutoScaler Metric Charts:';
     let metricPageBase: PageAutoscalerMetricBase;
@@ -611,7 +649,7 @@ describe('Autoscaler -', () => {
         metricPageBase.waitForPage();
         expect(metricPageBase.isActivePage()).toBeTruthy();
         expect(metricPageBase.header.getTitleText()).toBe('AutoScaler Metric Charts: ' + testAppName);
-        // expect(metricPageBase.list.cards.getCardCount()).toBe(3);
+        expect(metricPageBase.list.cards.getCardCount()).toBe(3);
         metricPageBase.header.clickIconButton('clear');
       });
 
@@ -624,50 +662,9 @@ describe('Autoscaler -', () => {
         appSummaryPage.header.waitForTitleText(testAppName);
         browser.wait(ApplicationPageAutoscalerTab.detect()
           .then(appAutoscaler => {
-            expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(0);
-            expect(appAutoscaler.tableSchedules.getEmptyRecurringTableWarningText()).toBe('No recurring schedule.');
-            expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(0);
-            expect(appAutoscaler.tableSchedules.getEmptySpecificTableWarningText()).toBe('No specific date schedule.');
-          }), 10000, 'Failed to wait for App Autoscaler Tab after edit policy'
-        );
-      });
-    });
-  });
-
-  describe('Autoscaler Event Page -', () => {
-    const loggingPrefix = 'AutoScaler Event Table:';
-    let eventPageBase: PageAutoscalerEventBase;
-    describe('From autoscaler event card', () => {
-      beforeAll(() => {
-        const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
-        appAutoscaler.goToAutoscalerTab();
-        eventPageBase = appAutoscaler.tableEvents.clickGotoEventPage();
-      });
-
-      it('Go to metric page', () => {
-        e2e.sleep(1000);
-        e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Event Page`);
-        eventPageBase.waitForPage();
-        expect(eventPageBase.isActivePage()).toBeTruthy();
-        expect(eventPageBase.header.getTitleText()).toBe('AutoScaler Scaling Events: ' + testAppName);
-        // expect(eventPageBase.list.table.getRowCount()).toBe(0);
-        eventPageBase.header.clickIconButton('clear');
-      });
-
-      it('Should go to App Autoscaler Tab', () => {
-        e2e.sleep(1000);
-        e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
-        // Should be app autoscaler tab
-        const appSummaryPage = new CFPage('/applications/');
-        appSummaryPage.waitForPageOrChildPage();
-        appSummaryPage.header.waitForTitleText(testAppName);
-        browser.wait(ApplicationPageAutoscalerTab.detect()
-          .then(appAutoscaler => {
-            expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(0);
-            expect(appAutoscaler.tableSchedules.getEmptyRecurringTableWarningText()).toBe('No recurring schedule.');
-            expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(0);
-            expect(appAutoscaler.tableSchedules.getEmptySpecificTableWarningText()).toBe('No specific date schedule.');
-          }), 10000, 'Failed to wait for App Autoscaler Tab after edit policy'
+            expect(appAutoscaler.cardStatus.getStatusToggleInput()).toBe('true');
+            expect(appAutoscaler.cardStatus.getStatusText()).toBe('Enabled');
+          }), 10000, 'Failed to wait for App Autoscaler Tab after view metric charts'
         );
       });
     });
