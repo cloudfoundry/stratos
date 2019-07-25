@@ -27,14 +27,19 @@ export function getEntityRelationsForPaginationRequest(action: PaginatedAction) 
       newAction as EntityInlineParentAction
     );
   }
+  return listEntityRelations(
+    action as (EntityInlineParentAction & PaginatedAction)
+  );
 }
 
 export function addRelationParams(request: HttpRequest<any>, action: EntityRequestAction | PaginatedAction) {
   if (!isEntityInlineParentAction(action)) {
     return request;
   }
+  const paginationAction = action as PaginatedAction;
   // TODO This should decide which method to use getEntityRelationsForPaginationRequest or getEntityRelationsForEntityRequest
-  const relationInfo = getEntityRelationsForEntityRequest(action);
+  const relationInfo = paginationAction.paginationKey ?
+    getEntityRelationsForPaginationRequest(paginationAction) : getEntityRelationsForEntityRequest(action);
   const update = {
     fromObject: {}
   };
