@@ -4,7 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs';
-import { catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { isEntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relation-tree.helpers';
 import { listEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
 import { EntityInlineParentAction } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
@@ -18,7 +18,7 @@ import { SendEventAction } from '../actions/internal-events.actions';
 import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { CfAPIFlattener, flattenPagination } from '../helpers/paginated-request-helpers';
-import { getFailApiRequestActions, getRequestTypeFromMethod, startApiRequest } from '../reducers/api-request-reducer/request-helpers';
+import { getRequestTypeFromMethod, } from '../reducers/api-request-reducer/request-helpers';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
@@ -253,38 +253,38 @@ export class APIEffect {
           }),
         ];
       }),
-      catchError(error => {
-        const endpointString = options.headers.get(endpointHeader) || '';
-        const endpointIds: string[] = endpointString.split(',');
-        endpointIds.forEach(endpoint =>
-          this.store.dispatch(
-            new SendEventAction(endpointSchemaKey, endpoint, {
-              eventCode: error.status ? error.status + '' : '500',
-              severity: InternalEventSeverity.ERROR,
-              message: 'Jetstream API request error',
-              metadata: {
-                error,
-                url: error.url || apiAction.options.url,
-              },
-            }),
-          ),
-        );
-        const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
-          endpointIds,
-          url: error.url || apiAction.options.url,
-          eventCode: error.status ? error.status + '' : '500',
-          message: 'Jetstream API request error',
-          error
-        });
-        if (this.shouldRecursivelyDelete(requestType, apiAction)) {
-          this.store.dispatch(new RecursiveDeleteFailed(
-            apiAction.guid,
-            apiAction.endpointGuid,
-            catalogueEntity.getSchema(apiAction.schemaKey),
-          ));
-        }
-        return errorActions;
-      }),
+      // catchError(error => {
+      //   const endpointString = options.headers.get(endpointHeader) || '';
+      //   const endpointIds: string[] = endpointString.split(',');
+      //   endpointIds.forEach(endpoint =>
+      //     this.store.dispatch(
+      //       new SendEventAction(endpointSchemaKey, endpoint, {
+      //         eventCode: error.status ? error.status + '' : '500',
+      //         severity: InternalEventSeverity.ERROR,
+      //         message: 'Jetstream API request error',
+      //         metadata: {
+      //           error,
+      //           url: error.url || apiAction.options.url,
+      //         },
+      //       }),
+      //     ),
+      //   );
+      //   const errorActions = getFailApiRequestActions(actionClone, error, requestType, {
+      //     endpointIds,
+      //     url: error.url || apiAction.options.url,
+      //     eventCode: error.status ? error.status + '' : '500',
+      //     message: 'Jetstream API request error',
+      //     error
+      //   });
+      //   if (this.shouldRecursivelyDelete(requestType, apiAction)) {
+      //     this.store.dispatch(new RecursiveDeleteFailed(
+      //       apiAction.guid,
+      //       apiAction.endpointGuid,
+      //       catalogueEntity.getSchema(apiAction.schemaKey),
+      //     ));
+      //   }
+      //   return errorActions;
+      // }),
     );
   }
 

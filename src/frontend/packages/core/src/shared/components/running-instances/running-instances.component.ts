@@ -7,6 +7,7 @@ import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { appStatsEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { AppStat } from '../../../../../store/src/types/app-metadata.types';
 
 @Component({
   selector: 'app-running-instances',
@@ -23,22 +24,22 @@ export class RunningInstancesComponent implements OnInit {
   public runningInstances$: Observable<number>;
 
   constructor(
-    private store: Store<CFAppState>,
+    store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) { }
 
   ngOnInit() {
     const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);
-    const paginationMonitor = this.paginationMonitorFactory.create(
+    const paginationMonitor = this.paginationMonitorFactory.create<AppStat>(
       dummyAction.paginationKey,
       cfEntityFactory(appStatsEntityType)
     );
     this.runningInstances$ =
       paginationMonitor.currentPage$
         .pipe(
-          map(appInstancesPages => {
+          map((appInstancesPages) => {
             const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
-            return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
+            return allInstances.filter((stat) => stat.state === 'RUNNING').length;
           })
         );
   }

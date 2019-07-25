@@ -1,5 +1,5 @@
 import { Action, Store } from '@ngrx/store';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, catchError } from 'rxjs/operators';
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
@@ -11,6 +11,9 @@ import { startEntityHandler } from './entity-request-base-handlers/start-entity-
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
 import { EntityRequestPipeline, PreApiRequest, SuccessfulApiResponseDataMapper } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
+import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
+import { jetstreamErrorHandler } from './entity-request-base-handlers/jetstream-error.handler';
+import { of } from 'rxjs';
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
   store: Store<AppState>;
@@ -39,6 +42,10 @@ function getPreRequestFunction(catalogueEntity: StratosBaseCatalogueEntity) {
   return definition.preRequest || definition.endpoint.globalPreRequest || null;
 }
 
+function shouldRecursivelyDelete(requestType: string, apiAction: EntityRequestAction) {
+  return requestType === 'delete' && !apiAction.updatingKey;
+}
+
 export const apiRequestPipelineFactory = (
   pipeline: EntityRequestPipeline,
   { store, httpClient, action, appState }: PipelineFactoryConfig
@@ -48,6 +55,14 @@ export const apiRequestPipelineFactory = (
   const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
   const postSuccessDataMapper = getSuccessMapper(catalogueEntity);
   const preRequest = getPreRequestFunction(catalogueEntity);
+  const recursivelyDelete = shouldRecursivelyDelete(requestType, action);
+
+  if (recursivelyDelete) {
+    store.dispatch(
+      new RecursiveDelete(action.guid, catalogueEntity.getSchema(action.schemaKey)),
+    );
+  }
+
   startEntityHandler(actionDispatcher, catalogueEntity, requestType, action);
   return pipeline(store, httpClient, {
     action,
@@ -59,12 +74,22 @@ export const apiRequestPipelineFactory = (
   }).pipe(
     tap((response) => {
       if (response.success) {
-        successEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response);
+        successEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response, recursivelyDelete);
       } else {
-        failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response);
+        failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response, recursivelyDelete);
       }
     }),
-    map(() => catalogueEntity.getRequestAction('complete', requestType))
+    map(() => catalogueEntity.getRequestAction('complete', requestType)),
+    catchError(error => {
+      jetstreamErrorHandler(
+        error,
+        action,
+        catalogueEntity,
+        requestType,
+        recursivelyDelete
+      );
+      return of('Jetstream error handled.');
+    }),
   );
 };
 // action: ICFAction | PaginatedAction, state: CFAppState

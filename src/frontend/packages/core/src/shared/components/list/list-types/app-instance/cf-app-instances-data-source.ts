@@ -11,13 +11,12 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppStat } from '../../../../../../../store/src/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 
-export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
+export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStat> {
 
   constructor(
     store: Store<CFAppState>,
@@ -44,8 +43,8 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
           Object.keys(instances).forEach(key => {
             res.push({
               index: key,
-              usage: this.calcUsage(instances[key].entity),
-              value: instances[key].entity
+              usage: this.calcUsage(instances[key]),
+              value: instances[key]
             });
           });
           return res;

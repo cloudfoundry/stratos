@@ -24,6 +24,7 @@ import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
 import { UpdateCfAction } from '../types/request.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -67,6 +68,7 @@ export class RequestEffect {
    *    been dropped because their count is over 50
    *
    */
+  // TODO Move this into cF
   @Effect() validateEntities$ = this.actions$.pipe(
     ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
     mergeMap(action => {
@@ -118,7 +120,7 @@ export class RequestEffect {
         .pipe(catchError(error => {
           this.logger.warn(`Entity validation process failed`, error);
           if (validateAction.apiRequestStarted) {
-            return getFailApiRequestActions(apiAction, error, requestType);
+            return getFailApiRequestActions(apiAction, error, requestType, entityCatalogue.getEntity(apiAction));
           } else {
             this.update(apiAction, false, error.message);
             return [];

@@ -1,5 +1,6 @@
 import { JetstreamResponse, SuccessfulApiResponseDataMapper } from '../entity-request-pipeline.types';
 import { isJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
+import { EntityRequestAction } from '../../types/request.types';
 
 export class JetstreamError {
   constructor(
@@ -21,10 +22,10 @@ export interface HandledMultiEndpointResponse<T = any> {
   successes: T[];
 }
 
-
 function mapResponses(
   jetstreamResponse: JetstreamResponse<any>,
   requestUrl: string,
+  action: EntityRequestAction,
   postSuccessDataMapper?: SuccessfulApiResponseDataMapper
 ): HandledMultiEndpointResponse {
   const baseResponse = {
@@ -44,9 +45,9 @@ function mapResponses(
     } else {
       if (postSuccessDataMapper) {
         if (Array.isArray(jetstreamEndpointResponse)) {
-          jetstreamEndpointResponse.forEach(entity => multiResponses.successes.push(postSuccessDataMapper(entity, endpointGuid)))
+          jetstreamEndpointResponse.forEach(entity => multiResponses.successes.push(postSuccessDataMapper(entity, endpointGuid, action)));
         } else {
-          multiResponses.successes.push(postSuccessDataMapper(jetstreamEndpointResponse, endpointGuid));
+          multiResponses.successes.push(postSuccessDataMapper(jetstreamEndpointResponse, endpointGuid, action));
         }
       } else {
         multiResponses.successes.push(jetstreamEndpointResponse);
@@ -59,12 +60,12 @@ function mapResponses(
 
 export const handleMultiEndpointsPipeFactory = (
   requestUrl: string,
+  action: EntityRequestAction,
   postSuccessDataMapper?: SuccessfulApiResponseDataMapper
 ) => (
   resData: JetstreamResponse
 ): HandledMultiEndpointResponse => {
-    console.log(resData)
-    const responses = mapResponses(resData, requestUrl, postSuccessDataMapper);
+    const responses = mapResponses(resData, requestUrl, action, postSuccessDataMapper);
     return responses;
   };
 

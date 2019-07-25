@@ -67,7 +67,7 @@ export class CFEntitySchema extends EntitySchema {
 const AppSummarySchema = new CFEntitySchema(appSummaryEntityType, {}, { idAttribute: 'guid' });
 entityCache[appSummaryEntityType] = AppSummarySchema;
 
-const AppStatSchema = new CFEntitySchema(appStatsEntityType, {}, { idAttribute: getAPIResourceGuid });
+const AppStatSchema = new CFEntitySchema(appStatsEntityType, {}, { idAttribute: 'guid' });
 entityCache[appStatsEntityType] = AppStatSchema;
 
 const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getAPIResourceGuid });

@@ -19,6 +19,7 @@ import {
   EntityRequestAction,
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 
 export function getEntityRequestState(
   state: BaseRequestState,
@@ -189,15 +190,17 @@ export function completeApiRequest<T extends GeneralAppState = GeneralAppState>(
 
 export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
   store: Store<T>,
-  apiAction: ICFAction | PaginatedAction,
+  apiAction: EntityRequestAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
+  catalogueEntity: StratosBaseCatalogueEntity,
   internalEndpointError?: InternalEndpointError
 ) {
   const actions = getFailApiRequestActions(
     apiAction,
     error,
     requestType,
+    catalogueEntity,
     internalEndpointError
   );
   store.dispatch(actions[0]);
@@ -205,13 +208,14 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
 }
 
 export function getFailApiRequestActions(
-  apiAction: ICFAction | PaginatedAction,
+  apiAction: EntityRequestAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
-  internalEndpointError?: InternalEndpointError
+  catalogueEntity: StratosBaseCatalogueEntity,
+  internalEndpointError?: InternalEndpointError,
 ) {
   return [
-    new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
+    new APISuccessOrFailedAction(catalogueEntity.getRequestAction('failure', requestType).type, apiAction, error.message),
     new WrapperRequestActionFailed(
       error.message,
       apiAction,

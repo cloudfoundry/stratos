@@ -34,7 +34,7 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
   const baseRequest = buildRequestEntityPipe(requestType, action.options);
   const request = preRequest ? preRequest(baseRequest, action, catalogueEntity) : baseRequest;
   const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
-  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url, postSuccessDataMapper);
+  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url, action, postSuccessDataMapper);
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   return makeRequestEntityPipe(
     httpClient,

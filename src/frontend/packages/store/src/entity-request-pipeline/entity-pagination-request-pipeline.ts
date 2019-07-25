@@ -57,7 +57,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     params: paramsFromStore
   });
   const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
-  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url, postSuccessDataMapper);
+  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url, action, postSuccessDataMapper);
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   const pageIterator = flattenerConfig ? new PaginationPageIterator(httpClient, request, action, flattenerConfig) : null;
   return getRequestObservable(

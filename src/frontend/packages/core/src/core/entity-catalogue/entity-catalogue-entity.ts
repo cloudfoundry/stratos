@@ -15,7 +15,7 @@ import {
   IEntityMetadata,
   IStratosBaseEntityDefinition,
   IStratosEndpointDefinition,
-  IStratosEndpointWithoutSchemaDefinition,
+  StratosEndpointExtensionDefinition,
   IStratosEntityBuilder,
   IStratosEntityDefinition,
 } from './entity-catalogue.types';
@@ -187,7 +187,7 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
   // This is needed here for typing
   public definition: IStratosEndpointDefinition;
   constructor(
-    entity: IStratosEndpointWithoutSchemaDefinition | IStratosEndpointDefinition,
+    entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string
   ) {
     const fullEntity = {

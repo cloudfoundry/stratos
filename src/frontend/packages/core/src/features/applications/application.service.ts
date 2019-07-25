@@ -126,7 +126,7 @@ export class ApplicationService {
   app$: Observable<EntityInfo<APIResource<IApp>>>;
   waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
   appSummary$: Observable<EntityInfo<IAppSummary>>;
-  appStats$: Observable<APIResource<AppStat>[]>;
+  appStats$: Observable<AppStat[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
   appOrg$: Observable<APIResource<IOrganization>>;
@@ -242,8 +242,8 @@ export class ApplicationService {
 
     this.applicationState$ = this.waitForAppEntity$.pipe(
       combineLatest(this.appStats$.pipe(startWith(null))),
-      map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStatsArray ? appStatsArray.map(apiResource => apiResource.entity) : null);
+      map(([appInfo, appStatsArray]: [EntityInfo, AppStat[]]) => {
+        return this.appStateService.get(appInfo.entity.entity, appStatsArray || null);
       }), publishReplay(1), refCount());
 
     this.applicationStratProject$ = this.appEnvVars.entities$.pipe(map(applicationEnvVars => {
@@ -309,6 +309,7 @@ export class ApplicationService {
     updatedApplication: UpdateApplication,
     updateEntities?: AppMetadataTypes[],
     existingApplication?: IApp): Observable<ActionState> {
+    debugger
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
@@ -318,10 +319,12 @@ export class ApplicationService {
     ));
 
     // Create an Observable that can be used to determine when the update completed
-    const actionState = selectUpdateInfo(applicationEntityType,
+    const actionState = selectUpdateInfo(
+      applicationEntityType,
       this.appGuid,
-      UpdateExistingApplication.updateKey);
-    return this.store.select(actionState).pipe(filter(item => !item.busy));
+      UpdateExistingApplication.updateKey
+    );
+    return this.store.select(actionState).pipe(filter(item => !item.busy), first());
   }
 }
 

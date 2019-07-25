@@ -28,6 +28,7 @@ export type SucceedOrFailEntityRequestHandler = (
   requestType: ApiRequestTypes,
   action: EntityRequestAction,
   response: NormalizedResponse,
+  recursivelyDeleting: boolean
 ) => void;
 
 export type EndEntityRequestPipe<
@@ -79,7 +80,8 @@ export type EntityRequestPipeline<> = (
 
 export type SuccessfulApiResponseDataMapper<D = any> = (
   response: D,
-  endpointGuid: string
+  endpointGuid: string,
+  action: EntityRequestAction
 ) => D;
 
 export type PreApiRequest = (

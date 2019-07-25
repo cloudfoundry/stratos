@@ -30,6 +30,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
         this.cfOrgSpaceService.cf.select.next(cf);
       }
       if (cf && org) {
+
         this.cfOrgSpaceService.org.select.next(org);
       }
       if (cf && org && space) {

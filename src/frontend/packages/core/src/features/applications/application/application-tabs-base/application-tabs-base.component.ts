@@ -36,6 +36,7 @@ import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.component';
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
+import { UpdateExistingApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -275,7 +276,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection['Updating-Existing-Application']);
+          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
         return { updating };
       }),
       startWith({ updating: true })
