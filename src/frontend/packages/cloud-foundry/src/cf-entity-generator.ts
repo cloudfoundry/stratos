@@ -38,7 +38,7 @@ import { updateOrganizationSpaceReducer } from './store/reducers/organization-sp
 import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
 import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
 import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
-import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from '../../store/src/reducers/users.reducer';
+import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';
