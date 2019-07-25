@@ -17,7 +17,6 @@ import {
 } from '../../../store/src/helpers/paginated-request-helpers';
 import { createPaginationCompleteWatcher } from '../../../store/src/helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { CFResponse } from '../../../store/src/types/api.types';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../store/src/types/endpoint.types';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
@@ -34,6 +33,7 @@ import {
   UserRelationTypes,
 } from '../actions/permissions.actions';
 import { CFAppState } from '../cf-app-state';
+import { CFResponse } from '../store/types/cf-api.types';
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 

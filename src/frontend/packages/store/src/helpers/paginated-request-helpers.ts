@@ -5,8 +5,8 @@ import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { CFResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { CFResponse } from '../types/api.types';
 
 
 export interface IPaginationFlattener<T, C> {
