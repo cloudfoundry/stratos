@@ -9,7 +9,7 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../../../store/src/types/user.types';
+import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';

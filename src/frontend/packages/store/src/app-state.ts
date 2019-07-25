@@ -14,7 +14,7 @@ import { PaginationEntityTypeState } from './types/pagination.types';
 import { IRecentlyVisitedState } from './types/recently-visited.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
-import { UsersRolesState } from './types/users-roles.types';
+import { UsersRolesState } from '../../cloud-foundry/src/store/types/users-roles.types';
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
 
 export interface IRequestTypeState {
@@ -49,6 +49,12 @@ export abstract class AppState<
   userFavoritesGroups: IUserFavoritesGroupsState;
   recentlyVisited: IRecentlyVisitedState;
 }
+
+// Just the routing history
+export interface AppRoutingSate {
+  routing: RoutingHistory;
+}
+
 export interface GeneralRequestDataState {
   [name: string]: any;
 }

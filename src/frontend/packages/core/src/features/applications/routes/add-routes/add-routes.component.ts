@@ -26,7 +26,7 @@ import { createEntityRelationKey } from '../../../../../../store/src/helpers/ent
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { Route, RouteMode } from '../../../../../../store/src/types/route.types';
+import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { pathGet } from '../../../../core/utils.service';

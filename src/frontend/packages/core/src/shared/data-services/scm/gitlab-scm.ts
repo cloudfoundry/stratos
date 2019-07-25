@@ -3,7 +3,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Md5 } from 'ts-md5/dist/md5';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../../../store/src/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../../../../cloud-foundry/src/store/types/git.types';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 

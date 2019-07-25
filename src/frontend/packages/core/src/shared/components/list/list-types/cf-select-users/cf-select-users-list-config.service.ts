@@ -6,7 +6,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { CfUser, CfUserMissingRoles } from '../../../../../../../store/src/types/user.types';
+import { CfUser, CfUserMissingRoles } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../data-services/cf-user.service';
