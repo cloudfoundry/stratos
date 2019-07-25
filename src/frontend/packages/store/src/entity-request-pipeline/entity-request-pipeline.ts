@@ -37,11 +37,6 @@ function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
   return definition.successfulRequestDataMapper || definition.endpoint.globalSuccessfulRequestDataMapper || null;
 }
 
-function getPreRequestFunction(catalogueEntity: StratosBaseCatalogueEntity) {
-  const definition = catalogueEntity.definition as IStratosEntityDefinition;
-  return definition.preRequest || definition.endpoint.globalPreRequest || null;
-}
-
 function shouldRecursivelyDelete(requestType: string, apiAction: EntityRequestAction) {
   return requestType === 'delete' && !apiAction.updatingKey;
 }
@@ -53,8 +48,6 @@ export const apiRequestPipelineFactory = (
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const requestType = getRequestTypeFromMethod(action);
   const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
-  const postSuccessDataMapper = getSuccessMapper(catalogueEntity);
-  const preRequest = getPreRequestFunction(catalogueEntity);
   const recursivelyDelete = shouldRecursivelyDelete(requestType, action);
 
   if (recursivelyDelete) {
@@ -68,9 +61,7 @@ export const apiRequestPipelineFactory = (
     action,
     requestType,
     catalogueEntity,
-    appState,
-    postSuccessDataMapper,
-    preRequest
+    appState
   }).pipe(
     tap((response) => {
       if (response.success) {

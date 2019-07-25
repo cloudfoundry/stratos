@@ -135,7 +135,10 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
-    globalPreRequest: (request, action, catalogueEntity) => {
+    globalPreRequest: (request, action) => {
+      return addRelationParams(request, action);
+    },
+    globalPrePaginationRequest: (request, action) => {
       return addRelationParams(request, action);
     },
     globalSuccessfulRequestDataMapper: (data, endpointGuid) => {
@@ -152,6 +155,10 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
         return max < response.total_pages ? response.total_pages : max;
+      }, 0),
+      getEntityCount: (responses: JetstreamResponse<CFResponse>) => Object.keys(responses).reduce((count, endpointGuid) => {
+        const endpoint: CFResponse = responses[endpointGuid];
+        return count + endpoint.total_results;
       }, 0),
       getPaginationParameters: (page: number) => new HttpParams({ fromObject: { page: page + '' } })
     }

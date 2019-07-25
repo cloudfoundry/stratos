@@ -10,7 +10,7 @@ import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { RequestOptions } from '@angular/http';
 import { PipelineHttpClient } from './pipline-http-client.service';
 import { PaginatedAction } from '../types/pagination.types';
-export type ActionDispatcher = (action: Action) => void;
+export type ActionDispatcher<T extends Action = Action> = (action: T) => void;
 export interface JetstreamResponse<T = JetStreamErrorResponse> {
   [endpointGuid: string]: T;
 }
@@ -90,11 +90,15 @@ export type PreApiRequest = (
   catalogueEntity: StratosBaseCatalogueEntity
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
 
+export type PrePaginationApiRequest = (
+  request: HttpRequest<any>,
+  action: PaginatedAction,
+  catalogueEntity: StratosBaseCatalogueEntity
+) => HttpRequest<any> | Observable<HttpRequest<any>>;
+
 export interface BasePipelineConfig<T extends AppState = InternalAppState, Y extends Action = Action> {
   requestType: ApiRequestTypes;
   catalogueEntity: StratosBaseCatalogueEntity;
   action: Y;
   appState: T;
-  preRequest: PreApiRequest;
-  postSuccessDataMapper: SuccessfulApiResponseDataMapper;
 }

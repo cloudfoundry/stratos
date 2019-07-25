@@ -3,7 +3,11 @@ import { Observable } from 'rxjs';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
-import { SuccessfulApiResponseDataMapper, PreApiRequest } from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import {
+  SuccessfulApiResponseDataMapper,
+  PreApiRequest,
+  PrePaginationApiRequest
+} from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import {
   PaginationPageIteratorConfig
 } from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
@@ -67,6 +71,7 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   // Allows an entity to manipulate the request object before it's sent.
   // This will be used for all entities with this endpoint type.
   readonly globalPreRequest?: PreApiRequest;
+  readonly globalPrePaginationRequest?: PrePaginationApiRequest;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
@@ -86,6 +91,7 @@ export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSche
   // Allows an entity to manipulate the request object before it's sent.
   // This will override any globalPreRequest found in the endpoint.
   readonly preRequest?: PreApiRequest;
+  readonly prePaginationRequest?: PrePaginationApiRequest;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {
