@@ -12,7 +12,7 @@ import { cfEntityFactory, serviceEntityType } from '../../../../../../cloud-foun
 import {
   selectCreateServiceInstanceCfGuid,
   selectCreateServiceInstanceSpaceGuid,
-} from '../../../../../../store/src/selectors/create-service-instance.selectors';
+} from '../../../../../../cloud-foundry/src/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IService } from '../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';

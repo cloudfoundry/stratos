@@ -6,7 +6,7 @@ import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } f
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfEntity } from '../../../../../cloud-foundry/src/selectors/api.selectors';
-import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
+import { selectDeployAppState } from '../../../../../cloud-foundry/src/selectors/deploy-application.selector';
 import {
   AppData,
   DeployApplicationSource,

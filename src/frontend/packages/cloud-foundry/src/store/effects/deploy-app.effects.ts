@@ -25,7 +25,7 @@ import { CFAppState } from '../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-factory';
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { parseHttpPipeError } from '../../../../core/src/core/utils.service';
-import { selectDeployAppState } from '../../../../store/src/selectors/deploy-application.selector';
+import { selectDeployAppState } from '../../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { GitCommit } from '../types/git.types';
 import {

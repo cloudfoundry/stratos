@@ -1,6 +1,6 @@
 import { localStorageSync } from 'ngrx-store-localstorage';
 import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule, ActionReducer, Store } from '@ngrx/store';
+import { ActionReducerMap, StoreModule, ActionReducer } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
 

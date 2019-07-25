@@ -5,19 +5,19 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { LoggerService } from '../../../core/src/core/logger.service';
+import { LoggerService } from '../../../../core/src/core/logger.service';
 import {
   createCfFeatureFlagFetchAction,
-} from '../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
-import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../store/src/actions/endpoint.actions';
+} from '../../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../../store/src/actions/endpoint.actions';
 import {
   BaseHttpClientFetcher,
   flattenPagination,
   IPaginationFlattener,
-} from '../../../store/src/helpers/paginated-request-helpers';
-import { createPaginationCompleteWatcher } from '../../../store/src/helpers/store-helpers';
-import { endpointsRegisteredCFEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../store/src/types/endpoint.types';
+} from '../../../../store/src/helpers/paginated-request-helpers';
+import { createPaginationCompleteWatcher } from '../../../../store/src/helpers/store-helpers';
+import { endpointsRegisteredCFEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
+import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../../store/src/types/endpoint.types';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
   GET_CURRENT_USER_CF_RELATIONS_FAILED,
@@ -31,9 +31,9 @@ import {
   GetUserCfRelations,
   GetUserRelations,
   UserRelationTypes,
-} from '../actions/permissions.actions';
-import { CFAppState } from '../cf-app-state';
-import { CFResponse } from '../store/types/cf-api.types';
+} from '../../actions/permissions.actions';
+import { CFAppState } from '../../cf-app-state';
+import { CFResponse } from '../types/cf-api.types';
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 

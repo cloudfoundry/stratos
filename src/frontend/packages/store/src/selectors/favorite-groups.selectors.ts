@@ -4,14 +4,13 @@ import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { deriveEndpointFavoriteFromFavorite } from '../../../core/src/core/user-favorite-helpers';
-import { IRequestEntityTypeState } from '../app-state';
+import { IRequestEntityTypeState, InternalAppState } from '../app-state';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 
 const favoritesEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema.entityType);
 
-// TODO: Confirm - should this be CFAppState?
-export const favoriteEntitiesSelector = (state: CFAppState):
+export const favoriteEntitiesSelector = (state: InternalAppState):
   IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey];
 
 // TODO: Confirm - should this be CFAppState?

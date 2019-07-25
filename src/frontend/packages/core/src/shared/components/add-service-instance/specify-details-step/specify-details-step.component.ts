@@ -44,7 +44,7 @@ import { getDefaultRequestState, RequestInfoState } from '../../../../../../stor
 import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceSpaceGuid,
-} from '../../../../../../store/src/selectors/create-service-instance.selectors';
+} from '../../../../../../cloud-foundry/src/selectors/create-service-instance.selectors';
 import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import { CreateServiceInstanceState } from '../../../../../../cloud-foundry/src/store/types/create-service-instance.types';
 import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
