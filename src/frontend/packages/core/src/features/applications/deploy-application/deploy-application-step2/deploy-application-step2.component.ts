@@ -32,7 +32,7 @@ import {
   selectSourceType,
 } from '../../../../../../store/src/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
-import { GitAppDetails, SourceType } from '../../../../../../store/src/types/deploy-application.types';
+import { GitAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { GitCommit, GitRepo } from '../../../../../../store/src/types/git.types';
 import { GitBranch } from '../../../../../../store/src/types/github.types';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';

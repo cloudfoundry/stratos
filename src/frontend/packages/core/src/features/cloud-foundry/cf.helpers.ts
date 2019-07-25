@@ -16,7 +16,7 @@ import {
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { ICfRolesState } from '../../../../store/src/types/current-user-roles.types';
+import { ICfRolesState } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import {

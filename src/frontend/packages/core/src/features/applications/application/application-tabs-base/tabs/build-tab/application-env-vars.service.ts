@@ -10,7 +10,7 @@ import {
   PaginationObservables,
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { OverrideAppDetails } from '../../../../../../../../store/src/types/deploy-application.types';
+import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 

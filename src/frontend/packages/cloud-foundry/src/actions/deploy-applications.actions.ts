@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-factory';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
-import { GitAppDetails, OverrideAppDetails, SourceType } from '../../../store/src/types/deploy-application.types';
+import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
 import { GitBranch, GitCommit } from '../../../store/src/types/git.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../store/src/types/request.types';

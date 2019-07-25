@@ -1,6 +1,6 @@
 import { ActivatedRoute } from '@angular/router';
 
-import { SourceType } from '../../../../../store/src/types/deploy-application.types';
+import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 
 export enum DEPLOY_TYPES_IDS {
   GITLAB = 'gitlab',

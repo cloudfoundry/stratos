@@ -13,7 +13,7 @@ import {
   IOrgRoleState,
   ISpaceRoleState,
   RoleEntities,
-} from '../../types/current-user-roles.types';
+} from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { currentUserRolesReducer } from './current-user-roles.reducer';
 
 const testOrgGuid = 'org-1';

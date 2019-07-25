@@ -38,7 +38,7 @@ import {
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
-import { AppStat } from '../../../../store/src/types/app-metadata.types';
+import { AppStat } from '../../../../cloud-foundry/src/store/types/app-metadata.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IApp, IAppSummary, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';

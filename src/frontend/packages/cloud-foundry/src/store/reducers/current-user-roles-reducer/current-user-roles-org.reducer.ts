@@ -1,5 +1,5 @@
 import { UserRelationTypes } from '../../../actions/permissions.actions';
-import { IOrgRoleState } from '../../../../../store/src/types/current-user-roles.types';
+import { IOrgRoleState } from '../../types/cf-current-user-roles.types';
 
 export const defaultUserOrgRoleState: IOrgRoleState = {
   isManager: false,

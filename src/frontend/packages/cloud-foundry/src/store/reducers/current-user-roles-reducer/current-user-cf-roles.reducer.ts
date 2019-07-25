@@ -1,11 +1,8 @@
 import { ISpace } from '../../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import {
-  getDefaultEndpointRoles,
-  ICfRolesState,
-  IOrgsRoleState,
-} from '../../../../../store/src/types/current-user-roles.types';
+import { getDefaultEndpointRoles } from '../../../../../store/src/types/current-user-roles.types';
 import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../actions/permissions.actions';
+import { ICfRolesState, IOrgsRoleState } from '../../types/cf-current-user-roles.types';
 import { createOrgRoleStateState } from './current-user-roles-org.reducer';
 import { currentUserOrgRolesReducer } from './current-user-roles-orgs.reducer';
 import { currentUserSpaceRolesReducer } from './current-user-roles-spaces.reducer';

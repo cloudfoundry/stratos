@@ -1,8 +1,8 @@
 import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
+import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { appSummaryEntityType, userProvidedServiceInstanceEntityType } from '../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../store/src/app-state';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../../store/src/types/user.types';
