@@ -3,10 +3,10 @@ import { inject, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { CoreModule } from '../../../core/src/core/core.module';
 import { EndpointsPageComponent } from '../../../core/src/features/endpoints/endpoints-page/endpoints-page.component';
 import { SharedModule } from '../../../core/src/shared/shared.module';
-import { CFAppState } from '../app-state';
 import { ShowSnackBar } from './../actions/snackBar.actions';
 import { AppStoreModule } from './../store.module';
 

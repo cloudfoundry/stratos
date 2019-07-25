@@ -55,11 +55,11 @@ export interface GeneralRequestDataState {
 
 export interface GeneralAppRequestDataState extends BaseEntityValues, GeneralRequestDataState { }
 
-export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'endpoint'>>;
+export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'stratosEndpoint'>>;
 export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;
 export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
-export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'userFavorites'>>, 'userFavoritesGroups'>;
+export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'stratosUserFavorites'>>, 'userFavoritesGroups'>;
 
 // One stop shop for all of your app state needs
 
