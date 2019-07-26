@@ -14,6 +14,7 @@ import {
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
+import { getEventFiles } from '../../../core/browser-helper';
 import { safeUnsubscribe } from '../../../core/utils.service';
 
 @Component({
@@ -58,7 +59,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
   get fileCount(): number { return this.files && this.files.length || 0; }
 
   onNativeInputFileSelect($event) {
-    const fs = $event.srcElement.files;
+    const fs = getEventFiles($event);
     if (fs.length > 0) {
       this.files = fs;
       this.onFileSelect.emit(this.files[0]);

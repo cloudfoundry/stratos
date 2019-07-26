@@ -6,6 +6,11 @@
     margin-bottom: $space;
     width: 100%;
   }
+  &__columns-1 {
+    app-card {
+      width: 100%;
+    }
+  }
   &__columns-2 {
     app-card {
       @include breakpoint(tablet) {

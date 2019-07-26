@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
@@ -13,10 +13,10 @@ import { TableCellEventTimestampComponent } from './table-cell-event-timestamp/t
 import { TableCellEventTypeComponent } from './table-cell-event-type/table-cell-event-type.component';
 
 @Injectable()
-export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
+export class CfAppEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
 
   eventSource: CfAppEventsDataSource;
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
       columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent, sort: true, cellFlex: '3'
     },
@@ -42,6 +42,7 @@ export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements 
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
+      this
     );
   }
 

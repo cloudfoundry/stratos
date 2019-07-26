@@ -24,19 +24,19 @@ export class ServiceTabsBaseComponent {
     {
       link: 'summary',
       label: 'Summary',
-      matIcon: 'description'
+      icon: 'description'
     },
     {
       link: 'instances',
       label: 'Instances',
-      matIcon: 'service_instance',
-      matIconFont: 'stratos-icons'
+      icon: 'service_instance',
+      iconFont: 'stratos-icons'
     },
     {
       link: 'plans',
       label: 'Plans',
-      matIcon: 'service_plan',
-      matIconFont: 'stratos-icons'
+      icon: 'service_plan',
+      iconFont: 'stratos-icons'
     }
   ];
 
