@@ -97,6 +97,27 @@ function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, htt
   );
 }
 
+const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) =>
+  store.select(selectPaginationState(action.entityType, action.paginationKey));
+
+/**
+ * Using the given action wait until the associated pagination section changes from busy to not busy
+ */
+const createPaginationCompleteWatcher = (store: Store<CFAppState>, action: BasePaginatedAction): Observable<boolean> =>
+  fetchPaginationStateFromAction(store, action).pipe(
+    map((paginationState: PaginationEntityState) => {
+      const pageRequest: ActionState =
+        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+      return pageRequest ? pageRequest.busy : true;
+    }),
+    pairwise(),
+    map(([oldFetching, newFetching]) => {
+      return oldFetching === true && newFetching === false;
+    }),
+    skipWhile(completed => !completed),
+    first(),
+  );
+
 @Injectable()
 export class PermissionsEffects {
   constructor(
@@ -160,6 +181,7 @@ export class PermissionsEffects {
     })
   );
 
+
   private dispatchRoleRequests(endpoints: EndpointModel[]): CfsRequestState {
     const requests: CfsRequestState = {};
 
@@ -217,28 +239,6 @@ export class PermissionsEffects {
     });
   }
 }
-
-const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) =>
-  store.select(selectPaginationState(action.entityType, action.paginationKey));
-
-/**
- * Using the given action wait until the associated pagination section changes from busy to not busy
- */
-const createPaginationCompleteWatcher = (store: Store<CFAppState>, action: BasePaginatedAction): Observable<boolean> =>
-  fetchPaginationStateFromAction(store, action).pipe(
-    map((paginationState: PaginationEntityState) => {
-      const pageRequest: ActionState =
-        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-      return pageRequest ? pageRequest.busy : true;
-    }),
-    pairwise(),
-    map(([oldFetching, newFetching]) => {
-      return oldFetching === true && newFetching === false;
-    }),
-    skipWhile(completed => !completed),
-    first(),
-  );
-
 
 @Injectable()
 export class PermissionEffects {
