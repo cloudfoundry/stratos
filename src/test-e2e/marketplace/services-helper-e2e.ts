@@ -124,7 +124,8 @@ export class ServicesHelperE2E {
         if (!!attemptsLeft) {
           e2e.log(`Failed to create service instance '${serviceInstanceName}' of type '${serviceName}'.
            Attempting ${attemptsLeft} more time/s`);
-          browser.sleep(1000);
+          // Wait 10 seonds until we try again
+          browser.sleep(10000);
           this.createInstanceAttempt(retryNumber + 1, maxRetries, serviceName, serviceInstanceName);
         } else {
           fail(`Failed to create service instance after ${maxRetries} retries`);

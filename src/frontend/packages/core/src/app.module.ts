@@ -6,6 +6,7 @@ import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
+import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
 import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import {
@@ -44,7 +45,6 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { CloudFoundryStoreModule } from '../../cloud-foundry/src/store/cloud-foundry.store.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -103,6 +103,7 @@ export class CustomRouterStateSerializer
     AboutModule,
     CustomImportModule,
     XSRFModule,
+    CfAutoscalerModule
   ],
   providers: [
     TabNavService,
@@ -124,14 +125,18 @@ export class AppModule {
     private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
     EntityActionDispatcher.initialize(this.store);
-    eventService.addEventConfig<boolean>(
-      {
-        eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
-        message: 'Timeout session is disabled - this is considered a security risk.',
-        key: 'timeoutSessionWarning',
-        link: '/user-profile'
-      }
-    );
+    eventService.addEventConfig<boolean>({
+      eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
+      message: 'Timeout session is disabled - this is considered a security risk.',
+      key: 'timeoutSessionWarning',
+      link: '/user-profile'
+    });
+    eventService.addEventConfig<boolean>({
+      eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
+      message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
+      key: 'pollingEnabledWarning',
+      link: '/user-profile'
+    });
     // This should be brought back in in the future
     // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
     //   {

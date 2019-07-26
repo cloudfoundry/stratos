@@ -4,7 +4,7 @@ export const userFavouritesSchemaKey = 'userFavorites';
 export const endpointSchemaKey = 'endpoint';
 export const userProfileSchemaKey = 'userProfile';
 
-export const entityCache: {
+const entityCache: {
   [key: string]: EntitySchema
 } = {};
 

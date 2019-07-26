@@ -12,7 +12,7 @@
   .simple-usage-graph-color {
     @each $color in $colors {
       &--#{nth($color, 1)} {
-        background-color: #{nth($color, 2)}
+        background-color: #{nth($color, 2)};
       }
       &--#{nth($color, 1)}-background {
         background-color: transparentize(nth($color, 2), .8);

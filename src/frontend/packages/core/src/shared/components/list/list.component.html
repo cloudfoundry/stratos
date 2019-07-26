@@ -14,9 +14,12 @@
             config.text?.title }}</div>
           <!-- Time range selector -->
           <div class="list-component__header__left--metrics-range"
-            *ngIf="config.showMetricsRange && !(isAddingOrSelecting$ | async)">
+            *ngIf="config.showCustomTime && !(isAddingOrSelecting$ | async)">
             <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
-              (metricsAction)="config.getDataSource().updateMetricsAction($event)"></app-metrics-range-selector>
+              (metricsAction)="config.getDataSource().updateMetricsAction($event)" [times]="config.customTimeWindows"
+              [selectedTimeValue]="config.customTimeInitialValue" [pollInterval]="config.customTimePollingInterval"
+              [validate]="config.customTimeValidation">
+            </app-metrics-range-selector>
           </div>
 
           <!-- Multi actions (those applied to selection) -->
@@ -136,22 +139,20 @@
               <mat-icon>list</mat-icon>
             </button>
           </div>
-          <button id="app-list-refresh-button" mat-icon-button *ngIf="dataSource.refresh"
-            [disabled]="(dataSource.isLoadingPage$ | async) || (isAddingOrSelecting$ | async)" (click)="refresh()">
-            <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}"
-              aria-label="Refresh list data">refresh</mat-icon>
-          </button>
+          <app-polling-indicator id="app-list-refresh-button" *ngIf="dataSource.refresh"
+            [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+            [isPolling]="(isRefreshing$ | async)">
+          </app-polling-indicator>
         </div>
 
       </mat-card>
     </div>
     <div class="refresh-button__no-header"
       *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
-      <button id="app-list-refresh-button" mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)"
-        [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
-        <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">
-          refresh</mat-icon>
-      </button>
+      <app-polling-indicator id="app-list-refresh-button" *ngIf="!(isAddingOrSelecting$ | async)"
+        [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+        [isPolling]="(isRefreshing$ | async)" [fabButton]="true">
+      </app-polling-indicator>
     </div>
     <div class="list-component__body">
       <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
@@ -201,10 +202,3 @@
     </div>
   </ng-container>
 </div>
-
-<ng-template #refreshButton>
-  <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async"
-    (click)="refresh()">
-    <mat-icon aria-label="Refresh list data">refresh</mat-icon>
-  </button>
-</ng-template>
