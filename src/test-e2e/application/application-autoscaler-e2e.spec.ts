@@ -1,5 +1,5 @@
 import { browser, promise } from 'protractor';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
@@ -323,8 +323,8 @@ describe('Autoscaler -', () => {
       // createPolicy.stepper.getStepperForm().fill({ end_date: '2101/01/01' });
       // createPolicy.stepper.getStepperForm().fill({ repeat_type: 'month' });
       // createPolicy.stepper.getStepperForm().fill({ days_of_month: ['2', '3'] });
-      // createPolicy.stepper.getStepperForm().fill({ start_time: '08:00AM'});
-      // createPolicy.stepper.getStepperForm().fill({ end_time: '08:00PM'});
+      createPolicy.stepper.getStepperForm().fill({ start_time: '08:00 AM' });
+      createPolicy.stepper.getStepperForm().fill({ end_time: '08:00 PM' });
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '5' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
@@ -346,13 +346,27 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.getRuleTilesCount()).toBe(1);
       expect(createPolicy.stepper.canNext()).toBeFalsy();
       // Fill in form -- valid inputs
-      // createPolicy.stepper.getStepperForm().fill({ start_date_time: '2098/01/01,08:00AM' });
-      // createPolicy.stepper.getStepperForm().fill({ end_date_time: '2099/01/01,08:00PM' });
+      const start = moment().tz('UTC').add(1, 'minutes').format('YYYY/MM/DD,hh:mm A');
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: start });
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
-      createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '5' });
+      createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
+      createPolicy.stepper.clickDoneButton();
+
+      // Click [Add] button
+      createPolicy.stepper.clickAddButton();
+      expect(createPolicy.stepper.getRuleTilesCount()).toBe(2);
+      expect(createPolicy.stepper.canNext()).toBeFalsy();
+      // Fill in form -- invalid inputs
+      createPolicy.stepper.getStepperForm().fill({ instance_min_count: '20' });
+      expect(createPolicy.stepper.getMatErrorsCount()).toBe(4);
+      // Fill in form -- fix invalid inputs
+      createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: '2099/01/01,08:00 AM' });
+      createPolicy.stepper.getStepperForm().fill({ end_date_time: '2099/01/01,08:00 PM' });
+      expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       createPolicy.stepper.clickDoneButton();
 
       expect(createPolicy.stepper.canNext()).toBeTruthy();
@@ -393,20 +407,22 @@ describe('Autoscaler -', () => {
           expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(1);
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 0)).toBe('Always');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 1)).toBe('1,2,3 of the week');
-          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 2)).toBe('10:00');
-          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 3)).toBe('18:00');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 2)).toBe('08:00');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 3)).toBe('20:00');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 4)).toBe('5');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 5)).toBe('2');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 6)).toBe('10');
-          expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(1);
-          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 0))
-            .toBe(moment().add(1, 'days').format('YYYY-MM-DD') + 'T10:00');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(2);
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 1))
             .toBe(moment().add(1, 'days').format('YYYY-MM-DD') + 'T18:00');
-          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 2)).toBe('5');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 2)).toBe('2');
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 3)).toBe('2');
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 4)).toBe('10');
-
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 0)).toBe('2099-01-01T08:00');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 1)).toBe('2099-01-01T20:00');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 2)).toBe('5');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 3)).toBe('2');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 4)).toBe('10');
         }), 10000, 'Failed to wait for App Autoscaler Tab after attach policy'
       );
     });
@@ -570,7 +586,7 @@ describe('Autoscaler -', () => {
       });
 
       it('Should pass SpecificDates Step', () => {
-        createPolicy.stepper.clickDeleteButton(0);
+        createPolicy.stepper.clickDeleteButton(1);
         expect(createPolicy.stepper.canNext()).toBeTruthy();
         createPolicy.stepper.next();
       });
@@ -586,51 +602,13 @@ describe('Autoscaler -', () => {
           .then(appAutoscaler => {
             expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(0);
             expect(appAutoscaler.tableSchedules.getEmptyRecurringTableWarningText()).toBe('No recurring schedule.');
-            expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(0);
-            expect(appAutoscaler.tableSchedules.getEmptySpecificTableWarningText()).toBe('No specific date schedule.');
+            expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(1);
+            // expect(appAutoscaler.tableSchedules.getEmptySpecificTableWarningText()).toBe('No specific date schedule.');
           }), 10000, 'Failed to wait for App Autoscaler Tab after edit policy'
         );
       });
     });
 
-  });
-
-  describe('Autoscaler Event Page - ', () => {
-    const loggingPrefix = 'AutoScaler Event Table:';
-    let eventPageBase: PageAutoscalerEventBase;
-    describe('From autoscaler event card', () => {
-      beforeAll(() => {
-        const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
-        appAutoscaler.goToAutoscalerTab();
-        eventPageBase = appAutoscaler.tableEvents.clickGotoEventPage();
-      });
-
-      it('Go to events page', () => {
-        e2e.sleep(1000);
-        e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Event Page`);
-        eventPageBase.waitForPage();
-        expect(eventPageBase.list.empty.getDefault().isPresent()).toBeFalsy();
-        expect(eventPageBase.list.empty.getDefault().getComponent().isPresent()).toBeFalsy();
-        expect(eventPageBase.list.empty.getCustom().getComponent().isDisplayed()).toBeTruthy();
-        expect(eventPageBase.list.empty.getCustomLineOne()).toBe('This application has no routes');
-        eventPageBase.header.clickIconButton('clear');
-      });
-
-      it('Should go to App Autoscaler Tab', () => {
-        e2e.sleep(1000);
-        e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
-        // Should be app autoscaler tab
-        const appSummaryPage = new CFPage('/applications/');
-        appSummaryPage.waitForPageOrChildPage();
-        appSummaryPage.header.waitForTitleText(testAppName);
-        browser.wait(ApplicationPageAutoscalerTab.detect()
-          .then(appAutoscaler => {
-            expect(appAutoscaler.cardStatus.getStatusToggleInput()).toBe('false');
-            expect(appAutoscaler.cardStatus.getStatusText()).toBe('Disabled');
-          }), 10000, 'Failed to wait for App Autoscaler Tab after view scaling events'
-        );
-      });
-    });
   });
 
   describe('Autoscaler Metric Page -', () => {
@@ -647,7 +625,6 @@ describe('Autoscaler -', () => {
         e2e.sleep(1000);
         e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Metric Page`);
         metricPageBase.waitForPage();
-        expect(metricPageBase.isActivePage()).toBeTruthy();
         expect(metricPageBase.header.getTitleText()).toBe('AutoScaler Metric Charts: ' + testAppName);
         expect(metricPageBase.list.cards.getCardCount()).toBe(3);
         metricPageBase.header.clickIconButton('clear');
@@ -665,6 +642,47 @@ describe('Autoscaler -', () => {
             expect(appAutoscaler.cardStatus.getStatusToggleInput()).toBe('true');
             expect(appAutoscaler.cardStatus.getStatusText()).toBe('Enabled');
           }), 10000, 'Failed to wait for App Autoscaler Tab after view metric charts'
+        );
+      });
+    });
+  });
+
+  describe('Autoscaler Event Page - ', () => {
+    const loggingPrefix = 'AutoScaler Event Table:';
+    let eventPageBase: PageAutoscalerEventBase;
+    describe('From autoscaler event card', () => {
+      beforeAll(() => {
+        const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
+        appAutoscaler.goToAutoscalerTab();
+        e2e.sleep(30000);
+        eventPageBase = appAutoscaler.tableEvents.clickGotoEventPage();
+      });
+
+      it('Go to events page', () => {
+        e2e.sleep(1000);
+        e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Event Page`);
+        eventPageBase.waitForPage();
+        expect(eventPageBase.header.getTitleText()).toBe('AutoScaler Scaling Events: ' + testAppName);
+        // expect(eventPageBase.list.empty.getDefault().isDisplayed()).toBeTruthy();
+        // expect(eventPageBase.list.empty.getDefault().getComponent().getText()).toBe('There are no scaling events');
+        expect(eventPageBase.list.table.getRowCount()).toBe(1);
+        expect(eventPageBase.list.table.getCell(0, 2).getText()).toBe('schedule');
+        expect(eventPageBase.list.table.getCell(0, 4).getText()).toBe('+1 instance(s) because limited by min instances 2');
+        eventPageBase.header.clickIconButton('clear');
+      });
+
+      it('Should go to App Autoscaler Tab', () => {
+        e2e.sleep(1000);
+        e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
+        // Should be app autoscaler tab
+        const appSummaryPage = new CFPage('/applications/');
+        appSummaryPage.waitForPageOrChildPage();
+        appSummaryPage.header.waitForTitleText(testAppName);
+        browser.wait(ApplicationPageAutoscalerTab.detect()
+          .then(appAutoscaler => {
+            expect(appAutoscaler.cardStatus.getStatusToggleInput()).toBe('true');
+            expect(appAutoscaler.cardStatus.getStatusText()).toBe('Enabled');
+          }), 10000, 'Failed to wait for App Autoscaler Tab after view scaling events'
         );
       });
     });

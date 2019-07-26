@@ -177,7 +177,7 @@ export class FormComponent extends Component {
     return this.getControlsMap().then(ctrls => {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
-        const value = fields[field];
+        const value: any = fields[field];
         expect(ctrl).toBeDefined(`Could not find form control with id '${field}'. Found ctrls with ids '${Object.keys(ctrls)}'`);
         if (!ctrl) {
           return;
@@ -189,6 +189,21 @@ export class FormComponent extends Component {
             if (ctrl.checked !== value) {
               ctrl.sendKeys(' ');
             }
+            break;
+          case 'date':
+            const datePattern = '(1|2)[0-9][0-9][0-9]/(?:(?:0[1-9])|(?:1[0-2]))/(?:(?:[0-2][1-9])|(?:[1-3][0-1]))';
+            expect(new RegExp(`^${datePattern}$`).test(value)).toBe(true, `Form input '${value}' of date is invalid`);
+            this.sendMultipleKeys(ctrl, value);
+            break;
+          case 'time':
+            const timePattern = '([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
+            expect(new RegExp(`^${timePattern}$`).test(value)).toBe(true, `Form input '${value}' of time is invalid`);
+            this.sendMultipleKeys(ctrl, value);
+            break;
+          case 'datetime-local':
+            const dateTimePattern = '(1|2)[0-9][0-9][0-9]/(?:(?:0[1-9])|(?:1[0-2]))/(?:(?:[0-2][1-9])|(?:[1-3][0-1])),([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
+            expect(new RegExp(`^${dateTimePattern}$`).test(value)).toBe(true, `Form input '${value}' of datetime-local is invalid`);
+            this.sendMultipleKeys(ctrl, value);
             break;
           case 'mat-select':
             let strValue = value as string;
@@ -230,6 +245,17 @@ export class FormComponent extends Component {
     this.getField(name).sendKeys(' ');
     return this.getField(name).sendKeys(protractor.Key.BACK_SPACE);
   }
+
+  sendMultipleKeys(ctrl: FormItem, keyString: string) {
+    keyString.split(/[ ,:\/]/).forEach((key) => {
+      ctrl.sendKeys(key);
+      if (key.length === 4) {
+        ctrl.sendKeys(Key.ARROW_RIGHT);
+      }
+    });
+    ctrl.sendKeys(Key.RETURN);
+  }
+
 }
 
 
