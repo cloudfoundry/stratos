@@ -1,13 +1,13 @@
-import { cfUserEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { IOrganization, ISpace } from '../../../core/src/core/cf-api.types';
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../actions/endpoint.actions';
-import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../../../cloud-foundry/src/actions/organization.actions';
-import { createDefaultUserRelations } from '../../../cloud-foundry/src/actions/user.actions.helpers';
-import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../../../cloud-foundry/src/actions/users.actions';
-import { IRequestEntityTypeState } from '../app-state';
-import { deepMergeState } from '../helpers/reducer.helper';
-import { APIResource, NormalizedResponse } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
+import { cfUserEntityType } from '../../cf-entity-factory';
+import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
+import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../../actions/organization.actions';
+import { createDefaultUserRelations } from '../../actions/user.actions.helpers';
+import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../../actions/users.actions';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { deepMergeState } from '../../../../store/src/helpers/reducer.helper';
+import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import {
   CfUser,
   CfUserMissingOrgRoles,
@@ -16,7 +16,7 @@ import {
   getDefaultCfUserMissingRoles,
   OrgUserRoleNames,
   SpaceUserRoleNames,
-} from '../types/user.types';
+} from '../../../../store/src/types/user.types';
 
 const properties = {
   org: {

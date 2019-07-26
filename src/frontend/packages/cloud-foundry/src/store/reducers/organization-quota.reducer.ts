@@ -1,8 +1,8 @@
-import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
-import { IOrganization } from '../../../core/src/core/cf-api.types';
-import { IRequestEntityTypeState } from '../app-state';
-import { APIResource, NormalizedResponse } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
+import { getCFEntityKey } from '../../cf-entity-helpers';
+import { IOrganization } from '../../../../core/src/core/cf-api.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
 type entityOrgType = APIResource<IOrganization<string>>;
 export function updateOrganizationQuotaReducer(

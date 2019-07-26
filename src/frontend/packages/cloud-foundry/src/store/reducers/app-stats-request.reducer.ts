@@ -1,6 +1,6 @@
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { IRequestEntityTypeState } from '../app-state';
-import { RequestInfoState } from './api-request-reducer/types';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 
 export function appStatsReducer(state: IRequestEntityTypeState<RequestInfoState>, action) {
   switch (action.type) {

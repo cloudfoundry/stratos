@@ -27,7 +27,7 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../../../store/src/reducers/users-roles.reducer';
+import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../../../cloud-foundry/src/store/reducers/users-roles.reducer';
 import {
   selectUsersRolesCf,
   selectUsersRolesPicked,

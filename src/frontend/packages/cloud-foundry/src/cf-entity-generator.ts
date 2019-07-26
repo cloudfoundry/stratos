@@ -30,17 +30,15 @@ import {
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import {
-  applicationAddRemoveReducer as spaceApplicationAddRemoveReducer,
-} from '../../store/src/reducers/application-add-remove-reducer';
-import { updateApplicationRoutesReducer } from '../../store/src/reducers/application-route.reducer';
+import { spaceApplicationAddRemoveReducer } from './store/reducers/application-add-remove-reducer';
+import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
-import { updateOrganizationQuotaReducer } from '../../store/src/reducers/organization-quota.reducer';
-import { updateOrganizationSpaceReducer } from '../../store/src/reducers/organization-space.reducer';
-import { routeReducer, updateAppSummaryRoutesReducer } from '../../store/src/reducers/routes.reducer';
-import { serviceInstanceReducer } from '../../store/src/reducers/service-instance.reducer';
-import { updateSpaceQuotaReducer } from '../../store/src/reducers/space-quota.reducer';
-import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from '../../store/src/reducers/users.reducer';
+import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
+import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
+import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
+import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
+import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
+import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { AppStats } from '../../store/src/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';

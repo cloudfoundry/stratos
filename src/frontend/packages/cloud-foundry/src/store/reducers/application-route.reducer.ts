@@ -1,9 +1,9 @@
-import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { BaseRouteAction, RouteEvents } from '../../../cloud-foundry/src/actions/route.actions';
-import { APIResource } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
-import { IApp } from '../../../core/src/core/cf-api.types';
-import { IRequestEntityTypeState } from '../app-state';
+import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/application-service-routes.actions';
+import { BaseRouteAction, RouteEvents } from '../../actions/route.actions';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { IApp } from '../../../../core/src/core/cf-api.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 
 export function updateApplicationRoutesReducer() {
   return (
