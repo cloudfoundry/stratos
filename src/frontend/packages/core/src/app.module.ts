@@ -207,7 +207,6 @@ export class AppModule {
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
     if (favorite) {
-      // TODO: NJ RC Review the isEndpoint condition for finding entityKey (see comment below)
       const isEndpoint = (favorite.entityType === endpointSchemaKey);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
       const entityKey = isEndpoint ? entityCatalogue.getEntityKey({

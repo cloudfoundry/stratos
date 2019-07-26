@@ -10,11 +10,9 @@ import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 
 const favoritesEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema.entityType);
 
-// TODO: Confirm - should this be CFAppState?
 export const favoriteEntitiesSelector = (state: CFAppState):
   IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey];
 
-// TODO: Confirm - should this be CFAppState?
 export const favoriteGroupsStateSelector = (state: CFAppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
 
 export const favoriteGroupsFetchingSelector = (state: IUserFavoritesGroupsState): boolean => state.busy;
