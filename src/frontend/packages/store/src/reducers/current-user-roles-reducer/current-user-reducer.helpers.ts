@@ -48,16 +48,3 @@ export function removeOldRoles<T>(
     };
   }, { ...state });
 }
-
-export function isOrgRelation(relationType: UserRelationTypes) {
-  return relationType === UserRelationTypes.AUDITED_ORGANIZATIONS ||
-    relationType === UserRelationTypes.BILLING_MANAGED_ORGANIZATION ||
-    relationType === UserRelationTypes.MANAGED_ORGANIZATION ||
-    relationType === UserRelationTypes.ORGANIZATIONS;
-}
-
-export function isSpaceRelation(relationType: UserRelationTypes) {
-  return relationType === UserRelationTypes.AUDITED_SPACES ||
-    relationType === UserRelationTypes.MANAGED_SPACES ||
-    relationType === UserRelationTypes.SPACES;
-}

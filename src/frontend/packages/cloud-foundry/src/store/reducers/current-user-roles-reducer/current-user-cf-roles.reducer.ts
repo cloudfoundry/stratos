@@ -1,11 +1,14 @@
-import { GetCurrentUserRelationsComplete } from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { APIResource } from '../../types/api.types';
-import { getDefaultEndpointRoles, ICfRolesState, IOrgsRoleState } from '../../types/current-user-roles.types';
-import { isOrgRelation, isSpaceRelation } from './current-user-reducer.helpers';
+import { ISpace } from '../../../../../core/src/core/cf-api.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import {
+  getDefaultEndpointRoles,
+  ICfRolesState,
+  IOrgsRoleState,
+} from '../../../../../store/src/types/current-user-roles.types';
+import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../actions/permissions.actions';
 import { createOrgRoleStateState } from './current-user-roles-org.reducer';
 import { currentUserOrgRolesReducer } from './current-user-roles-orgs.reducer';
 import { currentUserSpaceRolesReducer } from './current-user-roles-spaces.reducer';
-import { ISpace } from '../../../../core/src/core/cf-api.types';
 
 export function currentUserCFRolesReducer(
   state: ICfRolesState = getDefaultEndpointRoles(),
@@ -45,4 +48,18 @@ function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResourc
       }
     };
   }, organizations);
+}
+
+
+function isOrgRelation(relationType: UserRelationTypes) {
+  return relationType === UserRelationTypes.AUDITED_ORGANIZATIONS ||
+    relationType === UserRelationTypes.BILLING_MANAGED_ORGANIZATION ||
+    relationType === UserRelationTypes.MANAGED_ORGANIZATION ||
+    relationType === UserRelationTypes.ORGANIZATIONS;
+}
+
+function isSpaceRelation(relationType: UserRelationTypes) {
+  return relationType === UserRelationTypes.AUDITED_SPACES ||
+    relationType === UserRelationTypes.MANAGED_SPACES ||
+    relationType === UserRelationTypes.SPACES;
 }
