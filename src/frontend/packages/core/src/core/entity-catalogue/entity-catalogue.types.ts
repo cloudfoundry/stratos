@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
+import { Omit } from '../utils.service';
 
 
 export interface EntityCatalogueEntityConfig {
@@ -24,7 +25,7 @@ export interface IEntityMetadata {
   name: string;
   [key: string]: string;
 }
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
 /**
  * Static information describing a base stratos entity.
  *

@@ -42,6 +42,7 @@ function deleteRelease {
 function waitForHelmRelease {
   echo "Waiting for Stratos Helm Release to be ready..."
   local DONE="false"
+  local TIMEOUT=0
   while [ $DONE != "true" ]; do
     COUNT=$(kubectl get po --namespace=${NAMESPACE} | wc -l)
     kubectl get po --namespace=${NAMESPACE}
@@ -63,6 +64,11 @@ function waitForHelmRelease {
     if [ "$DONE" != "true" ]; then
       echo "Waiting for Stratos Helm release to be ready..."
       sleep 5
+      TIMEOUT=$((TIMEOUT+1))
+      if [ ${TIMEOUT} -gt 60 ]; then
+        echo "Timed out waiting for Helm release to be ready"
+        exit 1
+      fi
     fi
   done
 }

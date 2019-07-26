@@ -6,14 +6,14 @@ import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
 
 /**
  * This is used to dynamically add an extension's routes - since we can't do this
- * if the extentsion's module is lazy-loaded.
+ * if the extension's module is lazy-loaded.
  *
  * This CanActive plugin typically is added to the route config to catch all unknown routes '**'
- * When activated, it removes itself from the routing congif, so it only evern activates once.
+ * When activated, it removes itself from the routing config, so it only ever activates once.
  *
  * It checks if there are any new routes from extensions that need to be added and add them.
  *
- * Lastly, it navigates to the saem route that it intercepted - if a new extension route
+ * Lastly, it navigates to the same route that it intercepted - if a new extension route
  * was added that now matches, it gets the route, otherwise the route goes up the chain
  * as it would have before.
  */

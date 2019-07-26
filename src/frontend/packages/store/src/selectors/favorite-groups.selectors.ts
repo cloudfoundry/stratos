@@ -13,7 +13,6 @@ const favoritesEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, u
 export const favoriteEntitiesSelector = (state: InternalAppState):
   IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey];
 
-// TODO: Confirm - should this be CFAppState?
 export const favoriteGroupsStateSelector = (state: CFAppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
 
 export const favoriteGroupsFetchingSelector = (state: IUserFavoritesGroupsState): boolean => state.busy;
