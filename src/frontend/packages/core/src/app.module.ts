@@ -86,8 +86,8 @@ export class CustomRouterStateSerializer
   imports: [
     // This need to be first to initialize the entityCatalogue
     AppStoreExtensionsModule,
-    CloudFoundryPackageModule,
     AppStoreModule,
+    CloudFoundryPackageModule,
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
@@ -133,7 +133,7 @@ export class AppModule {
     });
     eventService.addEventConfig<boolean>({
       eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
-      message: 'Polling is disabled - some pages may show stale data.',
+      message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
       key: 'pollingEnabledWarning',
       link: '/user-profile'
     });

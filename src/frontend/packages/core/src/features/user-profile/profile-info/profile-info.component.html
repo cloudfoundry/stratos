@@ -39,42 +39,44 @@
         <mat-card-header>
           <mat-card-title>Settings</mat-card-title>
         </mat-card-header>
-        <div class="user-profile__option" *ngIf="timeoutSession$ | async as timeoutSession"
-          [ngClass]="{'user-profile__option-warning': timeoutSession === 'false'}">
-          <div class="user-profile__option-inner">
-            <div class="user-profile__option-header">
-              Session timeout
-              <mat-icon *ngIf="timeoutSession === 'false'"
-                matTooltip="Session timeout is disabled, you are now at a greater security risk."
-                matTooltipPosition="right" class="user-profile__option-warning-icon" inline="true">
-                warning
-              </mat-icon>
+        <div class="user-profile__options">
+          <div class="user-profile__option" *ngIf="timeoutSession$ | async as timeoutSession"
+            [ngClass]="{'user-profile__option-warning': timeoutSession === 'false'}">
+            <div class="user-profile__option-inner">
+              <div class="user-profile__option-header">
+                Session timeout
+                <mat-icon *ngIf="timeoutSession === 'false'"
+                  matTooltip="Session timeout is disabled, you are now at a greater security risk."
+                  matTooltipPosition="right" class="user-profile__option-warning-icon" inline="true">
+                  warning
+                </mat-icon>
+              </div>
+              <button mat-flat-button (click)="updateSessionKeepAlive(timeoutSession !== 'true')"
+                [color]="timeoutSession === 'true' ? 'warn' : 'primary'">
+                {{ timeoutSession === 'true' ? 'Disable' : 'Enable' }} session timeout
+              </button>
+              <div class="user-profile__option-subtext">Automatically log you out of the application if you are inactive
+                for a long period of time. Disabling session timeout is considered a security risk.</div>
             </div>
-            <button mat-flat-button (click)="updateSessionKeepAlive(timeoutSession !== 'true')"
-              [color]="timeoutSession === 'true' ? 'warn' : 'primary'">
-              {{ timeoutSession === 'true' ? 'Disable' : 'Enable' }} session timeout
-            </button>
-            <div class="user-profile__option-subtext">Automatically log you out of the application if you are inactive
-              for a long period of time. Disabling this is considered a security risk.</div>
           </div>
-        </div>
-        <div class="user-profile__option" *ngIf="pollingEnabled$ | async as pollingEnabled"
-          [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
-          <div class="user-profile__option-inner">
-            <div class="user-profile__option-header">
-              Polling
-              <mat-icon *ngIf="pollingEnabled === 'false'"
-                matTooltip="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
-                class="user-profile__option-warning-icon" inline="true">
-                warning
-              </mat-icon>
+          <div class="user-profile__option" *ngIf="pollingEnabled$ | async as pollingEnabled"
+            [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
+            <div class="user-profile__option-inner">
+              <div class="user-profile__option-header">
+                Polling
+                <mat-icon *ngIf="pollingEnabled === 'false'"
+                  matTooltip="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
+                  class="user-profile__option-warning-icon" inline="true">
+                  warning
+                </mat-icon>
+              </div>
+              <button mat-flat-button (click)="setPollingEnabled(pollingEnabled !== 'true')"
+                [color]="pollingEnabled === 'true' ? 'warn' : 'primary'">
+                {{ pollingEnabled === 'true' ? 'Disable' : 'Enable' }} polling
+              </button>
+              <div class="user-profile__option-subtext">Automatically refresh data throughout the application. Disabling
+                polling may result in some pages showing out-of-date information.</div>
             </div>
-            <button mat-flat-button (click)="setPollingEnabled(pollingEnabled !== 'true')"
-              [color]="pollingEnabled === 'true' ? 'warn' : 'primary'">
-              {{ pollingEnabled === 'true' ? 'Disable' : 'Enable' }} polling
-            </button>
-            <div class="user-profile__option-subtext">Disabling polling wil result in some pages not automatically
-              updating.</div>
           </div>
         </div>
       </mat-card>

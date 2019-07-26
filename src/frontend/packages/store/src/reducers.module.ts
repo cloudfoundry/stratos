@@ -10,13 +10,11 @@ import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
-import { createAppReducer } from './reducers/create-application.reducer';
 import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
-import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { endpointsReducer } from './reducers/endpoints.reducer';
 import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
@@ -43,8 +41,6 @@ export const appReducers = {
   request: requestReducer,
   requestData: requestDataReducer,
   dashboard: dashboardReducer,
-  createApplication: createAppReducer,
-  deployApplication: deployAppReducer,
   createServiceInstance: createServiceInstanceReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,

@@ -1,3 +1,4 @@
+import { CloudFoundryStoreModule } from './../../../../cloud-foundry/src/store/cloud-foundry.store.module';
 /* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';

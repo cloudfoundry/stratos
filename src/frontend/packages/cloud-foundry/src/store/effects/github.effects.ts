@@ -4,14 +4,14 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../../cloud-foundry/src/actions/github.actions';
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { gitRepoEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { GitSCMService, GitSCMType } from '../../../core/src/shared/data-services/scm/scm.service';
-import { NormalizedResponse } from '../types/api.types';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../actions/github.actions';
+import { CFAppState } from '../../cf-app-state';
+import { gitRepoEntityType } from '../../cf-entity-factory';
+import { LoggerService } from '../../../../core/src/core/logger.service';
+import { GitSCMService, GitSCMType } from '../../../../core/src/shared/data-services/scm/scm.service';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
 
 
