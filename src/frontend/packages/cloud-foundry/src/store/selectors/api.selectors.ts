@@ -1,6 +1,6 @@
 import { compose } from '@ngrx/store';
 
-import { RequestInfoState } from '../../../store/src/reducers/api-request-reducer/types';
+import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getAPIRequestDataState,
   getAPIRequestInfoState,
@@ -8,9 +8,9 @@ import {
   getEntityUpdateSections,
   getRequestEntityKey,
   getUpdateSectionById,
-} from '../../../store/src/selectors/api.selectors';
-import { APIResource, APIResourceMetadata } from '../../../store/src/types/api.types';
-import { getCFEntityKey } from '../cf-entity-helpers';
+} from '../../../../store/src/selectors/api.selectors';
+import { APIResource, APIResourceMetadata } from '../../../../store/src/types/api.types';
+import { getCFEntityKey } from '../../cf-entity-helpers';
 
 export function selectCfRequestInfo(entityType: string, entityGuid: string) {
   const entityKey = getCFEntityKey(entityType);

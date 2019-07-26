@@ -3,9 +3,6 @@ import { RequestInfoState } from './reducers/api-request-reducer/types';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
-import { CreateNewApplicationState } from '../../cloud-foundry/src/store/types/create-application.types';
-import { CreateServiceInstanceState } from '../../cloud-foundry/src/store/types/create-service-instance.types';
-import { DeployApplicationState } from '../../cloud-foundry/src/store/types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
 import { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
@@ -14,7 +11,6 @@ import { PaginationEntityTypeState } from './types/pagination.types';
 import { IRecentlyVisitedState } from './types/recently-visited.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
-import { UsersRolesState } from '../../cloud-foundry/src/store/types/users-roles.types';
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
 
 export interface IRequestTypeState {
@@ -38,21 +34,12 @@ export abstract class AppState<
   request: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
   requestData: T;
   dashboard: DashboardState;
-  createApplication: CreateNewApplicationState;
-  deployApplication: DeployApplicationState;
-  createServiceInstance: CreateServiceInstanceState;
   lists: ListsState;
   routing: RoutingHistory;
-  manageUsersRoles: UsersRolesState;
   internalEvents: InternalEventsState;
   currentUserRoles: ICurrentUserRolesState;
   userFavoritesGroups: IUserFavoritesGroupsState;
   recentlyVisited: IRecentlyVisitedState;
-}
-
-// Just the routing history
-export interface AppRoutingSate {
-  routing: RoutingHistory;
 }
 
 export interface GeneralRequestDataState {
@@ -66,6 +53,7 @@ export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;
 export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
 export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'userFavorites'>>, 'userFavoritesGroups'>;
+export type AppRoutingOnlyAppState = Pick<AppState, 'routing'>;
 
 // One stop shop for all of your app state needs
 

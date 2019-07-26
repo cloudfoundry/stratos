@@ -5,6 +5,7 @@ import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
+import { PermissionEffects, PermissionsEffects } from './effects/permissions.effect';
 
 // TODO: Remove commented effects once all CF effects are moved accross (leaving them here helps with tracking)
 @NgModule({
@@ -38,9 +39,8 @@ import { GithubEffects } from './effects/github.effects';
       // AppEffects,
       // RouteEffect,
       // UserFavoritesEffect,
-      // // FIXME: STRAT-155 - Move cf effects into cf module
-      // PermissionsEffects,
-      // PermissionEffects
+      PermissionsEffects,
+      PermissionEffects
     ])
   ]
 })

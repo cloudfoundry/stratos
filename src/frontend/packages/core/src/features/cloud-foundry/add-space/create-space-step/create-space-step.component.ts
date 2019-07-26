@@ -8,7 +8,7 @@ import { filter } from 'rxjs/operators';
 import { CreateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';

@@ -16,7 +16,7 @@ import {
   organizationEntityType,
   routeEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';

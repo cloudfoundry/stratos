@@ -30,7 +30,7 @@ import {
   selectPEProjectName,
   selectProjectExists,
   selectSourceType,
-} from '../../../../../../store/src/selectors/deploy-application.selector';
+} from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { GitAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { GitCommit, GitRepo } from '../../../../../../cloud-foundry/src/store/types/git.types';

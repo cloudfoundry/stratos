@@ -7,18 +7,10 @@ import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType, cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
-import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
-import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   getCurrentUserCFEndpointRolesState,
-} from '../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { APIResource } from '../../../../store/src/types/api.types';
+} from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import { ICfRolesState } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import {
   CfUser,
   CfUserRoleParams,
@@ -28,6 +20,14 @@ import {
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../cloud-foundry/src/store/types/users-roles.types';
+import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
+import { RouterNav } from '../../../../store/src/actions/router.actions';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { ISpace } from '../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';

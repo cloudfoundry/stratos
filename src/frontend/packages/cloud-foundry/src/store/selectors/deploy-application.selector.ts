@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { DeployApplicationSource, DeployApplicationState, ProjectExists } from '../../../cloud-foundry/src/store/types/deploy-application.types';
+import { CFAppState } from '../../cf-app-state';
+import { DeployApplicationSource, DeployApplicationState, ProjectExists } from '../types/deploy-application.types';
 
 export const selectDeployAppState = (state: CFAppState) => state.deployApplication;
 

@@ -7,7 +7,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types
 import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../../../core/cf-api.types';

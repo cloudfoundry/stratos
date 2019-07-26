@@ -19,7 +19,7 @@ import {
   spaceEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

@@ -13,7 +13,7 @@ import {
 } from '../../actions/create-applications-page.actions';
 import { CFAppState } from '../../cf-app-state';
 import { environment } from '../../../../core/src/environments/environment.prod';
-import { selectNewAppCFDetails } from '../../../../store/src/selectors/create-application.selectors';
+import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
 
 

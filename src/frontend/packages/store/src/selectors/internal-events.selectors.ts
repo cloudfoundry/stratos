@@ -1,10 +1,9 @@
 import { compose, createSelector } from '@ngrx/store';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { InternalEventSeverity, InternalEventsState } from '../types/internal-events.types';
+import { InternalAppState } from '../app-state';
 
-
-export const internalEventStateSelector = (state: CFAppState) => state.internalEvents;
+export const internalEventStateSelector = (state: InternalAppState) => state.internalEvents;
 
 export const internalEventTypeSelector = (type: string) => compose(
   (state: InternalEventsState) => state.types[type] || {},

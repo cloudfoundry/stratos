@@ -14,7 +14,7 @@ import {
   organizationEntityType,
   quotaDefinitionEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,

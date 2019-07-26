@@ -14,16 +14,7 @@ import {
   organizationEntityType,
   spaceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import {
-  getPaginationObservables,
-  PaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  getCurrentUserCFGlobalStates,
-} from '../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import {
   CfUser,
   createUserRoleInOrg,
@@ -33,6 +24,13 @@ import {
   UserRoleInOrg,
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
