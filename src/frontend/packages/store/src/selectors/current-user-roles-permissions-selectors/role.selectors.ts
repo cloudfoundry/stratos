@@ -1,21 +1,20 @@
 import { compose } from '@ngrx/store';
 
 import {
+  IAllCfRolesState,
+  ICfRolesState,
+  IGlobalRolesState,
+  IOrgsRoleState,
+  ISpacesRoleState,
+  RoleEntities,
+} from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
+import {
   PermissionStrings,
   PermissionValues,
   ScopeStrings,
 } from '../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserRolesAppState } from '../../app-state';
-import {
-  IAllCfRolesState,
-  ICfRolesState,
-  ICurrentUserRolesState,
-  IGlobalRolesState,
-  IOrgsRoleState,
-  ISpacesRoleState,
-  IStratosRolesState,
-  RoleEntities,
-} from '../../types/current-user-roles.types';
+import { ICurrentUserRolesState, IStratosRolesState } from '../../types/current-user-roles.types';
 
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;

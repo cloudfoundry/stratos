@@ -12,7 +12,7 @@ import {
   RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE,
   SetCreateServiceInstanceApp,
 } from '../../actions/create-service-instance.actions';
-import { CreateServiceInstanceState } from '../../../../store/src/types/create-service-instance.types';
+import { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
 
 const defaultState: CreateServiceInstanceState = {

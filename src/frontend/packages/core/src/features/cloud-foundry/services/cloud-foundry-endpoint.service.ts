@@ -28,7 +28,7 @@ import {
   PaginationObservables,
 } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { CfApplicationState } from '../../../../../store/src/types/application.types';
+import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { QParam } from '../../../../../store/src/types/pagination.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';

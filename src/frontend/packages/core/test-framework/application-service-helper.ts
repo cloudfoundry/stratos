@@ -3,11 +3,7 @@ import { Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { AppStat } from '../../store/src/types/app-metadata.types';
-import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
+import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
@@ -17,6 +13,10 @@ import {
   ApplicationStateService,
 } from '../src/shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
+import { IApp, IAppSummary, ISpace, IDomain } from '../src/core/cf-api.types';
+import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

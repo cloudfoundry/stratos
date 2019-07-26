@@ -1,5 +1,7 @@
 import { promise } from 'protractor';
 
+import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
 import {
   IApp,
   IDomain,
@@ -9,8 +11,7 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../frontend/packages/core/src/core/cf-api.types';
-import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
-import { CfUser } from '../../frontend/packages/store/src/types/user.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { CfOrgLevelPage } from '../cloud-foundry/org-level/cf-org-level-page.po';
 import { CfSpaceLevelPage } from '../cloud-foundry/space-level/cf-space-level-page.po';

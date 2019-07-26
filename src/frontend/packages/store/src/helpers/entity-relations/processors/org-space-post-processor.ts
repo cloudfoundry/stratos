@@ -17,7 +17,7 @@ import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
 import {
   createEntityRelationPaginationKey,

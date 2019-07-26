@@ -32,7 +32,7 @@ import {
   IUserPermissionInSpace,
   UserRoleInOrg,
   UserRoleInSpace,
-} from '../../../../store/src/types/user.types';
+} from '../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';

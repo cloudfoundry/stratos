@@ -1,6 +1,6 @@
 import { UserRelationTypes } from '../../../actions/permissions.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { ISpaceRoleState } from '../../../../../store/src/types/current-user-roles.types';
+import { ISpaceRoleState } from '../../types/cf-current-user-roles.types';
 import { ISpace } from '../../../../../core/src/core/cf-api.types';
 
 export const defaultUserSpaceRoleState: ISpaceRoleState = {

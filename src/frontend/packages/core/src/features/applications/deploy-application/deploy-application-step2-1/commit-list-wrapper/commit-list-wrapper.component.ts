@@ -6,7 +6,7 @@ import { filter, map, mergeMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import {
   GithubCommitsListConfigServiceDeploy,
 } from '../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-deploy.service';

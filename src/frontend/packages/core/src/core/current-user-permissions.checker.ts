@@ -14,7 +14,7 @@ import {
 } from '../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../store/src/types/api.types';
-import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../../../store/src/types/current-user-roles.types';
+import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
   createCFFeatureFlagPaginationKey,

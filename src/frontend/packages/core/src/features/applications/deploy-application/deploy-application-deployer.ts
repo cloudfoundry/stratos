@@ -13,7 +13,7 @@ import {
   DeployApplicationState,
   OverrideAppDetails,
   SocketEventTypes,
-} from '../../../../../store/src/types/deploy-application.types';
+} from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../environments/environment.prod';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';

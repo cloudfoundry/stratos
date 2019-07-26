@@ -15,7 +15,7 @@ import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpe
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { selectApplicationSource, selectCfDetails } from '../../../../../store/src/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
-import { DeployApplicationSource, SourceType } from '../../../../../store/src/types/deploy-application.types';
+import { DeployApplicationSource, SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
