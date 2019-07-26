@@ -7,7 +7,7 @@ import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { appStatsEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
-import { AppStat } from '../../../../../store/src/types/app-metadata.types';
+import { AppStat } from '../../../../../cloud-foundry/src/store/types/app-metadata.types';
 
 @Component({
   selector: 'app-running-instances',
@@ -15,7 +15,7 @@ import { AppStat } from '../../../../../store/src/types/app-metadata.types';
   styleUrls: ['./running-instances.component.scss']
 })
 export class RunningInstancesComponent implements OnInit {
-
+  // TODO Typing
   @Input() instances;
   @Input() cfGuid;
   @Input() appGuid;

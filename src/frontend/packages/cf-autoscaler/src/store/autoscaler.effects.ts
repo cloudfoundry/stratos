@@ -205,13 +205,14 @@ export class AutoscalerEffects {
         options.params.set('order', options.params.get('order-direction'));
         options.params.delete('order-direction');
       }
-      if (metricConfig && metricConfig.params) {
-        options.params.set('start-time', metricConfig.params.start + '000000000');
-        options.params.set('end-time', metricConfig.params.end + '000000000');
-      } else if (action.query && action.query.params) {
-        options.params.set('start-time', action.query.params.start + '000000000');
-        options.params.set('end-time', action.query.params.end + '000000000');
-      }
+      // TODO this needs to be changed into a string key-value
+      // if (metricConfig && metricConfig.params) {
+      //   options.params.set('start-time', metricConfig.params.start + '000000000');
+      //   options.params.set('end-time', metricConfig.params.end + '000000000');
+      // } else if (action.query && action.query.params) {
+      //   options.params.set('start-time', action.query.params.start + '000000000');
+      //   options.params.set('end-time', action.query.params.end + '000000000');
+      // }
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {
@@ -410,17 +411,17 @@ export class AutoscalerEffects {
     const searchParams = new URLSearchParams();
     if (initialParams) {
       Object.keys(initialParams).forEach((key) => {
-        searchParams.set(key, initialParams[key]);
+        searchParams.set(key, initialParams[key] as string);
       });
     }
     if (params) {
       Object.keys(params).forEach((key) => {
-        searchParams.set(key, params[key]);
+        searchParams.set(key, params[key] as string);
       });
     }
     if (paginationParams) {
       Object.keys(paginationParams).forEach((key) => {
-        searchParams.set(key, paginationParams[key]);
+        searchParams.set(key, paginationParams[key] as string);
       });
     }
     return searchParams;
@@ -430,9 +431,6 @@ export class AutoscalerEffects {
     return paginationState
       ? {
         ...paginationState.params,
-        q: [
-          ...(paginationState.params.q || [])
-        ],
         page: paginationState.currentPage.toString(),
       }
       : {};

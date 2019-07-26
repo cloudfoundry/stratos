@@ -444,7 +444,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       ).subscribe(pag => {
         this.store.dispatch(new SetParams(newAction, this.paginationKey, {
           ...pag.params,
-          metricConfig: newAction.query
+          // TODO This needs to be a string key-value pair.
+          // metricConfig: newAction.query
         }, false, true));
       });
     }

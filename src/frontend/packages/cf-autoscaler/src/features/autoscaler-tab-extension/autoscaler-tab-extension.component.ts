@@ -18,7 +18,6 @@ import { ConfirmationDialogService } from '../../../../core/src/shared/component
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
@@ -45,6 +44,7 @@ import {
   appAutoscalerPolicyEntityType,
   autoscalerEntityFactory,
 } from '../../store/autoscaler-entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
   // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)

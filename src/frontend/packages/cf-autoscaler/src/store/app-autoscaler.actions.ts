@@ -1,10 +1,8 @@
 import { RequestOptions } from '@angular/http';
 
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../store/src/types/request.types';
+import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
@@ -15,6 +13,8 @@ import {
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
+import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -50,7 +50,7 @@ export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
 
 export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Policy] Step';
 
-export class GetAppAutoscalerHealthAction implements IRequestAction {
+export class GetAppAutoscalerHealthAction implements EntityRequestAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
@@ -62,7 +62,7 @@ export class GetAppAutoscalerHealthAction implements IRequestAction {
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
-export class GetAppAutoscalerPolicyAction implements IRequestAction {
+export class GetAppAutoscalerPolicyAction implements EntityRequestAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
@@ -73,7 +73,7 @@ export class GetAppAutoscalerPolicyAction implements IRequestAction {
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
-export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
+export class UpdateAppAutoscalerPolicyAction implements EntityRequestAction {
   static updateKey = 'Updating-Existing-Application-Policy';
   constructor(
     public guid: string,
@@ -85,7 +85,7 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
-export class DetachAppAutoscalerPolicyAction implements IRequestAction {
+export class DetachAppAutoscalerPolicyAction implements EntityRequestAction {
   static updateKey = 'Detaching-Existing-Application-Policy';
   constructor(
     public guid: string,
@@ -122,7 +122,7 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
   windowValue: string;
 }
 
-export interface AutoscalerPaginationParams {
+export interface AutoscalerPaginationParams extends PaginationParam {
   'order-direction-field'?: string;
   'order-direction': 'asc' | 'desc';
   'results-per-page': string;

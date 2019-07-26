@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { StratosStatus } from '../../shared.types';
-import { AppStat } from '../../../../../store/src/types/app-metadata.types';
-
-
+import { AppStat } from '../../../../../cloud-foundry/src/store/types/app-metadata.types';
 
 export interface ApplicationStateData {
   label: string;
