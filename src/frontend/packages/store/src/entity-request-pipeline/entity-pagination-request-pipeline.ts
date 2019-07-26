@@ -108,6 +108,5 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
         })
       );
     })
-  )
-
+  );
 };

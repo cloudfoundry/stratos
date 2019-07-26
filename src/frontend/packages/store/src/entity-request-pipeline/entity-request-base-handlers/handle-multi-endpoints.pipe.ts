@@ -45,7 +45,8 @@ function mapResponses(
     } else {
       if (postSuccessDataMapper) {
         if (Array.isArray(jetstreamEndpointResponse)) {
-          jetstreamEndpointResponse.forEach(entity => multiResponses.successes.push(postSuccessDataMapper(entity, endpointGuid, action)));
+          const pageResult = jetstreamEndpointResponse.map(entity => postSuccessDataMapper(entity, endpointGuid, action));
+          multiResponses.successes.push(pageResult);
         } else {
           multiResponses.successes.push(postSuccessDataMapper(jetstreamEndpointResponse, endpointGuid, action));
         }

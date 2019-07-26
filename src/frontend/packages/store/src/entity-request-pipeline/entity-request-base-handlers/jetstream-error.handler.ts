@@ -14,7 +14,7 @@ export function jetstreamErrorHandler(
   requestType: ApiRequestTypes,
   recursivelyDeleting: boolean
 ) {
-  const endpointString = action.options.headers.get(endpointHeader) || '';
+  const endpointString = action.options.headers ? action.options.headers.get(endpointHeader) || '' : '';
   const endpointIds: string[] = endpointString.split(',');
   endpointIds.forEach(endpoint =>
     this.store.dispatch(
