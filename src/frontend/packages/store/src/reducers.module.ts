@@ -1,11 +1,13 @@
-import { localStorageSync } from 'ngrx-store-localstorage';
 import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule, ActionReducer, Store } from '@ngrx/store';
+import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
+import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { environment } from '../../core/src/environments/environment';
+import { getDashboardStateSessionId } from './helpers/store-helpers';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
+import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
@@ -22,8 +24,6 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { UsersRolesReducer } from './reducers/users-roles.reducer';
-import { getDashboardStateSessionId } from './helpers/store-helpers';
-import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -87,7 +87,10 @@ if (!environment.production) {
   // }
 }
 const storeModule = StoreModule.forRoot(
-  appReducers
+  appReducers,
+  {
+    metaReducers
+  }
 );
 const imports = environment.production ? [
   storeModule
