@@ -5,6 +5,7 @@ import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { InternalEventSeverity } from '../../types/internal-events.types';
 import { getFailApiRequestActions, ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
+import { ActionDispatcher } from '../entity-request-pipeline.types';
 
 export const endpointHeader = 'x-cap-cnsi-list';
 export function jetstreamErrorHandler(
@@ -12,12 +13,14 @@ export function jetstreamErrorHandler(
   action: EntityRequestAction,
   catalogueEntity: StratosBaseCatalogueEntity,
   requestType: ApiRequestTypes,
+  actionDispatcher: ActionDispatcher,
   recursivelyDeleting: boolean
 ) {
   const endpointString = action.options.headers ? action.options.headers.get(endpointHeader) || '' : '';
   const endpointIds: string[] = endpointString.split(',');
+  console.log(action);
   endpointIds.forEach(endpoint =>
-    this.store.dispatch(
+    actionDispatcher(
       new SendEventAction(endpointSchemaKey, endpoint, {
         eventCode: error.status ? error.status + '' : '500',
         severity: InternalEventSeverity.ERROR,
@@ -37,7 +40,7 @@ export function jetstreamErrorHandler(
     error
   });
   if (recursivelyDeleting) {
-    this.store.dispatch(new RecursiveDeleteFailed(
+    actionDispatcher(new RecursiveDeleteFailed(
       action.guid,
       action.endpointGuid,
       catalogueEntity.getSchema(action.schemaKey),

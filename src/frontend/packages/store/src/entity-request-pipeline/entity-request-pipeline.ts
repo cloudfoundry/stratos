@@ -72,14 +72,16 @@ export const apiRequestPipelineFactory = (
     }),
     map(() => catalogueEntity.getRequestAction('complete', requestType)),
     catchError(error => {
+      // TODO We should pass the endpoint ids to this so we can correctly map the error to the endpoint.
       jetstreamErrorHandler(
         error,
         action,
         catalogueEntity,
         requestType,
+        actionDispatcher,
         recursivelyDelete
       );
-      return of('Jetstream error handled.');
+      return of({ type: 'Jetstream error handled.' });
     }),
   );
 };
