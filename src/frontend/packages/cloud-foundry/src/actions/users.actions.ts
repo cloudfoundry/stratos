@@ -9,7 +9,7 @@ import {
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { IRequestAction } from '../../../store/src/types/request.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/src/types/user.types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
 import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';

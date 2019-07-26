@@ -11,7 +11,7 @@ import {
 } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../../../../../../../../cloud-foundry/src/actions/github.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { GitCommit, GitRepo } from '../../../../../../../../store/src/types/git.types';
+import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import {

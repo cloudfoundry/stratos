@@ -1,5 +1,5 @@
 import { APIResource } from '../../../store/src/types/api.types';
-import { CfUser } from '../../../store/src/types/user.types';
+import { CfUser } from '../../../cloud-foundry/src/store/types/user.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
 
 export interface StratosCFEntity {
@@ -187,8 +187,11 @@ export interface IOrganization<T = unknown> {
 
 export interface IDomain {
   name: string;
-  router_group_guid?: any;
-  router_group_type?: any;
+  router_group_guid?: string;
+  router_group_type?: string;
+  owning_organization_guid?: string;
+  owning_organization_url?: string;
+  shared_organizations_url?: string;
 }
 
 export interface ICfV2Info {

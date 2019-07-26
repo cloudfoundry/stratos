@@ -5,7 +5,7 @@ import { IRequestState } from '../types/entity.types';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { RequestInfoState } from './api-request-reducer/types';
 import { chainApiReducers, ExtraApiReducers, requestActions } from './api-request-reducers.generator.helpers';
-import { appStatsReducer } from './app-stats-request.reducer';
+import { appStatsReducer } from '../../../cloud-foundry/src/store/reducers/app-stats-request.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create

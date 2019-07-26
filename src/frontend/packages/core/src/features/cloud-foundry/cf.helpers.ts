@@ -16,7 +16,7 @@ import {
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { ICfRolesState } from '../../../../store/src/types/current-user-roles.types';
+import { ICfRolesState } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import {
@@ -26,8 +26,8 @@ import {
   SpaceUserRoleNames,
   UserRoleInOrg,
   UserRoleInSpace,
-} from '../../../../store/src/types/user.types';
-import { UserRoleLabels } from '../../../../store/src/types/users-roles.types';
+} from '../../../../cloud-foundry/src/store/types/user.types';
+import { UserRoleLabels } from '../../../../cloud-foundry/src/store/types/users-roles.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { ISpace } from '../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';

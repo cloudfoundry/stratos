@@ -34,7 +34,7 @@ import {
   selectUsersRolesRoles,
 } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CfUser, OrgUserRoleNames } from '../../../../../../../store/src/types/user.types';
+import { CfUser, OrgUserRoleNames } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization } from '../../../../../core/cf-api.types';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';

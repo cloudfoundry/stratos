@@ -8,7 +8,7 @@ import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/action
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../../../store/src/types/user.types';
+import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization } from '../../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';

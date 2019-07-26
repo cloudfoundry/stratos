@@ -17,7 +17,7 @@ import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
 import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
 import {
   createEntityRelationPaginationKey,
@@ -71,7 +71,9 @@ export function orgSpacePostProcess(
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
   const { entityKey: cfOrgOrSpaceEntityKey } = entityCatalogue.getEntity(action.endpointType, action.entityType);
   const orgOrSpace = entities[cfOrgOrSpaceEntityKey][action.guid];
-  const users = entities[cfOrgOrSpaceEntityKey];
+  const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+  const { entityKey: cfUserEntityKey } = userCatalogueEntity;
+  const users = entities[cfUserEntityKey];
   const existingUsers = allEntities[cfOrgOrSpaceEntityKey];
 
   const newUsers = {};
@@ -86,8 +88,6 @@ export function orgSpacePostProcess(
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
     updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
-  const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
-  const { entityKey: cfUserEntityKey } = userCatalogueEntity;
   if (!Object.keys(newUsers).length) {
     return;
   }

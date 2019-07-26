@@ -10,11 +10,10 @@ import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
-import { CreateAppPageEffects } from './effects/create-app-effects';
-import { DeployAppEffects } from './effects/deploy-app.effects';
+import { DeployAppEffects } from '../../cloud-foundry/src/store/effects/deploy-app.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
-import { GithubEffects } from './effects/github.effects';
+import { GithubEffects } from '../../cloud-foundry/src/store/effects/github.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
@@ -31,6 +30,8 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
 
+import { CloudFoundryStoreModule } from './../../cloud-foundry/src/store/cloud-foundry.store.module';
+
 @NgModule({
   imports: [
     AppReducersModule,
@@ -42,7 +43,6 @@ import { AppReducersModule } from './reducers.module';
       AuthEffect,
       UAASetupEffect,
       EndpointsEffect,
-      CreateAppPageEffects,
       UpdateAppEffects,
       PaginationEffects,
       ActionHistoryEffect,
@@ -51,8 +51,6 @@ import { AppReducersModule } from './reducers.module';
       SystemEffects,
       SnackBarEffects,
       SetClientFilterEffect,
-      DeployAppEffects,
-      GithubEffects,
       CloudFoundryEffects,
       MetricsEffect,
       RequestEffect,
@@ -65,7 +63,7 @@ import { AppReducersModule } from './reducers.module';
       // FIXME: STRAT-155 - Move cf effects into cf module
       PermissionsEffects,
       PermissionEffects
-    ])
+    ]),
   ]
 })
 export class AppStoreModule { }

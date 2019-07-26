@@ -12,7 +12,7 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppStat } from '../../../../../../../store/src/types/app-metadata.types';
+import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { TableCellCustom } from '../../../list.types';
-import { CfRoleChangeWithNames } from '../../../../../../../../store/src/types/users-roles.types';
+import { CfRoleChangeWithNames } from '../../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 
 @Component({
   selector: 'app-table-cell-confirm-role-add-rem',

@@ -1,4 +1,4 @@
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { AppRoutingSate } from '../app-state';
 
 export interface RoutingEvent {
   id: number;
@@ -24,9 +24,9 @@ export const defaultRoutingState: RoutingHistory = {
   currentState: null
 };
 
-export function getPreviousRoutingState(state: CFAppState) {
+export function getPreviousRoutingState(state: AppRoutingSate) {
   return state.routing.previousState;
 }
-export function getCurrentRoutingState(state: CFAppState) {
+export function getCurrentRoutingState(state: AppRoutingSate) {
   return state.routing.currentState;
 }

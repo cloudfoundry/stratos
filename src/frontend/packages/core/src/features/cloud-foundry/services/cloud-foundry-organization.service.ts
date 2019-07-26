@@ -17,7 +17,7 @@ import {
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { OrgUserRoleNames } from '../../../../../store/src/types/user.types';
+import { OrgUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import {
   IApp,
   IOrganization,
@@ -68,6 +68,7 @@ export const createSpaceQuotaDefinition = (orgGuid: string): ISpaceQuotaDefiniti
 export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;
+  quotaLink$: Observable<string[]>;
   userOrgRole$: Observable<string>;
   quotaDefinition$: Observable<IOrgQuotaDefinition>;
   totalMem$: Observable<number>;
@@ -152,7 +153,6 @@ export class CloudFoundryOrganizationService {
     this.serviceInstancesCount$ = fetchServiceInstancesCount(this.cfGuid, this.orgGuid, null, this.store, this.paginationMonitorFactory);
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid);
-
   }
 
   private initialiseSpaceObservables() {
@@ -198,6 +198,17 @@ export class CloudFoundryOrganizationService {
     this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
+    this.quotaLink$ = this.org$.pipe(map(o => {
+      const quotaDefinition = o.entity.entity.quota_definition;
+
+      return quotaDefinition && [
+        '/cloud-foundry',
+        this.cfGuid,
+        'organizations',
+        this.orgGuid,
+        'quota'
+      ];
+    }));
   }
 
   private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {

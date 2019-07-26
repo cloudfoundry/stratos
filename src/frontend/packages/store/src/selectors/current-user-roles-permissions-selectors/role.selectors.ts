@@ -10,13 +10,12 @@ import { CurrentUserRolesAppState } from '../../app-state';
 import {
   IAllCfRolesState,
   ICfRolesState,
-  ICurrentUserRolesState,
   IGlobalRolesState,
   IOrgsRoleState,
   ISpacesRoleState,
-  IStratosRolesState,
   RoleEntities,
-} from '../../types/current-user-roles.types';
+} from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
+import { ICurrentUserRolesState, IStratosRolesState } from '../../types/current-user-roles.types';
 
 export const selectCurrentUserRolesState = (state: CurrentUserRolesAppState) => state.currentUserRoles;
 
