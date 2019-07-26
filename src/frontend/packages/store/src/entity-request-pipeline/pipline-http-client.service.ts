@@ -15,16 +15,18 @@ export class PipelineHttpClient {
     public httpClient: HttpClient,
     private store: Store<InternalAppState>,
   ) { }
-  private getRequest<R>(hr: HttpRequest<any>, endpointType: string, endpointGuids: string | string[] = null) {
+
+  private makeRequest<R>(hr: HttpRequest<any>, endpointType: string, endpointGuids: string | string[] = null) {
     if (endpointGuids && endpointGuids.length) {
       const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
+
       return this.httpClient.request<R>(hr.clone({ headers, reportProgress: false }));
     } else {
       return this.store.select(registeredEndpointsOfTypesSelector(endpointType)).pipe(
         first(),
         mergeMap(endpoints => {
           const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, Object.keys(endpoints));
-          return this.httpClient.request<R>(hr.clone({ headers, reportProgress: false }));
+          return this.httpClient.request<R>(hr.clone({ headers }));
         })
       );
     }
@@ -34,7 +36,7 @@ export class PipelineHttpClient {
     endpointType: string,
     endpointGuids: string | string[] = null
   ): Observable<R> {
-    return this.getRequest<R>(hr, endpointType, endpointGuids).pipe(
+    return this.makeRequest<R>(hr, endpointType, endpointGuids).pipe(
       filter(event => event instanceof HttpResponse),
       map((response: HttpResponse<R>) => response.body)
     );

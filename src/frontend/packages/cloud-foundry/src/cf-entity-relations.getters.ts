@@ -40,17 +40,15 @@ export function addRelationParams(request: HttpRequest<any>, action: EntityReque
   // TODO This should decide which method to use getEntityRelationsForPaginationRequest or getEntityRelationsForEntityRequest
   const relationInfo = paginationAction.paginationKey ?
     getEntityRelationsForPaginationRequest(paginationAction) : getEntityRelationsForEntityRequest(action);
-  const update = {
-    fromObject: {}
-  };
+  const update = {};
   if (relationInfo.maxDepth > 0) {
-    update.fromObject['inline-relations-depth'] = (relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth) + '';
+    update['inline-relations-depth'] = (relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth) + '';
   }
   if (relationInfo.relations.length) {
-    update.fromObject['include-relations'] = relationInfo.relations.join(',');
+    update['include-relations'] = relationInfo.relations.join(',');
   }
   return request.clone({
-    params: new HttpParams(update)
+    setParams: update
   });
 }
 

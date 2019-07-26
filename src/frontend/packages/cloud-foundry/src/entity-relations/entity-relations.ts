@@ -219,12 +219,11 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
  * Iterate through required parent-child relationships and check if they exist
  */
 function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
-  const { cfGuid, entities, parentRelation, allEntities, allPagination, newEntities } = config;
+  const { cfGuid, entities, parentRelation, allEntities, allPagination, newEntities, action } = config;
 
   if (!entities) {
     return [];
   }
-
   let results: ValidateEntityResult[] = [];
   parentRelation.childRelations.forEach(childRelation => {
     entities.forEach(entity => {
@@ -412,6 +411,7 @@ function handleValidationLoopResults(
  */
 export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
   const pAction = isPaginatedAction(config.action);
+
   if (!!pAction && pAction.__forcedPageEntityConfig__) {
     const entityConfig = pAction.__forcedPageEntityConfig__;
     const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);

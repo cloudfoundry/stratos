@@ -160,7 +160,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
         const endpoint: CFResponse = responses[endpointGuid];
         return count + endpoint.total_results;
       }, 0),
-      getPaginationParameters: (page: number) => new HttpParams({ fromObject: { page: page + '' } })
+      getPaginationParameters: (page: number) => ({ page: page + '' })
     }
   } as StratosEndpointExtensionDefinition;
   return [

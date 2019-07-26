@@ -309,7 +309,6 @@ export class ApplicationService {
     updatedApplication: UpdateApplication,
     updateEntities?: AppMetadataTypes[],
     existingApplication?: IApp): Observable<ActionState> {
-    debugger
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,

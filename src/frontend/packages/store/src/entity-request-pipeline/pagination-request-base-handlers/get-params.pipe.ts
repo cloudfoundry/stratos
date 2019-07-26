@@ -19,6 +19,13 @@ function setRequestParams(
   requestParams: HttpParams,
   params: PaginationParam,
 ) {
+  if (!params) {
+    return requestParams;
+  }
+
+  return Object.keys(params).reduce((allParams, key) => {
+    return allParams.set(key, params[key] + '');
+  }, requestParams);
   // TODO See if this works without this.
   // This is cf specific so needs to be moved and a hook added if it's needed.
   // if (params.hasOwnProperty('q')) {
@@ -49,11 +56,7 @@ function setRequestParams(
   //   delete params.q;
   // }
   // Assign other params
-  for (const key in params) {
-    if (params.hasOwnProperty(key)) {
-      requestParams.set(key, params[key] as string);
-    }
-  }
+
 }
 
 export function getPaginationParamsPipe(
@@ -61,12 +64,7 @@ export function getPaginationParamsPipe(
   catalogueEntity: StratosBaseCatalogueEntity,
   appState: InternalAppState
 ) {
-  const params = new HttpParams();
-
-  // Set initial params
-  if (action.initialParams) {
-    setRequestParams(params, action.initialParams);
-  }
+  const params = setRequestParams(new HttpParams(), action.initialParams);
 
   // Set params from store
   const paginationState = selectPaginationState(
@@ -74,15 +72,16 @@ export function getPaginationParamsPipe(
     action.paginationKey,
   )(appState);
   const paginationParams = getPaginationParams(paginationState);
+  // TODO We shouldn't be modifying this here as it is a unexpected side effect.
   action.pageNumber = paginationState
     ? paginationState.currentPage
     : 1;
-  setRequestParams(params, paginationParams);
-  if (!params.has(resultPerPageParam)) {
-    params.set(
+  const paramsFromPagination = setRequestParams(params, paginationParams);
+  if (!paramsFromPagination.has(resultPerPageParam)) {
+    return paramsFromPagination.set(
       resultPerPageParam,
       resultPerPageParamDefault.toString(),
     );
   }
-  return params;
+  return paramsFromPagination;
 }

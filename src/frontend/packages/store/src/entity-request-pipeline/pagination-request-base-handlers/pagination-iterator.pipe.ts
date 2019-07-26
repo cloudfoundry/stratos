@@ -9,7 +9,7 @@ import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/enti
 
 export interface PaginationPageIteratorConfig<R = any, E = any> {
   // TODO This should also pass page size for apis that use start=&end= params.
-  getPaginationParameters: (page: number) => HttpParams;
+  getPaginationParameters: (page: number) => Record<string, string>;
   getTotalPages: (initialResponses: JetstreamResponse<R>) => number;
   getEntityCount: (initialResponses: JetstreamResponse<R>) => number;
   getEntitiesFromResponse: (responses: R) => E[];
@@ -47,8 +47,12 @@ export class PaginationPageIterator<R = any, E = any> {
   }
 
   private addPageToRequest(page: number) {
+    const newParamsObject = this.config.getPaginationParameters(page);
+    const newParams = Object.keys(newParamsObject).reduce((params, key) => {
+      return params.set(key, newParamsObject[key]);
+    }, this.baseHttpRequest.params);
     return this.baseHttpRequest.clone({
-      params: this.config.getPaginationParameters(page)
+      params: newParams
     });
   }
 
