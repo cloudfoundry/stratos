@@ -20,9 +20,6 @@ import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
-import { getDashboardStateSessionId } from './helpers/store-helpers';
-import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
-import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
