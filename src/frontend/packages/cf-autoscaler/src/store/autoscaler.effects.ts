@@ -13,7 +13,7 @@ import {
   resultPerPageParamDefault,
 } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { APIResource, NormalizedResponse, PaginationResponse } from '../../../store/src/types/api.types';
+import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../store/src/types/pagination.types';
 import {
   StartRequestAction,
@@ -52,6 +52,7 @@ import {
   AppAutoscalerPolicyLocal,
   AppScalingTrigger,
 } from './app-autoscaler.types';
+import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
