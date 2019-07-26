@@ -3,9 +3,8 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { SET_CLIENT_FILTER, SetClientFilter, SetClientPage } from '../actions/pagination.actions';
-
+import { InternalAppState } from '../app-state';
 
 
 @Injectable()
@@ -13,7 +12,7 @@ export class SetClientFilterEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store<InternalAppState>,
   ) { }
 
   @Effect({ dispatch: false }) clearPageNumber$ = this.actions$.pipe(

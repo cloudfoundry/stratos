@@ -1,20 +1,13 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
-import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { domainEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   CfAppMapRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
 
 @Component({
@@ -34,10 +27,8 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   @Input() selectedRoute$: BehaviorSubject<APIResource>;
 
   constructor(
-    private store: Store<CFAppState>,
     private appService: ApplicationService,
-    listConfig: ListConfig<APIResource>,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    listConfig: ListConfig<APIResource>
   ) {
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;
   }
@@ -54,18 +45,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
       )
       .subscribe();
 
-    const action = new FetchAllDomains(this.appService.cfGuid);
-    this.paginationSubscription = getPaginationObservables<APIResource, CFAppState>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          new CFEntityConfig(domainEntityType)
-        )
-      },
-      true
-    ).entities$.subscribe();
+    this.paginationSubscription = this.appService.orgDomains$.subscribe();
   }
 
   ngOnDestroy(): void {

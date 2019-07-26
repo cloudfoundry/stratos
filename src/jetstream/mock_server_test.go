@@ -273,6 +273,12 @@ const (
 	updateTokens        = `UPDATE tokens`
 	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
 	insertIntoCNSIs     = `INSERT INTO cnsis`
+	findUserGUID        = `SELECT user_guid FROM local_users WHERE (.+)`
+	addLocalUser        = `INSERT INTO local_users (.+)`
+	findPasswordHash    = `SELECT password_hash FROM local_users WHERE (.+)`
+	findUserScope       = `SELECT user_scope FROM local_users WHERE (.+)`
+	updateLastLoginTime = `UPDATE local_users (.+)`
+	findLastLoginTime   = `SELECT last_login FROM local_users WHERE (.+)`
 	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
 )
 

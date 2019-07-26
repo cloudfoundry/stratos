@@ -10,7 +10,16 @@ import {
   spaceQuotaEntityType,
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
-import { EntityInlineChildAction } from '../entity-relations/entity-relations.types';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+
+
+export const GET_QUOTA_DEFINITION = '[QuotaDefinition] Get one';
+export const GET_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinition] Get one success';
+export const GET_QUOTA_DEFINITION_FAILED = '[QuotaDefinition] Get one failed';
+
+export const GET_SPACE_QUOTA_DEFINITION = '[SpaceQuotaDefinition] Get one';
+export const GET_SPACE_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinition] Get one success';
+export const GET_SPACE_QUOTA_DEFINITION_FAILED = '[QuotaDefinition] Get one failed';
 
 export const GET_QUOTA_DEFINITIONS = '[QuotaDefinitions] Get all';
 export const GET_QUOTA_DEFINITIONS_SUCCESS = '[QuotaDefinitions] Get all success';
@@ -27,6 +36,9 @@ export const ASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED = '[QuotaDefinitions] Assoc
 export const DISASSOCIATE_SPACE_QUOTA_DEFINITION = '[QuotaDefinitions] Disassociate space quota definition';
 export const DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinitions] Disassociate space quota definition success';
 export const DISASSOCIATE_SPACE_QUOTA_DEFINITION_FAILED = '[QuotaDefinitions] Disassociate space quota definition failed';
+
+// const quotaDefinitionEntitySchema = entityFactory(quotaDefinitionSchemaKey);
+// const spaceQuotaEntitySchema = entityFactory(spaceQuotaSchemaKey);
 
 export class GetQuotaDefinitions extends CFStartAction implements PaginatedAction {
   constructor(
@@ -54,6 +66,40 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
     'order-direction': 'asc',
   };
   flattenPagination = true;
+}
+
+export class GetQuotaDefinition extends CFStartAction implements ICFAction, EntityInlineParentAction {
+  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `quota_definitions/${guid}`;
+    this.options.method = RequestMethod.Get;
+  }
+  actions = [
+    GET_QUOTA_DEFINITION,
+    GET_QUOTA_DEFINITION_SUCCESS,
+    GET_QUOTA_DEFINITION_FAILED
+  ];
+  entity = [cfEntityFactory(quotaDefinitionEntityType)];
+  entityType = quotaDefinitionEntityType;
+  options: RequestOptions;
+}
+
+export class GetSpaceQuotaDefinition extends CFStartAction implements ICFAction, EntityInlineParentAction {
+  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `space_quota_definitions/${guid}`;
+    this.options.method = RequestMethod.Get;
+  }
+  actions = [
+    GET_SPACE_QUOTA_DEFINITION,
+    GET_SPACE_QUOTA_DEFINITION_SUCCESS,
+    GET_SPACE_QUOTA_DEFINITION_FAILED
+  ];
+  entity = [cfEntityFactory(spaceQuotaEntityType)];
+  entityType = spaceQuotaEntityType;
+  options: RequestOptions;
 }
 
 export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implements PaginatedAction, EntityInlineChildAction {

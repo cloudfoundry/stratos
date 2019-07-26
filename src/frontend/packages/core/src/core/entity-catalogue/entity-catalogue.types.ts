@@ -11,7 +11,7 @@ import {
 import {
   PaginationPageIteratorConfig
 } from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-
+import { Omit } from '../utils.service';
 export interface EntityCatalogueEntityConfig {
   entityType: string;
   endpointType: string;
@@ -31,7 +31,7 @@ export interface IEntityMetadata {
   name: string;
   [key: string]: string;
 }
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
 /**
  * Static information describing a base stratos entity.
  *

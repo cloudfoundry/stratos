@@ -2,9 +2,9 @@ import { Schema, schema } from 'normalizr';
 
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { APIResource } from '../../store/src/types/api.types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/src/types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/user.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { getAPIResourceGuid } from './selectors/api.selectors';
+import { getAPIResourceGuid } from './store/selectors/api.selectors';
 
 export const applicationEntityType = 'application';
 export const stackEntityType = 'stack';
@@ -42,7 +42,7 @@ export const serviceInstancesWithNoBindingsEntityType = 'serviceInstanceWithNoBi
 export const serviceBindingNoBindingsEntityType = 'serviceBindingNoBindings';
 
 
-export const entityCache: {
+const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
@@ -380,8 +380,4 @@ export function cfEntityFactory(key: string): EntitySchema {
     throw new Error(`Unknown entity schema type: ${key}`);
   }
   return entity;
-}
-
-export function addEntityToCache(entitySchema: EntitySchema, key?: string) {
-  entityCache[key || entitySchema.key] = entitySchema;
 }

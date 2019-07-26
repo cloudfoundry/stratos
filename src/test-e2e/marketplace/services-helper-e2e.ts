@@ -1,7 +1,8 @@
 import { browser, promise, protractor } from 'protractor';
 
+import { CFResponse, createEmptyCfResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
 import { IServiceInstance } from '../../frontend/packages/core/src/core/cf-api-svc.types';
-import { APIResource, CFResponse, createEmptyCfResponse } from '../../frontend/packages/store/src/types/api.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
@@ -124,7 +125,8 @@ export class ServicesHelperE2E {
         if (!!attemptsLeft) {
           e2e.log(`Failed to create service instance '${serviceInstanceName}' of type '${serviceName}'.
            Attempting ${attemptsLeft} more time/s`);
-          browser.sleep(1000);
+          // Wait 10 seonds until we try again
+          browser.sleep(10000);
           this.createInstanceAttempt(retryNumber + 1, maxRetries, serviceName, serviceInstanceName);
         } else {
           fail(`Failed to create service instance after ${maxRetries} retries`);

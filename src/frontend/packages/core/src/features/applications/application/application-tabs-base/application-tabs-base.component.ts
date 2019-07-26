@@ -1,10 +1,9 @@
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
-import { filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
@@ -37,11 +36,13 @@ import { IPageSideNavTab } from '../../../dashboard/page-side-nav/page-side-nav.
 import { ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
 import { UpdateExistingApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
+import { ApplicationPollingService } from './application-polling.service';
 
 @Component({
   selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
-  styleUrls: ['./application-tabs-base.component.scss']
+  styleUrls: ['./application-tabs-base.component.scss'],
+  providers: [ApplicationPollingService]
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public appState$: Observable<ApplicationStateData>;
@@ -65,7 +66,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService,
     private favoritesConfigMapper: FavoritesConfigMapper,
-
+    private appPollingService: ApplicationPollingService
   ) {
     const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     this.schema = catalogueEntity.getSchema();
@@ -95,13 +96,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     );
 
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', matIcon: 'description' },
-      { link: 'instances', label: 'Instances', matIcon: 'library_books' },
-      { link: 'routes', label: 'Routes', matIconFont: 'stratos-icons', matIcon: 'network_route' },
-      { link: 'log-stream', label: 'Log Stream', matIcon: 'featured_play_list' },
-      { link: 'services', label: 'Services', matIconFont: 'stratos-icons', matIcon: 'service' },
-      { link: 'variables', label: 'Variables', matIcon: 'list', hidden: appDoesNotHaveEnvVars$ },
-      { link: 'events', label: 'Events', matIcon: 'watch_later' }
+      { link: 'summary', label: 'Summary', icon: 'description' },
+      { link: 'instances', label: 'Instances', icon: 'library_books' },
+      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'network_route' },
+      { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
+      { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
+      { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },
+      { link: 'events', label: 'Events', icon: 'watch_later' }
     ];
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
@@ -111,14 +112,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           {
             link: 'metrics',
             label: 'Metrics',
-            matIcon: 'equalizer'
+            icon: 'equalizer'
           }
         ];
       }
     });
 
     // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.Application));
+    const tabs = getTabsFromExtensions(StratosTabType.Application);
+    tabs.map((extensionTab) => {
+      this.tabLinks.push(extensionTab);
+    });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
     this.stratosProjectSub = this.applicationService.applicationStratProject$
@@ -134,11 +138,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           // Add tab or update existing tab
           const tab = this.tabLinks.find(t => t.link === 'gitscm');
           if (!tab) {
-            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel(), matIconFont: iconInfo.fontName, matIcon: iconInfo.iconName });
+            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName });
           } else {
             tab.label = scm.getLabel();
-            tab.matIconFont = iconInfo.fontName;
-            tab.matIcon = iconInfo.iconName;
+            tab.iconFont = iconInfo.fontName;
+            tab.icon = iconInfo.iconName;
           }
           this.tabLinks = [...this.tabLinks];
         }
@@ -150,13 +154,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   applicationActions$: Observable<string[]>;
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
-  entityServiceAppRefresh$: Subscription;
   stratosProjectSub: Subscription;
-  autoRefreshString = 'auto-refresh';
-
-  autoRefreshing$ = this.entityService.updatingSection$.pipe(map(
-    update => update[this.autoRefreshString] || { busy: false }
-  ));
 
   tabLinks: IPageSideNavTab[];
 
@@ -246,22 +244,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const { cfGuid, appGuid } = this.applicationService;
-    // Auto refresh
-    this.ngZone.runOutsideAngular(() => {
-      this.entityServiceAppRefresh$ = this.entityService
-        .poll(10000, this.autoRefreshString).pipe(
-          tap(({ resource }) => {
-            this.ngZone.run(() => {
-              this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-              if (resource && resource.entity && resource.entity.state === 'STARTED') {
-                this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-              }
-            });
-          }))
-        .subscribe();
-    });
-
     this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
@@ -294,9 +276,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.summaryDataChanging$ = observableCombineLatest(
       initialFetch$,
       this.applicationService.isUpdatingApp$,
-      this.autoRefreshing$
-    ).pipe(map(([isFetchingApp, isUpdating, autoRefresh]) => {
-      if (autoRefresh.busy) {
+      this.appPollingService.isPolling$
+    ).pipe(map(([isFetchingApp, isUpdating, isPolling]) => {
+      if (isPolling) {
         return false;
       }
       return !!(isFetchingApp || isUpdating);
@@ -304,6 +286,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(this.appSub$, this.entityServiceAppRefresh$, this.stratosProjectSub);
+    safeUnsubscribe(this.appSub$, this.stratosProjectSub);
+    this.appPollingService.stop();
   }
 }

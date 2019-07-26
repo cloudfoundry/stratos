@@ -1,17 +1,18 @@
 import { Store } from '@ngrx/store';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
+import { Observable, of as observableOf } from 'rxjs';
+
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { AppStat } from '../../store/src/types/app-metadata.types';
+import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
 import {
+  ApplicationEnvVarsHelper,
   EnvVarStratosProject,
-  ApplicationEnvVarsHelper
 } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
-import { ISpace, IApp, IAppSummary } from '../src/core/cf-api.types';
+import { ISpace, IApp, IAppSummary, IDomain } from '../src/core/cf-api.types';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
-import { Observable, of as observableOf } from 'rxjs';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 
 function createEntity<T>(entity: T): APIResource<T> {
@@ -77,6 +78,7 @@ export class ApplicationServiceMock {
   });
   appSpace$: Observable<APIResource<ISpace>> = observableOf(createEntity<ISpace>({} as ISpace));
   applicationRunning$: Observable<boolean> = observableOf(false);
+  orgDomains$: Observable<APIResource<IDomain>[]> = observableOf([]);
 }
 
 export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: string) {

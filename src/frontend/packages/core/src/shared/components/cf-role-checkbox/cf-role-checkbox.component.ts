@@ -12,8 +12,8 @@ import {
   IUserPermissionInSpace,
   OrgUserRoleNames,
   SpaceUserRoleNames,
-} from '../../../../../store/src/types/user.types';
-import { CfUserRolesSelected } from '../../../../../store/src/types/users-roles.types';
+} from '../../../../../cloud-foundry/src/store/types/user.types';
+import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';

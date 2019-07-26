@@ -43,6 +43,7 @@
       href="{{applicationService.applicationUrl$ | async}}" target="_blank" matTooltip="Visit">
       <mat-icon>launch</mat-icon>
     </a>
+    <app-application-poll class="summary__sub-nav__poll"></app-application-poll>
   </div>
 </app-page-sub-nav>
 <div class="summary" *ngIf="applicationService.application$ | async as appSvc">

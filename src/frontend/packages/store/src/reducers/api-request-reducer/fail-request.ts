@@ -32,6 +32,7 @@ export function failRequest(state, action: IFailedRequestAction) {
       requestFailedState.error = true;
       requestFailedState.creating = false;
       requestFailedState.message = action.message;
+      requestFailedState.response = action.response;
     }
     return setEntityRequestState(state, requestFailedState, apiAction);
   }

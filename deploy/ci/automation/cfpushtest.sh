@@ -1,5 +1,12 @@
 #!/bin/bash
 
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+CYAN="\033[96m"
+YELLOW="\033[93m"
+BOLD="\033[1m"
+RESET='\033[0m'
+
 echo "===================="
 echo "Stratos CF Push Test"
 echo "===================="
@@ -83,6 +90,15 @@ echo "    env:" >> $MANIFEST
 echo "      SKIP_AUTO_REGISTER: true" >> $MANIFEST
 echo "      FORCE_ENABLE_PERSISTENCE_FEATURES: true" >> $MANIFEST
 
+# Make sure we add invite users config if set
+if [ -n "${SMTP_HOST}" ]; then
+  echo "      SMTP_HOST: ${SMTP_HOST}" >> $MANIFEST
+fi
+
+if [ -n "${SMTP_FROM_ADDRESS}" ]; then
+  echo "      SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS}" >> $MANIFEST
+fi
+
 # SSO
 SUITE=""
 if [ "$2" == "sso" ] || [ "$3" == "sso" ] ; then
@@ -101,7 +117,7 @@ cat $MANIFEST
 
 # Prebuild
 if [ "$2" == "prebuild" ]; then
-  echo "Pre-building UI ..."
+  echo -e "${CYAN}Pre-building UI ...${RESET}"
   npm install
   npm run prebuild-ui
 fi
@@ -118,9 +134,20 @@ date
 if [ $RET -ne 0 ]; then
   set +e
   echo "Push failed... showing recent log of the Stratos app"
-  cf logs console --recent
+  cf logs --recent console
   set -e
 else
+
+  # Show the recent logs just we can see startup settings
+  echo -e "${BOLD}${GREEN}Showing recent logs of the Stratos App${RESET}"
+  cf logs --recent console | tail -n 100
+  
+  echo -e "${BOLD}${GREEN}"
+  echo "==============================================================================="
+  echo ""
+  echo "Running E2E Tests...."
+  echo -e "${RESET}"
+
   # Push was okay, so we can prepare and run E2E tests
   rm -rf node_modules
   npm install

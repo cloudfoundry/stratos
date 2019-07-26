@@ -1,7 +1,7 @@
-import { DisconnectEndpoint, RegisterEndpoint, EndpointActionComplete } from '../../actions/endpoint.actions';
-import { ICurrentUserRolesState, getDefaultEndpointRoles } from '../../types/current-user-roles.types';
-import { APISuccessOrFailedAction } from '../../types/request.types';
+import { EndpointActionComplete } from '../../actions/endpoint.actions';
+import { getDefaultEndpointRoles, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { EndpointModel } from '../../types/endpoint.types';
+import { APISuccessOrFailedAction } from '../../types/request.types';
 
 export function removeEndpointRoles(state: ICurrentUserRolesState, action: EndpointActionComplete) {
   const cfState = {

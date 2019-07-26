@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   CheckProjectExists,
   FetchBranchesForProject,
@@ -18,7 +18,7 @@ import {
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { GitSCM } from '../../../../data-services/scm/scm';

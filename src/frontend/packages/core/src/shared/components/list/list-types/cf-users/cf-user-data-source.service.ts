@@ -4,7 +4,7 @@ import { cfEntityFactory, cfUserEntityType } from '../../../../../../../cloud-fo
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
-import { CfUser } from '../../../../../../../store/src/types/user.types';
+import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ListConfig } from '../../list.component.types';

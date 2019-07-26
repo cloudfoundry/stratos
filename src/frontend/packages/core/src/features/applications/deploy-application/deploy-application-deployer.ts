@@ -5,15 +5,15 @@ import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } f
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../../cloud-foundry/src/selectors/api.selectors';
-import { selectDeployAppState } from '../../../../../store/src/selectors/deploy-application.selector';
+import { selectCfEntity } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import {
   AppData,
   DeployApplicationSource,
   DeployApplicationState,
   OverrideAppDetails,
   SocketEventTypes,
-} from '../../../../../store/src/types/deploy-application.types';
+} from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../environments/environment.prod';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';

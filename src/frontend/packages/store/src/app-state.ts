@@ -3,10 +3,6 @@ import { RequestInfoState } from './reducers/api-request-reducer/types';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
-import { CreateNewApplicationState } from './types/create-application.types';
-import { CreateServiceInstanceState } from './types/create-service-instance.types';
-import { ICurrentUserRolesState } from './types/current-user-roles.types';
-import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
 import { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
@@ -15,7 +11,7 @@ import { PaginationEntityTypeState } from './types/pagination.types';
 import { IRecentlyVisitedState } from './types/recently-visited.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
-import { UsersRolesState } from './types/users-roles.types';
+import { ICurrentUserRolesState } from './types/current-user-roles.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: any;
@@ -38,17 +34,14 @@ export abstract class AppState<
   request: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
   requestData: T;
   dashboard: DashboardState;
-  createApplication: CreateNewApplicationState;
-  deployApplication: DeployApplicationState;
-  createServiceInstance: CreateServiceInstanceState;
   lists: ListsState;
   routing: RoutingHistory;
-  manageUsersRoles: UsersRolesState;
   internalEvents: InternalEventsState;
   currentUserRoles: ICurrentUserRolesState;
   userFavoritesGroups: IUserFavoritesGroupsState;
   recentlyVisited: IRecentlyVisitedState;
 }
+
 export interface GeneralRequestDataState {
   [name: string]: any;
 }
@@ -59,7 +52,17 @@ export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'endpoint'>>;
 export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;
 export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
+
+// Restricted to: { requestData: {userFavorites: ...}, userFavoritesGroups: ...  }
 export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'userFavorites'>>, 'userFavoritesGroups'>;
+
+export type AppRoutingOnlyAppState = Pick<AppState, 'routing'>;
+
+export type ListsOnlyAppState = Pick<AppState, 'lists'>;
+
+// =======================================================================================
+// Internal types below - these should NOT be used outside of the store package
+// =======================================================================================
 
 // One stop shop for all of your app state needs
 

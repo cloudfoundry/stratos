@@ -1,12 +1,13 @@
 import {
-  CHANGE_SIDE_NAV_MODE,
   CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
   DISABLE_SIDE_NAV_MOBILE_MODE,
+  ENABLE_POLLING,
   ENABLE_SIDE_NAV_MOBILE_MODE,
   OPEN_SIDE_NAV,
   SET_HEADER_EVENT,
   SetHeaderEvent,
+  SetPollingEnabledAction,
   SHOW_SIDE_HELP,
   TOGGLE_HEADER_EVENT,
   TOGGLE_SIDE_NAV,
@@ -20,6 +21,7 @@ import {
 
 export interface DashboardState {
   timeoutSession: boolean;
+  pollingEnabled: boolean;
   sidenavOpen: boolean;
   isMobile: boolean;
   isMobileNavOpen: boolean;
@@ -31,16 +33,17 @@ export interface DashboardState {
 
 export const defaultDashboardState: DashboardState = {
   timeoutSession: true,
+  pollingEnabled: true,
   sidenavOpen: true,
   isMobile: false,
   isMobileNavOpen: false,
   sideNavPinned: true,
   headerEventMinimized: false,
   sideHelpOpen: false,
-  sideHelpDocument: null
+  sideHelpDocument: null,
 };
 
-export function dashboardReducer(state: DashboardState = defaultDashboardState, action) {
+export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
   switch (action.type) {
     case OPEN_SIDE_NAV:
       if (state.isMobile) {
@@ -57,8 +60,6 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
         return { ...state, isMobileNavOpen: !state.isMobileNavOpen };
       }
       return { ...state, sidenavOpen: !state.sidenavOpen };
-    case CHANGE_SIDE_NAV_MODE:
-      return { ...state, sideNavMode: action.mode };
     case ENABLE_SIDE_NAV_MOBILE_MODE:
       return { ...state, isMobile: true, isMobileNavOpen: false };
     case DISABLE_SIDE_NAV_MOBILE_MODE:
@@ -79,6 +80,12 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return {
         ...state,
         timeoutSession: timeoutSessionAction.timeoutSession
+      };
+    case ENABLE_POLLING:
+      const pollingAction = action as SetPollingEnabledAction;
+      return {
+        ...state,
+        pollingEnabled: pollingAction.enablePolling
       };
     case HYDRATE_DASHBOARD_STATE:
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;

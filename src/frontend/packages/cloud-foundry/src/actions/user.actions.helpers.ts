@@ -1,6 +1,6 @@
 import { cfUserEntityType } from '../cf-entity-factory';
+import { CfUserRoleParams } from '../store/types/user.types';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
-import { CfUserRoleParams } from '../../../store/src/types/user.types';
 
 export function createDefaultUserRelations() {
   return [

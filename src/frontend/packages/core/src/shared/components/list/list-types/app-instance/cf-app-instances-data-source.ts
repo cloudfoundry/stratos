@@ -11,10 +11,10 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { AppStat } from '../../../../../../../store/src/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
+import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
 
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStat> {
 

@@ -57,10 +57,12 @@ export class EntityRelationSpecHelper {
         app_instance_limit: 2,
         instance_memory_limit: 3,
         name,
-        trial_db_allowed: true,
-        app_task_limit: 1,
-        total_service_keys: 1,
-        total_reserved_route_ports: 1
+        total_routes: -1,
+        total_services: -1,
+        trial_db_allowed: false,
+        app_task_limit: -1,
+        total_service_keys: -1,
+        total_reserved_route_ports: null
       },
       metadata: {
         guid,

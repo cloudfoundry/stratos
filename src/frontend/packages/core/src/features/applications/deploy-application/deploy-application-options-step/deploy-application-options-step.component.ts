@@ -7,13 +7,13 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
+import { GetAllOrganizationDomains } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { GetAllStacks } from '../../../../../../cloud-foundry/src/actions/stack.action';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectCfDetails } from '../../../../../../store/src/selectors/deploy-application.selector';
+import { selectCfDetails } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { OverrideAppDetails } from '../../../../../../store/src/types/deploy-application.types';
+import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../core/cf-api.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -102,7 +102,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     // Create the domains list for the domains drop down
     this.domains$ = cfDetails$.pipe(
       switchMap(cfDetails => {
-        const action = new FetchAllDomains(cfDetails.cloudFoundry);
+        const action = new GetAllOrganizationDomains(cfDetails.org, cfDetails.cloudFoundry);
         return getPaginationObservables<APIResource<IDomain>>(
           {
             store: this.store,

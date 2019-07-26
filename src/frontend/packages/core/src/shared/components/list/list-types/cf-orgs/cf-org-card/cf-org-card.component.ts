@@ -9,7 +9,7 @@ import { RouterNav } from '../../../../../../../../store/src/actions/router.acti
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { createUserRoleInOrg } from '../../../../../../../../store/src/types/user.types';
+import { createUserRoleInOrg } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';

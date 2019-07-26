@@ -23,18 +23,22 @@ describe('CF - Invite User Configuration - ', () => {
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
       .connectAllEndpoints(ConsoleUserType.user);
-    // There is only one CF endpoint registered (since that is what we setup)
-    const page = new CFPage();
-    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
-    return CfTopLevelPage.detect().then(p => {
-      cfPage = p;
-      cfPage.waitForPageOrChildPage();
-      cfPage.loadingIndicator.waitUntilNotShown();
-    });
   });
 
   describe('Configure - ', () => {
-    beforeAll(() => cfPage.isUserInviteConfigured().then(configured => {
+
+    beforeEach(() => {
+      // There is only one CF endpoint registered (since that is what we setup)
+      const page = new CFPage();
+      page.sideNav.goto(SideNavMenuItem.CloudFoundry);
+      return CfTopLevelPage.detect().then(p => {
+        cfPage = p;
+        cfPage.waitForPageOrChildPage();
+        cfPage.loadingIndicator.waitUntilNotShown();
+      });
+    });
+
+    beforeEach(() => cfPage.isUserInviteConfigured().then(configured => {
       if (configured) {
         cfPage.clickInviteDisable();
         return ConfirmDialogComponent.expectDialogAndConfirm('Disable', 'Disable User Invitations');
@@ -42,12 +46,10 @@ describe('CF - Invite User Configuration - ', () => {
     })
     );
 
-    it('Initial State', () => {
+    it('Bad Creds', () => {
       expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
       expect(cfPage.canConfigureUserInvite()).toBeTruthy();
-    });
 
-    it('Bad Creds', () => {
       cfPage.clickInviteConfigure();
       const dialog = new ConfigInviteClientDialog();
       expect(dialog.canConfigure()).toBeFalsy();
@@ -64,6 +66,9 @@ describe('CF - Invite User Configuration - ', () => {
     });
 
     it('Good Creds', () => {
+      expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
+      expect(cfPage.canConfigureUserInvite()).toBeTruthy();
+
       cfPage.clickInviteConfigure();
       const dialog = new ConfigInviteClientDialog();
       expect(dialog.canConfigure()).toBeFalsy();
@@ -76,21 +81,18 @@ describe('CF - Invite User Configuration - ', () => {
   });
 
   describe('UnConfigure - ', () => {
-    it('Initial State', () => {
+    it('UnConfigure', () => {
+      // Initial state
       expect(cfPage.isUserInviteConfigured(true)).toBeTruthy();
       expect(cfPage.canConfigureUserInvite()).toBeFalsy();
-    });
 
-    it('UnConfigure', () => {
       cfPage.clickInviteDisable();
       ConfirmDialogComponent.expectDialogAndConfirm('Disable', 'Disable User Invitations');
-    });
 
-    it('End State', () => {
+      // End State
       expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
       expect(cfPage.canConfigureUserInvite()).toBeTruthy();
     });
   });
 
 });
-

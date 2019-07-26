@@ -85,6 +85,7 @@ export interface IFailedRequestAction {
   message: string;
   apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
+  response?: any;
 }
 
 export abstract class StartAction implements Action {
@@ -158,7 +159,8 @@ export class WrapperRequestActionFailed extends RequestFailedAction implements I
     public message: string,
     public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
-    public internalEndpointError?: InternalEndpointError
+    public internalEndpointError?: InternalEndpointError,
+    public response?: any
   ) {
     super();
   }

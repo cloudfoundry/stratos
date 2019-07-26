@@ -6,7 +6,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { selectUsersRolesRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { SpaceUserRoleNames } from '../../../../../../../store/src/types/user.types';
+import { SpaceUserRoleNames } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ITableColumn } from '../../list-table/table.types';

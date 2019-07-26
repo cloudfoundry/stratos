@@ -30,7 +30,7 @@ import {
   userProvidedServiceInstanceEntityType
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { selectCfRequestInfo } from '../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 
 
 @Injectable()

@@ -4,8 +4,8 @@ import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
 import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
-import { CFResponse } from '../types/api.types';
-
+import { CFResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
+// TODO This can be deleted once the api effect rework is done.
 export interface PaginationFlattenerConfig<T = any, C = any> extends Pick<
   PaginationFlattener<T, C>,
   'getTotalPages' | 'getTotalResults' | 'mergePages' | 'clearResults'

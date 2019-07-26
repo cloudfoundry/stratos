@@ -4,7 +4,7 @@ import { first, map } from 'rxjs/operators';
 
 import { AppChip } from '../../../../chips/chips.component';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { CfRoute } from '../../../../../../../../store/src/types/route.types';
+import { CfRoute } from '../../../../../../../../cloud-foundry/src/store/types/route.types';
 
 @Component({
   selector: 'app-table-cell-route-apps-attached',
