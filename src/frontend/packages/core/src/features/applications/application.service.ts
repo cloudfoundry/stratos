@@ -14,6 +14,7 @@ import {
   UpdateApplication,
   UpdateExistingApplication,
 } from '../../../../cloud-foundry/src/actions/application.actions';
+import { GetAllOrganizationDomains } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -40,7 +41,7 @@ import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoi
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { AppStat } from '../../../../cloud-foundry/src/store/types/app-metadata.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import { IApp, IAppSummary, IOrganization, ISpace } from '../../core/cf-api.types';
+import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -56,7 +57,6 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -137,6 +137,7 @@ export class ApplicationService {
   applicationState$: Observable<ApplicationStateData>;
   applicationUrl$: Observable<string>;
   applicationRunning$: Observable<boolean>;
+  orgDomains$: Observable<APIResource<IDomain>[]>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -257,6 +258,25 @@ export class ApplicationService {
 
     this.applicationRunning$ = this.application$.pipe(
       map(app => app ? app.app.entity.state === 'STARTED' : false)
+    );
+
+    // In an ideal world we'd get domains inline with the application, however the inline path from app to org domains exceeds max cf depth
+    // of 2 (app --> space --> org --> domains).
+    this.orgDomains$ = this.appOrg$.pipe(
+      switchMap(org => {
+        const domainsAction = new GetAllOrganizationDomains(org.metadata.guid, this.cfGuid);
+        return getPaginationObservables<APIResource<IDomain>>(
+          {
+            store: this.store,
+            action: domainsAction,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              domainsAction.paginationKey,
+              action
+            )
+          },
+          true
+        ).entities$;
+      }),
     );
 
   }

@@ -3,7 +3,6 @@ import { compose, createSelector } from '@ngrx/store';
 import { InternalEventSeverity, InternalEventsState } from '../types/internal-events.types';
 import { InternalAppState } from '../app-state';
 
-
 export const internalEventStateSelector = (state: InternalAppState) => state.internalEvents;
 
 export const internalEventTypeSelector = (type: string) => compose(

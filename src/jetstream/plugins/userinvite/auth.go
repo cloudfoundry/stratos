@@ -33,7 +33,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*
 		return nil, nil, interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Unable to save user invite token",
-			"Unable to save user invite token: %v+", err,
+			"Unable to save user invite token: %+v", err,
 		)
 	}
 
@@ -93,7 +93,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 		return nil, nil, interfaces.NewHTTPShadowError(
 			res.StatusCode,
 			errMessage,
-			errMessage+" %v+", err,
+			errMessage+" %+v", err,
 		)
 	}
 
@@ -103,7 +103,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 		return nil, nil, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Error parsing response from UAA",
-			"Error parsing response from UAA: %v+", err,
+			"Error parsing response from UAA: %+v", err,
 		)
 	}
 

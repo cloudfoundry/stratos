@@ -7,7 +7,6 @@ import { AuthOnlyAppState } from '../../store/src/app-state';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
