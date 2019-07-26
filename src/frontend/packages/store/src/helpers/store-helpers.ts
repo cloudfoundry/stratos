@@ -3,13 +3,16 @@ import { Observable } from 'rxjs';
 import { first, map, pairwise, skipWhile } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { BasePaginatedAction, PaginationEntityState } from '../types/pagination.types';
 
 
-export const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) =>
-  store.select(selectPaginationState(action.entityType, action.paginationKey));
+export const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) => {
+  const config = entityCatalogue.getEntity(action);
+  return store.select(selectPaginationState(config.entityKey, action.paginationKey));
+};
 
 /**
  * Using the given action wait until the associated pagination section changes from busy to not busy

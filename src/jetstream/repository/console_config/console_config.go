@@ -6,7 +6,11 @@ import (
 
 type Repository interface {
 	GetConsoleConfig() (*interfaces.ConsoleConfig, error)
-	SaveConsoleConfig(config *interfaces.ConsoleConfig) error
-	UpdateConsoleConfig(config *interfaces.ConsoleConfig) error
-	IsInitialised() (bool, error)
+	DeleteConsoleConfig() error
+
+	// Access to the config data
+	GetValue(group, name string) (string, bool, error)
+	SetValue(group, name, value string) error
+	DeleteValue(group, name string) error
+	GetValues(group string) (map[string]string, error)
 }

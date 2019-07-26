@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 import * as moment from 'moment';
-import { ITimeRange, StoreMetricTimeRange, MetricQueryType } from './metrics-range-selector.types';
-import { MetricsAction, MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
+
+import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../store/src/types/base-metric.types';
+import { ITimeRange, MetricQueryType, StoreMetricTimeRange } from './metrics-range-selector.types';
 
 @Injectable()
 export class MetricsRangeSelectorService {
 
   constructor() { }
 
+  public defaultTimeValue: string;
   public times: ITimeRange[] = [
     {
       value: '5:minute',
@@ -58,10 +60,10 @@ export class MetricsRangeSelectorService {
     }));
   }
 
-  public getNewTimeWindowAction(action: MetricsAction, window: ITimeRange) {
-    const [start, end] = this.convertWindowToRange(window.value);
+  public getNewTimeWindowAction(action: MetricsAction, windowValue: string) {
+    const [start, end] = this.convertWindowToRange(windowValue);
     const newAction = { ...action };
-    newAction.windowValue = window.value;
+    newAction.windowValue = windowValue;
     return this.getNewDateRangeAction(newAction, start, end);
   }
 
@@ -87,7 +89,11 @@ export class MetricsRangeSelectorService {
   }
 
   private getDefaultTimeRange(times = this.times) {
-    return times.find(time => time.value === '1:hour') || this.times[0];
+    if (this.defaultTimeValue) {
+      return times.find(time => time.value === this.defaultTimeValue) || this.times[0];
+    } else {
+      return times.find(time => time.value === '1:hour') || this.times[0];
+    }
   }
 
 }

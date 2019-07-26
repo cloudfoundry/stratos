@@ -2,6 +2,7 @@ import { RequestMethod } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { MetricQueryConfig } from '../actions/metrics.actions';
 import { ListActionState } from '../reducers/api-request-reducer/types';
 import { IRequestAction } from './request.types';
 
@@ -15,6 +16,7 @@ export class QParam {
 
 export interface PaginationParam {
   q?: QParam[];
+  metricConfig?: MetricQueryConfig;
   [entityKey: string]: any;
 }
 

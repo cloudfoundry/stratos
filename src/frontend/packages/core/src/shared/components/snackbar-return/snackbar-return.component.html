@@ -1,0 +1,7 @@
+<div class="app-snackbar-return mat-simple-snackbar">
+  <span>{{ message }}</span>
+  <div class="app-snackbar-return-action mat-simple-snackbar-action" *ngIf="returnUrl">
+    <button mat-button (click)="return()">{{ returnLabel }}</button>
+    <button mat-button (click)="dismiss()">Dismiss</button>
+  </div>
+</div>
