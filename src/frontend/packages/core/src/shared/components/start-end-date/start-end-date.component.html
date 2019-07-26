@@ -9,6 +9,6 @@
     <app-date-time [(dateTime)]="end"></app-date-time>
   </div>
 </div>
-<div class="invalid-message" *ngIf="!valid">
-  Start date must be before end date.
+<div class="invalid-message">
+  {{ validMessage }}
 </div>

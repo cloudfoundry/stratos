@@ -5,12 +5,10 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 import {
   AssignRouteToApplication,
   GetAppRoutes,
 } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { FetchAllDomains } from '../../../../../../cloud-foundry/src/actions/domains.actions';
 import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
 import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
@@ -24,7 +22,6 @@ import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selecto
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { Route, RouteMode } from '../../../../../../store/src/types/route.types';
 import { IDomain, ISpace } from '../../../../core/cf-api.types';
@@ -114,22 +111,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       }
     }));
 
-    const fetchAllDomainsAction = new FetchAllDomains(this.cfGuid);
-    const sharedDomains$ = getPaginationObservables(
-      {
-        store: this.store,
-        action: fetchAllDomainsAction,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          fetchAllDomainsAction.paginationKey,
-          new CFEntityConfig(domainEntityType)
-        )
-      },
-      true
-    ).entities$;
-
-    const space$ = sharedDomains$.pipe(
-      // We don't need the shared domains, but we need them fetched first so we get the router_group_type
-      switchMap(sharedDomains => this.appService.waitForAppEntity$
+    const space$ = this.applicationService.orgDomains$.pipe(
+      // We don't need the domains, but we need them fetched first so we get the router_group_type
+      switchMap(() => this.appService.waitForAppEntity$
         .pipe(
           switchMap(app => {
             this.spaceGuid = app.entity.entity.space_guid;
@@ -140,8 +124,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             );
             return spaceService.waitForEntity$;
           }),
-          filter(({ entity, entityRequestInfo }) => !!entity.entity.domains),
-          tap(({ entity, entityRequestInfo }) => {
+          filter(({ entity }) => !!entity.entity.domains),
+          tap(({ entity }) => {
             this.domains = [];
             const domains = entity.entity.domains;
             domains.forEach(domain => {
