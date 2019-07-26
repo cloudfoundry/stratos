@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom, pairwise, skipWhile } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import {
@@ -15,7 +15,6 @@ import {
   flattenPagination,
   IPaginationFlattener,
 } from '../../../../store/src/helpers/paginated-request-helpers';
-import { createPaginationCompleteWatcher } from '../../../../store/src/helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../../store/src/types/endpoint.types';
 import {
@@ -34,6 +33,9 @@ import {
 } from '../../actions/permissions.actions';
 import { CFAppState } from '../../cf-app-state';
 import { CFResponse } from '../types/cf-api.types';
+import { BasePaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
 
@@ -94,6 +96,27 @@ function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, htt
     share()
   );
 }
+
+const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) =>
+  store.select(selectPaginationState(action.entityType, action.paginationKey));
+
+/**
+ * Using the given action wait until the associated pagination section changes from busy to not busy
+ */
+const createPaginationCompleteWatcher = (store: Store<CFAppState>, action: BasePaginatedAction): Observable<boolean> =>
+  fetchPaginationStateFromAction(store, action).pipe(
+    map((paginationState: PaginationEntityState) => {
+      const pageRequest: ActionState =
+        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+      return pageRequest ? pageRequest.busy : true;
+    }),
+    pairwise(),
+    map(([oldFetching, newFetching]) => {
+      return oldFetching === true && newFetching === false;
+    }),
+    skipWhile(completed => !completed),
+    first(),
+  );
 
 @Injectable()
 export class PermissionsEffects {
@@ -157,6 +180,7 @@ export class PermissionsEffects {
       );
     })
   );
+
 
   private dispatchRoleRequests(endpoints: EndpointModel[]): CfsRequestState {
     const requests: CfsRequestState = {};

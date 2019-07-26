@@ -3,12 +3,12 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { SendEventAction } from '../actions/internal-events.actions';
 import { RequestTypes } from '../actions/request.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { WrapperRequestActionFailed } from '../types/request.types';
+import { InternalAppState } from '../app-state';
 
 
 
@@ -21,7 +21,7 @@ export class EndpointApiError {
 
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store<InternalAppState>,
   ) { }
 
   @Effect({ dispatch: false }) endpointApiError$ = this.actions$.pipe(
