@@ -5,7 +5,7 @@ import { EffectsModule } from '@ngrx/effects';
 
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
-import { AppVariablesEffect } from './effects/app-variables.effects';
+import { AppVariablesEffect } from '../../cloud-foundry/src/store/effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';

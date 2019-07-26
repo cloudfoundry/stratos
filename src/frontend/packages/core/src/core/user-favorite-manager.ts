@@ -41,6 +41,11 @@ export interface IAllFavorites {
   entityGroups: IGroupedFavorites[];
 }
 
+export interface IFavoritesInfo {
+  fetching: boolean;
+  error: boolean;
+}
+
 export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetadata> {
   type: string;
   cardMapper: TFavoriteMapperFunction<any>;

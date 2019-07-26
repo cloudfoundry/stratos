@@ -52,8 +52,17 @@ export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'endpoint'>>;
 export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;
 export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
+
+// Restricted to: { requestData: {userFavorites: ...}, userFavoritesGroups: ...  }
 export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'userFavorites'>>, 'userFavoritesGroups'>;
+
 export type AppRoutingOnlyAppState = Pick<AppState, 'routing'>;
+
+export type ListsOnlyAppState = Pick<AppState, 'lists'>;
+
+// =======================================================================================
+// Internal types below - these should NOT be used outside of the store package
+// =======================================================================================
 
 // One stop shop for all of your app state needs
 
