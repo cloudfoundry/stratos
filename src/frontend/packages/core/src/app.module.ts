@@ -133,7 +133,7 @@ export class AppModule {
     });
     eventService.addEventConfig<boolean>({
       eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
-      message: 'Data polling is disabled - you may see out-of-date data.',
+      message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
       key: 'pollingEnabledWarning',
       link: '/user-profile'
     });
