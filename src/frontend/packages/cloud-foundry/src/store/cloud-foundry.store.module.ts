@@ -1,3 +1,4 @@
+import { AppVariablesEffect } from './effects/app-variables.effects';
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
@@ -6,6 +7,8 @@ import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
 import { PermissionEffects, PermissionsEffects } from './effects/permissions.effect';
+import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
+import { RouteEffect } from './effects/route.effects';
 
 // TODO: Remove commented effects once all CF effects are moved accross (leaving them here helps with tracking)
 @NgModule({
@@ -23,21 +26,21 @@ import { PermissionEffects, PermissionsEffects } from './effects/permissions.eff
       // UpdateAppEffects,
       // PaginationEffects,
       // ActionHistoryEffect,
-      // AppVariablesEffect,
+      AppVariablesEffect,
       // RouterEffect,
       // SystemEffects,
       // SnackBarEffects,
       // SetClientFilterEffect,
       DeployAppEffects,
       GithubEffects,
-      // CloudFoundryEffects,
+      CloudFoundryEffects,
       // MetricsEffect,
       // RequestEffect,
       // UserProfileEffect,
       // UsersRolesEffects,
       // RecursiveDeleteEffect,
       // AppEffects,
-      // RouteEffect,
+      RouteEffect,
       // UserFavoritesEffect,
       PermissionsEffects,
       PermissionEffects

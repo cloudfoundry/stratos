@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -46,6 +45,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+import { DispatchOnlyAppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
 
 
@@ -59,7 +59,7 @@ export class EndpointsEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<DispatchOnlyAppState>
   ) { }
 
   @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(

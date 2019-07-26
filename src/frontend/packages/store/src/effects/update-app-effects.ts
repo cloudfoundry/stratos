@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
 import { mergeMap } from 'rxjs/operators';
 
 import {
@@ -11,7 +10,6 @@ import {
   GetAppSummaryAction,
 } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 
 
@@ -21,8 +19,7 @@ export class UpdateAppEffects {
 
   constructor(
     private http: Http,
-    private actions$: Actions,
-    private store: Store<CFAppState>
+    private actions$: Actions
   ) {
   }
 
