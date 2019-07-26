@@ -42,7 +42,7 @@ export const serviceInstancesWithNoBindingsEntityType = 'serviceInstanceWithNoBi
 export const serviceBindingNoBindingsEntityType = 'serviceBindingNoBindings';
 
 
-export const entityCache: {
+const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
@@ -380,8 +380,4 @@ export function cfEntityFactory(key: string): EntitySchema {
     throw new Error(`Unknown entity schema type: ${key}`);
   }
   return entity;
-}
-
-export function addEntityToCache(entitySchema: EntitySchema, key?: string) {
-  entityCache[key || entitySchema.key] = entitySchema;
 }

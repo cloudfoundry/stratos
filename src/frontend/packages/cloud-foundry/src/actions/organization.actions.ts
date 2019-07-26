@@ -2,15 +2,24 @@ import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
+import { entityFactory } from '../../../store/src/helpers/entity-factory';
 import {
+  createEntityRelationPaginationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
 } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
+import {
+  cfEntityFactory,
+  cfUserEntityType,
+  domainEntityType,
+  organizationEntityType,
+  spaceEntityType,
+  spaceWithOrgEntityType,
+} from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
-import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType, spaceWithOrgEntityType } from '../cf-entity-factory';
 import { createDefaultUserRelations } from './user.actions.helpers';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
@@ -24,6 +33,10 @@ export const GET_ORGANIZATIONS_FAILED = '[Organization] Get all failed';
 export const GET_ORGANIZATION_SPACES = '[Space] Get all org spaces';
 export const GET_ORGANIZATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
 export const GET_ORGANIZATION_SPACES_FAILED = '[Space] Get all org spaces failed';
+
+export const GET_ORGANIZATION_DOMAINS = '[Organization] Get all org domains';
+export const GET_ORGANIZATION_DOMAINS_SUCCESS = '[Organization] Get all org domains success';
+export const GET_ORGANIZATION_DOMAINS_FAILED = '[Organization] Get all org domains failed';
 
 export const DELETE_ORGANIZATION = '[Organization] Delete organization';
 export const DELETE_ORGANIZATION_SUCCESS = '[Organization] Delete organization success';
@@ -88,6 +101,37 @@ export class GetAllOrganizationSpacesWithOrgs extends GetAllOrganizationSpaces {
   entity = cfEntityFactory(spaceWithOrgEntityType);
   entityType = spaceEntityType;
   schemaKey = spaceWithOrgEntityType;
+}
+
+export class GetAllOrganizationDomains extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
+  constructor(
+    public orgGuid: string,
+    public endpointGuid: string,
+    public paginationKey: string = null,
+    public includeRelations = [],
+    public populateMissing = true
+  ) {
+    super();
+    if (!this.paginationKey) {
+      this.paginationKey = createEntityRelationPaginationKey(organizationEntityType, orgGuid);
+    }
+    this.options = new RequestOptions();
+    this.options.url = `organizations/${orgGuid}/domains`;
+    this.options.method = 'get';
+    this.parentGuid = orgGuid;
+  }
+  actions = [GET_ORGANIZATION_DOMAINS, GET_ORGANIZATION_DOMAINS_SUCCESS, GET_ORGANIZATION_DOMAINS_FAILED];
+  entity = entityFactory(domainEntityType);
+  entityType = domainEntityType;
+  options: RequestOptions;
+  flattenPagination = true;
+  initialParams = {
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'name'
+  };
+  parentGuid: string;
+  parentEntityConfig = new CFEntityConfig(organizationEntityType);
 }
 
 export class GetAllOrganizations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {

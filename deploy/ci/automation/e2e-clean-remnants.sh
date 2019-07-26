@@ -101,4 +101,8 @@ echo "Cleaning test Users"
 USERS=$(cf space-users e2e e2e | grep "accept" | sed -e 's/^[[:space:]]*//')
 clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 
+# user -a with org users so we get all users (including those without roles)
+USERS=$(cf org-users -a e2e | grep "accept" | sed -e 's/^[[:space:]]*//')
+clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
 echo "Done"

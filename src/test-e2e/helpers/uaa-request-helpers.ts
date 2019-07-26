@@ -22,7 +22,7 @@ export class UaaRequestHelpers extends RequestHelpers {
       resolveWithFullResponse: true,
       jar: request.jar(),
       timeout: 30000
-    }) ;
+    });
     request.debug = false;
   }
 
@@ -38,10 +38,15 @@ export class UaaRequestHelpers extends RequestHelpers {
     return this.uaaConfig.tokenEndpoint;
   }
 
-  createUaaHeader = () => ({
-    authorization: `bearer ${this.token}`,
-    'X-Identity-Zone-Subdomain': this.uaaConfig.zone || 'scf',
-  })
+  createUaaHeader = () => {
+    const header = {
+      authorization: `bearer ${this.token}`,
+    };
+    if (this.uaaConfig.zone) {
+      header['X-Identity-Zone-Subdomain'] = this.uaaConfig.zone;
+    }
+    return header;
+  }
 
   sendGet(url: string): promise.Promise<any> {
     return this.sendUaaRequest(url, 'GET').then(JSON.parse);
@@ -57,11 +62,11 @@ export class UaaRequestHelpers extends RequestHelpers {
 
   private sendUaaRequest(url: string, method: string, body?: string): promise.Promise<any> {
     return this.setup()
-    .then(() => this.sendRequest(this.request, {
-      headers: this.createUaaHeader(),
-      method,
-      url
-    }, body));
+      .then(() => this.sendRequest(this.request, {
+        headers: this.createUaaHeader(),
+        method,
+        url
+      }, body));
   }
 
   private createUaaToken(req): promise.Promise<string> {
@@ -70,9 +75,11 @@ export class UaaRequestHelpers extends RequestHelpers {
     const secret = `client_secret=${uaa.creds.clientSecret}`;
     const grantType = `grant_type=${uaa.creds.grantType || 'client_credentials'}`;
     const body = `${client}&${secret}&${grantType}&token_format=opaque`;
-    return this.sendRequest(req, { method: 'POST', url: `oauth/token`, headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }}, body).then(body => {
+    return this.sendRequest(req, {
+      method: 'POST', url: `oauth/token`, headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }, body).then(body => {
       const tokenResponse = JSON.parse(body);
       return tokenResponse.access_token;
     });

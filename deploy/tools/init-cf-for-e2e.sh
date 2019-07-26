@@ -13,11 +13,13 @@ USER_PASS="pass"
 REMOVE_USER="e2e-remove-user"
 SKIP_LOGIN="false"
 CF_API_ENDPOINT="https://api.local.pcfdev.io"
+#(CFDEV)CF_API_ENDPOINT="https://api.dev.cfdev.sh"
 DEFAULT_ORG="e2e"
 DEFAULT_SPACE="e2e"
 SETUP_INVITE_USER="true"
 UAA_CLI_CMD="uaac"
 UAA_ENDPOINT="https://uaa.local.pcfdev.io"
+#(CFDEV)UAA_ENDPOINT="https://uaa.dev.cfdev.sh"
 #(SCF)UAA_ENDPOINT="https://uaa.cf.capbristol.com"
 ADMIN_CLIENT_SECRET="admin-client-secret"
 #(SCF)ADMIN_CLIENT_SECRET="<snip>"
@@ -108,8 +110,12 @@ function cloneRepo() {
     mkdir -p cfpushtemp
     pushd cfpushtemp
     git clone https://github.com/$PROJECT/$REPO
-    popd
+  else
+    echo "Rebasing: $PROJECT/$REPO"
+    pushd cfpushtemp/$REPO
+    git pull --rebase
   fi
+  popd
 }
 
 function addInviteUserUaaClient() {
