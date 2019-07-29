@@ -9,9 +9,6 @@ import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { AutoscalerModule } from './core/autoscaler.module';
 import { AutoscalerTabExtensionComponent } from './features/autoscaler-tab-extension/autoscaler-tab-extension.component';
-import { registerAutoscalerEntities } from './store/autoscaler-entity-generator';
-
-registerAutoscalerEntities();
 
 const customRoutes: Routes = [
   {

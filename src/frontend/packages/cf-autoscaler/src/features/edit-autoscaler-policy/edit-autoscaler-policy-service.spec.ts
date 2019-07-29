@@ -3,7 +3,6 @@ import { inject, TestBed } from '@angular/core/testing';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { ApplicationsModule } from '../../../../core/src/features/applications/applications.module';
 import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
-import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 describe('EditAutoscalerPolicyService', () => {
@@ -16,7 +15,6 @@ describe('EditAutoscalerPolicyService', () => {
       imports: [
         ApplicationsModule,
         createBasicStoreModule(),
-        CfAutoscalerTestingModule
       ]
     });
   });

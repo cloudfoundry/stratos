@@ -9,9 +9,8 @@ import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../core/test-framework/application-service-helper';
 import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
-import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
-import { EditAutoscalerPolicyStep2Component } from './edit-autoscaler-policy-step2.component';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
+import { EditAutoscalerPolicyStep2Component } from './edit-autoscaler-policy-step2.component';
 
 describe('EditAutoscalerPolicyStep2Component', () => {
   let component: EditAutoscalerPolicyStep2Component;
@@ -26,7 +25,6 @@ describe('EditAutoscalerPolicyStep2Component', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        CfAutoscalerTestingModule
       ],
       providers: [
         DatePipe,

@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../store/src/app-state';
+import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';

@@ -4,6 +4,8 @@ import { ConnectionBackend, Http } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
+import { applicationEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { ApplicationsModule } from '../../../../../core/src/features/applications/applications.module';
@@ -11,8 +13,7 @@ import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../core/test-framework/store-test-helper';
-import { GetApplication } from '../../../../../store/src/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { AppStoreExtensionsModule } from '../../../../../store/src/store.extensions.module';
 import { endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
@@ -21,15 +22,17 @@ describe('CfAppAutoscalerEventsConfigService', () => {
   const initialState = getInitialTestStoreState();
 
   const cfGuid = Object.keys(initialState.requestData[endpointStoreNames.type])[0];
-  const appGuid = Object.keys(initialState.requestData.application)[0];
+  const appGuid = Object.keys(initialState.requestData.cfApplication)[0];
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        AppStoreExtensionsModule,
+        CfAutoscalerTestingModule,
         CfAppAutoscalerEventsConfigService,
         EntityServiceFactory,
         generateTestEntityServiceProvider(
           appGuid,
-          entityFactory(applicationSchemaKey),
+          cfEntityFactory(applicationEntityType),
           new GetApplication(appGuid, cfGuid)
         ),
         generateTestApplicationServiceProvider(appGuid, cfGuid),
@@ -43,7 +46,6 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         ApplicationsModule,
         createBasicStoreModule(),
         RouterTestingModule,
-        CfAutoscalerTestingModule
       ]
     });
   });
@@ -51,4 +53,10 @@ describe('CfAppAutoscalerEventsConfigService', () => {
   it('should be created', inject([CfAppAutoscalerEventsConfigService], (service: CfAppAutoscalerEventsConfigService) => {
     expect(service).toBeTruthy();
   }));
+
+  it('Blocked', () => {
+    fail('Blocked: Requires metrics to be working (specifically metrics entities)');
+  });
+
+  afterAll(() => { });
 });

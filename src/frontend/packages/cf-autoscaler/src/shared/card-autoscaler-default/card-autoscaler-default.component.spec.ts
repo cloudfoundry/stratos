@@ -13,7 +13,6 @@ import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entit
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
 import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
-import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from './card-autoscaler-default.component';
 
 describe('CardAutoscalerDefaultComponent', () => {
@@ -32,7 +31,6 @@ describe('CardAutoscalerDefaultComponent', () => {
         CommonModule,
         BrowserAnimationsModule,
         createBasicStoreModule(),
-        CfAutoscalerTestingModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

@@ -1,9 +1,10 @@
 import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
-import { IRequestAction } from '../../store/src/types/request.types';
-import { CFAppState } from '../../store/src/app-state';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+
+import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { RequestSectionKeys } from '../../store/src/reducers/api-request-reducer/types';
+import { IRequestAction } from '../../store/src/types/request.types';
+import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { ENTITY_SERVICE } from '../src/shared/entity.tokens';
 
 export function generateTestEntityServiceProvider(

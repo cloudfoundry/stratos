@@ -9,6 +9,7 @@ import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
 import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { AppStoreExtensionsModule } from '../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { AutoscalerMetricPageComponent } from './autoscaler-metric-page.component';
 
@@ -20,12 +21,14 @@ describe('AutoscalerMetricPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [AutoscalerMetricPageComponent],
       imports: [
+        AppStoreExtensionsModule,
+        CfAutoscalerTestingModule,
+        AppStoreExtensionsModule,
         BrowserAnimationsModule,
         createBasicStoreModule(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        CfAutoscalerTestingModule
       ],
       providers: [
         DatePipe,
@@ -44,5 +47,9 @@ describe('AutoscalerMetricPageComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('Blocked', () => {
+    fail('Blocked: Requires metrics to be working (specifically metrics entities)')
   });
 });

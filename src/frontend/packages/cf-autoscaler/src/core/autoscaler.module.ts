@@ -80,7 +80,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     TableCellAutoscalerEventChangeIconPipe,
   ],
   exports: [
-    CardAutoscalerDefaultComponent
+    CardAutoscalerDefaultComponent // TODO: RC is this needed
   ],
   providers: [
     ApplicationService
