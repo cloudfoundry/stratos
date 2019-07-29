@@ -22033,8 +22033,9 @@ export interface TestStoreEntity {
   data?: any;
 }
 
-export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
-  const initialState = Array.from(entityMap.keys()).reduce((state, entityConfig) => {
+export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>) {
+  return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
+    // const initialState = entityMap.entries()..reduce((state, entityConfig) => {
     const entities = entityMap.get(entityConfig);
     const entityKey = entityCatalogue.getEntityKey(entityConfig);
     return {
@@ -22072,6 +22073,10 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
       }
     };
   }, { request: {}, requestData: {} });
+}
+
+export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
+  const initialState = createEntityStoreState(entityMap);
 
   return StoreModule.forRoot(
     appReducers,

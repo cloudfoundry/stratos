@@ -1,17 +1,17 @@
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 
+import { appReducers } from '../../../../../../../../store/src/reducers.module';
+import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../../../core/core.module';
 import { MDAppModule } from '../../../../../../core/md.module';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { EventsTabComponent } from './events-tab.component';
-import { SharedModule } from '../../../../../../shared/shared.module';
-import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../../../../../store/src/reducers.module';
-import { ApplicationService } from '../../../../application.service';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
+import { SharedModule } from '../../../../../../shared/shared.module';
+import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
+import { EventsTabComponent } from './events-tab.component';
+
 
 
 describe('EventsTabComponent', () => {
@@ -25,7 +25,7 @@ describe('EventsTabComponent', () => {
   const initialState = { ...getInitialTestStoreState() };
   initialState.pagination = {
     ...initialState.pagination,
-    event: {
+    cfEvent: {
       ['app-events:mockCfGuidmockAppGuid']: {
         pageCount: 1,
         currentPage: 1,

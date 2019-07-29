@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
-import { organizationSchemaKey, spaceSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { TabNavService } from '../../../../tab-nav.service';
 import {
@@ -9,6 +10,7 @@ import {
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { createBasicStoreModule, getInitialTestStoreState, testSCFGuid } from '../../../../test-framework/store-test-helper';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
 
 describe('SpaceQuotaDefinitionComponent', () => {
@@ -20,10 +22,13 @@ describe('SpaceQuotaDefinitionComponent', () => {
 
   const helper = new EntityRelationSpecHelper();
 
+  const orgCatalogEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+  const spaceCatalogEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+
   beforeEach(async(() => {
     const store = getInitialTestStoreState();
-    store.requestData[organizationSchemaKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-    store.requestData[spaceSchemaKey][spaceGuid] = helper.createEmptySpace(spaceGuid, 'space-name', orgGuid);
+    store.requestData[orgCatalogEntity.entityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
+    store.requestData[spaceCatalogEntity.entityKey][spaceGuid] = helper.createEmptySpace(spaceGuid, 'space-name', orgGuid);
     TestBed.configureTestingModule({
       declarations: [SpaceQuotaDefinitionComponent],
       imports: [

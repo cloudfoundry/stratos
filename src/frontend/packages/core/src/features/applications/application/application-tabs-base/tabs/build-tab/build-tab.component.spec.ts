@@ -7,7 +7,6 @@ import { StoreModule } from '@ngrx/store';
 
 import { appReducers } from '../../../../../../../../store/src/reducers.module';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
-import { endpointStoreNames } from '../../../../../../../../store/src/types/endpoint.types';
 import { TabNavService } from '../../../../../../../tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../../../../test-framework/store-test-helper';
@@ -72,8 +71,6 @@ describe('BuildTabComponent', () => {
   }));
 
   beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
-    const cfGuid = Object.keys(initialState.requestData[endpointStoreNames.type])[0];
-    const appGuid = Object.keys(initialState.requestData.application)[0];
     fixture = TestBed.createComponent(BuildTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

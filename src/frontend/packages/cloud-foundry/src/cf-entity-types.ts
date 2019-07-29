@@ -29,7 +29,7 @@ import { GitBranch, GitCommit, GitRepo } from '../../store/src/types/git.types';
 import { CfUser } from '../../store/src/types/user.types';
 
 interface CFEntityValues {
-  cfFeatureFlag: IRequestEntityTypeState<IFeatureFlag>;
+  cfFeatureFlag: IRequestEntityTypeState<APIResource<IFeatureFlag>>;
   cfApplication: IRequestEntityTypeState<APIResource<IApp>>;
   cfStack: IRequestEntityTypeState<APIResource<IStack>>;
   cfSpace: IRequestEntityTypeState<APIResource<ISpace>>;

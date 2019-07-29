@@ -3,16 +3,16 @@ import { inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store, StoreModule } from '@ngrx/store';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { appReducers } from '../../../../../../../store/src/reducers.module';
+import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { SharedModule } from '../../../../shared.module';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
-import { CFAppState } from '../../../../../../../store/src/app-state';
-import { appReducers } from '../../../../../../../store/src/reducers.module';
-import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 
 describe('CfAppRoutesListConfigService', () => {
 

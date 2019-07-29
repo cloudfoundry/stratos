@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GetApplication } from '../../../../../../../store/src/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { GetApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
+import { applicationEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
@@ -23,7 +23,7 @@ describe('ApplicationPollComponent', () => {
         ApplicationPollingService,
         generateTestEntityServiceProvider(
           appId,
-          entityFactory(applicationSchemaKey),
+          cfEntityFactory(applicationEntityType),
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),
