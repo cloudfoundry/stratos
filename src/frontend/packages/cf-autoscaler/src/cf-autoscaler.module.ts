@@ -10,6 +10,7 @@ import { SharedModule } from '../../core/src/shared/shared.module';
 import { AutoscalerModule } from './core/autoscaler.module';
 import { AutoscalerTabExtensionComponent } from './features/autoscaler-tab-extension/autoscaler-tab-extension.component';
 
+// TODO Work out why we need this and remove it.
 const customRoutes: Routes = [
   {
     path: 'autoscaler',

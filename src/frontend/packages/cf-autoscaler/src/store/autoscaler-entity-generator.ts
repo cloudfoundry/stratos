@@ -22,11 +22,7 @@ import {
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
 
-export function registerAutoscalerEntities() {
-  generateCFEntities().forEach(entity => entityCatalogue.register(entity));
-}
-
-export function generateCFEntities(): StratosBaseCatalogueEntity[] {
+export function generateASEntities(): StratosBaseCatalogueEntity[] {
   // TODO: Q Should autoscaler have an endpoint type? Should it match cf?
   const endpointDefinition = {
     type: AUTOSCALER_ENDPOINT_TYPE,

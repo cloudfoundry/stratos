@@ -29,3 +29,18 @@ export function chainApiReducers<T = any>(
     }, baseReducer(draftState as Record<string, T>, action))
   );
 }
+
+export function chainReducers<T = any>(
+  extraReducers: ExtraApiReducers<T>
+) {
+  return (state: Record<string, T>, action: Action) => produce(
+    state,
+    draftState => Object.keys(extraReducers).reduce((baseState, entityKey) => {
+      const reducers = extraReducers[entityKey];
+      baseState[entityKey] = reducers.reduce((entityState, entityReducer) => {
+        return entityReducer(entityState, action);
+      }, baseState[entityKey]);
+      return baseState;
+    }, draftState as Record<string, T>)
+  );
+}
