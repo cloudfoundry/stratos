@@ -28,7 +28,8 @@ export class EffectsFeatureModule {
 
 @NgModule({})
 export class EntityCatalogueModule {
-  // FiXME: this does not allow for lazy loading, work out if we can allow this.
+  // TODO: this does not allow for lazy loading, work out if we can allow this.
+  // https://github.com/cloudfoundry-incubator/stratos/issues/3741
   static forFeature(entityFactory: () => StratosBaseCatalogueEntity[]): ModuleWithProviders {
     return {
       ngModule: EffectsFeatureModule,
