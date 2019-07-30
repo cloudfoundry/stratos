@@ -45,6 +45,8 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
+import { EntityCatalogueModule } from './core/entity-catalogue.module';
+import { baseStratosTypeFactory } from './base-entity-types';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -84,10 +86,11 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
+    EntityCatalogueModule.forFeature(baseStratosTypeFactory),
     // This need to be first to initialize the entityCatalogue
     AppStoreExtensionsModule,
-    AppStoreModule,
     CloudFoundryPackageModule,
+    AppStoreModule,
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,

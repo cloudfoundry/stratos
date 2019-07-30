@@ -9,6 +9,7 @@ import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } fro
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 import { SystemInfo, systemStoreNames } from './../types/system.types';
 import { InternalAppState } from '../app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 
 @Injectable()
 export class SystemEffects {
@@ -25,6 +26,7 @@ export class SystemEffects {
     mergeMap(action => {
       const apiAction = {
         entityType: systemStoreNames.type,
+        endpointType: STRATOS_ENDPOINT_TYPE,
         guid: SystemEffects.guid,
         type: action.type,
       } as IRequestAction;

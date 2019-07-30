@@ -14,16 +14,14 @@ export function getAllEntityStoreKeys() {
   ];
 }
 
-export function getDefaultStateFromEntityCatalogue<
-  T extends Record<string | number | symbol, any> = Record<string | number | symbol, any>
->(): T {
-  return getAllEntityStoreKeys().reduce((currentState, entityKey) => {
+export function getDefaultStateFromEntityCatalogue<T = any>(entityKeys: string[], defaultState: T) {
+  return entityKeys.reduce((currentState, entityKey) => {
     if (currentState[entityKey]) {
       return currentState;
     }
     return {
       ...currentState,
-      [entityKey]: {}
+      [entityKey]: defaultState
     };
   }, {}) as T;
 }

@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
-import { registerBaseStratosTypes } from '../../core/src/base-entity-types';
-registerBaseStratosTypes();
+// import { registerBaseStratosTypes } from '../../core/src/base-entity-types';
+
+// registerBaseStratosTypes();
+
 @NgModule()
 export class AppStoreExtensionsModule {
 

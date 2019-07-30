@@ -3,6 +3,7 @@ import { EntitySchema } from './entity-schema';
 export const userFavouritesSchemaKey = 'userFavorites';
 export const endpointSchemaKey = 'endpoint';
 export const userProfileSchemaKey = 'userProfile';
+export const systemInfoSchemaKey = 'system';
 
 const entityCache: {
   [key: string]: EntitySchema
@@ -12,6 +13,9 @@ const entityCache: {
 // dependencies which would otherwise be hidden (if we assigned directly to entityCache and references via entityCache in other entities)
 const UserFavouritesSchema = new EntitySchema(userFavouritesSchemaKey, null, {}, { idAttribute: 'id' });
 entityCache[userFavouritesSchemaKey] = UserFavouritesSchema;
+
+const SystemInfoSchema = new EntitySchema(systemInfoSchemaKey, null, {}, { idAttribute: 'id' });
+entityCache[systemInfoSchemaKey] = SystemInfoSchema;
 
 const EndpointSchema = new EntitySchema(endpointSchemaKey, null, {}, { idAttribute: 'guid' });
 entityCache[endpointSchemaKey] = EndpointSchema;

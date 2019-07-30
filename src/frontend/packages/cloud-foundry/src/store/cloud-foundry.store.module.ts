@@ -11,6 +11,7 @@ import { PermissionEffects, PermissionsEffects } from './effects/permissions.eff
 @NgModule({
   imports: [
     CloudFoundryReducersModule,
+    // EffectsModule.forFeature([CreateAppPageEffects])
     // HttpModule,
     // HttpClientModule,
     EffectsModule.forFeature([
