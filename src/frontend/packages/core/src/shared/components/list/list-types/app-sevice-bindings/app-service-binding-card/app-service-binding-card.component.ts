@@ -8,7 +8,7 @@ import { cfEntityFactory, serviceBindingEntityType } from '../../../../../../../
 import { GetServiceInstance } from '../../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { GetUserProvidedService } from '../../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
-import { AppEnvVarsState } from '../../../../../../../../store/src/types/app-metadata.types';
+import { AppEnvVarsState } from '../../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
 import {
   IService,
   IServiceBinding,

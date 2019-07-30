@@ -3,18 +3,14 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
-import { PermissionEffects, PermissionsEffects } from '../../cloud-foundry/src/effects/permissions.effect';
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
-import { AppVariablesEffect } from './effects/app-variables.effects';
+import { AppVariablesEffect } from '../../cloud-foundry/src/store/effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
-import { CreateAppPageEffects } from './effects/create-app-effects';
-import { DeployAppEffects } from './effects/deploy-app.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
-import { GithubEffects } from './effects/github.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
@@ -42,7 +38,6 @@ import { AppReducersModule } from './reducers.module';
       AuthEffect,
       UAASetupEffect,
       EndpointsEffect,
-      CreateAppPageEffects,
       UpdateAppEffects,
       PaginationEffects,
       ActionHistoryEffect,
@@ -51,8 +46,6 @@ import { AppReducersModule } from './reducers.module';
       SystemEffects,
       SnackBarEffects,
       SetClientFilterEffect,
-      DeployAppEffects,
-      GithubEffects,
       CloudFoundryEffects,
       MetricsEffect,
       RequestEffect,
@@ -62,10 +55,7 @@ import { AppReducersModule } from './reducers.module';
       AppEffects,
       RouteEffect,
       UserFavoritesEffect,
-      // FIXME: STRAT-155 - Move cf effects into cf module
-      PermissionsEffects,
-      PermissionEffects
-    ])
+    ]),
   ]
 })
 export class AppStoreModule { }

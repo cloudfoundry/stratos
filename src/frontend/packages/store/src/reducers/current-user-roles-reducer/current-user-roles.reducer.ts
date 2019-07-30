@@ -1,13 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
-import {
-  CONNECT_ENDPOINTS_SUCCESS,
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  EndpointActionComplete,
-  REGISTER_ENDPOINTS_SUCCESS,
-  UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../../actions/endpoint.actions';
 import { DELETE_ORGANIZATION_SUCCESS } from '../../../../cloud-foundry/src/actions/organization.actions';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
@@ -22,9 +14,19 @@ import {
 } from '../../../../cloud-foundry/src/actions/permissions.actions';
 import { DELETE_SPACE_SUCCESS } from '../../../../cloud-foundry/src/actions/space.actions';
 import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../../../cloud-foundry/src/actions/users.actions';
+import {
+  currentUserBaseCFRolesReducer,
+} from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-base-cf-role.reducer';
+import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
+import {
+  CONNECT_ENDPOINTS_SUCCESS,
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  EndpointActionComplete,
+  REGISTER_ENDPOINTS_SUCCESS,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+} from '../../actions/endpoint.actions';
 import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
-import { currentUserBaseCFRolesReducer } from './current-user-base-cf-role.reducer';
 import {
   currentUserCfRolesRequestStateReducer,
   currentUserRolesRequestStateReducer,

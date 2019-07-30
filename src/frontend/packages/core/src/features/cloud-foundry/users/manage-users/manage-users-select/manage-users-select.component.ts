@@ -6,7 +6,7 @@ import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxj
 import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CfUser } from '../../../../../../../store/src/types/user.types';
+import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import {
   CfSelectUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';

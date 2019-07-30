@@ -5,7 +5,7 @@ import { filter, first, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfPaginationState } from '../../../../../cloud-foundry/src/selectors/pagination.selectors';
+import { selectCfPaginationState } from '../../../../../cloud-foundry/src/store/selectors/pagination.selectors';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 

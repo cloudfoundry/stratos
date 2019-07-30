@@ -1,7 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
-import { getAPIResourceGuid } from '../../../cloud-foundry/src/selectors/api.selectors';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
 
 export const appAutoscalerHealthEntityType = 'autoscalerHealth';
 export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';

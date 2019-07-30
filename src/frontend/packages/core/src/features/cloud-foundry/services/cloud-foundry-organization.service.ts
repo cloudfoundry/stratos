@@ -17,7 +17,7 @@ import {
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { OrgUserRoleNames } from '../../../../../store/src/types/user.types';
+import { OrgUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import {
   IApp,
   IOrganization,

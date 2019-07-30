@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../../../store/src/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../../../../cloud-foundry/src/store/types/git.types';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 

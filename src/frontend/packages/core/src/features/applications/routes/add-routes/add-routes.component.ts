@@ -18,12 +18,12 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { Route, RouteMode } from '../../../../../../store/src/types/route.types';
+import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { pathGet } from '../../../../core/utils.service';

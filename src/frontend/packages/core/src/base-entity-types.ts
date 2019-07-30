@@ -60,7 +60,6 @@ export function registerBaseStratosTypes() {
   entityCatalogue.register(new DefaultEndpointCatalogueEntity());
   entityCatalogue.register(new UserFavoriteCatalogueEntity());
   entityCatalogue.register(new UserProfileCatalogueEntity());
-  // TODO(NJ): This gets called a few times do to lazy loaded modules that import this.
   entityCatalogue.register(new StratosCatalogueEndpointEntity({
     type: 'metrics',
     label: 'Metrics',

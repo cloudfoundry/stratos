@@ -28,7 +28,7 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
@@ -39,7 +39,7 @@ import {
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
-import { AppStat } from '../../../../store/src/types/app-metadata.types';
+import { AppStat } from '../../../../cloud-foundry/src/store/types/app-metadata.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';

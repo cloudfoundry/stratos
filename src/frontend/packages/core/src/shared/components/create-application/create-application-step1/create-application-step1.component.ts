@@ -9,7 +9,7 @@ import { SetCFDetails } from '../../../../../../cloud-foundry/src/actions/create
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   getSpacesFromOrgWithRole,
-} from '../../../../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
+} from '../../../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';

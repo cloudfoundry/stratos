@@ -7,7 +7,8 @@ import {
   GET_CURRENT_USER_RELATIONS_SUCCESS,
   GetUserCfRelations,
 } from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { getDefaultRolesRequestState, IAllCfRolesState, RolesRequestState } from '../../types/current-user-roles.types';
+import { IAllCfRolesState } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
+import { getDefaultRolesRequestState, RolesRequestState } from '../../types/current-user-roles.types';
 
 export function currentUserRolesRequestStateReducer(state: RolesRequestState = getDefaultRolesRequestState(), type: string) {
   switch (type) {

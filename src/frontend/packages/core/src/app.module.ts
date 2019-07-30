@@ -86,8 +86,8 @@ export class CustomRouterStateSerializer
   imports: [
     // This need to be first to initialize the entityCatalogue
     AppStoreExtensionsModule,
-    CloudFoundryPackageModule,
     AppStoreModule,
+    CloudFoundryPackageModule,
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
@@ -133,7 +133,7 @@ export class AppModule {
     });
     eventService.addEventConfig<boolean>({
       eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
-      message: 'Polling is disabled - some pages may show stale data.',
+      message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
       key: 'pollingEnabledWarning',
       link: '/user-profile'
     });
@@ -207,7 +207,6 @@ export class AppModule {
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
     if (favorite) {
-      // TODO: NJ RC Review the isEndpoint condition for finding entityKey (see comment below)
       const isEndpoint = (favorite.entityType === endpointSchemaKey);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
       const entityKey = isEndpoint ? entityCatalogue.getEntityKey({

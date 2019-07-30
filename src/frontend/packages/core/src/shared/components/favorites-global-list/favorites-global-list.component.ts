@@ -1,20 +1,17 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { getFavoriteInfoObservable } from '../../../../../store/src/helpers/store-helpers';
 import {
-  errorFetchingFavoritesSelector,
-  fetchingFavoritesSelector,
-} from '../../../../../store/src/selectors/favorite-groups.selectors';
-import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
+  IFavoriteEntity,
+  IFavoritesInfo,
+  IGroupedFavorites,
+  UserFavoriteManager,
+} from '../../../core/user-favorite-manager';
 
-
-interface IFavoritesInfo {
-  fetching: boolean;
-  error: boolean;
-}
 
 @Component({
   selector: 'app-favorites-global-list',
@@ -36,15 +33,7 @@ export class FavoritesGlobalListComponent implements OnInit {
       map(favs => this.sortFavoriteGroups(favs))
     );
 
-    this.favInfo$ = combineLatest(
-      this.store.select(fetchingFavoritesSelector),
-      this.store.select(errorFetchingFavoritesSelector)
-    ).pipe(
-      map(([fetching, error]) => ({
-        fetching,
-        error
-      }))
-    );
+    this.favInfo$ = getFavoriteInfoObservable(this.store);
   }
 
   private sortFavoriteGroups(entityGroups: IGroupedFavorites[]) {

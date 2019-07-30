@@ -1,29 +1,25 @@
-import { localStorageSync } from 'ngrx-store-localstorage';
 import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule, ActionReducer, Store } from '@ngrx/store';
+import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
+import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { environment } from '../../core/src/environments/environment';
+import { getDashboardStateSessionId } from './helpers/store-helpers';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
+import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
-import { createAppReducer } from './reducers/create-application.reducer';
-import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
-import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { endpointsReducer } from './reducers/endpoints.reducer';
 import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
-import { UsersRolesReducer } from './reducers/users-roles.reducer';
-import { getDashboardStateSessionId } from './helpers/store-helpers';
-import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -43,13 +39,9 @@ export const appReducers = {
   request: requestReducer,
   requestData: requestDataReducer,
   dashboard: dashboardReducer,
-  createApplication: createAppReducer,
-  deployApplication: deployAppReducer,
-  createServiceInstance: createServiceInstanceReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,
-  manageUsersRoles: UsersRolesReducer,
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,
@@ -87,7 +79,10 @@ if (!environment.production) {
   // }
 }
 const storeModule = StoreModule.forRoot(
-  appReducers
+  appReducers,
+  {
+    metaReducers
+  }
 );
 const imports = environment.production ? [
   storeModule

@@ -10,7 +10,7 @@ import { SetClientFilter } from '../../../../../../../store/src/actions/paginati
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { CfUser } from '../../../../../../../store/src/types/user.types';
+import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';

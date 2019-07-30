@@ -22,7 +22,6 @@ export type ExtendedRequestDataState<E extends Record<keyof E, any>> = {
 };
 
 
-// TODO: NJ RC Shouldn't this be the same as BaseEntityValues?
 // FIXME: These should also come from catalogue? - STRAT-151
 export interface IRequestState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<RequestInfoState>;

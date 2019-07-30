@@ -8,7 +8,7 @@ import {
   servicePlanEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/selectors/api.selectors';
+import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../../core/cf-api-svc.types';
 import { TableCellCustom } from '../../../list.types';
