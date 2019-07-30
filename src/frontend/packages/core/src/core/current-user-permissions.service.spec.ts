@@ -955,13 +955,6 @@ fdescribe('CurrentUserPermissionsService', () => {
         AppStoreExtensionsModule,
         CloudFoundryPackageModule,
         createBasicStoreModule(createStoreState())
-
-        // StoreModule.forRoot(
-        //   appReducers,
-        //   {
-        //     ;
-        //   }
-        // )
       ]
     });
     service = TestBed.get(CurrentUserPermissionsService);

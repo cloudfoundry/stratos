@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { applicationEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
+import { applicationEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
@@ -18,7 +18,7 @@ describe('CfAppInstancesConfigService', () => {
 
   const initialState = getInitialTestStoreState();
   const cfGuid = Object.keys(initialState.requestData[endpointStoreNames.type])[0];
-  const appGuid = Object.keys(initialState.requestData.application)[0];
+  const appGuid = Object.keys(initialState.requestData.cfApplication)[0];
 
   beforeEach(() => {
     TestBed.configureTestingModule({
