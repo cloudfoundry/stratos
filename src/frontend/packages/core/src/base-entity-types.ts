@@ -3,9 +3,9 @@ import {
   STRATOS_ENDPOINT_TYPE,
   userFavoritesEntitySchema,
   userProfileEntitySchema,
+  systemInfoEntitySchema,
 } from './base-entity-schemas';
 import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
 
 //
@@ -56,19 +56,32 @@ class UserProfileCatalogueEntity extends StratosCatalogueEntity {
   }
 }
 
-export function registerBaseStratosTypes() {
-  entityCatalogue.register(new DefaultEndpointCatalogueEntity());
-  entityCatalogue.register(new UserFavoriteCatalogueEntity());
-  entityCatalogue.register(new UserProfileCatalogueEntity());
-  entityCatalogue.register(new StratosCatalogueEndpointEntity({
-    type: 'metrics',
-    label: 'Metrics',
-    labelPlural: 'Metrics',
-    tokenSharing: true,
-    logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-    authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
-  },
-    metadata => `/endpoints/metrics/${metadata.guid}`
-  ));
+class SystemInfoCatalogueEntity extends StratosCatalogueEntity {
+  constructor() {
+    super({
+      schema: systemInfoEntitySchema,
+      type: systemInfoEntitySchema.entityType,
+      endpoint: stratosType,
+    });
+  }
+}
+
+export function baseStratosTypeFactory() {
+  return [
+    new DefaultEndpointCatalogueEntity(),
+    new SystemInfoCatalogueEntity(),
+    new UserFavoriteCatalogueEntity(),
+    new UserProfileCatalogueEntity(),
+    new StratosCatalogueEndpointEntity({
+      type: 'metrics',
+      label: 'Metrics',
+      labelPlural: 'Metrics',
+      tokenSharing: true,
+      logoUrl: '/core/assets/endpoint-icons/metrics.svg',
+      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
+    },
+      metadata => `/endpoints/metrics/${metadata.guid}`
+    )
+  ];
 }
 

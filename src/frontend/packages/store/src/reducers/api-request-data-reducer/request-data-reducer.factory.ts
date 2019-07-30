@@ -7,13 +7,16 @@ import { deepMergeState } from '../../helpers/reducer.helper';
 import { IFlatTree } from '../../helpers/schema-tree-traverse';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { IRequestArray } from '../api-request-reducer/types';
+import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
+
 
 
 export function requestDataReducerFactory(actions: IRequestArray): ActionReducer<Record<string, any>> {
   const successAction = actions[1];
-  const defaultState = getDefaultStateFromEntityCatalogue<Record<string, any>>();
-  return function entitiesReducer(state = defaultState, action: Action): Record<string, any> {
+  return function entitiesReducer(state = {}, action: Action): Record<string, any> {
     switch (action.type) {
+      case InitCatalogueEntitiesAction.ACTION_TYPE:
+        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
       case successAction:
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {

@@ -13,13 +13,14 @@ import { IRequestArray } from './types';
 import { updateRequest } from './update-request';
 import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 import { Action } from '@ngrx/store';
-import { BaseRequestState } from '../../app-state';
+import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
 
 export function requestReducerFactory(actions: IRequestArray) {
   const [startAction, successAction, failedAction, updateAction] = actions;
-  const defaultState = getDefaultStateFromEntityCatalogue<BaseRequestState>();
-  return function apiRequestReducer(state = defaultState, action: Action) {
+  return function apiRequestReducer(state = {}, action: Action) {
     switch (action.type) {
+      case InitCatalogueEntitiesAction.ACTION_TYPE:
+        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
       case startAction:
         return startRequest(state, action as StartRequestAction);
       case successAction:

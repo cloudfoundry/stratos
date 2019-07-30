@@ -124,7 +124,7 @@ export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
 }
 
-function generateCFEntities(): StratosBaseCatalogueEntity[] {
+export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition = {
     type: CF_ENDPOINT_TYPE,
     label: 'Cloud Foundry',

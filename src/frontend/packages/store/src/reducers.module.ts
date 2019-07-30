@@ -7,7 +7,6 @@ import { localStorageSync } from 'ngrx-store-localstorage';
 import { environment } from '../../core/src/environments/environment';
 import { getDashboardStateSessionId } from './helpers/store-helpers';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
-import { requestDataReducer } from './reducers/api-request-data-reducers.generator';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
@@ -37,7 +36,8 @@ export const appReducers = {
   endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,
-  requestData: requestDataReducer,
+  // This is added as part of the entity catalogue module.
+  // requestData,
   dashboard: dashboardReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
