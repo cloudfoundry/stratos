@@ -48,6 +48,8 @@ import {
 import { AutoscalerEffects } from '../store/autoscaler.effects';
 import { AutoscalerStoreModule } from '../store/autoscaler.store.module';
 import { AutoscalerRoutingModule } from './autoscaler.routing';
+import { EntityCatalogueModule } from '../../../core/src/core/entity-catalogue.module';
+import { generateASEntities } from '../store/autoscaler-entity-generator';
 
 
 @NgModule({
@@ -57,6 +59,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     AutoscalerRoutingModule,
     AutoscalerStoreModule,
     NgxChartsModule,
+    EntityCatalogueModule.forFeature(generateASEntities),
     EffectsModule.forFeature([
       AutoscalerEffects
     ])

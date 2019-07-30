@@ -3,6 +3,7 @@ import {
   entityFactory,
   userFavouritesSchemaKey,
   userProfileSchemaKey,
+  systemInfoSchemaKey,
 } from '../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
@@ -17,3 +18,4 @@ class StratosEntitySchema extends EntitySchema {
 export const userFavoritesEntitySchema = new StratosEntitySchema(entityFactory(userFavouritesSchemaKey).entityType);
 export const endpointEntitySchema = new StratosEntitySchema(entityFactory(endpointSchemaKey).entityType);
 export const userProfileEntitySchema = new StratosEntitySchema(entityFactory(userProfileSchemaKey).entityType);
+export const systemInfoEntitySchema = new StratosEntitySchema(entityFactory(systemInfoSchemaKey).entityType);

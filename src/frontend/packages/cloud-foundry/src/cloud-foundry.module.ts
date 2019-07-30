@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 
-import { registerCFEntities } from './cf-entity-generator';
 import { CloudFoundryComponentsModule } from './shared/components/components.module';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
-
-registerCFEntities();
+import { EntityCatalogueModule } from '../../core/src/core/entity-catalogue.module';
+import { generateCFEntities } from './cf-entity-generator';
 
 @NgModule({
   imports: [
+    EntityCatalogueModule.forFeature(generateCFEntities),
     CloudFoundryStoreModule,
     // FIXME: Ensure that anything lazy loaded is not included here - #3675
     CloudFoundryComponentsModule,

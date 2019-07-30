@@ -47,6 +47,7 @@ import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
+import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
 
 const getPaginationUpdater = (types: [string, string, string]) => {
   const [requestType, successType, failureType] = types;
@@ -93,9 +94,13 @@ function paginationReducer(updatePagination) {
   };
 }
 
-function paginate(action, state = getDefaultStateFromEntityCatalogue(), updatePagination) {
+function paginate(action, state = {}, updatePagination) {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     return state;
+  }
+
+  if (action.type === InitCatalogueEntitiesAction.ACTION_TYPE) {
+    return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
   }
 
   if (action.type === CREATE_PAGINATION) {
