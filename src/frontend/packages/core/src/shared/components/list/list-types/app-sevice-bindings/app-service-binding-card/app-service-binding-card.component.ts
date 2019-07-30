@@ -4,11 +4,17 @@ import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { cfEntityFactory, serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstance } from '../../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { GetUserProvidedService } from '../../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { cfEntityFactory, serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { ApplicationService } from '../../../../../../../../cloud-foundry/src/features/applications/application.service';
+import { isUserProvidedServiceInstance } from '../../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { getCfService } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
+import {
+  ServiceActionHelperService,
+} from '../../../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import { AppEnvVarsState } from '../../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
+import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import {
   IService,
   IServiceBinding,
@@ -18,10 +24,6 @@ import {
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { getCfService } from '../../../../../../features/service-catalog/services-helper';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';

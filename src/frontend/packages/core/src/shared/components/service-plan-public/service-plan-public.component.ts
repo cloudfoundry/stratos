@@ -2,15 +2,15 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { IServiceBroker, IServicePlan } from '../../../core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import {
   getCfService,
   getServiceBroker,
   getServicePlanAccessibilityCardStatus,
-} from '../../../features/service-catalog/services-helper';
-import { ServicesService } from '../../../features/service-catalog/services.service';
+} from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
+import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBroker, IServicePlan } from '../../../core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { StratosStatus } from '../../shared.types';
 
 @Component({

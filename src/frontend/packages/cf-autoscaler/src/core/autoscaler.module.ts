@@ -2,8 +2,9 @@ import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
+import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
 import { CoreModule } from '../../../core/src/core/core.module';
-import { ApplicationService } from '../../../core/src/features/applications/application.service';
+import { EntityCatalogueModule } from '../../../core/src/core/entity-catalogue.module';
 import { SharedModule } from '../../../core/src/shared/shared.module';
 import { AutoscalerBaseComponent } from '../features/autoscaler-base.component';
 import { AutoscalerMetricPageComponent } from '../features/autoscaler-metric-page/autoscaler-metric-page.component';
@@ -45,11 +46,10 @@ import {
 import {
   AppAutoscalerComboSeriesVerticalComponent,
 } from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
+import { generateASEntities } from '../store/autoscaler-entity-generator';
 import { AutoscalerEffects } from '../store/autoscaler.effects';
 import { AutoscalerStoreModule } from '../store/autoscaler.store.module';
 import { AutoscalerRoutingModule } from './autoscaler.routing';
-import { EntityCatalogueModule } from '../../../core/src/core/entity-catalogue.module';
-import { generateASEntities } from '../store/autoscaler-entity-generator';
 
 
 @NgModule({

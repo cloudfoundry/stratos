@@ -6,13 +6,13 @@ import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
-import { ApplicationMonitorService } from '../../../../core/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
-import { getGuids } from '../../../../core/src/features/applications/application/application-base.component';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
