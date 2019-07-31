@@ -1,9 +1,9 @@
-import { HttpParams, HttpRequest } from '@angular/common/http';
+import { HttpRequest } from '@angular/common/http';
 import { range, of, Observable, combineLatest } from 'rxjs';
 import { mergeMap, reduce, map, tap } from 'rxjs/operators';
 import { PaginatedAction } from '../../types/pagination.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
-import { JetstreamResponse, ActionDispatcher } from '../entity-request-pipeline.types';
+import { JetstreamResponse, ActionDispatcher, SuccessfulApiResponseDataMapper } from '../entity-request-pipeline.types';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
@@ -21,7 +21,8 @@ export class PaginationPageIterator<R = any, E = any> {
     public baseHttpRequest: HttpRequest<JetstreamResponse<R>>,
     public action: PaginatedAction,
     public actionDispatcher: ActionDispatcher,
-    public config: PaginationPageIteratorConfig<R, E>
+    public config: PaginationPageIteratorConfig<R, E>,
+    public postSuccessDataMapper?: SuccessfulApiResponseDataMapper<E>
   ) { }
 
   private makeRequest(httpRequest: HttpRequest<JetstreamResponse<R>>) {
@@ -56,11 +57,18 @@ export class PaginationPageIterator<R = any, E = any> {
     });
   }
 
+  private mapEntities(entities: E[], endpointId: string): E[] {
+    return this.postSuccessDataMapper ?
+      entities.map(entity => this.postSuccessDataMapper(entity, endpointId, this.action)) : entities as E[];
+  }
+
   private reducePages(responsePages: JetstreamResponse<R>[]) {
     return responsePages.reduce((mergedResponse, page) => {
       // Merge all 'pages' into one page of entities;
       return Object.keys(page).reduce((responses, endpointId) => {
-        const entities = this.config.getEntitiesFromResponse(page[endpointId]);
+        const entities = this.mapEntities(this.config.getEntitiesFromResponse(page[endpointId]), endpointId) as E[];
+        // const entities = this.config.getEntitiesFromResponse(page[endpointId]);
+
         if (!responses[endpointId]) {
           responses[endpointId] = [];
         }

@@ -31,12 +31,6 @@ export interface PipelineConfig<T extends AppState = InternalAppState> {
   preRequest?: PreApiRequest;
 }
 
-
-function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
-  const definition = catalogueEntity.definition as IStratosEntityDefinition;
-  return definition.successfulRequestDataMapper || definition.endpoint.globalSuccessfulRequestDataMapper || null;
-}
-
 function shouldRecursivelyDelete(requestType: string, apiAction: EntityRequestAction) {
   return requestType === 'delete' && !apiAction.updatingKey;
 }
