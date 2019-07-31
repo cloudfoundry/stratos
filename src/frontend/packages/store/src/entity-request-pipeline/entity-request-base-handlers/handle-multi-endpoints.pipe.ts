@@ -26,17 +26,18 @@ function mapResponses(
   jetstreamResponse: JetstreamResponse<any>,
   requestUrl: string,
   action: EntityRequestAction,
-  postSuccessDataMapper?: SuccessfulApiResponseDataMapper
-): HandledMultiEndpointResponse {
+  postSuccessDataMapper?: SuccessfulApiResponseDataMapper,
+  getEntitiesFromResponse?: (response: any) => any
+): HandledMultiEndpointResponse<any> {
   const baseResponse = {
     errors: [],
     successes: []
-  };
+  } as HandledMultiEndpointResponse<any>;
   if (!jetstreamResponse) {
     return baseResponse;
   }
   return Object.keys(jetstreamResponse).reduce((multiResponses, endpointGuid) => {
-    const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
+    const jetstreamEndpointResponse = jetstreamResponse[endpointGuid] as any | any[];
     const jetStreamError = isJetStreamError(jetstreamEndpointResponse || null);
     if (jetStreamError) {
       multiResponses.errors.push(
@@ -44,31 +45,75 @@ function mapResponses(
       );
     } else {
       if (postSuccessDataMapper) {
-        if (Array.isArray(jetstreamEndpointResponse)) {
-          const pageResult = jetstreamEndpointResponse.map(entity => postSuccessDataMapper(entity, endpointGuid, action));
-          multiResponses.successes.push(pageResult);
-        } else {
-          multiResponses.successes.push(postSuccessDataMapper(jetstreamEndpointResponse, endpointGuid, action));
-        }
+        multiResponses.successes = multiResponses.successes.concat(postProcessSuccessResponses(
+          jetstreamEndpointResponse,
+          endpointGuid,
+          action,
+          postSuccessDataMapper,
+          getEntitiesFromResponse
+        ));
       } else {
         multiResponses.successes.push(jetstreamEndpointResponse);
       }
     }
     return multiResponses;
-  }, baseResponse);
+  }, baseResponse as HandledMultiEndpointResponse<any>);
 }
 
+function postProcessSuccessResponses(
+  response: any | any[],
+  endpointGuid: string,
+  action: EntityRequestAction,
+  postSuccessDataMapper: SuccessfulApiResponseDataMapper,
+  getEntitiesFromResponse: (response: any) => any
+) {
+  if (Array.isArray(response)) {
+    // We have multiple pages for this endpoint response
+    return response.map(singleResponse => postProcessSuccessResponse(
+      singleResponse,
+      endpointGuid,
+      action,
+      postSuccessDataMapper,
+      getEntitiesFromResponse)
+    );
+  }
 
+  return [postProcessSuccessResponse(
+    response,
+    endpointGuid,
+    action,
+    postSuccessDataMapper,
+    getEntitiesFromResponse
+  )];
+}
+
+function postProcessSuccessResponse(
+  response: any,
+  endpointGuid: string,
+  action: EntityRequestAction,
+  postSuccessDataMapper: SuccessfulApiResponseDataMapper,
+  getEntitiesFromResponse: (response: any) => any
+) {
+  const entities = getEntitiesFromResponse ? getEntitiesFromResponse(response) : response;
+  if (postSuccessDataMapper) {
+    // This is a paginated request or single request that returns multiple entities.
+    if (Array.isArray(entities)) {
+      return entities.map(entity => postSuccessDataMapper(entity, endpointGuid, action));
+    }
+    return postSuccessDataMapper(entities, endpointGuid, action);
+  }
+}
 export const handleMultiEndpointsPipeFactory = (
   requestUrl: string,
   action: EntityRequestAction,
-  postSuccessDataMapper?: SuccessfulApiResponseDataMapper
-) => (
-  resData: JetstreamResponse
-): HandledMultiEndpointResponse => {
-    const responses = mapResponses(resData, requestUrl, action, postSuccessDataMapper);
-    return responses;
-  };
+  postSuccessDataMapper?: SuccessfulApiResponseDataMapper,
+  getEntitiesFromResponse?: (response: any) => any
+) => (resData: JetstreamResponse): HandledMultiEndpointResponse => {
+  // if (action.entityType === 'applicationStats') {
+  //   debugger;
+  // }
+  return mapResponses(resData, requestUrl, action, postSuccessDataMapper, getEntitiesFromResponse);
+};
 
 function getJetstreamErrorInformation(jetstreamErrorResponse: JetStreamErrorResponse): JetStreamErrorInformation {
   const errorResponse =

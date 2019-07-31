@@ -64,11 +64,8 @@ export class PaginationPageIterator<R = any, E = any> {
 
   private reducePages(responsePages: JetstreamResponse<R>[]) {
     return responsePages.reduce((mergedResponse, page) => {
-      // Merge all 'pages' into one page of entities;
+      // Merge all 'pages' into pages of endpoint responses;
       return Object.keys(page).reduce((responses, endpointId) => {
-        const entities = this.mapEntities(this.config.getEntitiesFromResponse(page[endpointId]), endpointId) as E[];
-        // const entities = this.config.getEntitiesFromResponse(page[endpointId]);
-
         if (!responses[endpointId]) {
           responses[endpointId] = [];
         }
@@ -76,7 +73,7 @@ export class PaginationPageIterator<R = any, E = any> {
           ...responses,
           [endpointId]: [
             ...responses[endpointId],
-            ...entities
+            page[endpointId]
           ]
         };
       }, mergedResponse);
@@ -97,7 +94,7 @@ export class PaginationPageIterator<R = any, E = any> {
     return combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
   }
 
-  public mergeAllPagesEntities() {
+  public mergeAllPagesEntities(): Observable<JetstreamResponse<any[]>> {
     const initialRequest = this.addPageToRequest(1);
     return this.makeRequest(initialRequest).pipe(
       mergeMap(initialResponse => {

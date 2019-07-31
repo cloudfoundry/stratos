@@ -47,7 +47,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly listDetailsComponent?: any;
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
-  readonly paginationPageIteratorConfig?: PaginationPageIteratorConfig;
+  readonly paginationConfig?: PaginationPageIteratorConfig;
 }
 
 

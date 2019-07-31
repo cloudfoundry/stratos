@@ -76,7 +76,8 @@ export const apiRequestPipelineFactory = (
         actionDispatcher,
         recursivelyDelete
       );
-      return of({ type: 'Jetstream error handled.' });
+      console.warn(error);
+      return of({ type: 'Stratos error handled.', error });
     }),
   );
 };

@@ -18,7 +18,6 @@ export function jetstreamErrorHandler(
 ) {
   const endpointString = action.options.headers ? action.options.headers.get(endpointHeader) || '' : '';
   const endpointIds: string[] = endpointString.split(',');
-  console.log(action);
   endpointIds.forEach(endpoint =>
     actionDispatcher(
       new SendEventAction(endpointSchemaKey, endpoint, {
