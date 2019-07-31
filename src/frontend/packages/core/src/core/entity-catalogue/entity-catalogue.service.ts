@@ -97,6 +97,12 @@ class EntityCatalogue {
       this.registerEntity(entity as StratosCatalogueEntity);
     }
   }
+
+  public clear() {
+    this.endpoints.clear();
+    this.entities.clear();
+  }
+
   /* tslint:disable:max-line-length */
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     entityConfig: EntityCatalogueEntityConfig

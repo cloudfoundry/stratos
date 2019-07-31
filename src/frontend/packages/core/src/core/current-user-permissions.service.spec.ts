@@ -25,7 +25,7 @@ import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 
 
-fdescribe('CurrentUserPermissionsService', () => {
+describe('CurrentUserPermissionsService', () => {
   let service: CurrentUserPermissionsService;
 
 
