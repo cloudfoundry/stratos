@@ -5,6 +5,9 @@ import { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipe
 
 export function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
   const definition = catalogueEntity.definition as IStratosEntityDefinition;
+  if (typeof definition.successfulRequestDataMapper === 'string') {
+    return null;
+  }
   return definition.successfulRequestDataMapper || definition.endpoint.globalSuccessfulRequestDataMapper || null;
 }
 

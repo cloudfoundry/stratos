@@ -80,7 +80,6 @@ function postProcessSuccessResponses(
 ) {
   const entities = getAllEntitiesFromResponses(response, getEntitiesFromResponse);
 
-  console.log('response', response, entities);
   if (Array.isArray(entities)) {
     return {
       endpointGuid,

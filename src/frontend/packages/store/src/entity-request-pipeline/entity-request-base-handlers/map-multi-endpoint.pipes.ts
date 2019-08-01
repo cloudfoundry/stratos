@@ -8,6 +8,48 @@ import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-cat
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
 import { Action } from '@ngrx/store';
+import { NormalizedResponse } from '../../types/api.types';
+function getEntities(
+  endpointResponse: {
+    normalizedEntities: NormalizedResponse<any>;
+    endpointGuid: string;
+  },
+  action: EntityRequestAction
+): { [entityKey: string]: any[] } {
+  return Object.keys(endpointResponse.normalizedEntities.entities).reduce(
+    (newEntities, entityKey) => {
+      const innerCatalogueEntity = entityCatalogue.getEntityFromKey(entityKey) as StratosBaseCatalogueEntity;
+      const entitySuccessMapper = getSuccessMapper(innerCatalogueEntity);
+      const entities = entitySuccessMapper ? Object.keys(endpointResponse.normalizedEntities.entities[entityKey]).reduce(
+        (newEntitiesOfType, guid) => {
+          const entity = entitySuccessMapper(
+            endpointResponse.normalizedEntities.entities[entityKey][guid],
+            endpointResponse.endpointGuid,
+            guid,
+            entityKey,
+            action.endpointType,
+            action
+          );
+          const newGuid = innerCatalogueEntity.getGuidFromEntity(entity) || guid;
+          return {
+            ...newEntitiesOfType,
+            [newGuid]: entitySuccessMapper(
+              endpointResponse.normalizedEntities.entities[entityKey][guid],
+              endpointResponse.endpointGuid,
+              guid,
+              entityKey,
+              action.endpointType,
+              action
+            )
+          };
+        }, {}
+      ) : Object.values(endpointResponse.normalizedEntities[entityKey]);
+      return {
+        ...newEntities,
+        [entityKey]: entities
+      };
+    }, {});
+}
 
 export function mapMultiEndpointResponses(
   action: EntityRequestAction,
@@ -31,42 +73,15 @@ export function mapMultiEndpointResponses(
     };
   } else {
     const responses = multiEndpointResponses.successes.map(normalizeEntityPipe);
-    const mapped = responses.map(endpointResponse => ({
-      entities: Object.keys(endpointResponse.normalizedEntities.entities).reduce(
-        (newEntities, entityKey) => {
-          const innerCatalogueEntity = entityCatalogue.getEntityFromKey(entityKey);
-          const entitySuccessMapper = getSuccessMapper(innerCatalogueEntity);
-          const entities = entitySuccessMapper ? Object.keys(endpointResponse.normalizedEntities.entities[entityKey]).reduce(
-            (newEntitiesOfType, guid) => {
-              const entity = entitySuccessMapper(
-                endpointResponse.normalizedEntities.entities[entityKey][guid],
-                endpointResponse.endpointGuid,
-                guid,
-                entityKey,
-                action.endpointType,
-                action
-              );
-              const newGuid = innerCatalogueEntity.getGuidFromEntity(entity) || guid;
-              return {
-                ...newEntitiesOfType,
-                [newGuid]: entitySuccessMapper(
-                  endpointResponse.normalizedEntities.entities[entityKey][guid],
-                  endpointResponse.endpointGuid,
-                  guid,
-                  entityKey,
-                  action.endpointType,
-                  action
-                )
-              };
-            }, {}
-          ) : endpointResponse.normalizedEntities[entityKey];
-          return {
-            ...newEntities,
-            [entityKey]: entities
-          };
-        }, {}),
-      result: endpointResponse.normalizedEntities.result
-    }));
+    const mapped = responses.map(endpointResponse => {
+      const entities = getEntities(endpointResponse, action);
+      const parentEntities = entities[catalogueEntity.entityKey];
+      return {
+        entities,
+        // If we changed the guid of the entities then make sure this is reflected in the result array.
+        result: parentEntities ? Object.keys(parentEntities) : endpointResponse.normalizedEntities.result
+      };
+    });
     // NormalizedResponse
     const response = multiEndpointResponseMergePipe(mapped);
     return {

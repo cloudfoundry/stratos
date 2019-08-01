@@ -217,15 +217,26 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
     schema: cfEntityFactory(appEnvVarsEntityType),
     endpoint: endpointDefinition,
     paginationConfig: {
-      getEntitiesFromResponse: (response) => response.resources,
-      getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
-        return max < response.total_pages ? response.total_pages : max;
-      }, 0),
+      getEntitiesFromResponse: (response) => Object.keys(response).map(key => response[key]),
+      getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).length,
       getEntityCount: (responses: JetstreamResponse<CFResponse>) => Object.keys(responses).reduce((count, endpointGuid) => {
         const endpoint: CFResponse = responses[endpointGuid];
         return count + endpoint.total_results;
       }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' })
+    },
+    globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
+      console.log(data)
+      if (data) {
+        if (data.entity) {
+          data.entity.cfGuid = endpointGuid;
+          data.entity.guid = guid;
+        } else {
+          data.cfGuid = endpointGuid;
+          data.guid = guid;
+        }
+      }
+      return data;
     }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
