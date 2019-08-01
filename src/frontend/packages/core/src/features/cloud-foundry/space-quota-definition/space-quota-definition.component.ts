@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { GetSpaceQuotaDefinition } from '../../../../../store/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -17,6 +17,8 @@ import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-h
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
+
+export const QUOTA_SPACE_GUID = 'space';
 
 @Component({
   selector: 'app-space-quota-definition',
@@ -33,10 +35,12 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
-  editLink: string[];
+  editLink$: Observable<string[]>;
+  editParams: object;
   detailsLoading$: Observable<boolean>;
   spaceSubscriber: Subscription;
   public canEditQuota$: Observable<boolean>;
+  public isOrg = false;
 
   constructor(
     protected entityServiceFactory: EntityServiceFactory,
@@ -47,17 +51,10 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   ) {
     super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
-    this.editLink = [
-      '/cloud-foundry',
-      this.cfGuid,
-      'organizations',
-      this.orgGuid,
-      'space-quota-definitions',
-      this.quotaGuid,
-      'edit-space-quota'
-    ];
-    const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid).pipe(tap(console.log));
+    const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;
+    this.canEditQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
+    this.isOrg = !spaceGuid;
+    this.editParams = { [QUOTA_SPACE_GUID]: spaceGuid };
   }
 
   setupQuotaDefinitionObservable() {
@@ -79,6 +76,18 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     this.detailsLoading$ = entityInfo$.pipe(
       filter(definition => !!definition),
       map(definition => definition.entityRequestInfo.fetching)
+    );
+
+    this.editLink$ = quotaGuid$.pipe(
+      map(quotaGuid => [
+        '/cloud-foundry',
+        this.cfGuid,
+        'organizations',
+        this.orgGuid,
+        'space-quota-definitions',
+        quotaGuid,
+        'edit-space-quota'
+      ])
     );
   }
 
