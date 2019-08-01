@@ -7,6 +7,8 @@ import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
+import { getDefaultPaginationEntityState } from '../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
+import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
@@ -22041,38 +22043,18 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfi
     return {
       request: {
         ...state.request,
-        [entityKey]: getStoreSectionForIds(entities, {
-          fetching: false,
-          updating: {
-            _root_: {
-              busy: false,
-              error: false,
-              message: ''
-            },
-            updating: {
-              busy: false,
-              error: false,
-              message: ''
-            }
-          },
-          creating: false,
-          error: false,
-          deleting: {
-            busy: false,
-            error: false,
-            message: '',
-            deleted: false
-          },
-          response: null,
-          message: ''
-        })
+        [entityKey]: getStoreSectionForIds(entities, getDefaultRequestState())
       },
       requestData: {
         ...state.requestData,
         [entityKey]: getStoreSectionForIds(entities)
+      },
+      pagination: {
+        ...state.pagination,
+        [entityKey]: getStoreSectionForIds(entities, getDefaultPaginationEntityState())
       }
     };
-  }, { request: {}, requestData: {} });
+  }, { request: {}, requestData: {}, pagination: {} });
 }
 
 export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
@@ -22085,3 +22067,30 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
     }
   );
 }
+
+
+// {
+//   fetching: false,
+//   updating: {
+//     _root_: {
+//       busy: false,
+//       error: false,
+//       message: ''
+//     },
+//     updating: {
+//       busy: false,
+//       error: false,
+//       message: ''
+//     }
+//   },
+//   creating: false,
+//   error: false,
+//   deleting: {
+//     busy: false,
+//     error: false,
+//     message: '',
+//     deleted: false
+//   },
+//   response: null,
+//   message: ''
+// }
