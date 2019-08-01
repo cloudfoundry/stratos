@@ -104,6 +104,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   getStatusObservable?(entity: Y): Observable<StratosStatus>;
+  // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
   getLink?(entityMetadata: T): string;
   getLines?(entityMetadata: T): [string, string | Observable<string>][];

@@ -79,7 +79,7 @@ export type EntityRequestPipeline<> = (
 
 
 export type SuccessfulApiResponseDataMapper<D = any> = (
-  response: JetstreamResponse<any> | JetstreamResponse<any[]>,
+  response: D,
   endpointGuid: string,
   guid: string,
   entityType: string,

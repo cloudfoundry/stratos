@@ -153,9 +153,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
       return data;
     },
     paginationConfig: {
-      getEntitiesFromResponse: (response: CFResponse) => {
-        return response.resources
-      },
+      getEntitiesFromResponse: (response: CFResponse) => response.resources,
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
         return max < response.total_pages ? response.total_pages : max;
       }, 0),
@@ -217,7 +215,18 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
   const definition = {
     type: appEnvVarsEntityType,
     schema: cfEntityFactory(appEnvVarsEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      getEntitiesFromResponse: (response) => response.resources,
+      getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
+        return max < response.total_pages ? response.total_pages : max;
+      }, 0),
+      getEntityCount: (responses: JetstreamResponse<CFResponse>) => Object.keys(responses).reduce((count, endpointGuid) => {
+        const endpoint: CFResponse = responses[endpointGuid];
+        return count + endpoint.total_results;
+      }, 0),
+      getPaginationParameters: (page: number) => ({ page: page + '' })
+    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
     dataReducers: [
@@ -344,22 +353,28 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
       }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' })
     },
-    successfulRequestDataMapper: (data, endpointGuid, guid) => {
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       if (data) {
         return {
           ...data,
           cfGuid: endpointGuid,
-          guid: `${guid}-${data.guid}`
+          guid: `${action.guid}-${guid}`
         };
       }
       return data;
     },
-  } as IStratosEntityDefinition<any, AppStats>;
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<AppStats>>(definition, {
+  } as IStratosEntityDefinition<any, AppStat>;
+  return new StratosCatalogueEntity<IFavoriteMetadata, AppStat>(definition, {
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
     ],
-    actionBuilders: appStatsActionBuilders
+    actionBuilders: appStatsActionBuilders,
+    entityBuilder: {
+      getMetadata: ent => ({
+        name: ent.guid
+      }),
+      getGuid: metadata => metadata.name,
+    }
   });
 }
 

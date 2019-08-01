@@ -38,9 +38,18 @@ export function mapMultiEndpointResponses(
           const entitySuccessMapper = getSuccessMapper(innerCatalogueEntity);
           const entities = entitySuccessMapper ? Object.keys(endpointResponse.normalizedEntities.entities[entityKey]).reduce(
             (newEntitiesOfType, guid) => {
+              const entity = entitySuccessMapper(
+                endpointResponse.normalizedEntities.entities[entityKey][guid],
+                endpointResponse.endpointGuid,
+                guid,
+                entityKey,
+                action.endpointType,
+                action
+              );
+              const newGuid = innerCatalogueEntity.getGuidFromEntity(entity) || guid;
               return {
                 ...newEntitiesOfType,
-                [guid]: entitySuccessMapper(
+                [newGuid]: entitySuccessMapper(
                   endpointResponse.normalizedEntities.entities[entityKey][guid],
                   endpointResponse.endpointGuid,
                   guid,
