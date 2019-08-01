@@ -1,6 +1,5 @@
-import { JetstreamResponse, SuccessfulApiResponseDataMapper } from '../entity-request-pipeline.types';
+import { JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { isJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
-import { EntityRequestAction } from '../../types/request.types';
 
 export class JetstreamError {
   constructor(
@@ -16,17 +15,18 @@ interface JetStreamErrorInformation {
   description: string;
   error_code: string;
 }
-
+export interface MultiEndpointResponse<T> {
+  endpointGuid: string;
+  entities: T;
+}
 export interface HandledMultiEndpointResponse<T = any> {
   errors: JetstreamError[];
-  successes: T[];
+  successes: MultiEndpointResponse<T>[];
 }
 
 function mapResponses(
-  jetstreamResponse: JetstreamResponse<any>,
+  jetstreamResponse: PagedJetstreamResponse,
   requestUrl: string,
-  action: EntityRequestAction,
-  postSuccessDataMapper?: SuccessfulApiResponseDataMapper,
   getEntitiesFromResponse?: (response: any) => any
 ): HandledMultiEndpointResponse<any> {
   const baseResponse = {
@@ -37,83 +37,69 @@ function mapResponses(
     return baseResponse;
   }
   return Object.keys(jetstreamResponse).reduce((multiResponses, endpointGuid) => {
-    const jetstreamEndpointResponse = jetstreamResponse[endpointGuid] as any | any[];
-    const jetStreamError = isJetStreamError(jetstreamEndpointResponse || null);
+    const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
+    const jetStreamError = isJetStreamError(jetstreamEndpointResponse as JetStreamErrorResponse || null);
     if (jetStreamError) {
       multiResponses.errors.push(
         buildJetstreamError(jetstreamEndpointResponse as JetStreamErrorResponse, endpointGuid, requestUrl)
       );
     } else {
-      if (postSuccessDataMapper) {
-        multiResponses.successes = multiResponses.successes.concat(postProcessSuccessResponses(
-          jetstreamEndpointResponse,
-          endpointGuid,
-          action,
-          postSuccessDataMapper,
-          getEntitiesFromResponse
-        ));
-      } else {
-        multiResponses.successes.push(jetstreamEndpointResponse);
-      }
+      multiResponses.successes = multiResponses.successes.concat(postProcessSuccessResponses(
+        jetstreamEndpointResponse as any[],
+        endpointGuid,
+        getEntitiesFromResponse
+      ));
     }
     return multiResponses;
   }, baseResponse as HandledMultiEndpointResponse<any>);
 }
 
+function getAllEntitiesFromResponses(response: any[], getEntitiesFromResponse?: (response: any) => any) {
+  if (getEntitiesFromResponse) {
+    return response.reduce((merged, res) => {
+      const entities = getEntitiesFromResponse(res);
+      if (Array.isArray(entities)) {
+        return [
+          ...merged,
+          ...entities
+        ];
+      }
+      return [
+        ...merged,
+        entities
+      ];
+    }, []);
+  }
+  return response;
+}
+
 function postProcessSuccessResponses(
-  response: any | any[],
+  response: JetstreamResponse<any>[],
   endpointGuid: string,
-  action: EntityRequestAction,
-  postSuccessDataMapper: SuccessfulApiResponseDataMapper,
-  getEntitiesFromResponse: (response: any) => any
-) {
-  if (Array.isArray(response)) {
-    // We have multiple pages for this endpoint response
-    return response.map(singleResponse => postProcessSuccessResponse(
-      singleResponse,
-      endpointGuid,
-      action,
-      postSuccessDataMapper,
-      getEntitiesFromResponse)
-    );
-  }
-
-  return [postProcessSuccessResponse(
-    response,
-    endpointGuid,
-    action,
-    postSuccessDataMapper,
-    getEntitiesFromResponse
-  )];
-}
-
-function postProcessSuccessResponse(
-  response: any,
-  endpointGuid: string,
-  action: EntityRequestAction,
-  postSuccessDataMapper: SuccessfulApiResponseDataMapper,
-  getEntitiesFromResponse: (response: any) => any
-) {
-  const entities = getEntitiesFromResponse ? getEntitiesFromResponse(response) : response;
-  if (postSuccessDataMapper) {
-    // This is a paginated request or single request that returns multiple entities.
-    if (Array.isArray(entities)) {
-      return entities.map(entity => postSuccessDataMapper(entity, endpointGuid, action));
-    }
-    return postSuccessDataMapper(entities, endpointGuid, action);
-  }
-}
-export const handleMultiEndpointsPipeFactory = (
-  requestUrl: string,
-  action: EntityRequestAction,
-  postSuccessDataMapper?: SuccessfulApiResponseDataMapper,
   getEntitiesFromResponse?: (response: any) => any
-) => (resData: JetstreamResponse): HandledMultiEndpointResponse => {
-  // if (action.entityType === 'applicationStats') {
-  //   debugger;
-  // }
-  return mapResponses(resData, requestUrl, action, postSuccessDataMapper, getEntitiesFromResponse);
-};
+) {
+  const entities = getAllEntitiesFromResponses(response, getEntitiesFromResponse);
+
+  console.log('response', response, entities);
+  if (Array.isArray(entities)) {
+    return {
+      endpointGuid,
+      entities
+    };
+    // We have multiple pages for this endpoint response
+    // return response.map(singleResponse => postProcessSuccessResponse(
+    //   singleResponse,
+    //   endpointGuid,
+    //   action,
+    //   postSuccessDataMapper,
+    //   getEntitiesFromResponse)
+    // );
+  }
+  return {
+    endpointGuid,
+    entities: [entities]
+  };
+}
 
 function getJetstreamErrorInformation(jetstreamErrorResponse: JetStreamErrorResponse): JetStreamErrorInformation {
   const errorResponse =
@@ -146,141 +132,9 @@ function buildJetstreamError(
     getJetstreamErrorInformation(jetstreamErrorResponse),
   );
 }
-
-    // function getEntities(
-  //   apiAction: EntityRequestAction,
-  //   data: any,
-  //   errorCheck: JetstreamError[],
-  // ): {
-  //   entities: NormalizedResponse;
-  //   totalResults: number;
-  //   totalPages: number;
-  // } {
-  //   let totalResults = 0;
-  //   let totalPages = 0;
-  //   const allEntities = Object.keys(data)
-  //     .filter(
-  //       guid =>
-  //         data[guid] !== null &&
-  //         errorCheck.findIndex(error => error.guid === guid && !error.error) >=
-  //         0,
-  //     )
-  //     .map(cfGuid => {
-  //       const cfData = data[cfGuid];
-  //       switch (apiAction.entityLocation) {
-  //         case RequestEntityLocation.ARRAY: // The response is an array which contains the entities
-  //           const keys = Object.keys(cfData);
-  //           totalResults = keys.length;
-  //           totalPages = 1;
-  //           return keys.map(key => {
-  //             const guid = apiAction.guid + '-' + key;
-  //             const result = completeResourceEntity(
-  //               cfData[key],
-  //               cfGuid,
-  //               guid,
-  //             );
-  //             result.entity.guid = guid;
-  //             return result;
-  //           });
-  //         case RequestEntityLocation.OBJECT: // The response is the entity
-  //           return completeResourceEntity(cfData, cfGuid, apiAction.guid);
-  //         case RequestEntityLocation.RESOURCE: // The response is an object and the entities list is within a 'resource' param
-  //         default:
-  //           if (!cfData.resources) {
-  //             // Treat the response as RequestEntityLocation.OBJECT
-  //             return completeResourceEntity(
-  //               cfData,
-  //               cfGuid,
-  //               apiAction.guid,
-  //             );
-  //           }
-  //           totalResults += cfData.total_results;
-  //           totalPages += cfData.total_pages;
-  //           if (!cfData.resources.length) {
-  //             return null;
-  //           }
-  //           return cfData.resources.map(resource => {
-  //             return completeResourceEntity(
-  //               resource,
-  //               cfGuid,
-  //               resource.guid,
-  //             );
-  //           });
-  //       }
-  //     });
-  //   const flatEntities = [].concat(...allEntities).filter(e => !!e);
-
-  //   // TODO This need tidying up.
-  //   let entityArray;
-  //   const pagAction = apiAction as PaginatedAction;
-  //   if (pagAction.__forcedPageEntityConfig__) {
-  //     const entityConfig = pagAction.__forcedPageEntityConfig__;
-  //     const schema = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType).getSchema(entityConfig.schemaKey);
-  //     entityArray = [schema];
-  //   } else {
-  //     // No need to do this, use Array.isArray - nj
-  //     /* tslint:disable-next-line:no-string-literal  */
-  //     if (apiAction.entity['length'] > 0) {
-  //       entityArray = apiAction.entity;
-  //     } else {
-  //       entityArray = new Array<Schema>();
-  //       entityArray.push(apiAction.entity);
-  //     }
-  //   }
-
-  //   return {
-  //     entities: flatEntities.length
-  //       ? normalize(flatEntities, entityArray)
-  //       : null,
-  //     totalResults,
-  //     totalPages,
-  //   };
-  // }
-
-  // function completeResourceEntity(
-  //   resource: APIResource | any,
-  //   cfGuid: string,
-  //   guid: string,
-  // ): APIResource {
-  //   if (!resource) {
-  //     return resource;
-  //   }
-
-  //   const result = resource.metadata
-  //     ? {
-  //       entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
-  //       metadata: resource.metadata,
-  //     }
-  //     : {
-  //       entity: { ...resource, cfGuid },
-  //       metadata: { guid },
-  //     };
-
-  //   // Inject `cfGuid` in nested entities
-  //   Object.keys(result.entity).forEach(resourceKey => {
-  //     const nestedResource = result.entity[resourceKey];
-  //     if (instanceOfAPIResource(nestedResource)) {
-  //       result.entity[resourceKey] = completeResourceEntity(
-  //         nestedResource,
-  //         cfGuid,
-  //         nestedResource.metadata.guid,
-  //       );
-  //     } else if (Array.isArray(nestedResource)) {
-  //       result.entity[resourceKey] = nestedResource.map(nested => {
-  //         return nested && typeof nested === 'object'
-  //           ? completeResourceEntity(
-  //             nested,
-  //             cfGuid,
-  //             nested.metadata
-  //               ? nested.metadata.guid
-  //               : guid + '-' + resourceKey,
-  //           )
-  //           : nested;
-  //       });
-  //     }
-  //   });
-
-  //   return result;
-  // }
-
-
+export const handleMultiEndpointsPipeFactory = (
+  requestUrl: string,
+  getEntitiesFromResponse?: (response: any) => any
+) => (resData: PagedJetstreamResponse): HandledMultiEndpointResponse => {
+  return mapResponses(resData, requestUrl, getEntitiesFromResponse);
+};

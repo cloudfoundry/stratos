@@ -93,6 +93,10 @@ class EntityCatalogue {
       this.registerEntity(entity as StratosCatalogueEntity);
     }
   }
+
+  public getEntityFromKey(entityKey: string) {
+    return this.entities.get(entityKey) || this.endpoints.get(entityKey);
+  }
   /* tslint:disable:max-line-length */
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     entityConfig: EntityCatalogueEntityConfig

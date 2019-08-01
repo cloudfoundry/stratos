@@ -11,14 +11,15 @@ import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { multiEndpointResponseMergePipe } from './entity-request-base-handlers/merge-multi-endpoint-data.pipe';
 import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
-import { BasePipelineConfig, EntityRequestPipeline, ActionDispatcher, JetstreamResponse } from './entity-request-pipeline.types';
+import { BasePipelineConfig, EntityRequestPipeline, PagedJetstreamResponse } from './entity-request-pipeline.types';
 import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
 import { PipelineHttpClient } from './pipline-http-client.service';
-import { getSuccessMapper, mergeHttpParams } from './pipeline-helpers';
+import { getSuccessMapper, mergeHttpParams, singleRequestToPaged } from './pipeline-helpers';
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { Observable, isObservable, of } from 'rxjs';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
 
 function getRequestObjectObservable(request: HttpRequest<any> | Observable<HttpRequest<any>>): Observable<HttpRequest<any>> {
   return isObservable(request) ? request : of(request);
@@ -34,7 +35,7 @@ function getRequestObservable(
   action: PaginatedAction,
   request: HttpRequest<any>,
   paginationPageIterator?: PaginationPageIterator
-): Observable<JetstreamResponse<any>> {
+): Observable<PagedJetstreamResponse> {
   const initialRequest = makeRequestEntityPipe(
     httpClient,
     request,
@@ -45,7 +46,7 @@ function getRequestObservable(
     console.warn('Action requires all request pages but no page flattener was given.');
   }
   if (!action.flattenPagination || !paginationPageIterator) {
-    return initialRequest;
+    return initialRequest.pipe(map(response => singleRequestToPaged(response)));
   }
   return paginationPageIterator.mergeAllPagesEntities();
 }
@@ -58,7 +59,6 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   httpClient: PipelineHttpClient,
   { action, requestType, catalogueEntity, appState }: PaginatedRequestPipelineConfig
 ) => {
-  const postSuccessDataMapper = getSuccessMapper(catalogueEntity);
   const prePaginatedRequestFunction = getPrePaginatedRequestFunction(catalogueEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const entity = catalogueEntity as StratosCatalogueEntity;
@@ -72,14 +72,11 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   });
   const request = prePaginatedRequestFunction ? prePaginatedRequestFunction(requestFromStore, action, catalogueEntity) : requestFromStore;
 
-  const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
+
   const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(
     action.options.url,
-    action,
-    postSuccessDataMapper,
     flattenerConfig.getEntitiesFromResponse
   );
-  const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   return getRequestObjectObservable(request).pipe(
     first(),
     switchMap(requestObject => {
@@ -92,25 +89,13 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
         pageIterator
       ).pipe(
         map(handleMultiEndpointsPipe),
-        map(multiEndpointResponses => {
-          endpointErrorHandler(
-            action,
-            catalogueEntity,
-            requestType,
-            multiEndpointResponses.errors
-          );
-          if (!multiEndpointResponses.successes || !multiEndpointResponses.successes.length) {
-            return {
-              success: false,
-              errorMessage: 'Request Failed'
-            };
-          } else {
-            return {
-              success: true,
-              response: multiEndpointResponseMergePipe(multiEndpointResponses.successes.map(normalizeEntityPipe))
-            };
-          }
-        })
+        map(multiEndpointResponses => mapMultiEndpointResponses(
+          action,
+          catalogueEntity,
+          requestType,
+          multiEndpointResponses,
+          actionDispatcher
+        ))
       );
     })
   );

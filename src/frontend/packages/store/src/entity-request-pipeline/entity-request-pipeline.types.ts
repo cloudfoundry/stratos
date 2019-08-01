@@ -11,7 +11,7 @@ import { RequestOptions } from '@angular/http';
 import { PipelineHttpClient } from './pipline-http-client.service';
 import { PaginatedAction } from '../types/pagination.types';
 export type ActionDispatcher<T extends Action = Action> = (action: T) => void;
-export interface JetstreamResponse<T = JetStreamErrorResponse> {
+export interface JetstreamResponse<T = any> {
   [endpointGuid: string]: T;
 }
 
@@ -81,6 +81,9 @@ export type EntityRequestPipeline<> = (
 export type SuccessfulApiResponseDataMapper<D = any> = (
   response: JetstreamResponse<any> | JetstreamResponse<any[]>,
   endpointGuid: string,
+  guid: string,
+  entityType: string,
+  endpointType: string,
   action: EntityRequestAction
 ) => D;
 
@@ -101,4 +104,7 @@ export interface BasePipelineConfig<T extends AppState = InternalAppState, Y ext
   catalogueEntity: StratosBaseCatalogueEntity;
   action: Y;
   appState: T;
+}
+export interface PagedJetstreamResponse<T = any> {
+  [endpointId: string]: T[] | JetStreamErrorResponse;
 }

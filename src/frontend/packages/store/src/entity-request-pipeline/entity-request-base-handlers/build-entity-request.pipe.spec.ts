@@ -3,7 +3,7 @@ import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Headers, URLSearchParams } from '@angular/http';
 
-fdescribe('build-entity-request-pipe', () => {
+describe('build-entity-request-pipe', () => {
   it(' use HttpRequest', () => {
     const testUrl = 'testUrl';
     const request = buildRequestEntityPipe('fetch', new HttpRequest<any>('GET', testUrl));

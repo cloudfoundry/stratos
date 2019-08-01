@@ -3,7 +3,7 @@ import { range, of, Observable, combineLatest } from 'rxjs';
 import { mergeMap, reduce, map, tap } from 'rxjs/operators';
 import { PaginatedAction } from '../../types/pagination.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
-import { JetstreamResponse, ActionDispatcher, SuccessfulApiResponseDataMapper } from '../entity-request-pipeline.types';
+import { JetstreamResponse, ActionDispatcher, SuccessfulApiResponseDataMapper, PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
@@ -57,11 +57,6 @@ export class PaginationPageIterator<R = any, E = any> {
     });
   }
 
-  private mapEntities(entities: E[], endpointId: string): E[] {
-    return this.postSuccessDataMapper ?
-      entities.map(entity => this.postSuccessDataMapper(entity, endpointId, this.action)) : entities as E[];
-  }
-
   private reducePages(responsePages: JetstreamResponse<R>[]) {
     return responsePages.reduce((mergedResponse, page) => {
       // Merge all 'pages' into pages of endpoint responses;
@@ -72,12 +67,12 @@ export class PaginationPageIterator<R = any, E = any> {
         return {
           ...responses,
           [endpointId]: [
-            ...responses[endpointId],
+            ...(responses[endpointId] as any[]),
             page[endpointId]
           ]
         };
       }, mergedResponse);
-    }, {} as JetstreamResponse<E[]>);
+    }, {} as PagedJetstreamResponse);
   }
 
   private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number) {
@@ -94,7 +89,7 @@ export class PaginationPageIterator<R = any, E = any> {
     return combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
   }
 
-  public mergeAllPagesEntities(): Observable<JetstreamResponse<any[]>> {
+  public mergeAllPagesEntities(): Observable<PagedJetstreamResponse> {
     const initialRequest = this.addPageToRequest(1);
     return this.makeRequest(initialRequest).pipe(
       mergeMap(initialResponse => {

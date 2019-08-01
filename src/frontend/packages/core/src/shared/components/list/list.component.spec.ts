@@ -6,7 +6,6 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
@@ -20,6 +19,7 @@ import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 
 class MockedNgZone {
   run = fn => fn();

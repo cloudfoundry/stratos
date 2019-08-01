@@ -140,18 +140,22 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     globalPrePaginationRequest: (request, action) => {
       return addRelationParams(request, action);
     },
-    globalSuccessfulRequestDataMapper: (data, endpointGuid) => {
+    globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
       if (data) {
         if (data.entity) {
           data.entity.cfGuid = endpointGuid;
+          data.entity.guid = guid;
         } else {
           data.cfGuid = endpointGuid;
+          data.guid = guid;
         }
       }
       return data;
     },
     paginationConfig: {
-      getEntitiesFromResponse: (response: CFResponse) => response.resources,
+      getEntitiesFromResponse: (response: CFResponse) => {
+        return response.resources
+      },
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
         return max < response.total_pages ? response.total_pages : max;
       }, 0),
@@ -340,12 +344,12 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
       }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' })
     },
-    successfulRequestDataMapper: (data, endpointGuid, action) => {
+    successfulRequestDataMapper: (data, endpointGuid, guid) => {
       if (data) {
         return {
           ...data,
           cfGuid: endpointGuid,
-          guid: `${action.guid}-${data.guid}`
+          guid: `${guid}-${data.guid}`
         };
       }
       return data;

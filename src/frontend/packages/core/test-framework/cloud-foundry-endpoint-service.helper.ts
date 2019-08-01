@@ -4,7 +4,6 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../store/src/app-state';
 import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
@@ -39,6 +38,7 @@ import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-moni
 import { SharedModule } from '../src/shared/shared.module';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
+import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
