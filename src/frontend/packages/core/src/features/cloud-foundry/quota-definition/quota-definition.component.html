@@ -1,11 +1,21 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" *ngIf="quotaGuid">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" *ngIf="isCf">
   <h1>{{ (quotaDefinition$ | async)?.entity?.name }}</h1>
-  <div class="page-header-right">
-    <button mat-icon-button name="edit" [routerLink]="editLink" matTooltip="Edit">
+  <div class="page-header-right" *ngIf="canEditQuota$ | async">
+    <!-- Show edit button in top blue bar -->
+    <button mat-icon-button name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
       <mat-icon>edit</mat-icon>
     </button>
   </div>
 </app-page-header>
+
+<app-page-sub-nav *ngIf="!isCf">
+  <!-- Show edit button inline with header-->
+  <ng-container *ngIf="canEditQuota$ | async">
+    <button mat-icon-button name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </ng-container>
+</app-page-sub-nav>
 
 <div class="quota-definition-base quota-definition-page" *ngIf="quotaDefinition$ | async as quotaDefinition">
 

@@ -20,6 +20,8 @@ import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfQuotasDataSourceService } from './cf-quotas-data-source.service';
 import { TableCellQuotaComponent } from './table-cell-quota/table-cell-quota.component';
 
+export const QUOTA_FROM_LIST = 'list';
+
 @Injectable()
 export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
   dataSource: CfQuotasDataSourceService;
@@ -107,7 +109,10 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
           'quota-definitions',
           item.metadata.guid,
           'edit-quota'
-        ]
+        ],
+        query: {
+          [QUOTA_FROM_LIST]: true
+        }
       })
     );
   }

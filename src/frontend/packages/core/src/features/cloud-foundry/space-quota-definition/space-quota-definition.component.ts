@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { GetSpaceQuotaDefinition } from '../../../../../store/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -10,6 +10,8 @@ import { entityFactory, spaceQuotaSchemaKey } from '../../../../../store/src/hel
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IOrganization, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -34,12 +36,14 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   editLink: string[];
   detailsLoading$: Observable<boolean>;
   spaceSubscriber: Subscription;
+  public canEditQuota$: Observable<boolean>;
 
   constructor(
     protected entityServiceFactory: EntityServiceFactory,
     protected store: Store<AppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,
+    currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
@@ -52,6 +56,8 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
       this.quotaGuid,
       'edit-space-quota'
     ];
+    const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
+    this.canEditQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid).pipe(tap(console.log));
   }
 
   setupQuotaDefinitionObservable() {

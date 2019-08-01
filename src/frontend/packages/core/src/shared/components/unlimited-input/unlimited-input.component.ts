@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl, ControlContainer, FormGroupDirective } from '@angular/forms';
+import { AbstractControl, ControlContainer, FormGroupDirective, Validators } from '@angular/forms';
 
 const UNLIMITED = -1;
 
@@ -44,6 +44,7 @@ export class UnlimitedInputComponent implements OnInit {
 
   ngOnInit() {
     this.formControl = this.ctrlContainer.form.get(this.name);
+    this.formControl.setValidators(Validators.min(0));
 
     if (this.formControl.value) {
       this.setInitialValues(this.formControl.value);

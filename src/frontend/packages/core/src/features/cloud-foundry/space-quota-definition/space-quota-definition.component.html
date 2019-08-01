@@ -1,6 +1,6 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" *ngIf="quotaGuid">
   <h1>{{ (quotaDefinition$ | async)?.entity?.name }}</h1>
-  <div class="page-header-right">
+  <div class="page-header-right" *ngIf="canEditQuota$ | async">
     <button mat-icon-button name="edit" [routerLink]="editLink" matTooltip="Edit">
       <mat-icon>edit</mat-icon>
     </button>
