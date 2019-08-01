@@ -48,7 +48,7 @@ require (
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
-	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/mattn/go-sqlite3 v1.11.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/moby/moby v1.13.1 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
