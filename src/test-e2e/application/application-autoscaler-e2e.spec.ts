@@ -1,40 +1,22 @@
-import { browser, promise } from 'protractor';
 import * as moment from 'moment-timezone';
+import { browser } from 'protractor';
 
-import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFPage } from '../po/cf-page.po';
-import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
+import { createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageAutoscalerTab } from './po/application-page-autoscaler.po';
 import { ApplicationBasePage } from './po/application-page.po';
-import { PageAutoscalerMetricBase } from './po/page-autoscaler-metric-base.po';
 import { PageAutoscalerEventBase } from './po/page-autoscaler-event-base.po';
+import { PageAutoscalerMetricBase } from './po/page-autoscaler-metric-base.po';
 
-let nav: SideNavigation;
-let appWall: ApplicationsPage;
 let applicationE2eHelper: ApplicationE2eHelper;
-let cfHelper: CFHelpers;
-
-const cfName = e2e.secrets.getDefaultCFEndpoint().name;
-const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
-const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
 describe('Autoscaler -', () => {
 
-  const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
-  const testAppUrl = 'https://github.com/' + testApp;
-  const testAppName = ApplicationE2eHelper.createApplicationName();
-  const appDetails = {
-    cfGuid: '',
-    appGuid: ''
-  };
-
   beforeAll(() => {
-    nav = new SideNavigation();
-    appWall = new ApplicationsPage();
     const setup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
@@ -42,7 +24,6 @@ describe('Autoscaler -', () => {
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
-    cfHelper = new CFHelpers(setup);
   });
 
   beforeAll(() => applicationE2eHelper.cfHelper.updateDefaultCfOrgSpace());
@@ -51,135 +32,7 @@ describe('Autoscaler -', () => {
     browser.waitForAngularEnabled(true);
   });
 
-  describe('Deploy process - ', () => {
-
-    let originalTimeout = 40000;
-    beforeAll(() => nav.goto(SideNavMenuItem.Applications));
-
-    // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(() => {
-      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
-    });
-
-    afterEach(() => {
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-    });
-
-    // Allow up to 2 minutes for the application to be deployed
-    describe('Should deploy app from Git URL', () => {
-
-      const loggingPrefix = 'Application Deploy: Deploy from Git URL:';
-      let deployApp;
-
-      beforeAll(() => {
-        // Should be on deploy app modal
-        expect(appWall.isActivePage()).toBeTruthy();
-        appWall.waitForPage();
-        const baseCreateAppStep = appWall.clickCreateApp();
-        baseCreateAppStep.waitForPage();
-        deployApp = baseCreateAppStep.selectDeployUrl();
-      });
-
-      it('Check deploy steps', () => {
-        expect(deployApp.header.getTitleText()).toBe('Deploy from Public Git URL');
-        // Check the steps
-        e2e.debugLog(`${loggingPrefix} Checking Steps`);
-        deployApp.stepper.getStepNames().then(steps => {
-          expect(steps.length).toBe(4);
-          expect(steps[0]).toBe('Cloud Foundry');
-          expect(steps[1]).toBe('Source');
-          expect(steps[2]).toBe('Overrides (Optional)');
-          expect(steps[3]).toBe('Deploy');
-        });
-      });
-
-      it('Should pass CF/Org/Space Step', () => {
-        e2e.debugLog(`${loggingPrefix} Cf/Org/Space Step`);
-        expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
-        promise.all([
-          deployApp.stepper.getStepperForm().getText('cf'),
-          deployApp.stepper.getStepperForm().getText('org'),
-          deployApp.stepper.getStepperForm().getText('space')
-        ]).then(([cf, org, space]) => {
-          if (cf !== 'Cloud Foundry' && org !== 'Organization' && space !== 'Space') {
-            expect(deployApp.stepper.canNext()).toBeTruthy();
-          } else {
-            expect(deployApp.stepper.canNext()).toBeFalsy();
-          }
-        });
-
-        // Fill in form
-        deployApp.stepper.getStepperForm().fill({ cf: cfName });
-        deployApp.stepper.getStepperForm().fill({ org: orgName });
-        deployApp.stepper.getStepperForm().fill({ space: spaceName });
-        expect(deployApp.stepper.canNext()).toBeTruthy();
-
-        // Press next to get to source step
-        deployApp.stepper.next();
-      });
-
-      it('Should pass Source step', () => {
-        e2e.debugLog(`${loggingPrefix} Source Step`);
-        expect(deployApp.stepper.getActiveStepName()).toBe('Source');
-        expect(deployApp.stepper.canNext()).toBeFalsy();
-        deployApp.stepper.getStepperForm().fill({ giturl: testAppUrl });
-        deployApp.stepper.getStepperForm().fill({ urlbranchname: 'master' });
-
-        // Press next to get to source config step
-        deployApp.stepper.waitUntilCanNext('Next');
-        deployApp.stepper.next();
-      });
-
-      it('Should pass Overrides step', () => {
-        e2e.debugLog(`${loggingPrefix} Overrides Step`);
-        expect(deployApp.stepper.canNext()).toBeTruthy();
-
-        const overrides = deployApp.getOverridesForm();
-        overrides.waitUntilShown();
-        overrides.fill({ name: testAppName, random_route: true });
-
-        e2e.debugLog(`${loggingPrefix} Overrides Step - overrides set`);
-      });
-
-      it('Should Deploy Application', () => {
-        // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
-        // waiting for angular if we don't turn off.
-        browser.waitForAngularEnabled(false);
-
-        // Press next to deploy the app
-        deployApp.stepper.next();
-
-        e2e.debugLog(`${loggingPrefix} Deploying Step (wait)`);
-
-        // Wait for the application to be fully deployed - so we see any errors that occur
-        deployApp.waitUntilDeployed();
-
-        // Wait until app summary button can be pressed
-        deployApp.stepper.waitUntilCanNext('Go to App Summary');
-
-        e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
-      }, 120000);
-
-      it('Should go to App Summary Page', () => {
-        // Click next
-        deployApp.stepper.next();
-
-        e2e.sleep(1000);
-        e2e.debugLog(`${loggingPrefix} Waiting For Application Summary Page`);
-        // Should be app summary
-        const appSummaryPage = new CFPage('/applications/');
-        appSummaryPage.waitForPageOrChildPage();
-        appSummaryPage.header.waitForTitleText(testAppName);
-        browser.wait(ApplicationBasePage.detect()
-          .then(appSummary => {
-            appDetails.cfGuid = appSummary.cfGuid;
-            appDetails.appGuid = appSummary.appGuid;
-          }), 10000, 'Failed to wait for Application Summary page after deploying application'
-        );
-      });
-    });
-  });
+  const { testAppName, appDetails } = createApplicationDeployTests(true);
 
   describe('Tab Tests -', () => {
     beforeAll(() => {
@@ -207,17 +60,8 @@ describe('Autoscaler -', () => {
   describe('Autoscaler Attach Policy -', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
     let createPolicy;
-    let originalTimeout = 40000;
 
-    // Might take a bit longer to edit the app policy than the global default timeout allows
-    beforeEach(() => {
-      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
-    });
-
-    afterEach(() => {
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-    });
+    extendE2ETestTime(60000);
 
     beforeAll(() => {
       const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
@@ -431,17 +275,8 @@ describe('Autoscaler -', () => {
   describe('Autoscaler Edit Policy -', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
     let createPolicy;
-    let originalTimeout = 40000;
 
-    // Might take a bit longer to edit the app policy than the global default timeout allows
-    beforeEach(() => {
-      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
-    });
-
-    afterEach(() => {
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-    });
+    extendE2ETestTime(60000);
 
     describe('From autoscaler default card', () => {
       beforeAll(() => {

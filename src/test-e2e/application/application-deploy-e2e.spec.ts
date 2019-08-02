@@ -1,13 +1,10 @@
-import { browser, promise } from 'protractor';
+import { browser } from 'protractor';
 
-import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { extendE2ETestTime } from '../helpers/extend-test-helpers';
-import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
-import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
+import { createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageEventsTab } from './po/application-page-events.po';
 import { ApplicationPageGithubTab } from './po/application-page-github.po';
@@ -16,32 +13,17 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
-import { DeployApplication } from './po/deploy-app.po';
 
-let nav: SideNavigation;
-let appWall: ApplicationsPage;
 let applicationE2eHelper: ApplicationE2eHelper;
 let cfHelper: CFHelpers;
 
-const cfName = e2e.secrets.getDefaultCFEndpoint().name;
-const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
-const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
 describe('Application Deploy -', () => {
 
-  const testApp = e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app';
-  const testAppName = ApplicationE2eHelper.createApplicationName();
   const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack;
-  let deployedCommit: promise.Promise<string>;
   let defaultStack = '';
-  const appDetails = {
-    cfGuid: '',
-    appGuid: ''
-  };
 
   beforeAll(() => {
-    nav = new SideNavigation();
-    appWall = new ApplicationsPage();
     const setup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
@@ -60,149 +42,8 @@ describe('Application Deploy -', () => {
     browser.waitForAngularEnabled(true);
   });
 
-  describe('Deploy process - ', () => {
-
-    beforeAll(() => nav.goto(SideNavMenuItem.Applications));
-
-    // Might take a bit longer to deploy the app than the global default timeout allows
-    extendE2ETestTime(120000);
-
-    // Allow up to 2 minutes for the application to be deployed
-    describe('Should deploy app from GitHub', () => {
-
-      const loggingPrefix = 'Application Deploy: Deploy from Github:';
-      let deployApp: DeployApplication;
-
-      beforeAll(() => {
-        // Should be on deploy app modal
-        expect(appWall.isActivePage()).toBeTruthy();
-        appWall.waitForPage();
-        const baseCreateAppStep = appWall.clickCreateApp();
-        baseCreateAppStep.waitForPage();
-        deployApp = baseCreateAppStep.selectDeploy();
-      });
-
-      it('Check deploy steps', () => {
-        expect(deployApp.header.getTitleText()).toBe('Deploy from Public GitHub');
-        // Check the steps
-        e2e.debugLog(`${loggingPrefix} Checking Steps`);
-        deployApp.stepper.getStepNames().then(steps => {
-          expect(steps.length).toBe(5);
-          expect(steps[0]).toBe('Cloud Foundry');
-          expect(steps[1]).toBe('Source');
-          expect(steps[2]).toBe('Source Config');
-          expect(steps[3]).toBe('Overrides (Optional)');
-          expect(steps[4]).toBe('Deploy');
-        });
-      });
-
-      it('Should pass CF/Org/Space Step', () => {
-        e2e.debugLog(`${loggingPrefix} Cf/Org/Space Step`);
-        expect(deployApp.stepper.getActiveStepName()).toBe('Cloud Foundry');
-        promise.all([
-          deployApp.stepper.getStepperForm().getText('cf'),
-          deployApp.stepper.getStepperForm().getText('org'),
-          deployApp.stepper.getStepperForm().getText('space')
-        ]).then(([cf, org, space]) => {
-          if (cf !== 'Cloud Foundry' && org !== 'Organization' && space !== 'Space') {
-            expect(deployApp.stepper.canNext()).toBeTruthy();
-          } else {
-            expect(deployApp.stepper.canNext()).toBeFalsy();
-          }
-        });
-
-        // Fill in form
-        deployApp.stepper.getStepperForm().fill({ cf: cfName });
-        deployApp.stepper.getStepperForm().fill({ org: orgName });
-        deployApp.stepper.getStepperForm().fill({ space: spaceName });
-        expect(deployApp.stepper.canNext()).toBeTruthy();
-
-        // Press next to get to source step
-        deployApp.stepper.next();
-      });
-
-      it('Should pass Source step', () => {
-        e2e.debugLog(`${loggingPrefix} Source Step`);
-        expect(deployApp.stepper.getActiveStepName()).toBe('Source');
-        expect(deployApp.stepper.canNext()).toBeFalsy();
-        deployApp.stepper.getStepperForm().fill({ projectname: testApp });
-
-        // Press next to get to source config step
-        deployApp.stepper.waitUntilCanNext('Next');
-        deployApp.stepper.next();
-      });
-
-      it('Should pass Source Config step', () => {
-        e2e.debugLog(`${loggingPrefix} Source Config Step`);
-        expect(deployApp.stepper.getActiveStepName()).toBe('Source Config');
-        const commits = deployApp.getCommitList();
-        expect(commits.getHeaderText()).toBe('Select a commit');
-
-        expect(deployApp.stepper.canNext()).toBeFalsy();
-
-        commits.getTableData().then(data => {
-          expect(data.length).toBeGreaterThan(0);
-        });
-
-        commits.selectRow(0);
-        e2e.debugLog(`${loggingPrefix} Select a commit (selected)`);
-
-        deployedCommit = commits.getCell(0, 2).getText();
-        expect(deployApp.stepper.canNext()).toBeTruthy();
-
-        // Press next to get to overrides step
-        deployApp.stepper.next();
-      });
-
-      it('Should pass Overrides step', () => {
-        e2e.debugLog(`${loggingPrefix} Overrides Step`);
-        expect(deployApp.stepper.canNext()).toBeTruthy();
-
-        const overrides = deployApp.getOverridesForm();
-        overrides.waitUntilShown();
-        overrides.fill({ name: testAppName, random_route: true });
-
-        e2e.debugLog(`${loggingPrefix} Overrides Step - overrides set`);
-      });
-
-      it('Should Deploy Application', () => {
-        // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
-        // waiting for angular if we don't turn off.
-        browser.waitForAngularEnabled(false);
-
-        // Press next to deploy the app
-        deployApp.stepper.next();
-
-        e2e.debugLog(`${loggingPrefix} Deploying Step (wait)`);
-
-        // Wait for the application to be fully deployed - so we see any errors that occur
-        deployApp.waitUntilDeployed();
-
-        // Wait until app summary button can be pressed
-        deployApp.stepper.waitUntilCanNext('Go to App Summary');
-
-        e2e.debugLog(`${loggingPrefix} Deploying Step (after wait)`);
-      }, 120000);
-
-      it('Should go to App Summary Page', () => {
-        // Click next
-        deployApp.stepper.next();
-
-        e2e.sleep(1000);
-        e2e.debugLog(`${loggingPrefix} Waiting For Application Summary Page`);
-        // Should be app summary
-        const appSummaryPage = new CFPage('/applications/');
-        appSummaryPage.waitForPageOrChildPage();
-        appSummaryPage.header.waitForTitleText(testAppName);
-        browser.wait(ApplicationBasePage.detect()
-          .then(appSummary => {
-            appDetails.cfGuid = appSummary.cfGuid;
-            appDetails.appGuid = appSummary.appGuid;
-          }), 10000, 'Failed to wait for Application Summary page after deploying application'
-        );
-      });
-    });
-  });
+  const deployRes = createApplicationDeployTests();
+  const { testApp, testAppName, appDetails } = deployRes;
 
   describe('Tab Tests -', () => {
 
@@ -252,9 +93,9 @@ describe('Application Deploy -', () => {
       expect(appGithub.commits.empty.getCustom().isPresent()).toBeFalsy();
 
       // Check that whatever the sha we selected earlier matches the sha in the deploy info, commit details and highlighted table row
-      expect(deployedCommit).toBeTruthy('deployedCommit info is missing (has the deploy test run?)');
-      if (deployedCommit) {
-        deployedCommit.then(commitSha => {
+      expect(deployRes.deployedCommit).toBeTruthy('deployedCommit info is missing (has the deploy test run?)');
+      if (deployRes.deployedCommit) {
+        deployRes.deployedCommit.then(commitSha => {
           expect(appGithub.cardDeploymentInfo.commit.getValue()).toBe(commitSha);
           expect(appGithub.cardCommitInfo.sha.getValue()).toBe(commitSha);
 
@@ -289,6 +130,10 @@ describe('Application Deploy -', () => {
     expect(appSummary.cardInfo.packageState.getValue()).toBe('STAGED');
     expect(appSummary.cardInfo.services.getValue()).toBe('0');
     expect(appSummary.cardInfo.routes.getValue()).toBe('1');
+
+    const cfName = e2e.secrets.getDefaultCFEndpoint().name;
+    const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
+    const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
     expect(appSummary.cardCfInfo.cf.getValue()).toBe(cfName);
     expect(appSummary.cardCfInfo.org.getValue()).toBe(orgName);
