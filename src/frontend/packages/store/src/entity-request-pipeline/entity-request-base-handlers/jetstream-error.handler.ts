@@ -6,8 +6,8 @@ import { InternalEventSeverity } from '../../types/internal-events.types';
 import { getFailApiRequestActions, ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
 import { ActionDispatcher } from '../entity-request-pipeline.types';
+import { PipelineHttpClient } from '../pipline-http-client.service';
 
-export const endpointHeader = 'x-cap-cnsi-list';
 export function jetstreamErrorHandler(
   error: any,
   action: EntityRequestAction,
@@ -16,7 +16,7 @@ export function jetstreamErrorHandler(
   actionDispatcher: ActionDispatcher,
   recursivelyDeleting: boolean
 ) {
-  const endpointString = action.options.headers ? action.options.headers.get(endpointHeader) || '' : '';
+  const endpointString = action.options.headers ? action.options.headers.get(PipelineHttpClient.EndpointHeader) || '' : '';
   const endpointIds: string[] = endpointString.split(',');
   endpointIds.forEach(endpoint =>
     actionDispatcher(

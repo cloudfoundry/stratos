@@ -31,7 +31,7 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
   actionDispatcher(entityAction);
   actionDispatcher(new WrapperRequestActionSuccess(data, action, requestType));
   if (recursivelyDeleting) {
-    this.store.dispatch(
+    actionDispatcher(
       new RecursiveDeleteComplete(
         action.guid,
         action.endpointGuid,

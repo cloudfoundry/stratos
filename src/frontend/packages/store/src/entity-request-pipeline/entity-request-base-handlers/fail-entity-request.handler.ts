@@ -13,7 +13,7 @@ export const failedEntityHandler: SucceedOrFailEntityRequestHandler = (
   actionDispatcher(entityAction);
   actionDispatcher(new WrapperRequestActionFailed('Api Request Failed', action, requestType));
   if (recursivelyDeleting) {
-    this.store.dispatch(
+    actionDispatcher(
       new RecursiveDeleteFailed(
         action.guid,
         action.endpointGuid,
