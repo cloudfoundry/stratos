@@ -19,6 +19,9 @@ export function mergeHttpParams(params1: HttpParams, params2: HttpParams) {
 }
 
 export function singleRequestToPaged(response: JetstreamResponse<any>): PagedJetstreamResponse {
+  if (!response) {
+    return null;
+  }
   return Object.keys(response).reduce((mapped, endpointKey) => {
     return {
       ...mapped,

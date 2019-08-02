@@ -612,43 +612,6 @@ export class APIEffect {
     );
   }
 
-  // private setRequestParams(
-  //   requestParams: URLSearchParams,
-  //   params: PaginationParam,
-  // ) {
-  //   if (params.hasOwnProperty('q')) {
-  //     // We need to create a series of q values that contain all from `requestParams` and `params`. Any that exist in `requestParams` should
-  //     // be overwritten in `params`
-
-  //     // Clear `requestParams` `q` and start afresh
-  //     const initialQParams = requestParams.getAll('q');
-  //     requestParams.delete('q');
-
-  //     // Loop through all the NEW params that we wish to keep
-  //     params.q.forEach(qParam => {
-  //       // Add new param we wish to keep
-  //       requestParams.append('q', qParamToString(qParam));
-  //       // Remove any initial params that have been `overwritten`. This won't be added again later on
-  //       const haveInitialParam = initialQParams.findIndex(qParamStr => qParam.key === qParamKeyFromString(qParamStr));
-  //       if (haveInitialParam >= 0) {
-  //         initialQParams.splice(haveInitialParam, 1);
-  //       }
-  //     });
-
-  //     // Add the rest of the initial params
-  //     initialQParams.forEach(qParamStr => requestParams.append('q', qParamStr));
-
-  //     // Remove from q from `params` so it's not added again below
-  //     delete params.qString;
-  //     delete params.q;
-  //   }
-  //   // Assign other params
-  //   for (const key in params) {
-  //     if (params.hasOwnProperty(key)) {
-  //       requestParams.set(key, params[key] as string);
-  //     }
-  //   }
-  // }
   private shouldRecursivelyDelete(requestType: string, apiAction: ICFAction) {
     return requestType === 'delete' && !apiAction.updatingKey;
   }

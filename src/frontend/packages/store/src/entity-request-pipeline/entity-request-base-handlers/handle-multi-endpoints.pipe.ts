@@ -1,5 +1,5 @@
 import { JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
-import { isJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
+import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 
 export class JetstreamError {
   constructor(
@@ -38,10 +38,10 @@ function mapResponses(
   }
   return Object.keys(jetstreamResponse).reduce((multiResponses, endpointGuid) => {
     const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
-    const jetStreamError = isJetStreamError(jetstreamEndpointResponse as JetStreamErrorResponse || null);
+    const jetStreamError = hasJetStreamError(jetstreamEndpointResponse as JetStreamErrorResponse[]);
     if (jetStreamError) {
       multiResponses.errors.push(
-        buildJetstreamError(jetstreamEndpointResponse as JetStreamErrorResponse, endpointGuid, requestUrl)
+        buildJetstreamError(jetStreamError as JetStreamErrorResponse, endpointGuid, requestUrl)
       );
     } else {
       multiResponses.successes = multiResponses.successes.concat(postProcessSuccessResponses(

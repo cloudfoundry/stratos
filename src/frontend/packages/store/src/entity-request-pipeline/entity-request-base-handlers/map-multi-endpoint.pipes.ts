@@ -30,7 +30,7 @@ function getEntities(
             action.endpointType,
             action
           );
-          const newGuid = innerCatalogueEntity.getGuidFromEntity(entity) || guid;
+          const newGuid = entity ? innerCatalogueEntity.getGuidFromEntity(entity) || guid : guid;
           return {
             ...newEntitiesOfType,
             [newGuid]: entitySuccessMapper(
@@ -66,7 +66,8 @@ export function mapMultiEndpointResponses(
     requestType,
     multiEndpointResponses.errors
   );
-  if (!multiEndpointResponses.successes || !multiEndpointResponses.successes.length) {
+  console.log(multiEndpointResponses)
+  if (multiEndpointResponses.errors && multiEndpointResponses.errors.length) {
     return {
       success: false,
       errorMessage: 'Request Failed'

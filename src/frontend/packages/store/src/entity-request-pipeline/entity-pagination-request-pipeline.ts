@@ -1,25 +1,21 @@
 import { HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
-import { map, first, switchMap, tap } from 'rxjs/operators';
-import { StratosCatalogueEntity, StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { isObservable, Observable, of } from 'rxjs';
+import { first, map, switchMap } from 'rxjs/operators';
+import { StratosBaseCatalogueEntity, StratosCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
 import { PaginatedAction } from '../types/pagination.types';
 import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
-import { endpointErrorsHandlerFactory } from './entity-request-base-handlers/endpoint-errors.handler';
 import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
-import { multiEndpointResponseMergePipe } from './entity-request-base-handlers/merge-multi-endpoint-data.pipe';
-import { normalizeEntityPipeFactory } from './entity-request-base-handlers/normalize-entity-request-response.pipe';
+import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
 import { BasePipelineConfig, EntityRequestPipeline, PagedJetstreamResponse } from './entity-request-pipeline.types';
 import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
+import { mergeHttpParams, singleRequestToPaged } from './pipeline-helpers';
 import { PipelineHttpClient } from './pipline-http-client.service';
-import { getSuccessMapper, mergeHttpParams, singleRequestToPaged } from './pipeline-helpers';
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { Observable, isObservable, of } from 'rxjs';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
 
 function getRequestObjectObservable(request: HttpRequest<any> | Observable<HttpRequest<any>>): Observable<HttpRequest<any>> {
   return isObservable(request) ? request : of(request);

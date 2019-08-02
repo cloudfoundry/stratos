@@ -112,9 +112,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     }));
 
     const space$ = this.applicationService.orgDomains$.pipe(
+      tap(console.log),
       // We don't need the domains, but we need them fetched first so we get the router_group_type
       switchMap(() => this.appService.waitForAppEntity$
         .pipe(
+          tap(console.log),
           switchMap(app => {
             this.spaceGuid = app.entity.entity.space_guid;
             const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
@@ -124,6 +126,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             );
             return spaceService.waitForEntity$;
           }),
+          tap(console.log),
           filter(({ entity }) => !!entity.entity.domains),
           tap(({ entity }) => {
             this.domains = [];
