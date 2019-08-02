@@ -81,13 +81,17 @@ export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpoin
  *
  * @export
  */
-export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSchemas, E = any> extends IStratosBaseEntityDefinition<T> {
+export interface IStratosEntityDefinition<
+  T = EntitySchema | EntityCatalogueSchemas,
+  E = any,
+  I = E
+  > extends IStratosBaseEntityDefinition<T> {
   readonly endpoint: StratosEndpointExtensionDefinition;
   readonly subTypes?: Omit<IStratosEntityDefinition, 'schema' | 'subTypes' | 'endpoint'>[];
   // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
   // This will override any globalSuccessfulRequestDataMapper found in the endpoint.
   // TODO We should wrap this and the global version with immer to make them immutable.
-  readonly successfulRequestDataMapper?: SuccessfulApiResponseDataMapper<E> | 'false' | string;
+  readonly successfulRequestDataMapper?: SuccessfulApiResponseDataMapper<E, I> | 'false' | string;
   // Allows an entity to manipulate the request object before it's sent.
   // This will override any globalPreRequest found in the endpoint.
   readonly preRequest?: PreApiRequest;

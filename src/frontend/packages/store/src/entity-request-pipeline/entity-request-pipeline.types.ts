@@ -78,14 +78,14 @@ export type EntityRequestPipeline<> = (
 ) => Observable<PipelineResult>;
 
 
-export type SuccessfulApiResponseDataMapper<D = any> = (
-  response: D,
+export type SuccessfulApiResponseDataMapper<O = any, I = O> = (
+  response: I,
   endpointGuid: string,
   guid: string,
   entityType: string,
   endpointType: string,
   action: EntityRequestAction
-) => D;
+) => O;
 
 export type PreApiRequest = (
   request: HttpRequest<any>,

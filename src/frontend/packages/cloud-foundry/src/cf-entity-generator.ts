@@ -119,6 +119,7 @@ import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { spaceApplicationAddRemoveReducer } from './store/reducers/application-add-remove-reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
+import { EnvVarStratosProject } from '../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -210,7 +211,13 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
     actionBuilders: quotaDefinitionActionBuilder
   });
 }
-
+function parseStratosProject(data) {
+  try {
+    return JSON.parse(data.STRATOS_PROJECT);
+  } catch (e) {
+    return { error: 'JSON_PARSE_ERROR' };
+  }
+}
 function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appEnvVarsEntityType,
@@ -225,25 +232,39 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
       }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' })
     },
-    globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
-      console.log(data)
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       if (data) {
-        if (data.entity) {
-          data.entity.cfGuid = endpointGuid;
-          data.entity.guid = guid;
-        } else {
-          data.cfGuid = endpointGuid;
-          data.guid = guid;
+        const mapped = {
+          entity: {
+            ...data,
+            cfGuid: endpointGuid
+          },
+          metadata: {
+            guid: action.guid
+          }
+        };
+        if (data.STRATOS_PROJECT) {
+          const STRATOS_PROJECT = parseStratosProject(data);
+          mapped.entity.STRATOS_PROJECT = STRATOS_PROJECT;
         }
+        return mapped;
       }
       return data;
-    }
-  };
+    },
+    // TODO: we need a envvar type
+  } as IStratosEntityDefinition<any, APIResource, any>;
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
     ],
-    actionBuilders: appEnvVarActionBuilders
+    actionBuilders: appEnvVarActionBuilders,
+    entityBuilder: {
+      getMetadata: ent => ({
+        name: `Application environment variables (${ent.metadata.guid}).`,
+        guid: ent.metadata.guid
+      }),
+      getGuid: metadata => metadata.guid,
+    }
   });
 }
 
