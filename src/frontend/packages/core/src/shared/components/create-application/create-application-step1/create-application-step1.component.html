@@ -17,8 +17,7 @@
       (selectionChange)="cfOrgSpaceService.org.select.next($event.value)" required placeholder="Organization" name="org"
       [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)">
       <mat-option *ngFor="let org of cfOrgSpaceService.org.list$ | async" [value]="org.guid">
-        {{org.guid}}
-        <!-- <span>{{ org.name }}</span> -->
+        <span>{{ org.name }}</span>
       </mat-option>
     </mat-select>
     <mat-error *ngIf="!(hasOrgs$ | async)">
