@@ -211,30 +211,21 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
     actionBuilders: quotaDefinitionActionBuilder
   });
 }
-function parseStratosProject(data) {
-  try {
-    return JSON.parse(data.STRATOS_PROJECT);
-  } catch (e) {
-    return { error: 'JSON_PARSE_ERROR' };
-  }
-}
+
 function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appEnvVarsEntityType,
     schema: cfEntityFactory(appEnvVarsEntityType),
     endpoint: endpointDefinition,
     paginationConfig: {
-      getEntitiesFromResponse: (response) => Object.keys(response).map(key => response[key]),
+      getEntitiesFromResponse: (response) => response,
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).length,
-      getEntityCount: (responses: JetstreamResponse<CFResponse>) => Object.keys(responses).reduce((count, endpointGuid) => {
-        const endpoint: CFResponse = responses[endpointGuid];
-        return count + endpoint.total_results;
-      }, 0),
-      getPaginationParameters: (page: number) => ({ page: page + '' })
+      getEntityCount: (responses: JetstreamResponse<CFResponse>) => 1,
+      getPaginationParameters: (page: number) => ({ page: '1' })
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       if (data) {
-        const mapped = {
+        return {
           entity: {
             ...data,
             cfGuid: endpointGuid
@@ -243,13 +234,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
             guid: action.guid
           }
         };
-        if (data.STRATOS_PROJECT) {
-          const STRATOS_PROJECT = parseStratosProject(data);
-          mapped.entity.STRATOS_PROJECT = STRATOS_PROJECT;
-        }
-        return mapped;
       }
-      return data;
+      return {};
     },
     // TODO: we need a envvar type
   } as IStratosEntityDefinition<any, APIResource, any>;
