@@ -3,10 +3,10 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { RouteEvents, UnmapRoute } from '../../../cloud-foundry/src/actions/route.actions';
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { ClearPaginationOfEntity } from '../actions/pagination.actions';
-import { APISuccessOrFailedAction } from '../types/request.types';
+import { RouteEvents, UnmapRoute } from '../../actions/route.actions';
+import { CFAppState } from '../../cf-app-state';
+import { ClearPaginationOfEntity } from '../../../../store/src/actions/pagination.actions';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
 @Injectable()
 export class RouteEffect {

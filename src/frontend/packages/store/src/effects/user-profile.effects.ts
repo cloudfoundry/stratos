@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
@@ -18,13 +17,13 @@ import {
 } from '../actions/user-profile.actions';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo } from '../types/user-profile.types';
+import { DispatchOnlyAppState } from './../app-state';
 import {
   IRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from './../types/request.types';
-
 
 
 const { proxyAPIVersion } = environment;
@@ -42,7 +41,7 @@ export class UserProfileEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store<DispatchOnlyAppState>,
     private httpClient: HttpClient,
   ) { }
 

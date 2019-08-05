@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
@@ -31,6 +30,7 @@ import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoi
 import { GetSystemInfo } from '../actions/system.actions';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';
 import { SessionData } from '../types/auth.types';
+import { DispatchOnlyAppState } from '../app-state';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -43,7 +43,7 @@ export class AuthEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store<DispatchOnlyAppState>,
     private logger: LoggerService
   ) { }
 
@@ -153,7 +153,7 @@ export class AuthEffect {
     return false;
   }
 
-  private rehydrateDashboardState(store: Store<CFAppState>, sessionData: SessionData) {
+  private rehydrateDashboardState(store: Store<DispatchOnlyAppState>, sessionData: SessionData) {
     const storage = localStorage || window.localStorage;
     // We use the username to key the session storage. We could replace this with the users id?
     if (storage && sessionData.user) {

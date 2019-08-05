@@ -27,7 +27,7 @@ import {
 } from '../../../../core/test-framework/store-test-helper';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { APIResponse } from '../../actions/request.actions';
-import { IRequestTypeState } from '../../app-state';
+import { InternalAppState, IRequestTypeState } from '../../app-state';
 import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validateEntityRelations } from './entity-relations';
@@ -192,7 +192,7 @@ describe('Entity Relations - validate -', () => {
       entityRelationMissingQuotaUrl
     );
 
-    inject([Store], (iStore: Store<CFAppState>) => {
+    inject([Store], (iStore: Store<InternalAppState>) => {
       const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
       const res = validateEntityRelations({
@@ -336,7 +336,7 @@ describe('Entity Relations - validate -', () => {
         true
       );
 
-      inject([Store], (iStore: Store<CFAppState>) => {
+      inject([Store], (iStore: Store<InternalAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
         const res = validateEntityRelations({
@@ -467,7 +467,7 @@ describe('Entity Relations - validate -', () => {
         endpointType: CF_ENDPOINT_TYPE
       } as IRequestAction, 'fetch', 1, 1);
 
-      inject([Store], (iStore: Store<CFAppState>) => {
+      inject([Store], (iStore: Store<InternalAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
 
         const res = validateEntityRelations({

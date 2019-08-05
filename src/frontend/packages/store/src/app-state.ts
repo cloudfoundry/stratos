@@ -58,6 +58,8 @@ export type AppRoutingOnlyAppState = Pick<AppState, 'routing'>;
 
 export type ListsOnlyAppState = Pick<AppState, 'lists'>;
 
+export type DispatchOnlyAppState = unknown;
+
 // =======================================================================================
 // Internal types below - these should NOT be used outside of the store package
 // =======================================================================================
