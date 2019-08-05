@@ -240,7 +240,6 @@ describe('Entity Relations - validate -', () => {
 
     function advancedSetup(mapStore: (store) => Partial<CFAppState> = mStore => mStore) {
       const store = mapStore(createBasicStore());
-      console.log(store);
       setup(store);
       // store = getInitialTestStoreState();
       // store.requestData[orgEntity.entityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');

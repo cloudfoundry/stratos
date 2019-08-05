@@ -9,7 +9,7 @@ import { ApplicationService } from '../../../../core/src/features/applications/a
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '../../../../core/test-framework/store-test-helper';
 import { AppStoreExtensionsModule } from '../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
@@ -29,7 +29,7 @@ describe('AutoscalerTabExtensionComponent', () => {
         AppStoreExtensionsModule,
         CfAutoscalerTestingModule,
         BrowserAnimationsModule,
-        createBasicStoreModule(),
+        createEmptyStoreModule(),
         CoreModule,
         SharedModule,
         NgxChartsModule,
@@ -53,4 +53,6 @@ describe('AutoscalerTabExtensionComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  afterAll(() => { });
 });

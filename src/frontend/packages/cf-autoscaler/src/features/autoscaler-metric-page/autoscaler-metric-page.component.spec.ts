@@ -8,7 +8,7 @@ import { ApplicationService } from '../../../../core/src/features/applications/a
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '../../../../core/test-framework/store-test-helper';
 import { AppStoreExtensionsModule } from '../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { AutoscalerMetricPageComponent } from './autoscaler-metric-page.component';
@@ -21,11 +21,10 @@ describe('AutoscalerMetricPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [AutoscalerMetricPageComponent],
       imports: [
-        AppStoreExtensionsModule,
         CfAutoscalerTestingModule,
         AppStoreExtensionsModule,
         BrowserAnimationsModule,
-        createBasicStoreModule(),
+        createEmptyStoreModule(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
@@ -49,7 +48,10 @@ describe('AutoscalerMetricPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // TODO: Fix after metrics has been sorted (cause of `Cannot read property 'getEntityMonitor' of undefined` test failure)
   it('Blocked', () => {
-    fail('Blocked: Requires metrics to be working (specifically metrics entities)')
+    fail('Blocked: Requires metrics to be working (specifically metrics entities)');
   });
+
+  afterAll(() => { });
 });

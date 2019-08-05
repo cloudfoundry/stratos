@@ -4,11 +4,13 @@ import { StoreModule } from '@ngrx/store';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { createUserRoleInOrg } from '../../cloud-foundry/src/store/types/user.types';
 import { appReducers } from '../../store/src/reducers.module';
+import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
+import {
+  getDefaultPaginationEntityState,
+} from '../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
-import { getDefaultPaginationEntityState } from '../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
-import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
@@ -22015,6 +22017,12 @@ export function createBasicStoreModule(initialState: Partial<CFAppState> = getIn
     {
       initialState
     }
+  );
+}
+
+export function createEmptyStoreModule(): ModuleWithProviders {
+  return StoreModule.forRoot(
+    appReducers
   );
 }
 

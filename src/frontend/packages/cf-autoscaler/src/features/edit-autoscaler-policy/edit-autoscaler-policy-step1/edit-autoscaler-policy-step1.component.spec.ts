@@ -8,7 +8,7 @@ import { ApplicationService } from '../../../../../core/src/features/application
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { AppStoreExtensionsModule } from '../../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
@@ -25,7 +25,7 @@ describe('EditAutoscalerPolicyStep1Component', () => {
         AppStoreExtensionsModule,
         CfAutoscalerTestingModule,
         BrowserAnimationsModule,
-        createBasicStoreModule(),
+        createEmptyStoreModule(),
         CoreModule,
         SharedModule,
         RouterTestingModule,

@@ -12,7 +12,8 @@ import {
 import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from './card-autoscaler-default.component';
 
 describe('CardAutoscalerDefaultComponent', () => {
@@ -27,10 +28,11 @@ describe('CardAutoscalerDefaultComponent', () => {
         RunningInstancesComponent,
       ],
       imports: [
+        CfAutoscalerTestingModule,
         CoreModule,
         CommonModule,
         BrowserAnimationsModule,
-        createBasicStoreModule(),
+        createEmptyStoreModule(),
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
