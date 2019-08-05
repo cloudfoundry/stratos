@@ -1,14 +1,27 @@
 import { Action } from '@ngrx/store';
-import { getTestCatalogueEntity } from '../../../../core/test-framework/entity-catalogue-test-helpers';
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { InternalEventSeverity } from '../../types/internal-events.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { JetstreamError } from './handle-multi-endpoints.pipe';
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { EntitySchema } from '../../helpers/entity-schema';
+
 
 describe('endpoint-error-handler', () => {
   it('correct actions are fried', (done) => {
-    const entity = getTestCatalogueEntity();
+    const entityType = 'key';
+
+    const entity = new StratosBaseCatalogueEntity({
+      type: entityType,
+      schema: new EntitySchema(
+        entityType,
+        'endpoint'
+      ),
+      label: 'Entity',
+      labelPlural: 'Entities',
+    });
+    console.log(entity)
     const endpointGuid = '123GUID';
     const requestType = 'fetch';
     const error = new JetstreamError(
