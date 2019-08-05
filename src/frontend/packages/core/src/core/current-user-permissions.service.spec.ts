@@ -59,19 +59,6 @@ describe('CurrentUserPermissionsService', () => {
             ScopeStrings.CF_WRITE_SCOPE,
             ScopeStrings.STRATOS_CHANGE_PASSWORD,
             ScopeStrings.CF_READ_SCOPE,
-
-
-            // ScopeStrings.CF_ADMIN_GROUP,
-            // ScopeStrings.CF_READ_ONLY_ADMIN_GROUP,
-            // ScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP ,
-            // ScopeStrings.SCIM_READ
-
-
-            // 'cloud_controller.read',
-            // 'password.write',
-            // 'cloud_controller.write',
-            // 'openid',
-            // 'uaa.user'
           ]
         },
         metricsAvailable: false,
@@ -111,17 +98,6 @@ describe('CurrentUserPermissionsService', () => {
             ScopeStrings.CF_READ_ONLY_ADMIN_GROUP,
             ScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP,
             ScopeStrings.SCIM_READ
-
-            // 'openid',
-            // 'scim.read',
-            // 'cloud_controller.admin',
-            // 'uaa.user',
-            // 'routing.router_groups.read',
-            // 'cloud_controller.read',
-            // 'password.write',
-            // 'cloud_controller.write',
-            // 'doppler.firehose',
-            // 'scim.write'
           ]
         },
         metricsAvailable: false,
@@ -140,7 +116,6 @@ describe('CurrentUserPermissionsService', () => {
           error_message: null,
           url: '/v2/config/feature_flags/user_org_creation',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          // guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0'
         },
         metadata: {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0',
@@ -640,20 +615,6 @@ describe('CurrentUserPermissionsService', () => {
             ScopeStrings.CF_READ_SCOPE,
             ScopeStrings.STRATOS_CHANGE_PASSWORD,
             ScopeStrings.SCIM_READ
-
-            // 'scim.me',
-            // 'openid',
-            // 'profile',
-            // 'roles',
-            // 'uaa.user',
-            // 'notification_preferences.write',
-            // 'cloud_controller.read',
-            // 'password.write',
-            // 'approvals.me',
-            // 'cloud_controller.write',
-            // 'cloud_controller_service_permissions.read',
-            // 'oauth.approvals',
-            // 'stratos.user'
           ],
         },
         cf: {

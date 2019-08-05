@@ -241,14 +241,6 @@ describe('Entity Relations - validate -', () => {
     function advancedSetup(mapStore: (store) => Partial<CFAppState> = mStore => mStore) {
       const store = mapStore(createBasicStore());
       setup(store);
-      // store = getInitialTestStoreState();
-      // store.requestData[orgEntity.entityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-      // store.request[orgEntity.entityKey][orgGuid] = getDefaultRequestState();
-      // TestBed.configureTestingModule({
-      //   imports: [
-      //     createBasicStoreModule(store),
-      //   ]
-      // });
       allEntities = store.requestData;
       newEntities = null;
       apiResponse = null;
@@ -317,7 +309,6 @@ describe('Entity Relations - validate -', () => {
       const childSpaceToOrgRelation = new EntityTreeRelation(cfEntityFactory(spaceEntityType), true, 'spaces', 'entity.spaces', [
         childRoutesToSpaceRelation
       ]);
-      // const parentOrgToSpaceRelation = new EntityTreeRelation(getOrgAction.entity[0], true, null, '', [childSpaceToOrgRelation]);
 
       const getSpaceRoutesAction = new FetchRelationPaginatedAction(
         cfGuid,
