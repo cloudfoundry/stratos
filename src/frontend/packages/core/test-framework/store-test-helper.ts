@@ -12,7 +12,7 @@ import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
 /* tslint:disable */
-export function getInitialTestStoreState(): CFAppState {
+export function getInitialTestStoreState(): InternalAppState {
   // const entities = getEntitiesFromExtensions();
   const state = getDefaultInitialTestStoreState();
   // entities.forEach(entity => {
@@ -22007,7 +22007,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
 }
 
 /* tslint:enable */
-export function createBasicStoreModule(initialState: Partial<CFAppState> = getInitialTestStoreState()): ModuleWithProviders {
+export function createBasicStoreModule(initialState: InternalAppState= getInitialTestStoreState()): ModuleWithProviders {
   return StoreModule.forRoot(
     appReducers,
     {

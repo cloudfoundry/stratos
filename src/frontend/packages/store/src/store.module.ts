@@ -5,17 +5,14 @@ import { EffectsModule } from '@ngrx/effects';
 
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
-import { AppVariablesEffect } from '../../cloud-foundry/src/store/effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
-import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 import { RequestEffect } from './effects/request.effects';
-import { RouteEffect } from './effects/route.effects';
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
@@ -45,19 +42,16 @@ import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-clien
       UpdateAppEffects,
       PaginationEffects,
       ActionHistoryEffect,
-      AppVariablesEffect,
       RouterEffect,
       SystemEffects,
       SnackBarEffects,
       SetClientFilterEffect,
-      CloudFoundryEffects,
       MetricsEffect,
       RequestEffect,
       UserProfileEffect,
       UsersRolesEffects,
       RecursiveDeleteEffect,
       AppEffects,
-      RouteEffect,
       UserFavoritesEffect,
     ]),
   ]
