@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import {
   AppMetadataTypes,
   GetAppStatsAction,
@@ -58,6 +58,7 @@ import {
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -281,6 +282,7 @@ export class ApplicationService {
     this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
 
     this.isUpdatingApp$ = this.appEntityService.entityObs$.pipe(map(a => {
+      console.log(a.entityRequestInfo);
       const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
       const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
       return !!updatingRoot.busy || !!updatingSection.busy;
@@ -340,7 +342,7 @@ export class ApplicationService {
 
     // Create an Observable that can be used to determine when the update completed
     const actionState = selectUpdateInfo(
-      applicationEntityType,
+      entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, applicationEntityType),
       this.appGuid,
       UpdateExistingApplication.updateKey
     );
