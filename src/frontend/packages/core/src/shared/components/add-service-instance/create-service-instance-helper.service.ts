@@ -186,7 +186,7 @@ export class CreateServiceInstanceHelper {
     let paginationKey;
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, `${spaceGuid}-${servicePlanGuid}`);
-      const q = [new QParam('service_plan_guid', servicePlanGuid, QParamJoiners.colon)];
+      const q = [new QParam('service_plan_guid', servicePlanGuid, QParamJoiners.colon).toString()];
       action = new GetServiceInstancesForSpace(spaceGuid, cfGuid, paginationKey, q);
     } else if (servicePlanGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, servicePlanGuid);
