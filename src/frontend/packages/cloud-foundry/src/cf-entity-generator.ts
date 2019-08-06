@@ -110,7 +110,7 @@ import { CFResponse } from './store/types/cf-api.types';
 import { APIResource } from '../../store/src/types/api.types';
 import { updateAppSummaryRoutesReducer, routeReducer } from './store/reducers/routes.reducer';
 import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
-import { AppStat, AppStats } from './store/types/app-metadata.types';
+import { AppStat } from './store/types/app-metadata.types';
 import { IStratosEntityDefinition, StratosEndpointExtensionDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { userReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
 import { GitCommit, GitRepo, GitBranch } from './store/types/git.types';
@@ -119,7 +119,6 @@ import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { spaceApplicationAddRemoveReducer } from './store/reducers/application-add-remove-reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
-import { EnvVarStratosProject } from '../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));

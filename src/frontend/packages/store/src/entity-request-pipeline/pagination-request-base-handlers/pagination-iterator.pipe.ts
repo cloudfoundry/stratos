@@ -3,7 +3,12 @@ import { range, of, Observable, combineLatest } from 'rxjs';
 import { mergeMap, reduce, map, tap } from 'rxjs/operators';
 import { PaginatedAction } from '../../types/pagination.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
-import { JetstreamResponse, ActionDispatcher, SuccessfulApiResponseDataMapper, PagedJetstreamResponse } from '../entity-request-pipeline.types';
+import {
+  JetstreamResponse,
+  ActionDispatcher,
+  SuccessfulApiResponseDataMapper,
+  PagedJetstreamResponse
+} from '../entity-request-pipeline.types';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 

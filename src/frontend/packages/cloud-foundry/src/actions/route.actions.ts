@@ -11,7 +11,11 @@ import {
   spaceEntityType,
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
-import { EntityInlineParentAction, createEntityRelationKey, createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
+import {
+  EntityInlineParentAction,
+  createEntityRelationKey,
+  createEntityRelationPaginationKey
+} from '../entity-relations/entity-relations.types';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';

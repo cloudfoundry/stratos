@@ -29,7 +29,8 @@ function setRequestParams(
   // TODO See if this works without this.
   // This is cf specific so needs to be moved and a hook added if it's needed.
   // if (params.hasOwnProperty('q')) {
-  //   // We need to create a series of q values that contain all from `requestParams` and `params`. Any that exist in `requestParams` should
+  //   // We need to create a series of q values that contain
+  // all from `requestParams` and `params`. Any that exist in `requestParams` should
   //   // be overwritten in `params`
 
   //   // Clear `requestParams` `q` and start afresh

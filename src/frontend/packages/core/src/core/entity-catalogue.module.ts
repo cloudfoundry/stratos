@@ -10,7 +10,7 @@ import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
 export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
 
 @NgModule({})
-export class EffectsFeatureModule {
+export class EntityCatalogueFeatureModule {
   constructor(
     store: Store<any>,
     reducerManager: ReducerManager,
@@ -32,7 +32,7 @@ export class EntityCatalogueModule {
   // https://github.com/cloudfoundry-incubator/stratos/issues/3741
   static forFeature(entityFactory: () => StratosBaseCatalogueEntity[]): ModuleWithProviders {
     return {
-      ngModule: EffectsFeatureModule,
+      ngModule: EntityCatalogueFeatureModule,
       providers: [
         ReducerManager,
         Store,

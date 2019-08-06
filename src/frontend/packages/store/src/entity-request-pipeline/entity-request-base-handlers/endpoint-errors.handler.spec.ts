@@ -21,7 +21,7 @@ describe('endpoint-error-handler', () => {
       label: 'Entity',
       labelPlural: 'Entities',
     });
-    console.log(entity)
+    console.log(entity);
     const endpointGuid = '123GUID';
     const requestType = 'fetch';
     const error = new JetstreamError(

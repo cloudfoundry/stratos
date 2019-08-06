@@ -1,6 +1,10 @@
 import { Store } from '@ngrx/store';
 
-import { cfEntityFactory, serviceInstancesEntityType, serviceInstancesWithSpaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  cfEntityFactory,
+  serviceInstancesEntityType,
+  serviceInstancesWithSpaceEntityType
+} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstances } from '../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {

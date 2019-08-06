@@ -21,8 +21,8 @@ export function roleInfoFromSessionReducer(
   return {
     ...state,
     cf: cfRoles
-  }
-  //return applyInternalScopes(state, cfRoles, user);
+  };
+  // return applyInternalScopes(state, cfRoles, user);
 }
 
 export function updateNewlyConnectedEndpoint(
