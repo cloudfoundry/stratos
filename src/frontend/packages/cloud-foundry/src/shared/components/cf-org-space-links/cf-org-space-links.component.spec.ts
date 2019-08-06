@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
 import { CfOrgSpaceLabelService } from '../../../../../core/src/shared/services/cf-org-space-label.service';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceLinksComponent } from './cf-org-space-links.component';
 
 
@@ -17,7 +17,7 @@ describe('CfOrgSpaceLinksComponent', () => {
       declarations: [CfOrgSpaceLinksComponent],
       imports: [
         RouterTestingModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ]
     })
       .compileComponents();

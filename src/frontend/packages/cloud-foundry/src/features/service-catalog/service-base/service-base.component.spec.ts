@@ -1,8 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import {
+  BaseTestModules,
+  generateCfStoreModules,
+} from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
 import { ServiceBaseComponent } from './service-base.component';
@@ -19,7 +21,7 @@ describe('ServiceBaseComponent', () => {
         DatePipe],
       imports: [
         BaseTestModules,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
       ]
     })
       .compileComponents();

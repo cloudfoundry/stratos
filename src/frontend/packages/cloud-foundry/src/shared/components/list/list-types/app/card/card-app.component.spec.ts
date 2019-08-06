@@ -8,7 +8,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { APIResourceMetadata } from '../../../../../../../../store/src/types/api.types';
 import { CardAppComponent } from './card-app.component';
 
@@ -21,7 +21,7 @@ describe('CardAppComponent', () => {
       imports: [
         CoreModule,
         RouterTestingModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         SharedModule
       ],
       providers: [

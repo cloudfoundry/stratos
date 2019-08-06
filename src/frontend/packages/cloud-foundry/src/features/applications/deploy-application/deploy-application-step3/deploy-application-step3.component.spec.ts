@@ -7,7 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { DeployApplicationStep3Component } from './deploy-application-step3.component';
 
 describe('DeployApplicationStep3Component', () => {
@@ -16,19 +16,19 @@ describe('DeployApplicationStep3Component', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DeployApplicationStep3Component ],
+      declarations: [DeployApplicationStep3Component],
       imports: [
         CommonModule,
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         BrowserAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

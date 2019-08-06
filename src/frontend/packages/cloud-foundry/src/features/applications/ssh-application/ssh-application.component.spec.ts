@@ -5,7 +5,7 @@ import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../application.service';
 import { SshApplicationComponent } from './ssh-application.component';
 
@@ -20,7 +20,7 @@ describe('SshApplicationComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

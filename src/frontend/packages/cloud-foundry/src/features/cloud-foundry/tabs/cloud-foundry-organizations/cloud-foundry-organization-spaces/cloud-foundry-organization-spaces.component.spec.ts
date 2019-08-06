@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../core/tab-nav.service';
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import {
@@ -18,7 +18,7 @@ describe('CloudFoundryOrganizationSpacesComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationSpacesComponent],
-      imports: [...BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         ...generateTestCfEndpointServiceProvider(),
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },

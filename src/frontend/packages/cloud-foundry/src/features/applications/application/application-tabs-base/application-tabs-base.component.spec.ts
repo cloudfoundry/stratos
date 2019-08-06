@@ -16,8 +16,8 @@ import {
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../../core/test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
 import { ApplicationEnvVarsHelper } from './tabs/build-tab/application-env-vars.service';
 
@@ -40,7 +40,7 @@ describe('ApplicationTabsBaseComponent', () => {
         BrowserAnimationsModule,
         RouterTestingModule,
         MDAppModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         HttpClientModule,
         HttpClientTestingModule
       ],

@@ -11,8 +11,8 @@ import {
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
+import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CliInfoApplicationComponent } from './cli-info-application.component';
 
@@ -31,7 +31,7 @@ describe('CliInfoApplicationComponent', () => {
         SharedModule,
         MDAppModule,
         RouterTestingModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ],
       providers: [
         generateTestEntityServiceProvider(

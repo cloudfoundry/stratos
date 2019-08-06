@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { DeployApplicationFsComponent } from './deploy-application-fs.component';
 
 describe('DeployApplicationFsComponent', () => {
@@ -13,16 +13,16 @@ describe('DeployApplicationFsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DeployApplicationFsComponent ],
+      declarations: [DeployApplicationFsComponent],
       imports: [
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         BrowserAnimationsModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

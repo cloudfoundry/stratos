@@ -3,7 +3,7 @@ import { inject, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CfAppConfigService } from './cf-app-config.service';
 
 
@@ -18,7 +18,7 @@ describe('CfAppConfigService', () => {
         CommonModule,
         CoreModule,
         SharedModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ]
     });
   });

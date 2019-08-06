@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CfEndpointsMissingComponent } from './cf-endpoints-missing.component';
 
 
@@ -16,7 +16,7 @@ describe('CfEndpointsMissingComponent', () => {
       imports: [
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         RouterTestingModule
       ]
     })

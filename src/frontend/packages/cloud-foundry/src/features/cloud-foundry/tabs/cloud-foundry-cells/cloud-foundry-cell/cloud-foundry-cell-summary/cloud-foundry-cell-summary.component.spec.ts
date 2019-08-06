@@ -11,7 +11,9 @@ import {
   MetricsChartHelpers,
 } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../../../../../core/src/shared/services/metrics-range-selector.types';
-import { BaseTestModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
@@ -66,7 +68,7 @@ describe('CloudFoundryCellSummaryComponent', () => {
       declarations: [
         CloudFoundryCellSummaryComponent
       ],
-      imports: [...BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         {
           provide: CloudFoundryCellService,

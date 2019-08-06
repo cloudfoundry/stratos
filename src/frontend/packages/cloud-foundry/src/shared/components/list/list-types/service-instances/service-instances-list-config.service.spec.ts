@@ -1,8 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../../core/test-framework/store-test-helper';
+import {
+  BaseTestModules,
+  generateCfStoreModules,
+} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../../features/service-catalog/services.service.mock';
 import { ServiceInstancesListConfigService } from './service-instances-list-config.service';
@@ -16,7 +18,7 @@ describe('ServiceInstancesListConfigService', () => {
         DatePipe],
       imports: [
         BaseTestModules,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
       ]
     });
   });

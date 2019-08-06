@@ -5,7 +5,7 @@ import { applicationEntityType, cfEntityFactory } from '../../../../../cloud-fou
 import { CustomImportModule } from '../../../../../core/src/custom-import.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import { ApplicationsModule } from '../applications.module';
 import { ApplicationDeleteComponent } from './application-delete.component';
@@ -18,7 +18,7 @@ describe('ApplicationDeleteComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...BaseTestModules,
+        ...generateCfBaseTestModules(),
         ApplicationsModule
       ],
       providers: [

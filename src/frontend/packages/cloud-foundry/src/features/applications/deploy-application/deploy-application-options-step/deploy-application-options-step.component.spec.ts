@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -22,7 +22,7 @@ describe('DeployApplicationOptionsStepComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         NoopAnimationsModule,
       ]
     })

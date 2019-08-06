@@ -12,7 +12,7 @@ import { InternalEventMonitorFactory } from '../../../../../core/src/shared/moni
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
@@ -38,7 +38,7 @@ describe('CreateApplicationComponent', () => {
         SharedModule,
         HttpClientModule,
         HttpClientTestingModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
       ],
       providers: [
         PaginationMonitorFactory,

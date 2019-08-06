@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesConfirmComponent } from './manage-users-confirm.component';
@@ -18,7 +18,7 @@ describe('UsersRolesConfirmComponent', () => {
       imports: [
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         NoopAnimationsModule,
         HttpModule
       ],

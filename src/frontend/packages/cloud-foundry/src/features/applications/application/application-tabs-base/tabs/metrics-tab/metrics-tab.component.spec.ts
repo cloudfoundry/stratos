@@ -11,8 +11,8 @@ import { SharedModule } from '../../../../../../../../core/src/shared/shared.mod
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
+import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../../core/test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { MetricsTabComponent } from './metrics-tab.component';
 
@@ -25,7 +25,7 @@ describe('MetricsTabComponent', () => {
     TestBed.configureTestingModule({
       declarations: [MetricsTabComponent],
       imports: [
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         SharedModule,
         MDAppModule,
         NoopAnimationsModule

@@ -3,9 +3,9 @@ import { HttpModule } from '@angular/http';
 
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import {
+  generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
 import { CfUserService } from './cf-user.service';
 
 describe('CfUserService', () => {
@@ -13,12 +13,12 @@ describe('CfUserService', () => {
     TestBed.configureTestingModule({
       imports: [
         SharedModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         HttpModule
       ],
       providers: [
         ...generateTestCfEndpointServiceProvider()
-        ]
+      ]
     });
   });
 

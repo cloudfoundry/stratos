@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
+import { CloudFoundryTestingModule } from '../../cloud-foundry/src/cloud-foundry-test.module';
 import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import {
   CloudFoundryEndpointService,
@@ -13,6 +14,7 @@ import { UserInviteService } from '../../cloud-foundry/src/features/cloud-foundr
 import { CfOrgSpaceDataService } from '../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../cloud-foundry/src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
+import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import {
@@ -39,8 +41,10 @@ import { MultilineTitleComponent } from '../src/shared/components/multiline-titl
 import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../src/shared/shared.module';
-import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
+import { createBasicStoreModule, createEmptyStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
+
+// TODO: RC Move this file to cf package
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -118,9 +122,9 @@ export function generateTestCfServiceProvider() {
 }
 
 export const BaseTestModulesNoShared = [
+  ...generateCfStoreModules(),
   RouterTestingModule,
   CoreModule,
-  createBasicStoreModule(),
   NoopAnimationsModule,
   HttpModule
 ];
@@ -129,3 +133,28 @@ export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];
+
+export function generateCfStoreModules(initialStore?: CFAppState) {
+  return [
+    CloudFoundryTestingModule,
+    AppStoreExtensionsModule,
+    !!initialStore ? createBasicStoreModule(initialStore) : createEmptyStoreModule(),
+  ];
+}
+
+export function generateCfBaseTestModulesNoShared(initialStore?: CFAppState) {
+  return [
+    ...generateCfStoreModules(initialStore),
+    RouterTestingModule,
+    CoreModule,
+    NoopAnimationsModule,
+    HttpModule
+  ];
+}
+
+export function generateCfBaseTestModules(initialStore?: CFAppState) {
+  return [
+    ...generateCfBaseTestModulesNoShared(initialStore),
+    SharedModule
+  ];
+}

@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 import { DeployApplicationStep21Component } from './deploy-application-step2-1.component';
 
@@ -19,7 +19,7 @@ describe('DeployApplicationStep21Component', () => {
       imports: [
         CoreModule,
         SharedModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ]
     })
       .compileComponents();

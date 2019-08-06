@@ -1,7 +1,7 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { inject, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
@@ -29,7 +29,7 @@ describe('CfSpaceUsersListConfigService', () => {
         HttpHandler,
         CloudFoundryEndpointService
       ],
-      imports: [...BaseTestModules]
+      imports: generateCfBaseTestModules()
     });
   });
 

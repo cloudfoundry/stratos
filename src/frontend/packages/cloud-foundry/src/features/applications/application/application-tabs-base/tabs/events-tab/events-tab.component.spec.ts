@@ -1,19 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
+import { EntityCatalogueHelpers } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
+import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { getInitialTestStoreState } from '../../../../../../../../core/test-framework/store-test-helper';
-import { appReducers } from '../../../../../../../../store/src/reducers.module';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { appEventEntityType } from '../../../../../../cf-entity-factory';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
-
 
 
 describe('EventsTabComponent', () => {
@@ -27,7 +28,7 @@ describe('EventsTabComponent', () => {
   const initialState = { ...getInitialTestStoreState() };
   initialState.pagination = {
     ...initialState.pagination,
-    cfEvent: {
+    [EntityCatalogueHelpers.buildEntityKey(appEventEntityType, CF_ENDPOINT_TYPE)]: {
       ['app-events:mockCfGuidmockAppGuid']: {
         pageCount: 1,
         currentPage: 1,
@@ -60,15 +61,10 @@ describe('EventsTabComponent', () => {
         ApplicationEnvVarsHelper,
       ],
       imports: [
+        ...generateCfStoreModules(initialState),
         MDAppModule,
         SharedModule,
         CoreModule,
-        StoreModule.forRoot(
-          appReducers,
-          {
-            initialState
-          }
-        ),
         NoopAnimationsModule,
       ]
     })

@@ -22,7 +22,7 @@ import {
 } from '../../../../../../core/src/shared/components/running-instances/running-instances.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CardAppInstancesComponent } from './card-app-instances.component';
 
@@ -44,7 +44,7 @@ describe('CardAppInstancesComponent', () => {
         CoreModule,
         CommonModule,
         BrowserAnimationsModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

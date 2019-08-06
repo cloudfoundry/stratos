@@ -17,8 +17,8 @@ import {
   ApplicationServiceMock,
   generateTestApplicationServiceProvider,
 } from '../../../../../core/test-framework/application-service-helper';
+import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
@@ -37,7 +37,7 @@ describe('EditApplicationComponent', () => {
         BrowserAnimationsModule,
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         RouterTestingModule,
         HttpClientModule,
         HttpClientTestingModule,

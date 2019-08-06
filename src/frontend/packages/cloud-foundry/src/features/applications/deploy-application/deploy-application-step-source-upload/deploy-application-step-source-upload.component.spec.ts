@@ -6,7 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { DeployApplicationStepSourceUploadComponent } from './deploy-application-step-source-upload.component';
 
 describe('DeployApplicationStepSourceUploadComponent', () => {
@@ -15,18 +15,18 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DeployApplicationStepSourceUploadComponent ],
+      declarations: [DeployApplicationStepSourceUploadComponent],
       imports: [
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         BrowserAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

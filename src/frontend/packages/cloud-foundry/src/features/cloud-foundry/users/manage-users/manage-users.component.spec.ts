@@ -7,7 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserServiceTestProvider } from '../../../../../../core/test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from './cf-roles.service';
@@ -28,7 +28,7 @@ describe('UsersRolesComponent', () => {
       imports: [
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
+        generateCfStoreModules(),
         NoopAnimationsModule,
         RouterTestingModule,
         HttpModule

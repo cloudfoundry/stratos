@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
@@ -16,7 +16,7 @@ describe('QuotaDefinitionComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [QuotaDefinitionComponent],
-      imports: [...BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         {
           provide: ActivatedRoute,

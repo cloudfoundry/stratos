@@ -6,7 +6,7 @@ import {
   ServicePlanPublicComponent,
 } from '../../../../../../../../core/src/shared/components/service-plan-public/service-plan-public.component';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../../../features/service-catalog/services.service.mock';
 import { TableCellAServicePlanPublicComponent } from './table-cell-service-plan-public.component';
@@ -24,7 +24,7 @@ describe('TableCellAServicePlanPublicComponent', () => {
       imports: [
         StoreModule,
         CoreModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ],
       providers: [
         EntityMonitorFactory,

@@ -16,8 +16,8 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
+import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../../core/test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
@@ -37,7 +37,7 @@ describe('LogStreamTabComponent', () => {
         NoopAnimationsModule,
         RouterTestingModule,
         MDAppModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ],
       declarations: [
         LogViewerComponent,

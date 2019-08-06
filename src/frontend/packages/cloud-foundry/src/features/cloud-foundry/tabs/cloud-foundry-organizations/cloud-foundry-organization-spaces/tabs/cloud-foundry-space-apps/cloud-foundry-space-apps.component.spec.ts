@@ -1,7 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundrySpaceServiceMock,
 } from '../../../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
@@ -15,7 +17,7 @@ describe('CloudFoundrySpaceAppsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySpaceAppsComponent],
-      imports: [...BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         DatePipe,
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock }
