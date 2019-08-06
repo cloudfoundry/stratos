@@ -17,7 +17,7 @@ import {
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { generateCFEntities } from '../../../../cloud-foundry/src/cf-entity-generator';
 import { CFRequestDataState } from '../../../../cloud-foundry/src/cf-entity-types';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../core/src/core/entity-catalogue.module';
+import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../core/src/core/entity-catalogue-test.module';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import {

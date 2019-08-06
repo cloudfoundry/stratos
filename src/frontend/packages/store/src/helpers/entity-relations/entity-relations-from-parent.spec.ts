@@ -8,7 +8,7 @@ import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { generateCFEntities } from '../../../../cloud-foundry/src/cf-entity-generator';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../core/src/core/entity-catalogue.module';
+import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../core/src/core/entity-catalogue-test.module';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import {

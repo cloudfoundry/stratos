@@ -9,25 +9,6 @@ import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 
-export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
-
-@NgModule({})
-export class EffectsFeatureTestModule {
-  constructor(
-    reducerManager: ReducerManager,
-    @Inject(TEST_CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogueEntity[],
-  ) {
-    entityCatalogue.clear();
-    const entities = [].concat.apply([], entityGroups) as StratosBaseCatalogueEntity[];
-    entities.forEach(entity => entityCatalogue.register(entity));
-
-    const dataReducer = requestDataReducerFactory(requestActions);
-    const extraReducers = entityCatalogue.getAllEntityRequestDataReducers();
-    const chainedReducers = chainApiReducers(dataReducer, extraReducers);
-    reducerManager.addReducer('requestData', chainedReducers);
-  }
-}
-
 export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
 
 @NgModule({})

@@ -11,8 +11,8 @@ import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
 
 class EntityCatalogue {
-  private entities: Map<string, StratosCatalogueEntity> = new Map();
-  private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
+  protected entities: Map<string, StratosCatalogueEntity> = new Map();
+  protected endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
     if (this.endpoints.has(endpoint.entityKey)) {
@@ -98,11 +98,6 @@ class EntityCatalogue {
     }
   }
 
-  public clear() {
-    this.endpoints.clear();
-    this.entities.clear();
-  }
-
   /* tslint:disable:max-line-length */
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     entityConfig: EntityCatalogueEntityConfig
@@ -184,6 +179,12 @@ class EntityCatalogue {
 }
 
 // Only to be used for tests
-export class TestEntityCatalogue extends EntityCatalogue { }
+export class TestEntityCatalogue extends EntityCatalogue {
+  public clear() {
+    this.endpoints.clear();
+    this.entities.clear();
+  }
+}
 
-export const entityCatalogue = new EntityCatalogue();
+/* tslint:disable-next-line:no-string-literal  */
+export const entityCatalogue = !!window['__karma__'] ? new TestEntityCatalogue() : new EntityCatalogue();

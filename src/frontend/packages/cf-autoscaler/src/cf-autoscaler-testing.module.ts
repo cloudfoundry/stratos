@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { generateCFEntities } from '../../cloud-foundry/src/cf-entity-generator';
 import { CATALOGUE_ENTITIES, EffectsFeatureModule } from '../../core/src/core/entity-catalogue.module';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue, TestEntityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { generateASEntities } from './store/autoscaler-entity-generator';
 
 @NgModule({
@@ -11,8 +11,8 @@ import { generateASEntities } from './store/autoscaler-entity-generator';
     providers: [
       {
         provide: CATALOGUE_ENTITIES, useFactory: () => {
-          // Ensure the catalogue is empty before providing possibly duplicate entries
-          entityCatalogue.clear();
+          const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
+          testEntityCatalogue.clear();
           return [
             ...generateASEntities(),
             ...generateCFEntities()
