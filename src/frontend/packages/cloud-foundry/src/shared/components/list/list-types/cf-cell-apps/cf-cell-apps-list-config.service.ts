@@ -5,13 +5,11 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { IApp, ISpace } from '../../../../../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  BaseCfListConfig,
-} from '../../../../../../../core/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 
 @Injectable()

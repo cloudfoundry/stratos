@@ -3,11 +3,9 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  BaseCfListConfig,
-} from '../../../../../../../core/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfStacksCardComponent } from './cf-stacks-card/cf-stacks-card.component';
 import { CfStacksDataSource } from './cf-stacks-data-source';
 

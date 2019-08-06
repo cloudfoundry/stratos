@@ -1,7 +1,9 @@
+import {
+  IListDataSource,
+} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { CardTypes } from '../../../../../../../core/src/shared/components/list/list-cards/card/card.component';
+import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { CardTypes } from '../../list-cards/card/card.component';
-import { IListConfig, ListViewTypes } from '../../list.component.types';
 
 
 export class BaseCfListConfig<T> implements IListConfig<T> {

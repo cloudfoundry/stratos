@@ -1,5 +1,6 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { IService, IServiceExtra } from '../../../core/cf-api-svc.types';
+import { Component, Input, OnInit } from '@angular/core';
+
+import { IService, IServiceExtra } from '../../../../../core/src/core/cf-api-svc.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 
 @Component({
