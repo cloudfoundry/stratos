@@ -21,6 +21,7 @@ describe('Metrics', () => {
     endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
     endpointsPage.register();
     tileSelector.select('Metrics');
+    register.stepper.waitForStep('Register');
     expect(register.isRegisterDialog()).toBeTruthy();
     expect(register.stepper.canNext()).toBeFalsy();
 
@@ -42,7 +43,11 @@ describe('Metrics', () => {
 
     expect(register.stepper.canNext()).toBeTruthy();
     register.stepper.next();
+
+    // Skipping connect step
+    register.stepper.waitForStep('Connect (Optional)');
     register.stepper.next();
+
     expect(register.isRegisterDialog()).toBeFalsy();
 
     // Check that we have one row
