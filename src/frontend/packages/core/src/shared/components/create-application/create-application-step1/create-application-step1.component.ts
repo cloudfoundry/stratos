@@ -8,12 +8,14 @@ import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/opera
 import { SetCFDetails } from '../../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
+  CfOrgSpaceDataService,
+} from '../../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
+import {
   getSpacesFromOrgWithRole,
 } from '../../../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-create-application-step1',

@@ -9,12 +9,12 @@ import {
   applicationEntityType,
   cfEntityFactory,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
+import { AppEnvVarsState } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { AppEnvVarsState } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 

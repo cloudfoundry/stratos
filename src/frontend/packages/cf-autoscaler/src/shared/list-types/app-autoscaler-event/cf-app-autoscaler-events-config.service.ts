@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
