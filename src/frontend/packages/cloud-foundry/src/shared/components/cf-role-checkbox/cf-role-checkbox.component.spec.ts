@@ -18,8 +18,8 @@ describe('CfRoleCheckboxComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
-        generateCfStoreModules(),
         NoopAnimationsModule,
         HttpModule
       ],

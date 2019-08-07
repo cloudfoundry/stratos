@@ -18,8 +18,8 @@ describe('TableCellSelectOrgComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
-        generateCfStoreModules(),
         NoopAnimationsModule,
         HttpModule
       ],

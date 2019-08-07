@@ -12,8 +12,8 @@ describe('CfUserService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         SharedModule,
-        generateCfStoreModules(),
         HttpModule
       ],
       providers: [

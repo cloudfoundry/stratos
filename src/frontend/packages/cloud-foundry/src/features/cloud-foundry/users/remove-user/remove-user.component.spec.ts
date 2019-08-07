@@ -21,9 +21,9 @@ describe('RemoveUserComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         NoopAnimationsModule,
         RouterTestingModule,
         HttpModule

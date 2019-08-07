@@ -34,13 +34,13 @@ describe('ApplicationTabsBaseComponent', () => {
         ApplicationTabsBaseComponent,
       ],
       imports: [
+        ...generateCfStoreModules(),
         StoreModule,
         CoreModule,
         SharedModule,
         BrowserAnimationsModule,
         RouterTestingModule,
         MDAppModule,
-        generateCfStoreModules(),
         HttpClientModule,
         HttpClientTestingModule
       ],

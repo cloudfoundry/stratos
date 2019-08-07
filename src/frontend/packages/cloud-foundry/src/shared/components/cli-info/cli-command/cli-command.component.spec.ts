@@ -14,9 +14,9 @@ describe('CliCommandComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CliCommandComponent, CodeBlockComponent],
       imports: [
+        ...generateCfStoreModules(),
         MDAppModule,
         CoreModule,
-        generateCfStoreModules(),
       ]
     })
       .compileComponents();

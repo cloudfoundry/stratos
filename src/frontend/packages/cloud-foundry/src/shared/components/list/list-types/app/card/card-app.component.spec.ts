@@ -19,9 +19,9 @@ describe('CardAppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         RouterTestingModule,
-        generateCfStoreModules(),
         SharedModule
       ],
       providers: [

@@ -14,10 +14,9 @@ describe('SpaceRolesListWrapperComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        // CloudFoundryModule
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         NoopAnimationsModule
       ],
       providers: [

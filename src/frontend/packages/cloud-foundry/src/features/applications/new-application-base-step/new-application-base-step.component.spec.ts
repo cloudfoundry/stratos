@@ -15,9 +15,9 @@ describe('NewApplicationBaseStepComponent', () => {
     TestBed.configureTestingModule({
       declarations: [NewApplicationBaseStepComponent],
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         RouterTestingModule
       ],
       providers: [TabNavService]

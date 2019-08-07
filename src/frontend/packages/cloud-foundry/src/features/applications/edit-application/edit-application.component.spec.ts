@@ -34,10 +34,10 @@ describe('EditApplicationComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditApplicationComponent],
       imports: [
+        ...generateCfStoreModules(),
         BrowserAnimationsModule,
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         RouterTestingModule,
         HttpClientModule,
         HttpClientTestingModule,

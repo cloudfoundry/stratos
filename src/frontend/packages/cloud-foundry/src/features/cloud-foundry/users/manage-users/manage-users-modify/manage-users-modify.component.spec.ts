@@ -18,9 +18,9 @@ describe('UsersRolesModifyComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         NoopAnimationsModule,
         HttpModule
       ],

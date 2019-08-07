@@ -17,6 +17,7 @@ import { ISpace } from '../../../../core/cf-api.types';
 import { PermissionStrings } from '../../../../core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
+// TODO: RC move
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',

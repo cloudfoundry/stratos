@@ -1,12 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
-import {
-  BaseTestModules,
-  generateCfStoreModules,
-} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../../features/service-catalog/services.service.mock';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ServiceInstancesListConfigService } from './service-instances-list-config.service';
 
 describe('ServiceInstancesListConfigService', () => {
@@ -15,10 +13,11 @@ describe('ServiceInstancesListConfigService', () => {
       providers: [
         ServiceInstancesListConfigService,
         { provide: ServicesService, useClass: ServicesServiceMock },
-        DatePipe],
+        DatePipe,
+        ServiceActionHelperService
+      ],
       imports: [
-        BaseTestModules,
-        generateCfStoreModules(),
+        generateCfBaseTestModules(),
       ]
     });
   });

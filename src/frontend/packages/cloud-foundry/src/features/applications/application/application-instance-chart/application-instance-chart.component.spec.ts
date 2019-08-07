@@ -15,7 +15,7 @@ xdescribe('ApplicationInstanceChartComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        generateCfStoreModules(),
+        ...generateCfStoreModules(),
         RouterTestingModule,
         CoreModule,
         SharedModule,

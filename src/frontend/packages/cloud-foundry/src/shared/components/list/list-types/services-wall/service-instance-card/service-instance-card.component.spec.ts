@@ -8,14 +8,16 @@ import {
 } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceInstanceCardComponent } from './service-instance-card.component';
 
-describe('ServiceInstanceCardComponent', () => {
+fdescribe('ServiceInstanceCardComponent', () => {
   let component: ServiceInstanceCardComponent;
   let fixture: ComponentFixture<ServiceInstanceCardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [ServiceInstanceCardComponent, CfOrgSpaceLinksComponent],
       imports: generateCfBaseTestModules(),
       providers: [
         ServicesWallService,

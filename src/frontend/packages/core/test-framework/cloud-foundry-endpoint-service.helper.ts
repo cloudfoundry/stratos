@@ -14,6 +14,7 @@ import { UserInviteService } from '../../cloud-foundry/src/features/cloud-foundr
 import { CfOrgSpaceDataService } from '../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../cloud-foundry/src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
+import { createUserRoleInOrg } from '../../cloud-foundry/src/store/types/user.types';
 import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
@@ -41,7 +42,7 @@ import { MultilineTitleComponent } from '../src/shared/components/multiline-titl
 import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../src/shared/shared.module';
-import { createBasicStoreModule, createEmptyStoreModule, testSCFGuid } from './store-test-helper';
+import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 // TODO: RC Move this file to cf package
@@ -121,6 +122,7 @@ export function generateTestCfServiceProvider() {
   };
 }
 
+// TODO: RC CF Specific
 export const BaseTestModulesNoShared = [
   ...generateCfStoreModules(),
   RouterTestingModule,
@@ -135,14 +137,70 @@ export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemCompon
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];
 
 // TODO: RC Move these to somewhere more cf test generic
-export function generateCfStoreModules(initialStore?: CFAppState) {
+function generateCfTopLevelStoreEntities(): Partial<CFAppState> {
+  return {
+    createApplication: {
+      cloudFoundryDetails: null,
+      name: '',
+      nameCheck: {
+        checking: false,
+        available: true,
+        name: ''
+      }
+    },
+    createServiceInstance: {
+      name: '',
+      servicePlanGuid: '',
+      spaceGuid: '',
+      orgGuid: '',
+      spaceScoped: false
+    },
+    deployApplication: {
+      cloudFoundryDetails: null,
+      applicationSource: {
+        type: {
+          id: '',
+          name: ''
+        }
+      },
+      projectExists: {
+        checking: false,
+        exists: false,
+        name: '',
+        error: false
+      }
+    },
+    manageUsersRoles: {
+      users: [],
+      cfGuid: '',
+      newRoles: {
+        name: '',
+        orgGuid: '',
+        spaces: {},
+        permissions: createUserRoleInOrg(
+          undefined,
+          undefined,
+          undefined,
+          undefined
+        )
+      },
+      changedRoles: []
+    },
+  };
+}
 
+export function generateCfStoreModules(initialStore?: CFAppState) {
+  const store = initialStore || generateCfTopLevelStoreEntities();
   return [
     CloudFoundryTestingModule,
     AppStoreExtensionsModule,
-    !!initialStore ? createBasicStoreModule(initialStore) : createEmptyStoreModule(),
+    createBasicStoreModule(store),
   ];
 }
+
+// BaseTestModulesNoShared
+// generateCfBaseTestModulesNoShared
+// ./src/frontend/packages/cloud-foundry
 
 export function generateCfBaseTestModulesNoShared(initialStore?: CFAppState) {
   return [

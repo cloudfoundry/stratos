@@ -21,8 +21,8 @@ describe('TableCellSpaceRoleComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
-        generateCfStoreModules(),
         NoopAnimationsModule,
         HttpModule
       ],

@@ -25,9 +25,9 @@ describe('MapRoutesComponent', () => {
           DatePipe
         ],
         imports: [
+          ...generateCfStoreModules(),
           CoreModule,
           SharedModule,
-          generateCfStoreModules(),
           NoopAnimationsModule,
           RouterTestingModule
         ]

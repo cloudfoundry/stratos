@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
 import { ServiceSummaryComponent } from './service-summary.component';
@@ -15,7 +15,7 @@ describe('ServiceSummaryComponent', () => {
       declarations: [
         ServiceSummaryComponent,
       ],
-      imports: [BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },
       ]

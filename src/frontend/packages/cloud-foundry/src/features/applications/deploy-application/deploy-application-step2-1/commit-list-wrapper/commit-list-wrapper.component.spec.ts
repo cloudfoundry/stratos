@@ -19,10 +19,10 @@ describe('CommitListWrapperComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CommitListWrapperComponent],
       imports: [
+        ...generateCfStoreModules(),
         CommonModule,
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         HttpModule,
         HttpClientModule,
         HttpClientTestingModule

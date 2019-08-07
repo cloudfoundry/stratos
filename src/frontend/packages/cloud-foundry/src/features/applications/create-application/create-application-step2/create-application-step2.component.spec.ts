@@ -5,11 +5,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConnectionBackend, Http, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { appReducers } from '../../../../../../store/src/reducers.module';
+import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CreateApplicationStep2Component } from './create-application-step2.component';
 
 describe('CreateApplicationStep2Component', () => {
@@ -22,13 +21,11 @@ describe('CreateApplicationStep2Component', () => {
         CreateApplicationStep2Component
       ],
       imports: [
+        ...generateCfStoreModules(),
         CommonModule,
         CoreModule,
         SharedModule,
         BrowserAnimationsModule,
-        StoreModule.forRoot(
-          appReducers
-        ),
         HttpModule,
         HttpClientModule,
         HttpClientTestingModule,

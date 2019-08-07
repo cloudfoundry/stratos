@@ -14,9 +14,9 @@ describe('CfEndpointsMissingComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         RouterTestingModule
       ]
     })

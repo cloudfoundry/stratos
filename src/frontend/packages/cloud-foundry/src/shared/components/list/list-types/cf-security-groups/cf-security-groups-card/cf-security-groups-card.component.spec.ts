@@ -5,7 +5,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
-  BaseTestModulesNoShared,
+  generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
   MetadataCardTestComponents,
 } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
@@ -19,7 +19,7 @@ describe('CfSecurityGroupsCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CfSecurityGroupsCardComponent, MetadataCardTestComponents, BooleanIndicatorComponent, AppChipsComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointService()]
     })
       .compileComponents();

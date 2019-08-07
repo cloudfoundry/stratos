@@ -5,6 +5,7 @@ import {
   generateCfBaseTestModules,
 } from '../../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { getCfSpaceServiceMock } from '../../../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
+import { ServiceActionHelperService } from '../../../../../../../shared/data-services/service-action-helper.service';
 import { CloudFoundrySpaceUserServiceInstancesComponent } from './cloud-foundry-space-user-service-instances.component';
 
 describe('CloudFoundrySpaceUserServiceInstancesComponent', () => {
@@ -15,7 +16,7 @@ describe('CloudFoundrySpaceUserServiceInstancesComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySpaceUserServiceInstancesComponent],
       imports: generateCfBaseTestModules(),
-      providers: [getCfSpaceServiceMock, DatePipe]
+      providers: [getCfSpaceServiceMock, DatePipe, ServiceActionHelperService]
     })
       .compileComponents();
   }));

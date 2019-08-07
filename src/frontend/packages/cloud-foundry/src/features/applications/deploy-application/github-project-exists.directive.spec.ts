@@ -17,10 +17,10 @@ describe('GithubProjectExistsDirective', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CommonModule,
         CoreModule,
         SharedModule,
-        generateCfStoreModules(),
         HttpClientModule,
         HttpClientTestingModule
       ],

@@ -10,7 +10,7 @@ import { generateCfStoreModules } from '../../../../../../core/test-framework/cl
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationStepSourceUploadComponent } from './deploy-application-step-source-upload.component';
 
-fdescribe('DeployApplicationStepSourceUploadComponent', () => {
+describe('DeployApplicationStepSourceUploadComponent', () => {
   let component: DeployApplicationStepSourceUploadComponent;
   let fixture: ComponentFixture<DeployApplicationStepSourceUploadComponent>;
 
@@ -18,7 +18,7 @@ fdescribe('DeployApplicationStepSourceUploadComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DeployApplicationStepSourceUploadComponent],
       imports: [
-        generateCfStoreModules(),
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         RouterTestingModule,

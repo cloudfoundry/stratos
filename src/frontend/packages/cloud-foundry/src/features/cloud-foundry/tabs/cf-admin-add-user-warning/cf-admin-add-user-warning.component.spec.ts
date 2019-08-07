@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfAdminAddUserWarningComponent } from './cf-admin-add-user-warning.component';
 
@@ -12,7 +13,7 @@ describe('CfAdminAddUserWarningComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CfAdminAddUserWarningComponent],
       imports: generateCfBaseTestModules(),
-      providers: [ActiveRouteCfOrgSpace]
+      providers: [ActiveRouteCfOrgSpace, CfUserService]
     })
       .compileComponents();
   }));

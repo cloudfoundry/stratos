@@ -5,14 +5,9 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, throwError as observableThrowError } from 'rxjs';
 import { catchError, map, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import {
-  AppNameFree,
-  AppNameTaken,
-  CHECK_NAME,
-  IsNewAppNameFree,
-} from '../../actions/create-applications-page.actions';
-import { CFAppState } from '../../cf-app-state';
 import { environment } from '../../../../core/src/environments/environment.prod';
+import { AppNameFree, AppNameTaken, CHECK_NAME, IsNewAppNameFree } from '../../actions/create-applications-page.actions';
+import { CFAppState } from '../../cf-app-state';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
 
@@ -59,4 +54,7 @@ export class CreateAppPageEffects {
     }));
 }
 
-export const selectNewAppState = (state: CFAppState): CreateNewApplicationState => state.createApplication;
+export const selectNewAppState = (state: CFAppState): CreateNewApplicationState => {
+  console.log('selectNewAppState: ', Object.keys(state));
+  return state.createApplication;
+};

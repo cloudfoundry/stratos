@@ -14,12 +14,15 @@ describe('CfUserPermissionCellComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        CfOrgPermissionCellComponent
+      ],
       providers: [
         ...generateTestCfEndpointServiceProvider()
       ],
       imports: [
+        ...generateCfStoreModules(),
         SharedModule,
-        generateCfStoreModules(),
         HttpModule
       ]
     })

@@ -25,10 +25,10 @@ describe('DeployApplicationStep2Component', () => {
         GithubProjectExistsDirective
       ],
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        generateCfStoreModules(),
         BrowserAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule

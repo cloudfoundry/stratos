@@ -30,7 +30,7 @@ describe('CreateApplicationComponent', () => {
         CreateApplicationStep3Component
       ],
       imports: [
-        generateCfStoreModules(),
+        ...generateCfStoreModules(),
         CommonModule,
         CoreModule,
         HttpModule,
@@ -60,4 +60,6 @@ describe('CreateApplicationComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  afterAll(() => { });
 });

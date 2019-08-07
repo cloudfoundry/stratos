@@ -26,10 +26,10 @@ describe('AddRouteStepperComponent', () => {
           MapRoutesComponent
         ],
         imports: [
+          ...generateCfStoreModules(),
           SteppersModule,
           CoreModule,
           SharedModule,
-          generateCfStoreModules(),
           RouterTestingModule,
           NoopAnimationsModule
         ],

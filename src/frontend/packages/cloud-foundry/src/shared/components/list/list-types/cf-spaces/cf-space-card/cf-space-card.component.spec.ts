@@ -5,7 +5,7 @@ import { ConfirmationDialogService } from '../../../../../../../../core/src/shar
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
-  BaseTestModulesNoShared,
+  generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
   MetadataCardTestComponents,
@@ -20,7 +20,7 @@ describe('CfSpaceCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CfOrgCardComponent, ...MetadataCardTestComponents],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
         CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory, ConfirmationDialogService]
     })

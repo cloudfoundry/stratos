@@ -13,6 +13,7 @@ import {
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { UserInviteService } from '../../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSpaceUsersListConfigService } from './cf-space-users-list-config.service';
 
 
@@ -27,7 +28,8 @@ describe('CfSpaceUsersListConfigService', () => {
         UserInviteService,
         HttpClient,
         HttpHandler,
-        CloudFoundryEndpointService
+        CloudFoundryEndpointService,
+        CfUserService
       ],
       imports: generateCfBaseTestModules()
     });

@@ -4,9 +4,11 @@ import { generateCfBaseTestModules } from '../../../../../../core/test-framework
 import {
   CfCellsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
+import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellsComponent } from './cloud-foundry-cells.component';
+
 
 describe('CloudFoundryCellsComponent', () => {
   let component: CloudFoundryCellsComponent;
@@ -26,7 +28,8 @@ describe('CloudFoundryCellsComponent', () => {
           }),
         },
         CloudFoundryEndpointService,
-        ActiveRouteCfOrgSpace
+        ActiveRouteCfOrgSpace,
+        CfUserService
       ],
     })
       .compileComponents();

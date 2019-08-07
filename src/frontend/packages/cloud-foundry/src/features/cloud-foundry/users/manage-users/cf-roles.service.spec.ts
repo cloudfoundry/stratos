@@ -13,7 +13,7 @@ describe('CfRolesService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        generateCfStoreModules(),
+        ...generateCfStoreModules(),
         SharedModule,
         CloudFoundryModule,
         HttpModule,

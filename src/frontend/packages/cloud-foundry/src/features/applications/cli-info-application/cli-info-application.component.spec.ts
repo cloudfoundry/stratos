@@ -28,7 +28,7 @@ describe('CliInfoApplicationComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CliInfoApplicationComponent],
       imports: [
-        generateCfStoreModules(),
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         MDAppModule,

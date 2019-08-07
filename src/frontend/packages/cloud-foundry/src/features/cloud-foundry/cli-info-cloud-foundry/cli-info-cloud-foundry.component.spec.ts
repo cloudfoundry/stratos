@@ -5,6 +5,8 @@ import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import { CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry.component';
@@ -15,7 +17,7 @@ describe('CliInfoCloudFoundryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CliInfoCloudFoundryComponent],
+      declarations: [CliInfoCloudFoundryComponent, CliInfoComponent, CliCommandComponent],
       imports: generateCfBaseTestModules(),
       providers: [
         CloudFoundryEndpointService,

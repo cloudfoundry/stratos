@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import {
@@ -23,9 +23,7 @@ import { CfUserListConfigService } from './cf-user-list-config.service';
 describe('CfUserListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        ...BaseTestModules
-      ],
+      imports: generateCfBaseTestModules(),
       providers: [
         {
           provide: CfUserListConfigService,

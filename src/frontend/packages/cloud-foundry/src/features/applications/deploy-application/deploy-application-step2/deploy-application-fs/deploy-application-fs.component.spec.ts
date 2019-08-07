@@ -15,10 +15,10 @@ describe('DeployApplicationFsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DeployApplicationFsComponent],
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        generateCfStoreModules(),
         BrowserAnimationsModule
       ]
     })

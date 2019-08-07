@@ -44,9 +44,9 @@ describe('CardAppUsageComponent', () => {
         TableCellStatusDirective,
       ],
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         BrowserAnimationsModule,
-        generateCfStoreModules(),
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

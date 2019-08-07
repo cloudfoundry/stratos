@@ -17,13 +17,11 @@ import {
 } from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  RunningInstancesComponent,
-} from '../../../../../../core/src/shared/components/running-instances/running-instances.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { CardAppInstancesComponent } from './card-app-instances.component';
 
 describe('CardAppInstancesComponent', () => {

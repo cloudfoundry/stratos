@@ -5,7 +5,7 @@ import { ConfirmationDialogService } from '../../../../../../../core/src/shared/
 import { EntityMonitorFactory } from '../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
-  BaseTestModulesNoShared,
+  generateCfBaseTestModulesNoShared,
   generateTestCfUserServiceProvider,
 } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import {
@@ -35,7 +35,7 @@ describe('CfOrgUsersListConfigService', () => {
         CloudFoundryEndpointService,
         ConfirmationDialogService
       ],
-      imports: [...BaseTestModulesNoShared]
+      imports: generateCfBaseTestModulesNoShared()
     });
   });
 

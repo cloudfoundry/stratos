@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellServicePlanComponent } from './table-cell-service-plan.component';
 
 describe('TableCellServicePlanComponent', () => {
@@ -10,7 +12,7 @@ describe('TableCellServicePlanComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellServicePlanComponent],
-      imports: [...BaseTestModulesNoShared]
+      imports: generateCfBaseTestModulesNoShared()
     })
       .compileComponents();
   }));

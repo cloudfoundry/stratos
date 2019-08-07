@@ -1,7 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import { BaseTestModulesNoShared } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CompactServiceInstanceCardComponent } from './compact-service-instance-card.component';
 
 describe('CompactServiceInstanceCardComponent', () => {
@@ -11,7 +13,7 @@ describe('CompactServiceInstanceCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CompactServiceInstanceCardComponent, AppChipsComponent],
-      imports: [BaseTestModulesNoShared]
+      imports: generateCfBaseTestModulesNoShared()
     })
       .compileComponents();
   }));

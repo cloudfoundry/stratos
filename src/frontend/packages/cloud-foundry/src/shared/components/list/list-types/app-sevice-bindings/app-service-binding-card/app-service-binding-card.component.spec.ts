@@ -11,8 +11,9 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import {
   ApplicationEnvVarsHelper,
@@ -26,10 +27,7 @@ describe('AppServiceBindingCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [
-        ...BaseTestModules,
-        createBasicStoreModule(),
-      ],
+      imports: generateCfBaseTestModules(),
       providers: [
         EntityMonitorFactory,
         generateTestApplicationServiceProvider('1', '1'),

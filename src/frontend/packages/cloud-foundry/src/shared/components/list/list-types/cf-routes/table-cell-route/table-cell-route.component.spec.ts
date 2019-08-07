@@ -14,8 +14,8 @@ describe('TableCellRouteComponent', () => {
     TestBed.configureTestingModule({
       declarations: [TableCellRouteComponent],
       imports: [
+        ...generateCfStoreModules(),
         RouterTestingModule,
-        generateCfStoreModules(),
       ]
     })
       .compileComponents();
