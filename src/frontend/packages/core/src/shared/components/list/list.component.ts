@@ -69,6 +69,7 @@ import {
   defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
   IListConfig,
+  IListFilter,
   IMultiListAction,
   IOptionalAction,
   ListConfig,
@@ -176,6 +177,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     };
   private filterString = '';
   private sortColumns: ITableColumn<T>[];
+  // private filterColumns: ITableColumn<T>[];
+  private filterColumns: IListFilter<T>[];
+  private filterSelected: IListFilter<T>;
 
   private paginationWidgetToStore: Subscription;
   private filterWidgetToStore: Subscription;
@@ -392,6 +396,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       return column.sort;
     });
 
+    this.filterColumns = this.config.getFilters();
+    if (!this.filterSelected) {
+      this.filterSelected = this.filterColumns.find(filterConfig => {
+        return filterConfig.default === true;
+      });
+    }
+
     const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
       this.headerSort.value = sort.field;
       this.headerSort.direction = sort.direction;
@@ -561,6 +572,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.uberSub,
       this.multiFilterChangesSub
     );
+    if (this.filterColumns) {
+      this.filterColumns.forEach(filterConfig => filterConfig.dataSource.destroy());
+    }
     if (this.dataSource) {
       this.dataSource.destroy();
     }
@@ -589,6 +603,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       direction,
       field
     });
+  }
+
+  updateListFilter(filterSelected: IListFilter<T>, filterString: string) {
+    this.config.setFilter(filterSelected.id);
+    this.initialise();
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
