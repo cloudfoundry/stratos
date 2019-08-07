@@ -80,5 +80,7 @@ export class HelmReleaseServicesListConfig implements IListConfig<HelmReleaseSer
   public getMultiActions = () => [];
   public getSingleActions = () => [];
   public getMultiFiltersConfigs = () => [];
+  public getFilters = () => [];
+  public setFilter = (id: string) => null;
   public getDataSource = () => this.dataSource;
 }

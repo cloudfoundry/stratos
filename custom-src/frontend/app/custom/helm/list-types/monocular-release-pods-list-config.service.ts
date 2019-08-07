@@ -98,5 +98,7 @@ export class HelmReleasePodsListConfig implements IListConfig<HelmReleasePod> {
   public getMultiActions = () => [];
   public getSingleActions = () => [];
   public getMultiFiltersConfigs = () => [];
+  public getFilters = () => [];
+  public setFilter = (id: string) => null;
   public getDataSource = () => this.dataSource;
 }

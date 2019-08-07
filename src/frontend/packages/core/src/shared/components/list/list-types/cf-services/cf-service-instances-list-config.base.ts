@@ -193,6 +193,8 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   getMultiActions = () => [];
   getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
+  getFilters = () => [];
+  setFilter = (id: string) => null;
   getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => null;
 

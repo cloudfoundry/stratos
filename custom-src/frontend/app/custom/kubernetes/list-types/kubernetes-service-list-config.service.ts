@@ -60,5 +60,6 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
   getSingleActions = () => [];
   getColumns = () => this.columns;
   getMultiFiltersConfigs = () => [];
-
+  getFilters = () => [];
+  setFilter = (id: string) => null;
 }

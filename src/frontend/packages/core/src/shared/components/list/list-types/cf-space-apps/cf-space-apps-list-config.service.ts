@@ -88,5 +88,7 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   getMultiActions = () => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
+  getFilters = () => [];
+  setFilter = (id: string) => null;
   getDataSource = () => this.dataSource;
 }

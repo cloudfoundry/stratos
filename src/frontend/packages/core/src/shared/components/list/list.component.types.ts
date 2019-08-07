@@ -48,6 +48,11 @@ export interface IListConfig<T> {
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   /**
+   * Collection of filters
+   */
+  getFilters: () => IListFilter<T>[];
+  setFilter: (id: string) => void;
+  /**
    * Fetch an observable that will emit once the underlying config components have been created. For instance if the data source requires
    * something from the store which requires an async call
    */
@@ -120,6 +125,14 @@ export interface IListMultiFilterConfig {
   select: BehaviorSubject<any>;
 }
 
+export interface IListFilter<T> {
+  dataSource: ListDataSource<T>;
+  default?: boolean;
+  id: string;
+  label: string;
+  placeholder: string;
+}
+
 export interface IListMultiFilterConfigItem {
   label: string;
   item: any;
@@ -144,6 +157,8 @@ export class ListConfig<T> implements IListConfig<T> {
   getColumns = (): ITableColumn<T>[] => null;
   getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getFilters = (): IListFilter<T>[] => [];
+  setFilter = (id: string) => null;
   getInitialised = () => observableOf(true);
 }
 

@@ -52,5 +52,6 @@ export class CfAppEventsConfigService extends ListConfig<APIResource> implements
   getColumns = () => this.columns;
   getDataSource = () => this.eventSource;
   getMultiFiltersConfigs = () => [];
-
+  getFilters = () => [];
+  setFilter = (id: string) => null;
 }

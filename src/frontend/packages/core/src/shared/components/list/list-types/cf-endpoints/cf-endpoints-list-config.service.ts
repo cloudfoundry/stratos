@@ -49,5 +49,7 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   public getMultiActions = () => [];
   public getSingleActions = () => [];
   public getMultiFiltersConfigs = () => [];
+  public getFilters = () => [];
+  public setFilter = (id: string) => null;
   public getDataSource = () => this.dataSource;
 }

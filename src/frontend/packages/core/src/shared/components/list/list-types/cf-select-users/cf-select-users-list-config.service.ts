@@ -132,6 +132,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
+  getFilters = () => [];
+  setFilter = (id: string) => null;
   getDataSource = () => this.dataSource;
   getInitialised = () => this.initialised;
 }

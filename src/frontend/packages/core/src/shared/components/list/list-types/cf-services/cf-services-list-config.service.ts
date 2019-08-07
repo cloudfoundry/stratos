@@ -84,5 +84,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   getMultiActions = () => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
+  getFilters = () => [];
+  setFilter = (id: string) => null;
   getDataSource = () => this.dataSource;
 }

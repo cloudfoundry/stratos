@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
+import { IListConfig, IListFilter, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { ConditionType, KubernetesNode } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
@@ -11,13 +11,15 @@ import { getConditionSort } from '../kube-sort.helper';
 import { ConditionCellComponent, SubtleConditionCellComponent } from './condition-cell/condition-cell.component';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
-import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
+import {
+  LabelsKubernetesNodesDataSource,
+  NameKubernetesNodesDataSource,
+  IPAddressKubernetesNodesDataSource
+} from './kubernetes-nodes-data-source';
 import { NodePodCountComponent } from './node-pod-count/node-pod-count.component';
 
 @Injectable()
 export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
-  nodesDataSource: KubernetesNodesDataSource;
-
   columns: Array<ITableColumn<KubernetesNode>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
@@ -68,6 +70,8 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       cellFlex: '5',
     },
   ];
+  filters: IListFilter<KubernetesNode>[];
+  filterSelected: IListFilter<KubernetesNode>;
 
   pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
@@ -82,14 +86,39 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   getMultiActions = () => [];
   getSingleActions = () => [];
   getColumns = () => this.columns;
-  getDataSource = () => this.nodesDataSource;
+  getDataSource = () => this.filterSelected.dataSource;
   getMultiFiltersConfigs = () => [];
+  getFilters = (): IListFilter<KubernetesNode>[] => this.filters;
+  setFilter = (id: string) => {
+    this.filterSelected = this.filters.find(filter => filter.id === id);
+  }
 
   constructor(
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
   ) {
-    this.nodesDataSource = new KubernetesNodesDataSource(store, kubeId, this);
-  }
+    this.filters = [
+      {
+        dataSource: new NameKubernetesNodesDataSource(store, kubeId, this),
+        default: true,
+        id: 'name',
+        label: 'Name',
+        placeholder: 'Filter by Name'
+      },
+      {
+        dataSource: new LabelsKubernetesNodesDataSource(store, kubeId, this),
+        id: 'labels',
+        label: 'Labels',
+        placeholder: 'Filter by Labels'
+      },
+      {
+        dataSource: new IPAddressKubernetesNodesDataSource(store, kubeId, this),
+        id: 'ip-address',
+        label: 'IP Address',
+        placeholder: 'Filter by IP Address'
+      }
+    ];
 
+    this.filterSelected = this.filters.find(filter => filter.default === true);
+  }
 }
