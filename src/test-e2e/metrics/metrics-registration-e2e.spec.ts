@@ -46,6 +46,7 @@ describe('Metrics', () => {
 
     // Skipping connect step
     register.stepper.waitForStep('Connect (Optional)');
+    register.stepper.waitForStepNotBusy();
     register.stepper.next();
 
     expect(register.isRegisterDialog()).toBeFalsy();
