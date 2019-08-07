@@ -6,7 +6,7 @@ import { generateCfStoreModules } from '../../../../../../core/test-framework/cl
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 import { DeployApplicationStep21Component } from './deploy-application-step2-1.component';
 
-fdescribe('DeployApplicationStep21Component', () => {
+describe('DeployApplicationStep21Component', () => {
   let component: DeployApplicationStep21Component;
   let fixture: ComponentFixture<DeployApplicationStep21Component>;
 

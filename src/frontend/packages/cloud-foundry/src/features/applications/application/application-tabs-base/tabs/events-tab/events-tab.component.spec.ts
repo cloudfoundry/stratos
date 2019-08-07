@@ -22,7 +22,7 @@ import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.serv
 import { EventsTabComponent } from './events-tab.component';
 
 
-fdescribe('EventsTabComponent', () => {
+describe('EventsTabComponent', () => {
   class ApplicationServiceMock {
     cfGuid = 'mockCfGuid';
     appGuid = 'mockAppGuid';

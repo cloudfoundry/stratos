@@ -30,7 +30,8 @@ fdescribe('CloudFoundryTabsBaseComponent', () => {
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
   beforeEach(
     async(() => {
-      const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity>>([
+      console.log('_________________________________________________________________________________');
+      const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
         [
           endpointEntitySchema,
           [{
@@ -78,4 +79,6 @@ fdescribe('CloudFoundryTabsBaseComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  afterAll(() => { });
 });

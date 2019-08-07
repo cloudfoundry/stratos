@@ -8,7 +8,7 @@ import {
 } from '../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from './cf-user.service';
 
-describe('CfUserService', () => {
+fdescribe('CfUserService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [

@@ -3,7 +3,12 @@ import { compose } from '@ngrx/store';
 import { CFAppState } from '../../cf-app-state';
 import { DeployApplicationSource, DeployApplicationState, ProjectExists } from '../types/deploy-application.types';
 
-export const selectDeployAppState = (state: CFAppState) => state.deployApplication;
+export const selectDeployAppState = (state: CFAppState) => {
+  console.log('selectDeployAppState: ', Object.keys(state));
+  console.log('selectDeployAppState: ', state.deployApplication);
+  console.log('selectDeployAppState: ', state.deployApplication.applicationSource);
+  return state.deployApplication;
+};
 
 export const getApplicationSource = (state: DeployApplicationState) => state.applicationSource;
 export const getSourceType = (state: DeployApplicationSource) => state && state.type;

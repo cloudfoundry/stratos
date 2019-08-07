@@ -5,7 +5,7 @@ import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellAppNameComponent } from './table-cell-app-name.component';
 
-describe('TableCellAppNameComponent', () => {
+fdescribe('TableCellAppNameComponent', () => {
   let component: TableCellAppNameComponent<any>;
   let fixture: ComponentFixture<TableCellAppNameComponent<any>>;
 

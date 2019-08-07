@@ -44,4 +44,6 @@ describe('DeleteAppRoutesComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  afterAll(() => { });
 });

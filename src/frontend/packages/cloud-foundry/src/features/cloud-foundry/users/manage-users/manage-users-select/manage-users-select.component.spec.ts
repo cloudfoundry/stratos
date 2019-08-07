@@ -10,7 +10,7 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesSelectComponent } from './manage-users-select.component';
 
-fdescribe('UsersRolesSelectComponent', () => {
+describe('UsersRolesSelectComponent', () => {
   let component: UsersRolesSelectComponent;
   let fixture: ComponentFixture<UsersRolesSelectComponent>;
 

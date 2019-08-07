@@ -14,24 +14,25 @@ import { generateCFEntities } from './cf-entity-generator';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
 @NgModule({
-  imports: [{
-    ngModule: EffectsFeatureModule,
-    providers: [
-      {
-        provide: CATALOGUE_ENTITIES, useFactory: () => {
-          const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
-          testEntityCatalogue.clear();
-          return [
-            ...generateCFEntities(),
-            ...baseStratosTypeFactory()
-          ];
+  imports: [
+    {
+      ngModule: EffectsFeatureModule,
+      providers: [
+        {
+          provide: CATALOGUE_ENTITIES, useFactory: () => {
+            const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
+            testEntityCatalogue.clear();
+            return [
+              ...generateCFEntities(),
+              ...baseStratosTypeFactory()
+            ];
+          }
         }
-      }
-    ]
-  },
-  // Either this is AppStoreModule (containing forRoot) is needed to allow other effects to be added.. to ensure we have the correct
-  // properties in the store (all properties need a reducer/effect)
-  EffectsModule.forRoot([]),
+      ]
+    },
+    // Either this is AppStoreModule (containing forRoot) is needed to allow other effects to be added.. to ensure we have the correct
+    // properties in the store (all properties need a reducer/effect)
+    EffectsModule.forRoot([]),
     CloudFoundryStoreModule,
     HttpClientModule,
     HttpClientTestingModule,

@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConnectionBackend, Http, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 
@@ -11,11 +11,11 @@ import { SharedModule } from '../../../../../../../core/src/shared/shared.module
 import { generateCfStoreModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { CommitListWrapperComponent } from './commit-list-wrapper.component';
 
-describe('CommitListWrapperComponent', () => {
+fdescribe('CommitListWrapperComponent', () => {
   let component: CommitListWrapperComponent;
   let fixture: ComponentFixture<CommitListWrapperComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CommitListWrapperComponent],
       imports: [
@@ -38,7 +38,7 @@ describe('CommitListWrapperComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CommitListWrapperComponent);
