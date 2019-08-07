@@ -10,7 +10,7 @@ import {
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step.component';
 
-describe('DeployApplicationOptionsStepComponent', () => {
+fdescribe('DeployApplicationOptionsStepComponent', () => {
   let component: DeployApplicationOptionsStepComponent;
   let fixture: ComponentFixture<DeployApplicationOptionsStepComponent>;
 
@@ -19,10 +19,10 @@ describe('DeployApplicationOptionsStepComponent', () => {
       declarations: [DeployApplicationOptionsStepComponent],
       providers: [ApplicationEnvVarsHelper],
       imports: [
+        generateCfStoreModules(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        generateCfStoreModules(),
         NoopAnimationsModule,
       ]
     })

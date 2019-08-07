@@ -30,6 +30,7 @@ describe('CreateApplicationComponent', () => {
         CreateApplicationStep3Component
       ],
       imports: [
+        generateCfStoreModules(),
         CommonModule,
         CoreModule,
         HttpModule,
@@ -38,7 +39,6 @@ describe('CreateApplicationComponent', () => {
         SharedModule,
         HttpClientModule,
         HttpClientTestingModule,
-        generateCfStoreModules(),
       ],
       providers: [
         PaginationMonitorFactory,

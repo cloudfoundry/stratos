@@ -134,7 +134,9 @@ export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemCompon
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];
 
+// TODO: RC Move these to somewhere more cf test generic
 export function generateCfStoreModules(initialStore?: CFAppState) {
+
   return [
     CloudFoundryTestingModule,
     AppStoreExtensionsModule,

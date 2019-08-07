@@ -7,9 +7,10 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationStepSourceUploadComponent } from './deploy-application-step-source-upload.component';
 
-describe('DeployApplicationStepSourceUploadComponent', () => {
+fdescribe('DeployApplicationStepSourceUploadComponent', () => {
   let component: DeployApplicationStepSourceUploadComponent;
   let fixture: ComponentFixture<DeployApplicationStepSourceUploadComponent>;
 
@@ -17,13 +18,16 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DeployApplicationStepSourceUploadComponent],
       imports: [
+        generateCfStoreModules(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        generateCfStoreModules(),
         BrowserAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
+      ],
+      providers: [
+        CfOrgSpaceDataService
       ]
     })
       .compileComponents();
