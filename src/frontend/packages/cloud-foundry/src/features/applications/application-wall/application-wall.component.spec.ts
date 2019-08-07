@@ -7,13 +7,16 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { ApplicationWallComponent } from './application-wall.component';
 
-describe('ApplicationWallComponent', () => {
+fdescribe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
   let fixture: ComponentFixture<ApplicationWallComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ApplicationWallComponent, CfEndpointsMissingComponent],
+      declarations: [
+        ApplicationWallComponent,
+        CfEndpointsMissingComponent
+      ],
       imports: generateCfBaseTestModules(),
       providers: [
         DatePipe,

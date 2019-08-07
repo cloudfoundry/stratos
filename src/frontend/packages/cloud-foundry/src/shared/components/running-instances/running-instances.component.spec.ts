@@ -13,8 +13,9 @@ describe('RunningInstancesComponent', () => {
     TestBed.configureTestingModule({
       declarations: [RunningInstancesComponent],
       imports: [
-        generateCfStoreModules(),
-        CoreModule
+        // TODO: RC search for createBasicStoreModule in cf
+        ...generateCfStoreModules(),
+        CoreModule,
       ],
       providers: [
         PaginationMonitorFactory

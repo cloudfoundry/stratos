@@ -13,7 +13,7 @@ import { CFAppState } from '../../../cf-app-state';
 import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
 
-describe('SpaceQuotaDefinitionComponent', () => {
+fdescribe('SpaceQuotaDefinitionComponent', () => {
   let component: SpaceQuotaDefinitionComponent;
   let fixture: ComponentFixture<SpaceQuotaDefinitionComponent>;
   const cfGuid = testSCFGuid;

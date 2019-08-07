@@ -19,6 +19,7 @@ import {
   ApplicationEnvVarsHelper,
 } from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
 
@@ -30,7 +31,8 @@ describe('AppServiceBindingCardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         AppServiceBindingCardComponent,
-        ServiceIconComponent
+        ServiceIconComponent,
+        CfOrgSpaceLinksComponent
       ],
       imports: generateCfBaseTestModules(),
       providers: [

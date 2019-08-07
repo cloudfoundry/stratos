@@ -54,6 +54,4 @@ export class CreateAppPageEffects {
     }));
 }
 
-export const selectNewAppState = (state: CFAppState): CreateNewApplicationState => {
-  return state.createApplication;
-};
+export const selectNewAppState = (state: CFAppState): CreateNewApplicationState => state.createApplication;
