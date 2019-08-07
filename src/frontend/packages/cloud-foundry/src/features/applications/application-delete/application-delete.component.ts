@@ -26,12 +26,6 @@ import {
   DataFunctionDefinition,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  AppServiceBindingDataSource,
-} from '../../../../../core/src/shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
-import {
-  AppServiceBindingListConfigService,
-} from '../../../../../core/src/shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { EntityMonitor } from '../../../../../core/src/shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../../core/src/shared/monitors/pagination-monitor';
@@ -42,6 +36,12 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import {
   CfAppRoutesListConfigService,
 } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+import {
+  AppServiceBindingDataSource,
+} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
+import {
+  AppServiceBindingListConfigService,
+} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import {
   TableCellAppInstancesComponent,
 } from '../../../shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';

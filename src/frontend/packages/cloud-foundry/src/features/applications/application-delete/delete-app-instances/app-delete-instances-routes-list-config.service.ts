@@ -12,9 +12,6 @@ import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.type
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import {
-  AppServiceBindingListConfigService,
-} from '../../../../../../core/src/shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
@@ -23,6 +20,9 @@ import {
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { QParam } from '../../../../../../store/src/types/pagination.types';
+import {
+  AppServiceBindingListConfigService,
+} from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ApplicationService } from '../../application.service';
 
 @Injectable()

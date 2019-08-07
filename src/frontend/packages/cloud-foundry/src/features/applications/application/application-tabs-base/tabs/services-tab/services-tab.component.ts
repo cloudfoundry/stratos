@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 
+import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import {
   AppServiceBindingListConfigService,
-} from '../../../../../../../../core/src/shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
+} from '../../../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 
 @Component({
   selector: 'app-services-tab',

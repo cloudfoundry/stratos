@@ -84,10 +84,6 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
-import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
-import { ServiceIconComponent } from './components/service-icon/service-icon.component';
-import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
-import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
@@ -164,7 +160,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetadataItemComponent,
     UsageGaugeComponent,
     CardStatusComponent,
-    RunningInstancesComponent,
     DialogConfirmComponent,
     ListComponent,
     ...listCardComponents,
@@ -180,9 +175,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    ServiceIconComponent,
-    ServicePlanPublicComponent,
-    ServicePlanPriceComponent,
     EnvVarViewComponent,
     RingChartComponent,
     MetricsChartComponent,
@@ -274,9 +266,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
     EnvVarViewComponent,
-    ServiceIconComponent,
-    ServicePlanPublicComponent,
-    ServicePlanPriceComponent,
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
@@ -316,7 +305,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AppNameUniqueDirective,
-    RunningInstancesComponent,
     PollingIndicatorComponent
   ],
   entryComponents: [

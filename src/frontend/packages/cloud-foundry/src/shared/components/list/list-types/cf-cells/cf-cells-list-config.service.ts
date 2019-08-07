@@ -10,14 +10,12 @@ import {
   TableCellBooleanIndicatorComponentConfig,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  BaseCfListConfig,
-} from '../../../../../../../core/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
 
 @Injectable()

@@ -1,9 +1,9 @@
-import { CoreModule } from '../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { CoreModule } from '../../../../../core/src/core/core.module';
+import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { RunningInstancesComponent } from './running-instances.component';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 describe('RunningInstancesComponent', () => {
   let component: RunningInstancesComponent;

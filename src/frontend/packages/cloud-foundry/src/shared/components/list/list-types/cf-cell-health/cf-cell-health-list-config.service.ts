@@ -11,9 +11,6 @@ import {
   TableCellBooleanIndicatorComponentConfig,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  BaseCfListConfig,
-} from '../../../../../../../core/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -24,6 +21,7 @@ import {
 import {
   CloudFoundryCellService,
 } from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
 
 @Injectable()

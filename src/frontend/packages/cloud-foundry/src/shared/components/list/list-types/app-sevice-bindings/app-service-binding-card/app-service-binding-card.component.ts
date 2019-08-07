@@ -14,21 +14,23 @@ import {
   ServiceActionHelperService,
 } from '../../../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import { AppEnvVarsState } from '../../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
-import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import {
   IService,
   IServiceBinding,
   IServiceInstance,
   IUserProvidedServiceInstance,
-} from '../../../../../../core/cf-api-svc.types';
-import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
-import { AppChip } from '../../../../chips/chips.component';
-import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
-import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { CardCell, IListRowCell } from '../../../list.types';
+} from '../../../../../../../../core/src/core/cf-api-svc.types';
+import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
+import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
+import {
+  MetaCardMenuItem,
+} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
+import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 
 interface EnvVarData {
   key: string;

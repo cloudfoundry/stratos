@@ -42,6 +42,9 @@ import { CfOrgSpaceLinksComponent } from './cf-org-space-links/cf-org-space-link
 import { CfRoleCheckboxComponent } from './cf-role-checkbox/cf-role-checkbox.component';
 import { CliCommandComponent } from './cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from './cli-info/cli-info.component';
+import {
+  AppServiceBindingCardComponent,
+} from './list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { CardAppComponent } from './list/list-types/app/card/card-app.component';
 import {
   TableCellAppCfOrgSpaceHeaderComponent,
@@ -118,8 +121,12 @@ import {
 import {
   UserProvidedServiceInstanceCardComponent,
 } from './list/list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
+import { RunningInstancesComponent } from './running-instances/running-instances.component';
 import { SchemaFormComponent } from './schema-form/schema-form.component';
 import { SelectServiceComponent } from './select-service/select-service.component';
+import { ServiceIconComponent } from './service-icon/service-icon.component';
+import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
 
 @NgModule({
   imports: [
@@ -130,6 +137,7 @@ import { SelectServiceComponent } from './select-service/select-service.componen
     MaterialDesignFrameworkModule,
   ],
   declarations: [
+    ServiceIconComponent,
     CfEndpointDetailsComponent,
     CliCommandComponent,
     CliInfoComponent,
@@ -144,7 +152,6 @@ import { SelectServiceComponent } from './select-service/select-service.componen
     BindAppsStepComponent,
     SpecifyUserProvidedDetailsComponent,
     AddServiceInstanceBaseStepComponent,
-    CfServiceCardComponent,
     SchemaFormComponent,
     CardAppStatusComponent,
     CardAppInstancesComponent,
@@ -160,7 +167,11 @@ import { SelectServiceComponent } from './select-service/select-service.componen
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
     CompactServiceInstanceCardComponent,
+    RunningInstancesComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent,
 
+    AppServiceBindingCardComponent,
     CardAppComponent,
     CfOrgCardComponent,
     CfSpaceCardComponent,
@@ -197,6 +208,7 @@ import { SelectServiceComponent } from './select-service/select-service.componen
     TableCellAppNameComponent,
   ],
   exports: [
+    ServiceIconComponent,
     CfEndpointDetailsComponent,
     CliCommandComponent,
     CliInfoComponent,
@@ -227,11 +239,15 @@ import { SelectServiceComponent } from './select-service/select-service.componen
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
     CompactServiceInstanceCardComponent,
+    RunningInstancesComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent,
   ],
   entryComponents: [
     CfEndpointDetailsComponent,
     NoServicePlansComponent,
 
+    AppServiceBindingCardComponent,
     CardAppComponent,
     CfOrgCardComponent,
     CfSpaceCardComponent,

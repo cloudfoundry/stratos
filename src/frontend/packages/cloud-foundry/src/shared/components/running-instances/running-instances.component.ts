@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { appStatsEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-running-instances',

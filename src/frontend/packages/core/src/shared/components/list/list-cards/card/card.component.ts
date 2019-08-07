@@ -2,15 +2,11 @@ import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChi
 
 import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import {
-  AppServiceBindingCardComponent,
-} from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 
 export const listCards = [
-  AppServiceBindingCardComponent,
   EndpointCardComponent
 ];
 export type CardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents | CardDynamicComponent<T>;

@@ -34,8 +34,8 @@ const customRoutes: Routes = [
     SharedModule,
     MDAppModule,
     NgxChartsModule,
-    AutoscalerModule,
     CloudFoundryComponentsModule,
+    AutoscalerModule,
     RouterModule.forRoot(customRoutes),
   ],
   declarations: [

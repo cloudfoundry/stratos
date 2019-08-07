@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { MDAppModule } from '../../../core/md.module';
+import { MDAppModule } from '../../../../../core/src/core/md.module';
 import { ServicePlanPriceComponent } from './service-plan-price.component';
 
 describe('ServicePlanPriceComponent', () => {
