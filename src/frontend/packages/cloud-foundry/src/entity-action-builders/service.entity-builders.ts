@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllServices, GetService } from '../actions/service.actions';
 import { GetAllServicesForSpace } from '../actions/space.actions';
 
@@ -14,7 +14,7 @@ export const serviceActionBuilders = {
     includeRelations,
     populateMissing
   ),
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
     includeRelations?: string[],
@@ -27,4 +27,4 @@ export const serviceActionBuilders = {
     includeRelations?: string[],
     populateMissing?: boolean,
   ) => new GetAllServicesForSpace(paginationKey, endpointGuid, spaceGuid, includeRelations, populateMissing)
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;

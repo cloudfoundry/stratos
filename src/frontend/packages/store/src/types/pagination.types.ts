@@ -64,7 +64,7 @@ export interface BasePaginatedAction extends Action {
 }
 
 export interface PaginatedAction extends BasePaginatedAction, EntityRequestAction {
-  actions: string[];
+  actions?: string[];
   /*
    * Fetch all pages and add them to a single page
    */

@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAppServiceBindings } from '../actions/application-service-routes.actions';
 import { CreateServiceBinding, DeleteServiceBinding, FetchAllServiceBindings } from '../actions/service-bindings.actions';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
@@ -23,7 +23,7 @@ export const serviceBindingActionBuilders = {
     endpointGuid,
     serviceInstanceGuid: string
   ) => new DeleteServiceBinding(endpointGuid, guid, serviceInstanceGuid),
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
     includeRelations?,

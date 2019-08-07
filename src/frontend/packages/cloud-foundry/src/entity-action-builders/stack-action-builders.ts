@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllOrgUsers } from '../actions/organization.actions';
 import { GetAllSpaceUsers } from '../actions/space.actions';
 import { GetStack, GetAllStacks } from '../actions/stack.action';
@@ -8,8 +8,8 @@ export const stackActionBuilders = {
     guid: string,
     endpointGuid: string,
   ) => new GetStack(guid, endpointGuid),
-  getAll: (
+  getMultiple: (
     endpointGuid: string,
   ) => new GetAllStacks(endpointGuid),
 
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;

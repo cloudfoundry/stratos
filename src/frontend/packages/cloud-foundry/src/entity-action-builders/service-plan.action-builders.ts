@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetServicePlansForService } from '../actions/service.actions';
 
 export const servicePlanActionBuilders = {
@@ -13,4 +13,4 @@ export const servicePlanActionBuilders = {
     paginationKey,
     includeRelations
   )
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;

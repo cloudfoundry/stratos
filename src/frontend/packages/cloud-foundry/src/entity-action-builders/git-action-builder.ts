@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import {
   EnvVarStratosProject,
 } from '../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -10,27 +10,29 @@ export const gitRepoActionBuilders = {
   getRepoInfo: (
     projectEnvVars: EnvVarStratosProject
   ) => new FetchGitHubRepoInfo(projectEnvVars)
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;
 
-export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
-  get: (commitSha: string, projectName: string, scm: GitSCM) => FetchCommit;
-  getAll: (commitSha: string, projectName: string, scm: GitSCM) => FetchCommits;
+export interface GitCommitActionBuilders extends StratosOrchestratedActionBuilders {
+  get: (commitSha: string, endpointGuid: string, projectName: string, scm: GitSCM) => FetchCommit;
+  getMultiple: (commitSha: string, endpointGuid: string, projectName: string, scm: GitSCM) => FetchCommits;
 }
 
 export const gitCommitActionBuilders: GitCommitActionBuilders = {
   get: (
     commitSha: string,
+    endpointGuid: string,
     projectName: string,
     scm: GitSCM
   ) => new FetchCommit(scm, commitSha, projectName),
-  getAll: (
+  getMultiple: (
     commitSha: string,
+    endpointGuid: string,
     projectName: string,
     scm: GitSCM
   ) => new FetchCommits(scm, commitSha, projectName)
 };
 
-export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
+export interface GitBranchActionBuilders extends StratosOrchestratedActionBuilders {
   getProjectBranches: (projectName: string, scm: GitSCM) => FetchBranchesForProject;
 }
 

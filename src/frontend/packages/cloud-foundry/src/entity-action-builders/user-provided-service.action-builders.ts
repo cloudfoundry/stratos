@@ -27,7 +27,7 @@ export const userProvidedServiceActionBuilder = {
     existingUserProvidedServiceInstance,
     proxyPaginationEntityConfig
   ),
-  getAll: (
+  getMultiple: (
     endpointGuid: string,
     paginationKey: string,
     includeRelations = [],

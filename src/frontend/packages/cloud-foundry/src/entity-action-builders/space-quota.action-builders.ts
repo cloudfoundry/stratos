@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetOrganizationSpaceQuotaDefinitions, AssociateSpaceQuota, DisassociateSpaceQuota } from '../actions/quota-definitions.actions';
 
 export const spaceQuotaDefinitionActionBuilders = {
@@ -33,4 +33,4 @@ export const spaceQuotaDefinitionActionBuilders = {
     endpointGuid,
     spaceQuotaGuid
   )
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;

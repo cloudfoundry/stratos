@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAppEnvVarsAction } from '../actions/app-metadata.actions';
 import { ListAppEnvVar } from '../../../core/src/shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import { AppVariablesDelete, AppVariablesEdit, AppVariablesAdd } from '../actions/app-variables.actions';
@@ -25,4 +25,4 @@ export const appEnvVarActionBuilders = {
     allEnvVars,
     newEnvVar
   )
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;

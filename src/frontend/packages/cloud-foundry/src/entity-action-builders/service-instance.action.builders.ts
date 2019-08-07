@@ -59,7 +59,7 @@ export const serviceInstanceActionBuilders = {
     params,
     tags
   ),
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
     includeRelations?: string[],

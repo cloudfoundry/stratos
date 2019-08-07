@@ -4,7 +4,7 @@ import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { StratosBaseCatalogueEntity, StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
-import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 
 class EntityCatalogue {
   private entities: Map<string, StratosCatalogueEntity> = new Map();
@@ -98,15 +98,15 @@ class EntityCatalogue {
     return this.entities.get(entityKey) || this.endpoints.get(entityKey);
   }
   /* tslint:disable:max-line-length */
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders>(
     entityConfig: EntityCatalogueEntityConfig
   ): StratosBaseCatalogueEntity<T, Y, AB>;
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders>(
     endpointType: string,
     entityType: string,
     subType?: string
   ): StratosBaseCatalogueEntity<T, Y, AB>;
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders>(
     endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
     entityType?: string,
     subType?: string

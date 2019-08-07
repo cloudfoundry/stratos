@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
-import { ActionOrchestrator, OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
+import { ActionOrchestrator, StratosOrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
 import { getPaginationAction, getRequestAction } from '../action-orchestrator/action-orchestrator.spec.helpers';
 import { EntityActionDispatcherManager } from './action-dispatcher';
 
@@ -16,7 +16,7 @@ describe('ActionDispatcher', () => {
     expect(entityActionDispatcher.getActionDispatcher('get').dispatch('1', '2')).toBe(false);
   });
   it('should dispatch custom action', () => {
-    interface CustomOrchestratedActionBuilders extends OrchestratedActionBuilders {
+    interface CustomOrchestratedActionBuilders extends StratosOrchestratedActionBuilders {
       custom: (guid: string) => EntityRequestAction;
     }
     const actionBuilders = {
@@ -48,7 +48,7 @@ describe('ActionDispatcher', () => {
     const endpointGuid = 'guid';
     const actionBuilders = {
       get: getActionBuilder
-    } as OrchestratedActionBuilders;
+    } as StratosOrchestratedActionBuilders;
     const spy = spyOn(actionBuilders, 'get');
     const actionOrchestrator = new ActionOrchestrator('get', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
@@ -64,7 +64,7 @@ describe('ActionDispatcher', () => {
     const endpointGuid = 'guid';
     const actionBuilders = {
       remove: getActionBuilder
-    } as OrchestratedActionBuilders;
+    } as StratosOrchestratedActionBuilders;
     const spy = spyOn(actionBuilders, 'delete');
     const actionOrchestrator = new ActionOrchestrator('delete', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
@@ -81,7 +81,7 @@ describe('ActionDispatcher', () => {
     const arbData = 'arb';
     const actionBuilders = {
       update: getActionBuilder
-    } as OrchestratedActionBuilders;
+    } as StratosOrchestratedActionBuilders;
     const spy = spyOn(actionBuilders, 'update');
     const actionOrchestrator = new ActionOrchestrator('update', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
@@ -97,7 +97,7 @@ describe('ActionDispatcher', () => {
     const aString = 'stringy';
     const actionBuilders = {
       create: getActionBuilder
-    } as OrchestratedActionBuilders;
+    } as StratosOrchestratedActionBuilders;
     const spy = spyOn(actionBuilders, 'create');
     const actionOrchestrator = new ActionOrchestrator('create', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
@@ -111,8 +111,8 @@ describe('ActionDispatcher', () => {
     }
 
     const actionBuilders = {
-      getAll: getActionBuilder
-    } as OrchestratedActionBuilders;
+      getMultiple: getActionBuilder
+    } as StratosOrchestratedActionBuilders;
     const endpointGuid = 'guid';
     const paginationKey = 'pagKey';
     const spy = spyOn(actionBuilders, 'getAll');

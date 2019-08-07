@@ -42,7 +42,7 @@ export const applicationActionBuilder = {
     existingApplication?: IApp,
     updateEntities?: AppMetadataTypes[]
   ) => new UpdateExistingApplication(guid, endpointGuid, updatedApplication, existingApplication, updateEntities),
-  getAll: (
+  getMultiple: (
     endpointGuid: string,
     paginationKey: string,
     includeRelations = [],

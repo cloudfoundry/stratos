@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllOrgUsers } from '../actions/organization.actions';
 import { GetAllSpaceUsers } from '../actions/space.actions';
 import { GetAllUsersAsAdmin, GetUser } from '../actions/users.actions';
@@ -9,7 +9,7 @@ export const userActionBuilders = {
     endpointGuid
   ) => new GetUser(guid, endpointGuid),
   // Must be admin user for this to succeed.
-  getAll: (
+  getMultiple: (
     paginationKey: string,
     endpointGuid: string,
     includeRelations?: string[],
@@ -30,4 +30,4 @@ export const userActionBuilders = {
     includeRelations?: string[]
   ) => new GetAllSpaceUsers(guid, paginationKey, endpointGuid, isAdmin, includeRelations),
 
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;

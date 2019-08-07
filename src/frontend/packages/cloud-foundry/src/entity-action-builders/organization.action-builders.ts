@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllOrganizations, DeleteOrganization, UpdateOrganization, GetOrganization } from '../actions/organization.actions';
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 
@@ -9,7 +9,7 @@ export const organizationActionBuilders = {
     includeRelations?: string[],
     populateMissing?: boolean
   ) => new GetOrganization(guid, endpointGuid, includeRelations, populateMissing),
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
     includeRelations?: string[],
@@ -21,4 +21,4 @@ export const organizationActionBuilders = {
     endpointGuid,
     updatedOrg
   )
-} as OrchestratedActionBuilders;
+} as StratosOrchestratedActionBuilders;
