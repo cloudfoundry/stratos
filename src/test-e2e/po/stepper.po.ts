@@ -28,7 +28,9 @@ export class StepperComponent extends Component {
   }
 
   next() {
-    return this.nextButton().click();
+    const nextButton = this.nextButton();
+    browser.actions().mouseMove(nextButton);
+    return nextButton.click();
   }
 
   cancel() {
