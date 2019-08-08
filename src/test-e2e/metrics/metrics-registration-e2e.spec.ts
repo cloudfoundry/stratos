@@ -53,6 +53,7 @@ describe('Metrics', () => {
     register.stepper.waitForStepNotBusy();
     browser.wait(register.stepper.waitUntilCanNext('Finish'));
     expect(register.stepper.canNext()).toBeTruthy();
+    e2e.sleep(5000);
     register.stepper.next();
 
     expect(register.isRegisterDialog()).toBeFalsy();
