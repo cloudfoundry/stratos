@@ -22,7 +22,7 @@ import {
   ProjectFetchFail,
 } from '../../actions/deploy-applications.actions';
 import { CFAppState } from '../../cf-app-state';
-import { githubBranchesEntityType, githubCommitEntityType } from '../../cf-entity-factory';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-factory';
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { parseHttpPipeError } from '../../../../core/src/core/utils.service';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
@@ -77,7 +77,7 @@ export class DeployAppEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityType: githubBranchesEntityType,
+        entityType: gitBranchesEntityType,
         endpointType: CF_ENDPOINT_TYPE,
         type: action.type,
         paginationKey: 'branches'
@@ -117,7 +117,7 @@ export class DeployAppEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityType: githubCommitEntityType,
+        entityType: gitCommitEntityType,
         endpointType: CF_ENDPOINT_TYPE,
         type: action.type
       } as ICFAction;
@@ -145,7 +145,7 @@ export class DeployAppEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityType: githubCommitEntityType,
+        entityType: gitCommitEntityType,
         endpointType: CF_ENDPOINT_TYPE,
         type: action.type,
         paginationKey: action.paginationKey

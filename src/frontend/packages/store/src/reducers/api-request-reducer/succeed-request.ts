@@ -9,11 +9,12 @@ import {
   setEntityRequestState
 } from './request-helpers';
 import { defaultDeletingActionState } from './types';
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 
 export function succeedRequest(state: BaseRequestState, action: ISuccessRequestAction) {
   if (action.apiAction.guid) {
-    const apiAction = action.apiAction as EntityRequestAction;
+    const apiAction = action.apiAction as BaseEntityRequestAction;
     const successAction = action as WrapperRequestActionSuccess;
     const requestSuccessState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {
@@ -26,7 +27,7 @@ export function succeedRequest(state: BaseRequestState, action: ISuccessRequestA
           message: successAction.updatingMessage || '',
         }
       );
-    } else if (action.requestType === 'delete' && !action.apiAction.updatingKey) {
+    } else if (action.requestType === 'delete' && !apiAction.updatingKey) {
       requestSuccessState.deleting = mergeObject(requestSuccessState.deleting, {
         busy: false,
         deleted: true
@@ -46,7 +47,7 @@ export function succeedRequest(state: BaseRequestState, action: ISuccessRequestA
 
     const newState = mergeState(
       createRequestStateFromResponse(successAction.response, state),
-      setEntityRequestState(state, requestSuccessState, action.apiAction)
+      setEntityRequestState(state, requestSuccessState, action.apiAction as BaseEntityRequestAction)
     );
 
     return newState;

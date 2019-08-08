@@ -33,10 +33,10 @@ export class UpdateAppEffects {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app
-            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.endpointGuid));
+            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.endpointGuid as string));
             break;
           case AppMetadataTypes.STATS:
-            const statsAction = new GetAppStatsAction(action.apiAction.guid, action.apiAction.endpointGuid);
+            const statsAction = new GetAppStatsAction(action.apiAction.guid, action.apiAction.endpointGuid as string);
             // Application has changed and the associated app stats need to also be updated.
             // Apps that are started can just make the stats call to update cached stats, however this call will fail for stopped apps.
             // For those cases create a fake stats request response that should result in the same thing
@@ -47,7 +47,7 @@ export class UpdateAppEffects {
             }
             break;
           case AppMetadataTypes.SUMMARY:
-            actions.push(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
+            actions.push(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid as string));
             break;
         }
       });

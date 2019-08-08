@@ -1,12 +1,12 @@
 import { Action } from '@ngrx/store';
 
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { githubBranchesEntityType, githubCommitEntityType } from '../cf-entity-factory';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
 import { GitBranch, GitCommit } from '../store/types/git.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
+import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-factory';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
@@ -63,7 +63,7 @@ export class FetchBranchesForProject implements PaginatedAction {
   ];
   public endpointType = CF_ENDPOINT_TYPE;
   type = FETCH_BRANCHES_FOR_PROJECT;
-  entityType = githubBranchesEntityType;
+  entityType = gitBranchesEntityType;
   paginationKey: 'branches';
 }
 
@@ -82,7 +82,7 @@ export class FetchCommit implements EntityRequestAction {
   public endpointType = CF_ENDPOINT_TYPE;
   constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
   type = FETCH_COMMIT;
-  entityType = githubCommitEntityType;
+  entityType = gitCommitEntityType;
 }
 
 export class FetchCommits implements PaginatedAction {
@@ -102,7 +102,7 @@ export class FetchCommits implements PaginatedAction {
   ];
   public endpointType = CF_ENDPOINT_TYPE;
   type = FETCH_COMMITS;
-  entityType = githubCommitEntityType;
+  entityType = gitCommitEntityType;
   paginationKey: string;
   initialParams = {
     'order-direction': 'asc',

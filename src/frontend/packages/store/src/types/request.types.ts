@@ -8,16 +8,14 @@ import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
 import { HttpRequest } from '@angular/common/http';
+import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export interface SingleEntityAction {
-  entityType: string;
-  endpointType: string;
   // For single entity requests
   guid?: string;
 }
 
-export interface RequestAction extends Action, SingleEntityAction {
-  endpointGuid?: string;
+export interface RequestAction extends Action, BasePipelineRequestAction, SingleEntityAction {
   updatingKey?: string;
 }
 
@@ -33,7 +31,7 @@ export enum RequestEntityLocation {
 
 export type RequestActionEntity = EntitySchema | EntitySchema[];
 export interface EntityRequestAction extends EntityCatalogueEntityConfig, RequestAction {
-  entity?: RequestActionEntity;
+  entity?: EntitySchema | EntitySchema[];
   /**
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section

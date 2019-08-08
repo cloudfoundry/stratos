@@ -7,7 +7,7 @@ import { catchError, mergeMap } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../actions/github.actions';
 import { CFAppState } from '../../cf-app-state';
-import { githubRepoEntityType } from '../../cf-entity-factory';
+import { gitRepoEntityType } from '../../cf-entity-factory';
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { GitSCMService, GitSCMType } from '../../../../core/src/shared/data-services/scm/scm.service';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
@@ -30,7 +30,7 @@ export class GithubEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityType: githubRepoEntityType,
+        entityType: gitRepoEntityType,
         endpointType: CF_ENDPOINT_TYPE,
         type: action.type,
         guid: action.stProject.deploySource.project

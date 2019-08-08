@@ -1,5 +1,5 @@
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { githubRepoEntityType } from '../cf-entity-factory';
+import { gitRepoEntityType } from '../cf-entity-factory';
 import {
   EnvVarStratosProject,
 } from '../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -11,5 +11,5 @@ export class FetchGitHubRepoInfo implements EntityRequestAction {
   constructor(public stProject: EnvVarStratosProject) { }
   type = FETCH_GITHUB_REPO;
   endpointType = CF_ENDPOINT_TYPE;
-  entityType = githubRepoEntityType;
+  entityType = gitRepoEntityType;
 }

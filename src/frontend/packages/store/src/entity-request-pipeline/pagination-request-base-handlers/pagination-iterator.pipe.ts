@@ -34,7 +34,8 @@ export class PaginationPageIterator<R = any, E = any> {
     return this.httpClient.pipelineRequest<JetstreamResponse<R>>(
       httpRequest,
       this.action.endpointType,
-      this.action.endpointGuid
+      this.action.endpointGuid,
+      this.action.externalRequest
     );
   }
 

@@ -7,7 +7,7 @@ export const makeRequestEntityPipe: MakeEntityRequestPipe = (
   requestOrObservable,
   endpointType,
   endpointGuids,
-  externalRequest = false
+  externalRequest: boolean = false
 ) => {
   if (requestOrObservable instanceof HttpRequest) {
     return httpClient.pipelineRequest(

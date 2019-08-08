@@ -32,13 +32,12 @@ function getHttpParams(options: RequestOptions) {
 // This will convert the old style RequestOptions into a new HttpRequest
 function getRequestFromLegacyOptions(
   options: RequestOptions,
-  requestType: ApiRequestTypes,
-  url: string
+  requestType: ApiRequestTypes
 ) {
   const method = getRequestTypeFromRequestType(requestType);
   return new HttpRequest(
     method,
-    url,
+    options.url,
     options.body,
     {
       headers: new HttpHeaders(options.headers ? options.headers.toJSON() : null),
@@ -54,7 +53,7 @@ export const buildRequestEntityPipe = (
   requestType: ApiRequestTypes,
   requestOptions: RequestOptions | HttpRequest<any>
 ): HttpRequest<any> => {
-  return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType, url);
+  return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType);
 };
 
 

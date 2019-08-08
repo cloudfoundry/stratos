@@ -36,7 +36,8 @@ function getRequestObservable(
     httpClient,
     request,
     action.endpointType,
-    action.endpointGuid
+    action.endpointGuid,
+    action.externalRequest
   );
   if (action.flattenPagination && !paginationPageIterator) {
     console.warn('Action requires all request pages but no page flattener was given.');
@@ -67,7 +68,6 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     params: allParams
   });
   const request = prePaginatedRequestFunction ? prePaginatedRequestFunction(requestFromStore, action, catalogueEntity) : requestFromStore;
-
 
   const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(
     action.options.url,

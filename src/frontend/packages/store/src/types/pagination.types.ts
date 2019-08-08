@@ -6,6 +6,7 @@ import { MetricQueryConfig } from '../actions/metrics.actions';
 import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
 import { HttpRequest } from '@angular/common/http';
+import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 
 
@@ -57,9 +58,7 @@ export function isPaginatedAction(obj: any): PaginatedAction {
   return obj && Object.keys(obj).indexOf('paginationKey') >= 0 ? obj as PaginatedAction : null;
 }
 
-export interface BasePaginatedAction extends Action {
-  entityType: string;
-  endpointType: string;
+export interface BasePaginatedAction extends BasePipelineRequestAction, Action {
   paginationKey: string;
 }
 

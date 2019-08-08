@@ -12,7 +12,6 @@ import {
   APISuccessOrFailedAction,
   ICFAction,
   InternalEndpointError,
-  SingleEntityAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
@@ -20,11 +19,12 @@ import {
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export function getEntityRequestState(
   state: BaseRequestState,
-  actionOrKey: SingleEntityAction | string,
-  guid: string = (actionOrKey as SingleEntityAction).guid
+  actionOrKey: BaseEntityRequestAction | string,
+  guid: string = (actionOrKey as BaseEntityRequestAction).guid
 ): RequestInfoState {
   const entityKey = getKeyFromActionOrKey(actionOrKey);
   const requestState = { ...state[entityKey][guid] };
@@ -37,8 +37,8 @@ export function getEntityRequestState(
 export function setEntityRequestState(
   state: BaseRequestState,
   requestState,
-  actionOrKey: SingleEntityAction | string,
-  guid: string = (actionOrKey as SingleEntityAction).guid
+  actionOrKey: BaseEntityRequestAction | string,
+  guid: string = (actionOrKey as BaseEntityRequestAction).guid
 ) {
   const entityKey = getKeyFromActionOrKey(actionOrKey);
   const newState = {
@@ -51,7 +51,7 @@ export function setEntityRequestState(
   return mergeState(state, newState);
 }
 
-function getKeyFromActionOrKey(actionOrKey: SingleEntityAction | string) {
+function getKeyFromActionOrKey(actionOrKey: BaseEntityRequestAction | string) {
   if (typeof actionOrKey === 'string') {
     return actionOrKey;
   }
