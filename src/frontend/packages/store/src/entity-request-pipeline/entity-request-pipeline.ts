@@ -2,7 +2,6 @@ import { Action, Store } from '@ngrx/store';
 import { map, tap, catchError } from 'rxjs/operators';
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { EntityRequestAction } from '../types/request.types';

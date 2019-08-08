@@ -1,6 +1,6 @@
 import { HttpRequest } from '@angular/common/http';
 import { range, of, Observable, combineLatest } from 'rxjs';
-import { mergeMap, reduce, map, tap } from 'rxjs/operators';
+import { mergeMap, reduce, map } from 'rxjs/operators';
 import { PaginatedAction } from '../../types/pagination.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
 import {

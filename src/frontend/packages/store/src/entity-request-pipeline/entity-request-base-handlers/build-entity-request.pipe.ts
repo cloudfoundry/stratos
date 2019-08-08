@@ -1,11 +1,7 @@
-import { BuildEntityRequestPipe } from '../entity-request-pipeline.types';
 import { HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { environment } from '../../../../core/src/environments/environment';
 import { RequestOptions } from '@angular/http';
-import { InternalAppState } from '../../app-state';
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
 
 export function getRequestTypeFromRequestType(requestType: ApiRequestTypes) {
   if (requestType === 'update') {
@@ -58,12 +54,6 @@ export const buildRequestEntityPipe = (
   requestType: ApiRequestTypes,
   requestOptions: RequestOptions | HttpRequest<any>
 ): HttpRequest<any> => {
-  const url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${requestOptions.url}`;
-  if (requestOptions instanceof HttpRequest) {
-    return requestOptions.clone({
-      url
-    });
-  }
   return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType, url);
 };
 
