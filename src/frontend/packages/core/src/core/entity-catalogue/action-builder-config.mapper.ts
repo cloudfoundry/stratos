@@ -11,10 +11,7 @@ import {
   BaseEntityRequestConfig
 } from './action-orchestrator/action-orchestrator';
 
-import { IStratosEntityDefinition, EntityCatalogueSchemas } from './entity-catalogue.types';
-
-import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
-import { StratosBaseCatalogueEntity } from './entity-catalogue-entity';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 
 export class ActionBuilderConfigMapper {
 
@@ -27,13 +24,15 @@ export class ActionBuilderConfigMapper {
   };
 
   static getActionBuilders(
-    builders: OrchestratedActionBuilderConfig,
-    catalogueEntity: StratosBaseCatalogueEntity
+    builders: StratosOrchestratedActionBuilders | OrchestratedActionBuilderConfig,
+    endpointType: string,
+    entityType: string,
+    schemaGetter: (schemaKey: string) => EntitySchema
   ): StratosOrchestratedActionBuilders {
     return Object.keys(builders).reduce((actionBuilders, key) => {
       return {
         ...actionBuilders,
-        [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key], key, catalogueEntity)
+        [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key], key, endpointType, entityType, schemaGetter)
       };
     }, {} as StratosOrchestratedActionBuilders);
   }
@@ -43,32 +42,43 @@ export class ActionBuilderConfigMapper {
       EntityRequestActionConfig<OrchestratedActionBuilder> |
       PaginationRequestActionConfig<OrchestratedActionBuilder>,
     actionKey: string,
-    catalogueEntity: StratosBaseCatalogueEntity
+    endpointType: string,
+    entityType: string,
+    schemaGetter: (schemaKey: string) => EntitySchema
   ): OrchestratedActionBuilder {
-    const definition = catalogueEntity.definition as IStratosEntityDefinition<EntityCatalogueSchemas>;
     if (configOrBuilder instanceof EntityRequestActionConfig) {
       // TODO We need to pass schemaKey
-      return (...args: Parameters<KnownEntityActionBuilder>) => new BaseEntityRequestAction(
-        catalogueEntity.getSchema(),
-        args[0],
-        args[1],
-        definition.type,
-        definition.endpoint ? definition.endpoint.type : STRATOS_ENDPOINT_TYPE,
-        configOrBuilder.getUrl(...args),
-        ActionBuilderConfigMapper.addHttpMethodFromActionKey(actionKey, configOrBuilder.requestConfig)
-      );
+      return (...args: Parameters<KnownEntityActionBuilder>) => {
+        const [guid, endpointGuid, ...meta] = args;
+        return new BaseEntityRequestAction(
+          schemaGetter(configOrBuilder.schemaKey),
+          guid,
+          endpointGuid,
+          entityType,
+          endpointType,
+          configOrBuilder.getUrl(...args),
+          ActionBuilderConfigMapper.addHttpMethodFromActionKey(actionKey, configOrBuilder.requestConfig),
+          meta,
+          !configOrBuilder.externalRequest
+        );
+      };
     }
     if (configOrBuilder instanceof PaginationRequestActionConfig) {
       // TODO We need to pass schemaKey
-      return (...args: Parameters<GetMultipleActionBuilder>) => new BasePaginationRequestAction(
-        catalogueEntity.getSchema(),
-        configOrBuilder.paginationKey || args[1],
-        args[0],
-        definition.type,
-        definition.endpoint ? definition.endpoint.type : STRATOS_ENDPOINT_TYPE,
-        configOrBuilder.getUrl(...args),
-        configOrBuilder.requestConfig
-      );
+      return (...args: Parameters<GetMultipleActionBuilder>) => {
+        const [endpointGuid, ...meta] = args;
+        return new BasePaginationRequestAction(
+          schemaGetter(configOrBuilder.schemaKey),
+          configOrBuilder.paginationKey || args[1],
+          endpointGuid,
+          entityType,
+          endpointType,
+          configOrBuilder.getUrl(...args),
+          configOrBuilder.requestConfig,
+          meta,
+          !configOrBuilder.externalRequest
+        );
+      };
     }
     return configOrBuilder;
   }

@@ -30,8 +30,25 @@ export type GetMultipleActionBuilder<T extends any[]= any[]> = (
 
 // This is used to create a basic single entity pipeline action.
 export class EntityRequestActionConfig<T extends OrchestratedActionBuilder> {
-  constructor(public getUrl: (...args: Parameters<T>) => string, public requestConfig: BaseEntityRequestConfig = {}) { }
+  constructor(
+    public getUrl: (...args: Parameters<T>) => string,
+    public requestConfig: BaseEntityRequestConfig = {},
+    public schemaKey: string = null,
+    public externalRequest: boolean = false
+  ) { }
 }
+
+
+export class PaginationRequestActionConfig<T extends OrchestratedActionBuilder> {
+  constructor(
+    public paginationKey: string,
+    public getUrl: (...args: Parameters<T>) => string,
+    public requestConfig: BasePaginationRequestConfig = {},
+    public schemaKey: string = null,
+    public externalRequest: boolean = false
+  ) { }
+}
+
 export interface BaseEntityRequestConfig {
   httpMethod?: BaseEntityRequestMethods;
   requestInit?: {
@@ -47,7 +64,21 @@ export interface BaseEntityRequestConfig {
 export type BasePaginationRequestConfig = Omit<BaseEntityRequestConfig, 'httpMethod'>;
 
 export type BaseEntityRequestMethods = 'DELETE' | 'GET' | 'HEAD' | 'JSONP' | 'OPTIONS' | 'POST' | 'PUT' | 'PATCH';
-export class BaseEntityRequestAction extends StartAction implements EntityRequestAction {
+
+export class BaseRequestAction extends StartAction {
+  constructor(
+    public entity: EntitySchema,
+    public endpointGuid: string | null,
+    public entityType: string,
+    public endpointType: string,
+    public metadata: any[] = [],
+    public jetstreamRequest: boolean = true
+  ) {
+    super();
+  }
+}
+
+export class BaseEntityRequestAction extends BaseRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
   constructor(
     public entity: EntitySchema,
@@ -56,14 +87,16 @@ export class BaseEntityRequestAction extends StartAction implements EntityReques
     public entityType: string,
     public endpointType: string,
     url: string,
-    requestConfig: BaseEntityRequestConfig
+    requestConfig: BaseEntityRequestConfig,
+    public metadata: any[] = [],
+    public jetstreamRequest: boolean = true
   ) {
-    super();
+    super(entity, endpointGuid, entityType, endpointType, metadata, jetstreamRequest);
     this.options = new HttpRequest(requestConfig.httpMethod || 'GET', url, requestConfig.requestBody, requestConfig.requestInit);
   }
 }
 
-export class BasePaginationRequestAction extends StartAction implements EntityRequestAction {
+export class BasePaginationRequestAction extends BaseRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
   constructor(
     public entity: EntitySchema,
@@ -73,20 +106,16 @@ export class BasePaginationRequestAction extends StartAction implements EntityRe
     public entityType: string,
     public endpointType: string,
     url: string,
-    requestConfig: BasePaginationRequestConfig
+    requestConfig: BasePaginationRequestConfig,
+    public metadata: any[] = [],
+    public jetstreamRequest: boolean = true
+
   ) {
-    super();
+    super(entity, endpointGuid, entityType, endpointType, metadata, jetstreamRequest);
     this.options = new HttpRequest('GET', url, requestConfig.requestBody, requestConfig.requestInit);
   }
 }
 
-export class PaginationRequestActionConfig<T extends OrchestratedActionBuilder> {
-  constructor(
-    public paginationKey: string,
-    public getUrl: (...args: Parameters<T>) => string,
-    public requestConfig: BasePaginationRequestConfig = {}
-  ) { }
-}
 
 // A list of functions that can be used get interface with the entity
 export interface StratosOrchestratedActionBuilders {
@@ -95,16 +124,8 @@ export interface StratosOrchestratedActionBuilders {
   update?: KnownEntityActionBuilder;
   create?: CreateActionBuilder;
   getMultiple?: GetMultipleActionBuilder;
-}
-export interface StratosOrchestratedActionBuilders {
-  get?: OrchestratedActionBuilder;
-  remove?: OrchestratedActionBuilder;
-  update?: OrchestratedActionBuilder;
-  create?: OrchestratedActionBuilder;
-  getMultiple?: OrchestratedActionBuilder;
   [actionType: string]: OrchestratedActionBuilder;
 }
-
 export interface OrchestratedActionBuilderConfig {
   get?: KnownEntityActionBuilder | EntityRequestActionConfig<KnownEntityActionBuilder>;
   remove?: KnownEntityActionBuilder | EntityRequestActionConfig<KnownEntityActionBuilder>;
@@ -119,7 +140,6 @@ export interface OrchestratedActionBuilderConfig {
 export class OrchestratedActionBuildersClass implements StratosOrchestratedActionBuilders {
   [actionType: string]: OrchestratedActionBuilder<any[], EntityRequestAction>;
 }
-
 export class ActionOrchestrator<T extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders> {
   public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);

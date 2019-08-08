@@ -33,12 +33,13 @@ export const gitCommitActionBuilders: GitCommitActionBuilders = {
 };
 
 export interface GitBranchActionBuilders extends StratosOrchestratedActionBuilders {
-  getProjectBranches: (projectName: string, scm: GitSCM) => FetchBranchesForProject;
+  get: (projectName: string, endpointGuid: string, scm: GitSCM) => FetchBranchesForProject;
 }
 
 export const gitBranchActionBuilders: GitBranchActionBuilders = {
-  getProjectBranches: (
+  get: (
     projectName: string,
+    endpointGuid: string,
     scm: GitSCM
   ) => new FetchBranchesForProject(scm, projectName)
 };

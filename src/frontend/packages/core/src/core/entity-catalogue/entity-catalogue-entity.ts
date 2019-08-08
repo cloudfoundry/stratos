@@ -6,12 +6,16 @@ import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-redu
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
-import { endpointEntitySchema } from '../../base-entity-schemas';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
-import { ActionOrchestrator, OrchestratedActionBuilderConfig, StratosOrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import {
+  ActionOrchestrator,
+  OrchestratedActionBuilderConfig,
+  StratosOrchestratedActionBuilders
+} from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
   EntityCatalogueSchemas,
@@ -48,6 +52,7 @@ export class StratosBaseCatalogueEntity<
   public readonly isEndpoint: boolean;
   public readonly actionDispatchManager: EntityActionDispatcherManager<AB>;
   public readonly actionOrchestrator: ActionOrchestrator<AB>;
+  public readonly endpointType: string;
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
     public readonly builders: EntityCatalogueBuilders<T, Y, AB> = {}
@@ -56,10 +61,16 @@ export class StratosBaseCatalogueEntity<
     this.type = this.definition.type || this.definition.schema.default.entityType;
     const baseEntity = definition as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
+    this.endpointType = this.getEndpointType(baseEntity);
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
-    const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(this.builders.stratosActionBuilders, this);
+    const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(
+      this.builders.stratosActionBuilders,
+      this.type,
+      this.endpointType,
+      (schemaKey: string) => this.getSchema(schemaKey)
+    );
     this.actionOrchestrator = new ActionOrchestrator<AB>(this.entityKey, actionBuilders as AB);
     this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
@@ -75,6 +86,11 @@ export class StratosBaseCatalogueEntity<
     }, {
         default: entitySchemas.default
       });
+  }
+
+  private getEndpointType(definition: IStratosBaseEntityDefinition) {
+    const entityDef = definition as IStratosEntityDefinition;
+    return entityDef.endpoint ? entityDef.endpoint.type : STRATOS_ENDPOINT_TYPE;
   }
 
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)

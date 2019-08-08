@@ -34,7 +34,9 @@ export class EntityService<T = any> {
     private store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
     public action: EntityRequestAction,
+    // TODO Move this to a CF entity service
     public validateRelations = true,
+    // TODO What is this used for?
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
     this.actionDispatch = (updatingKey?: string) => {
