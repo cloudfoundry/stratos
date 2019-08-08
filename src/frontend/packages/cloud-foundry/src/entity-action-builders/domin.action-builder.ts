@@ -1,5 +1,6 @@
 import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { FetchAllDomains, FetchDomain } from '../actions/domains.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const domainActionBuilders = {
   get: (
@@ -10,8 +11,8 @@ export const domainActionBuilders = {
   // for lists of same type - #STRAT-149
   getMultiple: (
     endpointGuid,
-    paginationKey?,
-    flatten?: boolean,
+    paginationKey,
+    { flatten }: CFBasePipelineRequestActionMeta
   ) => new FetchAllDomains(endpointGuid, paginationKey, flatten)
 } as StratosOrchestratedActionBuilders;
 

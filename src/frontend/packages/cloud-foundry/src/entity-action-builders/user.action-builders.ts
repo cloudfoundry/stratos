@@ -2,6 +2,7 @@ import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity
 import { GetAllOrgUsers } from '../actions/organization.actions';
 import { GetAllSpaceUsers } from '../actions/space.actions';
 import { GetAllUsersAsAdmin, GetUser } from '../actions/users.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const userActionBuilders = {
   get: (
@@ -12,8 +13,7 @@ export const userActionBuilders = {
   getMultiple: (
     paginationKey: string,
     endpointGuid: string,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetAllUsersAsAdmin(endpointGuid, includeRelations, populateMissing, paginationKey),
   getAllInOrganization: (
     guid: string,

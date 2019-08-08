@@ -120,6 +120,13 @@ import { spaceApplicationAddRemoveReducer } from './store/reducers/application-a
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
 
+export interface CFBasePipelineRequestActionMeta {
+  includeRelations?: string[];
+  populateMissing?: boolean;
+  flatten?: boolean;
+}
+// class CFBasePipelineRequestAction = BasePipelineRequestAction < { entity } >
+
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
 }

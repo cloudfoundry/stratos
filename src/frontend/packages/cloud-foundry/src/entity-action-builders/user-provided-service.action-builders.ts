@@ -7,13 +7,13 @@ import {
   UpdateUserProvidedServiceInstance,
 } from '../actions/user-provided-service.actions';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const userProvidedServiceActionBuilder = {
   get: (
     guid,
     endpointGuid,
-    includeRelations = [],
-    populateMissing = true
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetUserProvidedService(guid, endpointGuid, includeRelations, populateMissing),
   remove: (guid: string, endpointGuid: string) => new DeleteApplication(guid, endpointGuid),
   update: (
@@ -30,8 +30,7 @@ export const userProvidedServiceActionBuilder = {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    includeRelations = [],
-    populateMissing = false,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetAllUserProvidedServices(paginationKey, endpointGuid, includeRelations, populateMissing),
   getAllInSpace: (
     spaceGuid: string,

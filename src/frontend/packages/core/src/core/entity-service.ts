@@ -14,6 +14,7 @@ import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/sr
 import { EntityInfo } from '../../../store/src/types/api.types';
 import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
+import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -25,26 +26,37 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
     entityRequestInfo.deleting.deleted;
 }
 
+export interface EntityServiceActionBuilderConfig<M extends {} = {}> {
+  catalogueEntity: StratosBaseCatalogueEntity;
+  guid: string;
+  endpointGuid?: string;
+  schemaKey?: string;
+  actionBuilderMetadata?: M;
+}
+
+const dispatcherFactory = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (updatingKey?: string) => {
+  if (updatingKey) {
+    action.updatingKey = updatingKey;
+  }
+  store.dispatch(action);
+};
+
 /**
  * Designed to be used in a service factory provider
  */
 export class EntityService<T = any> {
-
+  public action: EntityRequestAction;
   constructor(
-    private store: Store<GeneralEntityAppState>,
+    store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
-    public action: EntityRequestAction,
+    actionOrConfig: EntityRequestAction | EntityServiceActionBuilderConfig,
     // TODO Move this to a CF entity service
     public validateRelations = true,
     // TODO What is this used for?
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
-    this.actionDispatch = (updatingKey?: string) => {
-      if (updatingKey) {
-        action.updatingKey = updatingKey;
-      }
-      this.store.dispatch(action);
-    };
+    this.action = this.getAction(actionOrConfig);
+    this.actionDispatch = dispatcherFactory(store, this.action);
 
     this.updateEntity = () => {
       this.actionDispatch(this.refreshKey);
@@ -68,7 +80,7 @@ export class EntityService<T = any> {
           }
           validated = true;
           store.dispatch(new ValidateEntitiesStart(
-            action as ICFAction,
+            this.action as ICFAction,
             [entityInfo.entity.metadata.guid],
             false
           ));
@@ -135,12 +147,29 @@ export class EntityService<T = any> {
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
-    const isBlocked = isEntityBlocked(entityRequestInfo);
     return entity && !isEntityBlocked(entityRequestInfo);
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
     return !entityRequestInfo || (!entity && !isEntityBlocked(entityRequestInfo));
+  }
+
+  private getAction(dispatcherConfigOrAction: EntityServiceActionBuilderConfig | EntityRequestAction) {
+    const action = dispatcherConfigOrAction as EntityRequestAction;
+    if (action.type) {
+      return action;
+    } else {
+      const {
+        catalogueEntity,
+        // TODO: Use this schema key
+        schemaKey,
+        guid,
+        endpointGuid,
+        actionBuilderMetadata = {}
+      } = dispatcherConfigOrAction as EntityServiceActionBuilderConfig;
+      const actionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('get');
+      return actionBuilder(guid, endpointGuid, actionBuilderMetadata);
+    }
   }
 
   /**
@@ -153,5 +182,4 @@ export class EntityService<T = any> {
       getEntityUpdateSections
     ));
   }
-
 }

@@ -20,6 +20,7 @@ export function createValidationPaginationWatcher(store, paramPaginationAction: 
 
 
 export function isEntityInlineParentAction(anything: any): boolean {
+  const meta = anything.meta || {};
   return anything && !!anything.includeRelations && anything.populateMissing !== undefined;
 }
 

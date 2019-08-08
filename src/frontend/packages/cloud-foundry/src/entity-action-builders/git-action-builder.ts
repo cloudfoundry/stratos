@@ -12,34 +12,37 @@ export const gitRepoActionBuilders = {
   ) => new FetchGitHubRepoInfo(projectEnvVars)
 } as StratosOrchestratedActionBuilders;
 
+interface GitMeta {
+  projectName: string;
+  scm: GitSCM;
+}
+
 export interface GitCommitActionBuilders extends StratosOrchestratedActionBuilders {
-  get: (commitSha: string, endpointGuid: string, projectName: string, scm: GitSCM) => FetchCommit;
-  getMultiple: (commitSha: string, endpointGuid: string, projectName: string, scm: GitSCM) => FetchCommits;
+  get: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommit;
+  getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
 }
 
 export const gitCommitActionBuilders: GitCommitActionBuilders = {
   get: (
     commitSha: string,
     endpointGuid: string,
-    projectName: string,
-    scm: GitSCM
-  ) => new FetchCommit(scm, commitSha, projectName),
+    commitMeta: GitMeta
+  ) => new FetchCommit(commitMeta.scm, commitSha, commitMeta.projectName),
   getMultiple: (
     commitSha: string,
     endpointGuid: string,
-    projectName: string,
-    scm: GitSCM
-  ) => new FetchCommits(scm, commitSha, projectName)
+    commitMeta: GitMeta
+  ) => new FetchCommits(commitMeta.scm, commitSha, commitMeta.projectName)
 };
 
 export interface GitBranchActionBuilders extends StratosOrchestratedActionBuilders {
-  get: (projectName: string, endpointGuid: string, scm: GitSCM) => FetchBranchesForProject;
+  get: (projectName: string, endpointGuid: string, meta: GitMeta) => FetchBranchesForProject;
 }
 
 export const gitBranchActionBuilders: GitBranchActionBuilders = {
   get: (
-    projectName: string,
+    guid: string,
     endpointGuid: string,
-    scm: GitSCM
-  ) => new FetchBranchesForProject(scm, projectName)
+    meta: GitMeta
+  ) => new FetchBranchesForProject(meta.scm, meta.projectName)
 };

@@ -2,6 +2,7 @@ import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity
 import { GetAppRoutes } from '../actions/application-service-routes.actions';
 import { CreateRoute, DeleteRoute, GetAllRoutes, NewRoute, UnmapRoute } from '../actions/route.actions';
 import { GetSpaceRoutes } from '../actions/space.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const routesActionBuilders = {
   create: (id, endpointGuid, route: NewRoute) => new CreateRoute(
@@ -26,9 +27,8 @@ export const routesActionBuilders = {
   ),
   getMultiple: (
     endpointGuid,
-    paginationKey?: string,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    paginationKey: string,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetAllRoutes(endpointGuid, includeRelations, populateMissing),
   unmap: (
     guid: string,

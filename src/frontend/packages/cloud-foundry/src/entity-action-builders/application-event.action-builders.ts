@@ -5,6 +5,6 @@ export const applicationEventActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    applicationGuid,
+    { applicationGuid }: { applicationGuid: string },
   ) => new GetAllAppEvents(paginationKey, endpointGuid, applicationGuid)
 } as StratosOrchestratedActionBuilders;
