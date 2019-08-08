@@ -11,6 +11,8 @@ describe('Metrics', () => {
   const register = new RegisterStepper();
   const tileSelector = new TileSelector();
 
+  const spoofMetricsEndpoint = e2e.secrets.getDefaultCFEndpoint().url;
+
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -32,8 +34,8 @@ describe('Metrics', () => {
 
     register.form.fill({
       name: 'MetricsTest',
-      url: 'https://www.google.com',
-      skipsll: false
+      url: spoofMetricsEndpoint,
+      skipsll: true
     });
 
     register.form.getControlsMap().then(fields => {
@@ -58,7 +60,7 @@ describe('Metrics', () => {
     expect(endpointsPage.cards.getCardCount()).toBe(1);
     endpointsPage.cards.getEndpointDataForEndpoint('MetricsTest', 'Metrics').then((data: EndpointMetadata) => {
       expect(data.name).toEqual('MetricsTest');
-      expect(data.url).toEqual('https://www.google.com');
+      expect(data.url).toEqual(spoofMetricsEndpoint);
       expect(data.connected).toBeFalsy();
     });
   });
