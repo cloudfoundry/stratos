@@ -10,6 +10,8 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { APIResourceMetadata } from '../../../../../../../../store/src/types/api.types';
+import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 import { CardAppComponent } from './card-app.component';
 
 describe('CardAppComponent', () => {
@@ -18,6 +20,11 @@ describe('CardAppComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        CardAppComponent,
+        RunningInstancesComponent,
+        CfOrgSpaceLinksComponent
+      ],
       imports: [
         ...generateCfStoreModules(),
         CoreModule,

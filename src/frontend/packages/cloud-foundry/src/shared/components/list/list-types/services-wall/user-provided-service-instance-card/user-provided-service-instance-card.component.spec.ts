@@ -11,7 +11,7 @@ import { ServiceActionHelperService } from '../../../../../data-services/service
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { UserProvidedServiceInstanceCardComponent } from './user-provided-service-instance-card.component';
 
-fdescribe('UserProvidedServiceInstanceCardComponent', () => {
+describe('UserProvidedServiceInstanceCardComponent', () => {
   let component: UserProvidedServiceInstanceCardComponent;
   let fixture: ComponentFixture<UserProvidedServiceInstanceCardComponent>;
 

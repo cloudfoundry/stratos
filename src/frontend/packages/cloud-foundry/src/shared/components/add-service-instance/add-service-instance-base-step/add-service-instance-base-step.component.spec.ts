@@ -10,6 +10,7 @@ describe('AddServiceInstanceBaseStepComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [AddServiceInstanceBaseStepComponent],
       imports: generateCfBaseTestModules(),
       providers: [TabNavService]
     })

@@ -4,6 +4,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
 import { CfAppConfigService } from './cf-app-config.service';
 
 
@@ -12,13 +13,14 @@ describe('CfAppConfigService', () => {
     TestBed.configureTestingModule({
       providers: [
         CfAppConfigService,
-        DatePipe
+        DatePipe,
+        CfOrgSpaceDataService
       ],
       imports: [
         CommonModule,
         CoreModule,
         SharedModule,
-        generateCfStoreModules()
+        generateCfStoreModules(),
       ]
     });
   });

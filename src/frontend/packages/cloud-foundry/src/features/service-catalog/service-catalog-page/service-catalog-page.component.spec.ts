@@ -7,6 +7,8 @@ import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { ServiceCatalogPageComponent } from './service-catalog-page.component';
 
 describe('ServiceCatalogPageComponent', () => {
@@ -23,8 +25,14 @@ describe('ServiceCatalogPageComponent', () => {
         BrowserAnimationsModule,
         generateCfStoreModules()
       ],
-      declarations: [ServiceCatalogPageComponent],
-      providers: [TabNavService]
+      declarations: [
+        ServiceCatalogPageComponent,
+        CfEndpointsMissingComponent
+      ],
+      providers: [
+        TabNavService,
+        CloudFoundryService
+      ]
     })
       .compileComponents();
   }));

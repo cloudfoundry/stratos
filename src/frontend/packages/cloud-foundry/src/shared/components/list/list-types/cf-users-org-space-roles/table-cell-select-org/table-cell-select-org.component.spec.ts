@@ -9,6 +9,7 @@ import { generateCfStoreModules } from '../../../../../../../../core/test-framew
 import { CfUserServiceTestProvider } from '../../../../../../../../core/test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellSelectOrgComponent } from './table-cell-select-org.component';
 
 describe('TableCellSelectOrgComponent', () => {
@@ -28,7 +29,8 @@ describe('TableCellSelectOrgComponent', () => {
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,
-        EntityMonitorFactory
+        EntityMonitorFactory,
+        CfUserService
       ],
       declarations: [TableCellSelectOrgComponent]
     })

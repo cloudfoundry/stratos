@@ -12,6 +12,7 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [SpecifyUserProvidedDetailsComponent],
       imports: [
         ...generateCfBaseTestModules(),
         HttpClientModule,
