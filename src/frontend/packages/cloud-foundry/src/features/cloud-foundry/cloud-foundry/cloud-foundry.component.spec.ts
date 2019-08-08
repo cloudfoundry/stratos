@@ -9,7 +9,7 @@ import {
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CloudFoundryComponent } from './cloud-foundry.component';
 
-describe('CloudFoundryComponent', () => {
+fdescribe('CloudFoundryComponent', () => {
   let component: CloudFoundryComponent;
   let fixture: ComponentFixture<CloudFoundryComponent>;
 

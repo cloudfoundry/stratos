@@ -42,7 +42,7 @@ import { MultilineTitleComponent } from '../src/shared/components/multiline-titl
 import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../src/shared/shared.module';
-import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
+import { createBasicStoreModule, getDefaultInitialTestStratosStoreState, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 // TODO: RC Move this file to cf package
@@ -137,7 +137,7 @@ export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemCompon
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];
 
 // TODO: RC Move these to somewhere more cf test generic
-function generateCfTopLevelStoreEntities(): Partial<CFAppState> {
+export function generateCfTopLevelStoreEntities() {
   return {
     createApplication: {
       cloudFoundryDetails: null,
@@ -190,7 +190,10 @@ function generateCfTopLevelStoreEntities(): Partial<CFAppState> {
 }
 
 export function generateCfStoreModules(initialStore?: CFAppState) {
-  const store = initialStore || generateCfTopLevelStoreEntities();
+  const store = initialStore || {
+    ...getDefaultInitialTestStratosStoreState(),
+    ...generateCfTopLevelStoreEntities()
+  };
   return [
     CloudFoundryTestingModule,
     AppStoreExtensionsModule,

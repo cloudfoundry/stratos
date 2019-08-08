@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { first, map, startWith, tap } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
@@ -50,6 +50,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
     this.favorite$ = endpointsService.endpoints$.pipe(
       first(),
+      tap(console.log),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
       map(endpoint => favoritesConfigMapper.getFavoriteEndpointFromEntity(endpoint))
     );

@@ -15,8 +15,10 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
   return function entitiesReducer(state = {}, action: Action): Record<string, any> {
     switch (action.type) {
       case InitCatalogueEntitiesAction.ACTION_TYPE:
+        console.log('!!!!!!!!!!!!!!!!!!!!!!! 1requestDataReducerFactory');
         return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
       case successAction:
+        console.log('!!!!!!!!!!!!!!!!!!!!!!! 2requestDataReducerFactory');
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           const entityKey = entityCatalogue.getEntity(success.apiAction.endpointType, success.apiAction.entityType).entityKey;
@@ -26,6 +28,7 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
         }
         return state;
       case RECURSIVE_ENTITY_SET_DELETED:
+        console.log('!!!!!!!!!!!!!!!!!!!!!!! 3requestDataReducerFactory');
         return cleanStateFromFlatTree(state, action as SetTreeDeleted);
       default:
         return state;

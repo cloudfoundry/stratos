@@ -24,6 +24,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
 
   beforeEach(async(() => {
     // TODO: RC search for getInitialTestStoreState in cf module and replace
+    // TODO: RC Does this actually work? the dispatch in entity c ataloge module should cause these to be cleared
     const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
       [
         cfEntityFactory(organizationEntityType),

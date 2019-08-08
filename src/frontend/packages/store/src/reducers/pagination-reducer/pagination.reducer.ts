@@ -149,6 +149,11 @@ function enterPaginationReducer(state: PaginationState, action, updatePagination
   const paginationKey = getPaginationKeyFromAction(action);
   if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
+    if (!newState[entityKey]) {
+      console.log(`Missing key in store '${entityKey}'`, Object.keys(newState));
+    } else if (!newState[entityKey][paginationKey]) {
+      console.log(`Missing pagination in store '${paginationKey}'`, Object.keys(newState[entityKey]));
+    }
     const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
     if (state[entityKey][paginationKey] === updatedPaginationState) {
       return state;

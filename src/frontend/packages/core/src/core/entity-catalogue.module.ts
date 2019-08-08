@@ -10,6 +10,8 @@ import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 
 export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
+// TODO: RC explain
+export const SKIP_ENTITY_SECTION_INIT = '__SKIP_ENTITY_SECTION_INIT__';
 
 @NgModule({})
 export class EffectsFeatureModule {
@@ -17,14 +19,18 @@ export class EffectsFeatureModule {
     store: Store<any>,
     reducerManager: ReducerManager,
     @Inject(CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogueEntity[][],
+    @Inject(SKIP_ENTITY_SECTION_INIT) skipEntityInit: boolean
   ) {
     const entities = [].concat.apply([], entityGroups) as StratosBaseCatalogueEntity[];
+    console.log('EffectsFeatureModule!!!!', entities.map(m => m.entityKey));
     entities.forEach(entity => entityCatalogue.register(entity));
     const dataReducer = requestDataReducerFactory(requestActions);
     const extraReducers = entityCatalogue.getAllEntityRequestDataReducers();
     const chainedReducers = chainApiReducers(dataReducer, extraReducers);
     reducerManager.addReducer('requestData', chainedReducers);
-    store.dispatch(new InitCatalogueEntitiesAction(entities));
+    if (!skipEntityInit) {
+      store.dispatch(new InitCatalogueEntitiesAction(entities));
+    }
   }
 }
 
@@ -38,7 +44,8 @@ export class EntityCatalogueModule {
       providers: [
         ReducerManager,
         Store,
-        { provide: CATALOGUE_ENTITIES, useFactory: entityFactory, multi: true }
+        { provide: CATALOGUE_ENTITIES, useFactory: entityFactory, multi: true },
+        { provide: SKIP_ENTITY_SECTION_INIT, useValue: false }
       ]
     };
   }

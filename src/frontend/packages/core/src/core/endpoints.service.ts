@@ -7,7 +7,7 @@ import { filter, first, map, skipWhile, switchMap, withLatestFrom } from 'rxjs/o
 import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../store/src/actions/metrics.actions';
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { entityFactory } from '../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey, entityFactory } from '../../../store/src/helpers/entity-factory';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
@@ -18,8 +18,10 @@ import {
 import { IMetrics } from '../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../shared/services/metrics-range-selector.types';
+import { EntityCatalogueHelpers } from './entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { UserService } from './user.service';
 
@@ -51,6 +53,15 @@ export class EndpointsService implements CanActivate {
     private endpointHealthChecks: EndpointHealthChecks,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
+    const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
+    store.select('requestData').subscribe(a => {
+      console.log('EndpointsService rq: ', a);
+      console.log('EndpointsService keys: ', Object.keys(a));
+      console.log('EndpointsService endpoints key: ', endpointEntityKey);
+      console.log('EndpointsService endpoints: ', a[endpointEntityKey]);
+    });
+
+
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>

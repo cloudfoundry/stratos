@@ -55,6 +55,5 @@ export class CreateAppPageEffects {
 }
 
 export const selectNewAppState = (state: CFAppState): CreateNewApplicationState => {
-  console.log('selectNewAppState: ', Object.keys(state));
   return state.createApplication;
 };

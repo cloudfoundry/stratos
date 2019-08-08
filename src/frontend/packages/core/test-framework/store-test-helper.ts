@@ -2,7 +2,6 @@ import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
-import { createUserRoleInOrg } from '../../cloud-foundry/src/store/types/user.types';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
 import {
@@ -11,8 +10,21 @@ import {
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
+import { generateCfTopLevelStoreEntities } from './cloud-foundry-endpoint-service.helper';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
+export const testSCFEntity = {
+  guid: testSCFGuid,
+  name: 'SCF-2.2.0-beta',
+  version: '',
+  user: {
+    scopes: [],
+    guid: 'a6254a42-a218-4f41-b77e-35a8d53d9dd1',
+    name: 'admin',
+    admin: true
+  },
+  type: ''
+};
 
 /* tslint:disable */
 export function getInitialTestStoreState(): CFAppState {
@@ -27,8 +39,7 @@ export function getInitialTestStoreState(): CFAppState {
   return state;
 }
 
-function getDefaultInitialTestStoreState(): CFAppState {
-
+export function getDefaultInitialTestStratosStoreState() {
   return {
     recentlyVisited: {
       entities: {},
@@ -59,18 +70,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
         },
         endpoints: {
           cf: {
-            [testSCFGuid]: {
-              guid: testSCFGuid,
-              name: 'SCF-2.2.0-beta',
-              version: '',
-              user: {
-                scopes: [],
-                guid: 'a6254a42-a218-4f41-b77e-35a8d53d9dd1',
-                name: 'admin',
-                admin: true
-              },
-              type: ''
-            },
+            [testSCFGuid]: testSCFEntity,
             '521a9d96-2d6c-4d94-a555-807437ab106d': {
               guid: '521a9d96-2d6c-4d94-a555-807437ab106d',
               name: 'SCF',
@@ -143,6 +143,61 @@ function getDefaultInitialTestStoreState(): CFAppState {
       error: false,
       message: ''
     },
+    dashboard: {
+      sidenavOpen: true,
+      headerEventMinimized: false,
+      timeoutSession: true,
+      sideHelpOpen: false,
+      sideHelpDocument: '',
+      isMobile: false,
+      isMobileNavOpen: false,
+      sideNavPinned: false,
+      pollingEnabled: true
+    },
+    actionHistory: [],
+    lists: {},
+    routing: {
+      previousState: {
+        id: 4,
+        url: '/marketplace',
+        urlAfterRedirects: '/marketplace',
+        state: {
+          url: '/marketplace',
+          params: {},
+          queryParams: {}
+        }
+      },
+      currentState: {
+        id: 5,
+        url: '/applications',
+        urlAfterRedirects: '/applications',
+        state: {
+          url: '/applications',
+          params: {},
+          queryParams: {}
+        }
+      }
+    },
+    internalEvents: {
+      types: {}
+    },
+    currentUserRoles: {
+      internal: {
+        isAdmin: false,
+        scopes: []
+      },
+      cf: {
+        [testSCFGuid]: getDefaultEndpointRoles()
+      },
+      state: getDefaultRolesRequestState()
+    }
+  }
+}
+
+function getDefaultInitialTestStoreState(): CFAppState {
+  return {
+    ...getDefaultInitialTestStratosStoreState(),
+    ...generateCfTopLevelStoreEntities(),
     pagination: {
       cfSummary: {},
       cfPrivate_domains: {},
@@ -695,48 +750,6 @@ function getDefaultInitialTestStoreState(): CFAppState {
         }
       },
       stratosUserProfile: {}
-    },
-    dashboard: {
-      sidenavOpen: true,
-      headerEventMinimized: false,
-      timeoutSession: true,
-      sideHelpOpen: false,
-      sideHelpDocument: '',
-      isMobile: false,
-      isMobileNavOpen: false,
-      sideNavPinned: false,
-      pollingEnabled: true
-    },
-    createApplication: {
-      cloudFoundryDetails: null,
-      name: '',
-      nameCheck: {
-        checking: false,
-        available: true,
-        name: ''
-      }
-    },
-    createServiceInstance: {
-      name: '',
-      servicePlanGuid: '',
-      spaceGuid: '',
-      orgGuid: '',
-      spaceScoped: false
-    },
-    deployApplication: {
-      cloudFoundryDetails: null,
-      applicationSource: {
-        type: {
-          id: '',
-          name: ''
-        }
-      },
-      projectExists: {
-        checking: false,
-        exists: false,
-        name: '',
-        error: false
-      }
     },
     request: {
       cfSummary: {},
@@ -21954,59 +21967,6 @@ function getDefaultInitialTestStoreState(): CFAppState {
         }
       },
     },
-    actionHistory: [],
-    lists: {},
-    routing: {
-      previousState: {
-        id: 4,
-        url: '/marketplace',
-        urlAfterRedirects: '/marketplace',
-        state: {
-          url: '/marketplace',
-          params: {},
-          queryParams: {}
-        }
-      },
-      currentState: {
-        id: 5,
-        url: '/applications',
-        urlAfterRedirects: '/applications',
-        state: {
-          url: '/applications',
-          params: {},
-          queryParams: {}
-        }
-      }
-    },
-    manageUsersRoles: {
-      users: [],
-      cfGuid: '',
-      newRoles: {
-        name: '',
-        orgGuid: '',
-        spaces: {},
-        permissions: createUserRoleInOrg(
-          undefined,
-          undefined,
-          undefined,
-          undefined
-        )
-      },
-      changedRoles: []
-    },
-    internalEvents: {
-      types: {}
-    },
-    currentUserRoles: {
-      internal: {
-        isAdmin: false,
-        scopes: []
-      },
-      cf: {
-        [testSCFGuid]: getDefaultEndpointRoles()
-      },
-      state: getDefaultRolesRequestState()
-    }
   };
 }
 
