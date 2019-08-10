@@ -58,6 +58,5 @@ export class DetachAppsListConfigService implements IListConfig<APIResource> {
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
   getFilters = () => [];
-  setFilter = (id: string) => null;
   getDataSource = () => this.dataSource;
 }

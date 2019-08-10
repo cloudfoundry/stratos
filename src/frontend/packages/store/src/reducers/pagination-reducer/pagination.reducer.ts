@@ -12,6 +12,7 @@ import {
   REMOVE_PARAMS,
   RESET_PAGINATION,
   SET_CLIENT_FILTER,
+  SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
   SET_CLIENT_PAGE_SIZE,
   SET_INITIAL_PARAMS,
@@ -34,6 +35,7 @@ import { paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
+import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
 import { paginationSetPage } from './pagination-reducer-set-page';
@@ -79,6 +81,8 @@ const getPaginationUpdater = (types: [string, string, string]) => {
         return paginationSetClientPage(state, action);
       case SET_CLIENT_FILTER:
         return paginationSetClientFilter(state, action);
+      case SET_CLIENT_FILTER_KEY:
+        return paginationSetClientFilterKey(state, action);
       case SET_PAGE_BUSY:
         return paginationPageBusy(state, action);
       default:

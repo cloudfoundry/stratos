@@ -70,7 +70,6 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
     this.getFilters = () => [];
-    this.setFilter = (id: string) => null;
     initCfOrgSpaceService(store, cfOrgSpaceService,
       this.dataSource.masterAction.entityKey,
       this.dataSource.masterAction.paginationKey).subscribe();

@@ -86,7 +86,6 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
   getFilters = () => [];
-  setFilter = (id: string) => null;
   getDataSource = () => this.dataSource;
   public getInitialised = () => this.initialised;
 }

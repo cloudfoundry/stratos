@@ -85,7 +85,6 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
   getDataSource = () => this.AppsDataSource;
   getMultiFiltersConfigs = () => [this.createRepositoryFilterConfig()];
   getFilters = () => [];
-  setFilter = (id: string) => null;
 
   private createRepositoryFilterConfig(): IListMultiFilterConfig {
     return {

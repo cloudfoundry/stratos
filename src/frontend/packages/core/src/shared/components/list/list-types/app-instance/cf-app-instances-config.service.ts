@@ -221,7 +221,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   getDataSource = () => this.instancesSource;
   getMultiFiltersConfigs = () => [];
   getFilters = () => [];
-  setFilter = (id: string) => null;
   getInitialised = () => this.initialised$;
 
   private createMetricsResults(entityServiceFactory: EntityServiceFactory) {

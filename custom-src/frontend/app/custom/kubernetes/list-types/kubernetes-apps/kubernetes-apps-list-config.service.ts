@@ -90,7 +90,6 @@ export class KubernetesAppsListConfigService implements IListConfig<KubernetesAp
   getDataSource = () => this.AppsDataSource;
   getMultiFiltersConfigs = () => [];
   getFilters = () => [];
-  setFilter = (id: string) => null;
 
   constructor(
     store: Store<AppState>,

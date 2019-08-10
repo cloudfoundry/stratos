@@ -18,5 +18,4 @@ export class BaseCfListConfig<T> implements IListConfig<T> {
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
   getFilters = () => [];
-  setFilter = (id: string) => null;
 }

@@ -12,6 +12,7 @@ export const SET_RESULT_COUNT = '[Pagination] Set result count';
 export const SET_CLIENT_PAGE_SIZE = '[Pagination] Set client page size';
 export const SET_CLIENT_PAGE = '[Pagination] Set client page';
 export const SET_CLIENT_FILTER = '[Pagination] Set client filter';
+export const SET_CLIENT_FILTER_KEY = '[Pagination] Set client filter key';
 export const SET_PARAMS = '[Pagination] Set Params';
 export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
@@ -112,6 +113,15 @@ export class SetClientFilter implements BasePaginatedAction {
   ) {
   }
   type = SET_CLIENT_FILTER;
+}
+
+export class SetClientFilterKey implements BasePaginatedAction {
+  constructor(
+    public entityKey: string,
+    public paginationKey: string,
+    public filterKey: string,
+  ) {}
+  type = SET_CLIENT_FILTER_KEY;
 }
 
 export class SetParams implements BasePaginatedAction {

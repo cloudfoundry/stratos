@@ -53,6 +53,5 @@ export class HelmVersionsListConfig implements IListConfig<HelmVersion> {
   public getSingleActions = () => [];
   public getMultiFiltersConfigs = () => [];
   public getFilters = () => [];
-  public setFilter = (id: string) => null;
   public getDataSource = () => this.dataSource;
 }

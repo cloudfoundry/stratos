@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import { DataFunction } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
+import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { IListConfig, IListFilter, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { ConditionType, KubernetesNode } from '../../store/kube.types';
@@ -11,15 +13,19 @@ import { getConditionSort } from '../kube-sort.helper';
 import { ConditionCellComponent, SubtleConditionCellComponent } from './condition-cell/condition-cell.component';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
-import {
-  LabelsKubernetesNodesDataSource,
-  NameKubernetesNodesDataSource,
-  IPAddressKubernetesNodesDataSource
-} from './kubernetes-nodes-data-source';
+import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
 import { NodePodCountComponent } from './node-pod-count/node-pod-count.component';
+
+export enum KubernetesNodesListFilterKeys {
+  NAME = 'name',
+  IP_ADDRESS = 'ip-address',
+  LABELS = 'labels'
+}
 
 @Injectable()
 export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
+  dataSource: KubernetesNodesDataSource;
+
   columns: Array<ITableColumn<KubernetesNode>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
@@ -70,8 +76,24 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       cellFlex: '5',
     },
   ];
-  filters: IListFilter<KubernetesNode>[];
-  filterSelected: IListFilter<KubernetesNode>;
+  filters: IListFilter[] = [
+    {
+      default: true,
+      key: KubernetesNodesListFilterKeys.NAME,
+      label: 'Name',
+      placeholder: 'Filter by Name'
+    },
+    {
+      key: KubernetesNodesListFilterKeys.LABELS,
+      label: 'Labels',
+      placeholder: 'Filter by Labels'
+    },
+    {
+      key: KubernetesNodesListFilterKeys.IP_ADDRESS,
+      label: 'IP Address',
+      placeholder: 'Filter by IP Address'
+    }
+  ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
   viewType = ListViewTypes.TABLE_ONLY;
@@ -86,39 +108,46 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   getMultiActions = () => [];
   getSingleActions = () => [];
   getColumns = () => this.columns;
-  getDataSource = () => this.filterSelected.dataSource;
+  getDataSource = () => this.dataSource;
   getMultiFiltersConfigs = () => [];
-  getFilters = (): IListFilter<KubernetesNode>[] => this.filters;
-  setFilter = (id: string) => {
-    this.filterSelected = this.filters.find(filter => filter.id === id);
-  }
+  getFilters = (): IListFilter[] => this.filters;
 
   constructor(
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
   ) {
-    this.filters = [
-      {
-        dataSource: new NameKubernetesNodesDataSource(store, kubeId, this),
-        default: true,
-        id: 'name',
-        label: 'Name',
-        placeholder: 'Filter by Name'
-      },
-      {
-        dataSource: new LabelsKubernetesNodesDataSource(store, kubeId, this),
-        id: 'labels',
-        label: 'Labels',
-        placeholder: 'Filter by Labels'
-      },
-      {
-        dataSource: new IPAddressKubernetesNodesDataSource(store, kubeId, this),
-        id: 'ip-address',
-        label: 'IP Address',
-        placeholder: 'Filter by IP Address'
+    const transformEntities: DataFunction<KubernetesNode>[] = [
+      (entities: KubernetesNode[], paginationState: PaginationEntityState) => {
+        const filterKey = paginationState.clientPagination.filter.filterKey;
+        const filterString = paginationState.clientPagination.filter.string.toUpperCase();
+
+        switch (filterKey) {
+          case KubernetesNodesListFilterKeys.IP_ADDRESS:
+            return entities.filter(node => {
+              const internalIP: string = node.status.addresses.find(address => {
+                return address.type === 'InternalIP';
+              }).address;
+              return internalIP.toUpperCase().includes(filterString);
+            });
+
+          case KubernetesNodesListFilterKeys.LABELS:
+            return entities.filter(node => {
+              return Object.entries(node.metadata.labels).some(([label, value]) => {
+                label = label.toUpperCase();
+                value = value.toUpperCase();
+                return label.includes(filterString) || value.includes(filterString);
+              });
+            });
+
+          case KubernetesNodesListFilterKeys.NAME:
+          default:
+            return entities.filter(node => {
+              return node.metadata.name.toUpperCase().includes(filterString);
+            });
+        }
       }
     ];
 
-    this.filterSelected = this.filters.find(filter => filter.default === true);
+    this.dataSource = new KubernetesNodesDataSource(store, kubeId, this, transformEntities);
   }
 }

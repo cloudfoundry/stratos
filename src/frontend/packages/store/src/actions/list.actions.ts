@@ -20,6 +20,7 @@ export class ListFilter {
   items: {
     [key: string]: any;
   };
+  filterKey?: string;
 }
 
 export const ListStateActionTypes = {

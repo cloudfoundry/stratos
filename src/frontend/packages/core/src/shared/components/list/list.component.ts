@@ -49,7 +49,7 @@ import {
   ListView,
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
-import { SetPage } from '../../../../../store/src/actions/pagination.actions';
+import { SetPage, SetClientFilterKey } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -177,9 +177,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     };
   private filterString = '';
   private sortColumns: ITableColumn<T>[];
-  // private filterColumns: ITableColumn<T>[];
-  private filterColumns: IListFilter<T>[];
-  private filterSelected: IListFilter<T>;
+  private filterColumns: IListFilter[];
+  private filterSelected: IListFilter;
 
   private paginationWidgetToStore: Subscription;
   private filterWidgetToStore: Subscription;
@@ -396,20 +395,25 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       return column.sort;
     });
 
-    this.filterColumns = this.config.getFilters();
-    if (!this.filterSelected) {
-      this.filterSelected = this.filterColumns.find(filterConfig => {
-        return filterConfig.default === true;
-      });
-    }
-
     const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
       this.headerSort.value = sort.field;
       this.headerSort.direction = sort.direction;
     }));
 
+    this.filterColumns = this.config.getFilters();
+
     const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
       this.filterString = paginationFilter.string;
+
+      const filterKey = paginationFilter.filterKey;
+      if (filterKey) {
+        this.filterSelected = this.filterColumns.find(filterConfig => {
+          return filterConfig.key === filterKey;
+        });
+      } else if (this.filterColumns) {
+        this.filterSelected = this.filterColumns.find(filterConfig => filterConfig.default);
+      }
+
       // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
       // downs (change org to one with one space results in that space being selected)
       Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
@@ -572,9 +576,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.uberSub,
       this.multiFilterChangesSub
     );
-    if (this.filterColumns) {
-      this.filterColumns.forEach(filterConfig => filterConfig.dataSource.destroy());
-    }
     if (this.dataSource) {
       this.dataSource.destroy();
     }
@@ -605,9 +606,12 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     });
   }
 
-  updateListFilter(filterSelected: IListFilter<T>, filterString: string) {
-    this.config.setFilter(filterSelected.id);
-    this.initialise();
+  updateListFilter(filterSelected: IListFilter, filterString: string) {
+    this.store.dispatch(new SetClientFilterKey(
+      this.dataSource.entityKey,
+      this.dataSource.paginationKey,
+      filterSelected.key
+    ));
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {

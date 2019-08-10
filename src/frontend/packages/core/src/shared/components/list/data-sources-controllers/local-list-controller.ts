@@ -136,6 +136,7 @@ export class LocalListController<T = any> {
       + (paginationEntity.params['order-direction-field'] || '') + ','
       + (paginationEntity.params['order-direction'] || '') + ','
       + paginationEntity.clientPagination.filter.string + ','
+      + paginationEntity.clientPagination.filter.filterKey + ','
       + paginationEntity.forcedLocalPage
       + Object.values(paginationEntity.clientPagination.filter.items);
     // Some outlier cases actually fetch independently from this list (looking at you app variables)
