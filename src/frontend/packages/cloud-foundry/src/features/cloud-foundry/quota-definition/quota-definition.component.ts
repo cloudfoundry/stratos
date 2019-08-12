@@ -72,6 +72,10 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   ) {
     const baseCFUrl = `/cloud-foundry/${this.cfGuid}`;
 
+    console.log('endpoint: ', endpoint);
+    console.log('org: ', org);
+    console.log('space: ', space);
+
     const breadcrumbs: IHeaderBreadcrumb[] = [{
       breadcrumbs: [
         { value: endpoint.name, routerLink: `${baseCFUrl}/quota-definitions` },

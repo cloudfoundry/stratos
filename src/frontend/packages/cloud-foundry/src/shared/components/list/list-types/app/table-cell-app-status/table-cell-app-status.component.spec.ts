@@ -18,7 +18,7 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellAppStatusComponent } from './table-cell-app-status.component';
 
-fdescribe('TableCellAppStatusComponent', () => {
+describe('TableCellAppStatusComponent', () => {
   let component: TableCellAppStatusComponent<any>;
   let fixture: ComponentFixture<TableCellAppStatusComponent<any>>;
 

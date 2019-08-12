@@ -2,7 +2,7 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Http, HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Store } from '@ngrx/store';
+import { Store, StoreModule } from '@ngrx/store';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { CloudFoundryTestingModule } from '../../cloud-foundry/src/cloud-foundry-test.module';
@@ -15,6 +15,7 @@ import { CfOrgSpaceDataService } from '../../cloud-foundry/src/shared/data-servi
 import { CfUserService } from '../../cloud-foundry/src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
 import { createUserRoleInOrg } from '../../cloud-foundry/src/store/types/user.types';
+import { appReducers } from '../../store/src/reducers.module';
 import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
@@ -42,7 +43,7 @@ import { MultilineTitleComponent } from '../src/shared/components/multiline-titl
 import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../src/shared/shared.module';
-import { createBasicStoreModule, getDefaultInitialTestStratosStoreState, testSCFGuid } from './store-test-helper';
+import { testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 // TODO: RC Move this file to cf package
@@ -189,15 +190,24 @@ export function generateCfTopLevelStoreEntities() {
   };
 }
 
-export function generateCfStoreModules(initialStore?: CFAppState) {
-  const store = initialStore || {
-    ...getDefaultInitialTestStratosStoreState(),
-    ...generateCfTopLevelStoreEntities()
-  };
+export function generateCfStoreModules() {
+  // const store = initialStore || {
+  //   ...getDefaultInitialTestStratosStoreState(), // TODO: RC search of remove
+  //   ...generateCfTopLevelStoreEntities() // TODO: RC search of remove?
+  // };
   return [
     CloudFoundryTestingModule,
     AppStoreExtensionsModule,
-    createBasicStoreModule(store),
+    // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers // TODO: RC fix comment given starting non-requestState
+    StoreModule.forRoot(
+      appReducers,
+      // {
+      //   initialState: {
+      //     ...generateCfTopLevelStoreEntities()
+      //   }
+      // }
+    )
+    // createBasicStoreModule(initialStore),
   ];
 }
 
@@ -205,9 +215,9 @@ export function generateCfStoreModules(initialStore?: CFAppState) {
 // generateCfBaseTestModulesNoShared
 // ./src/frontend/packages/cloud-foundry
 
-export function generateCfBaseTestModulesNoShared(initialStore?: CFAppState) {
+export function generateCfBaseTestModulesNoShared() {
   return [
-    ...generateCfStoreModules(initialStore),
+    ...generateCfStoreModules(),
     RouterTestingModule,
     CoreModule,
     NoopAnimationsModule,
@@ -215,9 +225,10 @@ export function generateCfBaseTestModulesNoShared(initialStore?: CFAppState) {
   ];
 }
 
-export function generateCfBaseTestModules(initialStore?: CFAppState) {
+export function generateCfBaseTestModules() {
   return [
-    ...generateCfBaseTestModulesNoShared(initialStore),
+    ...generateCfBaseTestModulesNoShared(),
     SharedModule
   ];
 }
+

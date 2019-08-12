@@ -23,7 +23,7 @@ import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
-import { baseStratosTypeFactory } from './base-entity-types';
+import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
 import { EntityCatalogueModule } from './core/entity-catalogue.module';
 import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
@@ -74,6 +74,7 @@ export class CustomRouterStateSerializer
   }
 }
 
+
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -84,7 +85,7 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
-    EntityCatalogueModule.forFeature(baseStratosTypeFactory),
+    EntityCatalogueModule.forFeature(generateStratosEntities),
     AppStoreExtensionsModule,
     RouteModule,
     CloudFoundryPackageModule,

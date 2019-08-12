@@ -1,19 +1,23 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 
+import { endpointEntitySchema } from '../../../../../core/src/base-entity-schemas';
+import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { EntityCatalogueEntityConfig } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createEntityStoreState, testSCFGuid, TestStoreEntity } from '../../../../../core/test-framework/store-test-helper';
+import { testSCFEntity, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
-import { CFAppState } from '../../../cf-app-state';
+import { NormalizedResponse } from '../../../../../store/src/types/api.types';
+import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
 import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
 
-describe('SpaceQuotaDefinitionComponent', () => {
+fdescribe('SpaceQuotaDefinitionComponent', () => {
   let component: SpaceQuotaDefinitionComponent;
   let fixture: ComponentFixture<SpaceQuotaDefinitionComponent>;
   const cfGuid = testSCFGuid;
@@ -24,30 +28,12 @@ describe('SpaceQuotaDefinitionComponent', () => {
 
   beforeEach(async(() => {
     // TODO: RC search for getInitialTestStoreState in cf module and replace
-    // TODO: RC Does this actually work? the dispatch in entity c ataloge module should cause these to be cleared
-    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
-      [
-        cfEntityFactory(organizationEntityType),
-        [{
-          guid: orgGuid,
-          data: helper.createEmptyOrg(orgGuid, 'org-name')
-        }]
-      ],
-      [
-        cfEntityFactory(spaceEntityType),
-        [{
-          guid: spaceGuid,
-          data: helper.createEmptySpace(spaceGuid, 'space-name', orgGuid)
-        }]
-      ]
-    ]);
-    const store = createEntityStoreState(entityMap) as CFAppState;
-
+    // TODO: RC Search and remove createEntityStoreState from  all component tests
     TestBed.configureTestingModule({
       declarations: [
         SpaceQuotaDefinitionComponent
       ],
-      imports: generateCfBaseTestModules(store),
+      imports: generateCfBaseTestModules(),
       providers: [{
         provide: ActivatedRoute,
         useValue: {
@@ -57,10 +43,51 @@ describe('SpaceQuotaDefinitionComponent', () => {
           }
         }
       },
-      generateTestCfEndpointServiceProvider(), TabNavService]
+      generateTestCfEndpointServiceProvider(),
+        TabNavService,
+        // { provide: SKIP_ENTITY_SECTION_INIT, useValue: true }
+      ]
 
     })
       .compileComponents();
+
+
+    const stratosEndpointEntityConfig: EntityCatalogueEntityConfig = endpointEntitySchema;
+    const stratosEndpointEntityKey = EntityCatalogueHelpers.buildEntityKey(
+      stratosEndpointEntityConfig.entityType,
+      stratosEndpointEntityConfig.endpointType
+    );
+
+    const orgEndpointEntityConfig: EntityCatalogueEntityConfig = cfEntityFactory(organizationEntityType);
+    const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(orgEndpointEntityConfig.entityType, orgEndpointEntityConfig.endpointType);
+    const org = helper.createEmptyOrg(orgGuid, 'org');
+
+    const spaceEndpointEntityConfig: EntityCatalogueEntityConfig = cfEntityFactory(spaceEntityType);
+    const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(
+      spaceEndpointEntityConfig.entityType,
+      spaceEndpointEntityConfig.endpointType
+    );
+    const space = helper.createEmptyOrg(spaceGuid, 'space');
+
+    const mappedData = {
+      entities: {
+        [stratosEndpointEntityKey]: {
+          [testSCFEntity.guid]: testSCFEntity
+        },
+        [orgEntityKey]: {
+          [org.entity.guid]: org
+        },
+        [spaceEntityKey]: {
+          [space.entity.guid]: space
+        }
+      },
+      result: [testSCFEntity.guid]
+    } as NormalizedResponse;
+    const store = TestBed.get(Store);
+    store.dispatch(new WrapperRequestActionSuccess(mappedData, {
+      type: 'POPULATE_TEST_DATA',
+      ...stratosEndpointEntityConfig
+    }, 'fetch'));
   }));
 
   beforeEach(() => {

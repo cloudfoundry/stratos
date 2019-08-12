@@ -21,7 +21,8 @@ fdescribe('ApplicationWallComponent', () => {
       providers: [
         DatePipe,
         TabNavService,
-        CloudFoundryService
+        CloudFoundryService,
+        // { provide: SKIP_ENTITY_SECTION_INIT, useValue: true }
       ]
     })
       .compileComponents();

@@ -6,7 +6,7 @@ import { generateCfStoreModules } from '../../../../../../../../core/test-framew
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 import { TableCellAppInstancesComponent } from './table-cell-app-instances.component';
 
-fdescribe('TableCellAppInstancesComponent', () => {
+describe('TableCellAppInstancesComponent', () => {
   let component: TableCellAppInstancesComponent<any>;
   let fixture: ComponentFixture<TableCellAppInstancesComponent<any>>;
 

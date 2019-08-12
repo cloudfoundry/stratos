@@ -27,7 +27,6 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
@@ -116,9 +115,9 @@ import { AppStats } from './store/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
 
-export function registerCFEntities() {
-  generateCFEntities().forEach(entity => entityCatalogue.register(entity));
-}
+// export function registerCFEntities() {
+//   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
+// }
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition = {
@@ -245,6 +244,9 @@ function generateCFInfoEntity(endpointDefinition: IStratosEndpointDefinition) {
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<ICfV2Info>, CfInfoDefinitionActionBuilders>(
     cfInfoDefinition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: cfInfoDefinitionActionBuilders,
       entityBuilder: {
         getMetadata: info => ({
@@ -522,6 +524,9 @@ function generateGitCommitEntity(endpointDefinition: IStratosEndpointDefinition)
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<GitCommit>, GitCommitActionBuilders>(
     definition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: gitCommitActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
@@ -544,6 +549,9 @@ function generateGitRepoEntity(endpointDefinition: IStratosEndpointDefinition) {
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<GitRepo>>(
     definition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: gitRepoActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
@@ -566,6 +574,9 @@ function generateGitBranchEntity(endpointDefinition: IStratosEndpointDefinition)
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<GitBranch>, GitBranchActionBuilders>(
     definition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: gitBranchActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({

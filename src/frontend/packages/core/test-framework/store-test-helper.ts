@@ -1,5 +1,6 @@
 import { ModuleWithProviders } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
+import { TestBed } from '@angular/core/testing';
+import { Store, StoreModule } from '@ngrx/store';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { appReducers } from '../../store/src/reducers.module';
@@ -7,13 +8,19 @@ import { getDefaultRequestState } from '../../store/src/reducers/api-request-red
 import {
   getDefaultPaginationEntityState,
 } from '../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
+import { NormalizedResponse } from '../../store/src/types/api.types';
+import { SessionDataEndpoint } from '../../store/src/types/auth.types';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
+import { WrapperRequestActionSuccess } from '../../store/src/types/request.types';
+import { endpointEntitySchema } from '../src/base-entity-schemas';
+import { EntityCatalogueHelpers } from '../src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 import { generateCfTopLevelStoreEntities } from './cloud-foundry-endpoint-service.helper';
+import { EndpointModel } from '../../store/src/types/endpoint.types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
-export const testSCFEntity = {
+export const testSCFSessionEntity: SessionDataEndpoint = {
   guid: testSCFGuid,
   name: 'SCF-2.2.0-beta',
   version: '',
@@ -24,6 +31,21 @@ export const testSCFEntity = {
     admin: true
   },
   type: ''
+};
+
+export const testSCFEntity: EndpointModel = {
+  guid: testSCFGuid,
+  name: 'SCF-2.2.0-beta',
+  user: {
+    scopes: [],
+    guid: 'a6254a42-a218-4f41-b77e-35a8d53d9dd1',
+    name: 'admin',
+    admin: true
+  },
+  cnsi_type: 'cf',
+  system_shared_token: false,
+  sso_allowed: false,
+  metricsAvailable: false
 };
 
 /* tslint:disable */
@@ -70,7 +92,7 @@ export function getDefaultInitialTestStratosStoreState() {
         },
         endpoints: {
           cf: {
-            [testSCFGuid]: testSCFEntity,
+            [testSCFGuid]: testSCFSessionEntity,
             '521a9d96-2d6c-4d94-a555-807437ab106d': {
               guid: '521a9d96-2d6c-4d94-a555-807437ab106d',
               name: 'SCF',
@@ -22062,3 +22084,24 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
 //   response: null,
 //   message: ''
 // }
+
+export function populateStoreWithTestEndpoint() {
+  const stratosEndpointEntityConfig: EntityCatalogueEntityConfig = endpointEntitySchema;
+  const stratosEndpointEntityKey = EntityCatalogueHelpers.buildEntityKey(
+    stratosEndpointEntityConfig.entityType,
+    stratosEndpointEntityConfig.endpointType
+  );
+  const mappedData = {
+    entities: {
+      [stratosEndpointEntityKey]: {
+        [testSCFEntity.guid]: testSCFEntity
+      }
+    },
+    result: [testSCFEntity.guid]
+  } as NormalizedResponse;
+  const store = TestBed.get(Store);
+  store.dispatch(new WrapperRequestActionSuccess(mappedData, {
+    type: 'POPULATE_TEST_DATA',
+    ...stratosEndpointEntityConfig
+  }, 'fetch'));
+}

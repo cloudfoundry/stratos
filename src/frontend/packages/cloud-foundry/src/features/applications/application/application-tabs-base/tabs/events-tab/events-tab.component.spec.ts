@@ -1,8 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { EntityCatalogueHelpers } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import {
+  getPaginationAction,
+} from '../../../../../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator.spec.helpers';
 import { EntityCatalogueEntityConfig } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
@@ -10,19 +13,16 @@ import {
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createEntityStoreState, TestStoreEntity } from '../../../../../../../../core/test-framework/store-test-helper';
-import {
-  getDefaultPaginationEntityState,
-} from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
-import { CFAppState } from '../../../../../../cf-app-state';
+import { NormalizedResponse } from '../../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
+import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/types/request.types';
 import { appEventEntityType, cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
 
 
-describe('EventsTabComponent', () => {
+fdescribe('EventsTabComponent', () => {
   class ApplicationServiceMock {
     cfGuid = 'mockCfGuid';
     appGuid = 'mockAppGuid';
@@ -31,19 +31,19 @@ describe('EventsTabComponent', () => {
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
 
-  const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
-    [
-      cfEntityFactory(appEventEntityType),
-      []
-    ],
-  ]);
-  const initialState = createEntityStoreState(entityMap) as CFAppState;
-  initialState.pagination = {
-    ...initialState.pagination,
-    [EntityCatalogueHelpers.buildEntityKey(appEventEntityType, CF_ENDPOINT_TYPE)]: {
-      ['app-events:mockCfGuidmockAppGuid']: getDefaultPaginationEntityState()
-    }
-  };
+  // const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
+  //   [
+  //     cfEntityFactory(appEventEntityType),
+  //     []
+  //   ],
+  // ]);
+  // const initialState = createEntityStoreState(entityMap) as CFAppState;
+  // initialState.pagination = {
+  //   ...initialState.pagination,
+  //   [EntityCatalogueHelpers.buildEntityKey(appEventEntityType, CF_ENDPOINT_TYPE)]: {
+  //     ['app-events:mockCfGuidmockAppGuid']: getDefaultPaginationEntityState()
+  //   }
+  // };
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -54,7 +54,7 @@ describe('EventsTabComponent', () => {
         ApplicationEnvVarsHelper,
       ],
       imports: [
-        ...generateCfStoreModules(initialState),
+        ...generateCfStoreModules(),
         MDAppModule,
         SharedModule,
         CoreModule,
@@ -62,6 +62,22 @@ describe('EventsTabComponent', () => {
       ]
     })
       .compileComponents();
+    const eventsConfig: EntityCatalogueEntityConfig = cfEntityFactory(appEventEntityType);
+    // const eventKey = EntityCatalogueHelpers.buildEntityKey(eventsConfig.entityType, eventsConfig.endpointType);
+
+
+    const mappedData = {
+      entities: {},
+      result: []
+    } as NormalizedResponse;
+    const pagAction: PaginatedAction = {
+      type: 'POPULATE_TEST_DATA',
+      ...getPaginationAction(),
+      ...eventsConfig,
+      paginationKey: 'app-events:mockCfGuidmockAppGuid'
+    };
+    const store = TestBed.get(Store);
+    store.dispatch(new WrapperRequestActionSuccess(mappedData, pagAction, 'fetch'));
   }));
 
   beforeEach(() => {

@@ -37,7 +37,7 @@ export const appReducers = {
   pagination: requestPaginationReducer,
   request: requestReducer,
   // This is added as part of the entity catalogue module.
-  // requestData,
+  // requestData: state => state, //TODO: RC add this as part of store init
   dashboard: dashboardReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,

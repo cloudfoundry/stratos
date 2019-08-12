@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/tab-nav.service';
@@ -6,14 +6,14 @@ import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
+import { populateStoreWithTestEndpoint, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
 import { QuotaDefinitionComponent } from './quota-definition.component';
 
 fdescribe('QuotaDefinitionComponent', () => {
   let component: QuotaDefinitionComponent;
   let fixture: ComponentFixture<QuotaDefinitionComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [QuotaDefinitionComponent],
       imports: generateCfBaseTestModules(),
@@ -28,11 +28,14 @@ fdescribe('QuotaDefinitionComponent', () => {
           }
         },
         generateTestCfEndpointServiceProvider(),
-        TabNavService
+        TabNavService,
+        // { provide: SKIP_ENTITY_SECTION_INIT, useValue: false } // TODO: RC Remove
       ]
     })
       .compileComponents();
-  }));
+
+      populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(QuotaDefinitionComponent);

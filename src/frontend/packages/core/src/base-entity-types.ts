@@ -1,9 +1,9 @@
 import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
+  systemInfoEntitySchema,
   userFavoritesEntitySchema,
   userProfileEntitySchema,
-  systemInfoEntitySchema,
 } from './base-entity-schemas';
 import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
@@ -66,7 +66,7 @@ class SystemInfoCatalogueEntity extends StratosCatalogueEntity {
   }
 }
 
-export function baseStratosTypeFactory() {
+export function generateStratosEntities() {
   return [
     new DefaultEndpointCatalogueEntity(),
     new SystemInfoCatalogueEntity(),

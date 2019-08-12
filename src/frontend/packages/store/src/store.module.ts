@@ -24,6 +24,28 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
 
+// export const baseEffects = [
+//   APIEffect,
+//   EndpointApiError,
+//   AuthEffect,
+//   UAASetupEffect,
+//   EndpointsEffect,
+//   UpdateAppEffects,
+//   PaginationEffects,
+//   ActionHistoryEffect,
+//   RouterEffect,
+//   SystemEffects,
+//   SnackBarEffects,
+//   SetClientFilterEffect,
+//   MetricsEffect,
+//   RequestEffect,
+//   UserProfileEffect,
+//   UsersRolesEffects,
+//   RecursiveDeleteEffect,
+//   AppEffects,
+//   UserFavoritesEffect,
+// ];
+
 @NgModule({
   imports: [
     AppReducersModule,

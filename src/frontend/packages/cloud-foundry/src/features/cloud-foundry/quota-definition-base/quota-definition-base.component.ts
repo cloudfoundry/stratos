@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first, map, tap } from 'rxjs/operators';
 
 import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
@@ -74,6 +74,7 @@ export class QuotaDefinitionBaseComponent {
     const org$ = this.org$ ? this.org$ : of(null);
     const space$ = this.space$ ? this.space$ : of(null);
     this.breadcrumbs$ = combineLatest(endpoints$, org$, space$).pipe(
+      tap(([endpoints]) => console.log(`SET BREADCRUMBS ${this.cfGuid}: `, endpoints)),
       map(([endpoints, org, space]) => this.getBreadcrumbs(endpoints[this.cfGuid], org, space)),
       first()
     );
