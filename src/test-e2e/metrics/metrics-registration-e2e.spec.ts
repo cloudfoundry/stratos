@@ -1,5 +1,3 @@
-import { browser } from 'protractor';
-
 import { e2e } from '../e2e';
 import { EndpointMetadata, EndpointsPage } from '../endpoints/endpoints.po';
 import { RegisterStepper } from '../endpoints/register-dialog.po';
@@ -51,9 +49,8 @@ describe('Metrics', () => {
     // Skipping connect step
     register.stepper.waitForStep('Connect (Optional)');
     register.stepper.waitForStepNotBusy();
-    browser.wait(register.stepper.waitUntilCanNext('Finish'));
+    register.stepper.waitUntilCanNext('Finish');
     expect(register.stepper.canNext()).toBeTruthy();
-    e2e.sleep(5000);
     register.stepper.next();
 
     expect(register.isRegisterDialog()).toBeFalsy();
