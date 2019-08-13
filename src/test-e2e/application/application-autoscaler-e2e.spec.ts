@@ -9,6 +9,7 @@ import { createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageAutoscalerTab } from './po/application-page-autoscaler.po';
 import { ApplicationBasePage } from './po/application-page.po';
+import { CreateAutoscalerPolicy } from './po/create-autoscaler-policy.po';
 import { PageAutoscalerEventBase } from './po/page-autoscaler-event-base.po';
 import { PageAutoscalerMetricBase } from './po/page-autoscaler-metric-base.po';
 
@@ -49,7 +50,9 @@ describe('Autoscaler -', () => {
     it('Autoscale Tab -- Disabled', () => {
       // Does app to be fully started
       const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
+      appAutoscaler.waitForAutoscalerTab();
       appAutoscaler.goToAutoscalerTab();
+      appAutoscaler.waitForPage();
       appAutoscaler.cardInstances.waitForRunningInstancesText('1 / 1');
       expect(appAutoscaler.cardStatus.getStatusToggleInput()).toBe('false');
       expect(appAutoscaler.cardStatus.getStatusText()).toBe('Disabled');
@@ -59,7 +62,18 @@ describe('Autoscaler -', () => {
 
   describe('Autoscaler Attach Policy -', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
-    let createPolicy;
+    let createPolicy: CreateAutoscalerPolicy;
+    let scheduleStartDate1: moment.Moment;
+    let scheduleEndDate1: moment.Moment;
+
+    let scheduleStartDate2: moment.Moment;
+    let scheduleEndDate2: moment.Moment;
+
+    // TODO: These should be detected by browser/locale?
+    const timeFormat = 'HH:mm';
+    // const timeFormat = 'hh:mm A';
+    const dateFormat = 'DD/MM/YYYY,HH:mm '; // TODO: Fix
+    // const dateFormat = 'YYYY/MM/DD,hh:mm A';
 
     extendE2ETestTime(80000);
 
@@ -67,6 +81,11 @@ describe('Autoscaler -', () => {
       const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
       appAutoscaler.goToAutoscalerTab();
       createPolicy = appAutoscaler.cardStatus.clickAttachPolicy();
+      // Schedule dates should not overlap
+      scheduleStartDate1 = moment().tz('UTC').add(1, 'days');
+      scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
+      scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
+      scheduleEndDate2 = moment().tz('UTC').add(4, 'days');
     });
 
     it('Check edit steps', () => {
@@ -167,10 +186,12 @@ describe('Autoscaler -', () => {
       // createPolicy.stepper.getStepperForm().fill({ end_date: '2101/01/01' });
       // createPolicy.stepper.getStepperForm().fill({ repeat_type: 'month' });
       // createPolicy.stepper.getStepperForm().fill({ days_of_month: [2, 3] });
+      const startTime = moment().set('hours', 8).set('minutes', 0);
+      const endTime = moment().set('hours', 20).set('minutes', 0);
       createPolicy.stepper.getStepperForm().fill({ days_of_week: [1, 2, 3] }); // unselect the previous options
-      createPolicy.stepper.getStepperForm().fill({ days_of_week: [3, 4, 5] }); // selec the new options
-      createPolicy.stepper.getStepperForm().fill({ start_time: '08:00 AM' });
-      createPolicy.stepper.getStepperForm().fill({ end_time: '08:00 PM' });
+      createPolicy.stepper.getStepperForm().fill({ days_of_week: [3, 4, 5] }); // select the new options
+      createPolicy.stepper.getStepperForm().fill({ start_time: startTime.format(timeFormat) });
+      createPolicy.stepper.getStepperForm().fill({ end_time: endTime.format(timeFormat) });
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '5' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
@@ -192,8 +213,8 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.getRuleTilesCount()).toBe(1);
       expect(createPolicy.stepper.canNext()).toBeFalsy();
       // Fill in form -- valid inputs
-      const start = moment().tz('UTC').add(1, 'minutes').format('YYYY/MM/DD,hh:mm A');
-      createPolicy.stepper.getStepperForm().fill({ start_date_time: start });
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateFormat) });
+      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateFormat) });
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
@@ -210,8 +231,8 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(4);
       // Fill in form -- fix invalid inputs
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
-      createPolicy.stepper.getStepperForm().fill({ start_date_time: '2099/01/01,08:00 AM' });
-      createPolicy.stepper.getStepperForm().fill({ end_date_time: '2099/01/01,08:00 PM' });
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate2.format(dateFormat) });
+      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate2.format(dateFormat) });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       createPolicy.stepper.clickDoneButton();
 
@@ -237,6 +258,10 @@ describe('Autoscaler -', () => {
           expect(appAutoscaler.cardDefault.getDefaultMinText()).toBe('1');
           expect(appAutoscaler.cardDefault.getDefaultMaxText()).toBe('8');
 
+          appAutoscaler.cardMetric.waitUntilShown();
+          appAutoscaler.cardMetric.waitForMetricsChartContainer();
+          appAutoscaler.cardMetric.waitForMetricsChart(0);
+          appAutoscaler.cardMetric.waitForMetricsChart(1);
           expect(appAutoscaler.cardMetric.getMetricChartsCount()).toBe(2);
           expect(appAutoscaler.cardMetric.getMetricChartTitleText(0)).toContain('memoryutil');
           expect(appAutoscaler.cardMetric.getMetricChartTitleText(1)).toContain('throughput');
@@ -259,13 +284,13 @@ describe('Autoscaler -', () => {
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 5)).toBe('2');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 6)).toBe('10');
           expect(appAutoscaler.tableSchedules.getSpecificTableRowsCount()).toBe(2);
-          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 1))
-            .toBe(moment().add(1, 'days').format('YYYY-MM-DD') + 'T18:00');
+          const dateFormat2 = 'YYYY-MM-DDTHH:mm';
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 1)).toBe(scheduleEndDate1.format(dateFormat2));
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 2)).toBe('2');
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 3)).toBe('2');
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(0, 4)).toBe('10');
-          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 0)).toBe('2099-01-01T08:00');
-          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 1)).toBe('2099-01-01T20:00');
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 0)).toBe(scheduleStartDate2.format(dateFormat2));
+          expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 1)).toBe(scheduleEndDate2.format(dateFormat2));
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 2)).toBe('5');
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 3)).toBe('2');
           expect(appAutoscaler.tableSchedules.getSpecificTableRowCellContent(1, 4)).toBe('10');

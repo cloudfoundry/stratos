@@ -89,7 +89,7 @@ export class FormComponent extends Component {
 
   mapField(elm: ElementFinder, index: number): FormItem | any {
     return {
-      index: index,
+      index,
       name: elm.getAttribute('name'),
       formControlName: elm.getAttribute('formcontrolname'),
       placeholder: elm.getAttribute('placeholder'),
@@ -175,7 +175,7 @@ export class FormComponent extends Component {
   }
 
   // Fill the form fields in the specified object
-  fill(fields: { [fieldKey: string]: string | boolean }, expectFailure = false): promise.Promise<void> {
+  fill(fields: { [fieldKey: string]: string | boolean | number[] }, expectFailure = false): promise.Promise<void> {
     return this.getControlsMap().then(ctrls => {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
@@ -198,13 +198,15 @@ export class FormComponent extends Component {
             this.sendMultipleKeys(ctrl, value);
             break;
           case 'time':
-            const timePattern = '([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
-            expect(new RegExp(`^${timePattern}$`).test(value)).toBe(true, `Form input '${value}' of time is invalid`);
+            // TODO: These should be detected by browser/locale?
+            // const timePattern = '([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
+            // expect(new RegExp(`^${timePattern}$`).test(value)).toBe(true, `Form input '${value}' of time is invalid`);
             this.sendMultipleKeys(ctrl, value);
             break;
           case 'datetime-local':
-            const dateTimePattern = '(1|2)[0-9][0-9][0-9]/(?:(?:0[1-9])|(?:1[0-2]))/(?:(?:[0-2][1-9])|(?:[1-3][0-1])),([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
-            expect(new RegExp(`^${dateTimePattern}$`).test(value)).toBe(true, `Form input '${value}' of datetime-local is invalid`);
+            // TODO: These should be detected by browser/locale?
+            // const dateTimePattern = '(1|2)[0-9][0-9][0-9]/(?:(?:0[1-9])|(?:1[0-2]))/(?:(?:[0-2][1-9])|(?:[1-3][0-1])),([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
+            // expect(new RegExp(`^${dateTimePattern}$`).test(value)).toBe(true, `Form input '${value}' of datetime-local is invalid`);
             this.sendMultipleKeys(ctrl, value);
             break;
           case 'mat-select':

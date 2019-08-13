@@ -64,6 +64,10 @@ export class ApplicationBasePage extends CFPage {
     return this.goToTab('Autoscale', 'autoscale');
   }
 
+  public waitForAutoscalerTab() {
+    return this.tabs.waitForItem('Autoscale');
+  }
+
   private goToTab(label: string, urlSuffix: string) {
     return this.tabs.goToItemAndWait(label, this.navLink.substring(0, this.navLink.lastIndexOf('/')), urlSuffix);
   }

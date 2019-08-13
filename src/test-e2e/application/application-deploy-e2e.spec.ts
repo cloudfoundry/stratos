@@ -17,7 +17,6 @@ import { ApplicationBasePage } from './po/application-page.po';
 let applicationE2eHelper: ApplicationE2eHelper;
 let cfHelper: CFHelpers;
 
-
 describe('Application Deploy -', () => {
 
   const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack;

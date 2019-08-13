@@ -1,7 +1,9 @@
-import { by, element, ElementFinder, promise, ElementArrayFinder } from 'protractor';
+import { browser, by, element, ElementArrayFinder, ElementFinder, promise, protractor } from 'protractor';
 
 import { Component } from '../../po/component.po';
 import { PageAutoscalerMetricBase } from './page-autoscaler-metric-base.po';
+
+const until = protractor.ExpectedConditions;
 
 export class CardAutoscalerMetric extends Component {
 
@@ -9,8 +11,20 @@ export class CardAutoscalerMetric extends Component {
     super(locator);
   }
 
-  private getMetricChart(index: number): ElementFinder {
+  getMetricChartContainer(): ElementFinder {
+    return this.locator.element(by.tagName('mat-card-content'));
+  }
+
+  waitForMetricsChartContainer(): promise.Promise<any> {
+    return browser.wait(until.presenceOf(this.getMetricChartContainer()), 5000);
+  }
+
+  getMetricChart(index: number): ElementFinder {
     return this.getMetricCharts().get(index);
+  }
+
+  waitForMetricsChart(index: number): promise.Promise<any> {
+    return browser.wait(until.presenceOf(this.getMetricChart(index)), 5000);
   }
 
   getMetricChartTitleText(index: number): promise.Promise<string> {
@@ -18,7 +32,7 @@ export class CardAutoscalerMetric extends Component {
   }
 
   private getMetricCharts(): ElementArrayFinder {
-    return this.locator.element(by.tagName('mat-card-content')).all(by.tagName('app-metadata-item'));
+    return this.getMetricChartContainer().all(by.tagName('app-metadata-item'));
   }
 
   getMetricChartsCount(): promise.Promise<number> {
