@@ -78,7 +78,7 @@
     "normalizr": "^3.2.3",
     "reselect": "^3.0.1",
     "rxjs": "^6.2.0",
-    "rxjs-spy": "^7.0.2",
+    "rxjs-spy": "^7.5.1",
     "rxjs-websockets": "~6.0.0",
     "stratos-angular6-json-schema-form": "^7.0.6",
     "ts-md5": "^1.2.4",
