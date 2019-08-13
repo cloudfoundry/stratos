@@ -25,9 +25,9 @@ export class EffectsFeatureModule {
     @Inject(SKIP_ENTITY_SECTION_INIT) skipEntityInit: boolean
   ) {
     const entities = [].concat.apply([], entityGroups) as StratosBaseCatalogueEntity[];
-    console.log('EffectsFeatureModule!!!!', entities.map(m => m.entityKey));
+    // console.log('EffectsFeatureModule!!!!', entities.map(m => m.entityKey));
     const key = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
-    console.log('EffectsFeatureModule!!!!2', entities.map(m => m.entityKey).indexOf(key));
+    // console.log('EffectsFeatureModule!!!!2', entities.map(m => m.entityKey).indexOf(key));
     entities.forEach(entity => {
       // console.log('Registering: ', entity.entityKey);
       entityCatalogue.register(entity);
@@ -39,7 +39,7 @@ export class EffectsFeatureModule {
     // reducerManager.
     reducerManager.addReducer('requestData', chainedReducers);
     if (skipEntityInit) {
-      console.warn('!!!!!!!!!!!!!!!!!: Skipping wipe!');
+      // console.warn('!!!!!!!!!!!!!!!!!: Skipping wipe!');
     } else {
       store.dispatch(new InitCatalogueEntitiesAction(entities));
     }

@@ -15,7 +15,7 @@ import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { InstancesTabComponent } from './instances-tab.component';
 
-fdescribe('InstancesTabComponent', () => {
+describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;
   let fixture: ComponentFixture<InstancesTabComponent>;
 

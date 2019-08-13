@@ -7,7 +7,7 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { ApplicationWallComponent } from './application-wall.component';
 
-fdescribe('ApplicationWallComponent', () => {
+describe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
   let fixture: ComponentFixture<ApplicationWallComponent>;
 

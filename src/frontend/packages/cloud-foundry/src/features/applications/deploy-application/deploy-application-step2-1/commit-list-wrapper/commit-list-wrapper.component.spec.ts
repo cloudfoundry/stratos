@@ -13,7 +13,7 @@ import { generateCfStoreModules } from '../../../../../../../core/test-framework
 import { SetAppSourceDetails } from '../../../../../actions/deploy-applications.actions';
 import { CommitListWrapperComponent } from './commit-list-wrapper.component';
 
-fdescribe('CommitListWrapperComponent', () => {
+describe('CommitListWrapperComponent', () => {
   let component: CommitListWrapperComponent;
   let fixture: ComponentFixture<CommitListWrapperComponent>;
 

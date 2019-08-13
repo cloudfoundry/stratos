@@ -66,6 +66,7 @@ export class CurrentUserPermissionsChecker {
       if (!endpointGuid) {
         return observableOf(false);
       }
+      console.log('THIS IS CALL', new Error().stack);
       return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission as ScopeStrings));
     }
 

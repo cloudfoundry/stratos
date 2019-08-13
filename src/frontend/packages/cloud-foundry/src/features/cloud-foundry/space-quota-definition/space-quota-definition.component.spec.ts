@@ -17,7 +17,7 @@ import { WrapperRequestActionSuccess } from '../../../../../store/src/types/requ
 import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
 
-fdescribe('SpaceQuotaDefinitionComponent', () => {
+describe('SpaceQuotaDefinitionComponent', () => {
   let component: SpaceQuotaDefinitionComponent;
   let fixture: ComponentFixture<SpaceQuotaDefinitionComponent>;
   const cfGuid = testSCFGuid;

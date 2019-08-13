@@ -96,15 +96,14 @@ export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
     useFactory: (
       store: Store<CFAppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
-      entityServiceFactory: EntityServiceFactory,
-      http: Http
+      entityServiceFactory: EntityServiceFactory
     ) => {
       return new CfUserService(
         store,
         paginationMonitorFactory,
         { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
         entityServiceFactory,
-        http);
+      );
     },
     deps: [Store, PaginationMonitorFactory, EntityServiceFactory, Http]
   };

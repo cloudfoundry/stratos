@@ -11,7 +11,7 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base.component';
 
-fdescribe('CloudFoundryTabsBaseComponent', () => {
+describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
   beforeEach(

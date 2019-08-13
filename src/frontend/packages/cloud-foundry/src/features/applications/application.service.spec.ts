@@ -11,6 +11,7 @@ import { GitSCMService } from '../../../../core/src/shared/data-services/scm/scm
 import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { generateTestApplicationServiceProvider } from '../../../../core/test-framework/application-service-helper';
+import { generateCfStoreModules } from '../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../core/test-framework/entity-service.helper';
 import { AppStoreModule } from '../../../../store/src/store.module';
 import { ApplicationService } from './application.service';
@@ -27,6 +28,7 @@ describe('ApplicationService', () => {
         CoreModule,
         AppStoreModule,
         RouterTestingModule,
+        generateCfStoreModules()
       ],
       providers: [
         generateTestEntityServiceProvider(

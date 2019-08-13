@@ -9,7 +9,7 @@ import {
 import { populateStoreWithTestEndpoint, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
 import { QuotaDefinitionComponent } from './quota-definition.component';
 
-fdescribe('QuotaDefinitionComponent', () => {
+describe('QuotaDefinitionComponent', () => {
   let component: QuotaDefinitionComponent;
   let fixture: ComponentFixture<QuotaDefinitionComponent>;
 

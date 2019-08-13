@@ -115,10 +115,6 @@ import { AppStats } from './store/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
 
-// export function registerCFEntities() {
-//   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
-// }
-
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition = {
     type: CF_ENDPOINT_TYPE,

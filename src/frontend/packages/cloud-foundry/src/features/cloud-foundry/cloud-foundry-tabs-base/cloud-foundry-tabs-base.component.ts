@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { first, map, startWith, tap } from 'rxjs/operators';
+import { first, map, startWith } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
@@ -47,12 +47,12 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     endpointsService: EndpointsService,
     favoritesConfigMapper: FavoritesConfigMapper
   ) {
-    console.log('endpointsService.endpoints$');
+    // console.log('endpointsService.endpoints$');
     this.favorite$ = endpointsService.endpoints$.pipe(
-      tap(endpoints => console.log('BendpointsService.endpoints$', endpoints)),
+      // tap(endpoints => console.log('BendpointsService.endpoints$', endpoints)),
       first(),
-      tap(endpoints => console.log('AendpointsService.endpoints$', endpoints)),
-      tap(endpoints => console.log('AendpointsService.endpoints$', endpoints[this.cfEndpointService.cfGuid])),
+      // tap(endpoints => console.log('AendpointsService.endpoints$', endpoints)),
+      // tap(endpoints => console.log('AendpointsService.endpoints$', endpoints[this.cfEndpointService.cfGuid])),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
       map(endpoint => favoritesConfigMapper.getFavoriteEndpointFromEntity(endpoint))
     );

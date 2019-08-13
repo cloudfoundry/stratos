@@ -5,9 +5,16 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalogue } from './../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from './../../../cf-types';
-
+import { LoggerService } from '../../../../core/src/core/logger.service';
+import { parseHttpPipeError } from '../../../../core/src/core/utils.service';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import {
+  ICFAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../../../../store/src/types/request.types';
 import {
   CHECK_PROJECT_EXISTS,
   CheckProjectExists,
@@ -23,18 +30,10 @@ import {
 } from '../../actions/deploy-applications.actions';
 import { CFAppState } from '../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-factory';
-import { LoggerService } from '../../../../core/src/core/logger.service';
-import { parseHttpPipeError } from '../../../../core/src/core/utils.service';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { GitCommit } from '../types/git.types';
-import {
-  ICFAction,
-  StartRequestAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess,
-} from '../../../../store/src/types/request.types';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { entityCatalogue } from './../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from './../../../cf-types';
 
 export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {
   const response = parseHttpPipeError(error, logger);
