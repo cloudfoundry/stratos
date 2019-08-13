@@ -85,6 +85,7 @@ import {
   GitCommitActionBuilders,
   gitCommitActionBuilders,
   gitRepoActionBuilders,
+  GitCommitActionBuildersConfig,
 } from './entity-action-builders/git-action-builder';
 import { organizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { quotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
@@ -624,7 +625,7 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     labelPlural: 'Git Commits',
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<GitCommit>, GitCommitActionBuilders>(
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<GitCommit>, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
     definition,
     {
       stratosActionBuilders: gitCommitActionBuilders,

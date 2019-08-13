@@ -161,8 +161,8 @@ export class ActionOrchestrator<T extends StratosOrchestratedActionBuilders = St
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
 
-  public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
-    return this.actionBuilders[actionType];
+  public getActionBuilder<M, Y extends keyof T>(actionType: Y): T[Y] {
+    return this.actionBuilders[actionType] as T[Y];
   }
 
   public hasActionBuilder(actionType: keyof T) {

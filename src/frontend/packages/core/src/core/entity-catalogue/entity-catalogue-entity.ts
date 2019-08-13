@@ -44,14 +44,16 @@ type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
 export class StratosBaseCatalogueEntity<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilderConfig,
+  // This typing may cause an issue down the line.
+  ABC extends StratosOrchestratedActionBuilders = AB extends StratosOrchestratedActionBuilders ? AB : StratosOrchestratedActionBuilders
   > {
   public readonly entityKey: string;
   public readonly type: string;
   public readonly definition: DefinitionTypes;
   public readonly isEndpoint: boolean;
-  public readonly actionDispatchManager: EntityActionDispatcherManager<AB>;
-  public readonly actionOrchestrator: ActionOrchestrator<AB>;
+  public readonly actionDispatchManager: EntityActionDispatcherManager<ABC>;
+  public readonly actionOrchestrator: ActionOrchestrator<ABC>;
   public readonly endpointType: string;
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
@@ -71,7 +73,7 @@ export class StratosBaseCatalogueEntity<
       this.endpointType,
       (schemaKey: string) => this.getSchema(schemaKey)
     );
-    this.actionOrchestrator = new ActionOrchestrator<AB>(this.entityKey, actionBuilders as AB);
+    this.actionOrchestrator = new ActionOrchestrator<ABC>(this.entityKey, actionBuilders as ABC);
     this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
 
@@ -172,9 +174,10 @@ export class StratosBaseCatalogueEntity<
 export class StratosCatalogueEntity<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = StratosOrchestratedActionBuilders,
+  ABC extends StratosOrchestratedActionBuilders = AB extends StratosOrchestratedActionBuilders ? AB : StratosOrchestratedActionBuilders
   > extends StratosBaseCatalogueEntity<T, Y, AB> {
-  public definition: IStratosEntityDefinition<EntityCatalogueSchemas, Y>;
+  public definition: IStratosEntityDefinition<EntityCatalogueSchemas, Y, ABC>;
   constructor(
     entity: IStratosEntityDefinition,
     config?: EntityCatalogueBuilders<T, Y, AB>

@@ -1,9 +1,14 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import {
-  EnvVarStratosProject,
+  EntityRequestActionConfig,
+  KnownEntityActionBuilder,
+  OrchestratedActionBuilderConfig,
+  StratosOrchestratedActionBuilders
+} from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import {
+  EnvVarStratosProject
 } from '../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
-import { FetchBranchesForProject, FetchCommit, FetchCommits } from '../actions/deploy-applications.actions';
+import { FetchBranchesForProject, FetchCommits } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';
 
 export const gitRepoActionBuilders = {
@@ -17,17 +22,28 @@ interface GitMeta {
   scm: GitSCM;
 }
 
-export interface GitCommitActionBuilders extends StratosOrchestratedActionBuilders {
-  get: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommit;
+export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
+  get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
 }
 
-export const gitCommitActionBuilders: GitCommitActionBuilders = {
-  get: (
-    commitSha: string,
-    endpointGuid: string,
-    commitMeta: GitMeta
-  ) => new FetchCommit(commitMeta.scm, commitSha, commitMeta.projectName),
+export interface GitCommitActionBuilders extends StratosOrchestratedActionBuilders {
+  get: KnownEntityActionBuilder<GitMeta>;
+  getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
+}
+
+export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
+  get: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
+    (commitSha, endpointGuid, meta) => meta.scm.getCommitURL(meta.projectName, commitSha),
+    null,
+    null,
+    true
+  ),
+  // get: (
+  //   commitSha: string,
+  //   endpointGuid: string,
+  //   commitMeta: GitMeta
+  // ) => new FetchCommit(commitMeta.scm, commitSha, commitMeta.projectName),
   getMultiple: (
     commitSha: string,
     endpointGuid: string,
@@ -44,5 +60,5 @@ export const gitBranchActionBuilders: GitBranchActionBuilders = {
     guid: string,
     endpointGuid: string,
     meta: GitMeta
-  ) => new FetchBranchesForProject(meta.scm, meta.projectName)
+  ) => new FetchBranchesForProject(meta.scm, guid)
 };

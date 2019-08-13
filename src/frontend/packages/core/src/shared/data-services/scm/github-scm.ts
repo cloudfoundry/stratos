@@ -34,7 +34,11 @@ export class GitHubSCM implements GitSCM {
   }
 
   getCommit(projectName: string, commitSha: string): Observable<GitCommit> {
-    return this.httpClient.get(`${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`) as Observable<GitCommit>;
+    return this.httpClient.get<GitCommit>(this.getCommitUrl(projectName, commitSha)) as Observable<GitCommit>;
+  }
+
+  getCommitUrl(projectName: string, commitSha: string) {
+    return `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`;
   }
 
   getCommits(projectName: string, commitSha: string): Observable<GitCommit[]> {
