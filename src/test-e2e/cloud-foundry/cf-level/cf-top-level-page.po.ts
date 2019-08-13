@@ -140,7 +140,7 @@ export class CfTopLevelPage extends CFPage {
   }
 
   goToQuotasTab() {
-    return this.goToTab('Quotas', 'quota-definitions');
+    return this.goToTab('Organization Quotas', 'quota-definitions');
   }
 
   goToRoutesTab() {

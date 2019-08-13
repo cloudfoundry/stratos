@@ -83,7 +83,7 @@ describe('Manage Quota', () => {
 
     it('- should go to quotas when canceled', () => {
       quotaFormPage.stepper.cancel();
-      expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Quotas');
+      expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organization Quotas');
     });
   });
 
