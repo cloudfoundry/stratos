@@ -10,11 +10,15 @@ import { entityFactory, spaceQuotaSchemaKey } from '../../../../../store/src/hel
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IOrganization, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
+
+export const QUOTA_SPACE_GUID = 'space';
 
 @Component({
   selector: 'app-space-quota-definition',
@@ -31,17 +35,26 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
+  editLink$: Observable<string[]>;
+  editParams: object;
   detailsLoading$: Observable<boolean>;
   spaceSubscriber: Subscription;
+  public canEditQuota$: Observable<boolean>;
+  public isOrg = false;
 
   constructor(
     protected entityServiceFactory: EntityServiceFactory,
     protected store: Store<AppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,
+    currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
+    const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;
+    this.canEditQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
+    this.isOrg = !spaceGuid;
+    this.editParams = { [QUOTA_SPACE_GUID]: spaceGuid };
   }
 
   setupQuotaDefinitionObservable() {
@@ -64,6 +77,18 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
       filter(definition => !!definition),
       map(definition => definition.entityRequestInfo.fetching)
     );
+
+    this.editLink$ = quotaGuid$.pipe(
+      map(quotaGuid => [
+        '/cloud-foundry',
+        this.cfGuid,
+        'organizations',
+        this.orgGuid,
+        'space-quota-definitions',
+        quotaGuid,
+        'edit-space-quota'
+      ])
+    );
   }
 
   protected getBreadcrumbs(
@@ -73,17 +98,28 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   ) {
     const baseCFUrl = `/cloud-foundry/${this.cfGuid}`;
     const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
-    const baseSpaceUrl = `${baseOrgUrl}/spaces/${space.metadata.guid}`;
 
     const breadcrumbs: IHeaderBreadcrumb[] = [
       {
         breadcrumbs: [
           { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-          { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` },
-          { value: space.entity.name, routerLink: `${baseSpaceUrl}/summary` },
+          { value: org.entity.name, routerLink: `${baseOrgUrl}/space-quota-definitions` },
         ],
       },
     ];
+
+    if (space) {
+      const baseSpaceUrl = `${baseCFUrl}/organizations/${org.metadata.guid}/spaces/${space.metadata.guid}`;
+
+      breadcrumbs.push({
+        key: 'space',
+        breadcrumbs: [
+          { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
+          { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` },
+          { value: space.entity.name, routerLink: `${baseSpaceUrl}/summary` },
+        ]
+      });
+    }
 
     return breadcrumbs;
   }

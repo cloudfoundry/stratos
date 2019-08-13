@@ -54,6 +54,11 @@ export class CloudFoundryOrganizationBaseComponent {
       link: 'quota',
       label: 'Quota',
       icon: 'data_usage'
+    },
+    {
+      link: 'space-quota-definitions',
+      label: 'Space Quotas',
+      icon: 'data_usage'
     }
   ];
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
