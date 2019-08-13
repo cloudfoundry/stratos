@@ -12,12 +12,22 @@ import {
   PaginationPageIteratorConfig
 } from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { Omit } from '../utils.service';
+
 export interface EntityCatalogueEntityConfig {
   entityType: string;
   endpointType: string;
   subType?: string;
   schemaKey?: string;
 }
+
+export interface ActionBuilderConfig<T extends Record<any, any> = Record<any, any>> {
+  actionMetadata?: T;
+  entityGuid?: string;
+  endpointGuid?: string;
+}
+
+export type EntityActionBuilderEntityConfig = EntityCatalogueEntityConfig & ActionBuilderConfig;
+
 export interface EntityCatalogueSchemas {
   default: EntitySchema;
   [schemaKey: string]: EntitySchema;

@@ -29,6 +29,9 @@ export class ActionBuilderConfigMapper {
     entityType: string,
     schemaGetter: (schemaKey: string) => EntitySchema
   ): StratosOrchestratedActionBuilders {
+    if (!builders) {
+      return {};
+    }
     return Object.keys(builders).reduce((actionBuilders, key) => {
       return {
         ...actionBuilders,

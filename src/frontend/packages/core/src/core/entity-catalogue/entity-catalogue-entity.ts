@@ -36,7 +36,7 @@ export interface EntityCatalogueBuilders<
   entityBuilder?: IStratosEntityBuilder<T, Y>;
   // Allows extensions to modify entities data in the store via none API Effect or unrelated actions.
   dataReducers?: ActionReducer<IRequestEntityTypeState<Y>>[];
-  stratosActionBuilders?: AB;
+  actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
   IStratosEndpointDefinition |
@@ -68,7 +68,7 @@ export class StratosBaseCatalogueEntity<
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
     const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(
-      this.builders.stratosActionBuilders,
+      this.builders.actionBuilders,
       this.type,
       this.endpointType,
       (schemaKey: string) => this.getSchema(schemaKey)

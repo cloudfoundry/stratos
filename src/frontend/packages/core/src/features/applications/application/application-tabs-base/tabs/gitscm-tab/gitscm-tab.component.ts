@@ -22,6 +22,8 @@ import { GitSCMService } from '../../../../../../shared/data-services/scm/scm.se
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 import { GitSCMType } from './../../../../../../shared/data-services/scm/scm.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../../base-entity-schemas';
+import { gitRepoEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 
 
 @Component({
@@ -95,8 +97,13 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
           repoEntityID,
-          new FetchGitHubRepoInfo(stProject),
-          false
+          {
+            endpointType: STRATOS_ENDPOINT_TYPE,
+            entityType: gitRepoEntityType,
+            actionMetadata: stProject
+          },
+          // new FetchGitHubRepoInfo(stProject),
+          // false
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(

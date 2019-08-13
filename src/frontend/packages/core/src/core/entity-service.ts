@@ -14,7 +14,13 @@ import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/sr
 import { EntityInfo } from '../../../store/src/types/api.types';
 import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
+import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { Optional, Inject } from '@angular/core';
+
+export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
+
+export type EntityInfoHandler = (action: EntityRequestAction) => (entityInfo: EntityInfo) => void;
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -24,14 +30,6 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
     entityRequestInfo.deleting.deleted;
-}
-
-export interface EntityServiceActionBuilderConfig<M extends {} = {}> {
-  catalogueEntity: StratosBaseCatalogueEntity;
-  guid: string;
-  endpointGuid?: string;
-  schemaKey?: string;
-  actionBuilderMetadata?: M;
 }
 
 const dispatcherFactory = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (updatingKey?: string) => {
@@ -49,13 +47,11 @@ export class EntityService<T = any> {
   constructor(
     store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
-    actionOrConfig: EntityRequestAction | EntityServiceActionBuilderConfig,
-    // TODO Move this to a CF entity service
-    public validateRelations = true,
-    // TODO What is this used for?
-    public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
+    actionOrConfig: EntityRequestAction | EntityActionBuilderEntityConfig,
+    @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandlerBuilder: EntityInfoHandler
   ) {
     this.action = this.getAction(actionOrConfig);
+    const actionInfoHandler = entityInfoHandlerBuilder ? entityInfoHandlerBuilder(this.action) : () => { };
     this.actionDispatch = dispatcherFactory(store, this.action);
 
     this.updateEntity = () => {
@@ -154,21 +150,22 @@ export class EntityService<T = any> {
     return !entityRequestInfo || (!entity && !isEntityBlocked(entityRequestInfo));
   }
 
-  private getAction(dispatcherConfigOrAction: EntityServiceActionBuilderConfig | EntityRequestAction) {
+  private getAction(dispatcherConfigOrAction: EntityActionBuilderEntityConfig | EntityRequestAction) {
     const action = dispatcherConfigOrAction as EntityRequestAction;
     if (action.type) {
       return action;
     } else {
       const {
-        catalogueEntity,
         // TODO: Use this schema key
         schemaKey,
-        guid,
+        entityGuid,
         endpointGuid,
-        actionBuilderMetadata = {}
-      } = dispatcherConfigOrAction as EntityServiceActionBuilderConfig;
-      const actionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('get');
-      return actionBuilder(guid, endpointGuid, actionBuilderMetadata);
+        actionMetadata = {},
+        entityType,
+        endpointType
+      } = dispatcherConfigOrAction as EntityActionBuilderEntityConfig;
+      const actionBuilder = entityCatalogue.getEntity(endpointType, entityType).actionOrchestrator.getActionBuilder('get');
+      return actionBuilder(entityGuid, endpointGuid, actionMetadata);
     }
   }
 
