@@ -134,7 +134,7 @@
     "replace-in-file": "^3.4.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
-    "rxjs-tslint": "^0.1.5",
+    "rxjs-tslint": "^0.1.7",
     "sass-lint": "^1.12.1",
     "stratos-merge-dirs": "^0.2.3",
     "stratos-protractor-reporter": "^1.2.3",
