@@ -42,6 +42,7 @@ describe('ListComponent', () => {
         getInitialised: () => null,
         getMultiActions: () => null,
         getMultiFiltersConfigs: () => null,
+        getFilters: () => null,
         getSingleActions: () => null,
         isLocal: false,
         pageSizeOptions: [1],
@@ -149,6 +150,7 @@ describe('ListComponent', () => {
     describe('Header', () => {
       it('Nothing enabled', () => {
         component.config.getMultiFiltersConfigs = () => [];
+        component.config.getFilters = () => [];
         component.config.enableTextFilter = false;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;
@@ -206,6 +208,19 @@ describe('ListComponent', () => {
             }
           ];
         };
+        component.config.getFilters = () => ([
+          {
+            default: true,
+            key: 'a',
+            label: 'A',
+            placeholder: 'Filter by A'
+          },
+          {
+            key: 'b',
+            label: 'B',
+            placeholder: 'Filter by B'
+          }
+        ]);
         component.config.enableTextFilter = true;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;
