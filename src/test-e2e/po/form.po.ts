@@ -27,6 +27,7 @@ export interface FormItem {
   valid: string;
   error: string;
   id: string;
+  multiple: boolean;
 }
 
 // Page Object for a form field
@@ -103,7 +104,8 @@ export class FormComponent extends Component {
       clear: elm.clear,
       click: elm.click,
       tag: elm.getTagName(),
-      id: elm.getAttribute('id')
+      id: elm.getAttribute('id'),
+      multiple: elm.getAttribute('multiple'),
     };
   }
 
@@ -206,6 +208,19 @@ export class FormComponent extends Component {
             this.sendMultipleKeys(ctrl, value);
             break;
           case 'mat-select':
+            if (ctrl.multiple) {
+              expect(value instanceof Array).toBe(true, `Form input '${value}' of multiple select must be array`);
+              value.sort();
+              ctrl.click();
+              for (let option = 1; option <= value[value.length - 1]; option++) {
+                if (value.indexOf(option) >= 0) {
+                  ctrl.sendKeys(Key.RETURN);
+                }
+                ctrl.sendKeys(Key.ARROW_DOWN);
+              }
+              ctrl.sendKeys(Key.ESCAPE);
+              break;
+            }
             let strValue = value as string;
             // Handle spaces in text. (sendKeys sends space bar.. which closes drop down)
             // Bonus - Sending string without space works... up until last character...which deselects desired option and selects top option

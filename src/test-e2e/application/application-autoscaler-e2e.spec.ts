@@ -61,7 +61,7 @@ describe('Autoscaler -', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
     let createPolicy;
 
-    extendE2ETestTime(60000);
+    extendE2ETestTime(80000);
 
     beforeAll(() => {
       const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
@@ -166,7 +166,9 @@ describe('Autoscaler -', () => {
       // createPolicy.stepper.getStepperForm().fill({ start_date: '2100/01/01' });
       // createPolicy.stepper.getStepperForm().fill({ end_date: '2101/01/01' });
       // createPolicy.stepper.getStepperForm().fill({ repeat_type: 'month' });
-      // createPolicy.stepper.getStepperForm().fill({ days_of_month: ['2', '3'] });
+      // createPolicy.stepper.getStepperForm().fill({ days_of_month: [2, 3] });
+      createPolicy.stepper.getStepperForm().fill({ days_of_week: [1, 2, 3] }); // unselect the previous options
+      createPolicy.stepper.getStepperForm().fill({ days_of_week: [3, 4, 5] }); // selec the new options
       createPolicy.stepper.getStepperForm().fill({ start_time: '08:00 AM' });
       createPolicy.stepper.getStepperForm().fill({ end_time: '08:00 PM' });
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
@@ -250,7 +252,7 @@ describe('Autoscaler -', () => {
           expect(appAutoscaler.tableSchedules.getScheduleTableTitleText()).toBe('Scheduled Limit Rules in UTC');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(1);
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 0)).toBe('Always');
-          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 1)).toBe('1,2,3 of the week');
+          expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 1)).toBe('3,4,5 of the week');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 2)).toBe('08:00');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 3)).toBe('20:00');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowCellContent(0, 4)).toBe('5');
