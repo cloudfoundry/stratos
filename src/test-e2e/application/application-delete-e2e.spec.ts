@@ -12,8 +12,9 @@ describe('Application Delete', () => {
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
   let applicationE2eHelper: ApplicationE2eHelper;
-  let cfGuid, app;
-  let testAppName;
+  let cfGuid: string;
+  let app;
+  let testAppName: string;
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -55,7 +56,7 @@ describe('Application Delete', () => {
     it('Should return to summary page after cancel', () => {
       const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
       appSummaryPage.navigateTo();
-      appSummaryPage.waitForPage();
+      appSummaryPage.waitForPage(40000);
       // Open delete app dialog
       const deleteApp = appSummaryPage.delete(testAppName);
       // App did not have a route, so there should be no routes step
@@ -73,6 +74,11 @@ describe('Application Delete', () => {
       const timeout = 100000;
       extendE2ETestTime(timeout);
 
+      beforeAll(() => {
+        expect(app).toBeDefined();
+        expect(testAppName).toBeDefined();
+      });
+
       it('Should delete app', () => {
         // We should be on the app wall
         expect(appWall.isActivePage()).toBeTruthy();
@@ -81,7 +87,7 @@ describe('Application Delete', () => {
         appWall.appList.header.refresh();
 
         appWall.appList.header.setSearchText(testAppName);
-        expect(appWall.appList.getTotalResults()).toBe(1);
+        expect(appWall.appList.getTotalResults()).toBe(1, 'Failed to find app that we should test delete on');
 
         // Open delete app dialog
         const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
