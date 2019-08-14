@@ -9,7 +9,7 @@ import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellBaseComponent } from './cloud-foundry-cell-base.component';
 
-// TODO: RC metrics
+// TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('CloudFoundryCellBaseComponent', () => {
   let component: CloudFoundryCellBaseComponent;
   let fixture: ComponentFixture<CloudFoundryCellBaseComponent>;

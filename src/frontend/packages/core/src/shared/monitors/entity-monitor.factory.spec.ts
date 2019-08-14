@@ -1,20 +1,21 @@
-import { TestBed, inject } from '@angular/core/testing';
-
-import { EntityMonitorFactory } from './entity-monitor.factory.service';
+import { inject, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
+
 import { appReducers } from '../../../../store/src/reducers.module';
-import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
-const initialState = getInitialTestStoreState();
-describe('EntityMonitor', () => {
+import { EntityMonitorFactory } from './entity-monitor.factory.service';
+
+// TODO: RC remove
+// const initialState = getInitialTestStoreState();
+fdescribe('EntityMonitor', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [EntityMonitorFactory],
       imports: [
         StoreModule.forRoot(
           appReducers,
-          {
-            initialState
-          }
+          // {
+          //   initialState
+          // }
         )
       ]
     });

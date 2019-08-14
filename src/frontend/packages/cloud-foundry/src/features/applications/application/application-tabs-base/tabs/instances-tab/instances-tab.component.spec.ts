@@ -27,7 +27,7 @@ describe('InstancesTabComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        NoopAnimationsModule, // TODO: RC Search BrowserAnimationsModule and replace with NoopAnimationsModule
+        NoopAnimationsModule,
         CloudFoundryComponentsModule
       ],
       providers: [

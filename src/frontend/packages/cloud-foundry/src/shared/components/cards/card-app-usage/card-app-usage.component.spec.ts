@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
@@ -46,7 +46,7 @@ describe('CardAppUsageComponent', () => {
       imports: [
         ...generateCfStoreModules(),
         CoreModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

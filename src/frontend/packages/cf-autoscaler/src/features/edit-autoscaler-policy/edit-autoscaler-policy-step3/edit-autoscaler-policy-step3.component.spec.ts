@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
@@ -20,7 +20,7 @@ describe('EditAutoscalerPolicyStep3Component', () => {
     TestBed.configureTestingModule({
       declarations: [EditAutoscalerPolicyStep3Component],
       imports: [
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         createEmptyStoreModule(),
         CoreModule,
         SharedModule,

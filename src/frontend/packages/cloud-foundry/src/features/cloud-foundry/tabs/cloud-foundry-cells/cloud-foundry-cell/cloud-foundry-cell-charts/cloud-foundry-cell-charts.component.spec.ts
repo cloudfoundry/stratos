@@ -7,7 +7,7 @@ import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellChartsComponent } from './cloud-foundry-cell-charts.component';
 
-// TODO: RC metrics
+// TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('CloudFoundryCellChartsComponent', () => {
   let component: CloudFoundryCellChartsComponent;
   let fixture: ComponentFixture<CloudFoundryCellChartsComponent>;

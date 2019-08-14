@@ -74,7 +74,6 @@ export class QuotaDefinitionBaseComponent {
     const org$ = this.org$ ? this.org$ : of(null);
     const space$ = this.space$ ? this.space$ : of(null);
     this.breadcrumbs$ = combineLatest(endpoints$, org$, space$).pipe(
-      // tap(([endpoints]) => console.log(`SET BREADCRUMBS ${this.cfGuid}: `, endpoints)), // TODO: RC Remove
       map(([endpoints, org, space]) => this.getBreadcrumbs(endpoints[this.cfGuid], org, space)),
       first()
     );

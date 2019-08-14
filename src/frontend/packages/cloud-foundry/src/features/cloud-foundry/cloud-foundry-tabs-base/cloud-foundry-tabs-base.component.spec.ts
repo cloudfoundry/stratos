@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SKIP_ENTITY_SECTION_INIT } from '../../../../../core/src/core/entity-catalogue.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
@@ -16,34 +15,6 @@ describe('CloudFoundryTabsBaseComponent', () => {
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
   beforeEach(
     async(() => {
-      // console.log('_________________________________________________________________________________');
-      // const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
-      //   [
-      //     endpointEntitySchema,
-      //     [{
-      //       guid: testSCFGuid,
-      //       data: testSCFEntity
-      //     }],
-      //   ],
-      //   [
-      //     cfEntityFactory(organizationEntityType),
-      //     []
-      //   ],
-      //   [
-      //     cfEntityFactory(applicationEntityType),
-      //     []
-      //   ],
-      //   [
-      //     cfEntityFactory(domainEntityType),
-      //     []
-      //   ],
-      // ]);
-      // const store = createEntityStoreState(entityMap) as CFAppState;
-      // console.log(JSON.stringify(store));
-
-
-
-
       TestBed.configureTestingModule({
         declarations: [CloudFoundryTabsBaseComponent],
         imports: generateCfBaseTestModules(),
@@ -52,7 +23,6 @@ describe('CloudFoundryTabsBaseComponent', () => {
           generateTestCfEndpointServiceProvider(),
           { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: testSCFGuid } },
           TabNavService,
-          { provide: SKIP_ENTITY_SECTION_INIT, useValue: false }
         ]
       }).compileComponents();
 

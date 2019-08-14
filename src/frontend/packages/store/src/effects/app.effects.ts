@@ -6,14 +6,14 @@ import { first, map } from 'rxjs/operators';
 import { GetAppSummaryAction } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { ASSIGN_ROUTE_SUCCESS } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
 import {
   createAppInstancesMetricAction,
-} from '../../../core/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
+} from '../../../cloud-foundry/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
+import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointOnlyAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
-
+// TODO: RC Move
 @Injectable()
 export class AppEffects {
 

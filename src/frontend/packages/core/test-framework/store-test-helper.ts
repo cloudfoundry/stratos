@@ -22027,6 +22027,9 @@ export interface TestStoreEntity {
   data?: any;
 }
 
+/**
+ * Should not be used by StoreModule.forRoot's initialState (lack of specific reducers in same object cause parts of state to be ignored)
+ */
 export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>) {
   return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
     // const initialState = entityMap.entries()..reduce((state, entityConfig) => {

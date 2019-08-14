@@ -4,7 +4,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConnectionBackend, Http, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
@@ -25,7 +25,7 @@ describe('CreateApplicationStep2Component', () => {
         CommonModule,
         CoreModule,
         SharedModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         HttpModule,
         HttpClientModule,
         HttpClientTestingModule,

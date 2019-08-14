@@ -16,7 +16,7 @@ import { generateTestEntityServiceProvider } from '../../../../../../../../core/
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { MetricsTabComponent } from './metrics-tab.component';
 
-// TODO: RC metrics
+// TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('MetricsTabComponent', () => {
   let component: MetricsTabComponent;
   let fixture: ComponentFixture<MetricsTabComponent>;

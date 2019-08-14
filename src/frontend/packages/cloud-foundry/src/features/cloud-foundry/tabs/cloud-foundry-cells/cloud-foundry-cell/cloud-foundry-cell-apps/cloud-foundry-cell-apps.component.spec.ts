@@ -6,7 +6,7 @@ import {
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellAppsComponent } from './cloud-foundry-cell-apps.component';
 
-// TODO: RC metrics
+// TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('CloudFoundryCellAppsComponent', () => {
   let component: CloudFoundryCellAppsComponent;
   let fixture: ComponentFixture<CloudFoundryCellAppsComponent>;

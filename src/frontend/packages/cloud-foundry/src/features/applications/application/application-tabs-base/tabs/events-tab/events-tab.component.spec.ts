@@ -31,20 +31,6 @@ describe('EventsTabComponent', () => {
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
 
-  // const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
-  //   [
-  //     cfEntityFactory(appEventEntityType),
-  //     []
-  //   ],
-  // ]);
-  // const initialState = createEntityStoreState(entityMap) as CFAppState;
-  // initialState.pagination = {
-  //   ...initialState.pagination,
-  //   [EntityCatalogueHelpers.buildEntityKey(appEventEntityType, CF_ENDPOINT_TYPE)]: {
-  //     ['app-events:mockCfGuidmockAppGuid']: getDefaultPaginationEntityState()
-  //   }
-  // };
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [EventsTabComponent],
@@ -63,8 +49,6 @@ describe('EventsTabComponent', () => {
     })
       .compileComponents();
     const eventsConfig: EntityCatalogueEntityConfig = cfEntityFactory(appEventEntityType);
-    // const eventKey = EntityCatalogueHelpers.buildEntityKey(eventsConfig.entityType, eventsConfig.endpointType);
-
 
     const mappedData = {
       entities: {},

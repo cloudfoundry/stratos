@@ -16,29 +16,6 @@ describe('CloudFoundryComponent', () => {
 
   beforeEach(
     async(() => {
-      // const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
-      //   [
-      //     endpointEntitySchema,
-      //     [{
-      //       guid: testSCFGuid,
-      //       data: testSCFEntity
-      //     }],
-      //   ],
-      //   // [
-      //   //   cfEntityFactory(organizationEntityType),
-      //   //   []
-      //   // ],
-      //   // [
-      //   //   cfEntityFactory(applicationEntityType),
-      //   //   []
-      //   // ],
-      //   // [
-      //   //   cfEntityFactory(domainEntityType),
-      //   //   []
-      //   // ],
-      // ]);
-      // const store = createEntityStoreState(entityMap) as CFAppState;
-
       TestBed.configureTestingModule({
         declarations: [
           CloudFoundryComponent,
@@ -49,7 +26,6 @@ describe('CloudFoundryComponent', () => {
           PaginationMonitorFactory,
           generateTestCfServiceProvider(),
           TabNavService,
-          // { provide: SKIP_ENTITY_SECTION_INIT, useValue: true }
         ]
       }).compileComponents();
 

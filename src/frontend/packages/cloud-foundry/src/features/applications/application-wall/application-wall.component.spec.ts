@@ -22,7 +22,6 @@ describe('ApplicationWallComponent', () => {
         DatePipe,
         TabNavService,
         CloudFoundryService,
-        // { provide: SKIP_ENTITY_SECTION_INIT, useValue: true }
       ]
     })
       .compileComponents();

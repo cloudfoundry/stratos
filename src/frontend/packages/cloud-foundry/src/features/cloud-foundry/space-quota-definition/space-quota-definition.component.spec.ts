@@ -27,25 +27,23 @@ describe('SpaceQuotaDefinitionComponent', () => {
   const helper = new EntityRelationSpecHelper();
 
   beforeEach(async(() => {
-    // TODO: RC search for getInitialTestStoreState in cf module and replace
-    // TODO: RC Search and remove createEntityStoreState from  all component tests
     TestBed.configureTestingModule({
       declarations: [
         SpaceQuotaDefinitionComponent
       ],
       imports: generateCfBaseTestModules(),
-      providers: [{
-        provide: ActivatedRoute,
-        useValue: {
-          snapshot: {
-            queryParams: { cfGuid, orgGuid, spaceGuid },
-            params: { quotaId: 'guid' }
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: { cfGuid, orgGuid, spaceGuid },
+              params: { quotaId: 'guid' }
+            }
           }
-        }
-      },
-      generateTestCfEndpointServiceProvider(),
+        },
+        generateTestCfEndpointServiceProvider(),
         TabNavService,
-        // { provide: SKIP_ENTITY_SECTION_INIT, useValue: true }
       ]
 
     })

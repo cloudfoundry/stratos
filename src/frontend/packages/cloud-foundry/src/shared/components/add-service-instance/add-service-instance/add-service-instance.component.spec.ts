@@ -17,7 +17,7 @@ import { CardStatusComponent } from '../../../../../../core/src/shared/component
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
 import {
   CreateApplicationStep1Component,
-} from '../../../../../../core/src/shared/components/create-application/create-application-step1/create-application-step1.component';
+} from '../../create-application/create-application-step1/create-application-step1.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import {
   MetaCardComponent,

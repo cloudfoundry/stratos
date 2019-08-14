@@ -16,7 +16,6 @@ import { GitSCMTabComponent } from './gitscm-tab.component';
 describe('GitSCMTabComponent', () => {
   let component: GitSCMTabComponent;
   let fixture: ComponentFixture<GitSCMTabComponent>;
-  // TODO: RC search for getInitialTestStoreState
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [GitSCMTabComponent],

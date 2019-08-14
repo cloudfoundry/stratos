@@ -2,7 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpModule } from '@angular/http';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
@@ -35,7 +35,7 @@ describe('EditApplicationComponent', () => {
       declarations: [EditApplicationComponent],
       imports: [
         ...generateCfStoreModules(),
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         CoreModule,
         SharedModule,
         RouterTestingModule,

@@ -1,17 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
-import {
-  BaseCfOrgSpaceRouteMock,
-  BaseTestModulesNoShared,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { testSCFGuid } from '../../../../test-framework/store-test-helper';
-import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionComponent } from './stacked-input-action/stacked-input-action.component';
 import { StackedInputActionsComponent } from './stacked-input-actions.component';
 
-describe('StackedInputActionsComponent', () => {
+// TODO: RC Move?
+fdescribe('StackedInputActionsComponent', () => {
   let component: StackedInputActionsComponent;
   let fixture: ComponentFixture<StackedInputActionsComponent>;
 
@@ -19,10 +15,6 @@ describe('StackedInputActionsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [StackedInputActionsComponent, BooleanIndicatorComponent, StackedInputActionComponent],
       imports: [...BaseTestModulesNoShared],
-      providers: [{
-        provide: ActiveRouteCfOrgSpace,
-        useFactory: () => new BaseCfOrgSpaceRouteMock(testSCFGuid)
-      }]
     })
       .compileComponents();
   }));

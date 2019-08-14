@@ -7,7 +7,7 @@ import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationInstanceChartComponent } from './application-instance-chart.component';
 
-// TODO: RC Metrics failure
+// TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('ApplicationInstanceChartComponent', () => {
   let component: ApplicationInstanceChartComponent;
   let fixture: ComponentFixture<ApplicationInstanceChartComponent>;

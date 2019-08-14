@@ -59,7 +59,7 @@ class MockCloudFoundryCellService {
 
 }
 
-// TODO: RC metrics
+// TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('CloudFoundryCellSummaryComponent', () => {
   let component: CloudFoundryCellSummaryComponent;
   let fixture: ComponentFixture<CloudFoundryCellSummaryComponent>;

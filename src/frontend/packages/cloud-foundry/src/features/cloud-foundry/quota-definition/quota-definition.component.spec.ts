@@ -29,12 +29,11 @@ describe('QuotaDefinitionComponent', () => {
         },
         generateTestCfEndpointServiceProvider(),
         TabNavService,
-        // { provide: SKIP_ENTITY_SECTION_INIT, useValue: false } // TODO: RC Remove
       ]
     })
       .compileComponents();
 
-      populateStoreWithTestEndpoint();
+    populateStoreWithTestEndpoint();
   });
 
   beforeEach(() => {

@@ -9,15 +9,12 @@ import { ConfirmationDialogService } from '../../../../../../../core/src/shared/
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { ApplicationServiceMock } from '../../../../../../../core/test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { getInitialTestStoreState } from '../../../../../../../core/test-framework/store-test-helper';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
 
 
 describe('CfAppRoutesListConfigService', () => {
-
-  const initialState = { ...getInitialTestStoreState() };
 
   beforeEach(() => {
     TestBed.configureTestingModule({

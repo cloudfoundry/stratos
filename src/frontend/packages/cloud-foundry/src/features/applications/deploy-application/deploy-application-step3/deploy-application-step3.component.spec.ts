@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
@@ -24,7 +24,7 @@ describe('DeployApplicationStep3Component', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
       ],
