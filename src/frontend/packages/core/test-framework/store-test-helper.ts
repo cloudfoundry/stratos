@@ -9,15 +9,15 @@ import {
   getDefaultPaginationEntityState,
 } from '../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { NormalizedResponse } from '../../store/src/types/api.types';
-import { SessionDataEndpoint } from '../../store/src/types/auth.types';
+import { SessionData, SessionDataEndpoint } from '../../store/src/types/auth.types';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
+import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { WrapperRequestActionSuccess } from '../../store/src/types/request.types';
 import { endpointEntitySchema } from '../src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 import { generateCfTopLevelStoreEntities } from './cloud-foundry-endpoint-service.helper';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 export const testSCFSessionEntity: SessionDataEndpoint = {
@@ -47,6 +47,79 @@ export const testSCFEntity: EndpointModel = {
   sso_allowed: false,
   metricsAvailable: false
 };
+
+export const testSessionData: SessionData = {
+  version: {
+    proxy_version: '0.9.5-a77102d6',
+    database_version: 20170818162837
+  },
+  user: {
+    guid: '530170c7-5042-40ed-8654-c4a79e4d1302',
+    name: 'admin',
+    admin: true,
+    scopes: []
+  },
+  endpoints: {
+    cf: {
+      [testSCFGuid]: testSCFSessionEntity,
+      '521a9d96-2d6c-4d94-a555-807437ab106d': {
+        guid: '521a9d96-2d6c-4d94-a555-807437ab106d',
+        name: 'SCF',
+        version: '',
+        user: {
+          scopes: [],
+          guid: 'ded8a59b-b21d-4da6-a07a-0d865a9b16e2',
+          name: 'admin',
+          admin: true
+        },
+        type: ''
+      },
+      '663a363e-1faf-4359-ac96-b8c24ec1a4ab': {
+        guid: '663a363e-1faf-4359-ac96-b8c24ec1a4ab',
+        name: 'TEST',
+        version: '',
+        user: {
+          scopes: [],
+          guid: 'b2a8ed5c-5c63-4b5b-bdf8-04ea66a9db00',
+          name: 'admin',
+          admin: true
+        },
+        type: ''
+      },
+      'b24923d0-f1ad-4534-bb02-f609a1667bb1': {
+        guid: 'b24923d0-f1ad-4534-bb02-f609a1667bb1',
+        name: 'SAP',
+        version: '',
+        user: {
+          scopes: [],
+          guid: '7965e2cc-ef57-4373-bb0d-b45025355883',
+          name: 'macdougall.neil@gmail.com',
+          admin: false
+        },
+        type: ''
+      },
+      'e2f91bca-38e8-435a-9f72-7a8f8de0ee17': {
+        guid: 'e2f91bca-38e8-435a-9f72-7a8f8de0ee17',
+        name: 'SCF 2.1.0-beta',
+        version: '',
+        user: {
+          scopes: [],
+          guid: 'a1e15ade-2f3d-4354-8935-0553973afb2c',
+          name: 'admin',
+          admin: true
+        },
+        type: ''
+      }
+    }
+  },
+  valid: true,
+  uaaError: false,
+  upgradeInProgress: false,
+  sessionExpiresOn: 1000,
+  plugins: {
+    demo: false
+  }
+}
 
 /* tslint:disable */
 export function getInitialTestStoreState(): CFAppState {
@@ -79,78 +152,7 @@ export function getDefaultInitialTestStratosStoreState() {
       user: null,
       error: false,
       errorResponse: '',
-      sessionData: {
-        version: {
-          proxy_version: '0.9.5-a77102d6',
-          database_version: 20170818162837
-        },
-        user: {
-          guid: '530170c7-5042-40ed-8654-c4a79e4d1302',
-          name: 'admin',
-          admin: true,
-          scopes: []
-        },
-        endpoints: {
-          cf: {
-            [testSCFGuid]: testSCFSessionEntity,
-            '521a9d96-2d6c-4d94-a555-807437ab106d': {
-              guid: '521a9d96-2d6c-4d94-a555-807437ab106d',
-              name: 'SCF',
-              version: '',
-              user: {
-                scopes: [],
-                guid: 'ded8a59b-b21d-4da6-a07a-0d865a9b16e2',
-                name: 'admin',
-                admin: true
-              },
-              type: ''
-            },
-            '663a363e-1faf-4359-ac96-b8c24ec1a4ab': {
-              guid: '663a363e-1faf-4359-ac96-b8c24ec1a4ab',
-              name: 'TEST',
-              version: '',
-              user: {
-                scopes: [],
-                guid: 'b2a8ed5c-5c63-4b5b-bdf8-04ea66a9db00',
-                name: 'admin',
-                admin: true
-              },
-              type: ''
-            },
-            'b24923d0-f1ad-4534-bb02-f609a1667bb1': {
-              guid: 'b24923d0-f1ad-4534-bb02-f609a1667bb1',
-              name: 'SAP',
-              version: '',
-              user: {
-                scopes: [],
-                guid: '7965e2cc-ef57-4373-bb0d-b45025355883',
-                name: 'macdougall.neil@gmail.com',
-                admin: false
-              },
-              type: ''
-            },
-            'e2f91bca-38e8-435a-9f72-7a8f8de0ee17': {
-              guid: 'e2f91bca-38e8-435a-9f72-7a8f8de0ee17',
-              name: 'SCF 2.1.0-beta',
-              version: '',
-              user: {
-                scopes: [],
-                guid: 'a1e15ade-2f3d-4354-8935-0553973afb2c',
-                name: 'admin',
-                admin: true
-              },
-              type: ''
-            }
-          }
-        },
-        valid: true,
-        uaaError: false,
-        upgradeInProgress: false,
-        sessionExpiresOn: 1000,
-        plugins: {
-          demo: false
-        }
-      },
+      sessionData: testSessionData,
       verifying: false
     },
     uaaSetup: {
@@ -22085,7 +22087,7 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
 //   message: ''
 // }
 
-export function populateStoreWithTestEndpoint() {
+export function populateStoreWithTestEndpoint(): EndpointModel {
   const stratosEndpointEntityConfig: EntityCatalogueEntityConfig = endpointEntitySchema;
   const stratosEndpointEntityKey = EntityCatalogueHelpers.buildEntityKey(
     stratosEndpointEntityConfig.entityType,
@@ -22104,4 +22106,6 @@ export function populateStoreWithTestEndpoint() {
     type: 'POPULATE_TEST_DATA',
     ...stratosEndpointEntityConfig
   }, 'fetch'));
+
+  return testSCFEntity;
 }

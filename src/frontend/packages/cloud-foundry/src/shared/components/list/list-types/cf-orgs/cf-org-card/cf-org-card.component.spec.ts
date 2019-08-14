@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { Store } from '@ngrx/store';
 
 import { ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
@@ -11,7 +12,8 @@ import {
   generateTestCfUserServiceProvider,
   MetadataCardTestComponents,
 } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { getInitialTestStoreState } from '../../../../../../../../core/test-framework/store-test-helper';
+import { getInitialTestStoreState, testSessionData } from '../../../../../../../../core/test-framework/store-test-helper';
+import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfOrgCardComponent } from './cf-org-card.component';
@@ -22,7 +24,10 @@ describe('CfOrgCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfOrgCardComponent, MetadataCardTestComponents],
+      declarations: [
+        CfOrgCardComponent,
+        MetadataCardTestComponents
+      ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
         PaginationMonitorFactory,
@@ -35,6 +40,9 @@ describe('CfOrgCardComponent', () => {
       ]
     })
       .compileComponents();
+
+    const store = TestBed.get(Store);
+    store.dispatch(new VerifiedSession(testSessionData));
   }));
 
   beforeEach(() => {
