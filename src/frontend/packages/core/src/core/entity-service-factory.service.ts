@@ -1,37 +1,18 @@
-import { Injectable, Inject, Optional } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { EntityService, ENTITY_INFO_HANDLER, EntityInfoHandler } from './entity-service';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
-import { EntityInfo } from '../../../store/src/types/api.types';
+import { EntityInfoHandler, EntityService, ENTITY_INFO_HANDLER } from './entity-service';
 
 @Injectable()
 export class EntityServiceFactory {
 
-  const infoValidator = (action) => {
-    let validated = false;
-    return (entityInfo) => {
-      if (!entityInfo || entityInfo.entity) {
-        if ((!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo))) {
-          return;
-        }
-        validated = true;
-        store.dispatch(new ValidateEntitiesStart(
-          this.action as ICFAction,
-          [entityInfo.entity.metadata.guid],
-          false
-        ));
-      }
-    }
-  }
-
   constructor(
     private store: Store<GeneralEntityAppState>,
     private entityMonitorFactory: EntityMonitorFactory,
-    @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandler: EntityInfoHandler
+    @Optional() @Inject(ENTITY_INFO_HANDLER) private entityInfoHandler: EntityInfoHandler
   ) { }
 
   create<T>(
@@ -52,7 +33,7 @@ export class EntityServiceFactory {
       config.endpointGuid ? config.endpointGuid : entityIdOrConfig as string,
       action
     );
-    return new EntityService<T>(this.store, entityMonitor, action, entityInfoHandler);
+    return new EntityService<T>(this.store, entityMonitor, action, this.entityInfoHandler);
   }
 
 }

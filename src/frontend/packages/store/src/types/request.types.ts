@@ -117,6 +117,7 @@ export interface ICFAction extends EntityRequestAction {
   options: RequestOptions;
   actions: string[];
   skipValidation?: boolean;
+  validate?: boolean;
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {

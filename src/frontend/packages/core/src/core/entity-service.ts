@@ -2,25 +2,23 @@ import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { ValidateEntitiesStart } from '../../../store/src/actions/request.actions';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
 import {
   RequestInfoState,
-  RequestSectionKeys,
-  TRequestTypeKeys,
   UpdatingSection,
 } from '../../../store/src/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
-import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { Optional, Inject } from '@angular/core';
+import { ActionDispatcher } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 
 export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
 
-export type EntityInfoHandler = (action: EntityRequestAction) => (entityInfo: EntityInfo) => void;
+export type EntityInfoHandler = (action: EntityRequestAction, actionDispatcher: ActionDispatcher) => (entityInfo: EntityInfo) => void;
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -51,14 +49,14 @@ export class EntityService<T = any> {
     @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandlerBuilder: EntityInfoHandler
   ) {
     this.action = this.getAction(actionOrConfig);
-    const actionInfoHandler = entityInfoHandlerBuilder ? entityInfoHandlerBuilder(this.action) : () => { };
+    const actionInfoHandler = entityInfoHandlerBuilder ? entityInfoHandlerBuilder(
+      this.action, (action) => store.dispatch(action)
+    ) : () => { };
     this.actionDispatch = dispatcherFactory(store, this.action);
 
     this.updateEntity = () => {
       this.actionDispatch(this.refreshKey);
     };
-
-    let validated = false;
 
     this.updatingSection$ = entityMonitor.updatingSection$;
     this.isDeletingEntity$ = entityMonitor.isDeletingEntity$;
@@ -69,19 +67,7 @@ export class EntityService<T = any> {
     ).pipe(
       publishReplay(1),
       refCount(),
-      tap((entityInfo: EntityInfo) => {
-        if (!entityInfo || entityInfo.entity) {
-          if ((!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo))) {
-            return;
-          }
-          validated = true;
-          store.dispatch(new ValidateEntitiesStart(
-            this.action as ICFAction,
-            [entityInfo.entity.metadata.guid],
-            false
-          ));
-        }
-      })
+      tap(actionInfoHandler)
     );
 
     this.waitForEntity$ = this.entityObs$.pipe(

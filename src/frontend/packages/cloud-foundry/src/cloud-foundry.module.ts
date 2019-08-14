@@ -4,7 +4,36 @@ import { CloudFoundryComponentsModule } from './shared/components/components.mod
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 import { EntityCatalogueModule } from '../../core/src/core/entity-catalogue.module';
 import { generateCFEntities } from './cf-entity-generator';
+import { ENTITY_INFO_HANDLER } from '../../core/src/core/entity-service';
+import { ICFAction } from '../../store/src/types/request.types';
+import { EntityInfo } from '../../store/src/types/api.types';
+import { ValidateEntitiesStart } from '../../store/src/actions/request.actions';
 
+export function shouldValidate(shouldSkip: boolean, isValidated: boolean, entityInfo: RequestInfoState) {
+  if (!entityInfo || shouldSkip || isValidated) {
+    return false;
+  }
+  return entityInfo.fetching ||
+    entityInfo.error ||
+    entityInfo.deleting.busy ||
+    entityInfo.deleting.deleted;
+}
+
+export function infoValidator(action: ICFAction, dispatcher) {
+  let validated = false;
+  return (entityInfo: EntityInfo) => {
+    if (!entityInfo || entityInfo.entity) {
+      if (shouldValidate(action.skipValidation, validated, entityInfo.entityRequestInfo)) {
+        validated = true;
+        dispatcher(new ValidateEntitiesStart(
+          action,
+          [entityInfo.entity.metadata.guid],
+          false
+        ));
+      }
+    }
+  };
+};
 @NgModule({
   imports: [
     EntityCatalogueModule.forFeature(generateCFEntities),
@@ -17,5 +46,9 @@ import { generateCFEntities } from './cf-entity-generator';
     //   PermissionEffects
     // ])
   ],
+  providers: [
+
+    { provide: ENTITY_INFO_HANDLER, useExisting: infoValidator }
+  ]
 })
 export class CloudFoundryPackageModule { }
