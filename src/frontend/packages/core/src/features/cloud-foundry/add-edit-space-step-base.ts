@@ -22,6 +22,9 @@ import { ISpaceQuotaDefinition } from '../../core/cf-api.types';
 import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 
 export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;
@@ -63,10 +66,14 @@ export class AddEditSpaceStepBase {
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(organizationEntityType, this.orgGuid);
+    
+    const spaceQuotaEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, spaceQuotaEntityType);
+    const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('getOrganizationSpaceQuotaDefinitions');
+    const getOrganizationSpaceQuotaDefnitionsAction = actionBuilder(quotaPaginationKey, this.orgGuid, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<ISpaceQuotaDefinition>>(
       {
         store: this.store,
-        action: new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, this.orgGuid, this.cfGuid),
+        action: getOrganizationSpaceQuotaDefnitionsAction as PaginatedAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(spaceQuotaEntityType)

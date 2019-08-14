@@ -26,6 +26,8 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
 
 
 const enum OrgStatus {
@@ -114,6 +116,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    const quotaDefinitionEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getQuotaDefnitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,

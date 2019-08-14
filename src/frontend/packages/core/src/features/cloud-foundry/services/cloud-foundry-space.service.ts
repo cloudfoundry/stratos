@@ -29,6 +29,8 @@ import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
 import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../base-entity-schemas';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -118,10 +120,14 @@ export class CloudFoundrySpaceService {
             createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.AUDITOR),
           );
         }
-        const getSpaceAction = new GetSpace(this.spaceGuid, this.cfGuid, relations);
+        const spaceEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, spaceEntityType);
+        const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+        const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, { includeRelations: relations});
+        //const getSpaceAction = new GetSpace(this.spaceGuid, this.cfGuid, relations);
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
           this.spaceGuid,
-          new GetSpace(this.spaceGuid, this.cfGuid, relations),
+          //new GetSpace(this.spaceGuid, this.cfGuid, relations),
+          getSpaceAction,
           true
         );
         return spaceEntityService.entityObs$.pipe(filter(o => !!o && !!o.entity));

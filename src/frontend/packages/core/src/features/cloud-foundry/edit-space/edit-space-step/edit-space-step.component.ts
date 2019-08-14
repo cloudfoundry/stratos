@@ -17,6 +17,9 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
+import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 
 
 @Component({
@@ -123,12 +126,17 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     let spaceQuotaQueryGuid;
     let action: AssociateSpaceQuota | DisassociateSpaceQuota;
 
+    const spaceQuotaEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, spaceQuotaEntityType);
     if (spaceQuotaGuid) {
       spaceQuotaQueryGuid = spaceQuotaGuid;
-      action = new AssociateSpaceQuota(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
+      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('associateSpaceQuota');
+      const associateSpaceQuotaAction = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
+      action = associateSpaceQuotaAction as AssociateSpaceQuota;
     } else {
       spaceQuotaQueryGuid = this.originalSpaceQuotaGuid;
-      action = new DisassociateSpaceQuota(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid);
+      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('disassociateSpaceQuota');
+      const disassociateSpaceQuotaAction = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
+      action = disassociateSpaceQuotaAction as AssociateSpaceQuota;
     }
     this.store.dispatch(action);
 

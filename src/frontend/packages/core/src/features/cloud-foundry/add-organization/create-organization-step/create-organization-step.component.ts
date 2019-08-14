@@ -26,6 +26,7 @@ import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalo
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
 
 
 @Component({
@@ -79,10 +80,13 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     );
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    const quotaDefinitionEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getQuotaDefnitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,
-        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        action: getQuotaDefnitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(quotaDefinitionEntityType)
