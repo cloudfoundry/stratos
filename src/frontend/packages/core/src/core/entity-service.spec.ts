@@ -21,6 +21,7 @@ import { createEntityStore, TestStoreEntity } from '../../test-framework/store-t
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
@@ -39,9 +40,6 @@ const createAction = (guid: string) => {
   } as ICFAction;
 }
 
-// const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
-// const cfId = 'cf123';
-
 const entityType = 'key';
 
 const catalogueEntity = new StratosBaseCatalogueEntity({
@@ -53,6 +51,7 @@ const catalogueEntity = new StratosBaseCatalogueEntity({
   label: 'Entity',
   labelPlural: 'Entities',
 });
+
 
 describe('EntityServiceService', () => {
   beforeAll(() => {
@@ -127,6 +126,10 @@ describe('EntityServiceService', () => {
         ]
       ]
     ]);
+
+
+
+
     const action = createAction('123');
     TestBed.configureTestingModule({
       providers: [
@@ -144,6 +147,16 @@ describe('EntityServiceService', () => {
       ],
       imports: [
         HttpModule,
+        {
+          ngModule: EffectsFeatureTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES, useValue: [
+                catalogueEntity
+              ]
+            }
+          ]
+        },
         createEntityStore(entityMap),
       ]
     });
