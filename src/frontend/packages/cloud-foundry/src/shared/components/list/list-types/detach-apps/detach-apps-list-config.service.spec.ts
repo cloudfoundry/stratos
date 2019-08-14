@@ -1,14 +1,14 @@
-import { TestBed, inject } from '@angular/core/testing';
-
-import { BaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { DetachAppsListConfigService } from './detach-apps-list-config.service';
 import { DatePipe } from '@angular/common';
+import { inject, TestBed } from '@angular/core/testing';
+
+import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { DetachAppsListConfigService } from './detach-apps-list-config.service';
 
 describe('DetachAppsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [DetachAppsListConfigService, DatePipe],
-      imports: [BaseTestModules],
+      imports: [generateCfBaseTestModules()],
     });
   });
 

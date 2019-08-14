@@ -8,7 +8,7 @@ import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';

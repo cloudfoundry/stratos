@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CustomImportModule } from '../../../../../../core/src/custom-import.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { CloudFoundryModule } from '../../cloud-foundry.module';
 import { CfRolesService } from './cf-roles.service';

@@ -7,7 +7,7 @@ import { CurrentUserPermissionsService } from '../../../../../../../core/src/cor
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';

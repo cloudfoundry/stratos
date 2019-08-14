@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../../core/test-framework/application-service-helper';
 import {
   generateCfBaseTestModules,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import {
   ApplicationEnvVarsHelper,

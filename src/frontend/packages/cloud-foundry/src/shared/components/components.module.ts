@@ -268,6 +268,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     RunningInstancesComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
+    CreateApplicationStep1Component
   ],
   entryComponents: [
     CfEndpointDetailsComponent,

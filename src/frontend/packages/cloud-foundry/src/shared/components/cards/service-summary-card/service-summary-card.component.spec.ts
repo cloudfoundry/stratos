@@ -8,7 +8,7 @@ import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors
 import {
   generateCfBaseTestModulesNoShared,
   MetadataCardTestComponents,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';

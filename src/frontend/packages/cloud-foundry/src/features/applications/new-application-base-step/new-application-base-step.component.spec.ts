@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { NewApplicationBaseStepComponent } from './new-application-base-step.component';
 
 describe('NewApplicationBaseStepComponent', () => {

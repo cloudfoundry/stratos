@@ -11,7 +11,7 @@ import { CapitalizeFirstPipe } from '../../../../../../core/src/shared/pipes/cap
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../core/test-framework/cloud-foundry-organization.service.mock';

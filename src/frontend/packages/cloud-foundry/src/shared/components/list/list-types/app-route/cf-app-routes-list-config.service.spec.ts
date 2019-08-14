@@ -8,7 +8,7 @@ import { CurrentUserPermissionsService } from '../../../../../../../core/src/cor
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { ApplicationServiceMock } from '../../../../../../../core/test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';

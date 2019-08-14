@@ -1,13 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
-import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
 import { BooleanIndicatorComponent } from '../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionComponent } from './stacked-input-action/stacked-input-action.component';
 import { StackedInputActionsComponent } from './stacked-input-actions.component';
 
 // TODO: RC Move?
-fdescribe('StackedInputActionsComponent', () => {
+describe('StackedInputActionsComponent', () => {
   let component: StackedInputActionsComponent;
   let fixture: ComponentFixture<StackedInputActionsComponent>;
 

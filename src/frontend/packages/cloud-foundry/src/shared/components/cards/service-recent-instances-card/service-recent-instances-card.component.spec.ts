@@ -4,7 +4,7 @@ import { AppChipsComponent } from '../../../../../../core/src/shared/components/
 import {
   generateCfBaseTestModulesNoShared,
   MetadataCardTestComponents,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import {

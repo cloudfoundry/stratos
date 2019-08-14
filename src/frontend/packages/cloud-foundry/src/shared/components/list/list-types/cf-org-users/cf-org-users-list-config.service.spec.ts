@@ -7,7 +7,7 @@ import { PaginationMonitorFactory } from '../../../../../../../core/src/shared/m
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfUserServiceProvider,
-} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';

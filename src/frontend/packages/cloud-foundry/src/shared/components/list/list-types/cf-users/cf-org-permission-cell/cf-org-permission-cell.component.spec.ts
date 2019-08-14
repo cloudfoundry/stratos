@@ -5,7 +5,7 @@ import { SharedModule } from '../../../../../../../../core/src/shared/shared.mod
 import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
 
 describe('CfUserPermissionCellComponent', () => {

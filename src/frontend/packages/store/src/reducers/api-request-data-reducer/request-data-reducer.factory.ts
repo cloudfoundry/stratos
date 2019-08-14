@@ -15,12 +15,8 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
   return function entitiesReducer(state = {}, action: Action): Record<string, any> {
     switch (action.type) {
       case InitCatalogueEntitiesAction.ACTION_TYPE:
-        // console.error('DANGER DANGER CLEARING INITIAL STATE OF STORE', state.stratosEndpoint);
-        // console.error('DANGER DANGER CLEARING INITIAL STATE OF STORE 1requestDataReducerFactory, ', Object.keys(state));
-        // console.error('DANGER DANGER CLEARING INITIAL STATE OF STORE 1requestDataReducerFactory, ', (action as InitCatalogueEntitiesAction).entityKeys);
         return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
       case successAction:
-        // console.log('!!!!!!!!!!!!!!!!!!!!!!! 2requestDataReducerFactory', action);
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           const entityKey = entityCatalogue.getEntity(success.apiAction.endpointType, success.apiAction.entityType).entityKey;
@@ -30,7 +26,6 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
         }
         return state;
       case RECURSIVE_ENTITY_SET_DELETED:
-        // console.log('!!!!!!!!!!!!!!!!!!!!!!! 3requestDataReducerFactory');
         return cleanStateFromFlatTree(state, action as SetTreeDeleted);
       default:
         return state;

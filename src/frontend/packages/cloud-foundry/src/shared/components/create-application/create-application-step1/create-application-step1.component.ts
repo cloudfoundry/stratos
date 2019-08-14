@@ -13,7 +13,6 @@ import { CFAppState } from '../../../../cf-app-state';
 import { getSpacesFromOrgWithRole } from '../../../../store/selectors/cf-current-user-role.selectors';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
-// TODO: RC move
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',

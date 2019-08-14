@@ -8,7 +8,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { APIResourceMetadata } from '../../../../../../../../store/src/types/api.types';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';

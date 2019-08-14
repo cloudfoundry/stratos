@@ -8,7 +8,7 @@ import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/mo
 import {
   generateCfBaseTestModulesNoShared,
   MetadataCardTestComponents,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { CfServiceCardComponent } from './cf-service-card.component';
@@ -27,7 +27,6 @@ describe('CfServiceCardComponent', () => {
         AppChipsComponent,
         ServiceIconComponent
       ],
-      // TODO: RC search fopr BaseTestModules in cf modules
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
         EntityMonitorFactory

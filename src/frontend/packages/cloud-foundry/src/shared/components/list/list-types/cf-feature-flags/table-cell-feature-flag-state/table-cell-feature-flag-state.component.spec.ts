@@ -5,7 +5,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state.component';
 
 describe('TableCellFeatureFlagStateComponent', () => {

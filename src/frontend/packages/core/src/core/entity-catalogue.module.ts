@@ -39,7 +39,7 @@ export class EntityCatalogueModule {
       providers: [
         ReducerManager,
         Store,
-        { provide: CATALOGUE_ENTITIES, useFactory: entityFactory, multi: true },
+        { provide: CATALOGUE_ENTITIES, useFactory: entityFactory, multi: true }
       ]
     };
   }

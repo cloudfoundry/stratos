@@ -3,7 +3,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../../../features/service-catalog/services.service.mock';
 import { ServicePlanPublicComponent } from '../../../../service-plan-public/service-plan-public.component';

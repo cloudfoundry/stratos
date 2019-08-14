@@ -8,7 +8,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { ApplicationServiceMock } from '../../../../../../../../core/test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { CloudFoundryComponentsModule } from '../../../../../../shared/components/components.module';
 import { ApplicationService } from '../../../../application.service';

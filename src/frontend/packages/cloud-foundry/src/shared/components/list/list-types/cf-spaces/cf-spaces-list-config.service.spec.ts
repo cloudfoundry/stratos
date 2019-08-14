@@ -3,7 +3,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgsListConfigService } from '../cf-orgs/cf-orgs-list-config.service';
 
 describe('CfOrgsSpaceListConfigService', () => {

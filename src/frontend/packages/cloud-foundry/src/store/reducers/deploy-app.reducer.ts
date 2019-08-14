@@ -33,18 +33,14 @@ const defaultState: DeployApplicationState = {
 export function deployAppReducer(state: DeployApplicationState = defaultState, action) {
   switch (action.type) {
     case SET_APP_SOURCE_DETAILS:
-      //  console.log('----------------------------------------- SET_APP_SOURCE_DETAILS');
       return {
         ...state, applicationSource: { ...state.applicationSource, type: action.sourceType }
       };
     case SET_DEPLOY_CF_SETTINGS:
-      //   console.log('----------------------------------------- SET_DEPLOY_CF_SETTINGS');
-
       return {
         ...state, cloudFoundryDetails: action.cloudFoundryDetails
       };
     case CHECK_PROJECT_EXISTS:
-      //  console.log('----------------------------------------- CHECK_PROJECT_EXISTS');
       return {
         ...state, projectExists: {
           checking: true,
@@ -53,7 +49,6 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         }
       };
     case PROJECT_EXISTS:
-      //   console.log('----------------------------------------- PROJECT_EXISTS');
       return {
         ...state, projectExists: {
           checking: false,
@@ -64,7 +59,6 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         }
       };
     case PROJECT_DOESNT_EXIST:
-      //  console.log('----------------------------------------- PROJECT_DOESNT_EXIST');
       return {
         ...state, projectExists: {
           checking: false,
@@ -75,7 +69,6 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         }
       };
     case PROJECT_FETCH_FAILED:
-      //   console.log('----------------------------------------- PROJECT_FETCH_FAILED');
       return {
         ...state, projectExists: {
           checking: false,
@@ -86,7 +79,6 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         }
       };
     case FETCH_BRANCHES_FOR_PROJECT:
-      //  console.log('----------------------------------------- FETCH_BRANCHES_FOR_PROJECT');
       return {
         ...state, applicationSource:
         {
@@ -98,39 +90,32 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         }
       };
     case SAVE_APP_DETAILS:
-      //    console.log('----------------------------------------- SAVE_APP_DETAILS');
       return {
         ...state, applicationSource:
           { ...state.applicationSource, ...action.appDetails }
       };
     case SAVE_APP_OVERRIDE_DETAILS:
-      //   console.log('----------------------------------------- SAVE_APP_OVERRIDE_DETAILS');
       return {
         ...state, applicationOverrides: { ...action.appOverrideDetails }
       };
     case SET_BRANCH:
-      //  console.log('----------------------------------------- SET_BRANCH');
       return {
         ...state, applicationSource:
           { ...state.applicationSource, ...{ branch: action.branch } }
       };
     case SET_DEPLOY_BRANCH:
-      // console.log('----------------------------------------- SET_DEPLOY_BRANCH');
       return {
         ...state, applicationSource:
           { ...state.applicationSource, ...{ branchName: action.branch } }
       };
     case SET_DEPLOY_COMMIT:
-      // console.log('----------------------------------------- SET_DEPLOY_COMMIT');
       return {
         ...state, applicationSource:
           { ...state.applicationSource, ...{ commit: action.commit } }
       };
     case DELETE_DEPLOY_APP_SECTION:
-      // console.log('----------------------------------------- DELETE_DEPLOY_APP_SECTION');
       return defaultState;
     default:
-      // console.log('----------------------------------------- default: ', state);
       return state;
   }
 }

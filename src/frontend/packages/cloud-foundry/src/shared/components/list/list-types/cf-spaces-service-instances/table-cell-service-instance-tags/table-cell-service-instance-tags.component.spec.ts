@@ -4,7 +4,7 @@ import { AppChipsComponent } from '../../../../../../../../core/src/shared/compo
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
 
 describe('TableCellServiceInstanceTagsComponent', () => {

@@ -8,7 +8,7 @@ import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../core/src/core/github.helpers';
 import { GitSCMService } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { GithubProjectExistsDirective } from '../github-project-exists.directive';
 import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';

@@ -9,7 +9,7 @@ import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { testSCFEntity, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';

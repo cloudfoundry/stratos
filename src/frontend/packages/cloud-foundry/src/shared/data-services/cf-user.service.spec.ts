@@ -5,7 +5,7 @@ import { SharedModule } from '../../../../core/src/shared/shared.module';
 import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from './cf-user.service';
 
 describe('CfUserService', () => {

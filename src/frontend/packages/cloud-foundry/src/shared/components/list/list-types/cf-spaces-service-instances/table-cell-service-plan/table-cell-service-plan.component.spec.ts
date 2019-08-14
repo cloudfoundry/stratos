@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellServicePlanComponent } from './table-cell-service-plan.component';
 
 describe('TableCellServicePlanComponent', () => {

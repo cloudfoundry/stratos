@@ -8,7 +8,7 @@ import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
   MetadataCardTestComponents,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfSecurityGroupsCardComponent } from './cf-security-groups-card.component';
 

@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../core/test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { EditSpaceStepComponent } from './edit-space-step.component';

@@ -4,7 +4,7 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CardCfUserInfoComponent } from './card-cf-user-info.component';
 
 describe('CardCfUserInfoComponent', () => {

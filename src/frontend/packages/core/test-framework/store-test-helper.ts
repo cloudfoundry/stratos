@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
+import { generateCfTopLevelStoreEntities } from '../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
+import { AppState } from '../../store/src/app-state';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
 import {
@@ -17,7 +19,6 @@ import { endpointEntitySchema } from '../src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
-import { generateCfTopLevelStoreEntities } from './cloud-foundry-endpoint-service.helper';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 export const testSCFSessionEntity: SessionDataEndpoint = {
@@ -221,6 +222,7 @@ export function getDefaultInitialTestStratosStoreState() {
 function getDefaultInitialTestStoreState(): CFAppState {
   return {
     ...getDefaultInitialTestStratosStoreState(),
+    // TODO: RC This is cf specific
     ...generateCfTopLevelStoreEntities(),
     pagination: {
       cfSummary: {},
@@ -21995,7 +21997,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
 }
 
 /* tslint:enable */
-export function createBasicStoreModule(initialState: Partial<CFAppState> = getInitialTestStoreState()): ModuleWithProviders {
+export function createBasicStoreModule(initialState: Partial<AppState> = getInitialTestStoreState()): ModuleWithProviders {
   return StoreModule.forRoot(
     appReducers,
     {

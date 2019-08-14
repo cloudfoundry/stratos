@@ -32,7 +32,7 @@ import {
 } from '../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModulesNoShared } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 import { CfOrgSpaceLinksComponent } from '../cf-org-space-links/cf-org-space-links.component';

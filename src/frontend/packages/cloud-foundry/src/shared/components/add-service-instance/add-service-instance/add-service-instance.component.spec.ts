@@ -46,7 +46,7 @@ import { PaginationMonitorFactory } from '../../../../../../core/src/shared/moni
 import { TabNavService } from '../../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';

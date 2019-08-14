@@ -13,7 +13,7 @@ import {
 import { MetricQueryType } from '../../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import {
   generateCfBaseTestModules,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';

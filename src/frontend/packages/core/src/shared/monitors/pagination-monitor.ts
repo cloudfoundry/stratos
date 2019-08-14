@@ -265,7 +265,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         filter(busy => !busy),
         switchMap(() => entities$),
         publishReplay(1),
-        refCount()
+        refCount(),
       ),
       isMultiAction$
     };
@@ -363,7 +363,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         return !!Object.values(pagination.pageRequests).find(pageRequest => pageRequest.busy);
       }),
       distinctUntilChanged(),
-      observeOn(asapScheduler)
+      observeOn(asapScheduler),
     );
   }
   // ### Initialization methods end.

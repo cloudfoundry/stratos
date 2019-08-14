@@ -8,7 +8,7 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
 import { CardCfInfoComponent } from './card-cf-info.component';
 

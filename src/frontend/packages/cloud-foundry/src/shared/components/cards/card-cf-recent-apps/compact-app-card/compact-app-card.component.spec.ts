@@ -11,7 +11,7 @@ import {
 } from '../../../../../../../core/src/shared/components/application-state/application-state.service';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { CompactAppCardComponent } from './compact-app-card.component';
 

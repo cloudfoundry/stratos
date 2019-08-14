@@ -21,7 +21,7 @@ import {
 } from '../../../../../../core/src/shared/components/list/list-table/table-cell-status.directive';
 import { PercentagePipe } from '../../../../../../core/src/shared/pipes/percentage.pipe';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';

@@ -65,8 +65,8 @@ describe('ActionDispatcher', () => {
     const actionBuilders = {
       remove: getActionBuilder
     } as OrchestratedActionBuilders;
-    const spy = spyOn(actionBuilders, 'delete');
-    const actionOrchestrator = new ActionOrchestrator('delete', actionBuilders);
+    const spy = spyOn(actionBuilders, 'remove');
+    const actionOrchestrator = new ActionOrchestrator('remove', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
     expect(entityActionDispatcher.dispatchDelete(guid, endpointGuid)).toBe(true);
     expect(spy).toHaveBeenCalledWith(guid, endpointGuid);

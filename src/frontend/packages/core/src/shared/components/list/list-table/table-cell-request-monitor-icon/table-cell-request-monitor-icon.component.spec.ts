@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableCellRequestMonitorIconComponent } from './table-cell-request-monitor-icon.component';
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
 import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
+import { TableCellRequestMonitorIconComponent } from './table-cell-request-monitor-icon.component';
 
 describe('TableCellRequestMonitorIconComponent', () => {
   let component: TableCellRequestMonitorIconComponent;

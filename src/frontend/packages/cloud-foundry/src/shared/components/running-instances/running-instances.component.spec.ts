@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { RunningInstancesComponent } from './running-instances.component';
 
 describe('RunningInstancesComponent', () => {
@@ -13,7 +13,6 @@ describe('RunningInstancesComponent', () => {
     TestBed.configureTestingModule({
       declarations: [RunningInstancesComponent],
       imports: [
-        // TODO: RC search for createBasicStoreModule in cf
         ...generateCfStoreModules(),
         CoreModule,
       ],

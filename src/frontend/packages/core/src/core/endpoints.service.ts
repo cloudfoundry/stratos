@@ -51,15 +51,6 @@ export class EndpointsService implements CanActivate {
     private endpointHealthChecks: EndpointHealthChecks,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-    // const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
-    // store.select('requestData').subscribe(a => {
-    //   console.log('EndpointsService rq: ', a);
-    //   console.log('EndpointsService keys: ', Object.keys(a));
-    //   console.log('EndpointsService endpoints key: ', endpointEntityKey);
-    //   console.log('EndpointsService endpoints: ', a[endpointEntityKey]);
-    // });
-
-
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>

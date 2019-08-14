@@ -4,7 +4,7 @@ import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/mo
 import {
   generateCfBaseTestModulesNoShared,
   MetadataCardTestComponents,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfStacksCardComponent } from './cf-stacks-card.component';
 
 describe('CfStacksCardComponent', () => {

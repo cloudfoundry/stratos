@@ -1,16 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { first, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { CloudFoundryPackageModule } from '../../../cloud-foundry/src/cloud-foundry.module';
+import { cfEntityFactory, featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { generateCFEntities } from '../../../cloud-foundry/src/cf-entity-generator';
+import { AppState } from '../../../store/src/app-state';
 import { AppStoreExtensionsModule } from '../../../store/src/store.extensions.module';
 import { APIResource } from '../../../store/src/types/api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { PaginationState } from '../../../store/src/types/pagination.types';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../test-framework/store-test-helper';
 import { endpointEntitySchema } from '../base-entity-schemas';
+import { generateStratosEntities } from '../base-entity-types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import { IFeatureFlag } from './cf-api.types';
 import {
@@ -21,15 +21,16 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 
+const ffSchema = cfEntityFactory(featureFlagEntityType);
 
 describe('CurrentUserPermissionsService', () => {
   let service: CurrentUserPermissionsService;
 
 
-  function createStoreState(): Partial<CFAppState> {
+  function createStoreState(): Partial<AppState> {
     // Data
     const endpoints: EndpointModel[] = [
       {
@@ -292,22 +293,22 @@ describe('CurrentUserPermissionsService', () => {
       }
     ];
     const featureFlags2: APIResource<IFeatureFlag>[] = [
-      {
-        entity: {
-          name: 'user_org_creation',
-          enabled: false,
-          error_message: null,
-          url: '/v2/config/feature_flags/user_org_creation',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
+      // {
+      //   entity: {
+      //     name: 'user_org_creation',
+      //     enabled: false,
+      //     error_message: null,
+      //     url: '/v2/config/feature_flags/user_org_creation',
+      //     cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+      //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0'
+      //   },
+      //   metadata: {
+      //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0',
+      //     created_at: '',
+      //     updated_at: '',
+      //     url: ''
+      //   }
+      // },
       {
         entity: {
           name: 'private_domain_creation',
@@ -576,14 +577,13 @@ describe('CurrentUserPermissionsService', () => {
     };
 
     // User roles
-    const initialState: Partial<CFAppState> = {
+    const initialState: Partial<AppState> = {
 
     };
 
 
     // Create request and requestData sections
-    const ffEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, featureFlagEntityType);
-    const ffSchema = ffEntity.getSchema();
+    // TODO: RC Roles/Permissions
     const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
       [
         endpointEntitySchema,
@@ -911,12 +911,25 @@ describe('CurrentUserPermissionsService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CurrentUserPermissionsService],
+      providers: [
+        CurrentUserPermissionsService,
+      ],
       imports: [
         AppStoreExtensionsModule,
-        CloudFoundryPackageModule,
-        createBasicStoreModule(createStoreState())
-      ]
+        {
+          ngModule: EffectsFeatureTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES, useValue: [
+                ...generateStratosEntities(),
+                generateCFEntities().find(a => a.type === ffSchema.entityType)
+              ]
+            }
+          ]
+        },
+        createBasicStoreModule(createStoreState()),
+      ],
+
     });
     service = TestBed.get(CurrentUserPermissionsService);
   });
@@ -961,9 +974,7 @@ describe('CurrentUserPermissionsService', () => {
 
   it('should allow if feature flag', done => {
     service.can(
-      [
-        new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)
-      ]
+      [new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)]
     ).pipe(
       tap(can => {
         expect(can).toBe(true);

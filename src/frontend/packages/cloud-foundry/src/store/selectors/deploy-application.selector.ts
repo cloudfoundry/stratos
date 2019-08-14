@@ -4,9 +4,6 @@ import { CFAppState } from '../../cf-app-state';
 import { DeployApplicationSource, DeployApplicationState, ProjectExists } from '../types/deploy-application.types';
 
 export const selectDeployAppState = (state: CFAppState) => {
-  // console.log('selectDeployAppState: ', Object.keys(state));
-  // console.log('selectDeployAppState: ', state.deployApplication);
-  // console.log('selectDeployAppState: ', state.deployApplication.applicationSource);
   return state.deployApplication;
 };
 

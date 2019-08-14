@@ -5,7 +5,7 @@ import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfServiceProvider,
-} from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { populateStoreWithTestEndpoint } from '../../../../../core/test-framework/store-test-helper';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CloudFoundryComponent } from './cloud-foundry.component';

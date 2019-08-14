@@ -5,7 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserServiceTestProvider } from '../../../../../core/test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';

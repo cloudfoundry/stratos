@@ -5,7 +5,7 @@ import { CoreModule } from '../../../../../core/src/core/core.module';
 import {
   ApplicationStateService,
 } from '../../../../../core/src/shared/components/application-state/application-state.service';
-import { generateCfStoreModules } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationBaseComponent } from './application-base.component';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 

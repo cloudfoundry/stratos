@@ -168,22 +168,11 @@ class EntityCatalogue {
     const entities = this.getAllEntitiesTypes();
     const endpoints = this.getAllEndpointTypes();
     return [...entities, ...endpoints].reduce((allEntityReducers, entity) => {
-      // console.log('getAllEntityRequestDataReducers1: ', entity.entityKey);
-      // if (entity.entityKey) {
-      //   console.log('getAllEntityRequestDataReducers2: ', entity.entityKey);
-      //   return {
-      //     ...allEntityReducers,
-      //     [entity.entityKey]: [(state = {}, action) => state]
-      //   };
-      // }
       if (entity.entityKey && entity.builders.dataReducers && entity.builders.dataReducers.length) {
-        // console.log('getAllEntityRequestDataReducers2: ', entity.entityKey);
         return {
           ...allEntityReducers,
           [entity.entityKey]: entity.builders.dataReducers
         };
-      } else {
-        // console.log('getAllEntityRequestDataReducers3......................S: ', entity.entityKey);
       }
       return allEntityReducers;
     }, {} as ExtraApiReducers<IRequestEntityTypeState<any>>);

@@ -4,7 +4,7 @@ import { TabNavService } from '../../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgsListConfigService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 import { CloudFoundryOrganizationsComponent } from './cloud-foundry-organizations.component';
 

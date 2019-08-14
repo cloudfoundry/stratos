@@ -29,7 +29,7 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
               ...generateStratosEntities()
             ];
           }
-        },
+        }
       ]
     },
     // EffectsModule.forRoot(baseEffects),

@@ -5,7 +5,7 @@ import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';

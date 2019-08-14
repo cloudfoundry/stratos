@@ -6,7 +6,7 @@ import {
 } from '../../../../../../../../../core/test-framework/application-service-helper';
 import {
   generateCfBaseTestModules,
-} from '../../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationEnvVarsHelper } from '../../build-tab/application-env-vars.service';
 import { RoutesTabComponent } from './routes-tab.component';
 

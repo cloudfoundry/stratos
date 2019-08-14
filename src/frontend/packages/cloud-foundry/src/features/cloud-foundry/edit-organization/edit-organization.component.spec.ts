@@ -4,7 +4,7 @@ import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization.component';

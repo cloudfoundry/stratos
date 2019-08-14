@@ -4,7 +4,7 @@ import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { populateStoreWithTestEndpoint, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';

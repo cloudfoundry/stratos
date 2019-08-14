@@ -19,7 +19,7 @@ import { CardStatusComponent } from '../../../../../../core/src/shared/component
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';

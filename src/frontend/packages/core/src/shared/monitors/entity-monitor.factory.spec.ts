@@ -4,18 +4,13 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../store/src/reducers.module';
 import { EntityMonitorFactory } from './entity-monitor.factory.service';
 
-// TODO: RC remove
-// const initialState = getInitialTestStoreState();
-fdescribe('EntityMonitor', () => {
+describe('EntityMonitor', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [EntityMonitorFactory],
       imports: [
         StoreModule.forRoot(
           appReducers,
-          // {
-          //   initialState
-          // }
         )
       ]
     });

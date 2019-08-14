@@ -13,7 +13,7 @@ import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
   MetadataCardTestComponents,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { testSessionData } from '../../../../../../../../core/test-framework/store-test-helper';
 import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
 import {
