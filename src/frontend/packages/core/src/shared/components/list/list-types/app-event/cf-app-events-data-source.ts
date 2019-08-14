@@ -4,10 +4,10 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { GetAllAppEvents } from '../../../../../../../cloud-foundry/src/actions/app-event.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { appEventEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 

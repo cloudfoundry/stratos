@@ -4,6 +4,7 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { haveMultiConnectedCfs } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
@@ -12,7 +13,6 @@ import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
-import { haveMultiConnectedCfs } from '../../features/cloud-foundry/cf.helpers';
 
 export class CfOrgSpaceLabelService {
 

@@ -4,15 +4,16 @@ import { ConnectionBackend, Http } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
+import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { ApplicationsModule } from '../../../../../core/src/features/applications/applications.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../core/test-framework/store-test-helper';
-import { GetApplication } from '../../../../../store/src/actions/application.actions';
-import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
@@ -29,7 +30,7 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         EntityServiceFactory,
         generateTestEntityServiceProvider(
           appGuid,
-          entityFactory(applicationSchemaKey),
+          entityFactory(applicationEntityType),
           new GetApplication(appGuid, cfGuid)
         ),
         generateTestApplicationServiceProvider(appGuid, cfGuid),

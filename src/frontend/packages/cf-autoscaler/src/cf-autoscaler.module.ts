@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { of } from 'rxjs';
 
+import { CloudFoundryComponentsModule } from '../../cloud-foundry/src/shared/components/components.module';
 import { CoreModule } from '../../core/src/core/core.module';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
@@ -33,6 +34,7 @@ const customRoutes: Routes = [
     SharedModule,
     MDAppModule,
     NgxChartsModule,
+    CloudFoundryComponentsModule,
     AutoscalerModule,
     RouterModule.forRoot(customRoutes),
   ],
