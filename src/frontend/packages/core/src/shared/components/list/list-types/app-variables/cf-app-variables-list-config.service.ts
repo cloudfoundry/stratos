@@ -7,7 +7,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { AppVariablesDelete } from '../../../../../../../cloud-foundry/src/actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { applicationEntityType, appEnvVarsEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
@@ -17,6 +17,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 
 
 @Injectable()
@@ -81,11 +82,10 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     const confirmation = this.getConfirmationModal(newValues);
-    const action = new AppVariablesDelete(
-      this.envVarsDataSource.cfGuid,
-      this.envVarsDataSource.appGuid,
-      this.envVarsDataSource.transformedEntities,
-      newValues);
+    
+    const appEnvVarsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('removeFromApplication');
+    const action = actionBuilder(this.envVarsDataSource.cfGuid, this.envVarsDataSource.cfGuid, this.envVarsDataSource.transformedEntities, newValues);
 
     const entityReq$ = this.getEntityMonitor();
     const trigger$ = new Subject();

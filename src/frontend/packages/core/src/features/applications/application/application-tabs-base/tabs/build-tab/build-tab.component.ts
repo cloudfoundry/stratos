@@ -20,6 +20,9 @@ import { ENTITY_SERVICE } from '../../../../../../shared/entity.tokens';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../../base-entity-schemas';
+import { appStatsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -162,7 +165,10 @@ export class BuildTabComponent implements OnInit {
 
   private dispatchAppStats = () => {
     const { cfGuid, appGuid } = this.applicationService;
-    this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+    const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+    const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+    const getAppStatsAction = actionBuilder(appGuid, cfGuid);
+    this.store.dispatch(getAppStatsAction);
   }
 
   restartApplication() {
@@ -222,8 +228,10 @@ export class BuildTabComponent implements OnInit {
     this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
       // On app reaching the 'STOPPED' state clear the app's stats pagination section
       const { cfGuid, appGuid } = this.applicationService;
-      const action = new GetAppStatsAction(appGuid, cfGuid);
-      this.store.dispatch(new ResetPagination(action, action.paginationKey));
+      const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+      const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+      const getAppStatsAction = actionBuilder(appGuid, cfGuid) as GetAppStatsAction;
+      this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
     });
   }
 

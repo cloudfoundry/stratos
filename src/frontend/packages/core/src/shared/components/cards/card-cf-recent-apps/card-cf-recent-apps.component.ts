@@ -11,6 +11,9 @@ import {
   appDataSort,
   CloudFoundryEndpointService,
 } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
+import { appStatsEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 
 const RECENT_ITEMS_COUNT = 10;
 
@@ -43,7 +46,10 @@ export class CardCfRecentAppsComponent implements OnInit {
   private fetchAppStats(recentApps: APIResource<IApp>[]) {
     recentApps.forEach(app => {
       if (app.entity.state === 'STARTED') {
-        this.store.dispatch(new GetAppStatsAction(app.metadata.guid, this.cfEndpointService.cfGuid));
+        const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+        const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+        const getAppStatsAction = actionBuilder(app.metadata.guid, this.cfEndpointService.cfGuid);
+        this.store.dispatch(getAppStatsAction);
       }
     });
   }

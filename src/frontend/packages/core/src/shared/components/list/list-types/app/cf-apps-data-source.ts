@@ -11,6 +11,7 @@ import {
   organizationEntityType,
   routeEntityType,
   spaceEntityType,
+  appStatsEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
@@ -25,6 +26,8 @@ import { ListPaginationMultiFilterChange } from '../../data-sources-controllers/
 import { IListConfig } from '../../list.component.types';
 import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 
 // export function createGetAllAppAction(paginationKey): GetAllApplications {
 //   return new GetAllApplications(paginationKey, null, [
@@ -108,9 +111,12 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           if (appState === 'STARTED') {
+            const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+            const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+            const action = actionBuilder(appGuid, cfGuid);
             actions.push({
               id: appGuid,
-              action: new GetAppStatsAction(appGuid, cfGuid)
+              action
             });
           }
         });

@@ -17,6 +17,8 @@ import { AppEnvVarsState } from '../../../../../../../cloud-foundry/src/store/ty
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 
 export interface ListAppEnvVar {
   name: string;
@@ -58,7 +60,11 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   }
 
   saveAdd() {
-    this.store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.transformedEntities, this.addItem));
+    const appEnvVarsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('addNewToApplication');
+    const appVariablesAddAction = actionBuilder(this.cfGuid, this.appGuid, this.transformedEntities, this.addItem);
+
+    this.store.dispatch(appVariablesAddAction);
     super.saveAdd();
   }
 
@@ -67,7 +73,11 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   }
 
   saveEdit() {
-    this.store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.transformedEntities, this.editRow));
+    const appEnvVarsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('editInApplication');
+    const appVariablesEditAction = actionBuilder(this.cfGuid, this.appGuid, this.transformedEntities, this.editRow);
+    
+    this.store.dispatch(appVariablesEditAction);
     super.saveEdit();
   }
 

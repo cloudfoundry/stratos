@@ -27,6 +27,7 @@ import {
   serviceBindingEntityType,
   spaceEntityType,
   stackEntityType,
+  appSummaryEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -39,7 +40,7 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { AppStat } from '../../../../cloud-foundry/src/store/types/app-metadata.types';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { PaginationEntityState, PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -59,6 +60,7 @@ import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -101,9 +103,12 @@ export class ApplicationService {
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
     );
+    const appSummaryEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appSummaryEntityType);
+    const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
+    const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
-      new GetAppSummaryAction(appGuid, cfGuid),
+      getAppSummaryAction,
       false
     );
 
@@ -150,7 +155,9 @@ export class ApplicationService {
     app: IApp,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
-    const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
+    const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+    const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+    const dummyAction = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
@@ -214,7 +221,9 @@ export class ApplicationService {
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
-    const action = new GetAppStatsAction(this.appGuid, this.cfGuid);
+    const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+    const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+    const action = actionBuilder(this.appGuid, this.cfGuid) as PaginatedAction;
     const appStats = getPaginationObservables({
       store: this.store,
       action,

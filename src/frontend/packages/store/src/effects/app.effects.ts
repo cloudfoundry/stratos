@@ -12,6 +12,9 @@ import {
 } from '../../../core/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
 import { EndpointOnlyAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 
 
 @Injectable()
@@ -25,7 +28,10 @@ export class AppEffects {
   @Effect({ dispatch: false }) updateSummary$ = this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
     map(action => {
-      this.store.dispatch(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
+      const appSummaryEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appSummaryEntityType);
+      const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
+      const getAppSummaryAction = actionBuilder(action.apiAction.guid, action.apiAction.endpointGuid);
+      this.store.dispatch(getAppSummaryAction);
     }),
   );
 

@@ -15,6 +15,9 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStat> {
 
@@ -25,7 +28,9 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
     listConfig: IListConfig<ListAppInstance>
   ) {
     const paginationKey = createEntityRelationPaginationKey(applicationEntityType, appGuid);
-    const action = new GetAppStatsAction(appGuid, cfGuid);
+    const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+    const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+    const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
 
     super(
       {
