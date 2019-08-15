@@ -18,7 +18,6 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     const qParams = pag.params.q as string[];
     if (qParams) {
       const qParamString = qParams.find((q: string) => {
-        console.log(q);
         return QParam.fromString(q).key === 'type';
       });
       return qParamString ? QParam.fromString(qParamString).value as string : '';

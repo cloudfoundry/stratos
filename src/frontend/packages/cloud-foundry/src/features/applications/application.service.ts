@@ -282,7 +282,6 @@ export class ApplicationService {
     this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
 
     this.isUpdatingApp$ = this.appEntityService.entityObs$.pipe(map(a => {
-      console.log(a.entityRequestInfo);
       const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
       const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
       return !!updatingRoot.busy || !!updatingSection.busy;

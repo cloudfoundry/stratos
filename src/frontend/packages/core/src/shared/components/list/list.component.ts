@@ -436,7 +436,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       map((f: ListFilter) => {
         const isFilteringByString = f.string ? !!f.string.length : false;
         const isFilteringByItems = Object.values(f.items).filter(value => !!value).length > 0;
-        console.log(f.items);
         return isFilteringByString || isFilteringByItems;
       })
     );
