@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
 import { CardCell, IListRowCell } from '../../../../../../core/src/shared/components/list/list.types';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../../../../store/src/app-state';

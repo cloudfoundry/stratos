@@ -8,8 +8,8 @@ import { AppVariablesDelete } from '../../../../../../../cloud-foundry/src/actio
 import { UpdateExistingApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
