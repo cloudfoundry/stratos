@@ -4,8 +4,6 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../store/src/reducers.module';
 import { PaginationMonitorFactory } from './pagination-monitor.factory';
 
-// const initialState = getInitialTestStoreState();
-// TODO: RC Remove
 describe('PaginationMonitorFactoryService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -13,9 +11,6 @@ describe('PaginationMonitorFactoryService', () => {
       imports: [
         StoreModule.forRoot(
           appReducers,
-          // {
-          //   initialState
-          // }
         )
       ]
     });

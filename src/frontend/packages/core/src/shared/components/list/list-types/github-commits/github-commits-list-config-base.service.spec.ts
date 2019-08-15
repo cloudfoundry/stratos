@@ -9,7 +9,7 @@ import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
 
-// TODO: RC Move
+// TODO: RC Move this file to cf package
 describe('GithubCommitsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({

@@ -2,7 +2,6 @@ import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEntity,
 } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
@@ -84,5 +83,5 @@ function generateMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
     schema: autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<any>>(definition); // TODO: RC any
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<any>>(definition);
 }

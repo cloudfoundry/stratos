@@ -6,7 +6,6 @@ import { BooleanIndicatorComponent } from '../boolean-indicator/boolean-indicato
 import { StackedInputActionComponent } from './stacked-input-action/stacked-input-action.component';
 import { StackedInputActionsComponent } from './stacked-input-actions.component';
 
-// TODO: RC Move?
 describe('StackedInputActionsComponent', () => {
   let component: StackedInputActionsComponent;
   let fixture: ComponentFixture<StackedInputActionsComponent>;

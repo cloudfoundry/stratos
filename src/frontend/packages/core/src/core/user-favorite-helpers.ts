@@ -8,7 +8,7 @@ export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>
   return !favorite.entityId;
 }
 
-// TODO: This filew has cf specific code in it - this needs to be moved out
+// TODO: RC Move cf specific code to cf package
 export function getFavoriteFromCfEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
   entityKey: string,

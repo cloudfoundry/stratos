@@ -390,7 +390,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       },
       cfStack: {},
       cfSpace: {},
-      stratosUserFavorites: {}, // TODO: RC should be stratosUserFavourites
+      stratosUserFavorites: {},
       cfOrganization: {
         endpointOrgSpaceService: {
           pageCount: 1,
@@ -21990,7 +21990,6 @@ function getDefaultInitialTestStoreState(): CFAppState {
 
 /* tslint:enable */
 export function createBasicStoreModule(initialState: Partial<AppState> = getInitialTestStoreState()): ModuleWithProviders {
-  // TODO: RC clean initial state of cf stuff
   return StoreModule.forRoot(
     appReducers,
     {
@@ -22049,41 +22048,9 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfi
 
 export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
   const initialState = createEntityStoreState(entityMap);
-
-  return StoreModule.forRoot(
-    appReducers,
-    {
-      initialState
-    }
-  );
+  return createBasicStoreModule(initialState);
 }
 
-
-// {
-//   fetching: false,
-//   updating: {
-//     _root_: {
-//       busy: false,
-//       error: false,
-//       message: ''
-//     },
-//     updating: {
-//       busy: false,
-//       error: false,
-//       message: ''
-//     }
-//   },
-//   creating: false,
-//   error: false,
-//   deleting: {
-//     busy: false,
-//     error: false,
-//     message: '',
-//     deleted: false
-//   },
-//   response: null,
-//   message: ''
-// }
 
 export function populateStoreWithTestEndpoint(): EndpointModel {
   const stratosEndpointEntityConfig: EntityCatalogueEntityConfig = endpointEntitySchema;

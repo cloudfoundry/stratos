@@ -5,7 +5,6 @@ import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionComponent, StackedInputActionResult } from './stacked-input-action.component';
 
-// TODO: RC Move?
 describe('StackedInputActionComponent', () => {
   let component: StackedInputActionComponent;
   let fixture: ComponentFixture<StackedInputActionComponent>;
