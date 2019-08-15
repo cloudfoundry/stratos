@@ -385,7 +385,7 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfi
         [entityKey]: getStoreSectionForIds(entities, getDefaultPaginationEntityState())
       }
     };
-  }, { request: {}, requestData: {}, pagination: {} });
+  }, getDefaultInitialTestStoreState());
 }
 
 export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
