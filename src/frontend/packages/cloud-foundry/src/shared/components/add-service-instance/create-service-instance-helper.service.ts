@@ -20,7 +20,6 @@ import {
   IServicePlan,
   IServicePlanVisibility,
 } from '../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -32,6 +31,7 @@ import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 import { GetServiceInstancesForSpace } from '../../../actions/space.actions';
 import { GetServicePlanServiceInstances } from '../../../actions/service-plan.actions';
 import { GetServiceInstances } from '../../../actions/service-instances.actions';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -44,7 +44,7 @@ export class CreateServiceInstanceHelper {
     private store: Store<CFAppState>,
     public serviceGuid: string,
     @Inject(CF_GUID) public cfGuid: string,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.initBaseObservables();

@@ -33,6 +33,7 @@ import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 
 
 export const getSvcAvailability = (
@@ -199,18 +200,17 @@ export const populateServicePlanExtraTyped = (servicePlan: APIResource<IServiceP
 export const getServiceBroker = (
   serviceBrokerGuid: string,
   cfGuid: string,
-  entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IServiceBroker>> => {
+  entityServiceFactory: CFEntityServiceFactory): EntityService<APIResource<IServiceBroker>> => {
   return entityServiceFactory.create<APIResource<IServiceBroker>>(
     serviceBrokerGuid,
-    new GetServiceBroker(serviceBrokerGuid, cfGuid),
-    false
+    new GetServiceBroker(serviceBrokerGuid, cfGuid)
   );
 };
 
 export const getCfService = (
   serviceGuid: string,
   cfGuid: string,
-  entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IService>> => {
+  entityServiceFactory: CFEntityServiceFactory): EntityService<APIResource<IService>> => {
   return entityServiceFactory.create<APIResource<IService>>(
     serviceGuid,
     new GetService(serviceGuid, cfGuid),

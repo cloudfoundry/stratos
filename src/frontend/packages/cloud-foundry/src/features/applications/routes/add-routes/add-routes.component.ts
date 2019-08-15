@@ -20,7 +20,6 @@ import {
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain, ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { pathGet } from '../../../../../../core/src/core/utils.service';
 import {
   StepOnNextFunction,
@@ -33,6 +32,7 @@ import { RequestInfoState } from '../../../../../../store/src/reducers/api-reque
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../application.service';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
@@ -69,7 +69,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private applicationService: ApplicationService,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.appGuid = applicationService.appGuid;

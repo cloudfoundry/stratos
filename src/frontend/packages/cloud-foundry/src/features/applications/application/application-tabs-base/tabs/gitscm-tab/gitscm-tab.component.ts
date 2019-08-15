@@ -105,15 +105,13 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
           commitEntityID,
-          new FetchCommit(scm, commitId, projectName),
-          false
+          new FetchCommit(scm, commitId, projectName)
         );
 
         const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
         this.gitBranchEntityService = this.entityServiceFactory.create(
           branchID,
-          new FetchBranchesForProject(scm, projectName),
-          false
+          new FetchBranchesForProject(scm, projectName)
         );
 
         this.gitSCMRepo$ = this.gitSCMRepoEntityService.waitForEntity$.pipe(

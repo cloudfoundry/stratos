@@ -16,7 +16,6 @@ import {
 import { IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
@@ -40,6 +39,7 @@ import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '..
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
+import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 
 @Injectable()
 export class CfRolesService {
@@ -93,7 +93,7 @@ export class CfRolesService {
   constructor(
     private store: Store<CFAppState>,
     private cfUserService: CfUserService,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private userPerms: CurrentUserPermissionsService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace

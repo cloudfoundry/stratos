@@ -23,7 +23,6 @@ import {
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
@@ -37,6 +36,7 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { DeleteSpace } from '../../../actions/space.actions';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { GetOrganization } from '../../../actions/organization.actions';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,
@@ -87,7 +87,7 @@ export class CloudFoundryOrganizationService {
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,

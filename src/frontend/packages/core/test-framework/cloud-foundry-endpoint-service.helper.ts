@@ -5,7 +5,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../src/core/core.module';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import {
   ApplicationStateIconComponent,
 } from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -39,9 +38,10 @@ import { UserInviteService } from '../../cloud-foundry/src/features/cloud-foundr
 import { CloudFoundryEndpointService } from '../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { CloudFoundryService } from '../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
+import { CFEntityServiceFactory } from '../../cloud-foundry/src/cf-entity-service-factory.service';
 
 export const cfEndpointServiceProviderDeps = [
-  EntityServiceFactory,
+  CFEntityServiceFactory,
   CfOrgSpaceDataService,
   CfUserService,
   PaginationMonitorFactory,
@@ -88,7 +88,7 @@ export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
     useFactory: (
       store: Store<CFAppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
-      entityServiceFactory: EntityServiceFactory,
+      entityServiceFactory: CFEntityServiceFactory,
       http: Http
     ) => {
       return new CfUserService(
@@ -96,9 +96,10 @@ export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
         paginationMonitorFactory,
         { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
         entityServiceFactory,
-        http);
+        http
+      );
     },
-    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, Http]
+    deps: [Store, PaginationMonitorFactory, CFEntityServiceFactory, Http]
   };
 }
 

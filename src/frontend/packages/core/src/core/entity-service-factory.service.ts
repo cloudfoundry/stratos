@@ -17,17 +17,17 @@ export class EntityServiceFactory {
 
   create<T>(
     entityConfig: EntityActionBuilderEntityConfig,
-  );
+  ): EntityService<T>;
   create<T>(
     entityId: string,
     action: EntityRequestAction
-  );
+  ): EntityService<T>;
   create<T>(
     // FIXME: Remove entityId and use action.guid (should be accessibly via IRequestAction-->SingleEntityAction) - STRAT-159
     // FIXME: Also we should bump this into the catalogue https://jira.capbristol.com/browse/STRAT-141
     entityIdOrConfig: string | EntityActionBuilderEntityConfig,
     action?: EntityRequestAction
-  ) {
+  ): EntityService<T> {
     const config = entityIdOrConfig as EntityActionBuilderEntityConfig;
     const entityMonitor = this.entityMonitorFactory.create<T>(
       config.endpointGuid ? config.endpointGuid : entityIdOrConfig as string,

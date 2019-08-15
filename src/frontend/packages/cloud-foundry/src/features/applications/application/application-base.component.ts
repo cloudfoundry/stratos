@@ -11,12 +11,13 @@ import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/share
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 export function applicationServiceFactory(
   cfId: string,
   id: string,
   store: Store<CFAppState>,
-  entityServiceFactoryInstance: EntityServiceFactory,
+  entityServiceFactoryInstance: CFEntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
   paginationMonitorFactory: PaginationMonitorFactory,
@@ -35,7 +36,7 @@ export function applicationServiceFactory(
 export function entityServiceFactory(
   cfId: string,
   id: string,
-  esf: EntityServiceFactory
+  esf: CFEntityServiceFactory
 ) {
   return esf.create(
     id,

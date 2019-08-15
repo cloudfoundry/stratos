@@ -6,9 +6,9 @@ import { filter, map } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { IServiceExtra } from '../../../../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { getCfService } from '../../../../../../features/service-catalog/services-helper';
+import { CFEntityServiceFactory } from '../../../../../../cf-entity-service-factory.service';
 
 @Component({
   selector: 'app-table-cell-service-name',
@@ -20,7 +20,7 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
   serviceName$: Observable<string>;
   @Input() row;
   @Input() entityKey: string;
-  constructor(private store: Store<CFAppState>, private entityServiceFactory: EntityServiceFactory) {
+  constructor(private store: Store<CFAppState>, private entityServiceFactory: CFEntityServiceFactory) {
     super();
   }
 

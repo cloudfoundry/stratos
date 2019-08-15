@@ -134,8 +134,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
       const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
         branchKey,
-        new FetchBranchesForProject(this.scm, this.projectName),
-        false
+        new FetchBranchesForProject(this.scm, this.projectName)
       );
       gitBranchEntityService.waitForEntity$.pipe(
         first(),

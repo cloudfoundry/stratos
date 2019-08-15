@@ -20,13 +20,13 @@ import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/eff
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { createGetApplicationAction } from '../../application.service';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
+import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 
 
 @Component({
@@ -41,7 +41,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   setDomainHost: FormGroup;
 
-  constructor(private store: Store<CFAppState>, private entityServiceFactory: EntityServiceFactory) {
+  constructor(private store: Store<CFAppState>, private entityServiceFactory: CFEntityServiceFactory) {
     this.setDomainHost = new FormGroup({
       domain: new FormControl('', [Validators.required]),
       host: new FormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),

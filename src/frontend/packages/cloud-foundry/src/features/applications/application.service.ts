@@ -30,7 +30,6 @@ import {
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -59,6 +58,7 @@ import { AppStat } from '../../store/types/app-metadata.types';
 import { selectCfEntity } from '../../store/selectors/api.selectors';
 import { rootUpdatingKey, ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -92,7 +92,7 @@ export class ApplicationService {
     @Inject(CF_GUID) public cfGuid: string,
     @Inject(APP_GUID) public appGuid: string,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -104,7 +104,6 @@ export class ApplicationService {
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
-      false
     );
 
     this.constructCoreObservables();

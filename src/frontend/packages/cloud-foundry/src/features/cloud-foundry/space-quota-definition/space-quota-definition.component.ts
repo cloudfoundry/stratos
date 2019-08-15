@@ -6,7 +6,6 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { GetSpaceQuotaDefinition } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { IOrganization, ISpace, ISpaceQuotaDefinition } from '../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -14,6 +13,7 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 @Component({
   selector: 'app-space-quota-definition',
@@ -34,7 +34,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   spaceSubscriber: Subscription;
 
   constructor(
-    protected entityServiceFactory: EntityServiceFactory,
+    protected entityServiceFactory: CFEntityServiceFactory,
     protected store: Store<AppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,

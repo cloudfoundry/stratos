@@ -225,8 +225,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     const metricsAction = createAppInstancesMetricAction(this.appService.appGuid, this.appService.cfGuid);
     return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
       metricsAction.guid,
-      metricsAction,
-      false
+      metricsAction
     );
   }
 }

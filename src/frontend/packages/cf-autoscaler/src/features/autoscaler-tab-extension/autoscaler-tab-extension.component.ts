@@ -10,7 +10,6 @@ import { ApplicationMonitorService } from '../../../../cloud-foundry/src/feature
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
 import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
@@ -45,8 +44,9 @@ import {
   autoscalerEntityFactory,
 } from '../../store/autoscaler-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { CFEntityServiceFactory } from '../../../../cloud-foundry/src/cf-entity-service-factory.service';
 
-const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
+const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: CFEntityServiceFactory): Observable<boolean> => {
   // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
   const action = new GetAppAutoscalerPolicyAction(appGuid, endpointGuid);
   const entityService = esf.create<AppAutoscalerPolicy>(action.guid, action);
@@ -71,7 +71,7 @@ const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServ
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
+  hidden: (store: Store<AppState>, esf: CFEntityServiceFactory, activatedRoute: ActivatedRoute) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
     return enableAutoscaler(appGuid, endpointGuid, esf).pipe(map(enabled => !enabled));
@@ -138,7 +138,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private applicationService: ApplicationService,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,

@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { IApp, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -11,6 +10,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
+import { CFEntityServiceFactory } from '../../../../../cf-entity-service-factory.service';
 
 @Injectable()
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
@@ -24,7 +24,7 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
     noEntries: 'There are no applications'
   };
 
-  constructor(store: Store<CFAppState>, private activeRouteCfCell: ActiveRouteCfCell, entityServiceFactory: EntityServiceFactory) {
+  constructor(store: Store<CFAppState>, private activeRouteCfCell: ActiveRouteCfCell, entityServiceFactory: CFEntityServiceFactory) {
     super();
     this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this, entityServiceFactory);
   }

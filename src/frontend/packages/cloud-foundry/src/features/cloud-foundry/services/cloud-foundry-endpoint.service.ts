@@ -20,7 +20,6 @@ import {
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EntityService } from '../../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
@@ -38,6 +37,7 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
 import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -118,7 +118,7 @@ export class CloudFoundryEndpointService {
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory
   ) {

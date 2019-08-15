@@ -22,7 +22,6 @@ import {
 } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
 import {
@@ -31,6 +30,7 @@ import {
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { CFEntityServiceFactory } from '../../../../../../cf-entity-service-factory.service';
 
 interface EnvVarData {
   key: string;
@@ -60,7 +60,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   constructor(
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,

@@ -47,7 +47,6 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   createEntityRelationKey,
@@ -60,6 +59,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -103,7 +103,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     private store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private csiGuidsService: CsiGuidsService,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     public modeService: CsiModeService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     route: ActivatedRoute

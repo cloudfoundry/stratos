@@ -22,7 +22,6 @@ import {
 } from '../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
 import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
@@ -30,6 +29,7 @@ import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
+import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -63,7 +63,7 @@ export class ServicesService {
 
   constructor(
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     public activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory
 

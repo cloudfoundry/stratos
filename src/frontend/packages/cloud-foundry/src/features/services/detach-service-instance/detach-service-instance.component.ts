@@ -14,13 +14,13 @@ import {
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import { IServiceBinding, IServiceInstance } from '../../../../../core/src/core/cf-api-svc.types';
 import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 @Component({
   selector: 'app-detach-service-instance',
@@ -63,7 +63,7 @@ export class DetachServiceInstanceComponent {
     private datePipe: DatePipe,
     private serviceActionHelperService: ServiceActionHelperService,
     private activatedRoute: ActivatedRoute,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: CFEntityServiceFactory
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;

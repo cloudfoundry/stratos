@@ -16,7 +16,6 @@ import {
 import { SpaceUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
@@ -29,6 +28,7 @@ import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
 import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -62,7 +62,7 @@ export class CloudFoundrySpaceService {
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,

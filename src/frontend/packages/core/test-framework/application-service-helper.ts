@@ -6,7 +6,6 @@ import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types'
 
 import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
 import { ISpace, IApp, IAppSummary, IDomain } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
@@ -15,6 +14,7 @@ import {
   EnvVarStratosProject,
   ApplicationEnvVarsHelper
 } from '../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { CFEntityServiceFactory } from '../../cloud-foundry/src/cf-entity-service-factory.service';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -87,7 +87,7 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
     provide: ApplicationService,
     useFactory: (
       store: Store<CFAppState>,
-      entityServiceFactory: EntityServiceFactory,
+      entityServiceFactory: CFEntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,
       paginationMonitorFactory: PaginationMonitorFactory,
@@ -105,7 +105,7 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
     },
     deps: [
       Store,
-      EntityServiceFactory,
+      CFEntityServiceFactory,
       ApplicationStateService,
       ApplicationEnvVarsHelper,
       PaginationMonitorFactory

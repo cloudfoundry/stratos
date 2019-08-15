@@ -46,8 +46,8 @@ import {
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 
 @Injectable()
 export class CfUserService {
@@ -59,7 +59,7 @@ export class CfUserService {
     private store: Store<CFAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private http: Http,
   ) { }
 

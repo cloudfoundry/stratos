@@ -12,7 +12,7 @@ export class CFEntityServiceFactory {
   create<T>(
     entityId: string,
     action: EntityRequestAction,
-    validate: boolean
+    validate: boolean = false
   ) {
     const validatedAction = {
       ...action,
