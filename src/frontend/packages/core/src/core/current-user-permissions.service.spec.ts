@@ -7,6 +7,7 @@ import { AppState } from '../../../store/src/app-state';
 import { AppStoreExtensionsModule } from '../../../store/src/store.extensions.module';
 import { APIResource } from '../../../store/src/types/api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
+import { BaseEntityValues } from '../../../store/src/types/entity.types';
 import { PaginationState } from '../../../store/src/types/pagination.types';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../test-framework/store-test-helper';
 import { endpointEntitySchema } from '../base-entity-schemas';
@@ -30,7 +31,7 @@ describe('CurrentUserPermissionsService', () => {
   let service: CurrentUserPermissionsService;
 
 
-  function createStoreState(): Partial<AppState> {
+  function createStoreState(): Partial<AppState<BaseEntityValues>> {
     // Data
     const endpoints: EndpointModel[] = [
       {
@@ -577,7 +578,7 @@ describe('CurrentUserPermissionsService', () => {
     };
 
     // User roles
-    const initialState: Partial<AppState> = {
+    const initialState: Partial<AppState<BaseEntityValues>> = {
 
     };
 

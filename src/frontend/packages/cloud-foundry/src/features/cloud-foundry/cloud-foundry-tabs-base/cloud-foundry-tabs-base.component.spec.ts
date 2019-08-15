@@ -1,11 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../core/tab-nav.service';
+import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '../../../../../core/test-framework/store-test-helper';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { populateStoreWithTestEndpoint, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base.component';
@@ -21,7 +21,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
         providers: [
           CloudFoundryEndpointService,
           generateTestCfEndpointServiceProvider(),
-          { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: testSCFGuid } },
+          { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: testSCFEndpointGuid } },
           TabNavService,
         ]
       }).compileComponents();

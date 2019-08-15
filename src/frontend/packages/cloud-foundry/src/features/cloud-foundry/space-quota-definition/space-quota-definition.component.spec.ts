@@ -6,7 +6,7 @@ import { endpointEntitySchema } from '../../../../../core/src/base-entity-schema
 import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { EntityCatalogueEntityConfig } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { testSCFEntity, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
+import { testSCFEndpoint, testSCFEndpointGuid } from '../../../../../core/test-framework/store-test-helper';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
@@ -20,7 +20,7 @@ import { SpaceQuotaDefinitionComponent } from './space-quota-definition.componen
 describe('SpaceQuotaDefinitionComponent', () => {
   let component: SpaceQuotaDefinitionComponent;
   let fixture: ComponentFixture<SpaceQuotaDefinitionComponent>;
-  const cfGuid = testSCFGuid;
+  const cfGuid = testSCFEndpointGuid;
   const orgGuid = '123';
   const spaceGuid = '123';
 
@@ -70,7 +70,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
     const mappedData = {
       entities: {
         [stratosEndpointEntityKey]: {
-          [testSCFEntity.guid]: testSCFEntity
+          [testSCFEndpoint.guid]: testSCFEndpoint
         },
         [orgEntityKey]: {
           [org.entity.guid]: org
@@ -79,7 +79,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
           [space.entity.guid]: space
         }
       },
-      result: [testSCFEntity.guid]
+      result: [testSCFEndpoint.guid]
     } as NormalizedResponse;
     const store = TestBed.get(Store);
     store.dispatch(new WrapperRequestActionSuccess(mappedData, {

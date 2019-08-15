@@ -20,8 +20,6 @@ describe('CfUserService', () => {
         ...generateTestCfEndpointServiceProvider()
       ]
     });
-
-    // populateStoreWithTestEndpoint();
   });
 
   it('should be created', inject([CfUserService], (service: CfUserService) => {

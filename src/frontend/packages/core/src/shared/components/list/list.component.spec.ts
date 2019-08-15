@@ -10,7 +10,7 @@ import { ListView } from '../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
@@ -51,10 +51,10 @@ describe('ListComponent', () => {
       };
     }
 
-    function setup(store: CFAppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
+    function setup(config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
       TestBed.configureTestingModule({
         imports: [
-          createBasicStoreModule(store),
+          createBasicStoreModule(),
         ],
         providers: [
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
@@ -76,7 +76,7 @@ describe('ListComponent', () => {
 
       config.getInitialised = null;
 
-      setup(getInitialTestStoreState(), config, (component) => {
+      setup(config, (component) => {
         const componentDeTyped = (component as any);
         spyOn<any>(componentDeTyped, 'initialise');
         expect(componentDeTyped.initialise).not.toHaveBeenCalled();
@@ -96,7 +96,7 @@ describe('ListComponent', () => {
       const config = createBasicListConfig();
       spyOn<any>(config, 'getInitialised').and.returnValue(observableOf(true));
 
-      setup(getInitialTestStoreState(), config, (component) => {
+      setup(config, (component) => {
         const componentDeTyped = (component as any);
         spyOn<any>(componentDeTyped, 'initialise');
         expect(componentDeTyped.initialise).not.toHaveBeenCalled();
