@@ -2,10 +2,13 @@ import { ModuleWithProviders } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
-import { appSummaryEntityType, userProvidedServiceInstanceEntityType } from '../../cloud-foundry/src/cf-entity-factory';
-import { appReducers } from '../../store/src/reducers.module';
-import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { createUserRoleInOrg } from '../../cloud-foundry/src/store/types/user.types';
+import { appReducers } from '../../store/src/reducers.module';
+import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
+import {
+  getDefaultPaginationEntityState,
+} from '../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
+import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../store/src/types/current-user-roles.types';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 
@@ -141,16 +144,16 @@ function getDefaultInitialTestStoreState(): CFAppState {
       message: ''
     },
     pagination: {
-      [appSummaryEntityType]: {},
-      private_domains: {},
-      userProfile: {},
-      featureFlag: {},
-      serviceBroker: {},
-      securityGroup: {},
-      servicePlanVisibility: {},
-      buildpack: {},
+      cfSummary: {},
+      cfPrivate_domains: {},
+      cfUser: {},
+      cfFeatureFlag: {},
+      cfServiceBroker: {},
+      cfSecurityGroup: {},
+      cfServicePlanVisibility: {},
+      cfBuildpack: {},
       system: {},
-      application: {
+      cfApplication: {
         applicationWall: {
           pageCount: 1,
           currentPage: 1,
@@ -312,10 +315,10 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         },
       },
-      stack: {},
-      space: {},
-      userFavorites: {},
-      organization: {
+      cfStack: {},
+      cfSpace: {},
+      stratosUserFavorites: {}, // TODO: RC should be stratosUserFavourites
+      cfOrganization: {
         endpointOrgSpaceService: {
           pageCount: 1,
           currentPage: 1,
@@ -387,8 +390,8 @@ function getDefaultInitialTestStoreState(): CFAppState {
           },
         }
       },
-      route: {},
-      event: {
+      cfRoute: {},
+      cfEvent: {
         'app-events:01ccda9d-8f40-4dd0-bc39-08eea68e364f4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
           pageCount: 1,
           currentPage: 1,
@@ -550,7 +553,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      endpoint: {
+      stratosEndpoint: {
         "endpoint-list": {
           pageCount: 1,
           currentPage: 1,
@@ -572,56 +575,56 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      environmentVars: {},
-      stats: {},
-      user: {
-        endpointUsersService: {
-          pageCount: 1,
-          currentPage: 1,
-          totalResults: 3,
-          ids: {
-            '1': [
-              'bcf78136-6225-4515-bf8e-a32243deea0c',
-              'hcf_auto_config',
-              'b950b10c-c360-4bec-83c9-333c76cbbbe1'
-            ]
-          },
-          pageRequests: {
-            '1': {
-              busy: false,
-              error: false,
-              message: ''
-            }
-          },
-          params: {
-            'results-per-page': 100,
-            page: 1,
-            'inline-relations-depth': 1,
-            q: []
-          },
-          clientPagination: {
-            pageSize: 9,
-            currentPage: 1,
-            filter: {
-              string: '',
-              items: {}
-            },
-            totalResults: 3
-          }
-        }
-      },
-      serviceInstance: {},
-      serviceBinding: {},
-      service: {},
-      gitCommits: {},
-      gitBranches: {},
-      gitRepo: {},
-      domain: {},
+      cfEnvironmentVars: {},
+      cfStats: {},
+      // stratosUser: {
+      //   endpointUsersService: {
+      //     pageCount: 1,
+      //     currentPage: 1,
+      //     totalResults: 3,
+      //     ids: {
+      //       '1': [
+      //         'bcf78136-6225-4515-bf8e-a32243deea0c',
+      //         'hcf_auto_config',
+      //         'b950b10c-c360-4bec-83c9-333c76cbbbe1'
+      //       ]
+      //     },
+      //     pageRequests: {
+      //       '1': {
+      //         busy: false,
+      //         error: false,
+      //         message: ''
+      //       }
+      //     },
+      //     params: {
+      //       'results-per-page': 100,
+      //       page: 1,
+      //       'inline-relations-depth': 1,
+      //       q: []
+      //     },
+      //     clientPagination: {
+      //       pageSize: 9,
+      //       currentPage: 1,
+      //       filter: {
+      //         string: '',
+      //         items: {}
+      //       },
+      //       totalResults: 3
+      //     }
+      //   }
+      // },
+      cfServiceInstance: {},
+      cfServiceBinding: {},
+      cfService: {},
+      cfGitCommits: {},
+      cfGitBranches: {},
+      cfGitRepo: {},
+      cfDomain: {},
       metrics: {},
-      servicePlan: {},
-      cloudFoundryInfo: {},
-      [userProvidedServiceInstanceEntityType]: {},
-      quota_definition: {
+      cfServicePlan: {},
+      cfCloudFoundryInfo: {},
+      cfUserProvidedServiceInstance: {},
+      cfQuota_definition: {
         'endpoint-all': {
           pageCount: 1,
           currentPage: 1,
@@ -656,7 +659,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      space_quota_definition: {
+      cfSpace_quota_definition: {
         'endpoint-all': {
           pageCount: 1,
           currentPage: 1,
@@ -691,6 +694,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
+      stratosUserProfile: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -735,23 +739,23 @@ function getDefaultInitialTestStoreState(): CFAppState {
       }
     },
     request: {
-      [appSummaryEntityType]: {},
-      gitRepo: {},
-      userProfile: {},
-      servicePlanVisibility: {},
-      serviceBroker: {},
-      serviceInstance: {},
-      servicePlan: {},
-      environmentVars: {},
-      stats: {},
-      service: {},
-      serviceBinding: {},
-      securityGroup: {},
-      featureFlag: {},
-      buildpack: {},
+      cfSummary: {},
+      cfGitRepo: {},
+      stratosUserProfile: {},
+      cfServicePlanVisibility: {},
+      cfServiceBroker: {},
+      cfServiceInstance: {},
+      cfServicePlan: {},
+      cfEnvironmentVars: {},
+      cfStats: {},
+      cfService: {},
+      cfServiceBinding: {},
+      cfSecurityGroup: {},
+      cfFeatureFlag: {},
+      cfBuildpack: {},
       metrics: {},
-      userFavorites: {},
-      user: {
+      stratosUserFavorites: {},
+      cfUser: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
           updating: {
@@ -813,11 +817,11 @@ function getDefaultInitialTestStoreState(): CFAppState {
           message: ''
         }
       },
-      domain: {},
-      gitBranches: {},
-      cloudFoundryInfo: {},
-      gitCommits: {},
-      endpoint: {
+      cfDomain: {},
+      cfGitBranches: {},
+      cfCloudFoundryInfo: {},
+      cfGitCommits: {},
+      stratosEndpoint: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
           updating: {
@@ -839,7 +843,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           message: ''
         }
       },
-      application: {
+      cfApplication: {
         '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
           fetching: false,
           updating: {
@@ -3586,7 +3590,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           message: ''
         }
       },
-      stack: {
+      cfStack: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
           updating: {
@@ -3768,7 +3772,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           message: ''
         }
       },
-      space: {
+      cfSpace: {
         'd87ba175-51ec-4cc9-916c-bee26d00e498': {
           fetching: false,
           updating: {
@@ -3990,24 +3994,24 @@ function getDefaultInitialTestStoreState(): CFAppState {
           message: ''
         }
       },
-      organization: {},
-      route: {},
-      event: {},
+      cfOrganization: {},
+      cfRoute: {},
+      cfEvent: {},
       system: {},
-      private_domains: {},
-      quota_definition: {},
-      space_quota_definition: {},
-      [userProvidedServiceInstanceEntityType]: {}
+      cfPrivate_domains: {},
+      cfQuota_definition: {},
+      cfSpace_quota_definition: {},
+      cfUserProvidedServiceInstance: {}
     },
     requestData: {
-      [appSummaryEntityType]: {},
-      environmentVars: {},
-      stats: {},
-      gitRepo: {},
-      private_domains: {},
-      userFavorites: {},
-      servicePlanVisibility: {},
-      serviceBroker: {
+      cfSummary: {},
+      cfEnvironmentVars: {},
+      cfStats: {},
+      cfGitRepo: {},
+      cfPrivate_domains: {},
+      stratosUserFavorites: {},
+      cfServicePlanVisibility: {},
+      cfServiceBroker: {
         'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {
           entity: {
             name: 'app-autoscaler',
@@ -4025,7 +4029,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         },
       },
-      serviceInstance: {
+      cfServiceInstance: {
         '250d8795-d49e-4669-acd5-b5cf94f97c7b': {
           entity: {
             name: 'Ntahtntest',
@@ -4065,7 +4069,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      servicePlan: {
+      cfServicePlan: {
         '00da4974-5037-485a-96f0-cbbbf98dc8e9': {
           entity: {
             name: 'shared',
@@ -4090,7 +4094,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      service: {
+      cfService: {
         '977b0c26-9f39-46be-93f8-c33c0b37dcb0': {
           entity: {
             label: 'public-service',
@@ -4125,11 +4129,11 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         },
       },
-      serviceBinding: {},
-      securityGroup: {},
-      featureFlag: {},
-      buildpack: {},
-      user: {
+      cfServiceBinding: {},
+      cfSecurityGroup: {},
+      cfFeatureFlag: {},
+      cfBuildpack: {},
+      cfUser: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           entity: {
             admin: false,
@@ -4424,11 +4428,11 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      domain: {},
-      cloudFoundryInfo: {},
-      gitBranches: {},
-      gitCommits: {},
-      application: {
+      cfDomain: {},
+      cfCloudFoundryInfo: {},
+      cfGitBranches: {},
+      cfGitCommits: {},
+      cfApplication: {
         '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
           entity: {
             name: 'go-env',
@@ -16512,7 +16516,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      stack: {
+      cfStack: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           metadata: {
             guid: '57ab08d8-86cc-473a-8818-25d5e8d0ea23',
@@ -16622,7 +16626,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      space: {
+      cfSpace: {
         'd87ba175-51ec-4cc9-916c-bee26d00e498': {
           metadata: {
             guid: 'd87ba175-51ec-4cc9-916c-bee26d00e498',
@@ -21833,10 +21837,10 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         }
       },
-      organization: {},
-      route: {},
-      event: {},
-      endpoint: {
+      cfOrganization: {},
+      cfRoute: {},
+      cfEvent: {},
+      stratosEndpoint: {
         [testSCFGuid]: {
           guid: testSCFGuid,
           name: 'SCF',
@@ -21870,7 +21874,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
       },
       metrics: {},
       system: {},
-      userProfile: {
+      stratosUserProfile: {
         id: 'test-user',
         name: {
           familyName: 'User',
@@ -21895,8 +21899,8 @@ function getDefaultInitialTestStoreState(): CFAppState {
         zoneId: '',
         origin: ''
       },
-      [userProvidedServiceInstanceEntityType]: {},
-      quota_definition: {
+      cfUserProvidedServiceInstance: {},
+      cfQuota_definition: {
         '037d050d-979e-4dbf-940d-51a8a90729c8': {
           entity: {
             name: 'default',
@@ -21922,7 +21926,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
           }
         },
       },
-      space_quota_definition: {
+      cfSpace_quota_definition: {
         'a42468c7-b66c-4570-9e25-7cdcf1f3591b': {
           entity: {
             name: 'acceptance.e2e.quota.20190515T093829298Z',
@@ -22016,6 +22020,12 @@ export function createBasicStoreModule(initialState: Partial<CFAppState> = getIn
   );
 }
 
+export function createEmptyStoreModule(): ModuleWithProviders {
+  return StoreModule.forRoot(
+    appReducers
+  );
+}
+
 function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOverride?: any) {
   return entities.reduce((sections, entity) => {
     if (typeof entity === 'string') {
@@ -22033,45 +22043,30 @@ export interface TestStoreEntity {
   data?: any;
 }
 
-export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
-  const initialState = Array.from(entityMap.keys()).reduce((state, entityConfig) => {
+export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>) {
+  return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
+    // const initialState = entityMap.entries()..reduce((state, entityConfig) => {
     const entities = entityMap.get(entityConfig);
     const entityKey = entityCatalogue.getEntityKey(entityConfig);
     return {
       request: {
         ...state.request,
-        [entityKey]: getStoreSectionForIds(entities, {
-          fetching: false,
-          updating: {
-            _root_: {
-              busy: false,
-              error: false,
-              message: ''
-            },
-            updating: {
-              busy: false,
-              error: false,
-              message: ''
-            }
-          },
-          creating: false,
-          error: false,
-          deleting: {
-            busy: false,
-            error: false,
-            message: '',
-            deleted: false
-          },
-          response: null,
-          message: ''
-        })
+        [entityKey]: getStoreSectionForIds(entities, getDefaultRequestState())
       },
       requestData: {
         ...state.requestData,
         [entityKey]: getStoreSectionForIds(entities)
+      },
+      pagination: {
+        ...state.pagination,
+        [entityKey]: getStoreSectionForIds(entities, getDefaultPaginationEntityState())
       }
     };
-  }, { request: {}, requestData: {} });
+  }, { request: {}, requestData: {}, pagination: {} });
+}
+
+export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
+  const initialState = createEntityStoreState(entityMap);
 
   return StoreModule.forRoot(
     appReducers,
@@ -22080,3 +22075,30 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
     }
   );
 }
+
+
+// {
+//   fetching: false,
+//   updating: {
+//     _root_: {
+//       busy: false,
+//       error: false,
+//       message: ''
+//     },
+//     updating: {
+//       busy: false,
+//       error: false,
+//       message: ''
+//     }
+//   },
+//   creating: false,
+//   error: false,
+//   deleting: {
+//     busy: false,
+//     error: false,
+//     message: '',
+//     deleted: false
+//   },
+//   response: null,
+//   message: ''
+// }

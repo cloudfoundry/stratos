@@ -230,6 +230,8 @@ export interface IFeatureFlag {
   enabled: boolean;
   url?: string;
   error_message?: string;
+  cfGuid?: string;
+  guid?: string;
 }
 export interface IStack {
   name: string;

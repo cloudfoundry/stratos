@@ -14,6 +14,8 @@ import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
 
+
+
 describe('EventsTabComponent', () => {
   class ApplicationServiceMock {
     cfGuid = 'mockCfGuid';
@@ -25,7 +27,7 @@ describe('EventsTabComponent', () => {
   const initialState = { ...getInitialTestStoreState() };
   initialState.pagination = {
     ...initialState.pagination,
-    event: {
+    cfEvent: {
       ['app-events:mockCfGuidmockAppGuid']: {
         pageCount: 1,
         currentPage: 1,
@@ -70,7 +72,7 @@ describe('EventsTabComponent', () => {
         NoopAnimationsModule,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

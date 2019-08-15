@@ -3,9 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { generateTestApplicationServiceProvider } from '../../../../../../../core/test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../core/test-framework/entity-service.helper';
-import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { GetApplication } from '../../../../../actions/application.actions';
-import { applicationEntityType } from '../../../../../cf-entity-factory';
+import { applicationEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
 import { ApplicationPollingService } from '../application-polling.service';
 import { ApplicationEnvVarsHelper } from '../tabs/build-tab/application-env-vars.service';
 import { ApplicationPollComponent } from './application-poll.component';
@@ -24,7 +23,7 @@ describe('ApplicationPollComponent', () => {
         ApplicationPollingService,
         generateTestEntityServiceProvider(
           appId,
-          entityFactory(applicationEntityType),
+          cfEntityFactory(applicationEntityType),
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),
