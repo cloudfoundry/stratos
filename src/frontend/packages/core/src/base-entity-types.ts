@@ -72,6 +72,7 @@ export function generateStratosEntities() {
     new SystemInfoCatalogueEntity(),
     new UserFavoriteCatalogueEntity(),
     new UserProfileCatalogueEntity(),
+    // TODO: metrics location to be sorted - STRAT-152
     new StratosCatalogueEndpointEntity({
       type: 'metrics',
       label: 'Metrics',

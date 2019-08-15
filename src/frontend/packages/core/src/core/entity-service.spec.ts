@@ -38,7 +38,7 @@ const createAction = (guid: string) => {
     guid,
     type: 'test-action'
   } as ICFAction;
-}
+};
 
 const entityType = 'key';
 

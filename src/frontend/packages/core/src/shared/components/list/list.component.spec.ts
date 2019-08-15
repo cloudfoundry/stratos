@@ -9,6 +9,7 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
@@ -129,6 +130,7 @@ describe('ListComponent', () => {
         imports: [
           CoreModule,
           SharedModule,
+          CoreTestingModule,
           createBasicStoreModule(),
           NoopAnimationsModule
         ],

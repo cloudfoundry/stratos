@@ -3,6 +3,7 @@ import { inject, TestBed } from '@angular/core/testing';
 
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
@@ -21,6 +22,7 @@ describe('GithubCommitsListConfigService', () => {
         CommonModule,
         CoreModule,
         SharedModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ]
     });

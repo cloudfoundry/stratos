@@ -12,7 +12,9 @@ describe('EndpointCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [],
-      imports: [...BaseTestModules],
+      imports: [
+        ...BaseTestModules
+      ],
       providers: [EndpointListHelper]
     })
       .compileComponents();

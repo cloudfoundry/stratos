@@ -28,19 +28,24 @@ import {
 } from '../src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
 import { SharedModule } from '../src/shared/shared.module';
+import { CoreTestingModule } from './core-test.modules';
+import { createBasicStoreModule } from './store-test-helper';
 
-export function generateTestStoreModules() {
+export function generateBaseTestStoreModules() {
   return [
-    // CloudFoundryTestingModule,
+    CoreTestingModule,
     AppStoreExtensionsModule,
     StoreModule.forRoot(
       appReducers,
+      {
+        initialState: createBasicStoreModule()
+      }
     )
   ];
 }
 
 export const BaseTestModulesNoShared = [
-  ...generateTestStoreModules(),
+  ...generateBaseTestStoreModules(),
   RouterTestingModule,
   CoreModule,
   NoopAnimationsModule,

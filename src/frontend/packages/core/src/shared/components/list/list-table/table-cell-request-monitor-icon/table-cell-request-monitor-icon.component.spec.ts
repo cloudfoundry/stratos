@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
+import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 import { TableCellRequestMonitorIconComponent } from './table-cell-request-monitor-icon.component';
 
@@ -10,7 +11,9 @@ describe('TableCellRequestMonitorIconComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: BaseTestModules
+      imports: [
+        BaseTestModules,
+      ]
     })
       .compileComponents();
   }));
@@ -18,9 +21,10 @@ describe('TableCellRequestMonitorIconComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRequestMonitorIconComponent);
     component = fixture.componentInstance;
+    component.id = '1';
     component.config = () => ({
       entityKey: '',
-      schema: null,
+      schema: endpointEntitySchema,
       monitorState: AppMonitorComponentTypes.DELETE
     });
     component.row = {

@@ -21998,6 +21998,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
 
 /* tslint:enable */
 export function createBasicStoreModule(initialState: Partial<AppState> = getInitialTestStoreState()): ModuleWithProviders {
+  // TODO: RC clean initial state of cf stuff
   return StoreModule.forRoot(
     appReducers,
     {
