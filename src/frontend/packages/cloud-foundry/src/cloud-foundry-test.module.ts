@@ -14,9 +14,6 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
 @NgModule({
   imports: [
-    // Either this is AppStoreModule (containing forRoot) is needed to allow other effects to be added.. to ensure we have the correct
-    // properties in the store (all properties need a reducer/effect)
-    // AppStoreModule,
     {
       ngModule: EffectsFeatureModule,
       providers: [
@@ -32,11 +29,8 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
         }
       ]
     },
-    // EffectsModule.forRoot(baseEffects),
     EffectsModule.forRoot([]),
-
     CloudFoundryStoreModule,
-    // HttpClientModule,
     HttpClientTestingModule,
     HttpModule,
   ],
