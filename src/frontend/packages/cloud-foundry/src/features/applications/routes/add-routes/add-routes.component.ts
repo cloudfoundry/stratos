@@ -260,7 +260,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       tap(route => this.store.dispatch(new AssignRouteToApplication(this.appGuid, route.metadata.guid, this.cfGuid))),
       switchMap(() => this.appService.app$),
       map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),
-      filter(requestInfo => !requestInfo.busy),
+      filter(requestInfo => requestInfo && !requestInfo.busy),
       take(1),
       map(requestInfo => {
         if (requestInfo.error) {
