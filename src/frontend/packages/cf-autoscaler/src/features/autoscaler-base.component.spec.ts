@@ -3,8 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
 import { CoreModule } from '../../../core/src/core/core.module';
-import { ApplicationService } from '../../../core/src/features/applications/application.service';
 import { SharedModule } from '../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../core/test-framework/application-service-helper';

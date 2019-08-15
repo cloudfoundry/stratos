@@ -8,6 +8,7 @@ import {
 import {
   ServiceActionHelperService,
 } from '../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
+import { CoreModule } from '../../../../../../core/src/core/core.module';
 import {
   ApplicationStateService,
 } from '../../../../../../core/src/shared/components/application-state/application-state.service';
@@ -15,7 +16,8 @@ import { ConfirmationDialogService } from '../../../../../../core/src/shared/com
 import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
+import { createEmptyStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
@@ -32,8 +34,10 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         AppAutoscalerComboSeriesVerticalComponent
       ],
       imports: [
-        ...BaseTestModules,
-        NgxChartsModule
+        CfAutoscalerTestingModule,
+        createEmptyStoreModule(),
+        CoreModule,
+        NgxChartsModule,
       ],
       providers: [
         EntityMonitorFactory,
