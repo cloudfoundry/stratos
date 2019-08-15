@@ -186,5 +186,8 @@ export class TestEntityCatalogue extends EntityCatalogue {
   }
 }
 
+// FIXME: This shouldn't make it into the production code. It's quite the anti pattern but fixes the tests for the time being.
+// https://github.com/cloudfoundry-incubator/stratos/issues/3753 - Reverting the entity catalogue to an Angular service
+// makes testing much easier and remove the need for this.
 /* tslint:disable-next-line:no-string-literal  */
 export const entityCatalogue = !!window['__karma__'] ? new TestEntityCatalogue() : new EntityCatalogue();
