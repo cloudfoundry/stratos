@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllOrganizations, DeleteOrganization, UpdateOrganization, GetOrganization } from '../actions/organization.actions';
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
@@ -20,4 +20,4 @@ export const organizationActionBuilders = {
     endpointGuid,
     updatedOrg
   )
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;

@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { FetchDomain } from '../actions/domains.actions';
 import { GetAllSecurityGroups } from '../actions/security-groups-actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
@@ -13,6 +13,6 @@ export const securityGroupBuilders = {
     paginationKey,
     { includeRelations, flatten }: CFBasePipelineRequestActionMeta
   ) => new GetAllSecurityGroups(endpointGuid, paginationKey, includeRelations, flatten)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;
 
 

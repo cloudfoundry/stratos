@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { GetSpace, GetAllSpaces, DeleteSpace, CreateSpace, UpdateSpace } from '../actions/space.actions';
 import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
@@ -59,4 +59,4 @@ export const spaceActionBuilders = {
     paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetAllOrganizationSpaces(paginationKey, orgGuid, endpointGuid, includeRelations, populateMissing)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;

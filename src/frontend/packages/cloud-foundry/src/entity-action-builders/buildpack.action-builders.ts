@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { FetchAllBuildpacks } from '../actions/buildpack.action';
 
 export const buildpackActionBuilders = {
@@ -6,6 +6,6 @@ export const buildpackActionBuilders = {
     endpointGuid,
     paginationKey,
   ) => new FetchAllBuildpacks(endpointGuid, paginationKey)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;
 
 

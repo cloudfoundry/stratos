@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllServices, GetService } from '../actions/service.actions';
 import { GetAllServicesForSpace } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
@@ -26,4 +26,4 @@ export const serviceActionBuilders = {
     includeRelations?: string[],
     populateMissing?: boolean,
   ) => new GetAllServicesForSpace(paginationKey, endpointGuid, spaceGuid, includeRelations, populateMissing)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;

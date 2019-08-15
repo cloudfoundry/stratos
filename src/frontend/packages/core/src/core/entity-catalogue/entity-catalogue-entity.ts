@@ -14,7 +14,7 @@ import { EntityActionDispatcherManager } from './action-dispatcher/action-dispat
 import {
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
-  StratosOrchestratedActionBuilders
+  OrchestratedActionBuilders
 } from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
@@ -31,7 +31,7 @@ import {
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends OrchestratedActionBuilderConfig = StratosOrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders
   > {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
   // Allows extensions to modify entities data in the store via none API Effect or unrelated actions.
@@ -46,7 +46,7 @@ export class StratosBaseCatalogueEntity<
   Y = any,
   AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilderConfig,
   // This typing may cause an issue down the line.
-  ABC extends StratosOrchestratedActionBuilders = AB extends StratosOrchestratedActionBuilders ? AB : StratosOrchestratedActionBuilders
+  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders
   > {
   public readonly entityKey: string;
   public readonly type: string;
@@ -174,8 +174,8 @@ export class StratosBaseCatalogueEntity<
 export class StratosCatalogueEntity<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends OrchestratedActionBuilderConfig = StratosOrchestratedActionBuilders,
-  ABC extends StratosOrchestratedActionBuilders = AB extends StratosOrchestratedActionBuilders ? AB : StratosOrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
+  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders
   > extends StratosBaseCatalogueEntity<T, Y, AB> {
   public definition: IStratosEntityDefinition<EntityCatalogueSchemas, Y, ABC>;
   constructor(

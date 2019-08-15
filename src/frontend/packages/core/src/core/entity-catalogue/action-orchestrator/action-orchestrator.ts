@@ -133,7 +133,7 @@ export class BasePaginationRequestAction extends BasePipelineRequestAction imple
 
 
 // A list of functions that can be used get interface with the entity
-export interface StratosOrchestratedActionBuilders {
+export interface OrchestratedActionBuilders {
   get?: KnownEntityActionBuilder;
   remove?: KnownEntityActionBuilder;
   update?: KnownEntityActionBuilder;
@@ -153,10 +153,10 @@ export interface OrchestratedActionBuilderConfig {
   PaginationRequestActionConfig<GetMultipleActionBuilder>;
 }
 
-export class OrchestratedActionBuildersClass implements StratosOrchestratedActionBuilders {
+export class OrchestratedActionBuildersClass implements OrchestratedActionBuilders {
   [actionType: string]: OrchestratedActionBuilder<any[], EntityRequestAction>;
 }
-export class ActionOrchestrator<T extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders> {
+export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }

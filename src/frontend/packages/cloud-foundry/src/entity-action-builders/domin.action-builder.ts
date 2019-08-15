@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { FetchAllDomains, FetchDomain } from '../actions/domains.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
@@ -14,6 +14,6 @@ export const domainActionBuilders = {
     paginationKey,
     { flatten }: CFBasePipelineRequestActionMeta
   ) => new FetchAllDomains(endpointGuid, paginationKey, flatten)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;
 
 

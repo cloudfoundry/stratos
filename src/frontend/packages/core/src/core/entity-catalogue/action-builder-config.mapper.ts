@@ -1,6 +1,6 @@
 import {
   OrchestratedActionBuilderConfig,
-  StratosOrchestratedActionBuilders,
+  OrchestratedActionBuilders,
   OrchestratedActionBuilder,
   EntityRequestActionConfig,
   PaginationRequestActionConfig,
@@ -24,11 +24,11 @@ export class ActionBuilderConfigMapper {
   };
 
   static getActionBuilders(
-    builders: StratosOrchestratedActionBuilders | OrchestratedActionBuilderConfig,
+    builders: OrchestratedActionBuilders | OrchestratedActionBuilderConfig,
     endpointType: string,
     entityType: string,
     schemaGetter: (schemaKey: string) => EntitySchema
-  ): StratosOrchestratedActionBuilders {
+  ): OrchestratedActionBuilders {
     if (!builders) {
       return {};
     }
@@ -37,7 +37,7 @@ export class ActionBuilderConfigMapper {
         ...actionBuilders,
         [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key], key, endpointType, entityType, schemaGetter)
       };
-    }, {} as StratosOrchestratedActionBuilders);
+    }, {} as OrchestratedActionBuilders);
   }
 
   static getActionBuilder(
