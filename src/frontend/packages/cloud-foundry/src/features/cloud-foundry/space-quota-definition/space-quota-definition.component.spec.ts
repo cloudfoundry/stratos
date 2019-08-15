@@ -6,14 +6,14 @@ import { endpointEntitySchema } from '../../../../../core/src/base-entity-schema
 import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { EntityCatalogueEntityConfig } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { testSCFEntity, testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
+import {
+  generateCfBaseTestModules,
+  generateTestCfEndpointServiceProvider,
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
 

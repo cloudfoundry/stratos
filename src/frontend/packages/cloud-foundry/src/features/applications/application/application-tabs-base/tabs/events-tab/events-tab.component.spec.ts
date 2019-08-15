@@ -12,14 +12,15 @@ import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { NormalizedResponse } from '../../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
 import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/types/request.types';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { appEventEntityType, cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
+
 
 
 describe('EventsTabComponent', () => {
