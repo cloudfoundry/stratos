@@ -22,6 +22,7 @@ export const gitRepoActionBuilders = {
 interface GitMeta {
   projectName: string;
   scm: GitSCM;
+  commitId?: string;
 }
 
 export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
@@ -36,10 +37,10 @@ export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
 
 export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
   get: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
-    (commitSha, endpointGuid, meta) => meta.scm.getCommitURL(meta.projectName, commitSha),
-    null,
-    null,
-    true
+    (id, endpointGuid, meta) => meta.scm.getCommitApiUrl(meta.projectName, meta.commitId),
+    {
+      externalRequest: true
+    }
   ),
   // get: (
   //   commitSha: string,

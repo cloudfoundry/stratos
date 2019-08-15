@@ -62,7 +62,7 @@ export class ActionBuilderConfigMapper {
           configOrBuilder.getUrl(...args),
           ActionBuilderConfigMapper.addHttpMethodFromActionKey(actionKey, configOrBuilder.requestConfig),
           meta,
-          !configOrBuilder.externalRequest
+          configOrBuilder.externalRequest
         );
       };
     }

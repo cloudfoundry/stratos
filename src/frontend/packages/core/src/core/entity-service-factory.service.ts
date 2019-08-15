@@ -5,10 +5,13 @@ import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityInfoHandler, EntityService, ENTITY_INFO_HANDLER } from './entity-service';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class EntityServiceFactory {
-
+  private isConfig(config: string | EntityActionBuilderEntityConfig) {
+    return !!(config as EntityActionBuilderEntityConfig).entityGuid;
+  }
   constructor(
     private store: Store<GeneralEntityAppState>,
     private entityMonitorFactory: EntityMonitorFactory,
@@ -29,10 +32,21 @@ export class EntityServiceFactory {
     action?: EntityRequestAction
   ): EntityService<T> {
     const config = entityIdOrConfig as EntityActionBuilderEntityConfig;
+    const isConfig = this.isConfig(config);
+
     const entityMonitor = this.entityMonitorFactory.create<T>(
-      config.endpointGuid ? config.endpointGuid : entityIdOrConfig as string,
-      action
+      isConfig ? config.entityGuid : entityIdOrConfig as string,
+      isConfig ? config : action
     );
+    if (isConfig) {
+      // Get the get action from the entity catalogue.
+      const actionBuilder = entityCatalogue.getEntity(config.endpointType, config.entityType).actionOrchestrator.getActionBuilder('get');
+      return new EntityService<T>(this.store, entityMonitor, actionBuilder(
+        config.entityGuid,
+        config.endpointGuid,
+        config.actionMetadata || {}
+      ), this.entityInfoHandler);
+    }
     return new EntityService<T>(this.store, entityMonitor, action, this.entityInfoHandler);
   }
 

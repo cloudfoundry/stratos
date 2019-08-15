@@ -53,6 +53,9 @@ export const buildRequestEntityPipe = (
   requestType: ApiRequestTypes,
   requestOptions: RequestOptions | HttpRequest<any>
 ): HttpRequest<any> => {
+  if (requestOptions instanceof HttpRequest) {
+    return requestOptions;
+  }
   return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType);
 };
 

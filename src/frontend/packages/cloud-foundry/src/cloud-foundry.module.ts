@@ -66,7 +66,7 @@ export function infoValidator(action: ICFAction, dispatcher) {
   ],
 
   providers: [
-    { provide: ENTITY_INFO_HANDLER, useExisting: infoValidator },
+    { provide: ENTITY_INFO_HANDLER, useFactory: () => infoValidator },
     CfUserService,
     CloudFoundryService,
     ServiceActionHelperService,

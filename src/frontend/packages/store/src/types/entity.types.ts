@@ -18,7 +18,7 @@ export interface BaseEntityValues {
   // route: IRequestEntityTypeState<APIResource<IRoute>>;
   // event: IRequestEntityTypeState<APIResource>;
   // gitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
-  // gitCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
+  // gitCommits: IRequestEntityTypeState<GitCommit>;
   // domain: IRequestEntityTypeState<APIResource<IDomain>>;
   // user: IRequestEntityTypeState<APIResource<CfUser>>;
   // serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;

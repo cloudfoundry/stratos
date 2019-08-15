@@ -32,10 +32,10 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 })
 export class CommitListWrapperComponent {
 
-  selectedCommit$: Observable<APIResource<GitCommit>>;
+  selectedCommit$: Observable<GitCommit>;
 
   constructor(
-    private listConfig: ListConfig<APIResource<GitCommit>>
+    private listConfig: ListConfig<GitCommit>
   ) {
     const initialised$ = this.listConfig.getInitialised().pipe(
       filter(initialised => initialised)
@@ -45,7 +45,7 @@ export class CommitListWrapperComponent {
       map(() => this.listConfig.getDataSource().selectedRows),
       map(selectedRows => {
         const rows = Array.from(selectedRows.values());
-        return rows.length > 0 ? rows[0] as APIResource<GitCommit> : null;
+        return rows.length > 0 ? rows[0] as GitCommit : null;
       }),
     );
   }

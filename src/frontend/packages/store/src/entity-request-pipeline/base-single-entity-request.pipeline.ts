@@ -35,7 +35,8 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
     httpClient,
     request,
     action.endpointType,
-    action.endpointGuid
+    action.endpointGuid,
+    action.externalRequest
   ).pipe(
     map(response => singleRequestToPaged(response)),
     map(handleMultiEndpointsPipe),

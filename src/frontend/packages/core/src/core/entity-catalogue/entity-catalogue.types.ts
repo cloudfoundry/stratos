@@ -22,7 +22,7 @@ export interface EntityCatalogueEntityConfig {
 
 export interface ActionBuilderConfig<T extends Record<any, any> = Record<any, any>> {
   actionMetadata?: T;
-  entityGuid?: string;
+  entityGuid: string;
   endpointGuid?: string;
 }
 

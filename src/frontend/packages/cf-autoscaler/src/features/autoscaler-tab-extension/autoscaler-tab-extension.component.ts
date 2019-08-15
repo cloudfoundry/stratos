@@ -45,8 +45,9 @@ import {
 } from '../../store/autoscaler-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CFEntityServiceFactory } from '../../../../cloud-foundry/src/cf-entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 
-const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: CFEntityServiceFactory): Observable<boolean> => {
+const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
   // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
   const action = new GetAppAutoscalerPolicyAction(appGuid, endpointGuid);
   const entityService = esf.create<AppAutoscalerPolicy>(action.guid, action);
@@ -71,7 +72,7 @@ const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: CFEntitySe
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: CFEntityServiceFactory, activatedRoute: ActivatedRoute) => {
+  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
     return enableAutoscaler(appGuid, endpointGuid, esf).pipe(map(enabled => !enabled));

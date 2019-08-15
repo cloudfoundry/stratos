@@ -11,7 +11,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 
 
-export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {
+export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
   store: Store<CFAppState>;
 
   /**
@@ -21,7 +21,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
    */
   constructor(
     store: Store<CFAppState>,
-    listConfig: IListConfig<APIResource<GitCommit>>,
+    listConfig: IListConfig<GitCommit>,
     scm: GitSCM,
     projectName: string,
     sha: string,

@@ -20,8 +20,9 @@ import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shar
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 import { CFAppState } from '../../../../../../cf-app-state';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../../../../core/src/base-entity-schemas';
-import { gitRepoEntityType } from '../../../../../../cf-entity-factory';
+import { gitRepoEntityType, gitCommitEntityType } from '../../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';
 
 @Component({
   selector: 'app-gitscm-tab',
@@ -94,18 +95,19 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
           repoEntityID,
-          {
-            endpointType: STRATOS_ENDPOINT_TYPE,
-            entityType: gitRepoEntityType,
-            actionMetadata: stProject
-          },
-          // new FetchGitHubRepoInfo(stProject),
+          new FetchGitHubRepoInfo(stProject),
           // false
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
-          commitEntityID,
-          new FetchCommit(scm, commitId, projectName)
+          {
+            endpointType: CF_ENDPOINT_TYPE,
+            entityType: gitCommitEntityType,
+            actionMetadata: { projectName: stProject.deploySource.project, scm, commitId },
+            entityGuid: commitEntityID,
+          },
+          // commitEntityID,
+          // new FetchCommit(scm, commitId, projectName)
         );
 
         const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;

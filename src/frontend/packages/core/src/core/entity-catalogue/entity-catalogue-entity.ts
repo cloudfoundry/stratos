@@ -69,8 +69,8 @@ export class StratosBaseCatalogueEntity<
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
     const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(
       this.builders.actionBuilders,
-      this.type,
       this.endpointType,
+      this.type,
       (schemaKey: string) => this.getSchema(schemaKey)
     );
     this.actionOrchestrator = new ActionOrchestrator<ABC>(this.entityKey, actionBuilders as ABC);

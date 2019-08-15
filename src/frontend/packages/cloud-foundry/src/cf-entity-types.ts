@@ -39,7 +39,7 @@ interface CFEntityValues {
   event: IRequestEntityTypeState<APIResource>;
   gitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
   gitRepo: IRequestEntityTypeState<APIResource<GitRepo>>;
-  gitCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
+  gitCommits: IRequestEntityTypeState<GitCommit>;
   domain: IRequestEntityTypeState<APIResource<IDomain>>;
   user: IRequestEntityTypeState<APIResource<CfUser>>;
   serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;
