@@ -1,7 +1,7 @@
-import { SucceedOrFailEntityRequestHandler } from '../entity-request-pipeline.types';
-import { WrapperRequestActionSuccess } from '../../types/request.types';
-import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
+import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
+import { WrapperRequestActionSuccess } from '../../types/request.types';
+import { SucceedOrFailEntityRequestHandler } from '../entity-request-pipeline.types';
 
 export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
   actionDispatcher,
@@ -11,7 +11,7 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
   data,
   recursivelyDeleting
 ) => {
-  const entityAction = catalogueEntity.getRequestAction('success', requestType);
+  const entityAction = catalogueEntity.getRequestAction('success', requestType, action, data);
   if (
     !action.updatingKey &&
     (requestType === 'create' || requestType === 'delete')

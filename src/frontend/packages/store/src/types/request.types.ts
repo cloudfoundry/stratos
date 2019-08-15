@@ -1,3 +1,4 @@
+import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
@@ -7,7 +8,6 @@ import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
-import { HttpRequest } from '@angular/common/http';
 
 export interface SingleEntityAction {
   entityType: string;
@@ -33,6 +33,11 @@ export enum RequestEntityLocation {
 
 export type RequestActionEntity = EntitySchema | EntitySchema[];
 export interface EntityRequestAction extends EntityCatalogueEntityConfig, RequestAction {
+  /**
+   * This is just to maintain backwards compatibility while transitioning
+   * to entity pipeline proper usage
+   */
+  actions?: string[];
   entity?: RequestActionEntity;
   /**
    * This is used for multiaction lists where the deleted entity

@@ -1,19 +1,19 @@
 import { Action, Store } from '@ngrx/store';
-import { map, tap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
+import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { EntityRequestAction } from '../types/request.types';
 import { failedEntityHandler } from './entity-request-base-handlers/fail-entity-request.handler';
+import { jetstreamErrorHandler } from './entity-request-base-handlers/jetstream-error.handler';
 import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
 import { EntityRequestPipeline, PreApiRequest, SuccessfulApiResponseDataMapper } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
-import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
-import { jetstreamErrorHandler } from './entity-request-base-handlers/jetstream-error.handler';
-import { of } from 'rxjs';
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
   store: Store<AppState>;
@@ -65,7 +65,7 @@ export const apiRequestPipelineFactory = (
         failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response, recursivelyDelete);
       }
     }),
-    map(() => catalogueEntity.getRequestAction('complete', requestType)),
+    map(() => catalogueEntity.getRequestAction('complete', requestType, action)),
     catchError(error => {
       // TODO We should pass the endpoint ids to this so we can correctly map the error to the endpoint.
       jetstreamErrorHandler(

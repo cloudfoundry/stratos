@@ -1,8 +1,12 @@
-import { Store, ActionReducer, Action } from '@ngrx/store';
+import { ActionReducer, Store } from '@ngrx/store';
+import { normalize } from 'normalizr';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { endpointEntitySchema } from '../../base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
@@ -15,13 +19,10 @@ import {
   IEntityMetadata,
   IStratosBaseEntityDefinition,
   IStratosEndpointDefinition,
-  StratosEndpointExtensionDefinition,
   IStratosEntityBuilder,
   IStratosEntityDefinition,
+  StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
-import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
-import { normalize } from 'normalizr';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -136,10 +137,35 @@ export class StratosBaseCatalogueEntity<
     };
   }
 
-  public getRequestAction(actionString: 'start' | 'success' | 'failure' | 'complete', requestType: ApiRequestTypes): Action {
-    return {
-      type: `@stratos/${this.entityKey}/${requestType}/${actionString}`
-    };
+  public getRequestAction(
+    actionString: 'start' | 'success' | 'failure' | 'complete',
+    requestType: ApiRequestTypes,
+    action?: EntityRequestAction,
+    response?: any): APISuccessOrFailedAction {
+    // backward compatibility with the old actions.
+    // it should be removed after everything is based on the new flow
+    if (action && action.actions) {
+      let type;
+
+      switch (actionString) {
+        case 'success':
+          type = action.actions[1];
+          break;
+        case 'failure':
+          type = action.actions[2];
+          break;
+        case 'start':
+          type = action.actions[0];
+          break;
+      }
+
+      if (type) {
+        return new APISuccessOrFailedAction(type, action, response);
+      }
+    }
+
+    return new APISuccessOrFailedAction(`@stratos/${this.entityKey}/${requestType}/${actionString}`,
+      action, response);
   }
 
   public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {
