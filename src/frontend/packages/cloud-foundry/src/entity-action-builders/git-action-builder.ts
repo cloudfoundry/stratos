@@ -1,15 +1,15 @@
 import {
-  EntityRequestActionConfig,
-  KnownEntityActionBuilder,
+  OrchestratedActionBuilders,
   OrchestratedActionBuilderConfig,
-  StratosOrchestratedActionBuilders
+  EntityRequestActionConfig,
+  KnownEntityActionBuilder
 } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import {
-  EnvVarStratosProject
-} from '../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { FetchBranchesForProject, FetchCommits } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';
+import {
+  EnvVarStratosProject,
+} from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export const gitRepoActionBuilders = {
   getRepoInfo: (
@@ -17,7 +17,7 @@ export const gitRepoActionBuilders = {
     endpointGuid: string,
     projectEnvVars: EnvVarStratosProject
   ) => new FetchGitHubRepoInfo(projectEnvVars)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;
 
 interface GitMeta {
   projectName: string;
@@ -29,7 +29,7 @@ export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilder
   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
 }
 
-export interface GitCommitActionBuilders extends StratosOrchestratedActionBuilders {
+export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
   get: KnownEntityActionBuilder<GitMeta>;
   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
 }
@@ -53,7 +53,7 @@ export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
   ) => new FetchCommits(commitMeta.scm, commitSha, commitMeta.projectName)
 };
 
-export interface GitBranchActionBuilders extends StratosOrchestratedActionBuilders {
+export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
   get: (projectName: string, endpointGuid: string, meta: GitMeta) => FetchBranchesForProject;
 }
 

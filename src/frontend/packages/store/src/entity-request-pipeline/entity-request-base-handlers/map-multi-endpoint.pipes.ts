@@ -66,7 +66,6 @@ export function mapMultiEndpointResponses(
     requestType,
     multiEndpointResponses.errors
   );
-  console.log(multiEndpointResponses);
   if (multiEndpointResponses.errors && multiEndpointResponses.errors.length) {
     return {
       success: false,

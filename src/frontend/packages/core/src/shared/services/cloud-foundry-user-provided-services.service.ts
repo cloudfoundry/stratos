@@ -20,7 +20,6 @@ import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { fetchTotalResults } from '../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import {
@@ -31,6 +30,7 @@ import {
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 
 
 @Injectable()

@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppEventsDataSource } from './cf-app-events-data-source';

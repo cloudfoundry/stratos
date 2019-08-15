@@ -10,7 +10,7 @@ import { QParam, QParamJoiners } from '../../../../../../../store/src/q-param';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { IListConfig } from '../../list.component.types';
 import { cfEntityFactory, appEventEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 
 export class CfAppEventsDataSource extends ListDataSource<APIResource> {
 
@@ -18,7 +18,6 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     const qParams = pag.params.q as string[];
     if (qParams) {
       const qParamString = qParams.find((q: string) => {
-        console.log(q);
         return QParam.fromString(q).key === 'type';
       });
       return qParamString ? QParam.fromString(qParamString).value as string : '';
