@@ -3,7 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Observable } from 'rxjs';
 
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import {
   AutoscalerConstants,
   getAdjustmentType,
@@ -15,7 +15,11 @@ import {
   getThresholdMin,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
+import {
+  AppAutoscalerInvalidPolicyError,
+  AppAutoscalerPolicy,
+  AppAutoscalerPolicyLocal,
+} from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 

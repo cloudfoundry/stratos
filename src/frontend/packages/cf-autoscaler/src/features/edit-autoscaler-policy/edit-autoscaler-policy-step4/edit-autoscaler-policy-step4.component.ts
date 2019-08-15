@@ -6,9 +6,9 @@ import * as moment from 'moment-timezone';
 import { Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
 
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';

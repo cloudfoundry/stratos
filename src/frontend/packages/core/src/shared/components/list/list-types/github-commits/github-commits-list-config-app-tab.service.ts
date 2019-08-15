@@ -5,8 +5,6 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   CheckProjectExists,
   FetchBranchesForProject,
@@ -15,12 +13,14 @@ import {
   SetDeployCommit,
   StoreCFSettings,
 } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
+import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 import { IListAction } from '../../list.component.types';

@@ -6,9 +6,6 @@ import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../src/core/core.module';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { UserInviteService } from '../src/features/cloud-foundry/user-invites/user-invite.service';
 import {
   ApplicationStateIconComponent,
 } from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -30,15 +27,18 @@ import {
   MetaCardValueComponent,
 } from '../src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
-import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../src/shared/data-services/cf-user.service';
-import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from '../src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../src/shared/shared.module';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { CfUserServiceTestProvider } from './user-service-helper';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
+import { CfOrgSpaceDataService } from '../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
+import { CfUserService } from '../../cloud-foundry/src/shared/data-services/cf-user.service';
+import { UserInviteService } from '../../cloud-foundry/src/features/cloud-foundry/user-invites/user-invite.service';
+import { CloudFoundryEndpointService } from '../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { CloudFoundryService } from '../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
