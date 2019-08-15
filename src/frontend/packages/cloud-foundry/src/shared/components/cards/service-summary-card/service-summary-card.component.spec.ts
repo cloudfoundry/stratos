@@ -5,10 +5,8 @@ import {
 } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
 import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import {
-  generateCfBaseTestModulesNoShared,
-  MetadataCardTestComponents,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { MetadataCardTestComponents } from '../../../../../../core/test-framework/core-test.helper';
+import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';

@@ -122,16 +122,8 @@ export const testSessionData: SessionData = {
   }
 }
 
-/* tslint:disable */
 export function getInitialTestStoreState(): CFAppState {
-  // const entities = getEntitiesFromExtensions();
   const state = getDefaultInitialTestStoreState();
-  // entities.forEach(entity => {
-  //   state.pagination[entity.entityKey] = {};
-  //   state.request[entity.entityKey] = {};
-  //   state.requestData[entity.entityKey] = {};
-  // });
-
   return state;
 }
 
@@ -222,7 +214,7 @@ export function getDefaultInitialTestStratosStoreState() {
 function getDefaultInitialTestStoreState(): CFAppState {
   return {
     ...getDefaultInitialTestStratosStoreState(),
-    // TODO: RC This is cf specific
+    // TODO: RC This is cf specific and should be removed
     ...generateCfTopLevelStoreEntities(),
     pagination: {
       cfSummary: {},

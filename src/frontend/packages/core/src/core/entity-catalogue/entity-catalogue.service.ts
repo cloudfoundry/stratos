@@ -119,7 +119,10 @@ class EntityCatalogue {
       return this.getEntitySubType(entityOfType, subType) as StratosBaseCatalogueEntity<T, Y, AB>;
     }
     if (!entityOfType) {
-      console.warn(`Could not find catalogue entity for endpoint type '${config.endpointType}' and entity type '${config.entityType}'`);
+      console.warn(
+        `Could not find catalogue entity for endpoint type '${config.endpointType}' and entity type '${config.entityType}'. Stack: `,
+        new Error().stack
+      );
     }
     return entityOfType as StratosBaseCatalogueEntity<T, Y, AB>;
   }

@@ -5,9 +5,9 @@ import {
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
   generateCfBaseTestModulesNoShared,
-  MetadataCardTestComponents,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';

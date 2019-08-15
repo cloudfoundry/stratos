@@ -4,9 +4,9 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
   generateCfBaseTestModulesNoShared,
-  MetadataCardTestComponents,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfBuildpackCardComponent } from './cf-buildpack-card.component';
 

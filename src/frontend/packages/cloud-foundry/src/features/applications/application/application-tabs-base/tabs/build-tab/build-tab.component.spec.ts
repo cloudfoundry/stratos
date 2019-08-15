@@ -1,7 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
@@ -14,8 +14,8 @@ import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../../../../core/
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../../../../core/test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryComponentsModule } from '../../../../../../shared/components/components.module';
 import { ApplicationService } from '../../../../application.service';
 import { entityServiceFactory } from '../../../application-base.component';

@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
   generateCfBaseTestModulesNoShared,
-  MetadataCardTestComponents,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfStacksCardComponent } from './cf-stacks-card.component';
 
