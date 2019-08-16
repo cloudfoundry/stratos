@@ -13,13 +13,18 @@ import { IQuotaDefinition } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 
 
 @Component({
   selector: 'app-edit-quota-step',
   templateUrl: './edit-quota-step.component.html',
-  styleUrls: ['./edit-quota-step.component.scss']
+  styleUrls: ['./edit-quota-step.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class EditQuotaStepComponent implements OnDestroy {
 
@@ -35,9 +40,10 @@ export class EditQuotaStepComponent implements OnDestroy {
   constructor(
     private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.quotaGuid = this.activatedRoute.snapshot.params.quotaId;
 
     this.fetchQuotaDefinition();
