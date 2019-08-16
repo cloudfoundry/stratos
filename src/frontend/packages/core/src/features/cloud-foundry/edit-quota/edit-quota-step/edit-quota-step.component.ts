@@ -62,20 +62,7 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-
-    this.store.dispatch(new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, {
-      name: formValues.name,
-      total_services: formValues.totalServices,
-      total_routes: formValues.totalRoutes,
-      memory_limit: formValues.memoryLimit,
-      app_task_limit: formValues.appTasksLimit,
-      total_private_domains: formValues.totalPrivateDomains,
-      total_service_keys: formValues.totalServiceKeys,
-      instance_memory_limit: formValues.instanceMemoryLimit,
-      non_basic_services_allowed: formValues.nonBasicServicesAllowed,
-      total_reserved_route_ports: formValues.totalReservedRoutePorts,
-      app_instance_limit: formValues.appInstanceLimit
-    }));
+    this.store.dispatch(new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, formValues));
 
     return this.store.select(selectRequestInfo(quotaDefinitionSchemaKey, this.quotaGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateQuotaDefinition.UpdateExistingQuota].busy),

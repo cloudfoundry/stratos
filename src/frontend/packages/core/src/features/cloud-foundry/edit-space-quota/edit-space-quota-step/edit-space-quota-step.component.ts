@@ -65,19 +65,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-
-    this.store.dispatch(new UpdateSpaceQuotaDefinition(this.spaceQuotaGuid, this.cfGuid, {
-      name: formValues.name,
-      total_services: formValues.totalServices,
-      total_service_keys: formValues.totalServiceKeys,
-      total_routes: formValues.totalRoutes,
-      memory_limit: formValues.memoryLimit,
-      instance_memory_limit: formValues.instanceMemoryLimit,
-      non_basic_services_allowed: formValues.nonBasicServicesAllowed,
-      total_reserved_route_ports: formValues.totalReservedRoutePorts,
-      app_instance_limit: formValues.appInstanceLimit,
-      app_task_limit: formValues.appTasksLimit,
-    }));
+    this.store.dispatch(new UpdateSpaceQuotaDefinition(this.spaceQuotaGuid, this.cfGuid, formValues));
 
     return this.store.select(selectRequestInfo(spaceQuotaSchemaKey, this.spaceQuotaGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateSpaceQuotaDefinition.UpdateExistingSpaceQuota].busy),
