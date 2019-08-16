@@ -157,6 +157,7 @@ export class CfUserService {
       result.push({
         name: space.entity.name as string,
         orgGuid: space.entity.organization_guid,
+        orgName: null,
         spaceGuid,
         permissions: createUserRoleInSpace(
           isSpaceManager(user, spaceGuid),

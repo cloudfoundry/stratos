@@ -4,11 +4,13 @@ import { GetAllAppEvents } from '../../../../../../../store/src/actions/app-even
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { appEventSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
-export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
+export class CfAppEventsDataSource extends ListDataSource<APIResource> {
 
   public getFilterFromParams(pag: PaginationEntityState) {
     const qParams = pag.params.q;
@@ -35,6 +37,7 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
     store: Store<AppState>,
     cfGuid: string,
     appGuid: string,
+    listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
     const action = new GetAllAppEvents(paginationKey, appGuid, cfGuid);
@@ -44,10 +47,9 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
         store,
         action,
         schema: entityFactory(appEventSchemaKey),
-        getRowUniqueId: (object: EntityInfo) => {
-          return object.entity.metadata ? object.entity.metadata.guid : null;
-        },
+        getRowUniqueId: getRowMetadata,
         paginationKey,
+        listConfig
       }
     );
 

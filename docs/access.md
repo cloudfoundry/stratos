@@ -2,17 +2,6 @@
 
 Depending on the deployment mode, you may require access to an UAA.
 
-## Deploying in Docker-Compose
-
-In Docker Compose a UAA instance is deployed.
-The default login credentials for the Console admin user are:
-
- - username: `admin`,
- - password: `hscadmin`
-
-The Console admin scope in this environment is `stratos.admin`. Any user with this scope will be identified as a user.
-
-
 ## Cloud Foundry deployment
 
 In a Cloud Foundry deployment, the Console will be configured to use the UAA used by the Cloud Foundry instance.

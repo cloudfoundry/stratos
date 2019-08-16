@@ -40,7 +40,6 @@ func dbConfFromFlags() (dbconf *goose.DBConf, err error) {
 }
 
 func migrateDatabase(env *env.VarSet) bool {
-
 	flag.Usage = usage
 	flag.Parse()
 
@@ -193,7 +192,7 @@ stratos db migration cli
 func parseCloudFoundryEnv(env *env.VarSet) (string, error) {
 	var dbEnv string
 
-	fmt.Println("Attempting to parse VCAP_SERVICES")
+	log.Info("Attempting to parse VCAP_SERVICES")
 
 	var dbConfig datastore.DatabaseConfig
 
@@ -208,10 +207,10 @@ func parseCloudFoundryEnv(env *env.VarSet) (string, error) {
 		switch dbType := env.String(DB_TYPE, "unknown"); dbType {
 		case TYPE_POSTGRES:
 			dbEnv = "cf_postgres"
-			fmt.Printf("Migrating postgresql instance on %s\n", env.String(DB_HOST, ""))
+			log.Infof("Migrating postgresql instance on %s\n", env.String(DB_HOST, ""))
 		case TYPE_MYSQL:
 			dbEnv = "cf_mysql"
-			fmt.Printf("Migrating mysql instance on %s\n", env.String(DB_HOST, ""))
+			log.Infof("Migrating mysql instance on %s\n", env.String(DB_HOST, ""))
 		default:
 			// Database service not found or type not recognized
 			return "", nil

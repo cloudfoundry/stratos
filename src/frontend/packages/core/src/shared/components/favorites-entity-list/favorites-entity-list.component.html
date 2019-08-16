@@ -1,7 +1,7 @@
 <div *ngIf="!placeholder" class="favorite-entity-list">
   <form class="favorite-entity-list__search-form" [ngClass]="{'favorite-entity-list__hide-filters': !showFilters}">
     <mat-form-field class="favorite-entity-list__name-search">
-      <input matInput ngModel #nameChange="ngModel" name="favoriteName" placeholder="Name">
+      <input matInput [(ngModel)]="searchValue" name="favoriteName" placeholder="Name">
     </mat-form-field>
     <mat-form-field *ngIf="favoriteTypes && favoriteTypes.length > 0">
       <mat-select (selectionChange)="typeChanged($event.value)" placeholder="Favorite Type">
@@ -15,12 +15,13 @@
   </form>
   <div *ngIf="noResultsDueToFilter$ | async"> No favorites found for the current filters. </div>
   <div class="favorite-entity-list__cards">
-    <app-favorites-meta-card *ngFor="let entity of (limitedEntities$ | async);trackBy trackByFavoriteId" class="favorite-entity-list__card"
-      [favoriteEntity]="entity" [compact]="true" [endpointDisconnected]="endpointDisconnected"></app-favorites-meta-card>
+    <app-favorites-meta-card *ngFor="let entity of (limitedEntities$ | async);trackBy trackByFavoriteId"
+      class="favorite-entity-list__card" [favoriteEntity]="entity" [compact]="true"
+      [endpointDisconnected]="endpointDisconnected"></app-favorites-meta-card>
   </div>
   <ng-container *ngIf="(searchedEntities$ | async) as searchedEntities">
-    <button class="favorite-entity-list__expand-button" *ngIf="searchedEntities.length > minLimit" (click)="toggleExpand()"
-      mat-icon-button>
+    <button class="favorite-entity-list__expand-button" *ngIf="searchedEntities.length > minLimit"
+      (click)="toggleExpand()" mat-icon-button>
       <mat-icon *ngIf="(limitToggle$ | async) === null">expand_less</mat-icon>
       <mat-icon *ngIf="(limitToggle$ | async) !== null">expand_more</mat-icon>
     </button>

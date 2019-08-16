@@ -73,10 +73,24 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 			}
 		}
 	}
+
 }
 
 // Init creates a new CFHosting plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+
+	// Update Database migration status depending on app instance index and SQLite
+	if portalProxy.Env().IsSet(VCapApplication) {
+		isSQLite := portalProxy.GetConfig().DatabaseProviderName == SQLiteProviderName
+		if !isSQLite && portalProxy.Env().IsSet("CF_INSTANCE_INDEX") {
+			if appInstanceIndex, ok := portalProxy.Env().Lookup("CF_INSTANCE_INDEX"); ok {
+				if index, err := strconv.Atoi(appInstanceIndex); err == nil {
+					portalProxy.SetCanPerformMigrations(index == 0)
+				}
+			}
+		}
+	}
+
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
@@ -109,6 +123,10 @@ func (ch *CFHosting) Init() error {
 		ch.portalProxy.GetConfig().IsCloudFoundry = true
 
 		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
+
+		//Force auth endpoint type to remote (CF UAA)
+		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = "remote"
+
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
@@ -138,7 +156,7 @@ func (ch *CFHosting) Init() error {
 		data := []byte(vCapApp)
 		err := json.Unmarshal(data, &appData)
 		if err != nil {
-			log.Fatalf("Could not get the Cloud Foundry API URL: %v+", err)
+			log.Fatalf("Could not get the Cloud Foundry API URL: %+v", err)
 			return nil
 		}
 
@@ -179,7 +197,7 @@ func (ch *CFHosting) Init() error {
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
 		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
 		if err != nil {
-			log.Fatalf("Could not get the info for Cloud Foundry: %v+", err)
+			log.Fatalf("Could not get the info for Cloud Foundry: %+v", err)
 			return nil
 		}
 
@@ -189,19 +207,21 @@ func (ch *CFHosting) Init() error {
 			return fmt.Errorf("Invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
 		}
 
+		ch.portalProxy.GetConfig().ConsoleConfig.AuthorizationEndpoint = url
+
+		// Override the configuration to set the authorization endpoint
+		url, err = url.Parse(newCNSI.TokenEndpoint)
+		if err != nil {
+			return fmt.Errorf("Invalid token endpoint URL %s %s", newCNSI.TokenEndpoint, err)
+		}
+
 		ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
+
 		log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
 
 		// Not set in the environment and failed to read from the Secrets file
 		// CHECK is this necessary to set here?
 		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = ch.portalProxy.Env().MustBool("SKIP_SSL_VALIDATION")
-
-		// Save to Console DB
-		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
-		if err != nil {
-			log.Fatalf("Failed to save console configuration due to %s", err)
-			return fmt.Errorf("Failed to save console configuration due to %s", err)
-		}
 
 		if !ch.portalProxy.Env().IsSet(SkipAutoRegister) {
 			log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)

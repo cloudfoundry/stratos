@@ -91,14 +91,18 @@ export interface IListDataSourceConfig<A, T> {
   /**
    * Optional list configuration
    */
-  listConfig?: IListConfig<T>;
+  listConfig: IListConfig<T>;
 
   /**
    * A function that will be called when the list is destroyed.
    */
   destroy?: () => void;
 
+  /**
+   * A function that will be called instead of the default refresh
+   */
   refresh?: () => void;
+
   /**
    * A function which fetches an observable containing a specific row's state
    *

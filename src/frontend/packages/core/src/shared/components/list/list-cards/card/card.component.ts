@@ -24,7 +24,6 @@ import {
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 
-
 export const listCards = [
   CardAppComponent,
   CfOrgCardComponent,

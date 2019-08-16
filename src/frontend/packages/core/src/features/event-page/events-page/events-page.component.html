@@ -1,5 +1,12 @@
 <app-page-header>
-  Notifications
+  <h1>Notifications</h1>
+  <div class="page-header-right">
+    <span>
+      <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async">
+        <mat-icon>close</mat-icon>
+      </button>
+    </span>
+  </div>
 </app-page-header>
 <div class="event-page">
   <mat-list *ngIf="events$ | async as events; last as last ; else noEvents">

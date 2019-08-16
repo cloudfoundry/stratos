@@ -133,6 +133,10 @@ type LoginRes struct {
 	User        *ConnectedUser `json:"user"`
 }
 
+type LocalLoginRes struct {
+	User *ConnectedUser `json:"user"`
+}
+
 type LoginHookFunc func(c echo.Context) error
 type LoginHook struct {
 	Priority int
@@ -200,7 +204,7 @@ type Info struct {
 	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
 }
 
-// Extends CNSI Record and adds the user
+// EndpointDetail extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
 	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
@@ -216,14 +220,45 @@ type Versions struct {
 	DatabaseVersion int64  `json:"database_version"`
 }
 
+//AuthEndpointType - Restrict the possible values of the configured
+type AuthEndpointType string
+
+const (
+	//Remote - String representation of remote auth endpoint type
+	Remote AuthEndpointType = "remote"
+	//Local - String representation of remote auth endpoint type
+	Local AuthEndpointType = "local"
+)
+
+//AuthEndpointTypes - Allows lookup of internal string representation by the
+//value of the AUTH_ENDPOINT_TYPE env variable
+var AuthEndpointTypes = map[string]AuthEndpointType{
+	"remote": Remote,
+	"local":  Local,
+}
+
+// ConsoleConfig is essential configuration settings
 type ConsoleConfig struct {
-	UAAEndpoint         *url.URL `json:"uaa_endpoint"`
-	ConsoleAdminScope   string   `json:"console_admin_scope"`
-	ConsoleClient       string   `json:"console_client"`
-	ConsoleClientSecret string   `json:"console_client_secret"`
-	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
-	IsSetupComplete     bool     `json:"is_setup_complete"`
-	UseSSO              bool     `json:"use_sso"`
+	UAAEndpoint           *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
+	AuthorizationEndpoint *url.URL `json:"authorization_endpoint" configName:"AUTHORIZATION_ENDPOINT"`
+	ConsoleAdminScope     string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
+	ConsoleClient         string   `json:"console_client" configName:"CONSOLE_CLIENT"`
+	ConsoleClientSecret   string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`
+	LocalUser             string   `json:"local_user"`
+	LocalUserPassword     string   `json:"local_user_password"`
+	LocalUserScope        string   `json:"local_user_scope"`
+	AuthEndpointType      string   `json:"auth_endpoint_type" configName:"AUTH_ENDPOINT_TYPE"`
+	SkipSSLValidation     bool     `json:"skip_ssl_validation" configName:"SKIP_SSL_VALIDATION"`
+	UseSSO                bool     `json:"use_sso" configName:"SSO_LOGIN"`
+}
+
+// IsSetupComplete indicates if we have enough config
+func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+	if consoleConfig.UAAEndpoint == nil {
+		return false
+	}
+
+	return len(consoleConfig.UAAEndpoint.String()) > 0 && len(consoleConfig.ConsoleAdminScope) > 0
 }
 
 // CNSIRequest
@@ -264,6 +299,7 @@ type PortalConfig struct {
 	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
 	SSOOptions                      string   `configName:"SSO_OPTIONS"`
+	AuthEndpointType                string   `configName:"AUTH_ENDPOINT_TYPE"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                        string   `configName:"LOG_LEVEL"`
 	CFAdminIdentifier               string

@@ -44,6 +44,7 @@ import {
   SpecifyUserProvidedDetailsComponent,
 } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { CfOrgSpaceLinksComponent } from '../../cf-org-space-links/cf-org-space-links.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -62,6 +63,7 @@ describe('AddServiceInstanceComponent', () => {
         CardStatusComponent,
         MetadataItemComponent,
         CfServiceCardComponent,
+        CfOrgSpaceLinksComponent,
         MetaCardComponent,
         ServiceIconComponent,
         MetaCardTitleComponent,

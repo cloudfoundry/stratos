@@ -58,6 +58,25 @@
               for a long period of time. Disabling this is considered a security risk.</div>
           </div>
         </div>
+        <div class="user-profile__option" *ngIf="pollingEnabled$ | async as pollingEnabled"
+          [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
+          <div class="user-profile__option-inner">
+            <div class="user-profile__option-header">
+              Polling
+              <mat-icon *ngIf="pollingEnabled === 'false'"
+                matTooltip="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
+                class="user-profile__option-warning-icon" inline="true">
+                warning
+              </mat-icon>
+            </div>
+            <button mat-flat-button (click)="setPollingEnabled(pollingEnabled !== 'true')"
+              [color]="pollingEnabled === 'true' ? 'warn' : 'primary'">
+              {{ pollingEnabled === 'true' ? 'Disable' : 'Enable' }} polling
+            </button>
+            <div class="user-profile__option-subtext">Disabling polling wil result in some pages not automatically
+              updating.</div>
+          </div>
+        </div>
       </mat-card>
       <mat-card>
         <mat-card-header>

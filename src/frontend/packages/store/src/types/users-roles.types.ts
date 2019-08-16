@@ -19,6 +19,8 @@ export class CfRoleChange {
   spaceGuid?: string;
   add: boolean;
   role: OrgUserRoleNames | SpaceUserRoleNames;
+  orgName: string;
+  spaceName?: string;
 }
 
 export class CfRoleChangeWithNames extends CfRoleChange {
