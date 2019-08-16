@@ -79,6 +79,12 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
+import { AddQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-quota/add-quota.component';
+import { AddSpaceQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-space-quota/add-space-quota.component';
+import { EditQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota.component';
+import { EditSpaceQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota.component';
+import { CloudFoundryQuotasComponent } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
+import { CloudFoundryOrganizationSpaceQuotasComponent } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
 
 /* tslint:enable:max-line-length */
 
@@ -140,6 +146,14 @@ const cloudFoundry: Routes = [{
       path: 'organizations/:orgId/add-space',
       component: AddSpaceComponent
     },
+    {
+      path: 'add-quota',
+      component: AddQuotaComponent
+    },
+    {
+      path: 'organizations/:orgId/add-space-quota',
+      component: AddSpaceQuotaComponent
+    },
     ...usersRoles,
     {
       path: '',
@@ -149,6 +163,14 @@ const cloudFoundry: Routes = [{
         {
           path: 'quota-definitions/:quotaId',
           component: QuotaDefinitionComponent
+        },
+        {
+          path: 'quota-definitions/:quotaId/edit-quota',
+          component: EditQuotaComponent
+        },
+        {
+          path: 'organizations/:orgId/space-quota-definitions/:quotaId/edit-space-quota',
+          component: EditSpaceQuotaComponent
         },
         {
           path: 'organizations/:orgId/space-quota-definitions/:quotaId',
@@ -229,6 +251,10 @@ const cloudFoundry: Routes = [{
               component: CloudFoundryRoutesComponent
             },
             {
+              path: 'quota-definitions',
+              component: CloudFoundryQuotasComponent
+            },
+            {
               path: '**',
               component: PageNotFoundComponentComponent,
               canActivate: [DynamicExtensionRoutes],
@@ -292,6 +318,10 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'quota',
                   component: QuotaDefinitionComponent
+                },
+                {
+                  path: 'space-quota-definitions',
+                  component: CloudFoundryOrganizationSpaceQuotasComponent
                 },
                 {
                   path: '**',

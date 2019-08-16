@@ -63,7 +63,7 @@ describe('Manage Organization', () => {
       orgFormPage.stepper.setOrg(orgName);
       orgFormPage.submit();
       orgFormPage.stepper.waitUntilNotShown();
-      cfTopLevelPage.clickOnOrg(orgName);
+      cfTopLevelPage.clickOnCard(orgName);
     });
 
     it('- should go to organizations when canceled', () => {
@@ -86,7 +86,7 @@ describe('Manage Organization', () => {
       orgFormPage.stepper.setQuotaDefinition(quotaName);
       orgFormPage.submit();
 
-      cfTopLevelPage.clickOnOrg(secondOrgName);
+      cfTopLevelPage.clickOnCard(secondOrgName);
       expect(element(by.tagName('app-card-cf-org-user-details')).getText()).toContain(quotaName);
     });
 
@@ -111,7 +111,7 @@ describe('Manage Organization', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToOrgTab();
-      cfTopLevelPage.clickOnOrg(orgName);
+      cfTopLevelPage.clickOnCard(orgName);
 
       cfOrgLevelPage = new CfOrgLevelPage();
     });
@@ -132,7 +132,7 @@ describe('Manage Organization', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToOrgTab();
-      cfTopLevelPage.clickOnOrg(orgName);
+      cfTopLevelPage.clickOnCard(orgName);
 
       cfOrgLevelPage = new CfOrgLevelPage();
       cfOrgLevelPage.subHeader.clickIconButton('mode_edit');

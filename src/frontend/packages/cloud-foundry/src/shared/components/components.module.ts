@@ -127,6 +127,7 @@ import { SelectServiceComponent } from './select-service/select-service.componen
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
+import { TableCellQuotaComponent } from '../../../../core/src/shared/components/list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
 
 @NgModule({
   imports: [
@@ -206,6 +207,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellTCPRouteComponent,
     TableCellAppInstancesComponent,
     TableCellAppNameComponent,
+    TableCellQuotaComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -282,6 +284,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellTCPRouteComponent,
     TableCellAppInstancesComponent,
     TableCellAppNameComponent,
+    TableCellQuotaComponent
   ]
 })
 export class CloudFoundryComponentsModule { }
