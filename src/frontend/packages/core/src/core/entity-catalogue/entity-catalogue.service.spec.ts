@@ -1,12 +1,11 @@
-import { TestBed } from '@angular/core/testing';
-
-import { BaseEndpointAuth } from '../../features/endpoints/endpoint-auth';
-import { IStratosEndpointDefinition } from './entity-catalogue.types';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from './entity-catalogue-entity';
-import { TestEntityCatalogue } from './entity-catalogue.service';
-import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { endpointEntitySchema } from '../../base-entity-schemas';
+import { BaseEndpointAuth } from '../../features/endpoints/endpoint-auth';
+import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
+import { TestEntityCatalogue } from './entity-catalogue.service';
+import { IStratosEndpointDefinition } from './entity-catalogue.types';
+
 describe('EntityCatalogueService', () => {
   let entityCatalogue: TestEntityCatalogue;
   function getEndpointDefinition() {

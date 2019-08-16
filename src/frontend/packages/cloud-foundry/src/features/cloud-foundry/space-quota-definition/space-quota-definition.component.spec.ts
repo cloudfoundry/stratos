@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   BaseTestModules,
@@ -11,7 +13,7 @@ import {
   getInitialTestStoreState,
   testSCFGuid,
 } from '../../../../../core/test-framework/store-test-helper';
-import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations.spec';
+import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
 
@@ -24,10 +26,13 @@ describe('SpaceQuotaDefinitionComponent', () => {
 
   const helper = new EntityRelationSpecHelper();
 
+  const orgCatalogEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+  const spaceCatalogEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+
   beforeEach(async(() => {
     const store = getInitialTestStoreState();
-    store.requestData[organizationEntityType][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
-    store.requestData[spaceEntityType][spaceGuid] = helper.createEmptySpace(spaceGuid, 'space-name', orgGuid);
+    store.requestData[orgCatalogEntity.entityKey][orgGuid] = helper.createEmptyOrg(orgGuid, 'org-name');
+    store.requestData[spaceCatalogEntity.entityKey][spaceGuid] = helper.createEmptySpace(spaceGuid, 'space-name', orgGuid);
     TestBed.configureTestingModule({
       declarations: [SpaceQuotaDefinitionComponent],
       imports: [

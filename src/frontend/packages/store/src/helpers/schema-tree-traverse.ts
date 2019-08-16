@@ -147,7 +147,7 @@ export class EntitySchemaTreeBuilder {
   }
 
   private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
-    const ids = flatTree[key] || new Set<string>();
+    const ids = flatTree[getCFEntityKey(key)] || new Set<string>();
     flatTree[getCFEntityKey(key)] = ids.add(newId);
     return flatTree;
   }

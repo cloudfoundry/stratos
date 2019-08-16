@@ -44,8 +44,10 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
     public relationKey?: string,
     schemaKey?: string
   ) {
+    // Note - The core schema.Entity needs to be an entityKey or denormalize will fail
     super(endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
     this.schema = definition || {};
+    // Normally the entityType === schemaKey. Sometimes we can override that (space entity and space entity with spaceWithOrg schema)
     this.schemaKey = schemaKey;
   }
   public withEmptyDefinition() {

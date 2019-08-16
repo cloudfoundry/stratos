@@ -1,5 +1,5 @@
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 /**
  * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
@@ -7,7 +7,13 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
  * @export
  */
 export class EntityTreeRelation {
+  /**
+   * Where does this entity go into the store? (does contain endpointType)
+   */
   public entityKey: string;
+  /**
+   * What is the core entity type (does not contain endpointType)
+   */
   public entityType: string;
 
   /**

@@ -18,7 +18,6 @@ import { ApplicationServiceMock } from '../../../../../../../../core/test-framew
 import { getInitialTestStoreState } from '../../../../../../../../core/test-framework/store-test-helper';
 import { appReducers } from '../../../../../../../../store/src/reducers.module';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
-import { endpointStoreNames } from '../../../../../../../../store/src/types/endpoint.types';
 import { ApplicationService } from '../../../../application.service';
 import { entityServiceFactory } from '../../../application-base.component';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
@@ -74,8 +73,6 @@ describe('BuildTabComponent', () => {
   }));
 
   beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
-    const cfGuid = Object.keys(initialState.requestData[endpointStoreNames.type])[0];
-    const appGuid = Object.keys(initialState.requestData.application)[0];
     fixture = TestBed.createComponent(BuildTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

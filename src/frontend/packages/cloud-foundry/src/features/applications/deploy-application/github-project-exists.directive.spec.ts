@@ -12,6 +12,7 @@ import { createBasicStoreModule } from '../../../../../core/test-framework/store
 import { CFAppState } from '../../../cf-app-state';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
+
 describe('GithubProjectExistsDirective', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
