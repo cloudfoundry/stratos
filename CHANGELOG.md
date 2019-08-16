@@ -8,7 +8,6 @@ This release contains a number of fixes and improvements:
 
 **Fixes:**
 
-- Fix persist of dashboard settings [\#3730](https://github.com/cloudfoundry-incubator/stratos/pull/3730)
 - Fix connect to IBM Cloud [\#3715](https://github.com/cloudfoundry-incubator/stratos/pull/3715)
 - Create route - owned domains not proposed [\#3685](https://github.com/cloudfoundry-incubator/stratos/issues/3685)
 - Fixed connect endpoint issues in Firefox [\#3679](https://github.com/cloudfoundry-incubator/stratos/pull/3679)
@@ -21,6 +20,9 @@ This release contains a number of fixes and improvements:
 - No space/org shown in cell app instances page [\#3536](https://github.com/cloudfoundry-incubator/stratos/issues/3536)
 - Services Marketplace: cf endpoint on card when multiple cf connected [\#3560](https://github.com/cloudfoundry-incubator/stratos/pull/3560)
 - Setup screens are missing header [\#3557](https://github.com/cloudfoundry-incubator/stratos/issues/3557)
+- /uaa page is still available in a configured system [\#3056](https://github.com/cloudfoundry-incubator/stratos/issues/3056)
+- Endpoint login exposes user credentials via query string [\#3160](https://github.com/cloudfoundry-incubator/stratos/issues/3160)
+- Don't send registration info in query string [\#3777](https://github.com/cloudfoundry-incubator/stratos/pull/3777)
 
 **Improvements:**
 
