@@ -5,6 +5,8 @@ import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { UtilsService } from '../../../core/src/core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
@@ -14,7 +16,6 @@ import {
   EntitiesPipelineCompleted,
   ValidateEntitiesStart,
 } from '../actions/request.actions';
-import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
 import {
   completeApiRequest,
   getFailApiRequestActions,
@@ -24,8 +25,6 @@ import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
 import { UpdateCfAction } from '../types/request.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-
 
 @Injectable()
 export class RequestEffect {
@@ -68,7 +67,7 @@ export class RequestEffect {
    *    been dropped because their count is over 50
    *
    */
-  // TODO Move this into cF
+  // TODO Move this into Cf - #3769
   @Effect() validateEntities$ = this.actions$.pipe(
     ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
     mergeMap(action => {

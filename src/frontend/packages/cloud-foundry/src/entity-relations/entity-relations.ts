@@ -3,11 +3,6 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import {
-  FetchRelationAction,
-  FetchRelationPaginatedAction,
-  FetchRelationSingleAction,
-} from '../actions/relation.actions';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { isEntityBlocked } from '../../../core/src/core/entity-service';
 import { pathGet } from '../../../core/src/core/utils.service';
@@ -15,14 +10,19 @@ import { environment } from '../../../core/src/environments/environment';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { pick } from '../../../store/src/helpers/reducer.helper';
 import { RequestInfoState } from '../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { pick } from '../../../store/src/helpers/reducer.helper';
+import {
+  EntityRequestAction,
+  RequestEntityLocation,
+  WrapperRequestActionSuccess,
+} from '../../../store/src/types/request.types';
+import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { createValidationPaginationWatcher } from './entity-relation-tree.helpers';
 import { validationPostProcessor } from './entity-relations-post-processor';
@@ -336,6 +336,7 @@ function associateChildWithParent(
           guid: action.parentGuid,
           entityType: action.parentEntityConfig.entityType,
           endpointType: action.parentEntityConfig.endpointType,
+          // TODO: RC Check childEntityKEy
           type: '[Entity] Associate with parent',
         };
         if (!environment.production) {

@@ -1,10 +1,11 @@
 import { createSelector } from '@ngrx/store';
-import { IRequestEntityTypeState, InternalAppState } from '../app-state';
-import { EndpointModel, EndpointState, } from '../types/endpoint.types';
-import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { InternalAppState, IRequestEntityTypeState } from '../app-state';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { EndpointModel, EndpointState } from '../types/endpoint.types';
+import { selectEntities, selectEntity, selectRequestInfo } from './api.selectors';
 
 // The custom status section
 export const endpointStatusSelector = (state: InternalAppState): EndpointState => state.endpoints;
@@ -22,7 +23,7 @@ export const endpointOfTypeSelector = (type: string) =>
       return endpointsOfType;
     }, {});
   };
-// TODO More this
+// TODO More this #3769
 export const cfEndpointEntitiesSelector = endpointOfTypeSelector('cf');
 
 export const getRegisteredEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) => {
