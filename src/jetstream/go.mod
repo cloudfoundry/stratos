@@ -25,13 +25,11 @@ require (
 	github.com/cloudfoundry/noaa v2.1.0+incompatible
 	github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4
 	github.com/cppforlife/go-patch v0.2.0 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/domodwyer/mailyak v3.1.1+incompatible
 	github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20190411002643-bd77b112433e // indirect
@@ -44,7 +42,6 @@ require (
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/kubeapps/common v0.0.0-20181107174310-61d8eb6f11b4
-	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/lib/pq v1.1.0 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
@@ -56,7 +53,6 @@ require (
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/nwmac/sqlitestore v0.0.0-20180824125213-7d2ab221fb3f
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
-	github.com/pkg/errors v0.8.1 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.3.0
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
@@ -64,7 +60,6 @@ require (
 	github.com/ulikunitz/xz v0.5.6 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/net v0.0.0-20190420063019-afa5a82059c6 // indirect
 	google.golang.org/appengine v1.5.0 // indirect

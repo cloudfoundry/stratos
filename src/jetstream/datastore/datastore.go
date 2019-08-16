@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -147,16 +148,15 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	}
 
 	// SQL Lite
-	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"))
+	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"), env.String("SQLITE_DB_DIR", "."))
 }
 
 // GetSQLLiteConnection returns an SQLite DB Connection
-func GetSQLLiteConnection(sqliteKeepDB bool) (*sql.DB, error) {
+func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
 
-	sqlDbDir := env.String("SQLITE_DB_DIR", ".")
 	dbFilePath := path.Join(sqlDbDir, SQLiteDatabaseFile)
 	log.Infof("SQLite Database file: %s", dbFilePath)
-	
+
 	return GetSQLLiteConnectionWithPath(SQLiteDatabaseFile, sqliteKeepDB)
 }
 
