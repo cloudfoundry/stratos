@@ -6,7 +6,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { SetUAAScope, SetupUAA } from '../../../../../store/src/actions/setup.actions';
+import { SetupUAA, SetupUAASave } from '../../../../../store/src/actions/setup.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
@@ -43,6 +43,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       username: this.uaaForm.get('adminUsername').value,
       console_client_secret: this.uaaForm.get('clientSecret').value,
       use_sso: this.uaaForm.get('useSSO').value,
+      console_admin_scope: ''
     }));
     return this.store.select('uaaSetup').pipe(
       skipWhile((state: UAASetupState) => {
@@ -66,7 +67,17 @@ export class ConsoleUaaWizardComponent implements OnInit {
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetUAAScope(this.selectedScope));
+    this.store.dispatch(new SetupUAASave({
+      uaa_endpoint: this.uaaForm.get('apiUrl').value,
+      console_client: this.uaaForm.get('clientId').value,
+      password: this.uaaForm.get('adminPassword').value,
+      skip_ssl_validation: this.uaaForm.get('skipSll').value,
+      username: this.uaaForm.get('adminUsername').value,
+      console_client_secret: this.uaaForm.get('clientSecret').value,
+      use_sso: this.uaaForm.get('useSSO').value,
+      console_admin_scope: this.selectedScope
+    }));
+
     this.applyingSetup$.next(true);
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
