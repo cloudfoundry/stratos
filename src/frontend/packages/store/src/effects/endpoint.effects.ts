@@ -214,18 +214,20 @@ export class EndpointsEffect {
         /* tslint:disable-next-line:no-string-literal  */
         paramsObj['sub_type'] = action.endpointSubType;
       }
-      const params: HttpParams = new HttpParams({
-        fromObject: paramsObj
+      // Encode auth values in the body, not the query string
+      const body: any = new FormData();
+      Object.keys(paramsObj).forEach(key => {
+        body.set(key, paramsObj[key]);
       });
 
       return this.doEndpointAction(
         apiAction,
         '/pp/v1/register/' + action.endpointType,
-        params,
+        new HttpParams({}),
         'create',
         [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
         action.endpointType,
-        null,
+        body,
         this.processRegisterError
       );
     }));
