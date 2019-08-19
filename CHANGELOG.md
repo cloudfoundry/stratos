@@ -1,5 +1,45 @@
 # Change Log
 
+## 2.5.0
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.4.0...2.5.0)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Fix connect to IBM Cloud [\#3715](https://github.com/cloudfoundry-incubator/stratos/pull/3715)
+- Create route - owned domains not proposed [\#3685](https://github.com/cloudfoundry-incubator/stratos/issues/3685)
+- Fixed connect endpoint issues in Firefox [\#3679](https://github.com/cloudfoundry-incubator/stratos/pull/3679)
+- Fixed connect endpoint rendering issue in Firefox [\#3678](https://github.com/cloudfoundry-incubator/stratos/pull/3678)
+- Fix ExpressionChangedAfterItHasBeenCheckedError exception on home page [\#3667](https://github.com/cloudfoundry-incubator/stratos/pull/3667)
+- Fix bosh prometheus metrics [\#3602](https://github.com/cloudfoundry-incubator/stratos/pull/3602)
+- Fix stepper height on Chrome pre v72 & Bleeding of error style in stateful-icon [\#3599](https://github.com/cloudfoundry-incubator/stratos/pull/3599)
+- Remove sidenav header underline [\#3556](https://github.com/cloudfoundry-incubator/stratos/issues/3556)
+- cf/spaces routes: fixed breadcrumbs path for apps [\#3572](https://github.com/cloudfoundry-incubator/stratos/pull/3572)
+- No space/org shown in cell app instances page [\#3536](https://github.com/cloudfoundry-incubator/stratos/issues/3536)
+- Services Marketplace: cf endpoint on card when multiple cf connected [\#3560](https://github.com/cloudfoundry-incubator/stratos/pull/3560)
+- Setup screens are missing header [\#3557](https://github.com/cloudfoundry-incubator/stratos/issues/3557)
+- /uaa page is still available in a configured system [\#3056](https://github.com/cloudfoundry-incubator/stratos/issues/3056)
+- Endpoint login exposes user credentials via query string [\#3160](https://github.com/cloudfoundry-incubator/stratos/issues/3160)
+- Don't send registration info in query string [\#3777](https://github.com/cloudfoundry-incubator/stratos/pull/3777)
+
+**Improvements:**
+
+- Add Application Autoscaler UI [\#3455](https://github.com/cloudfoundry-incubator/stratos/pull/3455)
+- Quotas: org/space quotas: listing and management [\#3650](https://github.com/cloudfoundry-incubator/stratos/pull/3650)
+- Quotas: allow quota to be specified on creation/edit of org/space [\#3593](https://github.com/cloudfoundry-incubator/stratos/pull/3593)
+- Refactor setup config [\#3694](https://github.com/cloudfoundry-incubator/stratos/pull/3694)
+- Helm Chart: Add imagelist to the helm chart [\#3638](https://github.com/cloudfoundry-incubator/stratos/pull/3638)
+- Support separate auth and token endpoints [\#3635](https://github.com/cloudfoundry-incubator/stratos/pull/3635)
+- Improve failed connection message for cf & metrics endpoints [\#3600](https://github.com/cloudfoundry-incubator/stratos/pull/3600)
+- Handle endpoint types that do no support connect [\#3596](https://github.com/cloudfoundry-incubator/stratos/pull/3596)
+- Make disconnected endpoints more obviously different [\#3554](https://github.com/cloudfoundry-incubator/stratos/issues/3554)
+- Always build with go modules [\#3589](https://github.com/cloudfoundry-incubator/stratos/pull/3589)
+- Don't show cell metrics when they're not available [\#3586](https://github.com/cloudfoundry-incubator/stratos/pull/3586)
+- Handle 'no auth' auth type in optional connect step [\#3535](https://github.com/cloudfoundry-incubator/stratos/issues/3535)
+- Notifications page: Add a back button [\#3523](https://github.com/cloudfoundry-incubator/stratos/issues/3523)
+
 ## 2.4.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.3.0...2.4.0)

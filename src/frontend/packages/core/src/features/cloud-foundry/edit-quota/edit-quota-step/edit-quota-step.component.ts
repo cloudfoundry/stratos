@@ -13,13 +13,18 @@ import { IQuotaDefinition } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 
 
 @Component({
   selector: 'app-edit-quota-step',
   templateUrl: './edit-quota-step.component.html',
-  styleUrls: ['./edit-quota-step.component.scss']
+  styleUrls: ['./edit-quota-step.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class EditQuotaStepComponent implements OnDestroy {
 
@@ -35,9 +40,10 @@ export class EditQuotaStepComponent implements OnDestroy {
   constructor(
     private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.quotaGuid = this.activatedRoute.snapshot.params.quotaId;
 
     this.fetchQuotaDefinition();
@@ -62,20 +68,7 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-
-    this.store.dispatch(new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, {
-      name: formValues.name,
-      total_services: formValues.totalServices,
-      total_routes: formValues.totalRoutes,
-      memory_limit: formValues.memoryLimit,
-      app_task_limit: formValues.appTasksLimit,
-      total_private_domains: formValues.totalPrivateDomains,
-      total_service_keys: formValues.totalServiceKeys,
-      instance_memory_limit: formValues.instanceMemoryLimit,
-      non_basic_services_allowed: formValues.nonBasicServicesAllowed,
-      total_reserved_route_ports: formValues.totalReservedRoutePorts,
-      app_instance_limit: formValues.appInstanceLimit
-    }));
+    this.store.dispatch(new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, formValues));
 
     return this.store.select(selectRequestInfo(quotaDefinitionSchemaKey, this.quotaGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateQuotaDefinition.UpdateExistingQuota].busy),
