@@ -42,6 +42,7 @@ import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { CfInfoDefinitionActionBuilders } from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -81,26 +82,30 @@ export class CloudFoundryEndpointService {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    return new GetAllOrganizations(
-      paginationKey,
-      cfGuid, [
+    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getAllOrganizationsAction = actionBuilder(paginationKey,
+      cfGuid, { includeRelations: [
         createEntityRelationKey(organizationEntityType, spaceEntityType),
         createEntityRelationKey(organizationEntityType, domainEntityType),
         createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
         createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
         createEntityRelationKey(spaceEntityType, routeEntityType), // Not really needed at top level, but if we drop down into an org with
         // lots of spaces it saves spaces x routes requests
-      ]);
+      ], populateMissing: false}) as PaginatedAction;
+    return getAllOrganizationsAction;
   }
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    return new GetAllOrganizations(
-      paginationKey,
-      cfGuid, [
+    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getAllOrganizationsAction = actionBuilder(paginationKey,
+      cfGuid, {includeRelations: [
         createEntityRelationKey(organizationEntityType, spaceEntityType),
-      ]);
+      ]}) as PaginatedAction;
+    return getAllOrganizationsAction;
   }
 
   public static fetchAppCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
@@ -138,6 +143,7 @@ export class CloudFoundryEndpointService {
 
     const cfInfoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfInfoEntityType);
     //TODO Kate const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get') as ;
+    //Use cfInfoEntity.getGUIFFromEntity for the missing arg?
     const action = actionBuilder(this.cfGuid) as CfInfoDefinitionActionBuilders;
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,

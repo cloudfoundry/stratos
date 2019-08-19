@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -33,6 +33,10 @@ import { valueOrCommonFalsy } from '../components/list/data-sources-controllers/
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { constructor } from 'marked';
+import { store } from '@angular/core/src/render3';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
@@ -156,6 +160,13 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public org: CfOrgSpaceItem<IOrganization>;
   public space: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
+
+  //TODO kate - code block to initialise?
+  const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+  const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
+  const getAllOrganizationsAction = actionBuilder(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, {[
+    createEntityRelationKey(organizationEntityType, spaceEntityType),
+  ], populateMissing: false});
 
   public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
     createEntityRelationKey(organizationEntityType, spaceEntityType),
