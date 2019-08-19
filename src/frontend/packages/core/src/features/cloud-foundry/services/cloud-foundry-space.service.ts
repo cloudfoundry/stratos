@@ -123,10 +123,8 @@ export class CloudFoundrySpaceService {
         const spaceEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
         const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, { includeRelations: relations});
-        //const getSpaceAction = new GetSpace(this.spaceGuid, this.cfGuid, relations);
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
           this.spaceGuid,
-          //new GetSpace(this.spaceGuid, this.cfGuid, relations),
           getSpaceAction,
           true
         );

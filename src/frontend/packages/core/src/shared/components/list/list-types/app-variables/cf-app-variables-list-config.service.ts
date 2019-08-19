@@ -17,7 +17,6 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 
 
 @Injectable()
@@ -83,7 +82,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     const confirmation = this.getConfirmationModal(newValues);
     
-    const appEnvVarsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
     const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('removeFromApplication');
     const action = actionBuilder(this.envVarsDataSource.cfGuid, this.envVarsDataSource.cfGuid, this.envVarsDataSource.transformedEntities, newValues);
 

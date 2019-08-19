@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../../../../cloud-foundry/cf-types';
+import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { GetOrganization } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import { GetSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfUserEntityType, organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../../../cloud-foundry/src/store/types/user.types';
@@ -24,6 +24,7 @@ import {
 import { StepOnNextFunction } from '../../../../../shared/components/stepper/step/step.component';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invites/user-invite.service';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-invite-users-create',
@@ -70,9 +71,12 @@ export class InviteUsersCreateComponent implements OnInit {
 
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
+    const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+    const getOrgAction = getOrgActionBuilder(this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.cfGuid, {includeRelations: [], populateMissing: false });
     this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
       this.activeRouteCfOrgSpace.orgGuid,
-      new GetOrganization(this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.cfGuid, [], false)
+      getOrgAction
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     );

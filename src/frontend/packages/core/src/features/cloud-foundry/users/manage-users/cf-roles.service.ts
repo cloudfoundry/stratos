@@ -44,6 +44,8 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 @Injectable()
@@ -237,11 +239,12 @@ export class CfRolesService {
   }
 
   fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
+    const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+    const getOrgAction = getOrgActionBuilder(this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.cfGuid, {includeRelations: [], populateMissing: false });
     return this.entityServiceFactory.create<APIResource<IOrganization>>(
       orgGuid,
-      new GetOrganization(orgGuid, cfGuid, [
-        createEntityRelationKey(organizationEntityType, spaceEntityType)
-      ], true),
+      getOrgAction,
       true
     ).waitForEntity$;
   }

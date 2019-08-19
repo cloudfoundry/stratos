@@ -12,7 +12,6 @@ import { IListConfig } from '../../list.component.types';
 import { cfEntityFactory, appEventEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 
 export class CfAppEventsDataSource extends ListDataSource<APIResource> {
 
@@ -47,7 +46,7 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
-    const appEventEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appEventEntityType);
+    const appEventEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEventEntityType);
     const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple')
     const action = actionBuilder(paginationKey, appGuid, { cfGuid });
 

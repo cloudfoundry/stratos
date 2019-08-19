@@ -22,7 +22,7 @@ import {
   SetDeployBranch,
 } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { gitBranchesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
@@ -46,6 +46,8 @@ import {
   getApplicationDeploySourceTypes,
   getAutoSelectedDeployType,
 } from '../deploy-application-steps.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -232,9 +234,13 @@ export class DeployApplicationStep2Component
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
           const entityID = projectInfo.full_name + '-' + commitSha;
+          //TODO Kate
+          const gitCommitEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, gitCommitEntityType);
+          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('fetchCommit');
+          const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name);
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             entityID,
-            new FetchCommit(this.scm, commitSha, projectInfo.full_name),
+            fetchCommitAction
           );
 
           if (this.commitSubscription) {

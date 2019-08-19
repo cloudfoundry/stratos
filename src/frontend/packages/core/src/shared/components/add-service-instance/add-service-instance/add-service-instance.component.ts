@@ -54,6 +54,9 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -139,9 +142,12 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       switchMap(csi => {
         this.appsEmitted.next(false);
         const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
+        const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+        const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
+        const getAllAppsInSpaceAction = actionBuilder(csi.cfGuid, csi.spaceGuid, paginationKey) as PaginatedAction;
         return getPaginationObservables({
           store: this.store,
-          action: new GetAllAppsInSpace(csi.cfGuid, csi.spaceGuid, paginationKey),
+          action: getAllAppsInSpaceAction,
           paginationMonitor: this.paginationMonitorFactory.create(
             paginationKey,
             cfEntityFactory(applicationEntityType)

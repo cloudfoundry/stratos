@@ -103,7 +103,7 @@ export class ApplicationService {
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
     );
-    const appSummaryEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appSummaryEntityType);
+    const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
     const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
     const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(

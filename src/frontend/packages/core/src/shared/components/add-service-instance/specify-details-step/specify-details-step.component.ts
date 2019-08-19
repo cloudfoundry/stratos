@@ -37,7 +37,7 @@ import {
   UpdateServiceInstance,
 } from '../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceBindingEntityType, serviceInstancesEntityType, appEnvVarsEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
@@ -55,6 +55,8 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -320,8 +322,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                   return req;
                 } else {
                   // Refetch env vars for app, since they have been changed by CF
+                  const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+                  const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+                  const getAppEnvVarsAction = actionBuilder(state.bindAppGuid, state.cfGuid);
                   this.store.dispatch(
-                    new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
+                    getAppEnvVarsAction
                   );
 
                   return this.routeToServices(state.cfGuid, state.bindAppGuid);

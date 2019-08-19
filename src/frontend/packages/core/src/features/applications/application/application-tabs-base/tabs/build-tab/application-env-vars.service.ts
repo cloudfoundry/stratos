@@ -13,6 +13,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
 
 
 export interface EnvVarStratosProject {
@@ -40,7 +41,8 @@ export class ApplicationEnvVarsHelper {
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
     const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-    const action = new GetAppEnvVarsAction(appGuid, cfGuid);
+    const actionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('get');
+    const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     return getPaginationObservables<APIResource>({
       store: this.store,
       action,

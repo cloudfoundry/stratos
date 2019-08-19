@@ -19,6 +19,8 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export interface ListAppEnvVar {
   name: string;
@@ -35,9 +37,12 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
     appService: ApplicationService,
     listConfig: IListConfig<ListAppEnvVar>
   ) {
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+    const getAppEnvVarsAction = actionBuilder(appService.appGuid, appService.cfGuid) as PaginatedAction;
     super({
       store,
-      action: new GetAppEnvVarsAction(appService.appGuid, appService.cfGuid),
+      action: getAppEnvVarsAction,
       schema: cfEntityFactory(appEnvVarsEntityType),
       getRowUniqueId: object => object.name,
       getEmptyType: () => ({ name: '', value: '', }),

@@ -15,6 +15,7 @@ import { ApplicationService } from '../../application.service';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
 import { appSummaryEntityType, appStatsEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 @Injectable()
 export class ApplicationPollingService {
@@ -80,12 +81,12 @@ export class ApplicationPollingService {
     this.entityService.entityObs$.pipe(
       first(),
     ).subscribe(resource => {
-      const appSummaryEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appSummaryEntityType);
+      const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
       const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
       const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
       this.store.dispatch(getAppSummaryAction);
       if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
-        const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+        const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
         const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
         const getAppStatsAction = actionBuilder(appGuid, cfGuid);
         this.store.dispatch(getAppStatsAction);

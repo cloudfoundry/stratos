@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { gitCommitEntityType, gitBranchesEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   CheckProjectExists,
@@ -26,6 +26,8 @@ import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.ser
 import { IListAction } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 
 
 @Injectable()
@@ -132,9 +134,13 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
       const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
+      //TODO Kate
+      const gitBranchesEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, gitBranchesEntityType);
+      const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
+      const fetchBranchesAction = fetchBranchesActionBuilder(this.scm, this.projectName);
       const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
         branchKey,
-        new FetchBranchesForProject(this.scm, this.projectName),
+        fetchBranchesAction,
         false
       );
       gitBranchEntityService.waitForEntity$.pipe(

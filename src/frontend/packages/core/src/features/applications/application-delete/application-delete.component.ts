@@ -54,6 +54,7 @@ import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../cloud-foundry/cf.helpers';
 import { ApplicationService } from '../application.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../base-entity-schemas';
 
 
 @Component({
@@ -207,8 +208,10 @@ export class ApplicationDeleteComponent<T> {
       startWith(true)
     );
 
-
-    this.store.dispatch(new GetApplication(applicationService.appGuid, applicationService.cfGuid));
+    const appEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, applicationEntityType);
+    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('get');
+    const getApplicationAction = actionBuilder(applicationService.appGuid, applicationService.cfGuid);
+    this.store.dispatch(getApplicationAction);
   }
 
   private setupAppMonitor() {

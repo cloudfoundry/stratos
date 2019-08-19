@@ -16,6 +16,7 @@ import {
   quotaDefinitionEntityType,
   routeEntityType,
   spaceEntityType,
+  cfInfoEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
@@ -38,6 +39,9 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
 import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { CfInfoDefinitionActionBuilders } from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -132,6 +136,9 @@ export class CloudFoundryEndpointService {
       false
     );
 
+    const cfInfoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfInfoEntityType);
+    //TODO Kate const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get') as ;
+    const action = actionBuilder(this.cfGuid) as CfInfoDefinitionActionBuilders;
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
       new GetCFInfo(this.cfGuid),
@@ -215,6 +222,10 @@ export class CloudFoundryEndpointService {
   }
 
   public fetchDomains = () => {
+    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
+    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    //TODO kate
+    const action = actionBuilder(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey, [], false, false) as PaginatedAction;
     const action = new FetchAllDomains(this.cfGuid);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {

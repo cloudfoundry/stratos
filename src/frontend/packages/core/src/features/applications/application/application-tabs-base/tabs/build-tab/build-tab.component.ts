@@ -22,7 +22,8 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../../base-entity-schemas';
-import { appStatsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { appStatsEntityType, applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -237,9 +238,12 @@ export class BuildTabComponent implements OnInit {
 
   restageApplication() {
     const { cfGuid, appGuid } = this.applicationService;
+    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('restage');
+    const restageAppAction = actionBuilder(appGuid, cfGuid);
     this.confirmAndPollForState(
       appRestageConfirmation,
-      () => this.store.dispatch(new RestageApplication(appGuid, cfGuid)),
+      () => this.store.dispatch(restageAppAction),
       'starting',
       'STARTED',
       () => { }

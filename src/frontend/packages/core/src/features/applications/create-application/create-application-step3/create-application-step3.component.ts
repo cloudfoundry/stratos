@@ -27,6 +27,8 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { createGetApplicationAction } from '../../application.service';
 import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -135,7 +137,10 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
-    this.store.dispatch(new AssignRouteToApplication(appGuid, routeGuid, endpointGuid));
+    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
+    const assignRouteAction = actionBuilder(appGuid, routeGuid, endpointGuid);
+    this.store.dispatch(assignRouteAction);
     return this.wrapObservable(this.store.select(selectCfRequestInfo(applicationEntityType, appGuid)),
       'Application and route created. Could not associated route with app');
   }
@@ -160,11 +165,14 @@ export class CreateApplicationStep3Component implements OnInit {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
         this.hostControl().markAsDirty();
         this.newAppData = state;
+        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+        const getOrgAction = getOrgActionBuilder( state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
+                                                  createEntityRelationKey(organizationEntityType, domainEntityType) ]);
+  
         const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
           state.cloudFoundryDetails.org,
-          new GetOrganization(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
-            createEntityRelationKey(organizationEntityType, domainEntityType)
-          ]),
+          getOrgAction,
           true
         );
         return orgEntService.waitForEntity$.pipe(

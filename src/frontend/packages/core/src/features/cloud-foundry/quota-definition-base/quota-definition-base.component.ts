@@ -13,6 +13,11 @@ import { IOrganization, IOrgQuotaDefinition, ISpace, ISpaceQuotaDefinition } fro
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { organizationEntityType, domainEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { state } from '@angular/animations';
+import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 export class QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
@@ -43,9 +48,12 @@ export class QuotaDefinitionBaseComponent {
 
   setupOrgObservable() {
     if (this.orgGuid) {
+      const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+      const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+      const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid);
       this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
         this.orgGuid,
-        new GetOrganization(this.orgGuid, this.cfGuid)
+        getOrgAction
       ).waitForEntity$.pipe(
         map(data => data.entity),
       );

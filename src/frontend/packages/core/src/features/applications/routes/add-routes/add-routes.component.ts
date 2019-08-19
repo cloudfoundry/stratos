@@ -30,6 +30,8 @@ import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/compone
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
@@ -238,7 +240,10 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
-    this.store.dispatch(new AssignRouteToApplication(this.appGuid, routeGuid, this.cfGuid));
+    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
+    const assignRouteAction = actionBuilder(this.appGuid, routeGuid, this.cfGuid);
+    this.store.dispatch(assignRouteAction);
     return this.store.select(selectCfRequestInfo(applicationEntityType, this.appGuid)).pipe(
       pairwise(),
       filter(([oldApp, newApp]) => {
@@ -257,6 +262,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
     return this.selectedRoute$.pipe(
+//KATE TODO - route?
       tap(route => this.store.dispatch(new AssignRouteToApplication(this.appGuid, route.metadata.guid, this.cfGuid))),
       switchMap(() => this.appService.app$),
       map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),

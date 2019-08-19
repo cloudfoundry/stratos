@@ -24,8 +24,10 @@ import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { userProvidedServiceInstanceEntityType, serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { userProvidedServiceInstanceEntityType, serviceBindingEntityType, appEnvVarsEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCreateServiceInstance } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -271,8 +273,11 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
             // Refetch env vars for app, since they have been changed by CF
+            const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+            const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+            const getAppEnvVarsAction = actionBuilder(data.bindAppGuid, data.cfGuid);
             this.store.dispatch(
-              new GetAppEnvVarsAction(data.bindAppGuid, data.cfGuid)
+              getAppEnvVarsAction
             );
             return { success: true, redirect: true };
           }
