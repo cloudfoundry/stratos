@@ -15,6 +15,19 @@ import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
+export interface QuotaFormValues {
+  name: string;
+  totalServices: number;
+  totalRoutes: number;
+  memoryLimit: number;
+  appTasksLimit: number;
+  totalPrivateDomains: number;
+  totalServiceKeys: number;
+  instanceMemoryLimit: number;
+  nonBasicServicesAllowed: boolean;
+  totalReservedRoutePorts: number;
+  appInstanceLimit: number;
+}
 
 @Component({
   selector: 'app-quota-definition-form',
