@@ -23,6 +23,8 @@ COPY --from=builder /home/stratos/dev-certs /srv/dev-certs
 COPY --from=builder /home/stratos/ui /srv/ui
 COPY --from=builder /home/stratos/jetstream /srv/jetstream
 COPY --from=builder /home/stratos/config.properties /srv/config.properties
+# User Invite templates
+COPY --from=builder /home/stratos/src/jetstream/templates /srv/templates
 
 EXPOSE 443
 

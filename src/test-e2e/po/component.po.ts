@@ -33,13 +33,11 @@ export class Component {
   }
 
   // Pass an optional description to help when debugging test issues
-  waitUntilShown(elementDescription = 'Element'): promise.Promise<void> {
-    return browser.wait(until.presenceOf(this.locator), 5000, elementDescription + ' taking too long to appear in the DOM').then(() => {
-      return browser.wait(until.visibilityOf(this.locator), 5000, elementDescription + ' not visible timing out').then(v => {
-        // Slight delay for animations
-        return browser.driver.sleep(100);
-      });
-    });
+  waitUntilShown(elementDescription = 'Element', waitDuration = 5000): promise.Promise<void> {
+    return browser.wait(until.presenceOf(this.locator), waitDuration, elementDescription + ' taking too long to appear in the DOM')
+      .then(() => browser.wait(until.visibilityOf(this.locator), waitDuration, elementDescription + ' not visible timing out'))
+      // Slight delay for animations
+      .then(() => browser.driver.sleep(100));
   }
 
   waitUntilNotShown(description = 'Element'): promise.Promise<void> {

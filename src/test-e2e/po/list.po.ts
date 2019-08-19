@@ -1,4 +1,3 @@
-import { first } from 'rxjs/operators';
 import { browser, by, element, Key, promise, protractor } from 'protractor';
 import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 
@@ -34,6 +33,15 @@ export class ListTableComponent extends Component {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
   }
 
+  findRowByCellContent(content) {
+    const cell = this.locator.all(by.css('.app-table__cell')).filter(elem =>
+      elem.getText().then(text => text === content)
+    ).first();
+
+    browser.wait(until.presenceOf(cell));
+    return cell.element(by.xpath('ancestor::app-table-row'));;
+  }
+
   // Get the data in the table
   getTableDataRaw(): promise.Promise<any> {
     const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());
@@ -58,6 +66,16 @@ export class ListTableComponent extends Component {
         table.push(tableRow);
       });
       return table;
+    });
+  }
+
+  findRow(columnHeader: string, value: string): promise.Promise<number> {
+    return this.getTableData().then(data => {
+      const rowIndex = data.findIndex(row => row[columnHeader] === value);
+      if (rowIndex >= 0) {
+        return rowIndex;
+      }
+      throw new Error(`Could not find row with header ${columnHeader} and value ${value}`);
     });
   }
 
@@ -106,7 +124,7 @@ export class ListTableComponent extends Component {
 
   openRowActionMenuByRow(row: ElementFinder): MenuComponent {
     row.element(by.css('app-table-cell-actions button')).click();
-    const menu = new MenuComponent()
+    const menu = new MenuComponent();
     menu.waitUntilShown();
     return menu;
   }
@@ -177,7 +195,7 @@ export class ListCardComponent extends Component {
   getCardsMetadata(): promise.Promise<CardMetadata[]> {
     return this.getCards().map((elem, index) => {
       return {
-        index: index,
+        index,
         title: elem.element(by.css('.meta-card__title')).getText(),
         click: elem.click,
       };

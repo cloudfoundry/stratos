@@ -32,11 +32,11 @@ pushd "${STRATOS}/src/jetstream" > /dev/null
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
   echo "Building version: ${VERSION}"
-  go build -ldflags -X=main.appVersion=${VERSION}
+  GO111MODULE=on go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."
 else
   echo "Running backend tests ..."
-  go test ./... -v
+  GO111MODULE=on go test ./... -v
 fi
 
 popd > /dev/null

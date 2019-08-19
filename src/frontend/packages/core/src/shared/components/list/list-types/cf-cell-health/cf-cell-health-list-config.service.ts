@@ -1,22 +1,26 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
-import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { ListViewTypes } from '../../list.component.types';
 import {
-  TableCellBooleanIndicatorComponentConfig,
-  TableCellBooleanIndicatorComponent
-} from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
-import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
+  FetchCFCellMetricsPaginatedAction,
+  MetricQueryConfig,
+} from '../../../../../../../store/src/actions/metrics.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import {
-  CloudFoundryCellService
+  CloudFoundryCellService,
 } from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
-import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
+import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
+import {
+  TableCellBooleanIndicatorComponent,
+  TableCellBooleanIndicatorComponentConfig,
+} from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { ITableColumn } from '../../list-table/table.types';
+import { ListViewTypes } from '../../list.component.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
 
 @Injectable()
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
@@ -42,7 +46,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     super();
     const action = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId);
     this.dataSource = new CfCellHealthDataSource(store, this, action);
-    this.showMetricsRange = true;
+    this.showCustomTime = true;
   }
 
   private createMetricsAction(cfGuid: string, cellId: string): FetchCFCellMetricsPaginatedAction {

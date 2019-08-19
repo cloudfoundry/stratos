@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/autoscaler"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfappssh"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
@@ -37,6 +38,7 @@ func (pp *portalProxy) loadPlugins() {
 		{"kubernetes", kubernetes.Init},
 		{"monocular", monocular.Init},
 		{"userfavorites", userfavorites.Init},
+		{"autoscaler", autoscaler.Init},
 		{"demo", demo.Init},
 	} {
 		plugin, err := p.Init(pp)

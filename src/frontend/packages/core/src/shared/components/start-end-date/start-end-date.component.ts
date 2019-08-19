@@ -7,13 +7,6 @@ import * as moment from 'moment';
   styleUrls: ['./start-end-date.component.scss']
 })
 export class StartEndDateComponent {
-  @Output()
-  public endChange = new EventEmitter<moment.Moment>();
-  @Output()
-  public startChange = new EventEmitter<moment.Moment>();
-
-  @Output()
-  public isValid = new EventEmitter<boolean>();
 
   get valid() {
     return this.validValue;
@@ -24,23 +17,6 @@ export class StartEndDateComponent {
     this.isValid.emit(this.validValue);
   }
 
-  public validValue = true;
-
-  private startValue: moment.Moment;
-  private endValue: moment.Moment;
-
-
-  private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
-    return !oldDate || !newDate || !oldDate.isSame(newDate);
-  }
-
-  private isStartEndValid(start: moment.Moment, end: moment.Moment) {
-    if (!end || !start) {
-      return true;
-    }
-    return start.isBefore(end);
-  }
-
   @Input()
   set start(start: moment.Moment) {
     this.valid = true;
@@ -49,14 +25,12 @@ export class StartEndDateComponent {
       return;
     }
     if (start.isValid()) {
-      if (!this.isStartEndValid(start, this.end)) {
+      const clone = moment(start);
+      this.startValue = clone;
+      if (!this.pValidate(start, this.end)) {
         this.valid = false;
-        return;
-      }
-      if (this.isDifferentDate(this.startValue, start)) {
-        const clone = moment(start);
-        this.startValue = clone;
-        this.startChange.emit(clone);
+      } else {
+        this.emitChanges();
       }
     }
   }
@@ -73,19 +47,62 @@ export class StartEndDateComponent {
       return;
     }
     if (end && end.isValid()) {
-      if (!this.isStartEndValid(this.start, end)) {
+      const clone = moment(end);
+      this.endValue = clone;
+      if (!this.pValidate(this.start, end)) {
         this.valid = false;
-        return;
-      }
-      if (this.isDifferentDate(this.endValue, end)) {
-        const clone = moment(end);
-        this.endValue = clone;
-        this.endChange.emit(clone);
+      } else {
+        this.emitChanges();
       }
     }
   }
 
   get end() {
     return this.endValue;
+  }
+  @Output()
+  public endChange = new EventEmitter<moment.Moment>();
+  @Output()
+  public startChange = new EventEmitter<moment.Moment>();
+
+  @Output()
+  public isValid = new EventEmitter<boolean>();
+
+  public validValue = true;
+  public validMessage: string;
+
+  private startValue: moment.Moment;
+  private endValue: moment.Moment;
+
+  private lastValidStartValue: moment.Moment;
+  private lastValidEndValue: moment.Moment;
+
+  private emitChanges() {
+    if (this.isDifferentDate(this.lastValidStartValue, this.startValue)) {
+      this.lastValidStartValue = this.startValue;
+      this.startChange.emit(this.startValue);
+    }
+    if (this.isDifferentDate(this.lastValidEndValue, this.endValue)) {
+      this.lastValidEndValue = this.endValue;
+      this.endChange.emit(this.endValue);
+    }
+  }
+
+  @Input()
+  public validate: (start: moment.Moment, end: moment.Moment) => string = (start: moment.Moment, end: moment.Moment): string => {
+    if (!end || !start) {
+      return null;
+    }
+    return end.isBefore(start) ? 'Start date must be before end date.' : null;
+  }
+
+  private pValidate(start: moment.Moment, end: moment.Moment): boolean {
+    this.validMessage = this.validate(start, end);
+    return !this.validMessage;
+  }
+
+
+  private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
+    return !oldDate || !newDate || !oldDate.isSame(newDate);
   }
 }
