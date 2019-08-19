@@ -1,21 +1,22 @@
-import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 import { ConnectionBackend, Http } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
-import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { ApplicationsModule } from '../../../../../core/src/features/applications/applications.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../core/test-framework/store-test-helper';
+import { getInitialTestStoreState, createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { GetApplication } from '../../../../../store/src/actions/application.actions';
 import { applicationSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { endpointStoreNames } from '../../../../../store/src/types/endpoint.types';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
+import { CommonModule, DatePipe } from '@angular/common';
+import { CoreModule } from '../../../../../core/src/core/core.module';
+import { SharedModule } from '../../../../../core/src/shared/shared.module';
+import {
+  ApplicationEnvVarsHelper
+} from '../../../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 describe('CfAppAutoscalerEventsConfigService', () => {
   const initialState = getInitialTestStoreState();
@@ -25,6 +26,8 @@ describe('CfAppAutoscalerEventsConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        ApplicationEnvVarsHelper,
+        DatePipe,
         CfAppAutoscalerEventsConfigService,
         EntityServiceFactory,
         generateTestEntityServiceProvider(
@@ -40,9 +43,7 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         CommonModule,
         CoreModule,
         SharedModule,
-        ApplicationsModule,
         createBasicStoreModule(),
-        RouterTestingModule,
         CfAutoscalerTestingModule
       ]
     });
