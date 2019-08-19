@@ -808,10 +808,6 @@ function generateCFMetrics(endpointDefinition: IStratosEndpointDefinition) {
     definition,
     {
       dataReducers: [
-        // TODO: RC CI fix metrics related unit tests search for issue number (STRAT-152)
-        // TODO: RC CI fix clear of cf metrics on disconnect/unregister (doesn't follow entity/metadata format used in endpointDisconnectRemoveEntitiesReducer)
-        // TODO: RC CI Fix downstream metrics
-        // TODO: RC Autoscaler - test
         endpointDisconnectRemoveEntitiesReducer(),
       ],
     }
