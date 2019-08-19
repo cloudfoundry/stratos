@@ -9,6 +9,7 @@ import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-f
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
@@ -21,7 +22,7 @@ import { AppState } from '../../../../store/src/app-state';
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
@@ -30,7 +31,6 @@ import {
   GetAppAutoscalerAppMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerScalingHistoryAction,
-  UpdateAppAutoscalerPolicyAction,
 } from '../../store/app-autoscaler.actions';
 import {
   AppAutoscalerFetchPolicyFailedResponse,
@@ -40,11 +40,7 @@ import {
   AppAutoscalerScalingHistory,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
-import {
-  appAutoscalerAppMetricEntityType,
-  appAutoscalerPolicyEntityType,
-  autoscalerEntityFactory,
-} from '../../store/autoscaler-entity-factory';
+import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
 
 const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
   // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
@@ -223,7 +219,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
 
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error),
+      filter(request => !!request.error && !request.fetching),
       map(request => {
         const msg = request.message;
         request.error = false;
@@ -276,13 +272,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   detachPolicy(): Observable<ActionState> {
-    this.store.dispatch(
-      new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-    );
-    const actionState = selectUpdateInfo(appAutoscalerPolicyEntityType,
-      this.applicationService.appGuid,
-      UpdateAppAutoscalerPolicyAction.updateKey);
-    return this.store.select(actionState).pipe(filter(item => !!item));
+    const action = new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid);
+    this.store.dispatch(action);
+
+    const catalogueEntity = entityCatalogue.getEntity(action);
+    const actionState = selectDeletionInfo(catalogueEntity.entityKey, this.applicationService.appGuid);
+    return this.store.select(actionState).pipe(filter(item => !item.deleted));
   }
 
   updatePolicyPage = () => {
