@@ -1,9 +1,10 @@
+import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
 import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
+  systemInfoEntitySchema,
   userFavoritesEntitySchema,
   userProfileEntitySchema,
-  systemInfoEntitySchema,
 } from './base-entity-schemas';
 import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
@@ -31,8 +32,12 @@ class DefaultEndpointCatalogueEntity extends StratosCatalogueEntity {
     super({
       schema: endpointEntitySchema,
       type: endpointEntitySchema.entityType,
-      endpoint: stratosType
-    });
+      endpoint: stratosType,
+    }, {
+        dataReducers: [
+          systemEndpointsReducer
+        ]
+      });
   }
 }
 

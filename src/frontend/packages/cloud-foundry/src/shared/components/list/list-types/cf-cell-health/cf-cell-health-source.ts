@@ -7,9 +7,9 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { FetchCFCellMetricsPaginatedAction } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
 
 export interface CfCellHealthEntry {
   timestamp: number;

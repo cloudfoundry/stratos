@@ -5,16 +5,16 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { cfEntityFactory, spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { AppState } from '../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 
 
 @Component({
@@ -82,7 +82,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
         action: new GetOrganizationSpaceQuotaDefinitions(spaceQuotaPaginationKey, this.orgGuid, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           spaceQuotaPaginationKey,
-          entityFactory(spaceQuotaEntityType)
+          cfEntityFactory(spaceQuotaEntityType)
         )
       },
       true
