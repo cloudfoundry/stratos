@@ -15,7 +15,7 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
-import { CreateApplication } from './po/create-application.po';
+import { DeployApplication } from './po/deploy-app.po';
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -65,12 +65,12 @@ describe('Application Deploy -', () => {
     beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(function() {
+    beforeEach(function () {
       originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
       jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
     });
 
-    afterEach(function() {
+    afterEach(function () {
       jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });
 
@@ -78,7 +78,7 @@ describe('Application Deploy -', () => {
     describe('Should deploy app from GitHub', () => {
 
       const loggingPrefix = 'Application Deploy: Deploy from Github:';
-      let deployApp;
+      let deployApp: DeployApplication;
 
       beforeAll(() => {
         // Should be on deploy app modal

@@ -93,6 +93,7 @@ import { TileGridComponent } from './components/tile/tile-grid/tile-grid.compone
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
+import { UnlimitedInputComponent } from './components/unlimited-input/unlimited-input.component';
 import {
   UploadProgressIndicatorComponent,
 } from './components/upload-progress-indicator/upload-progress-indicator.component';
@@ -209,7 +210,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
     SnackBarReturnComponent,
-    PollingIndicatorComponent
+    PollingIndicatorComponent,
+    UnlimitedInputComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -296,7 +298,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AppNameUniqueDirective,
-    PollingIndicatorComponent
+    PollingIndicatorComponent,
+    UnlimitedInputComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

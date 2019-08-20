@@ -3,6 +3,9 @@ import { ApplicationModule, NgModule } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
+import {
+  TableCellQuotaComponent,
+} from '../../../../core/src/shared/components/list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import {
   AddServiceInstanceBaseStepComponent,
@@ -232,6 +235,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     TableCellUsageComponent,
+    TableCellQuotaComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -315,6 +319,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     TableCellUsageComponent,
+    TableCellQuotaComponent
   ]
 })
 export class CloudFoundryComponentsModule { }

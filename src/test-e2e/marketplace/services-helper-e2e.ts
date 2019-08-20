@@ -108,7 +108,7 @@ export class ServicesHelperE2E {
 
       this.setServiceInstanceDetail(serviceInstanceName);
 
-      this.createInstanceAttempt(0, 4, serviceName, serviceInstanceName);
+      this.createInstanceAttempt(0, 8, serviceName, serviceInstanceName);
     });
   }
 
