@@ -4,6 +4,10 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import {
+  GetSpaceQuotaDefinition,
+  UpdateSpaceQuotaDefinition,
+} from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -12,8 +16,6 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
-import { GetSpaceQuotaDefinition, UpdateSpaceQuotaDefinition } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 
 
 @Component({
@@ -60,9 +62,10 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-    this.store.dispatch(new UpdateSpaceQuotaDefinition(this.spaceQuotaGuid, this.cfGuid, formValues));
+    const action = new UpdateSpaceQuotaDefinition(this.spaceQuotaGuid, this.cfGuid, formValues);
+    this.store.dispatch(action);
 
-    return this.store.select(selectRequestInfo(spaceQuotaEntityType, this.spaceQuotaGuid)).pipe(
+    return this.store.select(selectRequestInfo(action, this.spaceQuotaGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateSpaceQuotaDefinition.UpdateExistingSpaceQuota].busy),
       map(o => o.updating[UpdateSpaceQuotaDefinition.UpdateExistingSpaceQuota]),
       map(requestInfo => ({

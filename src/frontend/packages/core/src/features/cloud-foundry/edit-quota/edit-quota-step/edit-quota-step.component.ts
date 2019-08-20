@@ -4,19 +4,16 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
   GetQuotaDefinition,
   UpdateQuotaDefinition,
 } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ActiveRouteCfOrgSpace } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -71,14 +68,10 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-    this.store.dispatch(new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, formValues));
+    const action = new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, formValues);
+    this.store.dispatch(action);
 
-    return this.store.select(
-      selectRequestInfo(
-        entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType),
-        this.quotaGuid
-      )
-    ).pipe(
+    return this.store.select(selectRequestInfo(action, this.quotaGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateQuotaDefinition.UpdateExistingQuota].busy),
       map(o => o.updating[UpdateQuotaDefinition.UpdateExistingQuota]),
       map(requestInfo => ({
