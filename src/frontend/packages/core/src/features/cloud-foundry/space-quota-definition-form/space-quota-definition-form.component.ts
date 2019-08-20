@@ -7,7 +7,6 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
@@ -15,6 +14,7 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 
 @Component({

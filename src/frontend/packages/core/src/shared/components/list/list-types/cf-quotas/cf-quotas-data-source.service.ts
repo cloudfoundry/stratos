@@ -5,9 +5,6 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 import {
   endpointSchemaKey,
 } from '../../../../../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { EntityMonitor } from '../../../../monitors/entity-monitor';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
@@ -17,6 +14,7 @@ import { GetQuotaDefinitions } from '../../../../../../../cloud-foundry/src/acti
 import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { quotaDefinitionEntityType, cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
 
