@@ -154,7 +154,7 @@ export class CloudFoundrySpaceService {
       )
     );
     this.quotaLink$ = combineLatest(this.quotaDefinition$, this.spaceQuotaDefinition$).pipe(
-      map(([quota, spaceQuota])  => {
+      map(([quota, spaceQuota]) => {
         if (!spaceQuota) {
           return [
             '/cloud-foundry',
@@ -170,12 +170,12 @@ export class CloudFoundrySpaceService {
           this.cfGuid,
           'organizations',
           this.orgGuid,
-          'space',
+          'spaces',
           this.spaceGuid,
           'space-quota'
         ];
       }
-    )
+      )
     );
   }
 
