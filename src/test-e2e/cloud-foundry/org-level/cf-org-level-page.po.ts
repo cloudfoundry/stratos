@@ -1,4 +1,4 @@
-import { browser, promise } from 'protractor';
+import { browser, by, promise, protractor } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
 import { ConfirmDialogComponent } from '../../po/confirm-dialog';
@@ -7,6 +7,9 @@ import { MetaCard } from '../../po/meta-card.po';
 
 
 export class CfOrgLevelPage extends CFPage {
+
+  private readonly until = protractor.ExpectedConditions;
+
   static forEndpoint(guid: string, orgGuid): CfOrgLevelPage {
     const page = new CfOrgLevelPage();
     page.navLink = '/cloud-foundry/' + guid + '/organizations/' + orgGuid;
@@ -37,13 +40,17 @@ export class CfOrgLevelPage extends CFPage {
     return this.goToTab('Spaces', 'spaces');
   }
 
+  goToSpaceQuotasTab() {
+    return this.goToTab('Space Quotas', 'space-quota-definitions');
+  }
+
   goToUsersTab() {
     return this.goToTab('Users', 'users');
   }
 
-  clickOnSpace(spaceName: string) {
+  clickOnCard(cardName: string) {
     const list = new ListComponent();
-    list.cards.findCardByTitle(spaceName).then((card) => {
+    list.cards.findCardByTitle(cardName).then((card) => {
       expect(card).toBeDefined();
       card.click();
     });
@@ -60,6 +67,28 @@ export class CfOrgLevelPage extends CFPage {
         card.waitUntilNotShown();
       });
     });
+  }
+
+  clickOnSpaceQuota(quotaName: string) {
+    const { table } = new ListComponent();
+    table.waitUntilShown();
+
+    const row = table.findRowByCellContent(quotaName);
+    row.element(by.css('a')).click();
+  }
+
+  deleteSpaceQuota(quotaName: string, waitUntilNotShown = true) {
+    const { table } = new ListComponent();
+    table.waitUntilShown();
+
+    const row = table.findRowByCellContent(quotaName);
+    const menu = table.openRowActionMenuByRow(row);
+    menu.clickItem('Delete');
+    ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space Quota', quotaName);
+
+    if (waitUntilNotShown) {
+      browser.wait(this.until.invisibilityOf(row), 20000);
+    }
   }
 
   private goToTab(label: string, urlSuffix: string) {
