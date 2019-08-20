@@ -8,6 +8,7 @@ import {
   mergeUpdatingState,
   setEntityRequestState,
 } from './request-helpers';
+import { defaultDeletingActionState } from './types';
 
 export function succeedRequest(state: IRequestTypeState, action: ISuccessRequestAction) {
   if (action.apiAction.guid) {
@@ -34,6 +35,12 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
       requestSuccessState.error = false;
       requestSuccessState.creating = false;
       requestSuccessState.response = successAction.response;
+    }
+
+    if (action.requestType !== 'delete') {
+      requestSuccessState.deleting = {
+        ...defaultDeletingActionState
+      };
     }
 
     const newState = mergeState(

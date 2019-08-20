@@ -24,6 +24,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() value: string;
   @Input() showUsage = false;
   @Input() textOnly = false;
+  @Input() labelAtTop = false;
   @Input() link: () => void | string;
 
   formattedValue: string;
@@ -31,6 +32,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   usage: string;
 
   status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
+  isUnlimited: boolean;
 
   constructor(private utils: UtilsService, private store: Store<AppState>) { }
 
@@ -56,7 +58,14 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   handleValue() {
-    this.formattedValue = this.formatForUnits(this.value);
+    const value = parseInt(this.value, 10);
+    this.isUnlimited = false;
+    if (value === -1) {
+      this.formattedValue = 'Unlimited';
+      this.isUnlimited = true;
+    } else {
+      this.formattedValue = this.formatForUnits(this.value);
+    }
 
     if (!this.limit) {
       return;
@@ -70,7 +79,6 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       this.formattedLimit = '∞';
       this.usage = '';
     } else {
-      const value = parseInt(this.value, 10);
       this.formattedLimit = this.formatForUnits(this.limit);
       this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
     }

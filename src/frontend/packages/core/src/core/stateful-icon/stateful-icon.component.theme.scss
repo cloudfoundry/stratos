@@ -5,13 +5,16 @@
   $status-warning: map-get($status-colors, warning);
   $status-danger: map-get($status-colors, danger);
   $status-tentative: map-get($status-colors, tentative);
-  .warning {
-    color: $status-warning;
-  }
-  .error {
-    color: $status-danger;
-  }
-  .ok {
-    color: $status-success;
+
+  .stateful-icon {
+    .warning {
+      color: $status-warning;
+    }
+    .error {
+      color: $status-danger;
+    }
+    .ok {
+      color: $status-success;
+    }
   }
 }

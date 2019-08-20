@@ -2,11 +2,18 @@ import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
+import { CustomImportModule } from '../../custom-import.module';
 import { SharedModule } from '../../shared/shared.module';
+import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
+import {
+  DeleteAppServiceInstancesComponent,
+} from './application-delete/delete-app-instances/delete-app-instances.component';
+import { DeleteAppRoutesComponent } from './application-delete/delete-app-routes/delete-app-routes.component';
 import { ApplicationMonitorService } from './application-monitor.service';
 import { ApplicationWallComponent } from './application-wall/application-wall.component';
 import { ApplicationService } from './application.service';
 import { ApplicationBaseComponent } from './application/application-base.component';
+import { ApplicationPollComponent } from './application/application-tabs-base/application-poll/application-poll.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
@@ -22,17 +29,13 @@ import { RoutesTabComponent } from './application/application-tabs-base/tabs/rou
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
+import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
+import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
-import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
-import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
-import { DeleteAppRoutesComponent } from './application-delete/delete-app-routes/delete-app-routes.component';
-import { DeleteAppServiceInstancesComponent } from './application-delete/delete-app-instances/delete-app-instances.component';
-import { CustomImportModule } from '../../custom-import.module';
-import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 
 @NgModule({
   imports: [
@@ -65,6 +68,7 @@ import { NewApplicationBaseStepComponent } from './new-application-base-step/new
     DeleteAppRoutesComponent,
     DeleteAppServiceInstancesComponent,
     NewApplicationBaseStepComponent,
+    ApplicationPollComponent
   ],
   providers: [
     ApplicationService,

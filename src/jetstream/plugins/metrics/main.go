@@ -195,7 +195,14 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		return tr, false, nil
 	} else if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		return nil, false, interfaces.LogHTTPError(res, err)
+		errMessage := ""
+		if res.StatusCode == http.StatusUnauthorized {
+			errMessage = ": Unauthorized"
+		}
+		return nil, false, interfaces.NewHTTPShadowError(
+			res.StatusCode,
+			fmt.Sprintf("Could not connect to the endpoint%s", errMessage),
+			"Could not connect to the endpoint: %s", err)
 	}
 
 	defer res.Body.Close()
@@ -262,14 +269,17 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		url = fmt.Sprintf("wss://%s", environment)
 	}
 
+	// Array for case that metrics are provided for multiple endpoints
+	var metricsMetadata []*MetricsProviderMetadata
 	storeMetadata := &MetricsProviderMetadata{
 		Type:        "cf",
 		URL:         url,
 		Job:         job,
 		Environment: environment,
 	}
+	metricsMetadata = append(metricsMetadata, storeMetadata)
 
-	jsonMsg, err := json.Marshal(storeMetadata)
+	jsonMsg, err := json.Marshal(metricsMetadata)
 	if err != nil {
 		return "", interfaces.LogHTTPError(res, err)
 	}

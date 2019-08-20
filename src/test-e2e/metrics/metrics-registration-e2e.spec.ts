@@ -11,6 +11,8 @@ describe('Metrics', () => {
   const register = new RegisterStepper();
   const tileSelector = new TileSelector();
 
+  const spoofMetricsEndpoint = e2e.secrets.getDefaultCFEndpoint().url;
+
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
@@ -21,6 +23,7 @@ describe('Metrics', () => {
     endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
     endpointsPage.register();
     tileSelector.select('Metrics');
+    register.stepper.waitForStep('Register');
     expect(register.isRegisterDialog()).toBeTruthy();
     expect(register.stepper.canNext()).toBeFalsy();
 
@@ -31,8 +34,8 @@ describe('Metrics', () => {
 
     register.form.fill({
       name: 'MetricsTest',
-      url: 'https://www.google.com',
-      skipsll: false
+      url: spoofMetricsEndpoint,
+      skipsll: true
     });
 
     register.form.getControlsMap().then(fields => {
@@ -42,7 +45,14 @@ describe('Metrics', () => {
 
     expect(register.stepper.canNext()).toBeTruthy();
     register.stepper.next();
+
+    // Skipping connect step
+    register.stepper.waitForStep('Connect (Optional)');
+    register.stepper.waitForStepNotBusy();
+    register.stepper.waitUntilCanNext('Finish');
+    expect(register.stepper.canNext()).toBeTruthy();
     register.stepper.next();
+
     expect(register.isRegisterDialog()).toBeFalsy();
 
     // Check that we have one row
@@ -52,7 +62,7 @@ describe('Metrics', () => {
     expect(endpointsPage.cards.getCardCount()).toBe(1);
     endpointsPage.cards.getEndpointDataForEndpoint('MetricsTest', 'Metrics').then((data: EndpointMetadata) => {
       expect(data.name).toEqual('MetricsTest');
-      expect(data.url).toEqual('https://www.google.com');
+      expect(data.url).toEqual(spoofMetricsEndpoint);
       expect(data.connected).toBeFalsy();
     });
   });

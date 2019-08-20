@@ -47,6 +47,9 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
       columnId: CfRoutesListConfigBase.columnIdMappedApps,
       headerCell: () => 'Attached Applications',
       cellComponent: TableCellRouteAppsAttachedComponent,
+      cellConfig: {
+        breadcrumbs: 'cf',
+      },
       cellFlex: '4',
     },
     {

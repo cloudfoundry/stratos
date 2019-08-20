@@ -9,8 +9,19 @@
           <app-metadata-item label="User Space Role/s">
             {{ (cfSpaceService.userRole$ | async) }}
           </app-metadata-item>
-          <app-metadata-item label="Quota Definition Name">
-            {{ (cfSpaceService.quotaDefinition$ | async)?.name }}
+          <app-metadata-item label="Quota Definition">
+            <ng-container
+              *ngIf="(cfSpaceService.spaceQuotaDefinition$ | async) as spaceQuotaDefinition; else fallBackQuota">
+              <a [routerLink]="cfSpaceService.quotaLink$ | async">
+                {{ spaceQuotaDefinition.name }}
+              </a>
+            </ng-container>
+            <ng-template #fallBackQuota>
+              None assigned
+              <span *ngIf="cfSpaceService.quotaDefinition$ | async as quotaDefinition"> - <a
+                  [routerLink]="" (click)="goToOrgQuota($event)">view organization's quota</a>
+              </span>
+            </ng-template>
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
             <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed"

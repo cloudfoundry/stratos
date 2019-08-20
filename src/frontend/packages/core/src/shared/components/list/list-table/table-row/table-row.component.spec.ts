@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of as observableOf } from 'rxjs';
+
 import { CoreModule } from '../../../../../core/core.module';
 import { TableRowComponent } from './table-row.component';
 
@@ -19,7 +20,8 @@ describe('TableRowComponent', () => {
   class TestHostComponent {
     rowState1 = observableOf({
       error: true,
-      blocked: true
+      blocked: true,
+      message: 'Error message'
     });
     rowState2 = observableOf({
       error: false,
@@ -34,7 +36,7 @@ describe('TableRowComponent', () => {
     fixture.elementRef.nativeElement.getElementsByClassName(className)[0],
     fixture.elementRef.nativeElement.getElementsByClassName(className)[1]
   ]);
-  const elementShown = (element: Element) => window.getComputedStyle(element).display !== 'none';
+  const elementShown = (element: Element) => element && window.getComputedStyle(element).display !== 'none';
 
 
   beforeEach(async(() => {

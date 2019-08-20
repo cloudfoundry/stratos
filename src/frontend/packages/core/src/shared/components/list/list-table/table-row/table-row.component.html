@@ -10,7 +10,7 @@
       <ng-container cdkCellOutlet></ng-container>
     </div>
   </div>
-  <div class="table-row__error mat-row">
+  <div class="table-row__error mat-row" *ngIf="errorMessage$ | async">
     <mat-icon class="table-row__error-icon">warning</mat-icon>
     <div class="table-row__error-message" [innerHTML]="errorMessage$ | async">
     </div>

@@ -19,6 +19,8 @@ import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../../shared/enti
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { ApplicationService } from '../../../../application.service';
 import { entityServiceFactory } from '../../../application-base.component';
+import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
+import { ApplicationPollingService } from '../../application-polling.service';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
@@ -32,7 +34,8 @@ describe('BuildTabComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         BuildTabComponent,
-        ViewBuildpackComponent
+        ViewBuildpackComponent,
+        ApplicationPollComponent
       ],
       imports: [
         CoreModule,
@@ -62,6 +65,7 @@ describe('BuildTabComponent', () => {
           useFactory: entityServiceFactory,
           deps: [CF_GUID, APP_GUID, EntityServiceFactory]
         },
+        ApplicationPollingService
       ]
     })
       .compileComponents();

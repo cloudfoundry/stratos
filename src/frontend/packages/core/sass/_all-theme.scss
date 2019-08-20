@@ -26,6 +26,7 @@
 @import '../src/shared/components/log-viewer/log-viewer.component.theme';
 @import '../src/shared/components/chips/chips.component.theme';
 @import '../src/shared/components/cards/card-number-metric/card-number-metric.component.theme';
+@import '../src/shared/components/cards/card-boolean-metric/card-boolean-metric.component.theme';
 @import '../src/shared/components/simple-usage-chart/simple-usage-chart.component.theme';
 @import '../src/core/dot-content/dot-content.component.theme';
 @import '../src/shared/components/stratos-title/stratos-title.component.theme';
@@ -119,6 +120,7 @@ $side-nav-light-active: #484848;
   @include app-deploy-app-theme($theme, $app-theme);
   @include app-cloud-foundry-firehose-theme($theme, $app-theme);
   @include app-card-number-metric-theme($theme, $app-theme);
+  @include app-card-boolean-metric-theme($theme, $app-theme);
   @include app-dot-content($theme, $app-theme);
   @include stratos-title-component-theme($theme, $app-theme);
   @include app-page-header-theme($theme, $app-theme);
