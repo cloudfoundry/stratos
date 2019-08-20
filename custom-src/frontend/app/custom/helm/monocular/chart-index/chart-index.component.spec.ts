@@ -20,7 +20,7 @@ import { GetMonocularCharts } from '../../store/helm.actions';
 
 export class MockChartService {
 
-  public getCharts(){
+  public getCharts() {
     return observableOf([]);
   }
 }
