@@ -3,6 +3,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { createUserRoleInOrg } from '../../cloud-foundry/src/store/types/user.types';
+import { InternalAppState } from '../../store/src/app-state';
 import { appReducers } from '../../store/src/reducers.module';
 import { getDefaultRequestState } from '../../store/src/reducers/api-request-reducer/types';
 import {
@@ -22011,7 +22012,7 @@ function getDefaultInitialTestStoreState(): CFAppState {
 }
 
 /* tslint:enable */
-export function createBasicStoreModule(initialState: InternalAppState= getInitialTestStoreState()): ModuleWithProviders {
+export function createBasicStoreModule(initialState: InternalAppState = getInitialTestStoreState()): ModuleWithProviders {
   return StoreModule.forRoot(
     appReducers,
     {

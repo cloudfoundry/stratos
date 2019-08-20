@@ -20,6 +20,7 @@ import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers'
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
+import { InternalAppState } from '../../../../../store/src/app-state';
 
 class MockedNgZone {
   run = fn => fn();
@@ -50,7 +51,7 @@ describe('ListComponent', () => {
       };
     }
 
-    function setup(store: CFAppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
+    function setup(store: InternalAppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -63,7 +64,7 @@ describe('ListComponent', () => {
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (
-        iStore: Store<CFAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
+        iStore: Store<InternalAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
       ) => {
         const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);

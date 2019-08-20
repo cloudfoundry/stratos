@@ -1,10 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { appStatsEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { AppStat } from '../../../../../cloud-foundry/src/store/types/app-metadata.types';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
@@ -15,18 +13,14 @@ import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitor
   styleUrls: ['./running-instances.component.scss']
 })
 export class RunningInstancesComponent implements OnInit {
-  // TODO Typing
-  @Input() instances;
-  @Input() cfGuid;
-  @Input() appGuid;
+  @Input() instances: number;
+  @Input() cfGuid: string;
+  @Input() appGuid: string;
 
   // Observable on the running instances count for the application
   public runningInstances$: Observable<number>;
 
-  constructor(
-    store: Store<CFAppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory
-  ) { }
+  constructor(private paginationMonitorFactory: PaginationMonitorFactory) { }
 
   ngOnInit() {
     const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);

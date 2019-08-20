@@ -12,7 +12,7 @@ import {
 } from '../../../store/src/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
-import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
+import { EntityRequestAction, ICFAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
@@ -23,6 +23,7 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
     entityRequestInfo.deleting.deleted;
+  // TODO: RC test removal of updating._root_.busy
 }
 
 /**
@@ -134,7 +135,7 @@ export class EntityService<T = any> {
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
     const isBlocked = isEntityBlocked(entityRequestInfo);
-    return entity && !isEntityBlocked(entityRequestInfo);
+    return entity && !isBlocked;
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {

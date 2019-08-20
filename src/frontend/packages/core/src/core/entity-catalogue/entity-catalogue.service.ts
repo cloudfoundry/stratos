@@ -1,10 +1,14 @@
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
-import { StratosBaseCatalogueEntity, StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
+import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import {
+  StratosBaseCatalogueEntity,
+  StratosCatalogueEndpointEntity,
+  StratosCatalogueEntity,
+} from './entity-catalogue-entity';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
-import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 
 class EntityCatalogue {
   protected entities: Map<string, StratosCatalogueEntity> = new Map();
@@ -97,6 +101,7 @@ class EntityCatalogue {
   public getEntityFromKey(entityKey: string) {
     return this.entities.get(entityKey) || this.endpoints.get(entityKey);
   }
+
   /* tslint:disable:max-line-length */
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     entityConfig: EntityCatalogueEntityConfig

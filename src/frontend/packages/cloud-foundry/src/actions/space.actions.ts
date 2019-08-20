@@ -257,7 +257,7 @@ export class GetServiceInstancesForSpace
     public spaceGuid: string,
     public endpointGuid: string,
     public paginationKey: string,
-    public q: QParam[] = null,
+    public q: string[] = null,
     public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true,
     public flattenPagination = true

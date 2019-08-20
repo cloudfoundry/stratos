@@ -1,9 +1,8 @@
-import { BuildEntityRequestPipe } from '../entity-request-pipeline.types';
-import { HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
-import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { environment } from '../../../../core/src/environments/environment';
+import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
-import { InternalAppState } from '../../app-state';
+
+import { environment } from '../../../../core/src/environments/environment';
+import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 

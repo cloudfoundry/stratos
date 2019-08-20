@@ -1,5 +1,5 @@
-import { JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
+import { JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
 
 export class JetstreamError {
   constructor(
@@ -85,14 +85,6 @@ function postProcessSuccessResponses(
       endpointGuid,
       entities
     };
-    // We have multiple pages for this endpoint response
-    // return response.map(singleResponse => postProcessSuccessResponse(
-    //   singleResponse,
-    //   endpointGuid,
-    //   action,
-    //   postSuccessDataMapper,
-    //   getEntitiesFromResponse)
-    // );
   }
   return {
     endpointGuid,

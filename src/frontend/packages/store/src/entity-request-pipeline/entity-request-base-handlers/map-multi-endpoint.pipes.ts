@@ -1,14 +1,16 @@
+import { Action } from '@ngrx/store';
+
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../../types/api.types';
+import { EntityRequestAction } from '../../types/request.types';
 import { getSuccessMapper } from '../pipeline-helpers';
+import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
+import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
 import { normalizeEntityPipeFactory } from './normalize-entity-request-response.pipe';
-import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
-import { EntityRequestAction } from '../../types/request.types';
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
-import { Action } from '@ngrx/store';
-import { NormalizedResponse } from '../../types/api.types';
+
 function getEntities(
   endpointResponse: {
     normalizedEntities: NormalizedResponse<any>;
@@ -66,7 +68,6 @@ export function mapMultiEndpointResponses(
     requestType,
     multiEndpointResponses.errors
   );
-  console.log(multiEndpointResponses);
   if (multiEndpointResponses.errors && multiEndpointResponses.errors.length) {
     return {
       success: false,

@@ -430,21 +430,24 @@ describe('Entity Relations - validate -', () => {
         [createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType)],
         true);
 
-      const associateAction = new WrapperRequestActionSuccess({
-        entities: {
-          [orgEntityKey]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
-        },
-        result: [orgGuid]
-      }, {
+      const associateAPIAction: EntityRequestAction = {
         endpointGuid: getOrgAction.endpointGuid,
         entity: getOrgAction.entity[0],
         entityLocation: RequestEntityLocation.OBJECT,
         guid: orgGuid,
         entityType: organizationEntityType,
         type: '[Entity] Associate with parent',
-        childEntityKey: quotaEntityKey,
+        // childEntityKey: quotaEntityKey, // TODO: RC Check
         endpointType: CF_ENDPOINT_TYPE
-      } as EntityRequestAction, 'fetch', 1, 1);
+      };
+
+      const associateAction = new WrapperRequestActionSuccess({
+        entities: {
+          [orgEntityKey]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
+        },
+        result: [orgGuid]
+      }, associateAPIAction, 'fetch', 1, 1);
+
 
       inject([Store], (iStore: Store<InternalAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();

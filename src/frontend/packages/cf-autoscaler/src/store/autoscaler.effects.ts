@@ -5,6 +5,7 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
 import { AppState } from '../../../store/src/app-state';
@@ -52,7 +53,6 @@ import {
   AppAutoscalerPolicyLocal,
   AppScalingTrigger,
 } from './app-autoscaler.types';
-import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -411,17 +411,17 @@ export class AutoscalerEffects {
     const searchParams = new URLSearchParams();
     if (initialParams) {
       Object.keys(initialParams).forEach((key) => {
-        searchParams.set(key, initialParams[key] as string);
+        searchParams.set(key, initialParams[key].toString());
       });
     }
     if (params) {
       Object.keys(params).forEach((key) => {
-        searchParams.set(key, params[key] as string);
+        searchParams.set(key, params[key].toString());
       });
     }
     if (paginationParams) {
       Object.keys(paginationParams).forEach((key) => {
-        searchParams.set(key, paginationParams[key] as string);
+        searchParams.set(key, paginationParams[key].toString());
       });
     }
     return searchParams;

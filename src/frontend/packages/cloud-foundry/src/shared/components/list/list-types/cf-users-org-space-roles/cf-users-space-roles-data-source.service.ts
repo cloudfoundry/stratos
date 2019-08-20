@@ -19,8 +19,6 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
   constructor(
-    cfGuid: string,
-    orgGuid: string,
     spaceGuid: string,
     store: Store<CFAppState>,
     userPerms: CurrentUserPermissionsService,

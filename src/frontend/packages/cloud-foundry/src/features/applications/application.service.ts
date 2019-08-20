@@ -49,11 +49,12 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+
+import { getRoute, isTCPRoute } from './routes/routes.helper';
 import {
   ApplicationEnvVarsHelper,
-  EnvVarStratosProject,
+  EnvVarStratosProject
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { rootUpdatingKey, ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -281,7 +282,6 @@ export class ApplicationService {
     this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
 
     this.isUpdatingApp$ = this.appEntityService.entityObs$.pipe(map(a => {
-      console.log(a.entityRequestInfo);
       const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
       const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
       return !!updatingRoot.busy || !!updatingSection.busy;

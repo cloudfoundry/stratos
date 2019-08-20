@@ -1,11 +1,10 @@
-import { RequestMethod, RequestOptions } from '@angular/http';
+import { HttpRequest } from '@angular/common/http';
+import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { MetricQueryConfig } from '../actions/metrics.actions';
 import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
-import { HttpRequest } from '@angular/common/http';
 
 
 

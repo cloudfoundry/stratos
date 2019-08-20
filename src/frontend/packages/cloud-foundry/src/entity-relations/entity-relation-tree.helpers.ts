@@ -1,11 +1,11 @@
-import { PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
-import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { Observable } from 'rxjs';
-import { ValidateResultFetchingState } from './entity-relations.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { map } from 'rxjs/operators';
+
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
-import { getPaginationKey } from '../../../store/src/actions/pagination.actions';
+import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
+import { EntityInlineParentAction, ValidateResultFetchingState } from './entity-relations.types';
 
 export function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
   Observable<ValidateResultFetchingState> {
@@ -19,7 +19,7 @@ export function createValidationPaginationWatcher(store, paramPaginationAction: 
 }
 
 
-export function isEntityInlineParentAction(anything: any): boolean {
-  return anything && !!anything.includeRelations && anything.populateMissing !== undefined;
+export function isEntityInlineParentAction(anything: any): EntityInlineParentAction {
+  return anything && !!anything.includeRelations && anything.populateMissing !== undefined ? anything as EntityInlineParentAction : null;
 }
 
