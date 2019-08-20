@@ -1,9 +1,13 @@
 import {
+  addOrUpdateUserFavoriteMetadataReducer,
+  deleteUserFavoriteMetadataReducer,
+} from '../../store/src/reducers/favorite.reducer';
+import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
+  systemInfoEntitySchema,
   userFavoritesEntitySchema,
   userProfileEntitySchema,
-  systemInfoEntitySchema,
 } from './base-entity-schemas';
 import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
@@ -42,6 +46,11 @@ class UserFavoriteCatalogueEntity extends StratosCatalogueEntity {
       schema: userFavoritesEntitySchema,
       type: userFavoritesEntitySchema.entityType,
       endpoint: stratosType,
+    }, {
+      dataReducers: [
+        addOrUpdateUserFavoriteMetadataReducer,
+        deleteUserFavoriteMetadataReducer,
+      ]
     });
   }
 }
