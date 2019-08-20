@@ -6,7 +6,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { SetupUAA } from '../../../../../store/src/actions/setup.actions';
+import { SetupUAA, SetupUAASave } from '../../../../../store/src/actions/setup.actions';
 import { InternalAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
