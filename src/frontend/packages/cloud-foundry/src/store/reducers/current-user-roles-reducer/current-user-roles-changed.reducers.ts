@@ -1,19 +1,11 @@
-import { ChangeUserRole } from '../../../../cloud-foundry/src/actions/users.actions';
-import {
-  defaultUserOrgRoleState,
-} from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-org.reducer';
-import {
-  defaultUserSpaceRoleState,
-} from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-space.reducer';
-import {
-  ICfRolesState,
-  IOrgRoleState,
-  ISpaceRoleState,
-} from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { PermissionStrings } from '../../../../core/src/core/current-user-permissions.config';
-import { ICurrentUserRolesState } from '../../types/current-user-roles.types';
-import { APISuccessOrFailedAction } from '../../types/request.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../../cloud-foundry/src/store/types/user.types';
+import { PermissionStrings } from '../../../../../core/src/core/current-user-permissions.config';
+import { ICurrentUserRolesState } from '../../../../../store/src/types/current-user-roles.types';
+import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
+import { ChangeUserRole } from '../../../actions/users.actions';
+import { ICfRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/cf-current-user-roles.types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
+import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
+import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
 
 export function updateAfterRoleChange(
   state: ICurrentUserRolesState,
