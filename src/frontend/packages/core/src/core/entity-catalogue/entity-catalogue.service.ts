@@ -7,8 +7,8 @@ import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinit
 import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 
 class EntityCatalogue {
-  private entities: Map<string, StratosCatalogueEntity> = new Map();
-  private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
+  protected entities: Map<string, StratosCatalogueEntity> = new Map();
+  protected endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
     if (this.endpoints.has(endpoint.entityKey)) {
@@ -178,6 +178,15 @@ class EntityCatalogue {
 }
 
 // Only to be used for tests
-export class TestEntityCatalogue extends EntityCatalogue { }
+export class TestEntityCatalogue extends EntityCatalogue {
+  public clear() {
+    this.endpoints.clear();
+    this.entities.clear();
+  }
+}
 
-export const entityCatalogue = new EntityCatalogue();
+// FIXME: This shouldn't make it into the production code. It's quite the anti pattern but fixes the tests for the time being.
+// https://github.com/cloudfoundry-incubator/stratos/issues/3753 - Reverting the entity catalogue to an Angular service
+// makes testing much easier and remove the need for this.
+/* tslint:disable-next-line:no-string-literal  */
+export const entityCatalogue = !!window['__karma__'] ? new TestEntityCatalogue() : new EntityCatalogue();

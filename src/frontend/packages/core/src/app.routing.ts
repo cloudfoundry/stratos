@@ -27,7 +27,8 @@ const appRoutes: Routes = [
     canActivate: [AuthGuardService, EndpointsService],
     children: [
       {
-        path: 'home', component: HomePageComponent,
+        path: 'home',
+        component: HomePageComponent,
         data: {
           stratosNavigation: {
             label: 'Home',
@@ -39,7 +40,7 @@ const appRoutes: Routes = [
       },
       {
         path: 'applications',
-        loadChildren: './features/applications/applications.module#ApplicationsModule',
+        loadChildren: '../../cloud-foundry/src/features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
             label: 'Applications',
@@ -68,7 +69,7 @@ const appRoutes: Routes = [
         }]
       },
       {
-        path: 'marketplace', loadChildren: './features/service-catalog/service-catalog.module#ServiceCatalogModule',
+        path: 'marketplace', loadChildren: '../../cloud-foundry/src/features/service-catalog/service-catalog.module#ServiceCatalogModule',
         data: {
           stratosNavigation: {
             label: 'Marketplace',
@@ -78,7 +79,7 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'services', loadChildren: './features/services/services.module#ServicesModule',
+        path: 'services', loadChildren: '../../cloud-foundry/src/features/services/services.module#ServicesModule',
         data: {
           stratosNavigation: {
             label: 'Services',
@@ -89,7 +90,7 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'cloud-foundry', loadChildren: './features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
+        path: 'cloud-foundry', loadChildren: '../../cloud-foundry/src/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
         data: {
           stratosNavigation: {
             label: 'Cloud Foundry',

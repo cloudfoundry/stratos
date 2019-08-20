@@ -9,10 +9,11 @@ import { ApplicationService } from '../../../../core/src/features/applications/a
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { AppStoreExtensionsModule } from '../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
-import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
+import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
 
 describe('AutoscalerTabExtensionComponent', () => {
   let component: AutoscalerTabExtensionComponent;
@@ -25,13 +26,14 @@ describe('AutoscalerTabExtensionComponent', () => {
         CardAutoscalerDefaultComponent,
       ],
       imports: [
+        AppStoreExtensionsModule,
+        CfAutoscalerTestingModule,
         BrowserAnimationsModule,
-        createBasicStoreModule(),
+        createEmptyStoreModule(),
         CoreModule,
         SharedModule,
         NgxChartsModule,
         RouterTestingModule,
-        CfAutoscalerTestingModule,
       ],
       providers: [
         DatePipe,
@@ -51,4 +53,6 @@ describe('AutoscalerTabExtensionComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  afterAll(() => { });
 });

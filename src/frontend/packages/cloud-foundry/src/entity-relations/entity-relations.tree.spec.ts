@@ -1,13 +1,14 @@
-import { CFEntitySchema } from '../cf-entity-factory';
 import { fetchEntityTree } from './entity-relations.tree';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CFEntitySchema } from '../cf-entity-factory';
 
 describe('Entity Relations - Tree', () => {
 
   function createBaseAction(): EntityInlineParentAction {
     const entityKey = 'parent';
     return {
-      endpointType: 'cf',
+      endpointType: CF_ENDPOINT_TYPE,
       entityType: entityKey,
       entity: new CFEntitySchema(entityKey),
       includeRelations: [],
@@ -58,50 +59,50 @@ describe('Entity Relations - Tree', () => {
     const childSchema = new CFEntitySchema('child1');
 
     const action = createBaseAction();
-    action.includeRelations = [createEntityRelationKey(action.entityType, childSchema.key)];
+    action.includeRelations = [createEntityRelationKey(action.entityType, childSchema.entityType)];
     action.entity = new CFEntitySchema(action.entityType, {
       entity: {
-        [childSchema.key]: childSchema
+        [childSchema.entityType]: childSchema
       }
     });
 
     const res = fetchEntityTree(action, false);
     expect(res.maxDepth).toBe(1);
     expect(res.requiredParamNames.length).toBe(1);
-    expect(res.requiredParamNames).toEqual([childSchema.key]);
+    expect(res.requiredParamNames).toEqual([childSchema.entityType]);
   });
 
   it('relation depth of 2 with relations', () => {
     const child2Schema = new CFEntitySchema('child2');
     const child1Schema = new CFEntitySchema('child1', {
       entity: {
-        [child2Schema.key]: child2Schema
+        [child2Schema.entityType]: child2Schema
       }
     });
 
     const action = createBaseAction();
     action.includeRelations = [
-      createEntityRelationKey(action.entityType, child1Schema.key),
-      createEntityRelationKey(child1Schema.key, child2Schema.key)
+      createEntityRelationKey(action.entityType, child1Schema.entityType),
+      createEntityRelationKey(child1Schema.entityType, child2Schema.entityType)
     ];
-    action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.key]: child1Schema } });
+    action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.entityType]: child1Schema } });
 
     const res = fetchEntityTree(action, false);
     expect(res.maxDepth).toBe(2);
     expect(res.requiredParamNames.length).toBe(2);
-    expect(res.requiredParamNames).toEqual([child1Schema.key, child2Schema.key]);
+    expect(res.requiredParamNames).toEqual([child1Schema.entityType, child2Schema.entityType]);
   });
 
   it('relation depth of 2 without relations', () => {
     const child2Schema = new CFEntitySchema('child2');
     const child1Schema = new CFEntitySchema('child1', {
       entity: {
-        [child2Schema.key]: child2Schema
+        [child2Schema.entityType]: child2Schema
       }
     });
 
     const action = createBaseAction();
-    action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.key]: child1Schema } });
+    action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.entityType]: child1Schema } });
 
     const res = fetchEntityTree(action, false);
     expect(res.maxDepth).toBe(0);
@@ -109,3 +110,4 @@ describe('Entity Relations - Tree', () => {
   });
 
 });
+

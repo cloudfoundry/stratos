@@ -4,9 +4,9 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { waitForCFPermissions } from '../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { CurrentUserPermissions } from '../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
-import { waitForCFPermissions } from '../features/cloud-foundry/cf.helpers';
 
 @Directive({
   selector: '[appUserPermission]'

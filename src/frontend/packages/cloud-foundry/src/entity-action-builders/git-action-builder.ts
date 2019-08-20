@@ -1,10 +1,10 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import {
-  EnvVarStratosProject,
-} from '../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { FetchBranchesForProject, FetchCommit, FetchCommits } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';
+import {
+  EnvVarStratosProject,
+} from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export const gitRepoActionBuilders = {
   getRepoInfo: (

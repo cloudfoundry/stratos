@@ -6,13 +6,13 @@ import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
