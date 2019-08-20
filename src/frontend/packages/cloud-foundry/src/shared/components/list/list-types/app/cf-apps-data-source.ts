@@ -16,7 +16,6 @@ import {
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
 import {
   distinctPageUntilChanged,
-  ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import {
   ListPaginationMultiFilterChange,

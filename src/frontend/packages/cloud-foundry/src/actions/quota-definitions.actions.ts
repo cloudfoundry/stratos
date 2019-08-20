@@ -1,7 +1,6 @@
 import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IQuotaDefinition } from '../../../core/src/core/cf-api.types';
-
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';

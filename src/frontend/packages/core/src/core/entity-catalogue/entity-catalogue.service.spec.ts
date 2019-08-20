@@ -1,10 +1,10 @@
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { endpointEntitySchema } from '../../base-entity-schemas';
+import { TestEntityCatalogue } from './entity-catalogue.service';
 import { BaseEndpointAuth } from '../../features/endpoints/endpoint-auth';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
-import { TestEntityCatalogue } from './entity-catalogue.service';
 import { IStratosEndpointDefinition } from './entity-catalogue.types';
+import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from './entity-catalogue-entity';
 
 describe('EntityCatalogueService', () => {
   let entityCatalogue: TestEntityCatalogue;

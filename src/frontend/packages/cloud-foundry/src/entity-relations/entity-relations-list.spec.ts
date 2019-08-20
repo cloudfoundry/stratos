@@ -1,7 +1,6 @@
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { listEntityRelations } from './entity-relations';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
-
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 const endpointType = 'endpointtype1';
 
 describe('Entity Relations - List relations', () => {

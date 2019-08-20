@@ -4,7 +4,6 @@ import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ListFilter, ListPagination, ListSort } from '../../../../../../store/src/actions/list.actions';
 import {
   AddParams,
@@ -20,6 +19,7 @@ import { PaginationClientFilter, PaginationEntityState } from '../../../../../..
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';
+import { GeneralAppState } from '../../../../../../store/src/app-state';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
@@ -44,7 +44,7 @@ function onPaginationEntityState(
 
 export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralAppState>,
     public dataSource: IListDataSource<T>,
     private ngZone: NgZone
   ) {

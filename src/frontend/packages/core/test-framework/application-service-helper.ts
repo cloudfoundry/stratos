@@ -3,7 +3,6 @@ import { Observable, of as observableOf } from 'rxjs';
 
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
-
 import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
 import { ISpace, IApp, IAppSummary, IDomain } from '../src/core/cf-api.types';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';

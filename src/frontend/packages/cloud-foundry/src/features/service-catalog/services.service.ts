@@ -9,9 +9,6 @@ import {
   serviceBrokerEntityType,
   servicePlanVisibilityEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceBrokers } from '../../../../cloud-foundry/src/actions/service-broker.actions';
-import { GetServicePlanVisibilities } from '../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
-import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import {
   IService,
   IServiceBroker,
@@ -29,6 +26,9 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { GetServicePlanVisibilities } from '../../actions/service-plan-visibility.actions';
+import { GetServiceBrokers } from '../../actions/service-broker.actions';
+import { GetSpace } from '../../actions/space.actions';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
 
 export interface ServicePlanAccessibility {
