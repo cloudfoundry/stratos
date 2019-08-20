@@ -34,9 +34,9 @@ import { KubernetesService } from '../services/kubernetes.service';
 export class KubernetesNodeComponent {
 
   tabLinks = [
-    { link: 'summary', label: 'Summary', matIcon: 'kubernetes', matIconFont: 'stratos-icons' },
-    { link: 'metrics', label: 'Metrics', matIcon: 'equalizer' },
-    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
+    { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
+    { link: 'metrics', label: 'Metrics', icon: 'equalizer' },
+    { link: 'pods', label: 'Pods', icon: 'adjust' },
   ];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
