@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 
+import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
@@ -54,7 +55,11 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     this.baseActionValue = action;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.guid,
-      action
+      // Look specifically for metrics entity type for the given endpoint. See #3783
+      {
+        entityType: metricEntityType,
+        endpointType: action.endpointType
+      }
     );
     this.rangeSelectorManager.init(this.metricsMonitor, action);
   }
