@@ -136,36 +136,33 @@ export class StratosBaseCatalogueEntity<
       subType
     };
   }
+  // Backward compatibility with the old actions.
+  // This should be removed after everything is based on the new flow
+  private getLegacyTypeFromAction(
+    action: EntityRequestAction,
+    actionString: 'start' | 'success' | 'failure' | 'complete'
+  ) {
+    if (action && action.actions) {
+      switch (actionString) {
+        case 'success':
+          return action.actions[1];
+        case 'failure':
+          return action.actions[2];
+        case 'start':
+          return action.actions[0];
+      }
+    }
+    return null;
+  }
 
   public getRequestAction(
     actionString: 'start' | 'success' | 'failure' | 'complete',
     requestType: ApiRequestTypes,
     action?: EntityRequestAction,
-    response?: any): APISuccessOrFailedAction {
-    // backward compatibility with the old actions.
-    // it should be removed after everything is based on the new flow
-    if (action && action.actions) {
-      let type;
-
-      switch (actionString) {
-        case 'success':
-          type = action.actions[1];
-          break;
-        case 'failure':
-          type = action.actions[2];
-          break;
-        case 'start':
-          type = action.actions[0];
-          break;
-      }
-
-      if (type) {
-        return new APISuccessOrFailedAction(type, action, response);
-      }
-    }
-
-    return new APISuccessOrFailedAction(`@stratos/${this.entityKey}/${requestType}/${actionString}`,
-      action, response);
+    response?: any
+  ): APISuccessOrFailedAction {
+    const type = this.getLegacyTypeFromAction(action, actionString) || `@stratos/${this.entityKey}/${requestType}/${actionString}`;
+    return new APISuccessOrFailedAction(type, action, response);
   }
 
   public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {
