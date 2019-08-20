@@ -18,11 +18,15 @@ import { CurrentUserPermissionsService } from '../../../../../../../core/src/cor
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
+
   constructor(
+    cfGuid: string,
+    orgGuid: string,
     spaceGuid: string,
     store: Store<CFAppState>,
     userPerms: CurrentUserPermissionsService,
-    listConfig?: IListConfig<APIResource>) {
+    listConfig?: IListConfig<APIResource>
+  ) {
     const paginationKey = cfUserEntityType + '-' + orgGuid;
     const action = new GetAllOrganizationSpacesWithOrgs(
       paginationKey,
