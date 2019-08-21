@@ -1,10 +1,10 @@
-import { PaginatedAction, PaginationParam, PaginationEntityState } from '../../types/pagination.types';
+import { HttpParams } from '@angular/common/http';
+
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { InternalAppState } from '../../app-state';
-import { HttpParams } from '@angular/common/http';
-import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { resultPerPageParam, resultPerPageParamDefault } from '../../reducers/pagination-reducer/pagination-reducer.types';
-import { QParam } from '../../q-param';
+import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../types/pagination.types';
 
 function getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
   return paginationState
