@@ -39,7 +39,7 @@ run:
       updateHelmDependency
 
       # Generate imagelist
-      ./imagelist-gen.sh ./console
+      ./imagelist-gen.sh ${STRATOS}/deploy/kubernetes/console
 
       # Package console Helm Chart
       helm package console
