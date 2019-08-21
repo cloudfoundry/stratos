@@ -1,9 +1,12 @@
 import * as moment from 'moment-timezone';
 import { browser } from 'protractor';
+import { timer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
+import { LocaleHelper } from '../locale.helper';
 import { CFPage } from '../po/cf-page.po';
 import { createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
@@ -63,29 +66,25 @@ describe('Autoscaler -', () => {
   describe('Autoscaler Attach Policy -', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
     let createPolicy: CreateAutoscalerPolicy;
-    let scheduleStartDate1: moment.Moment;
     let scheduleEndDate1: moment.Moment;
 
     let scheduleStartDate2: moment.Moment;
     let scheduleEndDate2: moment.Moment;
 
-    // TODO: These should be detected by browser/locale?
-    const timeFormat = 'HH:mm';
-    // const timeFormat = 'hh:mm A';
-    const dateFormat = 'DD/MM/YYYY,HH:mm '; // TODO: Fix
-    // const dateFormat = 'YYYY/MM/DD,hh:mm A';
+    let timeFormat: string;
+    let dateAndTimeFormat: string;
 
     extendE2ETestTime(80000);
+
+    beforeAll(() => new LocaleHelper().getWindowDateTimeFormats().then(formats => {
+      timeFormat = formats.timeFormat;
+      dateAndTimeFormat = `${formats.dateFormat},${timeFormat}`;
+    }));
 
     beforeAll(() => {
       const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
       appAutoscaler.goToAutoscalerTab();
       createPolicy = appAutoscaler.cardStatus.clickAttachPolicy();
-      // Schedule dates should not overlap
-      scheduleStartDate1 = moment().tz('UTC').add(1, 'days');
-      scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
-      scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
-      scheduleEndDate2 = moment().tz('UTC').add(4, 'days');
     });
 
     it('Check edit steps', () => {
@@ -212,12 +211,20 @@ describe('Autoscaler -', () => {
       createPolicy.stepper.clickAddButton();
       expect(createPolicy.stepper.getRuleTilesCount()).toBe(1);
       expect(createPolicy.stepper.canNext()).toBeFalsy();
+
+      // Schedule dates should not overlap
+      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(30, 'seconds'); // Should be set close to time it's entered
+      scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
+      scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
+      scheduleEndDate2 = moment().tz('UTC').add(4, 'days');
+
       // Fill in form -- valid inputs
-      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateFormat) });
-      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateFormat) });
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
+      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
+
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
@@ -231,8 +238,8 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(4);
       // Fill in form -- fix invalid inputs
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
-      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate2.format(dateFormat) });
-      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate2.format(dateFormat) });
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate2.format(dateAndTimeFormat) });
+      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate2.format(dateAndTimeFormat) });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       createPolicy.stepper.clickDoneButton();
 
@@ -516,17 +523,30 @@ describe('Autoscaler -', () => {
       beforeAll(() => {
         const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
         appAutoscaler.goToAutoscalerTab();
-        e2e.sleep(30000);
         eventPageBase = appAutoscaler.tableEvents.clickGotoEventPage();
       });
 
+      // TODO: It takes about 130s of waiting for the event to show up, which is a long time to wait about.
+      // This depends on scheduleStartDate1
+      extendE2ETestTime(180000);
+      function waitForRow() {
+        const sub = timer(5000, 5000).pipe(
+          switchMap(() => eventPageBase.list.table.getRowCount())
+        ).subscribe(rowCount => {
+          if (rowCount === 0) {
+            eventPageBase.list.header.refresh();
+          } else {
+            sub.unsubscribe();
+          }
+        });
+        browser.wait(() => sub.closed);
+      }
+
       it('Go to events page', () => {
-        e2e.sleep(1000);
         e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Event Page`);
         eventPageBase.waitForPage();
         expect(eventPageBase.header.getTitleText()).toBe('AutoScaler Scaling Events: ' + testAppName);
-        // expect(eventPageBase.list.empty.getDefault().isDisplayed()).toBeTruthy();
-        // expect(eventPageBase.list.empty.getDefault().getComponent().getText()).toBe('There are no scaling events');
+        waitForRow();
         expect(eventPageBase.list.table.getRowCount()).toBe(1);
         expect(eventPageBase.list.table.getCell(0, 2).getText()).toBe('schedule');
         expect(eventPageBase.list.table.getCell(0, 4).getText()).toBe('+1 instance(s) because limited by min instances 2');
@@ -534,7 +554,6 @@ describe('Autoscaler -', () => {
       });
 
       it('Should go to App Autoscaler Tab', () => {
-        e2e.sleep(1000);
         e2e.debugLog(`${loggingPrefix} Waiting For App Autoscaler Tab`);
         // Should be app autoscaler tab
         const appSummaryPage = new CFPage('/applications/');
