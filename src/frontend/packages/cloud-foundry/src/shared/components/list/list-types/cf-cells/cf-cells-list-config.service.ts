@@ -1,3 +1,4 @@
+// tslint:disable:max-line-length
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
@@ -17,6 +18,8 @@ import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
+
+// tslint:enable:max-line-length
 
 @Injectable()
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricCell>> {
