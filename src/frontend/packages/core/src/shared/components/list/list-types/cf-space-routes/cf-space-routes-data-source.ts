@@ -17,6 +17,9 @@ import { IRoute } from '../../../../../core/cf-api.types';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../list.component.types';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 
 export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {
@@ -28,10 +31,13 @@ export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements I
     cfGuid: string
   ) {
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
-    const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
+    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+    const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+    const action = actionBuilder(spaceGuid, cfGuid, paginationKey, [
       createEntityRelationKey(routeEntityType, applicationEntityType),
       createEntityRelationKey(routeEntityType, domainEntityType),
-    ], true, false);
+    ], true, false) as PaginatedAction;
+    
     action.initialParams['order-direction-field'] = 'creation';
     super(store, listConfig, cfGuid, action, false);
   }

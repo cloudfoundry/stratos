@@ -9,6 +9,8 @@ import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-en
 import { selectCfRequestInfo } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 import { SpaceScopedService } from '../../../features/service-catalog/services.service';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -126,14 +128,14 @@ export class CsiModeService {
   public createApplicationServiceBinding(serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-
-    this.store.dispatch(new CreateServiceBinding(
+    const servceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = servceBindingEntity.actionOrchestrator.getActionBuilder('create');
+    const createServiceBindingAction = actionBuilder(
       cfGuid,
       guid,
-      appGuid,
-      serviceInstanceGuid,
-      params
-    ));
+      { applicationGuid: appGuid, serviceInstanceGuid: serviceInstanceGuid, params: params }
+    );
+    this.store.dispatch(createServiceBindingAction);
 
     return this.store.select(selectCfRequestInfo(serviceBindingEntityType, guid)).pipe(
       filter(s => {

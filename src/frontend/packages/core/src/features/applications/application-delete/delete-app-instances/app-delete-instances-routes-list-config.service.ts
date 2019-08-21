@@ -7,7 +7,7 @@ import { first, map } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { FetchAllServiceBindings } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceEntityType, serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
@@ -24,6 +24,7 @@ import { ListViewTypes } from '../../../../shared/components/list/list.component
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ApplicationService } from '../../application.service';
 import { QParam } from '../../../../../../store/src/q-param';
+import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
@@ -32,10 +33,12 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   obsCache: { [serviceGuid: string]: Observable<RowState> } = {};
 
   static createFetchServiceBinding = (cfGuid: string, serviceInstanceGuid: string): FetchAllServiceBindings => {
-    const action = new FetchAllServiceBindings(
+    const sgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    //TODO Kate
+    const action = actionBuilder(
       cfGuid,
-      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid),
-    );
+      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid));
     action.initialParams['results-per-page'] = 1;
     action.initialParams.q = [
       new QParam('service_instance_guid', serviceInstanceGuid).toString(),

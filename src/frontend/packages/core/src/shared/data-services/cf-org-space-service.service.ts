@@ -154,6 +154,7 @@ export const createCfOrSpaceMultipleFilterFn = (
  */
 @Injectable()
 export class CfOrgSpaceDataService implements OnDestroy {
+
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
   public cf: CfOrgSpaceItem<EndpointModel>;
@@ -161,16 +162,8 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public space: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
-  //TODO kate - code block to initialise?
-  const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
-  const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
-  const getAllOrganizationsAction = actionBuilder(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, {[
-    createEntityRelationKey(organizationEntityType, spaceEntityType),
-  ], populateMissing: false});
+  public paginationAction: PaginatedAction;
 
-  public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
-    createEntityRelationKey(organizationEntityType, spaceEntityType),
-  ]);
 
   /**
    * This will contain all org and space data
@@ -198,6 +191,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.createCf();
     this.createOrg();
     this.createSpace();
+    this.createPaginationAction();
 
     // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
     this.org.list$.pipe(
@@ -296,6 +290,15 @@ export class CfOrgSpaceDataService implements OnDestroy {
       loading$: this.org.loading$,
       select: new BehaviorSubject(undefined)
     };
+  }
+
+  private createPaginationAction() {
+    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getAllOrganizationsAction = actionBuilder(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
+      createEntityRelationKey(organizationEntityType, spaceEntityType),
+    ]);
+    this.paginationAction = getAllOrganizationsAction;
   }
 
   public getEndpointOrgs(endpointGuid: string) {

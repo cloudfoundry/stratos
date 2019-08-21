@@ -55,6 +55,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../cloud-foundry/cf.helpers';
 import { ApplicationService } from '../application.service';
 import { STRATOS_ENDPOINT_TYPE } from '../../../base-entity-schemas';
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 
 
 @Component({
@@ -241,7 +242,11 @@ export class ApplicationDeleteComponent<T> {
   public buildRelatedEntitiesActionMonitors() {
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
-    const routesAction = new GetAppRoutes(appGuid, cfGuid);
+
+    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+    const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
+    const routesAction = actionBuilder(appGuid, cfGuid) as PaginatedAction;
+
     const instancePaginationKey = instanceAction.paginationKey;
     const routesPaginationKey = routesAction.paginationKey;
 
@@ -322,8 +327,11 @@ export class ApplicationDeleteComponent<T> {
       tap(({ success }) => {
         if (success) {
           if (this.selectedRoutes && this.selectedRoutes.length) {
+            const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+            const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('delete');
             this.selectedRoutes.forEach(route => {
-              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid));
+              const deleteRouteAction = actionBuilder(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid);
+              this.store.dispatch(deleteRouteAction);
             });
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {

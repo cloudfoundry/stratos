@@ -225,7 +225,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       path = '/' + path;
     }
 
-    this.store.dispatch(new CreateRoute(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port)));
+    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('create');
+    const createRouteAction = actionBuilder(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port));
+
+    this.store.dispatch(createRouteAction);
     return this.store.select(selectCfRequestInfo(routeEntityType, newRouteGuid))
       .pipe(
         filter(route => !route.creating && !route.fetching),
@@ -272,7 +276,10 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         if (requestInfo.error) {
           return { success: false, message: `Failed to associate route with app: ${requestInfo.message}` };
         } else {
-          this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
+          const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+          const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
+          const getAppRoutesAction = actionBuilder(this.appGuid, this.cfGuid);
+          this.store.dispatch(getAppRoutesAction);
           return { success: true, redirect: true };
         }
       })

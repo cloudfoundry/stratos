@@ -13,6 +13,10 @@ import {
   serviceInstancesEntityType,
   servicePlanEntityType,
   spaceEntityType,
+  serviceBrokerEntityType,
+  serviceEntityType,
+  serviceBindingEntityType,
+  applicationEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
@@ -32,7 +36,10 @@ import { StratosStatus } from '../../shared/shared.types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 
 
 export const getSvcAvailability = (
@@ -200,11 +207,14 @@ export const getServiceBroker = (
   serviceBrokerGuid: string,
   cfGuid: string,
   entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IServiceBroker>> => {
-  return entityServiceFactory.create<APIResource<IServiceBroker>>(
-    serviceBrokerGuid,
-    new GetServiceBroker(serviceBrokerGuid, cfGuid),
-    false
-  );
+    const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
+    const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('get');
+    const getServiceBrokerAction = actionBuilder(serviceBrokerGuid, cfGuid);  
+    return entityServiceFactory.create<APIResource<IServiceBroker>>(
+      serviceBrokerGuid,
+      new GetServiceBroker(serviceBrokerGuid, cfGuid),
+      false
+    );
 };
 
 export const getCfService = (

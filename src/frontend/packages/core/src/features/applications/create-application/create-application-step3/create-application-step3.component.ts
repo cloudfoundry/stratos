@@ -118,15 +118,16 @@ export class CreateApplicationStep3Component implements OnInit {
     const newRouteGuid = hostName + selectedDomainGuid;
 
     if (shouldCreate) {
-      this.store.dispatch(new CreateRoute(
-        newRouteGuid,
+      const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+      const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('create');
+      const createRouteAction = actionBuilder( newRouteGuid,
         cloudFoundry,
         {
           space_guid: space,
           domain_guid: selectedDomainGuid,
           host: hostName
-        }
-      ));
+        });
+      this.store.dispatch(createRouteAction);
       return this.wrapObservable(this.store.select(selectCfRequestInfo(routeEntityType, newRouteGuid)),
         'Application created. Could not create route');
     }

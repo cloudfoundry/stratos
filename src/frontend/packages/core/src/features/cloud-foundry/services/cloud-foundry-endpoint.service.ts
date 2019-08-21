@@ -231,8 +231,8 @@ export class CloudFoundryEndpointService {
     const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
     const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getMultiple');
     //TODO kate
-    const action = actionBuilder(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey, [], false, false) as PaginatedAction;
-    const action = new FetchAllDomains(this.cfGuid);
+    const action = actionBuilder(this.cfGuid) as PaginatedAction;
+    //const action = new FetchAllDomains(this.cfGuid);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {
         store: this.store,

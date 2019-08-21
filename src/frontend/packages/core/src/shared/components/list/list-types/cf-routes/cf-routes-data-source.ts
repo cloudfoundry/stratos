@@ -7,6 +7,9 @@ import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base'
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { GetAllRoutes } from '../../../../../../../cloud-foundry/src/actions/route.actions';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 
 
 export class CfRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {
@@ -16,6 +19,10 @@ export class CfRoutesDataSource extends CfRoutesDataSourceBase implements IListD
     listConfig: IListConfig<APIResource>,
     cfGuid: string
   ) {
+    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+    const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    //TODO Kate
+    const createRouteAction = actionBuilder(cfGuid);
     super(store, listConfig, cfGuid, new GetAllRoutes(cfGuid), true);
   }
 

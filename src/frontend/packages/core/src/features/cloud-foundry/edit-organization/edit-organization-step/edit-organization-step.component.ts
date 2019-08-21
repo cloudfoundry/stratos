@@ -28,6 +28,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 const enum OrgStatus {
@@ -116,13 +117,13 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const quotaDefinitionEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const quotaDefinitionEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
     const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getQuotaDefnitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,
-        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        action: getQuotaDefnitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(quotaDefinitionEntityType)

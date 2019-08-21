@@ -6,7 +6,7 @@ import { DeleteServiceBinding } from '../../../../cloud-foundry/src/actions/serv
 import { DeleteServiceInstance } from '../../../../cloud-foundry/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceInstancesEntityType, serviceBindingEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../core/cf-api-svc.types';
@@ -16,6 +16,7 @@ import {
 } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 
 
 @Injectable()
@@ -41,7 +42,9 @@ export class ServiceActionHelperService {
       }));
       return;
     }
-    const action = new DeleteServiceBinding(endpointGuid, serviceBindings[0].metadata.guid, serviceInstanceGuid);
+    const sgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('remove');
+    const action = actionBuilder(endpointGuid, serviceBindings[0].metadata.guid, {serviceInstanceGuid: serviceInstanceGuid});
     if (!noConfirm) {
       const confirmation = new ConfirmationDialogConfig(
         'Detach Service Instance',

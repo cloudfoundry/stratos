@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { spaceEntityType, routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -16,6 +16,9 @@ import { ConfirmationDialogService } from '../../../confirmation-dialog.service'
 import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { IListConfig } from '../../list.component.types';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
@@ -29,10 +32,14 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
     currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
-    const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid));
+    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+    const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+    const action = actionBuilder(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid)) as PaginatedAction;
     // If parentEntitySchema is set the entity validation process will look for the space routes in the parent space entity
     // In this case, we do have them however they're missing the route-->app relationship.. which means we fetch them at a rate of one per
     // route. For spaces with hundreds of routes this isn't acceptable, so remove the link to the parent and fetch the list afresh.
+
+    //TODO kate
     action.parentEntityConfig = null;
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, action, false);
 
