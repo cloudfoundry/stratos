@@ -4,16 +4,14 @@ import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import {
-  CloudFoundryEndpointService,
-} from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import {
-  UserInviteConfigurationDialogComponent,
-} from '../../../../../../cloud-foundry/src/features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
-import {
   UserInviteService,
 } from '../../../../../../cloud-foundry/src/features/cloud-foundry/user-invites/user-invite.service';
 import { ICfV2Info } from '../../../../../../core/src/core/cf-api.types';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import {
+  UserInviteConfigurationDialogComponent,
+} from '../../../../features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
 
 @Component({
   selector: 'app-card-cf-info',

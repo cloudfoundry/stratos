@@ -1,3 +1,4 @@
+// tslint:disable:max-line-length
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
@@ -6,6 +7,9 @@ import { CoreModule } from '../../../../core/src/core/core.module';
 import {
   TableCellCfCellComponent,
 } from '../../../../core/src/shared/components/list/list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
+import {
+  TableCellQuotaComponent,
+} from '../../../../core/src/shared/components/list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import {
   AddServiceInstanceBaseStepComponent,
@@ -127,7 +131,8 @@ import { SelectServiceComponent } from './select-service/select-service.componen
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
-import { TableCellQuotaComponent } from '../../../../core/src/shared/components/list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
+
+// tslint:enable:max-line-length
 
 @NgModule({
   imports: [
