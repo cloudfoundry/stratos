@@ -1,3 +1,4 @@
+import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
 import {
   addOrUpdateUserFavoriteMetadataReducer,
   deleteUserFavoriteMetadataReducer,
@@ -35,8 +36,12 @@ class DefaultEndpointCatalogueEntity extends StratosCatalogueEntity {
     super({
       schema: endpointEntitySchema,
       type: endpointEntitySchema.entityType,
-      endpoint: stratosType
-    });
+      endpoint: stratosType,
+    }, {
+        dataReducers: [
+          systemEndpointsReducer
+        ]
+      });
   }
 }
 

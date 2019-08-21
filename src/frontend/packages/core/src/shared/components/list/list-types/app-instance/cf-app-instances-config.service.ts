@@ -5,12 +5,15 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
+import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import {
+  CloudFoundryEndpointService,
+} from '../../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
-import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
@@ -24,6 +27,7 @@ import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 
+// TODO: Move file to CF package (#3769)
 export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
   return new FetchApplicationMetricsAction(
     appGuid,
@@ -188,11 +192,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private utilsService: UtilsService,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
-    private endpointsService: EndpointsService,
-    entityServiceFactory: EntityServiceFactory
+    entityServiceFactory: EntityServiceFactory,
+    cfEndpointService: CloudFoundryEndpointService
   ) {
 
-    this.initialised$ = this.endpointsService.hasCellMetrics(appService.cfGuid).pipe(
+    this.initialised$ = cfEndpointService.hasCellMetrics(appService.cfGuid).pipe(
       map(hasMetrics => {
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
@@ -19,10 +19,13 @@ import {
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
+import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -33,8 +36,10 @@ import {
   PaginationObservables,
 } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { QParam } from '../../../../../store/src/types/pagination.types';
+import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
@@ -121,7 +126,9 @@ export class CloudFoundryEndpointService {
     private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
-    private pmf: PaginationMonitorFactory
+    private pmf: PaginationMonitorFactory,
+    private endpointService: EndpointsService,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
@@ -236,5 +243,36 @@ export class CloudFoundryEndpointService {
 
   fetchApps() {
     this.store.dispatch(this.getAllAppsAction);
+  }
+
+  hasCellMetrics(endpointId: string): Observable<boolean> {
+    return this.endpointService.hasMetrics(endpointId).pipe(
+      switchMap(hasMetrics => {
+        if (!hasMetrics) {
+          return of(false);
+        }
+
+        // Check that we successfully retrieve some stats. If the metric is unknown an empty list is returned
+        const action = new FetchCFCellMetricsPaginatedAction(
+          endpointId,
+          endpointId,
+          new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
+          MetricQueryType.QUERY
+        );
+
+        return getPaginationObservables<IMetrics>({
+          store: this.store,
+          action,
+          paginationMonitor: this.paginationMonitorFactory.create(
+            action.paginationKey,
+            action
+          )
+        }).entities$.pipe(
+          filter(entities => !!entities && !!entities.length),
+          map(entities => !!entities.find(entity => !!entity.data.result.length)),
+          first()
+        );
+      })
+    );
   }
 }

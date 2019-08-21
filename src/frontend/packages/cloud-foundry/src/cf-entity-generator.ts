@@ -30,20 +30,9 @@ import {
 import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import { spaceApplicationAddRemoveReducer } from './store/reducers/application-add-remove-reducer';
-import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
-import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
-import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
-import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
-import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
-import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
-import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
 import { APIResource } from '../../store/src/types/api.types';
-import { AppStats } from './store/types/app-metadata.types';
-import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
-import { CfUser } from './store/types/user.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import {
   appEnvVarsEntityType,
@@ -60,6 +49,7 @@ import {
   gitBranchesEntityType,
   gitCommitEntityType,
   gitRepoEntityType,
+  metricEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -115,6 +105,17 @@ import { stackActionBuilders } from './entity-action-builders/stack-action-build
 import { userProvidedServiceActionBuilder } from './entity-action-builders/user-provided-service.action-builders';
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
+import { spaceApplicationAddRemoveReducer } from './store/reducers/application-add-remove-reducer';
+import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
+import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
+import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
+import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
+import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
+import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
+import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
+import { AppStats } from './store/types/app-metadata.types';
+import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
+import { CfUser } from './store/types/user.types';
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -161,6 +162,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     generateCFAppSummaryEntity(endpointDefinition),
     generateCFAppEnvVarEntity(endpointDefinition),
     generateCFQuotaDefinitionEntity(endpointDefinition),
+    generateCFMetrics(endpointDefinition)
   ];
 }
 
@@ -792,4 +794,22 @@ function getOrgStatus(org: APIResource<IOrganization>) {
     return 'Unknown';
   }
   return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
+}
+
+function generateCFMetrics(endpointDefinition: IStratosEndpointDefinition) {
+  const definition = {
+    type: metricEntityType,
+    schema: cfEntityFactory(metricEntityType),
+    label: 'CF Metric',
+    labelPlural: 'CF Metrics',
+    endpoint: endpointDefinition,
+  };
+  return new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(
+    definition,
+    {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer(),
+      ],
+    }
+  );
 }
