@@ -61,17 +61,6 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
       totalServiceKeys: new FormControl(quota.total_service_keys),
       appTasksLimit: new FormControl(quota.app_task_limit),
     });
-
-    // this.formGroup = new FormGroup({
-    //   name: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
-    //   totalServices: new FormControl(),
-    //   totalRoutes: new FormControl(),
-    //   memoryLimit: new FormControl(),
-    //   instanceMemoryLimit: new FormControl(),
-    //   nonBasicServicesAllowed: new FormControl(false),
-    //   totalReservedRoutePorts: new FormControl(),
-    //   appInstanceLimit: new FormControl(),
-    // });
   }
 
   fetchQuotasDefinitions() {

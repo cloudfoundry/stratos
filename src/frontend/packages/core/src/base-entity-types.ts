@@ -1,5 +1,9 @@
 import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
 import {
+  addOrUpdateUserFavoriteMetadataReducer,
+  deleteUserFavoriteMetadataReducer,
+} from '../../store/src/reducers/favorite.reducer';
+import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
   systemInfoEntitySchema,
@@ -47,6 +51,11 @@ class UserFavoriteCatalogueEntity extends StratosCatalogueEntity {
       schema: userFavoritesEntitySchema,
       type: userFavoritesEntitySchema.entityType,
       endpoint: stratosType,
+    }, {
+      dataReducers: [
+        addOrUpdateUserFavoriteMetadataReducer,
+        deleteUserFavoriteMetadataReducer,
+      ]
     });
   }
 }

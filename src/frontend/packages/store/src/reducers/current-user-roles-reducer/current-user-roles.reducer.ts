@@ -17,6 +17,9 @@ import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../../../cloud-foundry
 import {
   currentUserBaseCFRolesReducer,
 } from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-base-cf-role.reducer';
+import {
+  updateAfterRoleChange,
+} from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-changed.reducers';
 import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
@@ -32,7 +35,6 @@ import {
   currentUserRolesRequestStateReducer,
 } from './current-user-request-state.reducers';
 import { roleInfoFromSessionReducer, updateNewlyConnectedEndpoint } from './current-user-role-session.reducer';
-import { updateAfterRoleChange } from './current-user-roles-changed.reducers';
 import { addEndpoint, removeEndpointRoles, removeOrgRoles, removeSpaceRoles } from './current-user-roles-clear.reducers';
 
 const getDefaultState = () => ({
