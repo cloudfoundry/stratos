@@ -9,8 +9,7 @@ import { ApplicationService } from '../../../../../../../core/src/features/appli
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../../../core/test-framework/store-test-helper';
-import { CfAutoscalerTestingModule } from '../../../../../cf-autoscaler-testing.module';
+import { createEmptyStoreModule } from '../../../../../../../core/test-framework/store-test-helper';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-series-vertical.component';
 
 describe('AppAutoscalerComboSeriesVerticalComponent', () => {
@@ -22,11 +21,10 @@ describe('AppAutoscalerComboSeriesVerticalComponent', () => {
       declarations: [AppAutoscalerComboSeriesVerticalComponent],
       imports: [
         BrowserAnimationsModule,
-        createBasicStoreModule(),
+        createEmptyStoreModule(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        CfAutoscalerTestingModule,
         NgxChartsModule,
       ],
       providers: [

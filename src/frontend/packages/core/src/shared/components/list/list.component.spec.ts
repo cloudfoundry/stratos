@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
@@ -14,12 +15,12 @@ import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.serv
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { ApplicationStateService } from '../application-state/application-state.service';
+import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
-import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
-import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { InternalAppState } from '../../../../../store/src/app-state';
 
 class MockedNgZone {
   run = fn => fn();
@@ -50,7 +51,7 @@ describe('ListComponent', () => {
       };
     }
 
-    function setup(store: CFAppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
+    function setup(store: InternalAppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
       TestBed.configureTestingModule({
         imports: [
           createBasicStoreModule(store),
@@ -63,7 +64,7 @@ describe('ListComponent', () => {
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (
-        iStore: Store<CFAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
+        iStore: Store<InternalAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
       ) => {
         const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);

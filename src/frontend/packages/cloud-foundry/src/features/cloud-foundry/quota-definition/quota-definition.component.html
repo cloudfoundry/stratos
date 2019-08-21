@@ -1,6 +1,21 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" *ngIf="quotaGuid">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" *ngIf="isCf">
   <h1>{{ (quotaDefinition$ | async)?.entity?.name }}</h1>
+  <div class="page-header-right" *ngIf="canEditQuota$ | async">
+    <!-- Show edit button in top blue bar -->
+    <button mat-icon-button name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
 </app-page-header>
+
+<app-page-sub-nav *ngIf="!isCf">
+  <!-- Show edit button inline with header-->
+  <ng-container *ngIf="canEditQuota$ | async">
+    <button mat-icon-button name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </ng-container>
+</app-page-sub-nav>
 
 <div class="quota-definition-base quota-definition-page" *ngIf="quotaDefinition$ | async as quotaDefinition">
 
@@ -26,7 +41,6 @@
             value="{{ quotaDefinition.entity?.instance_memory_limit }}">
           </app-card-number-metric>
         </app-tile>
-        <app-tile></app-tile>
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Application</h4>
@@ -41,7 +55,6 @@
             value="{{ quotaDefinition.entity?.app_task_limit }}">
           </app-card-number-metric>
         </app-tile>
-        <app-tile></app-tile>
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Service</h4>
@@ -56,7 +69,6 @@
             value="{{ quotaDefinition.entity?.total_service_keys }}">
           </app-card-number-metric>
         </app-tile>
-        <app-tile></app-tile>
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Routes & Domains</h4>
@@ -71,11 +83,14 @@
             label="Maximum Reserved Route Ports" value="{{ quotaDefinition.entity?.total_reserved_route_ports }}">
           </app-card-number-metric>
         </app-tile>
+      </app-tile-group>
+      <app-tile-group>
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="domain" label="Maximum Private Domains"
             value="{{ quotaDefinition.entity?.total_private_domains }}">
           </app-card-number-metric>
         </app-tile>
+        <app-tile></app-tile>
       </app-tile-group>
     </app-tile-grid>
   </app-loading-page>

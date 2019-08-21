@@ -1,6 +1,7 @@
-import { HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
-import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
+
+import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 
 
 export function getRequestTypeFromRequestType(requestType: ApiRequestTypes) {

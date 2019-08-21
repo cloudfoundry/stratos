@@ -49,7 +49,6 @@ import {
 } from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 import { generateASEntities } from '../store/autoscaler-entity-generator';
 import { AutoscalerEffects } from '../store/autoscaler.effects';
-import { AutoscalerStoreModule } from '../store/autoscaler.store.module';
 import { AutoscalerRoutingModule } from './autoscaler.routing';
 
 
@@ -58,7 +57,6 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     CoreModule,
     SharedModule,
     AutoscalerRoutingModule,
-    AutoscalerStoreModule,
     NgxChartsModule,
     CloudFoundryComponentsModule,
     EntityCatalogueModule.forFeature(generateASEntities),
@@ -85,7 +83,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     TableCellAutoscalerEventChangeIconPipe,
   ],
   exports: [
-    CardAutoscalerDefaultComponent
+    CardAutoscalerDefaultComponent // TODO: RC is this needed
   ],
   providers: [
     ApplicationService

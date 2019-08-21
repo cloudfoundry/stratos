@@ -2,7 +2,11 @@ import { HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { isObservable, Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
-import { StratosBaseCatalogueEntity, StratosCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+
+import {
+  StratosBaseCatalogueEntity,
+  StratosCatalogueEntity,
+} from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';

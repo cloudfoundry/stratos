@@ -2,7 +2,6 @@ import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEntity,
 } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEndpointDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
@@ -24,7 +23,7 @@ import {
 
 export function generateASEntities(): StratosBaseCatalogueEntity[] {
   // TODO: Q Should autoscaler have an endpoint type? Should it match cf?
-  const endpointDefinition = {
+  const endpointDefinition: IStratosEndpointDefinition = {
     type: AUTOSCALER_ENDPOINT_TYPE,
     label: 'Cloud Foundry',
     labelPlural: 'Cloud Foundry',
@@ -32,7 +31,8 @@ export function generateASEntities(): StratosBaseCatalogueEntity[] {
     iconFont: 'stratos-icons',
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [],
-  } as IStratosEndpointDefinition;
+    schema: undefined
+  };
   return [
     generatePolicyEntity(endpointDefinition),
     generatePolicyTriggerEntity(endpointDefinition),

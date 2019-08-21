@@ -1,11 +1,12 @@
 import { Action } from '@ngrx/store';
+
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
+import { EntitySchema } from '../../helpers/entity-schema';
 import { InternalEventSeverity } from '../../types/internal-events.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { JetstreamError } from './handle-multi-endpoints.pipe';
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { EntitySchema } from '../../helpers/entity-schema';
 
 
 describe('endpoint-error-handler', () => {
@@ -21,7 +22,6 @@ describe('endpoint-error-handler', () => {
       label: 'Entity',
       labelPlural: 'Entities',
     });
-    console.log(entity);
     const endpointGuid = '123GUID';
     const requestType = 'fetch';
     const error = new JetstreamError(

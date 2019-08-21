@@ -42,7 +42,7 @@ describe('CfOrgCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        spaces: Object.values(getInitialTestStoreState().requestData.space) as APIResource<ISpace>[],
+        spaces: Object.values(getInitialTestStoreState().requestData.cfSpace) as APIResource<ISpace>[],
         guid: '',
         cfGuid: '',
         name: 'test0',

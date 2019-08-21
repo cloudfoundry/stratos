@@ -20,8 +20,8 @@ import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../..
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
-import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
 import { CFEntityServiceFactory } from '../../../../../cf-entity-service-factory.service';
+import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
 
 export interface CfCellApp {
   metric: IMetricApplication;

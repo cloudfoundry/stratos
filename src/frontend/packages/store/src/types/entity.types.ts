@@ -7,32 +7,12 @@ import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 import { UserProfileInfo } from './user-profile.types';
 
 export interface BaseEntityValues {
-  // FIXME: Should come from catalogue/start with stratos - STRAT-151
-  endpoint: IRequestEntityTypeState<EndpointModel>;
+  // FIXME: Should come from catalogue and start with stratos - STRAT-151
+  stratosEndpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
-  // featureFlag: IRequestEntityTypeState<IFeatureFlag>;
-  // application: IRequestEntityTypeState<APIResource<IApp>>;
-  // stack: IRequestEntityTypeState<APIResource<IStack>>;
-  // space: IRequestEntityTypeState<APIResource<ISpace>>;
-  // organization: IRequestEntityTypeState<APIResource<IOrganization>>;
-  // route: IRequestEntityTypeState<APIResource<IRoute>>;
-  // event: IRequestEntityTypeState<APIResource>;
-  // gitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
-  // gitCommits: IRequestEntityTypeState<GitCommit>;
-  // domain: IRequestEntityTypeState<APIResource<IDomain>>;
-  // user: IRequestEntityTypeState<APIResource<CfUser>>;
-  // serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;
-  // servicePlan: IRequestEntityTypeState<APIResource<IServicePlan>>;
-  // service: IRequestEntityTypeState<APIResource<IService>>;
-  // serviceBinding: IRequestEntityTypeState<APIResource<IServiceBinding>>;
-  // securityGroup: IRequestEntityTypeState<APIResource<ISecurityGroup>>;
-  // servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
-  // serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
-  userProfile: UserProfileInfo;
+  stratosUserProfile: UserProfileInfo;
   metrics: IRequestEntityTypeState<IMetrics>;
-  userFavorites: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>;
-  // Extensibility
-  // [name: string]: IRequestEntityTypeState<any>;
+  stratosUserFavorites: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>;
 }
 
 export type ExtendedRequestState<T extends string | number | symbol, Y> = Record<T, Y>;

@@ -5,13 +5,13 @@ import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { GetAllServices } from '../../../../../cloud-foundry/src/actions/service.actions';
 import { GetAllServicesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
-import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { serviceEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { cfEntityFactory, serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
 @Injectable()
 export class ServicesWallService {

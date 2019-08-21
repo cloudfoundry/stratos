@@ -28,6 +28,7 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
     entityRequestInfo.deleting.deleted;
+  // TODO: RC test removal of updating._root_.busy
 }
 
 const dispatcherFactory = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (updatingKey?: string) => {
@@ -129,7 +130,8 @@ export class EntityService<T = any> {
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
-    return entity && !isEntityBlocked(entityRequestInfo);
+    const isBlocked = isEntityBlocked(entityRequestInfo);
+    return entity && !isBlocked;
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {

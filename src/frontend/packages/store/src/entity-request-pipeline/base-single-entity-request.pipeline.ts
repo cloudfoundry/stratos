@@ -1,16 +1,17 @@
 import { Action, Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
+
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
+import { EntityRequestAction } from '../types/request.types';
 import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
 import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
-import { BasePipelineConfig, EntityRequestPipeline } from './entity-request-pipeline.types';
-import { PipelineHttpClient } from './pipline-http-client.service';
-import { EntityRequestAction } from '../types/request.types';
-import { singleRequestToPaged } from './pipeline-helpers';
 import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
+import { BasePipelineConfig, EntityRequestPipeline } from './entity-request-pipeline.types';
+import { singleRequestToPaged } from './pipeline-helpers';
+import { PipelineHttpClient } from './pipline-http-client.service';
 
 export interface SingleRequestPipelineConfig<T extends AppState = InternalAppState> extends BasePipelineConfig<T> {
   action: EntityRequestAction;
