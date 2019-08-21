@@ -2,7 +2,6 @@ import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
-import { entityFactory } from '../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
   EntityInlineChildAction,
@@ -121,7 +120,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
     this.parentGuid = orgGuid;
   }
   actions = [GET_ORGANIZATION_DOMAINS, GET_ORGANIZATION_DOMAINS_SUCCESS, GET_ORGANIZATION_DOMAINS_FAILED];
-  entity = entityFactory(domainEntityType);
+  entity = cfEntityFactory(domainEntityType);
   entityType = domainEntityType;
   options: RequestOptions;
   flattenPagination = true;
