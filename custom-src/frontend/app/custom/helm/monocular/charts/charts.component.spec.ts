@@ -14,6 +14,7 @@ import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
 import { ReposService } from '../shared/services/repos.service';
 import { ChartsComponent } from './charts.component';
+import { MockChartService } from '../shared/services/chart.service.mock';
 
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
 // import { SeoService } from '../shared/services/seo.service';
@@ -35,7 +36,7 @@ describe('Component: Charts', () => {
       providers: [
         ConfigService,
         MenuService,
-        { provide: ChartsService },
+        { provide: ChartsService, useValue: new MockChartService()},
         // { provide: SeoService },
         { provide: ActivatedRoute },
         { provide: Router },
