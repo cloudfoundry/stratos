@@ -6,14 +6,16 @@ import {
   createOrgRoleStateState,
 } from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-org.reducer';
 import {
-  getDefaultEndpointRoles,
-  getDefaultRolesRequestState,
   ICfRolesState,
-  ICurrentUserRolesState,
   IOrgRoleState,
   ISpaceRoleState,
   RoleEntities,
 } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
+import {
+  getDefaultEndpointRoles,
+  getDefaultRolesRequestState,
+  ICurrentUserRolesState,
+} from '../../types/current-user-roles.types';
 import { currentUserRolesReducer } from './current-user-roles.reducer';
 
 const testOrgGuid = 'org-1';

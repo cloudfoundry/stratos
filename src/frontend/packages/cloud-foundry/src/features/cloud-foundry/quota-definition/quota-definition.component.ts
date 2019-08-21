@@ -14,6 +14,10 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
+
+export const QUOTA_ORG_GUID = 'org';
 
 @Component({
   selector: 'app-quota-definition',
@@ -32,17 +36,26 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
+  editLink$: Observable<string[]>;
+  editParams: object;
   detailsLoading$: Observable<boolean>;
   orgSubscriber: Subscription;
+  public canEditQuota$: Observable<boolean>;
+  public isCf = false;
 
   constructor(
     protected entityServiceFactory: EntityServiceFactory,
     protected store: Store<AppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,
+    currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
+    const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
+    this.canEditQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_EDIT, cfGuid);
+    this.isCf = !orgGuid;
+    this.editParams = { [QUOTA_ORG_GUID]: orgGuid };
   }
 
   setupQuotaDefinitionObservable() {
@@ -62,6 +75,16 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     this.detailsLoading$ = entityInfo$.pipe(
       filter(definition => !!definition),
       map(definition => definition.entityRequestInfo.fetching)
+    );
+
+    this.editLink$ = quotaGuid$.pipe(
+      map(quotaGuid => [
+        '/cloud-foundry',
+        this.cfGuid,
+        'quota-definitions',
+        quotaGuid,
+        'edit-quota'
+      ])
     );
   }
 

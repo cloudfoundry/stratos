@@ -6,6 +6,22 @@ export interface StratosCFEntity {
   cfGuid: string;
 }
 
+export interface IQuotaDefinition {
+  guid?: string;
+  name: string;
+  organization_guid?: string;
+  app_instance_limit: number;
+  app_task_limit?: number;
+  memory_limit: number;
+  instance_memory_limit: number;
+  total_services: number;
+  total_service_keys?: number;
+  non_basic_services_allowed?: boolean;
+  trial_db_allowed?: boolean;
+  total_routes: number;
+  total_reserved_route_ports?: number;
+  total_private_domains?: number;
+}
 
 export interface IRoute {
   host: string;
@@ -230,6 +246,8 @@ export interface IFeatureFlag {
   enabled: boolean;
   url?: string;
   error_message?: string;
+  cfGuid?: string;
+  guid?: string;
 }
 export interface IStack {
   name: string;

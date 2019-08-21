@@ -100,7 +100,7 @@ function createPaginationAction(config: HandleRelationsConfig) {
     parentRelation,
     childRelation,
     includeRelations,
-    createEntityRelationPaginationKey(parentRelation.entityKey, parentGuid, childRelation.entity.relationKey),
+    createEntityRelationPaginationKey(parentRelation.entityType, parentGuid, childRelation.entity.relationKey),
     populateMissing,
     childEntitiesUrl
   );
@@ -191,7 +191,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
 
   if (!cfGuid) {
     throw Error(`No CF Guid provided when validating
-     ${parentRelation.entityKey} ${parentEntity.metadata.guid}'s ${childRelation.entityKey}`);
+     ${parentRelation.entityType} ${parentEntity.metadata.guid}'s ${childRelation.entityType}`);
   }
 
   // Have we failed to find some required missing entities?
@@ -236,7 +236,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
 
         if (childRelation.isArray) {
           const paginationState: PaginationEntityState = pathGet(
-            `${childRelation.entityKey}.${createEntityRelationPaginationKey(parentRelation.entityKey, entity.metadata.guid)}`,
+            `${childRelation.entityKey}.${createEntityRelationPaginationKey(parentRelation.entityType, entity.metadata.guid)}`,
             allPagination);
           childEntitiesAsArray = paginationState ? paginationState.ids[paginationState.currentPage] : null;
         } else {
@@ -419,7 +419,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
     config.action = {
       ...config.action,
       entity: [forcedSchema],
-      entityType: entityConfig.endpointType
+      entityType: entityConfig.entityType
     };
   }
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
@@ -451,7 +451,6 @@ function getRelationAction(action: IRequestAction): EntityInlineParentAction {
     const entity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType).getSchema(entityConfig.schemaKey);
     return {
       ...action,
-      entityType: entityConfig.entityType,
       entity
     } as EntityInlineParentAction;
   }
@@ -522,6 +521,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           if (!entity.entity[paramName]) {
             return;
           }
+
           const catalogueEntity = entityCatalogue.getEntity(eicAction);
           const entityKey = catalogueEntity.entityKey;
           const normedEntities = entity.entity[paramName].reduce((newNormedEntities, guidOrEntity) => {
