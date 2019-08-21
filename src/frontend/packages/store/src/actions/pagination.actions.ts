@@ -162,12 +162,11 @@ export class RemoveParams {
   type = REMOVE_PARAMS;
 }
 
-export class UpdatePaginationMaxedState implements Action {
+export class UpdatePaginationMaxedState implements Action, EntityCatalogueEntityConfig {
   type = UPDATE_MAXED_STATE;
   constructor(
     public max: number,
     public allEntities: number,
-    public entity: string,
     public entityType: string,
     public endpointType: string,
     public paginationKey: string,

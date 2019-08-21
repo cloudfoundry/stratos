@@ -1,10 +1,12 @@
-import { HttpClient, HttpRequest } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Http, Request, RequestOptions, Response } from '@angular/http';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
+
+import { CFResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
 import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
-import { CFResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
+
 // TODO This can be deleted once the api effect rework is done.
 export interface PaginationFlattenerConfig<T = any, C = any> extends Pick<
   PaginationFlattener<T, C>,
@@ -134,7 +136,9 @@ export function flattenPagination<T, C>(
     mergeMap(firstResData => {
       const allResults = flattener.getTotalResults(firstResData);
       if (maxCount) {
-        actionDispatcher(new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey));
+        actionDispatcher(
+          new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey)
+        );
         if (allResults > maxCount) {
           // If we have too many results only return basic first page information
           return forkJoin([flattener.clearResults(firstResData, allResults)]);

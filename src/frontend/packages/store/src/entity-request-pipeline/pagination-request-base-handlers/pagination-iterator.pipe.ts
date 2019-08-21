@@ -1,16 +1,17 @@
 import { HttpRequest } from '@angular/common/http';
-import { range, of, Observable, combineLatest } from 'rxjs';
-import { mergeMap, reduce, map, tap } from 'rxjs/operators';
-import { PaginatedAction } from '../../types/pagination.types';
-import { PipelineHttpClient } from '../pipline-http-client.service';
-import {
-  JetstreamResponse,
-  ActionDispatcher,
-  SuccessfulApiResponseDataMapper,
-  PagedJetstreamResponse
-} from '../entity-request-pipeline.types';
-import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
+import { combineLatest, Observable, of, range } from 'rxjs';
+import { map, mergeMap, reduce } from 'rxjs/operators';
+
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
+import { PaginatedAction } from '../../types/pagination.types';
+import {
+  ActionDispatcher,
+  JetstreamResponse,
+  PagedJetstreamResponse,
+  SuccessfulApiResponseDataMapper,
+} from '../entity-request-pipeline.types';
+import { PipelineHttpClient } from '../pipline-http-client.service';
 
 export interface PaginationPageIteratorConfig<R = any, E = any> {
   // TODO This should also pass page size for apis that use start=&end= params.
