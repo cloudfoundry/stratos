@@ -774,7 +774,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	if needSetupMiddleware {
 		e.Use(p.SetupMiddleware())
 		pp.POST("/v1/setup", p.setupConsole)
-		pp.POST("/v1/setup/update", p.setupConsoleUpdate)
+		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
