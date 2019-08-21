@@ -9,6 +9,7 @@ import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-fou
 import {
   EntitySummaryTitleComponent,
 } from '../../../../shared/components/entity-summary-title/entity-summary-title.component';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ListItemComponent } from '../list-item/list-item.component';
 import { LoaderComponent } from '../loader/loader.component';
@@ -21,6 +22,8 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
 import { ChartDetailsUsageComponent } from './chart-details-usage/chart-details-usage.component';
 import { ChartDetailsVersionsComponent } from './chart-details-versions/chart-details-versions.component';
 import { ChartDetailsComponent } from './chart-details.component';
+import { MockChartService } from '../shared/services/chart.service.mock';
+import { HttpClientModule } from '@angular/common/http';
 
 /* tslint:disable:no-unused-variable */
 // import { Angulartics2Module } from 'angulartics2';
@@ -89,6 +92,7 @@ describe('ChartDetailsComponent', () => {
           // Angulartics2Module,
           RouterTestingModule,
           HttpModule,
+          HttpClientModule,
           ...BaseTestModulesNoShared
         ],
         declarations: [
@@ -106,11 +110,11 @@ describe('ChartDetailsComponent', () => {
           EntitySummaryTitleComponent
         ],
         providers: [
-          { provide: ChartsService },
+          { provide: ChartsService, useValue: new MockChartService()},
           { provide: ConfigService, useValue: { appName: 'appName' } },
           // { provide: SeoService },
           { provide: MenuService },
-          ChartsService
+          PaginationMonitorFactory,
         ]
       }).compileComponents();
     })
