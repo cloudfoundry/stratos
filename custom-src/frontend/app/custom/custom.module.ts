@@ -14,8 +14,8 @@ import { KubernetesSetupModule } from './kubernetes/kubernetes.setup.module';
 import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
 import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.component';
 import { SuseLoginComponent } from './suse-login/suse-login.component';
-import { HelmModule } from './helm/helm.module';
-import { HelmSetupModule } from './helm/helm.setup.module';
+// import { HelmModule } from './helm/helm.module';
+// import { HelmSetupModule } from './helm/helm.setup.module';
 
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
@@ -29,8 +29,11 @@ const SuseCustomizations: CustomizationsMetadata = {
     SharedModule,
     MDAppModule,
     KubernetesSetupModule,
-    HelmModule,
-    HelmSetupModule
+    // #150 - Uncomment to enable helm plugin
+    // ---------------------------------------
+    // HelmModule,
+    // HelmSetupModule
+    // ---------------------------------------
   ],
   declarations: [
     SuseLoginComponent,
