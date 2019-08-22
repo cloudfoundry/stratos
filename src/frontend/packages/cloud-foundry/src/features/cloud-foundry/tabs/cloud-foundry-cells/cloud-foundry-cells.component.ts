@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import {
   CfCellsListConfigService,
@@ -24,7 +23,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 export class CloudFoundryCellsComponent {
   hasCellMetrics$: Observable<boolean>;
 
-  constructor(endpointService: EndpointsService, cfEndpointService: CloudFoundryEndpointService) {
-    this.hasCellMetrics$ = endpointService.hasCellMetrics(cfEndpointService.cfGuid);
+  constructor(cfEndpointService: CloudFoundryEndpointService) {
+    this.hasCellMetrics$ = cfEndpointService.hasCellMetrics(cfEndpointService.cfGuid);
   }
 }

@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 import { EditSpaceQuotaStepComponent } from './edit-space-quota-step.component';
+import { BaseTestModules } from '../../../../../test-framework/core-test.helper';
 
 describe('EditSpaceQuotaStepComponent', () => {
   let component: EditSpaceQuotaStepComponent;

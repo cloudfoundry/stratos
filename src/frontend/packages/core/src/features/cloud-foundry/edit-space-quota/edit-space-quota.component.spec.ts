@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../tab-nav.service';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SpaceQuotaDefinitionFormComponent } from '../space-quota-definition-form/space-quota-definition-form.component';
 import { EditSpaceQuotaStepComponent } from './edit-space-quota-step/edit-space-quota-step.component';
 import { EditSpaceQuotaComponent } from './edit-space-quota.component';
+import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 
 describe('EditSpaceQuotaComponent', () => {
   let component: EditSpaceQuotaComponent;

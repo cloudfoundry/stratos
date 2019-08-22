@@ -8,12 +8,10 @@ import {
   ChartDataTypes,
   getMetricsChartConfigBuilder,
 } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import {
-  FetchApplicationChartMetricsAction,
-  MetricQueryConfig,
-} from '../../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../../store/src/types/metric.types';
+import { FetchApplicationChartMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 import { ApplicationService } from '../../../../application.service';
 
 @Component({

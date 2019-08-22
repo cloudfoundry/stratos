@@ -4,12 +4,12 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import {
-  SetUAAScope,
   SETUP_UAA,
-  SETUP_UAA_SCOPE,
   SetupUAA,
   SetupUAAFailed,
   SetupUAASuccess,
+  SETUP_UAA_SAVE,
+  SetupUAASave,
 } from './../actions/setup.actions';
 
 
@@ -42,7 +42,7 @@ export class UAASetupEffect {
       }
 
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
-      return this.http.post(this.baseUrl, params, {
+      return this.http.post(`${this.baseUrl}/check`, params, {
         headers
       }).pipe(
         map(data => new SetupUAASuccess(data.json())),
@@ -52,14 +52,21 @@ export class UAASetupEffect {
 
 
   @Effect() uassSetScope = this.actions$.pipe(
-    ofType<SetUAAScope>(SETUP_UAA_SCOPE),
-    switchMap(({ scope }) => {
+    ofType<SetupUAASave>(SETUP_UAA_SAVE),
+    switchMap(({ setupData }) => {
       const headers = new Headers();
       const params = new URLSearchParams();
 
-      params.set('console_admin_scope', scope);
+      params.set('console_client', setupData.console_client);
+      params.set('username', setupData.username);
+      params.set('password', setupData.password);
+      params.set('skip_ssl_validation', setupData.skip_ssl_validation.toString() || 'false');
+      params.set('uaa_endpoint', setupData.uaa_endpoint);
+      params.set('use_sso', setupData.use_sso.toString() || 'false');
+      params.set('console_admin_scope', setupData.console_admin_scope);
+
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
-      return this.http.post(`${this.baseUrl}/update`, params, {
+      return this.http.post(this.baseUrl, params, {
         headers
       }).pipe(
         map(data => new SetupUAASuccess({})),

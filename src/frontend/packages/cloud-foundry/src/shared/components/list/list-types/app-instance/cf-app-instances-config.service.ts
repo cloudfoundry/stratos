@@ -4,32 +4,32 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../../../../core/src/core/endpoints.service';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
-import { UtilsService } from '../../../../../../../core/src/core/utils.service';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
+import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import {
-  getIntegerFieldSortFunction,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListAction,
-  IListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
-import { FetchApplicationMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+  CloudFoundryEndpointService,
+} from '../../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
-import { DeleteApplicationInstance } from '../../../../../actions/application.actions';
-import { CFAppState } from '../../../../../cf-app-state';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
+import { IListConfig, ListViewTypes, IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import {
+  getIntegerFieldSortFunction
+} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
+import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
+import { UtilsService } from '../../../../../../../core/src/core/utils.service';
+import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 
+// TODO: Move file to CF package (#3769)
 export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
   return new FetchApplicationMetricsAction(
     appGuid,
@@ -194,11 +194,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private utilsService: UtilsService,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
-    private endpointsService: EndpointsService,
-    entityServiceFactory: EntityServiceFactory
+    entityServiceFactory: EntityServiceFactory,
+    cfEndpointService: CloudFoundryEndpointService
   ) {
 
-    this.initialised$ = this.endpointsService.hasCellMetrics(appService.cfGuid).pipe(
+    this.initialised$ = cfEndpointService.hasCellMetrics(appService.cfGuid).pipe(
       map(hasMetrics => {
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
@@ -231,8 +231,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     const metricsAction = createAppInstancesMetricAction(this.appService.appGuid, this.appService.cfGuid);
     return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
       metricsAction.guid,
-      metricsAction,
-      false
+      metricsAction
     );
   }
 }

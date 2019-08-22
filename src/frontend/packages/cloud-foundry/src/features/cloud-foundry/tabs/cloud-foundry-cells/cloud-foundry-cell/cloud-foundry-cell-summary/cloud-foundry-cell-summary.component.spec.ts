@@ -14,10 +14,11 @@ import { MetricQueryType } from '../../../../../../../../core/src/shared/service
 import {
   generateCfBaseTestModules,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellSummaryComponent } from './cloud-foundry-cell-summary.component';
+import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 
 class MockCloudFoundryCellService {
   cfGuid = 'cfGuid';

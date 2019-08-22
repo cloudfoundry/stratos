@@ -1,3 +1,4 @@
+// tslint:disable:max-line-length
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
@@ -148,6 +149,8 @@ import { SelectServiceComponent } from './select-service/select-service.componen
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
+
+// tslint:enable:max-line-length
 
 @NgModule({
   imports: [

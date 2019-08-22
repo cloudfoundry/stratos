@@ -48,6 +48,7 @@ import {
   gitBranchesEntityType,
   gitCommitEntityType,
   gitRepoEntityType,
+  metricEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -156,6 +157,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     generateCFAppSummaryEntity(endpointDefinition),
     generateCFAppEnvVarEntity(endpointDefinition),
     generateCFQuotaDefinitionEntity(endpointDefinition),
+    generateCFMetrics(endpointDefinition)
   ];
 }
 
@@ -799,4 +801,22 @@ function getOrgStatus(org: APIResource<IOrganization>) {
     return 'Unknown';
   }
   return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
+}
+
+function generateCFMetrics(endpointDefinition: IStratosEndpointDefinition) {
+  const definition = {
+    type: metricEntityType,
+    schema: cfEntityFactory(metricEntityType),
+    label: 'CF Metric',
+    labelPlural: 'CF Metrics',
+    endpoint: endpointDefinition,
+  };
+  return new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(
+    definition,
+    {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer(),
+      ],
+    }
+  );
 }

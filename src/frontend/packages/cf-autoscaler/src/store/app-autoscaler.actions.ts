@@ -80,13 +80,13 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
     public endpointGuid: string,
     public policy: AppAutoscalerPolicyLocal,
   ) { }
+  updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
   type = UPDATE_APP_AUTOSCALER_POLICY;
   entityType = appAutoscalerPolicyEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
 export class DetachAppAutoscalerPolicyAction implements IRequestAction {
-  static updateKey = 'Detaching-Existing-Application-Policy';
   constructor(
     public guid: string,
     public endpointGuid: string,
