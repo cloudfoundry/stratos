@@ -32,8 +32,8 @@ import { map } from 'rxjs/operators';
 export class HelmReleaseComponent implements OnInit {
 
   public tabLinks = [
-    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
-    { link: 'services', label: 'Services', matIcon: 'service', matIconFont: 'stratos-icons' },
+    { link: 'pods', label: 'Pods', icon: 'adjust' },
+    { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' },
   ];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

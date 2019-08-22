@@ -30,18 +30,21 @@ export class ChartDetailsComponent implements OnInit {
     this.route.params.forEach((params: Params) => {
       const repo = params.repo;
       const chartName = params.chartName;
-      this.chartsService.getChart(repo, chartName).pipe(first()).subscribe(chart => {
-        this.loading = false;
-        this.chart = chart;
-        const version = params.version || this.chart.relationships.latestChartVersion.data.version;
-        this.chartsService.getVersion(repo, chartName, version).pipe(first())
-          .subscribe(chartVersion => {
-            this.currentVersion = chartVersion;
-            this.titleVersion = this.currentVersion.attributes.app_version || '';
-            this.updateMetaTags();
-          });
-        this.iconUrl = this.chartsService.getChartIconURL(this.chart);
-      });
+
+      if (!!chartName) {
+        this.chartsService.getChart(repo, chartName).pipe(first()).subscribe(chart => {
+          this.loading = false;
+          this.chart = chart;
+          const version = params.version || this.chart.relationships.latestChartVersion.data.version;
+          this.chartsService.getVersion(repo, chartName, version).pipe(first())
+            .subscribe(chartVersion => {
+              this.currentVersion = chartVersion;
+              this.titleVersion = this.currentVersion.attributes.app_version || '';
+              this.updateMetaTags();
+            });
+          this.iconUrl = this.chartsService.getChartIconURL(this.chart);
+        });
+      }
     });
   }
 

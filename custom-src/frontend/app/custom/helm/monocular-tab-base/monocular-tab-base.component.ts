@@ -8,10 +8,10 @@ import { Component } from '@angular/core';
 export class MonocularTabBaseComponent {
 
   tabLinks = [
-    { link: 'charts', label: 'Charts', matIcon: 'folder_open' },
-    { link: 'repos', label: 'Repositories', matIcon: 'products', matIconFont: 'stratos-icons' },
-    { link: 'releases', label: 'Releases', matIcon: 'apps' },
-    { link: 'config', label: 'Config', matIcon: 'build' },
+    { link: 'charts', label: 'Charts', icon: 'folder_open' },
+    { link: 'repos', label: 'Repositories', icon: 'products', iconFont: 'stratos-icons' },
+    { link: 'releases', label: 'Releases', icon: 'apps' },
+    { link: 'config', label: 'Config', icon: 'build' },
   ];
 
 }

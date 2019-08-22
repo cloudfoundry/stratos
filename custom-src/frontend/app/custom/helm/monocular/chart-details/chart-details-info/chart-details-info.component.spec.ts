@@ -3,6 +3,7 @@ import { async, TestBed } from '@angular/core/testing';
 
 import { ChartsService } from '../../shared/services/charts.service';
 import { ChartDetailsInfoComponent } from './chart-details-info.component';
+import { MockChartService } from '../../shared/services/chart.service.mock';
 
 
 describe('Component: ChartDetailsInfo', () => {
@@ -11,7 +12,9 @@ describe('Component: ChartDetailsInfo', () => {
       TestBed.configureTestingModule({
         declarations: [ChartDetailsInfoComponent],
         imports: [],
-        providers: [{ provide: ChartsService }],
+        providers: [
+          { provide: ChartsService, useValue: new MockChartService()},
+        ],
         schemas: [NO_ERRORS_SCHEMA]
       }).compileComponents();
     })
