@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"net/url"
+	"strconv"
 	"strings"
 
 	"errors"
@@ -143,7 +144,8 @@ func (c *KubernetesSpecification) Init() error {
 		UserInfo: c.GetGKEUserFromToken,
 	})
 
-	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = "false"
+	// Kube dashboard is enabled by Tech Preview mode
+	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
 
 	return nil
 }
