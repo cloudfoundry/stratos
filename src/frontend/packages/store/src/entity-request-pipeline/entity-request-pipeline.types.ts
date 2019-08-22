@@ -29,7 +29,7 @@ export type SucceedOrFailEntityRequestHandler = (
   catalogueEntity: StratosBaseCatalogueEntity,
   requestType: ApiRequestTypes,
   action: EntityRequestAction,
-  response: NormalizedResponse,
+  response: PipelineResult,
   recursivelyDeleting: boolean
 ) => void;
 
@@ -71,6 +71,8 @@ export interface PipelineResult {
   success: boolean;
   errorMessage?: string;
   response?: NormalizedResponse;
+  totalResults?: number;
+  totalPages?: number;
 }
 
 export type EntityRequestPipeline<> = (

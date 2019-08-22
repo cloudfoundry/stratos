@@ -5,6 +5,7 @@ import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/enti
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../types/api.types';
 import { EntityRequestAction } from '../../types/request.types';
+import { PipelineResult } from '../entity-request-pipeline.types';
 import { getSuccessMapper } from '../pipeline-helpers';
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
@@ -59,7 +60,7 @@ export function mapMultiEndpointResponses(
   requestType: ApiRequestTypes,
   multiEndpointResponses: HandledMultiEndpointResponse,
   actionDispatcher: (actionToDispatch: Action) => void
-) {
+): PipelineResult {
   const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   endpointErrorHandler(
@@ -79,16 +80,21 @@ export function mapMultiEndpointResponses(
       const entities = getEntities(endpointResponse, action);
       const parentEntities = entities[catalogueEntity.entityKey];
       return {
-        entities,
-        // If we changed the guid of the entities then make sure this is reflected in the result array.
-        result: parentEntities ? Object.keys(parentEntities) : endpointResponse.normalizedEntities.result
+        response: {
+          entities,
+          // If we changed the guid of the entities then make sure this is reflected in the result array.
+          result: parentEntities ? Object.keys(parentEntities) : endpointResponse.normalizedEntities.result,
+        },
+        totalPages: endpointResponse.totalPages,
+        totalResults: endpointResponse.totalResults,
+        success: null
       };
     });
     // NormalizedResponse
     const response = multiEndpointResponseMergePipe(mapped);
     return {
+      ...response,
       success: true,
-      response
     };
   }
 }

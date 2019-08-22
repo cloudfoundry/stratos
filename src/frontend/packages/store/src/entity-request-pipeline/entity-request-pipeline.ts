@@ -60,9 +60,9 @@ export const apiRequestPipelineFactory = (
     tap((response) => {
       // TODO Failure of a single endpoint (with many connected) doesn't seem to work - investigate.
       if (response.success) {
-        successEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response, recursivelyDelete);
+        successEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response, recursivelyDelete);
       } else {
-        failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response.response, recursivelyDelete);
+        failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response, recursivelyDelete);
       }
     }),
     map(() => catalogueEntity.getRequestAction('complete', requestType, action)),

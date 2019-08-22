@@ -5,7 +5,9 @@ export const normalizeEntityPipeFactory = (catalogueEntity: StratosBaseCatalogue
   return (responseData: MultiEndpointResponse<any>) => {
     return {
       normalizedEntities: catalogueEntity.getNormalizedEntityData(responseData.entities, schemaKey),
-      endpointGuid: responseData.endpointGuid
+      endpointGuid: responseData.endpointGuid,
+      totalResults: responseData.totalResults,
+      totalPages: responseData.totalPages
     };
   };
 };

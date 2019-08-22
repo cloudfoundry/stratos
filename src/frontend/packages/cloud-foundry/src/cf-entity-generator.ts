@@ -156,7 +156,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
         return max < response.total_pages ? response.total_pages : max;
       }, 0),
-      getEntityCount: (responses: JetstreamResponse<CFResponse>) => Object.keys(responses).reduce((count, endpointGuid) => {
+      getTotalEntities: (responses: JetstreamResponse<CFResponse>) => Object.keys(responses).reduce((count, endpointGuid) => {
         const endpoint: CFResponse = responses[endpointGuid];
         return count + endpoint.total_results;
       }, 0),
@@ -219,7 +219,7 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
     paginationConfig: {
       getEntitiesFromResponse: (response) => response,
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).length,
-      getEntityCount: (responses: JetstreamResponse<CFResponse>) => 1,
+      getTotalEntities: (responses: JetstreamResponse<CFResponse>) => 1,
       getPaginationParameters: (page: number) => ({ page: '1' })
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
@@ -368,8 +368,8 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
         });
       },
       getTotalPages: (responses: JetstreamResponse) => Object.values(responses).length,
-      getEntityCount: (responses) => Object.values(responses).reduce((count, endpointGuid) => {
-        return count + Object.keys(responses[endpointGuid]).length;
+      getTotalEntities: (responses: JetstreamResponse) => Object.values(responses).reduce((count, response) => {
+        return count + Object.keys(response).length;
       }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' })
     },

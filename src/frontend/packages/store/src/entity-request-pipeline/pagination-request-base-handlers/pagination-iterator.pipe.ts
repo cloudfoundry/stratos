@@ -1,6 +1,6 @@
 import { HttpRequest } from '@angular/common/http';
 import { combineLatest, Observable, of, range } from 'rxjs';
-import { map, mergeMap, reduce } from 'rxjs/operators';
+import { map, mergeMap, reduce, tap } from 'rxjs/operators';
 
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
@@ -17,7 +17,7 @@ export interface PaginationPageIteratorConfig<R = any, E = any> {
   // TODO This should also pass page size for apis that use start=&end= params.
   getPaginationParameters: (page: number) => Record<string, string>;
   getTotalPages: (initialResponses: JetstreamResponse<R>) => number;
-  getEntityCount: (initialResponses: JetstreamResponse<R>) => number;
+  getTotalEntities: (initialResponses: JetstreamResponse<R>) => number;
   getEntitiesFromResponse: (responses: R) => E[];
 }
 
@@ -42,12 +42,14 @@ export class PaginationPageIterator<R = any, E = any> {
   private getAllOtherPageRequests(totalPages: number): Observable<JetstreamResponse<R>[]> {
     const start = 2;
     const count = totalPages - start;
-    if (!count) {
+    if (count < 0) {
       return of([]);
     }
     return range(2, count).pipe(
+      tap(a => console.log(totalPages, count)),
       mergeMap(currentPage => this.makeRequest(this.addPageToRequest(currentPage)), 5),
       reduce((acc, res: JetstreamResponse<R>) => {
+        // TODO: RC Test iteration
         return acc;
       }, [] as JetstreamResponse<R>[])
     );
@@ -100,7 +102,7 @@ export class PaginationPageIterator<R = any, E = any> {
     return this.makeRequest(initialRequest).pipe(
       mergeMap(initialResponse => {
         const totalPages = this.config.getTotalPages(initialResponse);
-        const totalResults = this.config.getEntityCount(initialResponse);
+        const totalResults = this.config.getTotalEntities(initialResponse);
         return this.handleRequests(
           initialResponse,
           this.action,
