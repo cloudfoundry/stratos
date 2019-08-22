@@ -14,6 +14,8 @@ import { startEntityHandler } from './entity-request-base-handlers/start-entity-
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
 import { EntityRequestPipeline, PreApiRequest, SuccessfulApiResponseDataMapper } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
+import { patchActionWithForcedConfig } from './entity-request-base-handlers/forced-action-type.helpers';
+import { PaginatedAction } from '../types/pagination.types';
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
   store: Store<AppState>;
@@ -39,14 +41,17 @@ export const apiRequestPipelineFactory = (
   pipeline: EntityRequestPipeline,
   { store, httpClient, action, appState }: PipelineFactoryConfig
 ) => {
+  const patchedAction = patchActionWithForcedConfig(action as PaginatedAction);
+
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
-  const requestType = getRequestTypeFromMethod(action);
-  const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
-  const recursivelyDelete = shouldRecursivelyDelete(requestType, action);
+  const requestType = getRequestTypeFromMethod(patchedAction);
+
+  const catalogueEntity = entityCatalogue.getEntity(patchedAction.endpointType, patchedAction.entityType);
+  const recursivelyDelete = shouldRecursivelyDelete(requestType, patchedAction);
 
   if (recursivelyDelete) {
     store.dispatch(
-      new RecursiveDelete(action.guid, catalogueEntity.getSchema(action.schemaKey)),
+      new RecursiveDelete(action.guid, catalogueEntity.getSchema(patchedAction.schemaKey)),
     );
   }
 
@@ -70,7 +75,7 @@ export const apiRequestPipelineFactory = (
       // TODO We should pass the endpoint ids to this so we can correctly map the error to the endpoint.
       jetstreamErrorHandler(
         error,
-        action,
+        patchedAction,
         catalogueEntity,
         requestType,
         actionDispatcher,

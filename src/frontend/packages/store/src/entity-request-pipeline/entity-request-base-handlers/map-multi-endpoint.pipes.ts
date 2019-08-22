@@ -11,6 +11,8 @@ import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
 import { normalizeEntityPipeFactory } from './normalize-entity-request-response.pipe';
+import { patchActionWithForcedConfig } from './forced-action-type.helpers';
+import { PaginatedAction } from '../../types/pagination.types';
 
 function getEntities(
   endpointResponse: {
@@ -61,7 +63,12 @@ export function mapMultiEndpointResponses(
   multiEndpointResponses: HandledMultiEndpointResponse,
   actionDispatcher: (actionToDispatch: Action) => void
 ): PipelineResult {
-  const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
+  const normalizeEntityPipe = normalizeEntityPipeFactory(
+    catalogueEntity,
+    // Can this be done outside of the pipe?
+    // This pipe shouldn't have to worry about the multi entity lists.
+    patchActionWithForcedConfig(action).schemaKey
+  );
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   endpointErrorHandler(
     action,
