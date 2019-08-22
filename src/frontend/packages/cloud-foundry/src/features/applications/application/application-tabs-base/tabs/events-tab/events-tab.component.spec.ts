@@ -1,15 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
+import {
+  getPaginationAction,
+} from '../../../../../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator.spec.helpers';
+import { EntityCatalogueEntityConfig } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { getInitialTestStoreState } from '../../../../../../../../core/test-framework/store-test-helper';
-import { appReducers } from '../../../../../../../../store/src/reducers.module';
+import { NormalizedResponse } from '../../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
+import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/types/request.types';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { appEventEntityType, cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
@@ -24,32 +31,6 @@ describe('EventsTabComponent', () => {
 
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
-  const initialState = { ...getInitialTestStoreState() };
-  initialState.pagination = {
-    ...initialState.pagination,
-    cfEvent: {
-      ['app-events:mockCfGuidmockAppGuid']: {
-        pageCount: 1,
-        currentPage: 1,
-        totalResults: 0,
-        params: {
-        },
-        ids: {
-        },
-        pageRequests: {
-        },
-        clientPagination: {
-          pageSize: 5,
-          currentPage: 1,
-          totalResults: 0,
-          filter: {
-            string: '',
-            items: {}
-          },
-        }
-      }
-    }
-  };
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -60,19 +41,28 @@ describe('EventsTabComponent', () => {
         ApplicationEnvVarsHelper,
       ],
       imports: [
+        ...generateCfStoreModules(),
         MDAppModule,
         SharedModule,
         CoreModule,
-        StoreModule.forRoot(
-          appReducers,
-          {
-            initialState
-          }
-        ),
         NoopAnimationsModule,
       ]
     })
       .compileComponents();
+    const eventsConfig: EntityCatalogueEntityConfig = cfEntityFactory(appEventEntityType);
+
+    const mappedData = {
+      entities: {},
+      result: []
+    } as NormalizedResponse;
+    const pagAction: PaginatedAction = {
+      type: 'POPULATE_TEST_DATA',
+      ...getPaginationAction(),
+      ...eventsConfig,
+      paginationKey: 'app-events:mockCfGuidmockAppGuid'
+    };
+    const store = TestBed.get(Store);
+    store.dispatch(new WrapperRequestActionSuccess(mappedData, pagAction, 'fetch'));
   }));
 
   beforeEach(() => {

@@ -1,10 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../../../core/tab-nav.service';
-import { BaseTestModules } from '../../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundrySpaceServiceMock,
 } from '../../../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
+import {
+  CardCfRecentAppsComponent,
+} from '../../../../../../../shared/components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import {
+  CompactAppCardComponent,
+} from '../../../../../../../shared/components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
+import {
+  CardCfSpaceDetailsComponent,
+} from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
+import { CfUserService } from '../../../../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
@@ -17,14 +29,15 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundrySpaceSummaryComponent],
-      imports: [...BaseTestModules],
+      declarations: [CloudFoundrySpaceSummaryComponent, CardCfSpaceDetailsComponent, CardCfRecentAppsComponent, CompactAppCardComponent],
+      imports: generateCfBaseTestModules(),
       providers: [
         ActiveRouteCfOrgSpace,
         CloudFoundryEndpointService,
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         CloudFoundryOrganizationService,
-        TabNavService
+        TabNavService,
+        CfUserService
       ]
     })
       .compileComponents();

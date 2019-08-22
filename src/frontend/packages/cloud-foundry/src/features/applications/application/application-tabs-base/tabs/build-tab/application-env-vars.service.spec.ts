@@ -1,7 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 
 describe('ApplicationEnvVarsService', () => {
@@ -12,7 +12,7 @@ describe('ApplicationEnvVarsService', () => {
         PaginationMonitorFactory,
       ],
       imports: [
-        createBasicStoreModule()
+        generateCfStoreModules()
       ]
     });
   });

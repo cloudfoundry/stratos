@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellSpaceNameComponent } from './table-cell-space-name.component';
 
 describe('TableCellSpaceNameComponent', () => {
@@ -9,10 +11,10 @@ describe('TableCellSpaceNameComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellSpaceNameComponent ],
-      imports: [BaseTestModulesNoShared]
+      declarations: [TableCellSpaceNameComponent],
+      imports: generateCfBaseTestModulesNoShared()
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

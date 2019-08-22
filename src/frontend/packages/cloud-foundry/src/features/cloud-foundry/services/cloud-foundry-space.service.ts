@@ -170,7 +170,7 @@ export class CloudFoundrySpaceService {
           this.cfGuid,
           'organizations',
           this.orgGuid,
-          'space',
+          'spaces',
           this.spaceGuid,
           'space-quota'
         ];

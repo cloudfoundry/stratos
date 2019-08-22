@@ -1,13 +1,15 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
-import { CoreModule } from '../../../../../core/core.module';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
 
+// TODO: RC Move this file to cf package - #3769
 describe('GithubCommitsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -20,6 +22,7 @@ describe('GithubCommitsListConfigService', () => {
         CommonModule,
         CoreModule,
         SharedModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ]
     });

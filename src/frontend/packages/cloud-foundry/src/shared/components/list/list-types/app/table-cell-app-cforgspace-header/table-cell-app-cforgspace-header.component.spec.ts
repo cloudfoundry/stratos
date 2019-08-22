@@ -15,7 +15,7 @@ import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellAppStatusComponent } from '../table-cell-app-status/table-cell-app-status.component';
 
 describe('TableCellAppStatusComponent', () => {
@@ -33,7 +33,7 @@ describe('TableCellAppStatusComponent', () => {
       imports: [
         StoreModule,
         CoreModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ],
       providers: [
         ApplicationStateService,

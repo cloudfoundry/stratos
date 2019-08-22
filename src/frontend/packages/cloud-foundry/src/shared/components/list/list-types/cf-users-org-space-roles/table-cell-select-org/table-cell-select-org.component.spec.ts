@@ -5,10 +5,11 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserServiceTestProvider } from '../../../../../../../../core/test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellSelectOrgComponent } from './table-cell-select-org.component';
 
 describe('TableCellSelectOrgComponent', () => {
@@ -18,8 +19,8 @@ describe('TableCellSelectOrgComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
-        createBasicStoreModule(),
         NoopAnimationsModule,
         HttpModule
       ],
@@ -28,7 +29,8 @@ describe('TableCellSelectOrgComponent', () => {
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,
-        EntityMonitorFactory
+        EntityMonitorFactory,
+        CfUserService
       ],
       declarations: [TableCellSelectOrgComponent]
     })

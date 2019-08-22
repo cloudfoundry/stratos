@@ -1,13 +1,13 @@
 import { inject, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CsiModeService } from './csi-mode.service';
 
 describe('CsiModeService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [CsiModeService],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
     });
   });
 

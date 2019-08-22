@@ -28,9 +28,6 @@ import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
-import {
-  CreateApplicationStep1Component,
-} from './components/create-application/create-application-step1/create-application-step1.component';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
@@ -60,9 +57,6 @@ import {
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
-import {
-  EventTabActorIconPipe,
-} from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
@@ -147,7 +141,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     BlurDirective,
     UniqueDirective,
     CodeBlockComponent,
-    EventTabActorIconPipe,
     LogViewerComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,
@@ -191,7 +184,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     UserProfileBannerComponent,
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
-    CreateApplicationStep1Component,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     DateTimeComponent,
@@ -282,7 +274,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     BooleanIndicatorComponent,
     TableComponent,
     UserPermissionDirective,
-    CreateApplicationStep1Component,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     DateTimeComponent,

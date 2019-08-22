@@ -19,7 +19,11 @@ export class PaginationMonitorFactory {
     paginationKey: string,
     entityConfig: EntityCatalogueEntityConfig
   ) {
-    const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);
+    const { endpointType, entityType } = entityConfig;
+    const catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
+    if (!catalogueEntity) {
+      throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+    }
     const cacheKey = paginationKey + catalogueEntity.entityKey;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey] as PaginationMonitor<T>;

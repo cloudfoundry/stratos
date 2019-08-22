@@ -11,13 +11,16 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import {
   ApplicationEnvVarsHelper,
 } from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
 
 describe('AppServiceBindingCardComponent', () => {
@@ -26,10 +29,12 @@ describe('AppServiceBindingCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [
-        ...BaseTestModules,
-        createBasicStoreModule(),
+      declarations: [
+        AppServiceBindingCardComponent,
+        ServiceIconComponent,
+        CfOrgSpaceLinksComponent
       ],
+      imports: generateCfBaseTestModules(),
       providers: [
         EntityMonitorFactory,
         generateTestApplicationServiceProvider('1', '1'),

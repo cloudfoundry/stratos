@@ -8,12 +8,12 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
-import {
-  FetchCFCellMetricsPaginatedAction,
-  MetricQueryConfig,
-} from '../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+
+// TODO: Move file to CF package (#3769)
 
 export class CfCellsDataSource
   extends ListDataSource<IMetricVectorResult<IMetricCell>, IMetrics<IMetricVectorResult<IMetricCell>>> {

@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DialogConfirmComponent } from './dialog-confirm.component';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 
@@ -32,7 +32,7 @@ describe('DialogConfirmComponent', () => {
       imports: [
         CommonModule,
         CoreModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
       ]
     })
       .compileComponents();

@@ -17,7 +17,7 @@ import { CardStatusComponent } from '../../../../../../core/src/shared/component
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
 import {
   CreateApplicationStep1Component,
-} from '../../../../../../core/src/shared/components/create-application/create-application-step1/create-application-step1.component';
+} from '../../create-application/create-application-step1/create-application-step1.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import {
   MetaCardComponent,
@@ -39,19 +39,14 @@ import {
   MultilineTitleComponent,
 } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { PageHeaderModule } from '../../../../../../core/src/shared/components/page-header/page-header.module';
-import { ServiceIconComponent } from '../../../../../../core/src/shared/components/service-icon/service-icon.component';
-import {
-  ServicePlanPriceComponent,
-} from '../../../../../../core/src/shared/components/service-plan-price/service-plan-price.component';
-import {
-  ServicePlanPublicComponent,
-} from '../../../../../../core/src/shared/components/service-plan-public/service-plan-public.component';
 import { SteppersModule } from '../../../../../../core/src/shared/components/stepper/steppers.module';
 import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../core/src/shared/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
-import { BaseTestModulesNoShared } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -60,6 +55,9 @@ import { CfOrgSpaceLinksComponent } from '../../cf-org-space-links/cf-org-space-
 import { CfServiceCardComponent } from '../../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { SelectServiceComponent } from '../../select-service/select-service.component';
+import { ServiceIconComponent } from '../../service-icon/service-icon.component';
+import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
@@ -105,10 +103,10 @@ describe('AddServiceInstanceComponent', () => {
         SpecifyUserProvidedDetailsComponent
       ],
       imports: [
+        ...generateCfBaseTestModulesNoShared(),
         PageHeaderModule,
         SteppersModule,
         MaterialDesignFrameworkModule,
-        BaseTestModulesNoShared
       ],
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },

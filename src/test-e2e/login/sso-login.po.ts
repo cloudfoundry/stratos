@@ -24,7 +24,7 @@ export class SSOLoginPage {
     return welcome.getText().then(text => text.indexOf('Welcome') === 0);
   }
 
-  getTitle() {
+    getTitle() {
     return element(by.css('app-root h1')).getText();
   }
 
@@ -78,9 +78,17 @@ export class SSOLoginPage {
         browser.waitForAngularEnabled(false);
         that.enterLogin(username, password);
         that.submit();
-        browser.waitForAngularEnabled(true);
+
         SSOLoginPage.ssoLastUsername = username;
 
+        // UAA might ask us to confirm which scopes we are happy to share
+        browser.driver.sleep(3000);
+        element(by.id('authorize')).isPresent().then(exists => {
+          if (exists) {
+            element(by.id('authorize')).click();
+          }
+          browser.waitForAngularEnabled(true);
+        });
       } else {
         browser.waitForAngularEnabled(true);
         browser.wait(() => {

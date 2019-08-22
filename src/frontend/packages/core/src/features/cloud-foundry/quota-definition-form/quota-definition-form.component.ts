@@ -15,6 +15,19 @@ import { GetQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/qu
 import { quotaDefinitionEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
+export interface QuotaFormValues {
+  name: string;
+  totalServices: number;
+  totalRoutes: number;
+  memoryLimit: number;
+  appTasksLimit: number;
+  totalPrivateDomains: number;
+  totalServiceKeys: number;
+  instanceMemoryLimit: number;
+  nonBasicServicesAllowed: boolean;
+  totalReservedRoutePorts: number;
+  appInstanceLimit: number;
+}
 
 @Component({
   selector: 'app-quota-definition-form',

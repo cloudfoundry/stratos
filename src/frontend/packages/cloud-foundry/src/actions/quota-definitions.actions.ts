@@ -1,6 +1,10 @@
 import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IQuotaDefinition } from '../../../core/src/core/cf-api.types';
+import {
+  QuotaFormValues,
+} from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
@@ -12,7 +16,6 @@ import {
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
-
 
 export const GET_QUOTA_DEFINITION = '[QuotaDefinition] Get one';
 export const GET_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinition] Get one success';
@@ -64,6 +67,30 @@ export const DELETE_SPACE_QUOTA_DEFINITION_FAILED = '[QuotaDefinitions] Delete s
 
 const quotaDefinitionEntitySchema = cfEntityFactory(quotaDefinitionEntityType);
 const spaceQuotaEntitySchema = cfEntityFactory(spaceQuotaEntityType);
+
+const UNLIMITED = -1;
+function orgSpaceQuotaFormValuesToApiObject(formValues: QuotaFormValues, isOrg = true, orgGuid?: string): IQuotaDefinition {
+  const res: IQuotaDefinition = {
+    name: formValues.name,
+    total_services: formValues.totalServices || UNLIMITED,
+    total_routes: formValues.totalRoutes || UNLIMITED,
+    memory_limit: formValues.memoryLimit,
+    app_task_limit: formValues.appTasksLimit || UNLIMITED,
+    total_service_keys: formValues.totalServiceKeys || UNLIMITED,
+    instance_memory_limit: formValues.instanceMemoryLimit || UNLIMITED,
+    non_basic_services_allowed: formValues.nonBasicServicesAllowed,
+    total_reserved_route_ports: formValues.totalReservedRoutePorts || UNLIMITED,
+    app_instance_limit: formValues.appInstanceLimit || UNLIMITED,
+  };
+  if (isOrg) {
+    // Required for org quotas
+    res.total_private_domains = formValues.totalPrivateDomains || UNLIMITED;
+  } else if (orgGuid) {
+    // Required for creating space quota
+    res.organization_guid = orgGuid;
+  }
+  return res;
+}
 
 export class GetQuotaDefinitions extends CFStartAction implements PaginatedAction {
   constructor(
@@ -206,12 +233,12 @@ export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
 }
 
 export class CreateQuotaDefinition extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public createQuota: IQuotaDefinition) {
+  constructor(public endpointGuid: string, public createQuota: QuotaFormValues) {
     super();
     this.options = new RequestOptions();
     this.options.url = `quota_definitions`;
     this.options.method = RequestMethod.Post;
-    this.options.body = createQuota;
+    this.options.body = orgSpaceQuotaFormValuesToApiObject(createQuota);
     this.guid = createQuota.name;
   }
   actions = [
@@ -229,12 +256,12 @@ export class UpdateQuotaDefinition extends CFStartAction implements ICFAction {
 
   public static UpdateExistingQuota = 'Updating-Existing-Quota';
 
-  constructor(public guid: string, public endpointGuid: string, updateQuota: IQuotaDefinition) {
+  constructor(public guid: string, public endpointGuid: string, updateQuota: QuotaFormValues) {
     super();
     this.options = new RequestOptions();
     this.options.url = `quota_definitions/${guid}`;
     this.options.method = RequestMethod.Put;
-    this.options.body = updateQuota;
+    this.options.body = orgSpaceQuotaFormValuesToApiObject(updateQuota);
   }
   actions = [
     UPDATE_QUOTA_DEFINITION,
@@ -269,12 +296,12 @@ export class DeleteQuotaDefinition extends CFStartAction implements ICFAction {
 }
 
 export class CreateSpaceQuotaDefinition extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public createQuota: IQuotaDefinition) {
+  constructor(public endpointGuid: string, orgGuid: string, public createQuota: QuotaFormValues) {
     super();
     this.options = new RequestOptions();
     this.options.url = `space_quota_definitions`;
     this.options.method = RequestMethod.Post;
-    this.options.body = createQuota;
+    this.options.body = orgSpaceQuotaFormValuesToApiObject(createQuota, false, orgGuid);
     this.guid = createQuota.name;
   }
   actions = [
@@ -292,12 +319,12 @@ export class UpdateSpaceQuotaDefinition extends CFStartAction implements ICFActi
 
   public static UpdateExistingSpaceQuota = 'Updating-Existing-Space-Quota';
 
-  constructor(public guid: string, public endpointGuid: string, updateQuota: IQuotaDefinition) {
+  constructor(public guid: string, public endpointGuid: string, updateQuota: QuotaFormValues) {
     super();
     this.options = new RequestOptions();
     this.options.url = `space_quota_definitions/${guid}`;
     this.options.method = RequestMethod.Put;
-    this.options.body = updateQuota;
+    this.options.body = orgSpaceQuotaFormValuesToApiObject(updateQuota, false);
   }
   actions = [
     UPDATE_SPACE_QUOTA_DEFINITION,

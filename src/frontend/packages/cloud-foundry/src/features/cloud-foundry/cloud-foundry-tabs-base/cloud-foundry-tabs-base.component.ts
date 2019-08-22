@@ -47,7 +47,6 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     endpointsService: EndpointsService,
     favoritesConfigMapper: FavoritesConfigMapper
   ) {
-
     this.favorite$ = endpointsService.endpoints$.pipe(
       first(),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),

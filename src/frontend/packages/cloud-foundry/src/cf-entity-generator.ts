@@ -27,13 +27,11 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
-  IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
+  IStratosEntityDefinition
 } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
@@ -53,6 +51,7 @@ import {
   gitBranchesEntityType,
   gitCommitEntityType,
   gitRepoEntityType,
+  metricEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -118,13 +117,10 @@ import { serviceInstanceReducer } from './store/reducers/service-instance.reduce
 import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
 import { AppStat } from './store/types/app-metadata.types';
-import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
-
-export function registerCFEntities() {
-  generateCFEntities().forEach(entity => entityCatalogue.register(entity));
-}
+import { CFResponse } from './store/types/cf-api.types';
+import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
@@ -196,6 +192,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     generateCFAppSummaryEntity(endpointDefinition),
     generateCFAppEnvVarEntity(endpointDefinition),
     generateCFQuotaDefinitionEntity(endpointDefinition),
+    generateCFMetrics(endpointDefinition)
   ];
 }
 
@@ -315,6 +312,9 @@ function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefini
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<ICfV2Info>, CfInfoDefinitionActionBuilders>(
     cfInfoDefinition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: cfInfoDefinitionActionBuilders,
       entityBuilder: {
         getMetadata: info => ({
@@ -622,6 +622,9 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<GitCommit>, GitCommitActionBuilders>(
     definition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: gitCommitActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
@@ -644,6 +647,9 @@ function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefin
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<GitRepo>>(
     definition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: gitRepoActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
@@ -666,6 +672,9 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<GitBranch>, GitBranchActionBuilders>(
     definition,
     {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer()
+      ],
       actionBuilders: gitBranchActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
@@ -892,4 +901,22 @@ function getOrgStatus(org: APIResource<IOrganization>) {
     return 'Unknown';
   }
   return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
+}
+
+function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition = {
+    type: metricEntityType,
+    schema: cfEntityFactory(metricEntityType),
+    label: 'CF Metric',
+    labelPlural: 'CF Metrics',
+    endpoint: endpointDefinition,
+  };
+  return new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(
+    definition,
+    {
+      dataReducers: [
+        endpointDisconnectRemoveEntitiesReducer(),
+      ],
+    }
+  );
 }

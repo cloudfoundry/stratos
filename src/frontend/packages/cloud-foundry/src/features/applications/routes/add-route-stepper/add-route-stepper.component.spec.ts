@@ -7,7 +7,7 @@ import { SteppersModule } from '../../../../../../core/src/shared/components/ste
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../application.service';
 import { AddRoutesComponent } from '../add-routes/add-routes.component';
 import { MapRoutesComponent } from '../map-routes/map-routes.component';
@@ -26,10 +26,10 @@ describe('AddRouteStepperComponent', () => {
           MapRoutesComponent
         ],
         imports: [
+          ...generateCfStoreModules(),
           SteppersModule,
           CoreModule,
           SharedModule,
-          createBasicStoreModule(),
           RouterTestingModule,
           NoopAnimationsModule
         ],

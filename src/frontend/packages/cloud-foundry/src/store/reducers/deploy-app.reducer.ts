@@ -4,6 +4,7 @@ import {
   FETCH_BRANCHES_FOR_PROJECT,
   PROJECT_DOESNT_EXIST,
   PROJECT_EXISTS,
+  PROJECT_FETCH_FAILED,
   SAVE_APP_DETAILS,
   SAVE_APP_OVERRIDE_DETAILS,
   SET_APP_SOURCE_DETAILS,
@@ -11,7 +12,6 @@ import {
   SET_DEPLOY_BRANCH,
   SET_DEPLOY_CF_SETTINGS,
   SET_DEPLOY_COMMIT,
-  PROJECT_FETCH_FAILED,
 } from '../../actions/deploy-applications.actions';
 import { DeployApplicationState } from '../types/deploy-application.types';
 
@@ -81,13 +81,13 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
     case FETCH_BRANCHES_FOR_PROJECT:
       return {
         ...state, applicationSource:
-          {
-            ...state.applicationSource, branches: {
-              fetching: true,
-              success: false,
-              data: null
-            }
+        {
+          ...state.applicationSource, branches: {
+            fetching: true,
+            success: false,
+            data: null
           }
+        }
       };
     case SAVE_APP_DETAILS:
       return {

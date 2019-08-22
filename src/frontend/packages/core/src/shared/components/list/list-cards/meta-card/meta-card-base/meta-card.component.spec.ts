@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../../shared.module';
 import { MetaCardComponent } from './meta-card.component';
@@ -14,6 +15,7 @@ describe('MetaCardComponent', () => {
       imports: [
         SharedModule,
         StoreModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ]
     })

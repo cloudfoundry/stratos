@@ -1,3 +1,6 @@
+import { cfEntityFactory, metricEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
+import { IOrganization } from '../../../core/src/core/cf-api.types';
 import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEntity,
@@ -22,8 +25,7 @@ import {
 } from './autoscaler-entity-factory';
 
 export function generateASEntities(): StratosBaseCatalogueEntity[] {
-  // TODO: Q Should autoscaler have an endpoint type? Should it match cf?
-  const endpointDefinition: IStratosEndpointDefinition = {
+  const endpointDefinition = {
     type: AUTOSCALER_ENDPOINT_TYPE,
     label: 'Cloud Foundry',
     labelPlural: 'Cloud Foundry',
@@ -38,7 +40,8 @@ export function generateASEntities(): StratosBaseCatalogueEntity[] {
     generatePolicyTriggerEntity(endpointDefinition),
     generateHealthEntity(endpointDefinition),
     generateScalingEntity(endpointDefinition),
-    generateMetricEntity(endpointDefinition),
+    generateAppMetricEntity(endpointDefinition),
+    generateMetricEntity(endpointDefinition)
   ];
 }
 
@@ -78,11 +81,22 @@ function generateScalingEntity(endpointDefinition: IStratosEndpointDefinition) {
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<AppAutoscalerScalingHistory>>(definition);
 }
 
-function generateMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateAppMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
   const definition = {
     type: appAutoscalerAppMetricEntityType,
     schema: autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<any>>(definition); // TODO: RC any
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<any>>(definition);
+}
+
+function generateMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
+  const definition = {
+    type: metricEntityType,
+    schema: cfEntityFactory(metricEntityType),
+    label: 'Autoscaler Metric',
+    labelPlural: 'Autoscaler Metrics',
+    endpoint: endpointDefinition,
+  };
+  return new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(definition);
 }

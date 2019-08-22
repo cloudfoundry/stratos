@@ -3,9 +3,9 @@ import { HttpModule } from '@angular/http';
 
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import {
+  generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
 
 describe('CfUserPermissionCellComponent', () => {
@@ -14,12 +14,15 @@ describe('CfUserPermissionCellComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        CfOrgPermissionCellComponent
+      ],
       providers: [
         ...generateTestCfEndpointServiceProvider()
       ],
       imports: [
+        ...generateCfStoreModules(),
         SharedModule,
-        createBasicStoreModule(),
         HttpModule
       ]
     })

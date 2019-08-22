@@ -1,11 +1,12 @@
+// tslint:disable:max-line-length
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import {
-  TableCellCfCellComponent,
-} from '../../../../core/src/shared/components/list/list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
+  TableCellQuotaComponent,
+} from '../../../../core/src/shared/components/list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import {
   AddServiceInstanceBaseStepComponent,
@@ -43,8 +44,29 @@ import { CfRoleCheckboxComponent } from './cf-role-checkbox/cf-role-checkbox.com
 import { CliCommandComponent } from './cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from './cli-info/cli-info.component';
 import {
+  CreateApplicationStep1Component,
+} from './create-application/create-application-step1/create-application-step1.component';
+import { EventTabActorIconPipe } from './list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import {
+  TableCellEventActionComponent,
+} from './list/list-types/app-event/table-cell-event-action/table-cell-event-action.component';
+import {
+  TableCellEventDetailComponent,
+} from './list/list-types/app-event/table-cell-event-detail/table-cell-event-detail.component';
+import {
+  TableCellEventTimestampComponent,
+} from './list/list-types/app-event/table-cell-event-timestamp/table-cell-event-timestamp.component';
+import {
+  TableCellEventTypeComponent,
+} from './list/list-types/app-event/table-cell-event-type/table-cell-event-type.component';
+import { TableCellCfCellComponent } from './list/list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
+import { TableCellUsageComponent } from './list/list-types/app-instance/table-cell-usage/table-cell-usage.component';
+import {
   AppServiceBindingCardComponent,
 } from './list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
+import {
+  TableCellEditVariableComponent,
+} from './list/list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
 import { CardAppComponent } from './list/list-types/app/card/card-app.component';
 import {
   TableCellAppCfOrgSpaceHeaderComponent,
@@ -127,7 +149,8 @@ import { SelectServiceComponent } from './select-service/select-service.componen
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
-import { TableCellQuotaComponent } from '../../../../core/src/shared/components/list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
+
+// tslint:enable:max-line-length
 
 @NgModule({
   imports: [
@@ -207,6 +230,14 @@ import { TableCellQuotaComponent } from '../../../../core/src/shared/components/
     TableCellTCPRouteComponent,
     TableCellAppInstancesComponent,
     TableCellAppNameComponent,
+    CreateApplicationStep1Component,
+    EventTabActorIconPipe,
+    TableCellEditVariableComponent,
+    TableCellEventTimestampComponent,
+    TableCellEventTypeComponent,
+    TableCellEventActionComponent,
+    TableCellEventDetailComponent,
+    TableCellUsageComponent,
     TableCellQuotaComponent
   ],
   exports: [
@@ -244,6 +275,7 @@ import { TableCellQuotaComponent } from '../../../../core/src/shared/components/
     RunningInstancesComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
+    CreateApplicationStep1Component
   ],
   entryComponents: [
     CfEndpointDetailsComponent,
@@ -284,6 +316,12 @@ import { TableCellQuotaComponent } from '../../../../core/src/shared/components/
     TableCellTCPRouteComponent,
     TableCellAppInstancesComponent,
     TableCellAppNameComponent,
+    TableCellEditVariableComponent,
+    TableCellEventTimestampComponent,
+    TableCellEventTypeComponent,
+    TableCellEventActionComponent,
+    TableCellEventDetailComponent,
+    TableCellUsageComponent,
     TableCellQuotaComponent
   ]
 })

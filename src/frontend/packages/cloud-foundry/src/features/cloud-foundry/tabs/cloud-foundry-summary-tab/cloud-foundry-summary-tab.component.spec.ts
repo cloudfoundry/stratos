@@ -2,9 +2,16 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../core/tab-nav.service';
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf-info/card-cf-info.component';
+import {
+  CardCfRecentAppsComponent,
+} from '../../../../shared/components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import {
+  CompactAppCardComponent,
+} from '../../../../shared/components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CloudFoundrySummaryTabComponent } from './cloud-foundry-summary-tab.component';
 
 describe('CloudFoundrySummaryTabComponent', () => {
@@ -13,8 +20,8 @@ describe('CloudFoundrySummaryTabComponent', () => {
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
-        declarations: [CloudFoundrySummaryTabComponent],
-        imports: [...BaseTestModules],
+        declarations: [CloudFoundrySummaryTabComponent, CardCfInfoComponent, CardCfRecentAppsComponent, CompactAppCardComponent],
+        imports: generateCfBaseTestModules(),
         providers: [...generateTestCfEndpointServiceProvider(), TabNavService]
       }).compileComponents();
     })

@@ -2,7 +2,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
 
 describe('TableCellServiceInstanceTagsComponent', () => {
@@ -12,7 +14,7 @@ describe('TableCellServiceInstanceTagsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellServiceInstanceTagsComponent, AppChipsComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [EntityMonitorFactory]
 
     })

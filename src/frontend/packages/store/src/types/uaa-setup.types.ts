@@ -19,4 +19,5 @@ export interface UaaSetupData {
   username: string;
   console_client_secret?: string;
   use_sso: boolean;
+  console_admin_scope?: string;
 }

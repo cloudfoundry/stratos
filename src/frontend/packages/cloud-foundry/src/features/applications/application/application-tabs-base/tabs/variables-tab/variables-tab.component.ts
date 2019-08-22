@@ -10,10 +10,10 @@ import {
 } from '../../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import {
   ListAppEnvVar,
-} from '../../../../../../../../core/src/shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import {
   CfAppVariablesListConfigService,
-} from '../../../../../../../../core/src/shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
+} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { ApplicationService } from '../../../../application.service';
 

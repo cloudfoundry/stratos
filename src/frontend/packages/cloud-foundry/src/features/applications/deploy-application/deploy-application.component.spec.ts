@@ -3,16 +3,15 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConnectionBackend, Http, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../core/src/core/github.helpers';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { getInitialTestStoreState } from '../../../../../core/test-framework/store-test-helper';
-import { appReducers } from '../../../../../store/src/reducers.module';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundryComponentsModule } from '../../../shared/components/components.module';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CreateApplicationModule } from '../create-application/create-application.module';
@@ -35,7 +34,6 @@ import { GithubProjectExistsDirective } from './github-project-exists.directive'
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
   let fixture: ComponentFixture<DeployApplicationComponent>;
-  const initialState = { ...getInitialTestStoreState() };
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -62,20 +60,16 @@ describe('DeployApplicationComponent', () => {
         TabNavService
       ],
       imports: [
+        ...generateCfStoreModules(),
         SharedModule,
         CoreModule,
         RouterTestingModule,
         CreateApplicationModule,
-        BrowserAnimationsModule,
-        StoreModule.forRoot(
-          appReducers,
-          {
-            initialState
-          }
-        ),
+        NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
-        HttpModule
+        HttpModule,
+        CloudFoundryComponentsModule
       ]
     })
       .compileComponents();

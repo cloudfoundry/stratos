@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import {
   Component,
   ComponentFactoryResolver,
@@ -12,22 +11,6 @@ import {
 
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import {
-  TableCellEventActionComponent,
-} from '../../list-types/app-event/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from '../../list-types/app-event/table-cell-event-detail/table-cell-event-detail.component';
-import {
-  TableCellEventTimestampComponent,
-} from '../../list-types/app-event/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
-import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
-import {
-  TableCellEditVariableComponent,
-} from '../../list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
 import {
   TableCellEndpointDetailsComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
@@ -55,21 +38,16 @@ import { TableHeaderSelectComponent } from '../table-header-select/table-header-
 import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
+/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
   TableCellEditComponent,
-  TableCellEditVariableComponent,
-  TableCellEventTimestampComponent,
-  TableCellEventTypeComponent,
-  TableCellEventActionComponent,
-  TableCellEventDetailComponent,
   TableCellActionsComponent,
   TableCellEndpointStatusComponent,
   TableCellEndpointNameComponent,
-  TableCellUsageComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRadioComponent,
   TableCellRequestMonitorIconComponent,

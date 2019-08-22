@@ -190,7 +190,6 @@ export class CurrentUserPermissionsChecker {
 
   public getFeatureFlagChecks(configs: PermissionConfig[], endpointGuid?: string): Observable<boolean>[] {
     return configs.map(config => {
-      const { type } = config;
       return this.getFeatureFlagCheck(config, endpointGuid);
     });
   }
@@ -206,7 +205,8 @@ export class CurrentUserPermissionsChecker {
             key => new PaginationMonitor<APIResource<IFeatureFlag>>(
               this.store,
               key,
-              new CFEntityConfig(featureFlagEntityType)
+              new CFEntityConfig(featureFlagEntityType),
+              true
             ).currentPage$
           ));
       }),

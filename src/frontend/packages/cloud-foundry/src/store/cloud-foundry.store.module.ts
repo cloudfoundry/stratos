@@ -1,16 +1,16 @@
-import { AppVariablesEffect } from './effects/app-variables.effects';
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
+import { AppVariablesEffect } from './effects/app-variables.effects';
+import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
 import { PermissionEffects, PermissionsEffects } from './effects/permissions.effect';
-import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { RouteEffect } from './effects/route.effects';
 
-// TODO: Remove commented effects once all CF effects are moved accross (leaving them here helps with tracking)
+// TODO: Remove commented effects once all CF effects are moved across (leaving them here helps with tracking)
 @NgModule({
   imports: [
     CloudFoundryReducersModule,

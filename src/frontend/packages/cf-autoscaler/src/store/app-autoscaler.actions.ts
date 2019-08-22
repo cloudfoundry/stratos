@@ -13,8 +13,8 @@ import {
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -80,6 +80,7 @@ export class UpdateAppAutoscalerPolicyAction implements EntityRequestAction {
     public endpointGuid: string,
     public policy: AppAutoscalerPolicyLocal,
   ) { }
+  updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
   type = UPDATE_APP_AUTOSCALER_POLICY;
   entityType = appAutoscalerPolicyEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;

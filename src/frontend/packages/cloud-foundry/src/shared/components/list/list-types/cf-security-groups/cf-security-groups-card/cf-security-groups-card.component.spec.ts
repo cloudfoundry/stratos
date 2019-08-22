@@ -4,11 +4,11 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
-  BaseTestModulesNoShared,
+  generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
-  MetadataCardTestComponents,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfSecurityGroupsCardComponent } from './cf-security-groups-card.component';
 
@@ -19,7 +19,7 @@ describe('CfSecurityGroupsCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CfSecurityGroupsCardComponent, MetadataCardTestComponents, BooleanIndicatorComponent, AppChipsComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointService()]
     })
       .compileComponents();

@@ -1,7 +1,8 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
-import { CfAuthService } from './cf-auth.service';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CfAuthService } from './cf-auth.service';
 
 describe('CfAuthService', () => {
   beforeEach(() => {
@@ -9,6 +10,7 @@ describe('CfAuthService', () => {
     TestBed.configureTestingModule({
       providers: [CfAuthService],
       imports: [
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     });

@@ -3,7 +3,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state.component';
 
 describe('TableCellFeatureFlagStateComponent', () => {
@@ -13,7 +15,7 @@ describe('TableCellFeatureFlagStateComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellFeatureFlagStateComponent, BooleanIndicatorComponent],
-      imports: [...BaseTestModulesNoShared]
+      imports: generateCfBaseTestModulesNoShared()
     })
       .compileComponents();
   }));
