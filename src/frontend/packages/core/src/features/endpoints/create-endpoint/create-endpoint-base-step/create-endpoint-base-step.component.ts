@@ -7,6 +7,7 @@ import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepp
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { getEndpointTypes } from '../../endpoint-helpers';
+import { map, first } from 'rxjs/operators';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
@@ -40,20 +41,27 @@ export class CreateEndpointBaseStepComponent {
     }
   }
   constructor(public store: Store<AppState>) {
-    this.tileSelectorConfig = getEndpointTypes().map(et => {
-      return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
-        et.label,
-        et.imagePath ? {
-          location: et.imagePath
-        } : {
-            matIcon: et.icon,
-            matIconFont: et.iconFont
-          },
-        {
-          type: et.type,
-          subType: et.subType
-        }
-      );
+    // Need to filter the endpoint types on the tech preview flag
+    store.select('auth').pipe(
+      map(auth => auth.sessionData),
+      first(),
+    ).subscribe(sessionData => {
+      const techPreviewIsEnabled = sessionData.config.enableTechPreview || false;
+      this.tileSelectorConfig = getEndpointTypes(techPreviewIsEnabled).map(et => {
+        return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
+          et.label,
+          et.imagePath ? {
+            location: et.imagePath
+          } : {
+              matIcon: et.icon,
+              matIconFont: et.iconFont
+            },
+          {
+            type: et.type,
+            subType: et.subType
+          }
+        );
+      });
     });
   }
 

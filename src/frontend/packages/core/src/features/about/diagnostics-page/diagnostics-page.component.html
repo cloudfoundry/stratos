@@ -9,6 +9,7 @@
     <div *ngIf="(this.userIsAdmin$ | async) as isAdminUser">
       <app-metadata-item *ngIf="!isAdminUser" icon="person" label="User">{{ session.user.name }}</app-metadata-item>
       <app-metadata-item class="about-page__mat-warning-icon" *ngIf="isAdminUser" icon="security" label="User">{{ session.user.name }} (You have administrative privileges)</app-metadata-item>
+      <app-metadata-item *ngIf="session.config.enableTechPreview" class="about-page__mat-warning-icon" icon="whatshot" label="Tech Preview">Tech Preview features are enabled</app-metadata-item>
     </div>
   </mat-card>
 
