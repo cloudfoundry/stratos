@@ -1,10 +1,10 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
-import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild, Inject } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
@@ -24,6 +24,7 @@ import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 
 
 @Component({
@@ -52,6 +53,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
+    @Inject(Customizations) private customizations: CustomizationsMetadata
   ) {
     this.noMargin$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -192,7 +194,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
           link: path + '/' + route.path
         };
         if (item.requiresEndpointType) {
-          item.hidden = this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+          // Upstream always likes to show Cloud Foundry related endpoints - other distributions can chane this behaviour
+          const alwaysShow = this.customizations.alwaysShowNavForEndpointTypes ?
+            this.customizations.alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
+          item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
           item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));
         }
