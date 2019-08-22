@@ -98,3 +98,13 @@ func isAKSAuth(k *config.KubeConfigUser) bool {
 	}
 	return true
 }
+
+
+func (c *AzureKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+	// Register auth type with Jetstream
+	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+		Handler:  c.DoFlowRequest,
+		UserInfo: c.GetUserFromToken,
+	})
+}
+

@@ -17,6 +17,13 @@ import { MockChartService } from '../shared/services/chart.service.mock';
 // import { MainHeaderComponent } from '../main-header/main-header.component';
 // import { SeoService } from '../shared/services/seo.service';
 
+export class MockChartService {
+
+  public getCharts() {
+    return observableOf([]);
+  }
+}
+
 describe('Component: ChartIndex', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({

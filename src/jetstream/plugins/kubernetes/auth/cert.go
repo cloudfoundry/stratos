@@ -175,3 +175,11 @@ func (c *CertKubeAuth) RefreshCertAuth(skipSSLValidation bool, cnsiGUID, userGUI
 
 	return userToken, nil
 }
+
+func (c *CertKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+	// Register auth type with Jetstream
+	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+		Handler:  c.DoFlowRequest,
+		UserInfo: c.GetUserFromToken,
+	})
+}

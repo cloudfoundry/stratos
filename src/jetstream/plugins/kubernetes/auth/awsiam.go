@@ -143,6 +143,14 @@ func (c *AWSKubeAuth) getTokenIAM(info AWSIAMUserInfo) (string, error) {
 	return tok.Token, nil
 }
 
+func (c *AWSKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+		// Register auth type with Jetstream
+		c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+			Handler:  c.DoFlowRequest,
+			UserInfo: c.GetUserFromToken,
+		})
+}
+
 func (c *AWSKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doAWSIAMFlowRequest")
 

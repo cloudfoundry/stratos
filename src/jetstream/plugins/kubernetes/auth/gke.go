@@ -193,3 +193,11 @@ func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSe
 	err = json.Unmarshal(respBody, &tokenInfo)
 	return tokenInfo, err
 }
+
+func (c *GKEKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+	// Register auth type with Jetstream
+	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+		Handler:  c.DoFlowRequest,
+		UserInfo: c.GetUserFromToken,
+	})
+}

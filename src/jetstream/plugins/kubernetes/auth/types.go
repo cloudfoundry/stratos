@@ -17,6 +17,11 @@ type KubeAuthProvider interface {
 	AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error
 	FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error)
 
+	RegisterJetstreamAuthType(portal interfaces.PortalProxy)
+}
+
+// KubeJetstreamAuthProvider is the optional interface that can be implemented if you want to control Jetstream Auth Registration
+type KubeJetstreamAuthProvider interface {
 	DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error)
 	GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool)
 }

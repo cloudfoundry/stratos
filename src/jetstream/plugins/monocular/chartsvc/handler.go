@@ -173,17 +173,21 @@ func getChartVersionReadme(w http.ResponseWriter, req *http.Request, params Para
 
 // getChartVersionValues returns the values.yaml for a given chart
 func getChartVersionValues(w http.ResponseWriter, req *http.Request, params Params) {
-	db, closer := dbSession.DB()
-	defer closer()
-	var files models.ChartFiles
-	fileID := fmt.Sprintf("%s/%s-%s", params["repo"], params["chartName"], params["version"])
-	if err := db.C(filesCollection).FindId(fileID).One(&files); err != nil {
-		log.WithError(err).Errorf("could not find values.yaml with id %s", fileID)
+	chartID := fmt.Sprintf("%s/%s", params["repo"], params["chartName"])
+	version := params["version"]
+	fileID := fmt.Sprintf("%s-%s", chartID, version)
+	values, err := dataStore.GetChartVersionValuesYaml(chartID, version)
+	if err != nil {
+		log.WithError(err).Errorf("could not find files with id %s", fileID)
 		http.NotFound(w, req)
 		return
 	}
-
-	w.Write([]byte(files.Values))
+	if len(values) == 0 {
+		log.Errorf("could not find a values.yaml for id %s", fileID)
+		http.NotFound(w, req)
+		return
+	}
+	w.Write(values)
 }
 
 // listChartsWithFilters returns the list of repos that contains the given chart and the latest version found
