@@ -15,11 +15,15 @@ import { PaginationEntityState } from '../../../../../../../store/src/types/pagi
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, serviceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
-    const action = new GetServiceInstances(cfGuid, paginationKey);
+    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(cfGuid, paginationKey);
 
     super({
       store,

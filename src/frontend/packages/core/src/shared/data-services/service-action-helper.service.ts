@@ -70,8 +70,11 @@ export class ServiceActionHelperService {
       endpointType: CF_ENDPOINT_TYPE,
       entityType: serviceInstancesEntityType
     };
+    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('remove');
+    const deleteServiceInstanceAction = actionBuilder(endpointGuid, serviceInstanceGuid); 
     const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesEntityConfig) :
-      new DeleteServiceInstance(endpointGuid, serviceInstanceGuid);
+      deleteServiceInstanceAction;
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
       {

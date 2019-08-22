@@ -336,10 +336,13 @@ export class ApplicationDeleteComponent<T> {
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
             this.selectedServiceInstances.forEach(instance => {
+              const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
               if (isUserProvidedServiceInstance(instance.entity.service_instance.entity)) {
                 this.store.dispatch(new DeleteUserProvidedInstance(this.applicationService.cfGuid, instance.entity.service_instance_guid));
               } else {
-                this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.entity.service_instance_guid));
+                const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('remove');
+                const deleteServiceInstanceAction = actionBuilder(this.applicationService.cfGuid, instance.entity.service_instance_guid); 
+                this.store.dispatch(deleteServiceInstanceAction);
               }
             });
           }

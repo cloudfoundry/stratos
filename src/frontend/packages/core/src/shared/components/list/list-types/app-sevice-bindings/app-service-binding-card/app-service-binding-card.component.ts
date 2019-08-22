@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { cfEntityFactory, serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory, serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstance } from '../../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { GetUserProvidedService } from '../../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
@@ -27,6 +27,8 @@ import { AppChip } from '../../../../chips/chips.component';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../list.types';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 
 interface EnvVarData {
   key: string;
@@ -108,9 +110,12 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsServiceInstance() {
+    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
+    const getServiceInstanceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid); 
     const serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       this.row.entity.service_instance_guid,
-      new GetServiceInstance(this.row.entity.service_instance_guid, this.appService.cfGuid),
+      getServiceInstanceAction,
       true
     ).waitForEntity$;
     this.serviceInstance$ = serviceInstance$;

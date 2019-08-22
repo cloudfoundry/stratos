@@ -12,12 +12,16 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { ActionSchemaConfig, MultiActionConfig } from '../../data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../list.component.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> {
 
   constructor(store: Store<CFAppState>, transformEntities: any[], listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType);
-    const marketplaceAction = new GetServiceInstances(null, paginationKey);
+    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const marketplaceAction = actionBuilder(null, paginationKey);
     const userProvidedAction = new GetAllUserProvidedServices();
     const actionSchemaConfigs = [
       new ActionSchemaConfig(

@@ -401,10 +401,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     tagsStr: string[],
     isEditMode: boolean
   ) {
+    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     if (isEditMode) {
-      return new UpdateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+      const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('update');
+      const updateServiceInstanceAction = actionBuilder(cfGuid, newServiceInstanceGuid, {name: name, servicePlanGuid: servicePlanGuid, spaceGuid: spaceGuid, params: params, tags: tagsStr});   
+      return updateServiceInstanceAction;
     }
-    return new CreateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('create');
+    const createServiceInstanceAction = actionBuilder(cfGuid, newServiceInstanceGuid, {name: name, servicePlanGuid: servicePlanGuid, spaceGuid: spaceGuid, params: params, tags: tagsStr}); 
+    return createServiceInstanceAction;
   }
 
   private getIdFromResponseGetter(cfGuid: string, newId: string, isEditMode: boolean) {
@@ -413,7 +418,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         // We need to re-fetch the Service Instance
         // incase of creation because the entity returned is incomplete
         const guid = response.result[0];
-        this.store.dispatch(new GetServiceInstance(guid, cfGuid));
+        const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+        const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
+        const getServiceInstanceAction = actionBuilder(guid, cfGuid); 
+        this.store.dispatch(getServiceInstanceAction);
         return guid;
       }
       return newId;

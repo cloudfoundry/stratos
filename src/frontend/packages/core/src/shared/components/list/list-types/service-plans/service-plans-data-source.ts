@@ -18,6 +18,9 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 import { populateServicePlanExtraTyped } from '../../../../../features/service-catalog/services-helper';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export class ServicePlansDataSource extends ListDataSource<APIResource<IServicePlan>> {
   constructor(
@@ -28,9 +31,11 @@ export class ServicePlansDataSource extends ListDataSource<APIResource<IServiceP
   ) {
 
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, serviceGuid);
-    const action = new GetServicePlansForService(serviceGuid, cfGuid, paginationKey, [
+    const servicePlanEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, servicePlanEntityType);
+    const actionBuilder = servicePlanEntity.actionOrchestrator.getActionBuilder('getAllForServiceInstance');
+    const action = actionBuilder(serviceGuid, cfGuid, paginationKey, [
       createEntityRelationKey(servicePlanEntityType, serviceEntityType),
-    ]);
+    ]) as PaginatedAction;
 
     super({
       store,

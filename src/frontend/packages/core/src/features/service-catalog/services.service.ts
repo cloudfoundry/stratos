@@ -30,6 +30,8 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -85,10 +87,13 @@ export class ServicesService {
 
   getServicePlanVisibilities = () => {
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
+    const servicePlanVisibilityEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
+    const actionBuilder = servicePlanVisibilityEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getServicePlanVisibilitiesAction = actionBuilder(this.cfGuid, paginationKey);
     return getPaginationObservables<APIResource<IServicePlanVisibility>>(
       {
         store: this.store,
-        action: new GetServicePlanVisibilities(this.cfGuid, paginationKey),
+        action: getServicePlanVisibilitiesAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           cfEntityFactory(servicePlanVisibilityEntityType)
@@ -103,10 +108,13 @@ export class ServicesService {
 
   private getServiceBrokers = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid);
+    const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
+    const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getServiceBrokersAction = actionBuilder(this.cfGuid, paginationKey); 
     return getPaginationObservables<APIResource<IServiceBroker>>(
       {
         store: this.store,
-        action: new GetServiceBrokers(this.cfGuid, paginationKey),
+        action: getServiceBrokersAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           cfEntityFactory(serviceBrokerEntityType)

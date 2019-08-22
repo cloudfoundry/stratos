@@ -255,7 +255,9 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   }
 
   private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {
-    const action = new GetServiceInstance(serviceInstanceId, cfId);
+    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
+    const action = actionBuilder(serviceInstanceId, cfId); 
     return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesEntityType,
       action,
