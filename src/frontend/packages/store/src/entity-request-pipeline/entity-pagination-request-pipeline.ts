@@ -62,7 +62,8 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   const prePaginatedRequestFunction = getPrePaginatedRequestFunction(catalogueEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const entity = catalogueEntity as StratosCatalogueEntity;
-  const flattenerConfig = entity.definition.paginationConfig ? entity.definition.paginationConfig :
+  const flattenerConfig = entity.definition.paginationConfig ?
+    entity.definition.paginationConfig :
     entity.definition.endpoint ? entity.definition.endpoint.paginationConfig : null;
   const paramsFromStore = getPaginationParamsPipe(action, catalogueEntity, appState);
   const requestFromAction = buildRequestEntityPipe(requestType, action.options);
@@ -70,8 +71,9 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   const requestFromStore = requestFromAction.clone({
     params: allParams
   });
-  const request = prePaginatedRequestFunction ? prePaginatedRequestFunction(requestFromStore, action, catalogueEntity) : requestFromStore;
-
+  const request = prePaginatedRequestFunction ?
+    prePaginatedRequestFunction(requestFromStore, action, catalogueEntity, appState) :
+    requestFromStore;
 
   const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(
     action.options.url,

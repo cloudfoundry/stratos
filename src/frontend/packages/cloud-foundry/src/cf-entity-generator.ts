@@ -72,7 +72,7 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-factory';
-import { addRelationParams } from './cf-entity-relations.getters';
+import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
@@ -133,10 +133,11 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
     globalPreRequest: (request, action) => {
-      return addRelationParams(request, action);
+      return addCfRelationParams(request, action);
     },
-    globalPrePaginationRequest: (request, action) => {
-      return addRelationParams(request, action);
+    globalPrePaginationRequest: (request, action, catalogueEntity, appState) => {
+      const rWithRelations = addCfRelationParams(request, action);
+      return addCfQParams(rWithRelations, action, catalogueEntity, appState);
     },
     globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
       if (data) {
