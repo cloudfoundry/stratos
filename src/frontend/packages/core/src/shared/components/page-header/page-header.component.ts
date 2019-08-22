@@ -10,6 +10,7 @@ import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-action
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { TabNavService } from '../../../../tab-nav.service';
@@ -18,7 +19,6 @@ import { StratosStatus } from '../../shared.types';
 import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 
 @Component({
   selector: 'app-page-header',
@@ -66,7 +66,14 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   @Input() showUnderFlow = false;
 
-  @Input() showHistory = true;
+  private pShowHistory = true;
+  @Input()
+  get showHistory(): boolean {
+    return !this.logoutOnly && this.pShowHistory;
+  }
+  set showHistory(showHistory: boolean) {
+    this.pShowHistory = showHistory;
+  }
 
   public events$: Observable<IGlobalEvent[]>;
   public eventCount$: Observable<number>;

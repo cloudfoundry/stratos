@@ -1,7 +1,7 @@
 import { browser, promise } from 'protractor';
 import { protractor } from 'protractor/built/ptor';
 
-import { e2e } from '../e2e';
+import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
@@ -18,9 +18,10 @@ export function setUpTestOrgSpaceE2eTest(
   orgName: string,
   spaceName: string,
   userName: string,
-  dropBillingManager = false
+  dropBillingManager = false,
+  e2eSetup?: E2ESetup
 ) {
-  const e2eSetup = e2e.setup(ConsoleUserType.admin)
+  const pe2eSetup = e2eSetup || e2e.setup(ConsoleUserType.admin)
     .clearAllEndpoints()
     .registerDefaultCloudFoundry()
     .connectAllEndpoints(ConsoleUserType.admin)
@@ -37,7 +38,7 @@ export function setUpTestOrgSpaceE2eTest(
       orgName,
       spaceName,
       userName,
-      new CFHelpers(e2eSetup),
+      new CFHelpers(pe2eSetup),
       dropBillingManager), 25000, 'Did not complete "setUpTestOrgSpaceUserRoles" within 25 seconds');
   });
 }
@@ -113,7 +114,7 @@ export function setupCfUserTableTests(
     extendE2ETestTime(timeout);
 
     const usersTable = new CFUsersListComponent();
-    const userRowIndex = 0;
+    let userRowIndex = 0;
 
     let orgUserChip: UserRoleChip;
     const testOrgName = cfLevel === CfUserTableTestLevel.Cf ? orgName : null;
@@ -124,11 +125,14 @@ export function setupCfUserTableTests(
       usersTable.waitForNoLoadingIndicator(20000);
       usersTable.header.waitUntilShown('User table header');
       usersTable.header.setSearchText(userName);
-      expect(usersTable.getTotalResults()).toBe(1);
+      return usersTable.table.findRow('username', userName).then(row => {
+        userRowIndex = row;
+        expect(usersTable.table.getCell(userRowIndex, 1).getText()).toBe(userName);
 
-      orgUserChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'User');
-      usersTable.expandOrgsChips(userRowIndex);
-      return usersTable.expandSpaceChips(userRowIndex);
+        orgUserChip = usersTable.getPermissionChip(userRowIndex, testOrgName, null, true, 'User');
+        usersTable.expandOrgsChips(userRowIndex);
+        return usersTable.expandSpaceChips(userRowIndex);
+      });
     });
 
     it('Check org user pill is present and cannot be removed', () => {

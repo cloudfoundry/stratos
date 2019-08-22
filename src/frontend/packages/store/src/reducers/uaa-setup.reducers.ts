@@ -1,4 +1,4 @@
-import { SETUP_UAA, SETUP_UAA_FAILED, SETUP_UAA_SCOPE, SETUP_UAA_SUCCESS } from './../actions/setup.actions';
+import { SETUP_UAA, SETUP_UAA_FAILED, SETUP_UAA_SAVE, SETUP_UAA_SUCCESS } from './../actions/setup.actions';
 import { Action } from '@ngrx/store';
 import { UAASetupState } from '../types/uaa-setup.types';
 
@@ -12,7 +12,7 @@ const defaultState = {
 
 export function uaaSetupReducer(state: UAASetupState = defaultState, action) {
   switch (action.type) {
-    case SETUP_UAA_SCOPE:
+    case SETUP_UAA_SAVE:
     case SETUP_UAA:
       return {
         ...state,

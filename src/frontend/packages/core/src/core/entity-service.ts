@@ -127,7 +127,8 @@ export class EntityService<T = any> {
       }),
       map(([entityRequestInfo, entity]) => ({
         entityRequestInfo,
-        entity
+        // If the entity is deleted ensure that we don't pass through a stale state
+        entity: entityRequestInfo.deleting && entityRequestInfo.deleting.deleted ? null : entity
       }))
     );
   }

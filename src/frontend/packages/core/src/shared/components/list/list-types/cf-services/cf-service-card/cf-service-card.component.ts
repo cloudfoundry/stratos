@@ -9,6 +9,7 @@ import { CardCell } from '../../../list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { AppState } from '../../../../../../../../store/src/app-state';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 export interface ServiceTag {
   value: string;
@@ -20,8 +21,11 @@ export interface ServiceTag {
   styleUrls: ['./cf-service-card.component.scss']
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
-
   serviceEntity: APIResource<IService>;
+  cfOrgSpace: CfOrgSpaceLabelService;
+  extraInfo: IServiceExtra;
+  tags: AppChip<ServiceTag>[] = [];
+
   @Input() disableCardClick = false;
 
   @Input('row')
@@ -40,12 +44,13 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
           hideClearButton$: observableOf(true)
         });
       });
+
+      if (!this.cfOrgSpace) {
+        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.serviceEntity.entity.cfGuid);
+      }
     }
   }
 
-
-  extraInfo: IServiceExtra;
-  tags: AppChip<ServiceTag>[] = [];
   constructor(private store: Store<AppState>) {
     super();
   }
@@ -57,7 +62,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
     return this.serviceEntity.entity.label;
   }
 
-
   hasDocumentationUrl() {
     return !!(this.getDocumentationUrl());
   }
@@ -68,9 +72,12 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   hasSupportUrl() {
     return !!(this.getSupportUrl());
   }
+
   getSupportUrl() {
     return this.extraInfo && this.extraInfo.supportUrl;
   }
+
+  getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
   goToServiceInstances = () =>
     this.store.dispatch(new RouterNav({

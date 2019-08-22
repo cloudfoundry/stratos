@@ -13,6 +13,8 @@ chmod +x mc
 
 echo "Uploading test report...."
 
+./mc -install -y
+
 echo "Configuring upload client"
 ./mc config host add s3 ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
 

@@ -43,6 +43,7 @@ require (
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/kubeapps/common v0.0.0-20181107174310-61d8eb6f11b4
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/lib/pq v1.1.0 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
@@ -59,7 +60,7 @@ require (
 	github.com/ulikunitz/xz v0.5.6 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/net v0.0.0-20190420063019-afa5a82059c6 // indirect
 	google.golang.org/appengine v1.5.0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.0.0-00010101000000-000000000000

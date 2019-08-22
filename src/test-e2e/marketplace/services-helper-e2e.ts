@@ -107,7 +107,7 @@ export class ServicesHelperE2E {
 
       this.setServiceInstanceDetail(serviceInstanceName);
 
-      this.createInstanceAttempt(0, 3, serviceName, serviceInstanceName);
+      this.createInstanceAttempt(0, 8, serviceName, serviceInstanceName);
     });
   }
 
@@ -116,7 +116,7 @@ export class ServicesHelperE2E {
     browser.wait(until.or(
       until.invisibilityOf(this.createServiceInstance.stepper.nextButton()),
       this.createServiceInstance.stepper.canNext.bind(this.createServiceInstance.stepper)
-    ), 10000);
+    ), 20000);
 
     this.createServiceInstance.stepper.canNext().then(canNext => {
       if (canNext) {
@@ -124,7 +124,8 @@ export class ServicesHelperE2E {
         if (!!attemptsLeft) {
           e2e.log(`Failed to create service instance '${serviceInstanceName}' of type '${serviceName}'.
            Attempting ${attemptsLeft} more time/s`);
-          browser.sleep(1000);
+          // Wait 10 seonds until we try again
+          browser.sleep(10000);
           this.createInstanceAttempt(retryNumber + 1, maxRetries, serviceName, serviceInstanceName);
         } else {
           fail(`Failed to create service instance after ${maxRetries} retries`);

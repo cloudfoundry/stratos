@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetSpace } from '../../../../../store/src/actions/space.actions';
@@ -39,7 +39,15 @@ export class CloudFoundrySpaceService {
   orgGuid: string;
   spaceGuid: string;
   userRole$: Observable<string>;
+  /**
+   * Sensible quota to use for space. If there's no specific space quota set this will be the org quota. If there's no org quota
+   * a mock quota with everything allowed will be used
+   */
   quotaDefinition$: Observable<IQuotaDefinition>;
+  /**
+   * Actual Space Quota. In almost all cases `quotaDefinition$` should be used instead
+   */
+  spaceQuotaDefinition$: Observable<IQuotaDefinition>;
   allowSsh$: Observable<string>;
   totalMem$: Observable<number>;
   routes$: Observable<APIResource<IRoute>[]>;
@@ -51,6 +59,7 @@ export class CloudFoundrySpaceService {
   loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   usersCount$: Observable<number | null>;
+  quotaLink$: Observable<string[]>;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -134,15 +143,41 @@ export class CloudFoundrySpaceService {
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
-    this.quotaDefinition$ = this.space$.pipe(
-      map(q => q.entity.entity.space_quota_definition),
-      switchMap(def => def ? of(def.entity) : this.cfOrgService.quotaDefinition$),
+    this.spaceQuotaDefinition$ = this.space$.pipe(
+      map(q => q.entity.entity.space_quota_definition ? q.entity.entity.space_quota_definition.entity : null)
+    );
+    this.quotaDefinition$ = this.spaceQuotaDefinition$.pipe(
+      switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$),
       map(def => def ?
         {
           ...def,
           organization_guid: this.orgGuid
         } :
         createQuotaDefinition(this.orgGuid)
+      )
+    );
+    this.quotaLink$ = combineLatest(this.quotaDefinition$, this.spaceQuotaDefinition$).pipe(
+      map(([quota, spaceQuota]) => {
+        if (!spaceQuota) {
+          return [
+            '/cloud-foundry',
+            this.cfGuid,
+            'organizations',
+            this.orgGuid,
+            'quota',
+          ];
+        }
+
+        return quota && [
+          '/cloud-foundry',
+          this.cfGuid,
+          'organizations',
+          this.orgGuid,
+          'spaces',
+          this.spaceGuid,
+          'space-quota'
+        ];
+      }
       )
     );
   }

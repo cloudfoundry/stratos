@@ -52,7 +52,7 @@ export const appReducers = {
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,
-  recentlyVisited: recentlyVisitedReducer
+  recentlyVisited: recentlyVisitedReducer,
 } as ActionReducerMap<{}>;
 
 export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {

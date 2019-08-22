@@ -42,6 +42,7 @@ import { CardAppInstancesComponent } from './components/cards/card-app-instances
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
+import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import {
   CardCfOrgUserDetailsComponent,
@@ -121,6 +122,7 @@ import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.compon
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
+import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
@@ -129,6 +131,7 @@ import { ServiceIconComponent } from './components/service-icon/service-icon.com
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
+import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import {
   StackedInputActionComponent,
@@ -142,6 +145,7 @@ import { TileGridComponent } from './components/tile/tile-grid/tile-grid.compone
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
+import { UnlimitedInputComponent } from './components/unlimited-input/unlimited-input.component';
 import {
   UploadProgressIndicatorComponent,
 } from './components/upload-progress-indicator/upload-progress-indicator.component';
@@ -230,6 +234,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     BooleanIndicatorComponent,
     CardCfSpaceDetailsComponent,
     AppChipsComponent,
+    CardBooleanMetricComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
@@ -294,7 +299,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    CfOrgSpaceLinksComponent
+    CfOrgSpaceLinksComponent,
+    SnackBarReturnComponent,
+    PollingIndicatorComponent,
+    UnlimitedInputComponent,
   ],
   exports: [
     FormsModule,
@@ -345,6 +353,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardCfSpaceDetailsComponent,
     RingChartComponent,
     AppChipsComponent,
+    CardBooleanMetricComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
@@ -406,12 +415,17 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AddServiceInstanceBaseStepComponent,
-    AppNameUniqueDirective
+    AppNameUniqueDirective,
+    RunningInstancesComponent,
+    CardAppUsageComponent,
+    PollingIndicatorComponent,
+    UnlimitedInputComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
     EnvVarViewComponent,
     NoServicePlansComponent,
+    SnackBarReturnComponent
   ],
   providers: [
     ListConfig,

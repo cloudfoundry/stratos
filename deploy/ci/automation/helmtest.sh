@@ -42,12 +42,17 @@ function deleteRelease {
 function waitForHelmRelease {
   echo "Waiting for Stratos Helm Release to be ready..."
   local DONE="false"
+  local TIMEOUT=0
   while [ $DONE != "true" ]; do
     COUNT=$(kubectl get po --namespace=${NAMESPACE} | wc -l)
     kubectl get po --namespace=${NAMESPACE}
-    if [ $COUNT -eq 3 ]; then
+    if [ $COUNT -ge 3 ]; then
+      # COUNT includes the column header line
       READY=$(kubectl get po --namespace=${NAMESPACE} | grep "Running" | wc -l)
-      if [ $READY -eq 2 ]; then
+      COMPLETED=$(kubectl get po --namespace=${NAMESPACE} | grep "Completed" | wc -l)
+      TOTAL=$(($READY + $COMPLETED))
+      EXPECTED=$(($COUNT - 1))
+      if [ $TOTAL -eq $EXPECTED ]; then
         READY1=$(kubectl get po --namespace=${NAMESPACE} | grep "3/3" | wc -l)
         READY2=$(kubectl get po --namespace=${NAMESPACE} | grep "1/1" | wc -l)
         READY=$(($READY1 + $READY2))
@@ -59,6 +64,11 @@ function waitForHelmRelease {
     if [ "$DONE" != "true" ]; then
       echo "Waiting for Stratos Helm release to be ready..."
       sleep 5
+      TIMEOUT=$((TIMEOUT+1))
+      if [ ${TIMEOUT} -gt 60 ]; then
+        echo "Timed out waiting for Helm release to be ready"
+        exit 1
+      fi
     fi
   done
 }

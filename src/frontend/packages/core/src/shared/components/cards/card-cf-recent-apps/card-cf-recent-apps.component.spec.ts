@@ -14,6 +14,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-pag
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { PollingIndicatorComponent } from '../../polling-indicator/polling-indicator.component';
 
 describe('CardCfRecentAppsComponent', () => {
   let component: CardCfRecentAppsComponent;
@@ -25,6 +26,7 @@ describe('CardCfRecentAppsComponent', () => {
         CardCfRecentAppsComponent,
         ApplicationStateIconComponent,
         CompactAppCardComponent,
+        PollingIndicatorComponent,
         ApplicationStateIconPipe
       ],
       imports: [...BaseTestModulesNoShared],

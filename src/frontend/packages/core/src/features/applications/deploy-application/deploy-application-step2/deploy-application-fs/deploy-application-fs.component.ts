@@ -3,6 +3,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
+import { getEventFiles } from '../../../../../core/browser-helper';
 import { FileScannerInfo } from './deploy-application-fs-scanner';
 import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
 
@@ -31,7 +32,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
 
   // Handle result of a file input form field selection
   onFileChange(event) {
-    const files = event.srcElement.files;
+    const files = getEventFiles(event);
     const utils = new DeployApplicationFsUtils();
     utils.handleFileInputSelection(files).pipe(
       filter(res => !!res),

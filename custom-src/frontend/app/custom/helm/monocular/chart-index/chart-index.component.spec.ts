@@ -11,6 +11,7 @@ import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
 import { ChartIndexComponent } from './chart-index.component';
+import { MockChartService } from '../shared/services/chart.service.mock';
 
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
 // import { MainHeaderComponent } from '../main-header/main-header.component';
@@ -32,7 +33,7 @@ describe('Component: ChartIndex', () => {
       providers: [
         ConfigService,
         MenuService,
-        { provide: ChartsService },
+        { provide: ChartsService, useValue: new MockChartService()},
         // { provide: SeoService },
         { provide: Router }
       ],

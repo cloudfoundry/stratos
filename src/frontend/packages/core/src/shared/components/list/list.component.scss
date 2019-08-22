@@ -155,24 +155,3 @@
     margin: 24px;
   }
 }
-
-.refresh-icon {
-  animation: spin .4s infinite linear;
-  animation-play-state: paused;
-  transform: rotate(0deg);
-  transition: transform 1s linear;
-}
-
-.refreshing {
-  animation-play-state: running;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(359deg);
-  }
-}

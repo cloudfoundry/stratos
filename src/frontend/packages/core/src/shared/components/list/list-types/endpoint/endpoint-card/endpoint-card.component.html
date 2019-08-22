@@ -1,7 +1,8 @@
 <app-page-header-events class="endpoint-warning" [endpointIds$]="endpointIds$" [simpleErrorMessage]="true">
 </app-page-header-events>
 <app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
-  [ngClass]="{'no-link': !endpointLink }" [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$"
+  [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': row.connectionStatus === 'disconnected', 'endpoint-card--checking': row.connectionStatus === 'checking'}" 
+  [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$"
   [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">

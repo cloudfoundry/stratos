@@ -8,7 +8,6 @@ echo "================="
 echo "Checking docker version"
 
 docker version
-docker-compose version
 
 echo "Preparing for e2e tests..."
 
@@ -17,9 +16,6 @@ wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
-
-# There are two ways of running - building and deploying a full docker-compose deployment
-# or doing a local build and running that with sqlite
 
 # Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
 CAPTURE_VIDEO=$1

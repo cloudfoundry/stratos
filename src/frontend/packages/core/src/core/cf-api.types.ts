@@ -182,8 +182,11 @@ export interface IOrganization<spaceT = APIResource<ISpace>[]> {
 
 export interface IDomain {
   name: string;
-  router_group_guid?: any;
-  router_group_type?: any;
+  router_group_guid?: string;
+  router_group_type?: string;
+  owning_organization_guid?: string;
+  owning_organization_url?: string;
+  shared_organizations_url?: string;
 }
 
 export interface ICfV2Info {
@@ -242,15 +245,20 @@ export interface IPrivateDomain {
 }
 
 export interface IQuotaDefinition {
-  memory_limit: number;
-  app_instance_limit: number;
-  instance_memory_limit: number;
+  guid?: string;
   name: string;
   organization_guid?: string;
-  total_services?: number;
-  total_routes?: number;
-  total_private_domains?: number;
+  app_instance_limit: number;
+  app_task_limit?: number;
+  memory_limit: number;
+  instance_memory_limit: number;
+  total_services: number;
+  total_service_keys?: number;
   non_basic_services_allowed?: boolean;
+  trial_db_allowed?: boolean;
+  total_routes: number;
+  total_reserved_route_ports?: number;
+  total_private_domains?: number;
 }
 
 export interface IUpdateSpace {
@@ -263,6 +271,7 @@ export interface IUpdateSpace {
   security_group_guids?: string[];
   allow_ssh?: boolean;
   isolation_segment_guid?: string;
+  space_quota_definition_guid?: string;
 }
 
 export interface IUpdateOrganization {
