@@ -1,10 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import {
-  BaseTestModulesNoShared,
-  MetadataCardTestComponents,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { MetadataCardTestComponents } from '../../../../../../core/test-framework/core-test.helper';
+import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import {
@@ -25,7 +23,7 @@ describe('ServiceRecentInstancesCardComponent', () => {
         AppChipsComponent
 
       ],
-      imports: [BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },
       ]

@@ -4,10 +4,10 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
-  BaseTestModulesNoShared,
-  MetadataCardTestComponents,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfBuildpackCardComponent } from './cf-buildpack-card.component';
 
 describe('CfBuildpackCardComponent', () => {
@@ -17,7 +17,7 @@ describe('CfBuildpackCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CfBuildpackCardComponent, ...MetadataCardTestComponents, BooleanIndicatorComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         EntityMonitorFactory
       ]

@@ -2,12 +2,21 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../core/tab-nav.service';
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
+import {
+  CardCfOrgUserDetailsComponent,
+} from '../../../../../shared/components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import {
+  CardCfRecentAppsComponent,
+} from '../../../../../shared/components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import {
+  CompactAppCardComponent,
+} from '../../../../../shared/components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationSummaryComponent } from './cloud-foundry-organization-summary.component';
 
@@ -17,8 +26,8 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryOrganizationSummaryComponent],
-      imports: [...BaseTestModules],
+      declarations: [CloudFoundryOrganizationSummaryComponent, CardCfOrgUserDetailsComponent, CardCfRecentAppsComponent, CompactAppCardComponent],
+      imports: generateCfBaseTestModules(),
       providers: [
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
         generateTestCfEndpointServiceProvider(),

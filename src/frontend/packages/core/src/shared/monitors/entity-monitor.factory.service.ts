@@ -26,6 +26,9 @@ export class EntityMonitorFactory {
       return this.monitorCache[cacheKey];
     } else {
       const catalogueEntity = entityCatalogue.getEntity(entityConfig);
+      if (!catalogueEntity) {
+        throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+      }
       const monitor = catalogueEntity.getEntityMonitor(
         this.store,
         id,

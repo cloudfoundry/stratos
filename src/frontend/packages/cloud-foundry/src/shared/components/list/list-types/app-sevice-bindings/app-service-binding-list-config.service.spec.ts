@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
 import { generateTestApplicationServiceProvider } from '../../../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   ApplicationEnvVarsHelper,
 } from '../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -17,7 +17,7 @@ describe('AppServiceBindingListConfigService', () => {
         ApplicationEnvVarsHelper,
         DatePipe
       ],
-      imports: [...BaseTestModules]
+      imports: generateCfBaseTestModules()
     });
   });
 

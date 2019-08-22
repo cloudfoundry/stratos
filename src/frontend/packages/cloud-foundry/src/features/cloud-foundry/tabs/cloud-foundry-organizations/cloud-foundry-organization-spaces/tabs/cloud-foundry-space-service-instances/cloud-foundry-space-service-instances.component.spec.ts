@@ -1,9 +1,23 @@
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
+import { NgModule } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { getCfSpaceServiceMock } from '../../../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
+import {
+  TableCellAppCfOrgSpaceHeaderComponent,
+} from '../../../../../../../shared/components/list/list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import { ServiceActionHelperService } from '../../../../../../../shared/data-services/service-action-helper.service';
 import { CloudFoundrySpaceServiceInstancesComponent } from './cloud-foundry-space-service-instances.component';
+
+@NgModule({
+  declarations: [TableCellAppCfOrgSpaceHeaderComponent],
+  imports: [CommonModule],
+  entryComponents: [TableCellAppCfOrgSpaceHeaderComponent],
+})
+class EntryComponentModules { }
 
 describe('CloudFoundrySpaceServiceInstancesComponent', () => {
   let component: CloudFoundrySpaceServiceInstancesComponent;
@@ -12,8 +26,11 @@ describe('CloudFoundrySpaceServiceInstancesComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySpaceServiceInstancesComponent],
-      imports: [...BaseTestModules],
-      providers: [getCfSpaceServiceMock, DatePipe]
+      imports: [
+        ...generateCfBaseTestModules(),
+        EntryComponentModules,
+      ],
+      providers: [getCfSpaceServiceMock, DatePipe, ServiceActionHelperService],
     })
       .compileComponents();
   }));

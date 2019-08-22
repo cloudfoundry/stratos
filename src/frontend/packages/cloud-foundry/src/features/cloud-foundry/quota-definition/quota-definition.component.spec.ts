@@ -1,38 +1,40 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/tab-nav.service';
+import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '../../../../../core/test-framework/store-test-helper';
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { testSCFGuid } from '../../../../../core/test-framework/store-test-helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { QuotaDefinitionComponent } from './quota-definition.component';
 
 describe('QuotaDefinitionComponent', () => {
   let component: QuotaDefinitionComponent;
   let fixture: ComponentFixture<QuotaDefinitionComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [QuotaDefinitionComponent],
-      imports: [...BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              queryParams: { cfGuid: testSCFGuid },
+              queryParams: { cfGuid: testSCFEndpointGuid },
               params: { quotaId: 'guid' }
             }
           }
         },
         generateTestCfEndpointServiceProvider(),
-        TabNavService
+        TabNavService,
       ]
     })
       .compileComponents();
-  }));
+
+    populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(QuotaDefinitionComponent);

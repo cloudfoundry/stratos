@@ -1,10 +1,9 @@
-import { TestBed, inject } from '@angular/core/testing';
-
-import { PaginationMonitorFactory } from './pagination-monitor.factory';
+import { inject, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
+
 import { appReducers } from '../../../../store/src/reducers.module';
-import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
-const initialState = getInitialTestStoreState();
+import { PaginationMonitorFactory } from './pagination-monitor.factory';
+
 describe('PaginationMonitorFactoryService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -12,9 +11,6 @@ describe('PaginationMonitorFactoryService', () => {
       imports: [
         StoreModule.forRoot(
           appReducers,
-          {
-            initialState
-          }
         )
       ]
     });

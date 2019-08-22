@@ -2,7 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CsiModeService } from '../csi-mode.service';
 import { SpecifyUserProvidedDetailsComponent } from './specify-user-provided-details.component';
 
@@ -12,8 +12,9 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      declarations: [SpecifyUserProvidedDetailsComponent],
       imports: [
-        ...BaseTestModules,
+        ...generateCfBaseTestModules(),
         HttpClientModule,
         HttpClientTestingModule
       ],

@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.types';
 import {
   DetachAppsListConfigService,
-} from '../../../../../../core/src/shared/components/list/list-types/detach-apps/detach-apps-list-config.service';
+} from '../../../../shared/components/list/list-types/detach-apps/detach-apps-list-config.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 

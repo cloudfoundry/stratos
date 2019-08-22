@@ -4,7 +4,6 @@ import { MockBackend } from '@angular/http/testing';
 import { Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { GetApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralAppState } from '../../../store/src/app-state';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
@@ -22,6 +21,7 @@ import { createEntityStore, TestStoreEntity } from '../../test-framework/store-t
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
@@ -29,9 +29,16 @@ import { EntityServiceFactory } from './entity-service-factory.service';
 
 const endpointType = 'endpoint1';
 const entitySchema = new EntitySchema('child2', endpointType);
-
-const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
-const cfId = 'cf123';
+const createAction = (guid: string) => {
+  return {
+    actions: ['fa', 'k', 'e'],
+    options: {},
+    entityType: entitySchema.entityType,
+    endpointType: entitySchema.endpointType,
+    guid,
+    type: 'test-action'
+  } as ICFAction;
+};
 
 const entityType = 'key';
 
@@ -44,6 +51,7 @@ const catalogueEntity = new StratosBaseCatalogueEntity({
   label: 'Entity',
   labelPlural: 'Entities',
 });
+
 
 describe('EntityServiceService', () => {
   beforeAll(() => {
@@ -77,14 +85,7 @@ describe('EntityServiceService', () => {
         }
       }
     };
-    const action = {
-      actions: ['fa', 'k', 'e'],
-      options: {},
-      entityType: entitySchema.entityType,
-      endpointType: entitySchema.endpointType,
-      guid,
-      type: 'test-action'
-    } as ICFAction;
+    const action = createAction(guid);
 
     const entityService = createTestService(
       store,
@@ -125,14 +126,19 @@ describe('EntityServiceService', () => {
         ]
       ]
     ]);
+
+
+
+
+    const action = createAction('123');
     TestBed.configureTestingModule({
       providers: [
         EntityServiceFactory,
         EntityMonitorFactory,
         generateTestEntityServiceProvider(
-          appId,
+          action.guid,
           entitySchema,
-          new GetApplication(appId, cfId)
+          action
         ),
         {
           provide: XHRBackend,
@@ -141,6 +147,16 @@ describe('EntityServiceService', () => {
       ],
       imports: [
         HttpModule,
+        {
+          ngModule: EffectsFeatureTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES, useValue: [
+                catalogueEntity
+              ]
+            }
+          ]
+        },
         createEntityStore(entityMap),
       ]
     });

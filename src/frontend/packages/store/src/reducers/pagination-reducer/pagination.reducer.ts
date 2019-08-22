@@ -143,12 +143,24 @@ function isEndpointAction(action) {
     action.type === UNREGISTER_ENDPOINTS;
 }
 
+function logMissing(missing: string, allKeys: any) {
+  console.warn(
+    `Missing ${missing} in store`,
+    allKeys
+  );
+}
+
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
   const actionType = getActionType(action);
   const entityKey = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);
   if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
+    if (!newState[entityKey]) {
+      logMissing(`entity type ''`, Object.keys(newState))
+    } else if (!newState[entityKey][paginationKey]) {
+      logMissing(`pagination section '${paginationKey}' for entity type '${entityKey}'`, Object.keys(newState[entityKey]))
+    }
     const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
     if (state[entityKey][paginationKey] === updatedPaginationState) {
       return state;

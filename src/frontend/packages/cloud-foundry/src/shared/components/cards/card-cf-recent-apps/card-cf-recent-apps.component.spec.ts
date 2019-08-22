@@ -12,7 +12,9 @@ import {
 } from '../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
 import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { BaseTestModulesNoShared } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
@@ -32,7 +34,7 @@ describe('CardCfRecentAppsComponent', () => {
         PollingIndicatorComponent,
         ApplicationStateIconPipe
       ],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         CloudFoundryEndpointService,
         ActiveRouteCfOrgSpace,

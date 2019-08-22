@@ -2,7 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpModule } from '@angular/http';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
@@ -17,8 +17,8 @@ import {
   ApplicationServiceMock,
   generateTestApplicationServiceProvider,
 } from '../../../../../core/test-framework/application-service-helper';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
@@ -34,10 +34,10 @@ describe('EditApplicationComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditApplicationComponent],
       imports: [
-        BrowserAnimationsModule,
+        ...generateCfStoreModules(),
+        NoopAnimationsModule,
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
         RouterTestingModule,
         HttpClientModule,
         HttpClientTestingModule,

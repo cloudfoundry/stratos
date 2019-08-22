@@ -1,8 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { ROUTER_NAVIGATION } from '@ngrx/router-store';
+import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellAppNameComponent } from './table-cell-app-name.component';
 
 describe('TableCellAppNameComponent', () => {
@@ -15,10 +17,21 @@ describe('TableCellAppNameComponent', () => {
       imports: [
         CoreModule,
         RouterTestingModule,
-        createBasicStoreModule()
+        generateCfStoreModules()
       ]
     })
       .compileComponents();
+
+    TestBed.get(Store).dispatch({
+      type: ROUTER_NAVIGATION,
+      payload: {
+        event: {
+          url: 'url'
+        }
+      }
+    });
+
+
   }));
 
   beforeEach(() => {

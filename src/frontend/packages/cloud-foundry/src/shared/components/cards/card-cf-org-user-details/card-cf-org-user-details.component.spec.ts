@@ -9,9 +9,9 @@ import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { CapitalizeFirstPipe } from '../../../../../../core/src/shared/pipes/capitalizeFirstLetter.pipe';
 import {
-  BaseTestModulesNoShared,
+  generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
@@ -29,7 +29,7 @@ describe('CardCfOrgUserDetailsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CardCfOrgUserDetailsComponent, MetadataItemComponent, CapitalizeFirstPipe, BooleanIndicatorComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         CfUserService,
         generateTestCfEndpointServiceProvider(),

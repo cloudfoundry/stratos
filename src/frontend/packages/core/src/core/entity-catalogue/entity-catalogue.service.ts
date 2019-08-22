@@ -118,6 +118,12 @@ class EntityCatalogue {
     if (subType) {
       return this.getEntitySubType(entityOfType, subType) as StratosBaseCatalogueEntity<T, Y, AB>;
     }
+    if (!entityOfType) {
+      console.warn(
+        `Could not find catalogue entity for endpoint type '${config.endpointType}' and entity type '${config.entityType}'. Stack: `,
+        new Error().stack
+      );
+    }
     return entityOfType as StratosBaseCatalogueEntity<T, Y, AB>;
   }
 
@@ -165,8 +171,9 @@ class EntityCatalogue {
   }
 
   public getAllEntityRequestDataReducers() {
-    const entities = Array.from(this.entities.values());
-    return entities.reduce((allEntityReducers, entity) => {
+    const entities = this.getAllEntitiesTypes();
+    const endpoints = this.getAllEndpointTypes();
+    return [...entities, ...endpoints].reduce((allEntityReducers, entity) => {
       if (entity.entityKey && entity.builders.dataReducers && entity.builders.dataReducers.length) {
         return {
           ...allEntityReducers,

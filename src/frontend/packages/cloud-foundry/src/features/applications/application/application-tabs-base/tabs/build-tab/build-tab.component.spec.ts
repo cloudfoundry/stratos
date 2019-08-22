@@ -1,9 +1,8 @@
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
@@ -15,9 +14,9 @@ import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../../../../core/
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../../../../core/test-framework/application-service-helper';
-import { getInitialTestStoreState } from '../../../../../../../../core/test-framework/store-test-helper';
-import { appReducers } from '../../../../../../../../store/src/reducers.module';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundryComponentsModule } from '../../../../../../shared/components/components.module';
 import { ApplicationService } from '../../../../application.service';
 import { entityServiceFactory } from '../../../application-base.component';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
@@ -29,28 +28,23 @@ import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.componen
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
   let fixture: ComponentFixture<BuildTabComponent>;
-  const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
         BuildTabComponent,
         ViewBuildpackComponent,
-        ApplicationPollComponent
+        ApplicationPollComponent,
       ],
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        BrowserAnimationsModule,
-        StoreModule.forRoot(
-          appReducers,
-          {
-            initialState
-          }
-        ),
+        NoopAnimationsModule,
         HttpClientModule,
-        HttpClientTestingModule
+        HttpClientTestingModule,
+        CloudFoundryComponentsModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

@@ -1,13 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CfCellsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
+import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellsComponent } from './cloud-foundry-cells.component';
+
 
 describe('CloudFoundryCellsComponent', () => {
   let component: CloudFoundryCellsComponent;
@@ -16,10 +17,7 @@ describe('CloudFoundryCellsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryCellsComponent],
-      imports: [
-        ...BaseTestModules,
-        createBasicStoreModule()
-      ],
+      imports: generateCfBaseTestModules(),
       providers: [
         CfCellsListConfigService,
         {
@@ -30,7 +28,8 @@ describe('CloudFoundryCellsComponent', () => {
           }),
         },
         CloudFoundryEndpointService,
-        ActiveRouteCfOrgSpace
+        ActiveRouteCfOrgSpace,
+        CfUserService
       ],
     })
       .compileComponents();

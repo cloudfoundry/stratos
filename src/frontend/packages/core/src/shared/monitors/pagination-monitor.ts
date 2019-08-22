@@ -89,6 +89,10 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     public isLocal = false
   ) {
     const { endpointType, entityType, schemaKey } = entityConfig;
+    const catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
+    if (!catalogueEntity) {
+      throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+    }
     this.schema = entityCatalogue.getEntity(endpointType, entityType).getSchema(schemaKey);
     this.init(store, paginationKey, this.schema);
   }
@@ -261,7 +265,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         filter(busy => !busy),
         switchMap(() => entities$),
         publishReplay(1),
-        refCount()
+        refCount(),
       ),
       isMultiAction$
     };
@@ -359,7 +363,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         return !!Object.values(pagination.pageRequests).find(pageRequest => pageRequest.busy);
       }),
       distinctUntilChanged(),
-      observeOn(asapScheduler)
+      observeOn(asapScheduler),
     );
   }
   // ### Initialization methods end.

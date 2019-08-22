@@ -23,8 +23,8 @@ describe('EntityCatalogueService', () => {
   function getDefaultSchema() {
     return new EntitySchema('entitySchema1', 'endpoint1');
   }
-  function getSchema(modifier: string) {
-    return new EntitySchema('entitySchema1' + modifier, 'endpoint1');
+  function getSchema(modifier: string, schemaKey: string = null) {
+    return new EntitySchema('entitySchema1' + modifier, 'endpoint1', undefined, undefined, undefined, schemaKey);
   }
   beforeEach(() => entityCatalogue = new TestEntityCatalogue());
 
@@ -77,21 +77,24 @@ describe('EntityCatalogueService', () => {
 
   it('should get non-default schema from multiple schemas', () => {
     const endpoint = getEndpointDefinition();
-    const nonDefaultSchema = getSchema('1');
+    const schemaKey = 'nonDefaultSchema';
+    const nonDefaultSchema = getSchema('1', schemaKey);
+    expect(nonDefaultSchema).toEqual(nonDefaultSchema);
     const definition = {
       type: 'entity3',
       schema: {
         default: getDefaultSchema(),
-        nonDefaultSchema
+        [schemaKey]: nonDefaultSchema
       },
       endpoint
     };
     entityCatalogue.register(new StratosCatalogueEntity(definition));
 
     const catalogueEntity = entityCatalogue.getEntity(endpoint.type, definition.type);
-    const schema = catalogueEntity.getSchema('nonDefaultSchema');
+    const schema = catalogueEntity.getSchema(schemaKey);
     expect(schema).not.toBeUndefined();
-    expect(schema).toEqual(nonDefaultSchema);
+    // This now fails with schema.Entity function equalities... so just stringify instead
+    expect(JSON.stringify(schema)).toEqual(JSON.stringify(nonDefaultSchema));
   });
 
   it('should get endpoint', () => {

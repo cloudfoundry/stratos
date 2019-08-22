@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryInviteUserLinkComponent } from './cloud-foundry-invite-user-link.component';
 
 describe('CloudFoundryInviteUserLinkComponent', () => {
@@ -13,7 +13,7 @@ describe('CloudFoundryInviteUserLinkComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryInviteUserLinkComponent],
-      imports: [...BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         ...generateTestCfEndpointServiceProvider()
       ]

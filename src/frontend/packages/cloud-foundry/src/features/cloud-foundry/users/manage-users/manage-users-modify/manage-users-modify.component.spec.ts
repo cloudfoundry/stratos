@@ -5,7 +5,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { EntityMonitorFactory } from '../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesModifyComponent } from './manage-users-modify.component';
@@ -18,16 +19,17 @@ describe('UsersRolesModifyComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
         NoopAnimationsModule,
         HttpModule
       ],
       providers: [
         ActiveRouteCfOrgSpace,
         CfRolesService,
-        EntityMonitorFactory
+        EntityMonitorFactory,
+        CfUserService
       ],
       declarations: [
         UsersRolesModifyComponent,

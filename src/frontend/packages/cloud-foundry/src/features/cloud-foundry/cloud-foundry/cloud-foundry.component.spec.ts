@@ -1,12 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
-  BaseTestModules,
+  generateCfBaseTestModules,
   generateTestCfServiceProvider,
-} from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { populateStoreWithTestEndpoint } from '../../../../../core/test-framework/store-test-helper';
+import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CloudFoundryComponent } from './cloud-foundry.component';
 
 describe('CloudFoundryComponent', () => {
@@ -16,10 +17,19 @@ describe('CloudFoundryComponent', () => {
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
-        declarations: [CloudFoundryComponent],
-        imports: [...BaseTestModules, BrowserAnimationsModule],
-        providers: [PaginationMonitorFactory, generateTestCfServiceProvider(), TabNavService]
+        declarations: [
+          CloudFoundryComponent,
+          CfEndpointsMissingComponent
+        ],
+        imports: generateCfBaseTestModules(),
+        providers: [
+          PaginationMonitorFactory,
+          generateTestCfServiceProvider(),
+          TabNavService,
+        ]
       }).compileComponents();
+
+      populateStoreWithTestEndpoint();
     })
   );
 

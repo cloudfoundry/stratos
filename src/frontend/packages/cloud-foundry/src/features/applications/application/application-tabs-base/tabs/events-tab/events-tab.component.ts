@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import {
   CfAppEventsConfigService,
-} from '../../../../../../../../core/src/shared/components/list/list-types/app-event/cf-app-events-config.service';
+} from '../../../../../../shared/components/list/list-types/app-event/cf-app-events-config.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 
 @Component({

@@ -3,10 +3,12 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { BaseTestModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceInstanceCardComponent } from './service-instance-card.component';
 
 describe('ServiceInstanceCardComponent', () => {
@@ -15,10 +17,8 @@ describe('ServiceInstanceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [
-        BaseTestModules,
-        createBasicStoreModule(),
-      ],
+      declarations: [ServiceInstanceCardComponent, CfOrgSpaceLinksComponent],
+      imports: generateCfBaseTestModules(),
       providers: [
         ServicesWallService,
         EntityServiceFactory,
