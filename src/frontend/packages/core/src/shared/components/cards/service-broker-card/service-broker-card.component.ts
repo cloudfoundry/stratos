@@ -10,6 +10,9 @@ import { IServiceBroker } from '../../../../core/cf-api-svc.types';
 import { ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 
 @Component({
   selector: 'app-service-broker-card',
@@ -35,9 +38,12 @@ export class ServiceBrokerCardComponent {
       filter(o => !!o),
       // Broker is space scoped
       switchMap(spaceGuid => {
+        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+        const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+        const getSpaceAction = actionBuilder(spaceGuid, this.servicesService.cfGuid);  
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
           spaceGuid,
-          new GetSpace(spaceGuid, this.servicesService.cfGuid),
+          getSpaceAction,
           true,
         );
         return spaceService.waitForEntity$;

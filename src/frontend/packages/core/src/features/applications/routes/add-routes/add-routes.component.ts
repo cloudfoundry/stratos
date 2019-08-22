@@ -120,10 +120,13 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         .pipe(
           tap(console.log),
           switchMap(app => {
+            const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+            const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+            const getSpaceAction = actionBuilder(app.space_guid, app.cfGuid, {includeRelations: [createEntityRelationKey(spaceEntityType, domainEntityType)]});      
             this.spaceGuid = app.entity.entity.space_guid;
             const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
               this.spaceGuid,
-              new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)]),
+              getSpaceAction,
               true
             );
             return spaceService.waitForEntity$;

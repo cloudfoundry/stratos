@@ -27,10 +27,13 @@ import {
   serviceInstancesEntityType,
   spaceEntityType,
   organizationEntityType,
-  userProvidedServiceInstanceEntityType
+  userProvidedServiceInstanceEntityType,
+  applicationEntityType
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { ICFAction } from '../../../../store/src/types/request.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 
 
 @Injectable()
@@ -51,7 +54,9 @@ export class CloudFoundryUserProvidedServicesService {
 
   public getUserProvidedServices(cfGuid: string, spaceGuid?: string, relations = getUserProvidedServiceInstanceRelations)
     : Observable<APIResource<IUserProvidedServiceInstance>[]> {
-    const action = new GetAllUserProvidedServices(null, cfGuid, relations, false, spaceGuid);
+    const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+    const action = actionBuilder(null, cfGuid, relations, false, spaceGuid) as PaginatedAction;
     const pagObs = getPaginationObservables({
       store: this.store,
       action,
@@ -73,7 +78,9 @@ export class CloudFoundryUserProvidedServicesService {
     : Observable<number> {
     const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
-    const action = new GetAllUserProvidedServices(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid, [], false);
+    const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid, {includeRelatons: [], populateMissing: false}) as PaginatedAction;
     action.initialParams.q = [];
     if (orgGuid) {
       action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
@@ -85,9 +92,12 @@ export class CloudFoundryUserProvidedServicesService {
   }
 
   public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedServiceInstance>> {
+    const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('get');
+    const getUserProvidedServiceAction = actionBuilder(upsGuid, cfGuid);  
     const service = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       upsGuid,
-      new GetUserProvidedService(upsGuid, cfGuid),
+      getUserProvidedServiceAction,
       true
     );
     return service.waitForEntity$.pipe(
@@ -114,7 +124,11 @@ export class CloudFoundryUserProvidedServicesService {
     guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
   ): Observable<RequestInfoState> {
-    const updateAction = new UpdateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
+    const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('update');
+    //TODO kate
+    const updateAction = actionBuilder(cfGuid, guid, data, this.serviceInstancesEntityConfig);  
+    //const updateAction = new UpdateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
     const catalogueEntity = entityCatalogue.getEntity({
       entityType: userProvidedServiceInstanceEntityType,
       endpointType: CF_ENDPOINT_TYPE

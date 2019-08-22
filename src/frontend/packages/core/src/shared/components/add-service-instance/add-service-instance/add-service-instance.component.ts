@@ -266,10 +266,12 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   }
 
   private getSpaceEntityService(spaceGuid: string, cfGuid: string) {
-    const action = new GetSpace(spaceGuid, cfGuid);
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+    const getSpaceAction = actionBuilder(spaceGuid, cfGuid);  
     return this.entityServiceFactory.create<APIResource<ISpace>>(
       spaceEntityType,
-      new GetSpace(spaceGuid, cfGuid),
+      getSpaceAction,
       true);
   }
 

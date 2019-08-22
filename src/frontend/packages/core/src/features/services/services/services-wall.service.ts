@@ -12,6 +12,9 @@ import { IService } from '../../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { serviceEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 
 @Injectable()
 export class ServicesWallService {
@@ -26,6 +29,10 @@ export class ServicesWallService {
 
   initServicesObservable = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceEntityType);
+    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
+    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    //TODO kate
+    const getServicesAction = actionBuilder(paginationKey);  
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
@@ -53,10 +60,13 @@ export class ServicesWallService {
 
   getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
     const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
+    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
+    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+    const getAllServicesForSpaceAction = actionBuilder(paginationKey, cfGuid, spaceGuid) as PaginatedAction;  
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
-        action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
+        action: getAllServicesForSpaceAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           cfEntityFactory(serviceEntityType)

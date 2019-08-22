@@ -10,6 +10,9 @@ import { EntitySchema } from '../helpers/entity-schema';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';
@@ -65,7 +68,10 @@ export class RecursiveDeleteEffect {
 
   private deleteSuccessApiActionGenerators = {
     application: (guid: string, endpointGuid: string) => {
-      return new APISuccessOrFailedAction(DELETE_SUCCESS, new DeleteApplication(guid, endpointGuid) as ICFAction);
+      const applicationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+      const actionBuilder = applicationEntity.actionOrchestrator.getActionBuilder('remove');
+      const deleteApplicationAction = actionBuilder(guid, endpointGuid) as ICFAction;  
+      return new APISuccessOrFailedAction(DELETE_SUCCESS, deleteApplicationAction);
     }
   };
 

@@ -22,6 +22,7 @@ export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> 
     const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const marketplaceAction = actionBuilder(null, paginationKey);
+    //TODO Kate
     const userProvidedAction = new GetAllUserProvidedServices();
     const actionSchemaConfigs = [
       new ActionSchemaConfig(

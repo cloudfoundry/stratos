@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { cfEntityFactory, serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory, serviceBindingEntityType, serviceInstancesEntityType, userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceInstance } from '../../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { GetUserProvidedService } from '../../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
@@ -147,9 +147,13 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsUserProvidedServiceInstance() {
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+    //TODO kate
+    const getUserProvidedServiceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);  
     const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       this.row.entity.service_instance_guid,
-      new GetUserProvidedService(this.row.entity.service_instance_guid, this.appService.cfGuid),
+      getUserProvidedServiceAction,
       true
     ).waitForEntity$;
     this.serviceInstance$ = userProvidedServiceInstance$;

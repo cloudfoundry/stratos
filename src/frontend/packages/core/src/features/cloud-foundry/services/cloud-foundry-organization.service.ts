@@ -102,7 +102,10 @@ export class CloudFoundryOrganizationService {
   }
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
-    this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('remove');
+    const deleteSpaceAction = actionBuilder(spaceGuid,endpointGuid, {orgGuid: orgGuid});  
+    this.store.dispatch(deleteSpaceAction);
   }
 
   public fetchApps() {

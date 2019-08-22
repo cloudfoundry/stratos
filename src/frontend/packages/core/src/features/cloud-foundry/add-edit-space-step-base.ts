@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
@@ -45,8 +45,9 @@ export class AddEditSpaceStepBase {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     const paginationKey = getPaginationKey('cf-space', this.orgGuid);
-
-    const action = new GetAllOrganizationSpaces(paginationKey, this.orgGuid, this.cfGuid);
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const getAllSpaceActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
+    const action = getAllSpaceActionBuilder(paginationKey, this.orgGuid, this.cfGuid) as PaginatedAction;  
 
     this.allSpacesInOrg$ = getPaginationObservables<APIResource, CFAppState>(
       {

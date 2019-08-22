@@ -19,7 +19,8 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
-import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { spaceQuotaEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -109,13 +110,15 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   }
 
   updateSpace$() {
-    const updateAction = new UpdateSpace(this.spaceGuid, this.cfGuid, {
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('update');
+    const updateSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
       allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
-    });
-    this.store.dispatch(updateAction);
+    });  
+    this.store.dispatch(updateSpaceAction);
 
-    return this.store.select(selectRequestInfo(updateAction, this.spaceGuid)).pipe(
+    return this.store.select(selectRequestInfo(updateSpaceAction, this.spaceGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map((state) => state.updating[UpdateSpace.UpdateExistingSpace])
     );

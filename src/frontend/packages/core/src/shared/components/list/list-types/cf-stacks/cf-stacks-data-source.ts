@@ -7,10 +7,15 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class CfStacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
-    const action = new GetAllStacks(cfGuid);
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
+    const getAllStacksActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    //TODO kate
+    const action = getAllStacksActionBuilder(cfGuid);  
     super({
       store,
       action,

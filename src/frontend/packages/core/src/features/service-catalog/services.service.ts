@@ -8,6 +8,7 @@ import {
   cfEntityFactory,
   serviceBrokerEntityType,
   servicePlanVisibilityEntityType,
+  spaceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { GetServiceBrokers } from '../../../../cloud-foundry/src/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
@@ -218,10 +219,12 @@ export class ServicesService {
             isSpaceScoped: false
           });
         } else {
-
+          const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+          const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+          const getSpaceAction = actionBuilder(spaceGuid, this.cfGuid);            
           const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
             spaceGuid,
-            new GetSpace(spaceGuid, this.cfGuid),
+            getSpaceAction,
             true
           );
           return spaceEntityService.waitForEntity$.pipe(

@@ -179,9 +179,12 @@ export class ApplicationService {
     this.appSpace$ = moreWaiting$.pipe(
       first(),
       switchMap(app => {
+        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+        const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+        const getSpaceAction = actionBuilder(app.space_guid, app.cfGuid, {includeRelations: [createEntityRelationKey(spaceEntityType, organizationEntityType)], populateMissing: true});  
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           app.space_guid,
-          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)], true)
+          getSpaceAction
         ).waitForEntity$.pipe(
           map(entityInfo => entityInfo.entity)
         );

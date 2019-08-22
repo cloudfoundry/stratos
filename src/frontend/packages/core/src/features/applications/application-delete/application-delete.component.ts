@@ -320,7 +320,10 @@ export class ApplicationDeleteComponent<T> {
       return this.redirectToAppWall();
     }
     this.deleteStarted = true;
-    this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
+    const applicationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const actionBuilder = applicationEntity.actionOrchestrator.getActionBuilder('remove');
+    const deleteApplicationAction = actionBuilder(this.applicationService.appGuid, this.applicationService.cfGuid);  
+    this.store.dispatch(deleteApplicationAction);
     return this.appMonitor.entityRequest$.pipe(
       filter(request => !request.deleting.busy && (request.deleting.deleted || request.deleting.error)),
       map((request) => ({ success: request.deleting.deleted })),

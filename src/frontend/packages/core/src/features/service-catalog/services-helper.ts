@@ -227,9 +227,12 @@ export const getCfService = (
   serviceGuid: string,
   cfGuid: string,
   entityServiceFactory: EntityServiceFactory): EntityService<APIResource<IService>> => {
+  const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
+  const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
+  const getServiceAction = actionBuilder(serviceGuid, cfGuid);  
   return entityServiceFactory.create<APIResource<IService>>(
     serviceGuid,
-    new GetService(serviceGuid, cfGuid),
+    getServiceAction,
     true
   );
 };

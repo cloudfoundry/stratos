@@ -7,7 +7,7 @@ import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../../../../cloud-fou
 import { GetOrganization } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import { GetSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfUserEntityType, organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { SpaceUserRoleNames } from '../../../../../../../cloud-foundry/src/store/types/user.types';
@@ -80,9 +80,12 @@ export class InviteUsersCreateComponent implements OnInit {
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     );
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+    const getSpaceAction = actionBuilder(this.activeRouteCfOrgSpace.spaceGuid, this.activeRouteCfOrgSpace.cfGuid, {includeRelations: [], populateMissing: false});      
     this.space$ = this.isSpace ? this.entityServiceFactory.create<APIResource<ISpace>>(
       this.activeRouteCfOrgSpace.spaceGuid,
-      new GetSpace(this.activeRouteCfOrgSpace.spaceGuid, this.activeRouteCfOrgSpace.cfGuid, [], false)
+      getSpaceAction
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     ) : observableOf(null);

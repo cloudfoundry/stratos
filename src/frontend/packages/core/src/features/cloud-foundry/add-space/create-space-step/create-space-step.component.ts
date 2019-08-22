@@ -14,6 +14,8 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 
 
 @Component({
@@ -76,11 +78,14 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   submit: StepOnNextFunction = () => {
-    this.store.dispatch(new CreateSpace(this.cfGuid, this.orgGuid, {
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('create');
+    const createSpaceAction = actionBuilder(this.cfGuid, this.orgGuid, {
       name: this.spaceName.value,
       organization_guid: this.orgGuid,
       space_quota_definition_guid: this.quotaDefinition.value
-    }));
+    });  
+    this.store.dispatch(createSpaceAction);
 
     return this.store.select(selectCfRequestInfo(spaceEntityType, `${this.orgGuid}-${this.spaceName.value}`)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),

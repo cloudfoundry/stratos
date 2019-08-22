@@ -15,7 +15,7 @@ import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-h
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
-import { organizationEntityType, domainEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType, domainEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { state } from '@angular/animations';
 import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
@@ -62,9 +62,12 @@ export class QuotaDefinitionBaseComponent {
 
   setupSpaceObservable() {
     if (this.spaceGuid) {
+      const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+      const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+      const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid);      
       this.space$ = this.entityServiceFactory.create<APIResource<ISpace>>(
         this.spaceGuid,
-        new GetSpace(this.spaceGuid, this.cfGuid),
+        getSpaceAction,
         true
       ).waitForEntity$.pipe(
         map(data => data.entity),
