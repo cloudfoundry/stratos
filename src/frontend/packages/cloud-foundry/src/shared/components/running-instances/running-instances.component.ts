@@ -30,7 +30,7 @@ export class RunningInstancesComponent implements OnInit {
     this.runningInstances$ = paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
         const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
-        return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
+        return allInstances.filter(stat => stat.state === 'RUNNING').length;
       })
     );
   }
