@@ -124,7 +124,7 @@ describe('Autoscaler -', () => {
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ metric_type: 'memoryutil' });
       createPolicy.stepper.getStepperForm().fill({ operator: '>=' });
-      createPolicy.stepper.getStepperForm().fill({ threshold: '20' });
+      createPolicy.stepper.getStepperForm().fill({ threshold: '60' });
       createPolicy.stepper.getStepperForm().fill({ breach_duration_secs: '60' });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
@@ -213,7 +213,7 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.canNext()).toBeFalsy();
 
       // Schedule dates should not overlap
-      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(30, 'seconds'); // Should be set close to time it's entered
+      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(10, 'seconds'); // Should be set close to time it's entered
       scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
       scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
       scheduleEndDate2 = moment().tz('UTC').add(4, 'days');
@@ -275,7 +275,7 @@ describe('Autoscaler -', () => {
 
           expect(appAutoscaler.tableTriggers.getTableRowsCount()).toBe(2);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 0)).toBe('memoryutil');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 1)).toBe('>=20 % for 60 secs.');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 1)).toBe('>=60 % for 60 secs.');
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 2)).toBe('+2 instances');
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 0)).toBe('throughput');
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 1)).toBe('<=10rps for 120 secs.');
@@ -528,7 +528,7 @@ describe('Autoscaler -', () => {
 
       // TODO: It takes about 130s of waiting for the event to show up, which is a long time to wait about.
       // This depends on scheduleStartDate1
-      extendE2ETestTime(180000);
+      extendE2ETestTime(60000);
       function waitForRow() {
         const sub = timer(5000, 5000).pipe(
           switchMap(() => eventPageBase.list.table.getRowCount())
