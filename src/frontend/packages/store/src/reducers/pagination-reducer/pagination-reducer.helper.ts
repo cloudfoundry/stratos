@@ -132,7 +132,7 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-// TODO: This needs to be a service not just a function!
+// TODO: This needs to be a service not just a function! - #3802
 export const getPaginationObservables = <T = any, Y extends AppState = AppState>(
   { store, action, paginationMonitor }: {
     store: Store<Y>,
