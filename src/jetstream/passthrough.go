@@ -365,7 +365,7 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 }
 
 func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<- *interfaces.CNSIRequest) {
-	log.Debug("doRequest")
+	log.Debugf("doRequest for URL: %s", cnsiRequest.URL.String())
 	var body io.Reader
 	var res *http.Response
 	var req *http.Request

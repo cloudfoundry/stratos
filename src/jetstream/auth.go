@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -20,8 +19,8 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -343,7 +342,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
 
 	username := c.FormValue("username")
 	password := c.FormValue("password")
-	guid     := c.FormValue("guid")
+	guid := c.FormValue("guid")
 
 	if len(username) == 0 || len(password) == 0 || len(guid) == 0 {
 		return guid, username, errors.New("Needs username, password and guid")
@@ -1249,7 +1248,7 @@ func (p *portalProxy) GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *
 }
 
 func (p *portalProxy) DoAuthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request, authHandler interfaces.AuthHandlerFunc) (*http.Response, error) {
-
+	log.Debug("DoAuthFlowRequest")
 	// get a cnsi token record and a cnsi record
 	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
 	if err != nil {
