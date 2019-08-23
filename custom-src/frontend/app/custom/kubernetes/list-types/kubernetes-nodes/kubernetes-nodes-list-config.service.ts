@@ -100,7 +100,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
 
   enableTextFilter = true;
   text = {
-    filter: 'Filter by Name',
+    filter: '',
     noEntries: 'There are no nodes'
   };
 
@@ -140,10 +140,11 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
             });
 
           case KubernetesNodesListFilterKeys.NAME:
-          default:
             return entities.filter(node => {
               return node.metadata.name.toUpperCase().includes(filterString);
             });
+          default:
+            return entities;
         }
       }
     ];
