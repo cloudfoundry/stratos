@@ -265,18 +265,19 @@ export class ApplicationService {
     this.orgDomains$ = this.appOrg$.pipe(
       switchMap(org => {
         const domainsAction = new GetAllOrganizationDomains(org.metadata.guid, this.cfGuid);
+        const paginationMonitor = this.paginationMonitorFactory.create(
+          domainsAction.paginationKey,
+          domainsAction
+        );
         return getPaginationObservables<APIResource<IDomain>>(
           {
             store: this.store,
             action: domainsAction,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              domainsAction.paginationKey,
-              action
-            )
+            paginationMonitor
           },
           true
         ).entities$;
-      }),
+      })
     );
 
   }

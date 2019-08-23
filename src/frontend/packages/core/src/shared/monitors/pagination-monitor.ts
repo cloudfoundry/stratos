@@ -156,7 +156,6 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       this.currentPage$ = this.createPageObservable(this.pagination$, schema);
     }
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
-
   }
 
   private createPaginationObservable(
