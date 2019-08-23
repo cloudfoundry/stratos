@@ -97,7 +97,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     const schema = isSpace ? cfEntityFactory(spaceEntityType) : cfEntityFactory(organizationEntityType);
     const guid = isSpace ? row.spaceGuid : row.orgGuid;
     return {
-      entityKey: schema.key,
+      entityKey: entityCatalogue.getEntityKey(schema),
       schema,
       monitorState: AppMonitorComponentTypes.UPDATE,
       updateKey: ChangeUserRole.generateUpdatingKey(row.role, row.userGuid),

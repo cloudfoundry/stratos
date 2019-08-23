@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import {
   UsersRolesActions,
   UsersRolesClearUpdateState,
@@ -12,13 +13,13 @@ import {
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
+import { CfRoleChange } from '../../../cloud-foundry/src/store/types/users-roles.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';
 import { ICFAction, UpdateCfAction } from '../types/request.types';
-import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
-import { CfRoleChange } from '../../../cloud-foundry/src/store/types/users-roles.types';
 
 
 @Injectable()
@@ -34,13 +35,15 @@ export class UsersRolesEffects {
     mergeMap(action => {
       const actions = [];
       action.changedRoles.forEach(change => {
-        const apiAction = {
+        const apiAction: ICFAction = {
           guid: change.spaceGuid ? change.spaceGuid : change.orgGuid,
+          endpointType: CF_ENDPOINT_TYPE,
           entityType: change.spaceGuid ? spaceEntityType : organizationEntityType,
           updatingKey: ChangeUserRole.generateUpdatingKey(change.role, change.userGuid),
           options: null,
-          actions: []
-        } as ICFAction;
+          actions: [],
+          type: ''
+        };
         actions.push(new UpdateCfAction(apiAction, false, ''));
       });
       return actions;

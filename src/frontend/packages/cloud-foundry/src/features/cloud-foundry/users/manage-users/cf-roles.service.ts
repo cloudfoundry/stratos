@@ -38,7 +38,6 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
 
 @Injectable()
@@ -96,7 +95,6 @@ export class CfRolesService {
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private userPerms: CurrentUserPermissionsService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectUsersRolesCf)),
