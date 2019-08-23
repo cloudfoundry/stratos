@@ -38,14 +38,7 @@ function getEntities(
           const newGuid = entity ? innerCatalogueEntity.getGuidFromEntity(entity) || guid : guid;
           return {
             ...newEntitiesOfType,
-            [newGuid]: entitySuccessMapper(
-              endpointResponse.normalizedEntities.entities[entityKey][guid],
-              endpointResponse.endpointGuid,
-              guid,
-              entityKey,
-              action.endpointType,
-              action
-            )
+            [newGuid]: entity
           };
         }, {}
       ) : Object.values(endpointResponse.normalizedEntities[entityKey]);

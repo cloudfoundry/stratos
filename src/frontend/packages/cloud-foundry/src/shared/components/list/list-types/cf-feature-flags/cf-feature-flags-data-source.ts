@@ -28,17 +28,17 @@ export const FeatureFlagDescriptions = {
     'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables',
   service_instance_sharing: 'Org and Space Managers can allow service instances to be shared across different spaces.'
 };
-export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatureFlag>> {
-  constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
+export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
+  constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<IFeatureFlag>) {
     const action = createCfFeatureFlagFetchAction(cfGuid);
     super({
       store,
       action,
       schema: cfEntityFactory(featureFlagEntityType),
-      getRowUniqueId: getRowMetadata,
+      getRowUniqueId: (ff) => ff.guid,
       paginationKey: action.paginationKey,
       isLocal: true,
-      transformEntities: [{ type: 'filter', field: 'entity.name' }],
+      transformEntities: [{ type: 'filter', field: 'name' }],
       listConfig
     });
   }

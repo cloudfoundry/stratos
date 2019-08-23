@@ -776,9 +776,26 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
     schema: cfEntityFactory(featureFlagEntityType),
     label: 'Feature Flag',
     labelPlural: 'Feature Flags',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    successfulRequestDataMapper: (
+      response,
+      endpointGuid
+    ) => {
+      return {
+        ...response,
+        guid: `${endpointGuid}-${response.name}`
+      };
+    },
+    paginationConfig: {
+      getEntitiesFromResponse: (response) => {
+        return response;
+      },
+      getTotalPages: (responses: JetstreamResponse) => 1,
+      getTotalEntities: (responses: JetstreamResponse) => responses.length,
+      getPaginationParameters: (page: number) => ({ page: page + '' })
+    }
   };
-  return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<IFeatureFlag>>(
+  return new StratosCatalogueEntity<IBasicCFMetaData, IFeatureFlag>(
     featureFlagDefinition,
     {
       dataReducers: [
@@ -786,9 +803,9 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
       ],
       actionBuilders: featureFlagActionBuilders,
       entityBuilder: {
-        getMetadata: app => ({
-          guid: app.metadata.guid,
-          name: app.entity.name,
+        getMetadata: ff => ({
+          guid: ff.guid,
+          name: ff.name,
         }),
         getGuid: metadata => metadata.guid,
       }
