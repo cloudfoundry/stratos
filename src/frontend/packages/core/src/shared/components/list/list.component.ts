@@ -412,7 +412,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         });
       } else if (this.filterColumns) {
         this.filterSelected = this.filterColumns.find(filterConfig => filterConfig.default);
-        this.updateListFilter(this.filterSelected);
+        if (this.filterSelected) {
+          this.updateListFilter(this.filterSelected);
+        }
       }
 
       // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
