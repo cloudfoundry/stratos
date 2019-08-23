@@ -28,10 +28,11 @@ import {
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import {
+  IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
-  IStratosEntityDefinition
 } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
@@ -117,10 +118,9 @@ import { serviceInstanceReducer } from './store/reducers/service-instance.reduce
 import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
 import { AppStat } from './store/types/app-metadata.types';
+import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
-import { CFResponse } from './store/types/cf-api.types';
-import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
@@ -153,13 +153,16 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
-      getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).reduce((max, response) => {
-        return max < response.total_pages ? response.total_pages : max;
-      }, 0),
-      getTotalEntities: (responses: JetstreamResponse<CFResponse>) => Object.keys(responses).reduce((count, endpointGuid) => {
-        const endpoint: CFResponse = responses[endpointGuid];
-        return count + endpoint.total_results;
-      }, 0),
+      getTotalPages: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
+        // Input is keyed per endpoint. Value per endpoint can either be a response or a number of responses (one per page)
+        Object.values(responseWithPages).reduce((max, response: CFResponse | CFResponse[]) => {
+          const resp = (response[0] || response);
+          return max > resp.total_pages ? max : resp.total_pages;
+        }, 0),
+      getTotalEntities: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
+        Object.values(responseWithPages).reduce((all, response: CFResponse | CFResponse[]) => {
+          return all + (response[0] || response).total_results;
+        }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' })
     }
   };

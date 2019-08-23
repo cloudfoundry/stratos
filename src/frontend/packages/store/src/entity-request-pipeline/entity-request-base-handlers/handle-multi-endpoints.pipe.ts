@@ -1,5 +1,5 @@
 import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
-import { JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
+import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
 
 export class JetstreamError {
@@ -79,18 +79,22 @@ function getAllEntitiesFromResponses(response: any[], getEntitiesFromResponse?: 
 }
 
 function postProcessSuccessResponses(
-  response: JetstreamResponse<any>[],
+  response: any[],
   endpointGuid: string,
   flattenerConfig: PaginationPageIteratorConfig<any, any>
 ): MultiEndpointResponse<any> {
   const entities = getAllEntitiesFromResponses(response, flattenerConfig ? flattenerConfig.getEntitiesFromResponse : null);
 
+  const jetStreamResponse = {
+    [endpointGuid]: response
+  };
+
   if (Array.isArray(entities)) {
     return {
       endpointGuid,
       entities,
-      totalPages: flattenerConfig ? flattenerConfig.getTotalPages(response) : 0,
-      totalResults: flattenerConfig ? flattenerConfig.getTotalEntities(response) : 0
+      totalPages: flattenerConfig ? flattenerConfig.getTotalPages(jetStreamResponse) : 0,
+      totalResults: flattenerConfig ? flattenerConfig.getTotalEntities(jetStreamResponse) : 0
     };
   }
   return {

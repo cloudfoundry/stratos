@@ -1,6 +1,6 @@
 import { HttpRequest } from '@angular/common/http';
 import { combineLatest, Observable, of, range } from 'rxjs';
-import { map, mergeMap, reduce, tap } from 'rxjs/operators';
+import { map, mergeMap, reduce } from 'rxjs/operators';
 
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
@@ -45,11 +45,10 @@ export class PaginationPageIterator<R = any, E = any> {
     if (count < 0) {
       return of([]);
     }
-    return range(2, count).pipe(
-      tap(a => console.log(totalPages, count)),
+    return range(2, count + 1).pipe(
       mergeMap(currentPage => this.makeRequest(this.addPageToRequest(currentPage)), 5),
       reduce((acc, res: JetstreamResponse<R>) => {
-        // TODO: RC Test iteration
+        acc.push(res);
         return acc;
       }, [] as JetstreamResponse<R>[])
     );
@@ -110,7 +109,7 @@ export class PaginationPageIterator<R = any, E = any> {
           totalResults
         ).pipe(
           map(([initialRequestResponse, othersResponse]) => [initialRequestResponse, ...othersResponse]),
-          map(responsePages => this.reducePages(responsePages))
+          map(responsePages => this.reducePages(responsePages)),
         );
       })
     );

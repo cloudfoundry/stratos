@@ -7,7 +7,7 @@ import { CFResponse } from '../../../cloud-foundry/src/store/types/cf-api.types'
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
 import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
 
-// TODO This can be deleted once the api effect rework is done.
+// TODO: This can be deleted once the api effect rework is done.
 export interface PaginationFlattenerConfig<T = any, C = any> extends Pick<
   PaginationFlattener<T, C>,
   'getTotalPages' | 'getTotalResults' | 'mergePages' | 'clearResults'
@@ -119,7 +119,6 @@ export class CfAPIFlattener extends BaseHttpFetcher implements PaginationFlatten
     return observableOf(res);
   }
 }
-
 
 export function flattenPagination<T, C>(
   actionDispatcher: ActionDispatcher,
