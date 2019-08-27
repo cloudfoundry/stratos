@@ -338,7 +338,7 @@ links | `applications` | [HIGH] | Display a list of the apps that are bound to t
 
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
-link | `service_instance.applications`| [HIGH] | Display bound applications in a list of service instances | Not sure if this will be implemented the same as routes and route mappings, but would need similar functionality to fetch list inline 
+link | `service_instance.applications`| [HIGH] | Display bound applications in a list of service instances | Not sure if this will be implemented the same as routes and route mappings, but would need similar functionality to fetch list inline. This could be replaced with a link to `service_bindings` and then the `app` for that binding 
 `include` | `service_instance.applications`| [HIGH] | See above | See above
 link | `service_plan`| [HIGH] | Display service plan information per SI in a list of SI | See [2]. `/service_plan` has no v3 equivalent
 `include` | `service_plan` | [HIGH] | See above | See above
@@ -359,6 +359,83 @@ filter | `name` | [MEDIUM] | | See [3]
 
 We've recently integrated user provided service instances into Stratos. There doesn't seem to be any current support for this in v3. We'd
 need similar functionality to `/service_instances` (where there's cross over).
+
+### `/services`
+
+> Comparison of missing functionality as per proposed spec in https://docs.google.com/document/d/1bDsEiZRwQJNUI41cQlUaioaY7JA1fnv_AThOI2ekPXNM/edit#
+> For simplicity have kept the `services` name instead of the proposed new name of  `service_offerings`
+
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+link | `service.service_plans`| [HIGH] | Show a count of service plans for a service when showing a list of services | Depends on implementation of 'included' pagination - see https://github.com/cloudfoundry/cc-api-v3-style-guide#proposal-pagination-of-related-resources
+`include` | `service.service_plans` | [HIGH] | See above | See above
+link | `service.service_broker` | [MEDIUM] | Not currently used, but would be very nice to display the broker where a service is coming from | Note - whole service broker entity (not just name), would be nice
+`include` | `service.service_broker` | [MEDIUM] | See above | See above
+filter | `name` | [MEDIUM] | | See [1]
+`order_by` | `name` | [MEDIUM] | | see [1]
+`order_by` | `active` | [MEDIUM] | | see [1]
+`order_by` | `bindable` | [MEDIUM] | | see [1]
+
+[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+
+### `/service/${guid}`
+
+See `/services` above
+
+### `spaces/${guid}/services`
+
+To be replaced with `/services`
+
+### `services/${guid}/service_plans`
+
+Currently missing in v3 docs. If implemented would need the same link/includes as `service_bindings` section below
+
+### `service_bindings` (POST)
+
+This looks good
+
+### `service_bindings/${guid}` (DELETE)
+
+This looks good
+
+### `service_bindings`
+
+We don't currently use this, but in order for us to we would need the following
+
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+`include` | `service_binding.service_instance` | [HIGH] |  |
+`include` | `service_binding.app` | [HIGH] |  |
+filter | service instance name | [MEDIUM] | | See [1]
+filter | application name | [MEDIUM] | | See [1]
+`order_by` | service instance name | [MEDIUM] | | see [1]
+`order_by` | application name | [MEDIUM] | | see [1]
+
+[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+
+### `service_bindings/${guid}`
+
+We don't currently use this, but in order for us to we would need the same as above (list service_bindings)
+
+### `service_brokers`
+
+We don't currently use this but it would be very nice to. In order for us to though we would need the following
+
+Type | Name | Priority | UX Example | Notes
+--- | --- | --- | --- | ---
+link | `service_broker.space`| [HIGH] | |
+`include` | `service_broker.space` | [HIGH] | |
+link | `service_broker.service_offerings`| [HIGH] | For a given broker show a list of service offerings without making multiple requests |
+`include` | `service_broker.service_offerings` | [HIGH] | See above |
+filter | service broker name | [MEDIUM] | | See [1]
+filter | space guid | [MEDIUM] | | See [1]
+`order_by` | service broker name | [MEDIUM] | | see [1]
+
+[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+
+### `service_brokers/{guid}`
+
+We don't currently use this, but in order for us to we would need the same as above (list service_bindings)
 
 ## v3 Required Features
 

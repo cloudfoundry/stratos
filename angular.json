@@ -28,6 +28,7 @@
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.scss",
+              "src/frontend/packages/cf-autoscaler/src/styles.scss",
               "node_modules/xterm/dist/xterm.css"
             ],
             "scripts": []
@@ -114,7 +115,8 @@
               }
             ],
             "styles": [
-              "src/frontend/packages/core/src/styles.css"
+              "src/frontend/packages/core/src/styles.css",
+              "src/frontend/packages/cf-autoscaler/src/styles.css"
             ],
             "scripts": []
           },
@@ -282,6 +284,37 @@
             "tsConfig": ["src/tsconfig.json"],
             "tslintConfig": "src/frontend/packages/cloud-foundry/tslint.json",
             "files": ["src/frontend/packages/cloud-foundry/src/**/*.ts"]
+          }
+        }
+      }
+    },
+    "cf-autoscaler": {
+      "root": "src/frontend/packages/cf-autoscaler",
+      "sourceRoot": "src/frontend/packages/cf-autoscaler/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.lib.json",
+            "project": "src/frontend/packages/cf-autoscaler/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/cf-autoscaler/src/test.ts",
+            "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/cf-autoscaler/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": ["src/tsconfig.json"],
+            "tslintConfig": "src/frontend/packages/cf-autoscaler/tslint.json",
+            "files": ["src/frontend/packages/cf-autoscaler/src/**/*.ts"]
           }
         }
       }

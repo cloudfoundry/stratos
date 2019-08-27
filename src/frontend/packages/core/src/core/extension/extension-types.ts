@@ -44,6 +44,10 @@ interface BaseEndpointTypeConfig {
    * Add these actions to the endpoint card/row in the endpoints table.
    */
   createActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
+  /**
+   * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
+   */
+  techPreview?: boolean;
 }
 
 /**

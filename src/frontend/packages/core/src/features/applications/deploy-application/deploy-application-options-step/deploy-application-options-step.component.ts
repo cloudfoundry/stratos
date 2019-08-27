@@ -7,7 +7,7 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { SaveAppOverrides } from '../../../../../../store/src/actions/deploy-applications.actions';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
+import { GetAllOrganizationDomains } from '../../../../../../store/src/actions/organization.actions';
 import { GetAllStacks } from '../../../../../../store/src/actions/stack.action';
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
@@ -103,7 +103,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     // Create the domains list for the domains drop down
     this.domains$ = cfDetails$.pipe(
       switchMap(cfDetails => {
-        const action = new FetchAllDomains(cfDetails.cloudFoundry);
+        const action = new GetAllOrganizationDomains(cfDetails.org, cfDetails.cloudFoundry);
         return getPaginationObservables<APIResource<IDomain>>(
           {
             store: this.store,

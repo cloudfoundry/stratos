@@ -47,8 +47,12 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 
 	// Determine if we need to migrate data first
 	_, ok, err := configStore.GetValue(systemGroupName, configSetupNeededMarker)
-	if err != nil || !ok {
+	if err != nil {
+		log.Errorf("MigrateSetupData: Unable to check migration marker: %v", err)
 		return err
+	} else if !ok {
+		log.Debug("MigrateSetupData: marker not present - no need to run migrations")
+		return nil
 	}
 
 	// If we got a value, then we should migrate
@@ -70,31 +74,44 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 
 	if config == nil {
 		log.Info("Can not migrate setup data - setup table is empty")
-		return nil
+
+		// Remove the marker
+		return configStore.DeleteValue(systemGroupName, configSetupNeededMarker)
 	}
 
 	// Persist the config - only save the settings if they differ from the environment
-	if err := migrateConfigSetting(portal.Env(), configStore, "UAA_ENDPOINT", config.UAAEndpoint.String()); err != nil {
+	if err := migrateConfigSetting(portal.Env(), configStore, "UAA_ENDPOINT", config.UAAEndpoint.String(), ""); err != nil {
 		return err
 	}
 
-	if err := migrateConfigSetting(portal.Env(), configStore, "CONSOLE_ADMIN_SCOPE", config.ConsoleAdminScope); err != nil {
+	if err := migrateConfigSetting(portal.Env(), configStore, "CONSOLE_ADMIN_SCOPE", config.ConsoleAdminScope, ""); err != nil {
 		return err
 	}
 
-	if err := migrateConfigSetting(portal.Env(), configStore, "CONSOLE_CLIENT", config.ConsoleClient); err != nil {
+	if err := migrateConfigSetting(portal.Env(), configStore, "CONSOLE_CLIENT", config.ConsoleClient, ""); err != nil {
 		return err
 	}
 
-	if err := migrateConfigSetting(portal.Env(), configStore, "CONSOLE_CLIENT_SECRET", config.ConsoleClientSecret); err != nil {
+	if err := migrateConfigSetting(portal.Env(), configStore, "CONSOLE_CLIENT_SECRET", config.ConsoleClientSecret, ""); err != nil {
 		return err
 	}
 
-	if err := migrateConfigSetting(portal.Env(), configStore, "SKIP_SSL_VALIDATION", strconv.FormatBool(config.SkipSSLValidation)); err != nil {
+	if err := migrateConfigSetting(portal.Env(), configStore, "AUTH_ENDPOINT_TYPE", config.AuthEndpointType, ""); err != nil {
 		return err
 	}
 
-	if err := migrateConfigSetting(portal.Env(), configStore, "SSO_LOGIN", strconv.FormatBool(config.UseSSO)); err != nil {
+	if err := migrateConfigSetting(portal.Env(), configStore, "SKIP_SSL_VALIDATION", strconv.FormatBool(config.SkipSSLValidation), "false"); err != nil {
+		return err
+	}
+
+	if err := migrateConfigSetting(portal.Env(), configStore, "SSO_LOGIN", strconv.FormatBool(config.UseSSO), "false"); err != nil {
+		return err
+	}
+
+	// Delete the content form the legacy table
+	err = configStore.DeleteConsoleConfig()
+	if err != nil {
+		log.Warnf("Unable to delete legacy console config data: %+v", err)
 		return err
 	}
 
@@ -108,13 +125,16 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 	return nil
 }
 
-func migrateConfigSetting(envLookup *env.VarSet, configStore Repository, envVarName, value string) error {
+func migrateConfigSetting(envLookup *env.VarSet, configStore Repository, envVarName, value, defaultValue string) error {
 
 	var shouldStore = true
 
 	// Get the current value from the environment
 	if currentValue, ok := envLookup.Lookup(envVarName); ok {
 		shouldStore = currentValue != value
+	} else {
+		// Only store if the value is not the default value
+		shouldStore = value != defaultValue
 	}
 
 	if shouldStore {

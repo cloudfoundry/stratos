@@ -124,6 +124,7 @@ export function initEndpointTypes(epTypes: EndpointTypeExtensionConfig[]) {
 
   endpointTypes.forEach(ept => {
     endpointTypesMap[createEndpointKey(ept.type, ept.subType)] = ept;
+    ept.techPreview = ept.techPreview || false;
   });
 
   // Sort endpoints given their order. 0 -> top, undefined/null -> bottom
@@ -151,8 +152,9 @@ export function getCanShareTokenForEndpointType(type: string, subType: string): 
   return epT ? !!epT.allowTokenSharing : false;
 }
 
-export function getEndpointTypes() {
-  return endpointTypes;
+export function getEndpointTypes(techPreviewEnabled = false) {
+  // Filter out endpoints in tech preview if needed
+  return endpointTypes.filter(item => !item.techPreview || item.techPreview && techPreviewEnabled);
 }
 
 export function getEndpointType(type: string, subType: string): EndpointTypeConfig {

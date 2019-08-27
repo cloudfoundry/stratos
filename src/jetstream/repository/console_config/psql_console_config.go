@@ -13,7 +13,7 @@ import (
 )
 
 // Legacy
-var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso FROM console_config`
+var getConsoleConfig = `SELECT auth_endpoint_type, uaa_endpoint, auth_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, use_sso FROM console_config`
 
 var deleteConsoleConfig = `DELETE FROM console_config`
 
@@ -159,24 +159,49 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	var consoleConfig *interfaces.ConsoleConfig
 	for rows.Next() {
 		var (
-			authEndpoint string
+			uaaEndpoint      string
+			authEndpoint     sql.NullString
+			authEndpointType sql.NullString
 		)
 		rowCount++
 		if rowCount > 1 {
-			return nil, errors.New("Multiple configuration data detected!")
+			return nil, errors.New("Multiple configuration data detected")
 		}
 
 		consoleConfig = new(interfaces.ConsoleConfig)
-		err := rows.Scan(&authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
+		err := rows.Scan(&authEndpointType, &uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
 			&consoleConfig.ConsoleClientSecret, &consoleConfig.SkipSSLValidation, &consoleConfig.UseSSO)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan config record: %v", err)
 		}
 
-		if consoleConfig.UAAEndpoint, err = url.Parse(authEndpoint); err != nil {
+		if consoleConfig.UAAEndpoint, err = url.Parse(uaaEndpoint); err != nil {
 			return nil, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
+		}
+
+		// Might be null if database was upgraded
+		if authEndpoint.Valid {
+			if consoleConfig.AuthorizationEndpoint, err = url.Parse(authEndpoint.String); err != nil {
+				return nil, fmt.Errorf("Unable to parse Authorization Endpoint: %v", err)
+			}
+		}
+
+		if authEndpointType.Valid {
+			consoleConfig.AuthEndpointType = authEndpointType.String
+		} else {
+			consoleConfig.AuthEndpointType = "remote"
 		}
 	}
 
 	return consoleConfig, nil
+}
+
+// DeleteConsoleConfig will delete all row(s) from the legacy config_config table
+func (c *ConsoleConfigRepository) DeleteConsoleConfig() error {
+	log.Debug("DeleteConsoleConfig")
+	if _, err := c.db.Exec(deleteConsoleConfig); err != nil {
+		return fmt.Errorf("Unable to delete all data from console_config: %v", err)
+	}
+
+	return nil
 }

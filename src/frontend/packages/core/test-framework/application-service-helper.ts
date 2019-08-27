@@ -5,7 +5,7 @@ import { AppState } from '../../store/src/app-state';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { AppStat } from '../../store/src/types/app-metadata.types';
-import { IApp, IAppSummary, ISpace } from '../src/core/cf-api.types';
+import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
 import {
@@ -82,6 +82,7 @@ export class ApplicationServiceMock {
   });
   appSpace$: Observable<APIResource<ISpace>> = observableOf(createEntity<ISpace>({} as ISpace));
   applicationRunning$: Observable<boolean> = observableOf(false);
+  orgDomains$: Observable<APIResource<IDomain>[]> = observableOf([]);
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {

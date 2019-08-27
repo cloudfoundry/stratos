@@ -2,7 +2,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { schema } from 'normalizr';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
+import { filter, first, map, startWith } from 'rxjs/operators';
 
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';

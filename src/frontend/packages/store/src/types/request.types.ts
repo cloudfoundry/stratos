@@ -81,6 +81,7 @@ export interface IFailedRequestAction {
   message: string;
   apiAction: IRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
+  response?: any;
 }
 
 export abstract class CFStartAction implements Action {
@@ -162,7 +163,8 @@ export class WrapperRequestActionFailed extends RequestFailedAction implements I
     public message: string,
     public apiAction: IRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
-    public internalEndpointError?: InternalEndpointError
+    public internalEndpointError?: InternalEndpointError,
+    public response?: any
   ) {
     super();
   }

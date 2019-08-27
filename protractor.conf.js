@@ -11,6 +11,7 @@ const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 const globby = require('globby');
 const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
 const browserReporterPlugin = require('./src/test-e2e/browser-reporter-plugin.js');
+const https = require('https');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -72,15 +73,25 @@ const longSuite = globby.sync([
   './src/test-e2e/application/application-deploy-e2e.spec.ts',
   './src/test-e2e/application/application-deploy-local-e2e.spec.ts',
   './src/test-e2e/marketplace/**/*-e2e.spec.ts',
-  './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/cf-level/cf-users-list-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/org-level/org-users-list-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/space-level/space-users-list-e2e.spec.ts'
 ])
 
-const fullMinusLongSuite = globby.sync([
+const longSuite2 = globby.sync([
+  './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/cf-level/cf-users-removal-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/org-level/org-users-removal-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/space-level/space-users-removal-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/cf-level/cf-invite-config-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/org-level/org-invite-user-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts'
+])
+
+const fullMinusLongSuites = globby.sync([
   ...fullSuite,
   ...longSuite.map(file => '!' + file),
+  ...longSuite2.map(file => '!' + file),
 ])
 
 exports.config = {
@@ -99,8 +110,12 @@ exports.config = {
       ...longSuite,
       ...excludeTests
     ]),
+    longSuite2: globby.sync([
+      ...longSuite2,
+      ...excludeTests
+    ]),
     fullMinusLongSuite: globby.sync([
-      ...fullMinusLongSuite,
+      ...fullMinusLongSuites,
       ...excludeTests
     ]),
     sso: globby.sync([
@@ -153,6 +168,45 @@ exports.config = {
       browserReporterPlugin.install(jasmine, browser);
       jasmine.getEnv().addReporter(browserReporterPlugin.reporter());
     }
+
+    // Validate that the Github API url that the client will use during e2e tests is responding
+    const githubApiUrl = secrets.stratosGitHubApiUrl || 'https://api.github.com';
+    const path = '/repos/nwmac/cf-quick-app'
+    console.log(`Validating Github API Url Using: '${githubApiUrl + path}'`)
+
+    // This chunk can disappear when we update node to include the version of http that accepts `get(url, option, callback)`
+    const hasHttps = githubApiUrl.indexOf('https://') === 0;
+    const tempHost = hasHttps ? githubApiUrl.substring(8, githubApiUrl.length) : githubApiUrl
+    const hasPort = tempHost.indexOf(':') >= 0;
+    const port = hasPort ? parseInt(tempHost.substring(tempHost.indexOf(':') + 1, tempHost.length)) : hasHttps ? 443 : null;
+    const host = hasPort ? tempHost.replace(':' + port, '') : tempHost;
+
+    const options = {
+      host,
+      port,
+      path,
+      accept: '*/*',
+      method: 'GET',
+      // Required by github to avoid 403
+      headers: {
+        'User-Agent': 'request'
+      },
+      rejectUnauthorized: false
+    }
+
+    var defer = protractor.promise.defer();
+    https
+      .get(options, (resp) => {
+        if (resp.statusCode >= 400) {
+          defer.reject('Failed to validate Github API Url. Status Code: ' + resp.statusCode);
+        } else {
+          defer.fulfill('Github API Url responding');
+        }
+      })
+      .on("error", (err) => {
+        defer.reject('Failed to validate Github API Url: ' + err.message);
+      });
+    return defer.promise;
   }
 };
 

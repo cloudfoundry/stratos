@@ -1,18 +1,17 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Observable } from 'rxjs';
-import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
-import { TabNavService } from '../../../../tab-nav.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Observable, of } from 'rxjs';
+
 import { AppState } from '../../../../../store/src/app-state';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
+import { TabNavService } from '../../../../tab-nav.service';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { StratosTabMetadata } from '../../../core/extension/extension-service';
+import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
-export interface IPageSideNavTab {
-  key?: string;
-  label: string;
-  matIcon?: string;
-  matIconFont?: string;
-  link: string;
-  hidden?: Observable<boolean>;
+export interface IPageSideNavTab extends StratosTabMetadata {
+  hidden$?: Observable<boolean>;
 }
 
 @Component({
@@ -22,19 +21,33 @@ export interface IPageSideNavTab {
 })
 export class PageSideNavComponent implements OnInit {
 
-  @Input()
-  public tabs: IPageSideNavTab[];
+  pTabs: IPageSideNavTab[];
+  @Input() set tabs(tabs: IPageSideNavTab[]) {
+    if (!tabs || (this.pTabs && tabs.length === this.pTabs.length)) {
+      return;
+    }
+    this.pTabs = tabs.map(tab => ({
+      ...tab,
+      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute) : of(false))
+    }));
+  }
+  get tabs(): IPageSideNavTab[] {
+    return this.pTabs;
+  }
 
   @Input()
   public header: string;
   public activeTab$: Observable<string>;
   public breadcrumbs$: Observable<IBreadcrumb[]>;
-  public isMobile$ = this.store.select(selectIsMobile);
-
+  public isMobile$: Observable<boolean>;
   constructor(
-    public tabNavService: TabNavService,
-    private store: Store<Pick<AppState, 'dashboard'>>
-  ) { }
+    private store: Store<AppState>,
+    private esf: EntityServiceFactory,
+    private activatedRoute: ActivatedRoute,
+    public tabNavService: TabNavService
+  ) {
+    this.isMobile$ = this.store.select(selectIsMobile);
+  }
 
   ngOnInit() {
     this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();

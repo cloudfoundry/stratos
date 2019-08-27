@@ -45,6 +45,9 @@ console:
 
   # Whether to perform the volume migration job on install/upgrade (migrate to secrets)
   migrateVolumes: true
+  
+  # Enable/disable Tech Preview
+  techPreview: false
 
 images:
   console: stratos-console

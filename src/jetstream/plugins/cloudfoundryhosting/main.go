@@ -123,6 +123,10 @@ func (ch *CFHosting) Init() error {
 		ch.portalProxy.GetConfig().IsCloudFoundry = true
 
 		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
+
+		//Force auth endpoint type to remote (CF UAA)
+		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = "remote"
+
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
@@ -203,7 +207,16 @@ func (ch *CFHosting) Init() error {
 			return fmt.Errorf("Invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
 		}
 
+		ch.portalProxy.GetConfig().ConsoleConfig.AuthorizationEndpoint = url
+
+		// Override the configuration to set the authorization endpoint
+		url, err = url.Parse(newCNSI.TokenEndpoint)
+		if err != nil {
+			return fmt.Errorf("Invalid token endpoint URL %s %s", newCNSI.TokenEndpoint, err)
+		}
+
 		ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
+
 		log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
 
 		// Not set in the environment and failed to read from the Secrets file

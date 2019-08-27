@@ -41,6 +41,8 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/relations"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -180,6 +182,7 @@ func main() {
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
 	relations.InitRepositoryProvider(dc.DatabaseProvider)
+	localusers.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
@@ -321,7 +324,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 	}
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
-	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env(), consoleRepo)
+	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
 	if err != nil {
 		// Could not read config - this should not happen - so abort if it does
 		log.Fatalf("Unable to load console config; %+v", err)
@@ -343,19 +346,28 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
 	log.Infof("Stratos is initialized with the following setup:")
-	log.Infof("... UAA Endpoint        : %s", config.UAAEndpoint)
-	log.Infof("... Console Client      : %s", config.ConsoleClient)
-	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
-	log.Infof("... Setup Complete      : %t", config.IsSetupComplete())
-	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
-	log.Infof("... Use SSO Login       : %t", config.UseSSO)
+	log.Infof("... Auth Endpoint Type      : %s", config.AuthEndpointType)
+	if val, found := interfaces.AuthEndpointTypes[config.AuthEndpointType]; found {
+		if val == interfaces.Local {
+			log.Infof("... Local User              : %s", config.LocalUser)
+			log.Infof("... Local User Scope        : %s", config.LocalUserScope)
+		} else { //Auth type is set to remote
+			log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
+			log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
+			log.Infof("... Console Client          : %s", config.ConsoleClient)
+			log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
+			log.Infof("... Use SSO Login           : %t", config.UseSSO)
+				}
+	}
+	log.Infof("... Skip SSL Validation     : %t", config.SkipSSLValidation)
+	log.Infof("... Setup Complete          : %t", config.IsSetupComplete())
 }
 
 func showSSOConfig(portalProxy *portalProxy) {
 	// Show SSO Configuration
 	log.Infof("SSO Configuration:")
-	log.Infof("... SSO Enabled         : %t", portalProxy.Config.SSOLogin)
-	log.Infof("... SSO Options         : %s", portalProxy.Config.SSOOptions)
+	log.Infof("... SSO Enabled             : %t", portalProxy.Config.SSOLogin)
+	log.Infof("... SSO Options             : %s", portalProxy.Config.SSOOptions)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
@@ -764,7 +776,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	if needSetupMiddleware {
 		e.Use(p.SetupMiddleware())
 		pp.POST("/v1/setup", p.setupConsole)
-		pp.POST("/v1/setup/update", p.setupConsoleUpdate)
+		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
@@ -773,6 +785,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// SSO Routes will only respond if SSO is enabled
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
+
+	// Local User login/logout
+	pp.POST("/v1/auth/local_login", p.localLogin)
+	pp.POST("/v1/auth/local_logout", p.logout)
 
 	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)

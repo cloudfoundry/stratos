@@ -129,6 +129,9 @@ function getDefaultInitialTestStoreState(): AppState {
         sessionExpiresOn: 1000,
         plugins: {
           demo: false
+        },
+        config: {
+          enableTechPreview: false
         }
       },
       verifying: false
@@ -702,6 +705,7 @@ function getDefaultInitialTestStoreState(): AppState {
       isMobile: false,
       isMobileNavOpen: false,
       sideNavPinned: false,
+      pollingEnabled: true
     },
     createApplication: {
       cloudFoundryDetails: null,
