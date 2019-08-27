@@ -1,4 +1,4 @@
-package kubernetes
+package auth
 
 import (
 	"bytes"
@@ -16,33 +16,43 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-type KubeCertAuth struct {
-	Certificate    string `json:"cert"`
-	CertificateKey string `json:"certKey"`
-	Token          string `json:"token,omitempty"`
+const authConnectTypeCertAuth = "kube-cert-auth"
+
+// CertKubeAuth is GKE Authentication with Certificates
+type CertKubeAuth struct {
+	portalProxy interfaces.PortalProxy
 }
 
-func (k *KubeCertAuth) GetJSON() (string, error) {
-	jsonString, err := json.Marshal(k)
+// InitCertKubeAuth creates a GKEKubeAuth
+func InitCertKubeAuth(portalProxy interfaces.PortalProxy) *CertKubeAuth {
+	return &CertKubeAuth{portalProxy: portalProxy}
+}
+
+// GetName returns the provider name
+func (c *CertKubeAuth) GetName() string {
+	return authConnectTypeCertAuth
+}
+
+func (c *CertKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+	kubeAuthToken := &KubeCertificate{}
+	err := json.NewDecoder(strings.NewReader(tokenRec.AuthToken)).Decode(kubeAuthToken)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return string(jsonString), nil
+
+	info.ClientCertificateData = []byte(kubeAuthToken.Certificate)
+	info.ClientKeyData = []byte(kubeAuthToken.CertificateKey)
+	info.Token = kubeAuthToken.Token
+
+	return nil
 }
 
-func (k *KubeCertAuth) GetCerticate() (tls.Certificate, error) {
-	cert, err := tls.X509KeyPair([]byte(k.Certificate), []byte(k.CertificateKey))
-	if err != nil {
-		return tls.Certificate{}, err
-	}
-	return cert, nil
-}
+func (c *CertKubeAuth) extractCerts(ec echo.Context) (*KubeCertificate, error) {
 
-func (c *KubernetesSpecification) extractCerts(ec echo.Context) (*KubeCertAuth, error) {
-
-	kubeCertAuth := &KubeCertAuth{}
+	kubeCertAuth := &KubeCertificate{}
 
 	bodyReader := ec.Request().Body
 	defer bodyReader.Close()
@@ -66,7 +76,7 @@ func (c *KubernetesSpecification) extractCerts(ec echo.Context) (*KubeCertAuth, 
 
 }
 
-func (c *KubernetesSpecification) FetchCertAuth(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+func (c *CertKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
 	log.Info("FetchCerts")
 
 	kubeCertAuth, err := c.extractCerts(ec)
@@ -88,23 +98,23 @@ func (c *KubernetesSpecification) FetchCertAuth(cnsiRecord interfaces.CNSIRecord
 	expiry := time.Now().Local().Add(time.Hour * time.Duration(100000))
 	disconnected := false
 	tokenRecord := c.portalProxy.InitEndpointTokenRecord(expiry.Unix(), accessToken, refreshToken, disconnected)
-	tokenRecord.AuthType = AuthConnectTypeCertAuth
+	tokenRecord.AuthType = authConnectTypeCertAuth
 	return &tokenRecord, &cnsiRecord, nil
 }
 
-func (c *KubernetesSpecification) GetCNSIUserFromCertAuth(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+func (c *CertKubeAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
 	return &interfaces.ConnectedUser{
 		GUID: "Kube Cert Auth",
 		Name: "Cert Auth",
 	}, true
 }
 
-func (c *KubernetesSpecification) doCertAuthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doCertAuthFlowRequest")
 
 	authHandler := func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error) {
 
-		kubeAuthToken := &KubeCertAuth{}
+		kubeAuthToken := &KubeCertificate{}
 		err := json.NewDecoder(strings.NewReader(tokenRec.AuthToken)).Decode(kubeAuthToken)
 		if err != nil {
 			return nil, err
@@ -154,7 +164,7 @@ func (c *KubernetesSpecification) doCertAuthFlowRequest(cnsiRequest *interfaces.
 	return c.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
-func (c *KubernetesSpecification) RefreshCertAuth(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (c *CertKubeAuth) RefreshCertAuth(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
 	log.Debug("RefreshCertAuth")
 	// This shouldn't be called since cert-auth K8S shouldn't expire
 
@@ -164,4 +174,12 @@ func (c *KubernetesSpecification) RefreshCertAuth(skipSSLValidation bool, cnsiGU
 	}
 
 	return userToken, nil
+}
+
+func (c *CertKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+	// Register auth type with Jetstream
+	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+		Handler:  c.DoFlowRequest,
+		UserInfo: c.GetUserFromToken,
+	})
 }

@@ -2,6 +2,7 @@ package monocular
 
 import (
 	"database/sql"
+	"strings"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 
@@ -31,6 +32,11 @@ func init() {
 			return err
 		}
 
+		binaryDataType := "BYTEA"
+		if strings.Contains(conf.Driver.Name, "mysql") {
+			binaryDataType = "BLOB"
+		}
+
 		createChartFilesTable := "CREATE TABLE IF NOT EXISTS chart_files ("
 		createChartFilesTable += "id                  VARCHAR(255) NOT NULL,"
 		createChartFilesTable += "filename            VARCHAR(64)  NOT NULL,"
@@ -38,7 +44,7 @@ func init() {
 		createChartFilesTable += "name                VARCHAR(255) NOT NULL,"
 		createChartFilesTable += "repo_name           VARCHAR(255) NOT NULL,"
 		createChartFilesTable += "digest              VARCHAR(255) NOT NULL,"
-		createChartFilesTable += "content             BLOB,"
+		createChartFilesTable += "content             " + binaryDataType + ","
 		createChartFilesTable += "PRIMARY KEY (id, filename) );"
 
 		_, err = txn.Exec(createChartFilesTable)

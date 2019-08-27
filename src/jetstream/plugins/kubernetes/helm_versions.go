@@ -1,6 +1,8 @@
 package kubernetes
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
@@ -23,7 +25,13 @@ func (c *KubernetesSpecification) GetHelmVersions(ec echo.Context) error {
 	userID := ec.Get("user_id").(string)
 
 	resp, err := c.ProxyKubernetesAPI(userID, c.fetchHelmVersion)
-	log.Warn(err)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(
+			http.StatusInternalServerError,
+			"Error fetching Helm Tiller Versions",
+			"Error fetching Helm Tiller Versions: %v", err,
+		)
+	}
 	return ec.JSON(200, resp)
 }
 

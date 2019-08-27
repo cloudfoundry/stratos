@@ -10,7 +10,7 @@ import (
 )
 
 func (m *Monocular) GetType() string {
-	return EndpointType
+	return helmEndpointType
 }
 
 func (m *Monocular) GetClientId() string {
@@ -37,7 +37,7 @@ func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool) (interfaces
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
 
-	newCNSI.CNSIType = EndpointType
+	newCNSI.CNSIType = helmEndpointType
 
 	_, err := url.Parse(apiEndpoint)
 	if err != nil {

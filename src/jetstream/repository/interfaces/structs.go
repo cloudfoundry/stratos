@@ -67,12 +67,10 @@ type ConnectedEndpoint struct {
 const (
 	// AuthTypeOAuth2 means OAuth2
 	AuthTypeOAuth2 = "OAuth2"
-	// AuthTypeOIDC means no OIDC
+	// AuthTypeOIDC means OIDC
 	AuthTypeOIDC = "OIDC"
 	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	// AuthTypeAKS means AKS
-	AuthTypeAKS = "AKS"
 )
 
 const (

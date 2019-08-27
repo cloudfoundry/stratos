@@ -2,6 +2,7 @@ package monocular
 
 import (
 	"encoding/json"
+
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/helm/monocular/chartrepo"
 	log "github.com/sirupsen/logrus"
@@ -20,10 +21,12 @@ type SyncMetadata struct {
 // Sync Chanel
 var syncChan = make(chan SyncJob, 100)
 
+// InitSync starts the go routine that will sync repositories in the background
 func (m *Monocular) InitSync() {
 	go m.processSyncRequests()
 }
 
+// Sync shceudles a sync action for the given endpoint
 func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
 
 	job := SyncJob{
@@ -31,19 +34,17 @@ func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.
 		Endpoint: endpoint,
 	}
 
-	log.Warn("Scheduling Sync job")
 	syncChan <- job
 }
 
 func (m *Monocular) processSyncRequests() {
 	log.Info("Helm Repository Sync init")
 	for job := range syncChan {
-		log.Info("Processing Job")
-		log.Info(job.Endpoint.Name)
+		log.Debugf("Processing Helm Repository Sync Job: %s", job.Endpoint.Name)
 
 		// Could be delete or sync
 		if job.Action == 0 {
-			log.Info("Syncing new repository")
+			log.Debug("Syncing new repository")
 			metadata := SyncMetadata{
 				Status: "Synchronizing",
 				Busy:   true,
@@ -66,7 +67,7 @@ func (m *Monocular) processSyncRequests() {
 		}
 	}
 
-	log.Info("processSyncRequests finished")
+	log.Debug("processSyncRequests finished")
 }
 
 func marshalSyncMetadata(metadata SyncMetadata) string {
