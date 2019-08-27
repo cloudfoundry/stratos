@@ -38,8 +38,14 @@ run:
       # Generate Helm package
       updateHelmDependency
 
+      # Run customization script if there is one
+      if [ -f "${STRATOS}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
+        echo "Applying Helm Chart customizations"
+        ${STRATOS}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS}"
+      fi
+
       # Generate imagelist
-      ./imagelist-gen.sh ./console
+      ./imagelist-gen.sh ${STRATOS}/deploy/kubernetes/console
 
       # Package console Helm Chart
       helm package console
