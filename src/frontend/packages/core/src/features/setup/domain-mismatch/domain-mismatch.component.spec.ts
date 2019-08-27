@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DomainMismatchComponent } from './domain-mismatch.component';
 import { MDAppModule } from '../../../core/md.module';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
-import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
+import { StratosTitleComponent } from '@stratos/shared';
 
 describe('DomainMismatchComponent', () => {
   let component: DomainMismatchComponent;

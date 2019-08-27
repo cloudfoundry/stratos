@@ -2,6 +2,9 @@
   "extends": "../../../tsconfig.app.json",
   "compilerOptions": {
     "outDir": "../../../../out-tsc/app",
+    "paths": {
+      "@stratos/shared": ["/Users/nwm/dev/v3_libs/src/frontend/packages/shared/src/public-api.ts"]
+    }    
   },
   "exclude": [
     "./src/test.ts",

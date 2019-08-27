@@ -6,6 +6,7 @@ import { AboutPageComponent } from './about-page/about-page.component';
 import { AboutRoutingModule } from './about.routing';
 import { EulaPageComponent, EulaPageContentComponent } from './eula-page/eula-page.component';
 import { DiagnosticsPageComponent } from './diagnostics-page/diagnostics-page.component';
+import { StratosComponentsModule } from '@stratos/shared';
 
 
 
@@ -13,6 +14,7 @@ import { DiagnosticsPageComponent } from './diagnostics-page/diagnostics-page.co
   imports: [
     CoreModule,
     SharedModule,
+    StratosComponentsModule,
     AboutRoutingModule,
     CustomImportModule
   ],

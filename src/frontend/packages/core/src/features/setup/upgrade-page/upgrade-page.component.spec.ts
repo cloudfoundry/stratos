@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UpgradePageComponent } from './upgrade-page.component';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
-import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { MDAppModule } from '../../../core/md.module';
+import { StratosTitleComponent } from '@stratos/shared';
 
 describe('UpgradePageComponent', () => {
   let component: UpgradePageComponent;

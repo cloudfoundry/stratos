@@ -1,0 +1,13 @@
+{
+  "name": "@acme/theme",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@stratos/theme": "0.0.1"
+  },
+  "stratos": {
+    "isTheme": true,
+    "assets": {
+      "assets/core": "core"
+    }
+  }
+}

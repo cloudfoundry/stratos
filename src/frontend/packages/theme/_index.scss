@@ -1,0 +1,88 @@
+// Stratos theme definition
+
+@import '~@angular/material/theming';
+@import './mat-themes';
+@import './mat-colors';
+
+// Custom theme support
+//@import './custom';
+
+// Declare function stratos-theme
+
+// Defaults
+$side-nav-light-text: #fff;
+$side-nav-light-bg: #333;
+$side-nav-light-hover: #555;
+$side-nav-light-active: #484848;  
+
+// Provide the theme function that will be used to create the theme when needed
+@function stratos-theme() {
+
+  // Themes palettes and colors
+  $oss-theme-primary: mat-palette($mat-blue);
+  $oss-theme-accent: mat-palette($mat-blue);
+  $oss-theme-warn: mat-palette($mat-red);
+  $oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
+
+  // Default to using the open source theme
+  $theme: $oss-theme !default;
+  $nav-theme: null !default;
+  $status-theme: null !default;
+
+  $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
+  $is-dark: map-get($theme, is-dark);
+  $app-background-color: white;
+  $app-background-text-color: rgba(mat-color($foreground-colors, base), .65);
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
+  $subdued: mat-contrast($primary, 50);
+
+  @if $is-dark==true {
+    $app-background-color: lighten(mat-color($background-colors, background), 10%);
+    $subdued: darken($subdued, 50);
+  }
+
+  @else {
+    $app-background-color: darken(mat-color($background-colors, background), 2%);
+    $subdued: lighten($subdued, 50);
+  }
+
+  @return (
+    theme: $theme,
+    app-theme: (
+      app-background-color: $app-background-color,
+      app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
+      side-nav: app-generate-nav-theme($theme, $nav-theme),
+      status: app-generate-status-theme($theme, $status-theme),
+      subdued-color: $subdued,
+      ansi-colors: $ansi-color-palette
+    )
+  );
+}
+
+@function app-generate-nav-theme($theme, $nav-theme: null) {
+  @if ($nav-theme) {
+    @return $nav-theme;
+  }
+
+  @else {
+    // Use default palette for side navigation
+    @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
+  }
+}
+
+@function app-generate-status-theme($theme, $status-theme: null) {
+  @if ($status-theme) {
+    @return $status-theme;
+  }
+
+  @else {
+    $warn: map-get($theme, warn);
+    $primary: map-get($theme, primary);
+    $white: #fff; // Use default palette for status
+    @return (success: map-get($mat-green, 500), warning: map-get($mat-orange, 500), danger: mat-color($warn), tentative: map-get($mat-grey, 500), busy: mat-color($primary), text: $white, );
+  }
+}
+

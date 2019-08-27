@@ -139,7 +139,6 @@ import {
 import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { SteppersModule } from './components/stepper/steppers.module';
-import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
 import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
@@ -166,6 +165,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { StratosComponentsModule } from '@stratos/shared';
 
 /* tslint:disable:max-line-length */
 
@@ -180,6 +180,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CdkTableModule,
     NgxChartsModule,
     MaterialDesignFrameworkModule,
+    StratosComponentsModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -243,7 +244,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     RingChartComponent,
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
-    StratosTitleComponent,
     IntroScreenComponent,
     CliInfoComponent,
     CliCommandComponent,
@@ -360,7 +360,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     ServicePlanPriceComponent,
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
-    StratosTitleComponent,
     IntroScreenComponent,
     UserProfileBannerComponent,
     CliInfoComponent,

@@ -4,13 +4,16 @@
   "newProjectRoot": "src/frontend/packages",
   "projects": {
     "stratos": {
-      "root": "",
+      "root": "src/frontend/packages",
       "sourceRoot": "src/frontend/packages",
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+            "customWebpackConfig": {
+              "path": "./custom-webpack.config.js"
+            },            
             "preserveSymlinks": true,
             "outputPath": "dist",
             "index": "src/frontend/packages/core/src/index.html",
@@ -52,7 +55,7 @@
           }
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular-builders/dev-server:generic",
           "options": {
             "aot": true,
             "sslCert": "dev-ssl/server.crt",
