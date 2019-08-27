@@ -206,8 +206,6 @@ type Info struct {
 		TechPreview bool `json:"enableTechPreview"`
 	} `json:"config"`
 }
-// Configuration map[string]string                     `json:"configuration,omitempty"`
-// TODO: RC
 
 type EndpointRelation struct {
 	Guid         string                 `json:"guid"`

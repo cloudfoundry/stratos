@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	RegisterMigration(20190521341000, "Relations", func(txn *sql.Tx, conf *goose.DBConf) error {
+	RegisterMigration(20190821341000, "Relations", func(txn *sql.Tx, conf *goose.DBConf) error {
 
 		createFavoritesTable := "CREATE TABLE IF NOT EXISTS relations ("
 		createFavoritesTable += "provider                  VARCHAR(255)  NOT NULL,"
