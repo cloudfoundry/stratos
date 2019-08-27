@@ -19,6 +19,12 @@ export interface EntityCatalogueEntityConfig {
   subType?: string;
   schemaKey?: string;
 }
+
+export const extractEntityCatalogueEntityConfig = (ecec: Partial<EntityCatalogueEntityConfig>): EntityCatalogueEntityConfig => {
+  const { entityType, endpointType, subType, schemaKey } = ecec;
+  return { entityType, endpointType, subType, schemaKey };
+};
+
 export interface EntityCatalogueSchemas {
   default: EntitySchema;
   [schemaKey: string]: EntitySchema;
