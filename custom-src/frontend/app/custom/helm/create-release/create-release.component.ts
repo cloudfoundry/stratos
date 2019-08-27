@@ -103,7 +103,6 @@ export class CreateReleaseComponent implements OnInit {
     this.kubeEndpoints$.pipe(
       first(),
       tap(ep => {
-        console.log(ep);
         if (ep.length === 1) {
           this.details.controls.endpoint.setValue(ep[0].guid, {onlySelf: true});
           setTimeout(() => {
