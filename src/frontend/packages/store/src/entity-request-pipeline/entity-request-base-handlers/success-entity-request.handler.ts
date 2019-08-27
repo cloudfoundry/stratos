@@ -20,7 +20,11 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
     if (action.removeEntityOnDelete) {
       actionDispatcher(new ClearPaginationOfEntity(action, action.guid));
     } else {
-      actionDispatcher(new ClearPaginationOfType(action));
+      if (action.proxyPaginationEntityConfig) {
+        actionDispatcher(new ClearPaginationOfType(action.proxyPaginationEntityConfig));
+      } else {
+        actionDispatcher(new ClearPaginationOfType(action));
+      }
     }
 
     if (Array.isArray(action.clearPaginationEntityKeys)) {

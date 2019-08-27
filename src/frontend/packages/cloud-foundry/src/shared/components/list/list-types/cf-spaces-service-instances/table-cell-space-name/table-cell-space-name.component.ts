@@ -10,7 +10,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
   templateUrl: './table-cell-space-name.component.html',
   styleUrls: ['./table-cell-space-name.component.scss']
 })
-export class TableCellSpaceNameComponent<T> extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
+export class TableCellSpaceNameComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
   breadcrumbs: {};
   spaceUrl: string[];
