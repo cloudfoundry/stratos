@@ -3,6 +3,15 @@ entries:
   console:
   - apiVersion: v1
     appVersion: 2.5.0
+    created: "2019-08-27T09:13:55.989263657Z"
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 50d364b6d1d8d8c6d7e022621c3839d81ff2dd5ee299f2b3c9a318d2541a3760
+    name: console
+    urls:
+    - https://github.com/cloudfoundry-incubator/stratos/releases/download/2.5.0/console-helm-chart-2.5.0-2e4608488.tgz
+    version: 2.5.0
+  - apiVersion: v1
+    appVersion: 2.5.0
     created: "2019-08-19T11:33:59.30684145Z"
     description: A Helm chart for deploying Stratos UI Console
     digest: f89350e93cef78d7da222ed91763201fec2744356584b66801e2a436c1812de2
@@ -322,4 +331,4 @@ entries:
     urls:
     - https://github.com/SUSE/stratos-metrics/releases/download/1.0.0/console-metrics-helm-chart-v1.0.0-ddbf0c5.tgz
     version: 1.0.0
-generated: "2019-08-22T14:58:57.396497893Z"
+generated: "2019-08-27T09:13:55.988265439Z"
