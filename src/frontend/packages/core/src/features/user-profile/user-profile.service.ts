@@ -16,7 +16,7 @@ import {
   UpdateUserProfileAction,
 } from '../../../../store/src/actions/user-profile.actions';
 import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
-import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectUpdateInfo, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
 
 
 @Injectable()
@@ -27,6 +27,8 @@ export class UserProfileService {
   entityMonitor: EntityMonitor<UserProfileInfo>;
 
   userProfile$: Observable<UserProfileInfo>;
+
+  isError$: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
@@ -39,6 +41,11 @@ export class UserProfileService {
       filter(data => data && !!data.id)
     );
     this.isFetching$ = this.entityMonitor.isFetchingEntity$;
+
+    this.isError$ = this.store.select(selectRequestInfo(userProfileSchemaKey, UserProfileEffect.guid)).pipe(
+      filter(requestInfo => !!requestInfo && !requestInfo.fetching),
+      map(requestInfo => requestInfo.error)
+    );
   }
 
   fetchUserProfile() {
