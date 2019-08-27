@@ -249,6 +249,8 @@ spec:
           value: {{ default "" .Values.env.SMTP_PASSWORD | quote }}
         - name: INVITE_USER_SUBJECT
           value: {{ default "" .Values.console.userInviteSubject | quote }}
+        - name: ENABLE_TECH_PREVIEW
+          value: {{ default "false" .Values.console.techPreview | quote }}
         ports:
         - containerPort: 3003
           name: proxy
