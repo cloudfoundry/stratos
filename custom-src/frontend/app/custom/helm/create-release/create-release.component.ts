@@ -27,7 +27,7 @@ export class CreateReleaseComponent implements OnInit {
   // Confirmation dialog
   overwriteValuesConfirmation = new ConfirmationDialogConfig(
     'Overwrite Values?',
-    'Are you sure you want to replace your values with those from valuyes.yaml?',
+    'Are you sure you want to replace your values with those from values.yaml?',
     'Overwrite'
   );
 
