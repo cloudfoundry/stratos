@@ -63,10 +63,15 @@ type PortalProxy interface {
 
 	// Database Connection
 	GetDatabaseConnection() *sql.DB
+
 	AddAuthProvider(name string, provider AuthProvider)
 	GetAuthProvider(name string) AuthProvider
+	HasAuthProvider(name string) bool
 	DoAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error)
 	OAuthHandlerFunc(cnsiRequest *CNSIRequest, req *http.Request, refreshOAuthTokenFunc RefreshOAuthTokenFunc) AuthHandlerFunc
+	DoOAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error)
+	DoOidcFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error)
+	GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *TokenRecord) (*ConnectedUser, bool)
 
 	// Tokens - lower-level access
 	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error

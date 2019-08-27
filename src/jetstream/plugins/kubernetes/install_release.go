@@ -51,23 +51,18 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	log.Info("Installing release")
 	log.Info(chartID)
 
-	downloadURL, err := c.GetChart(chartID, params.Chart.Version)
+	downloadURL, err := c.getChart(chartID, params.Chart.Version)
 	if err != nil {
 		return fmt.Errorf("Could not get the Download URL")
 	}
 
 	log.Debugf("Chart Download URL: %s", downloadURL)
 
-	// Get IO reader for the Chart
-
 	// Should we ignore SSL certs?
 	// TODO: Look up Helm Repository endpoiint and use the value from that
 	http := c.portalProxy.GetHttpClient(true)
 
 	resp, err := http.Get(downloadURL)
-
-	// // Check StatusCode is 200
-	// // Body is a io.ReadCloser
 
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Could not download Chart Archive: %s", resp.Status)
@@ -79,7 +74,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 		return fmt.Errorf("Could not load chart from archive: %v+", err)
 	}
 
-	log.Debug("Loaded chart")
+	log.Debug("Loaded helm chart")
 
 	endpointGUID := params.Endpoint
 	userGUID := ec.Get("user_id").(string)
@@ -94,7 +89,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	if _, err := chartutil.LoadRequirements(chart); err == nil {
 		log.Debug("Chart requirements loaded")
 	} else if err != chartutil.ErrRequirementsNotFound {
-		log.Error("Can not load requirements")
+		log.Error("Can not load requirements for helm chart")
 	} else {
 		log.Error(err)
 	}
@@ -120,7 +115,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	return ec.JSON(200, installResponse)
 }
 
-func (c *KubernetesSpecification) GetChart(chartID, version string) (string, error) {
+func (c *KubernetesSpecification) getChart(chartID, version string) (string, error) {
 
 	helm := c.portalProxy.GetPlugin("monocular")
 	if helm == nil {
@@ -167,7 +162,7 @@ func (c *KubernetesSpecification) DeleteRelease(ec echo.Context) error {
 	deleteResponse, err := client.DeleteRelease(releaseName, helm.DeletePurge(true))
 	if err != nil {
 		return fmt.Errorf("Could not delete Helm Release: %v+", err)
-
 	}
+
 	return ec.JSON(200, deleteResponse)
 }

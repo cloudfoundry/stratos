@@ -2,6 +2,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { of as observableOf } from 'rxjs';
 
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
@@ -11,11 +12,18 @@ import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
 import { ChartIndexComponent } from './chart-index.component';
-import { MockChartService } from '../shared/services/chart.service.mock';
+import { GetMonocularCharts } from '../../store/helm.actions';
 
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
 // import { MainHeaderComponent } from '../main-header/main-header.component';
 // import { SeoService } from '../shared/services/seo.service';
+
+export class MockChartService {
+
+  public getCharts() {
+    return observableOf([]);
+  }
+}
 
 describe('Component: ChartIndex', () => {
   beforeEach(() => {

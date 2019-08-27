@@ -398,12 +398,12 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	// Copy original headers through, except custom portal-proxy Headers
 	fwdCNSIStandardHeaders(cnsiRequest, req)
 
-	// Find the auth provider for the auth type - default ot oauthflow
+	// Find the auth provider for the auth type - default to oauthflow
 	authHandler := p.GetAuthProvider(tokenRec.AuthType)
 	if authHandler.Handler != nil {
 		res, err = authHandler.Handler(cnsiRequest, req)
 	} else {
-		res, err = p.doOauthFlowRequest(cnsiRequest, req)
+		res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {

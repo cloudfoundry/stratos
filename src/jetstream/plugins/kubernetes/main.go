@@ -3,35 +3,32 @@ package kubernetes
 import (
 	"net/url"
 	"strconv"
-	"strings"
 
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
 )
 
+// KubernetesSpecification is the endpoint that adds Kubernetes support to the backend
 type KubernetesSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
 }
 
-// KubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
-const KubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
-
 const (
-	EndpointType                = "k8s"
-	CLIENT_ID_KEY               = "K8S_CLIENT"
-	AuthConnectTypeKubeConfig   = "KubeConfig"
-	AuthConnectTypeKubeConfigAz = "kubeconfig-az"
-	AuthConnectTypeAWSIAM       = "aws-iam"
-	AuthConnectTypeCertAuth     = "kube-cert-auth"
-	AuthConnectTypeGKE          = "gke-auth"
+	kubeEndpointType    = "k8s"
+	defaultKubeClientID = "K8S_CLIENT"
+
+	// kubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
+	kubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
+	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType}, nil
 }
 
 func (c *KubernetesSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
@@ -47,11 +44,11 @@ func (c *KubernetesSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePl
 }
 
 func (c *KubernetesSpecification) GetType() string {
-	return EndpointType
+	return kubeEndpointType
 }
 
 func (c *KubernetesSpecification) GetClientId() string {
-	return c.portalProxy.Env().String(CLIENT_ID_KEY, "k8s")
+	return c.portalProxy.Env().String(defaultKubeClientID, "k8s")
 }
 
 func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
@@ -72,81 +69,36 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 	return nil
 }
 
-func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
+func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userID string) (*interfaces.TokenRecord, bool, error) {
 	log.Debug("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
 
-	// OIDC ?
-	if strings.EqualFold(connectType, AuthConnectTypeKubeConfig) {
-		tokenRecord, _, err := c.FetchKubeConfigTokenOIDC(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
+	var authProvider = c.FindAuthProvider(connectType)
+	if authProvider == nil {
+		return nil, false, errors.New("Unsupported Auth connection type for Kubernetes endpoint")
 	}
 
-	// AKS ?
-	if strings.EqualFold(connectType, AuthConnectTypeKubeConfigAz) {
-		tokenRecord, _, err := c.FetchKubeConfigTokenAKS(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
+	tokenRecord, _, err := authProvider.FetchToken(cnsiRecord, ec)
+	if err != nil {
+		return nil, false, err
 	}
 
-	// IAM Creds?
-	if strings.EqualFold(connectType, AuthConnectTypeAWSIAM) {
-		tokenRecord, _, err := c.FetchIAMToken(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
-	}
-
-	// Cert Auth?
-	if strings.EqualFold(connectType, AuthConnectTypeCertAuth) {
-		tokenRecord, _, err := c.FetchCertAuth(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
-	}
-
-	// GKE ?
-	if strings.EqualFold(connectType, AuthConnectTypeGKE) {
-		tokenRecord, _, err := c.FetchGKEToken(cnsiRecord, ec)
-		if err != nil {
-			return nil, false, err
-		}
-		return tokenRecord, false, nil
-	}
-
-	return nil, false, errors.New("Unsupported Auth connection type for Kubernetes endpoint")
+	return tokenRecord, false, nil
 }
 
 // Init the Kubernetes Jetstream plugin
 func (c *KubernetesSpecification) Init() error {
-	c.portalProxy.AddAuthProvider(AuthConnectTypeAWSIAM, interfaces.AuthProvider{
-		Handler:  c.doAWSIAMFlowRequest,
-		UserInfo: c.GetCNSIUserFromIAMToken,
-	})
-	c.portalProxy.AddAuthProvider(AuthConnectTypeCertAuth, interfaces.AuthProvider{
-		Handler:  c.doCertAuthFlowRequest,
-		UserInfo: c.GetCNSIUserFromCertAuth,
-	})
-	c.portalProxy.AddAuthProvider(AuthConnectTypeKubeConfigAz, interfaces.AuthProvider{
-		Handler:  c.doCertAuthFlowRequest,
-		UserInfo: c.GetCNSIUserFromCertAuth,
-	})
-	c.portalProxy.AddAuthProvider(AuthConnectTypeGKE, interfaces.AuthProvider{
-		Handler:  c.doGKEFlowRequest,
-		UserInfo: c.GetGKEUserFromToken,
-	})
+
+	c.AddAuthProvider(auth.InitAWSKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitCertKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitAzureKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitOIDCKubeAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitKubeConfigAuth(c.portalProxy))
 
 	// Kube dashboard is enabled by Tech Preview mode
-	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
-
+	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview
+	
 	return nil
 }
 
@@ -173,7 +125,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
 
-	newCNSI.CNSIType = EndpointType
+	newCNSI.CNSIType = kubeEndpointType
 
 	_, err := url.Parse(apiEndpoint)
 	if err != nil {
