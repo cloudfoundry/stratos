@@ -15,17 +15,8 @@ describe('CF Endpoints Dashboard - ', () => {
         .clearAllEndpoints();
     });
 
-    beforeEach(() => {
-      nav.goto(SideNavMenuItem.CloudFoundry);
-      cloudFoundry.loadingIndicator.waitUntilNotShown();
-    });
-
-    it('should be the Endpoints page', () => {
-      expect(cloudFoundry.isActivePage()).toBeTruthy();
-    });
-
-    it('should show the `no registered endpoints` message', () => {
-      expect(cloudFoundry.hasNoCloudFoundryMessage).toBeTruthy();
+    it('No CF side nav when no CF connected', () => {
+      expect(nav.isMenuItemPresent(SideNavMenuItem.CloudFoundry)).toBeFalsy();
     });
   });
 
