@@ -1,9 +1,9 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
 
+import { MockChartService } from '../../shared/services/chart.service.mock';
 import { ChartsService } from '../../shared/services/charts.service';
 import { ChartDetailsInfoComponent } from './chart-details-info.component';
-import { MockChartService } from '../../shared/services/chart.service.mock';
 
 
 describe('Component: ChartDetailsInfo', () => {
@@ -13,7 +13,7 @@ describe('Component: ChartDetailsInfo', () => {
         declarations: [ChartDetailsInfoComponent],
         imports: [],
         providers: [
-          { provide: ChartsService, useValue: new MockChartService()},
+          { provide: ChartsService, useValue: new MockChartService() },
         ],
         schemas: [NO_ERRORS_SCHEMA]
       }).compileComponents();
