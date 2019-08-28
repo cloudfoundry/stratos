@@ -1,21 +1,21 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { delay, filter, map, pairwise, switchMap, first, tap } from 'rxjs/operators';
+import { delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { HelmInstall } from '../store/helm.actions';
 import { helmReleaseSchemaKey } from '../store/helm.entities';
 import { HELM_INSTALLING_KEY, HelmInstallValues } from '../store/helm.types';
-import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 
 @Component({
   selector: 'app-create-release',
@@ -45,7 +45,7 @@ export class CreateReleaseComponent implements OnInit {
   @ViewChild('overridesYamlTextArea') overridesYamlTextArea: ElementRef;
   @ViewChild(MatTextareaAutosize) overridesYamlAutosize: MatTextareaAutosize;
 
-  private valuesYaml = '';
+  public valuesYaml = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -95,7 +95,7 @@ export class CreateReleaseComponent implements OnInit {
   }
 
   private replaceWithValuesYaml() {
-    this.overrides.controls.values.setValue(this.valuesYaml, {onlySelf: true});
+    this.overrides.controls.values.setValue(this.valuesYaml, { onlySelf: true });
   }
 
   ngOnInit() {
@@ -104,7 +104,7 @@ export class CreateReleaseComponent implements OnInit {
       first(),
       tap(ep => {
         if (ep.length === 1) {
-          this.details.controls.endpoint.setValue(ep[0].guid, {onlySelf: true});
+          this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
           setTimeout(() => {
             this.releaseNameInputField.nativeElement.focus();
           }, 1);
