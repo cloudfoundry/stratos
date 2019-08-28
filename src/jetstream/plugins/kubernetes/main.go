@@ -97,8 +97,8 @@ func (c *KubernetesSpecification) Init() error {
 	c.AddAuthProvider(auth.InitKubeConfigAuth(c.portalProxy))
 
 	// Kube dashboard is enabled by Tech Preview mode
-	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview
-	
+	c.portalProxy.GetConfig().PluginConfig[KubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
+
 	return nil
 }
 
