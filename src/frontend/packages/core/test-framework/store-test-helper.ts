@@ -129,6 +129,9 @@ function getDefaultInitialTestStoreState(): AppState {
         sessionExpiresOn: 1000,
         plugins: {
           demo: false
+        },
+        config: {
+          enableTechPreview: false
         }
       },
       verifying: false

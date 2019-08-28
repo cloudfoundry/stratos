@@ -14,7 +14,8 @@ const helmEndpointTypes: EndpointTypeExtensionConfig[] = [{
   imagePath: '/core/assets/custom/helm.svg',
   homeLink: (guid) => ['/monocular/repos', guid],
   entitySchemaKeys: monocularEntityKeys,
-  doesNotSupportConnect: true
+  doesNotSupportConnect: true,
+  techPreview: true,
 }];
 
 @StratosExtension({
