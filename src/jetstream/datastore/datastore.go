@@ -147,7 +147,7 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	}
 
-	// SQL Lite
+	// SQL Lite - SQLITE_DB_DIR env var allows directory for console db to be changed
 	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"), env.String("SQLITE_DB_DIR", "."))
 }
 
@@ -157,7 +157,7 @@ func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
 	dbFilePath := path.Join(sqlDbDir, SQLiteDatabaseFile)
 	log.Infof("SQLite Database file: %s", dbFilePath)
 
-	return GetSQLLiteConnectionWithPath(SQLiteDatabaseFile, sqliteKeepDB)
+	return GetSQLLiteConnectionWithPath(dbFilePath, sqliteKeepDB)
 }
 
 // GetSQLLiteConnectionWithPath returns an SQLite DB Connection
