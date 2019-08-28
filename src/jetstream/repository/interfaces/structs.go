@@ -193,13 +193,16 @@ type GooseDBVersionRecord struct {
 
 // Info - this represents user specific info
 type Info struct {
-	Versions     *Versions                             `json:"version"`
-	User         *ConnectedUser                        `json:"user"`
-	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
-	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
-	Plugins      map[string]bool                       `json:"plugins"`
-	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
-	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
+	Versions      *Versions                             `json:"version"`
+	User          *ConnectedUser                        `json:"user"`
+	Endpoints     map[string]map[string]*EndpointDetail `json:"endpoints"`
+	CloudFoundry  *CFInfo                               `json:"cloud-foundry,omitempty"`
+	Plugins       map[string]bool                       `json:"plugins"`
+	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
+	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
+	Configuration struct {
+		TechPreview bool `json:"enableTechPreview"`
+	} `json:"config"`
 }
 
 // EndpointDetail extends CNSI Record and adds the user
@@ -311,4 +314,5 @@ type PortalConfig struct {
 	ConsoleConfig                   *ConsoleConfig
 	PluginConfig                    map[string]string
 	DatabaseProviderName            string
+	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
 }

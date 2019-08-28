@@ -56,6 +56,8 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		PluginConfig: p.Config.PluginConfig,
 	}
 
+	s.Configuration.TechPreview = p.Config.EnableTechPreview
+
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {
 		s.Diagnostics = p.Diagnostics
