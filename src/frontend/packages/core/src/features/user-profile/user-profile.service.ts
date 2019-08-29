@@ -22,7 +22,7 @@ import { selectUpdateInfo, selectRequestInfo } from '../../../../store/src/selec
 @Injectable()
 export class UserProfileService {
 
-  public isError$: Observable<boolean>;
+  isError$: Observable<boolean>;
 
   isFetching$: Observable<boolean>;
 
