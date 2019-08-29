@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
@@ -10,9 +11,10 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { combineLatest, Subscription } from 'rxjs';
+import { delay, first, map, tap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -41,18 +43,25 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
     useClass: EndpointsListConfigService,
   }, EndpointListHelper]
 })
-export class EndpointsPageComponent implements OnDestroy, OnInit {
+export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
 
   @ViewChild('customNoEndpoints', { read: ViewContainerRef }) customNoEndpointsContainer;
   customContentComponentRef: ComponentRef<any>;
 
+  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private snackBarText = {
+    message: `There are no connected endpoints, connect with your personal credentials to get started.`,
+    action: 'Got it'
+  };
+
   constructor(
     public endpointsService: EndpointsService,
     public store: Store<AppState>,
     private ngZone: NgZone,
     private resolver: ComponentFactoryResolver,
+    private snackBar: MatSnackBar,
     @Inject(Customizations) public customizations: CustomizationsMetadata
   ) {
     // Redirect to /applications if not enabled.
@@ -72,7 +81,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
     ).subscribe();
   }
 
-  sub: Subscription[] = [];
+  subs: Subscription[] = [];
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
@@ -90,8 +99,16 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
     clearInterval(this.healthCheckTimeout);
   }
 
+  private showSnackBar(show: boolean) {
+    if (!this.snackBarRef && show) {
+      this.snackBarRef = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, {});
+    } else if (this.snackBarRef && !show) {
+      this.snackBarRef.dismiss();
+    }
+  }
+
   ngOnInit() {
-    this.sub.push(this.endpointsService.haveRegistered$.subscribe(haveRegistered => {
+    this.subs.push(this.endpointsService.haveRegistered$.subscribe(haveRegistered => {
       // Use custom component if specified
       this.customNoEndpointsContainer.clear();
       if (!haveRegistered && this.customizations.noEndpointsComponent) {
@@ -110,13 +127,25 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    this.subs.push(combineLatest(
+      this.endpointsService.haveRegistered$,
+      this.endpointsService.haveConnected$,
+    ).pipe(
+      delay(1),
+      tap(([hasRegistered, hasConnected]) => {
+        this.showSnackBar(hasRegistered && !hasConnected);
+      }),
+    ).subscribe());
+  }
+
   ngOnDestroy() {
     this.stopEndpointHealthCheckPulse();
-    safeUnsubscribe(...this.sub);
+    safeUnsubscribe(...this.subs);
     if (this.customContentComponentRef) {
       this.customContentComponentRef.destroy();
     }
-
+    this.showSnackBar(false);
   }
 }
 
