@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
@@ -30,8 +29,8 @@ export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
   showToolbarHint = false;
   showNoConnected = true;
 
-  constructor(snackBar: MatSnackBar, cloudFoundryService: CloudFoundryService, endpointsService: EndpointsService) {
-    super(snackBar, endpointsService);
+  constructor(cloudFoundryService: CloudFoundryService, endpointsService: EndpointsService) {
+    super(endpointsService);
     this.haveConnected$ = cloudFoundryService.hasConnectedCFEndpoints$;
     this.haveRegistered$ = cloudFoundryService.hasRegisteredCFEndpoints$;
   }
