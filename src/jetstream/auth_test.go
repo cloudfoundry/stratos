@@ -18,7 +18,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
-	
 )
 
 const (
@@ -61,7 +60,7 @@ func TestLoginToUAA(t *testing.T) {
 		Convey("Should not fail to login", func() {
 			So(loginErr, ShouldBeNil)
 		})
-		
+
 		Convey("Expectations should be met", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
@@ -76,19 +75,19 @@ func TestLocalLogin(t *testing.T) {
 
 		username := "localuser"
 		password := "localuserpass"
-		scope    := "stratos.admin"
+		scope := "stratos.admin"
 
 		//Hash the password
 		passwordHash, _ := HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
-		
+
 		req := setupMockReq("POST", "", map[string]string{
 			"username": username,
 			"password": password,
-			"scope"   : scope,
-			"guid"    : userGUID,
+			"scope":    scope,
+			"guid":     userGUID,
 		})
 
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
@@ -96,7 +95,10 @@ func TestLocalLogin(t *testing.T) {
 
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 
-		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
+		rows := sqlmock.NewRows([]string{"user_guid"}).AddRow(userGUID)
+		mock.ExpectQuery(findUserGUID).WithArgs(username).WillReturnRows(rows)
+
+		rows = sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
 		rows = sqlmock.NewRows([]string{"scope"}).AddRow(scope)
@@ -124,21 +126,21 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 
 		username := "localuser"
 		password := "localuserpass"
-		email        := ""
-		scope        := "stratos.admin"
+		email := ""
+		scope := "stratos.admin"
 
 		//Hash the password
 		passwordHash, _ := HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
-		
+
 		req := setupMockReq("POST", "", map[string]string{
 			"username": username,
 			"password": "wrong_password",
-			"email"   : email,
-			"scope"   : scope,
-			"guid"    : userGUID,
+			"email":    email,
+			"scope":    scope,
+			"guid":     userGUID,
 		})
 
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
@@ -146,7 +148,10 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 
-		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
+		rows := sqlmock.NewRows([]string{"user_guid"}).AddRow(userGUID)
+		mock.ExpectQuery(findUserGUID).WithArgs(username).WillReturnRows(rows)
+
+		rows = sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
 		loginErr := pp.localLogin(ctx)
@@ -174,18 +179,21 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
-		
+
 		wrongScope := "not admin scope"
 		req := setupMockReq("POST", "", map[string]string{
 			"username": username,
 			"password": password,
-			"guid"    : userGUID,
+			"guid":     userGUID,
 		})
 
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
-		rows := sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
+		rows := sqlmock.NewRows([]string{"user_guid"}).AddRow(userGUID)
+		mock.ExpectQuery(findUserGUID).WithArgs(username).WillReturnRows(rows)
+
+		rows = sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
 		//Configure the admin scope we expect the user to have
@@ -284,7 +292,7 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 
-		loginErr :=	pp.loginToUAA(ctx)
+		loginErr := pp.loginToUAA(ctx)
 		Convey("Should not fail to login", func() {
 			So(loginErr, ShouldNotBeNil)
 		})
@@ -413,7 +421,7 @@ func TestLoginToCNSIWithMissingCNSIRecord(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnError(errors.New("no match for that GUID"))
 
-		loginErr :=	pp.loginToCNSI(ctx)
+		loginErr := pp.loginToCNSI(ctx)
 		// do the call
 		Convey("Should fail to login", func() {
 			So(loginErr, ShouldNotBeNil)
@@ -510,7 +518,6 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		// sessionValues["user_id"] = mockUserGUID
 		sessionValues["exp"] = time.Now().AddDate(0, 0, 1).Unix()
 
-		
 		Convey("Should mock/stub user in session object", func() {
 			So(pp.setSessionValues(ctx, sessionValues), ShouldBeNil)
 		})
@@ -519,7 +526,7 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		Convey("Should fail to login", func() {
 			So(loginErr, ShouldNotBeNil)
 		})
-		
+
 		Convey("Should meet expectations", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
