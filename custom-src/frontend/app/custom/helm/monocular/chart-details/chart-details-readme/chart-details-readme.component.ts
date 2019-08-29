@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import * as markdown from 'marked';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { ChartVersion } from '../../shared/models/chart-version';
@@ -40,9 +40,9 @@ export class ChartDetailsReadmeComponent {
       catchError((error) => {
         this.loading = false;
         if (error.status === 404) {
-          return '<h1>No Readme available for this chart</h1>';
+          return observableOf('<h1>No Readme available for this chart</h1>');
         } else {
-          return '<h1>An error occurred retrieving Readme</h1>';
+          return observableOf('<h1>An error occurred retrieving Readme</h1>');
         }
       }));
   }

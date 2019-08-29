@@ -44,8 +44,6 @@ func (c *OIDCKubeAuth) GetName() string {
 }
 
 func (c *OIDCKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
-	log.Info("AddAuthInfo")
-
 	authInfo := &interfaces.OAuth2Metadata{}
 	err := json.Unmarshal([]byte(tokenRec.Metadata), &authInfo)
 	if err != nil {

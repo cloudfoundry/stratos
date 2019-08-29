@@ -22,33 +22,35 @@ func (c *KubernetesSpecification) GetHelmClient(endpointGUID, userID string) (he
 
 	cnsiRecord, err := p.GetCNSIRecord(endpointGUID)
 	if err != nil {
-		return nil, nil, nil, errors.New("Can not get endpoint record")
+		return nil, nil, nil, errors.New("Helm: Can not get endpoint record")
 	}
 
 	tokenRecord, ok := p.GetCNSITokenRecord(endpointGUID, userID)
 	if !ok {
-		return nil, nil, nil, errors.New("Can not get user token for endpoint")
+		return nil, nil, nil, errors.New("Helm: Can not get user token for endpoint")
 	}
+
+	log.Error("GetHelmClient (2)")
 
 	config, err := c.GetConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord)
 	if err != nil {
+		log.Errorf("Helm: Could not get config for endpoint: %s", err)
 		return nil, nil, nil, errors.New("Can not get Kubernetes config for specified endpoint")
 	}
 
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Error("Could not get kube client")
+		log.Errorf("Helm: Could not get kube client: %s", err)
 		return nil, nil, nil, err
 	}
 
 	tillerTunnel, err := portforwarder.New("kube-system", kubeClient, config)
 	if err != nil {
-		log.Error("Could not establish port forwarding for Tiller")
-		log.Error(err)
+		log.Error("Helm: Could not establish port forwarding for Tiller")
 		return nil, nil, nil, err
 	}
 
-	log.Debugf("Tiller tunnel is using Port: %d", tillerTunnel.Local)
+	log.Debugf("Helm: Tiller tunnel is using Port: %d", tillerTunnel.Local)
 	tillerHost := fmt.Sprintf("127.0.0.1:%d", tillerTunnel.Local)
 	client := newClient(tillerHost)
 

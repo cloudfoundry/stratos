@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"net/url"
+	"strconv"
 
 	"errors"
 
@@ -90,15 +91,15 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 // Init the Kubernetes Jetstream plugin
 func (c *KubernetesSpecification) Init() error {
 
-	// Register all of the providers
-	c.AddAuthProvider(auth.InitGKEKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitAWSKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitCertKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitAzureKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitOIDCKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitKubeConfigAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitKubeTokenAuth(c.portalProxy))
 
-	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = "false"
+	// Kube dashboard is enabled by Tech Preview mode
+	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
 
 	return nil
 }

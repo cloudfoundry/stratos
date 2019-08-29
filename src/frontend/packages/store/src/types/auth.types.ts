@@ -29,6 +29,9 @@ export interface SessionEndpoints {
 export interface SessionEndpoint {
   [guid: string]: SessionDataEndpoint;
 }
+export interface SessionDataConfig {
+  enableTechPreview?: boolean;
+}
 export interface SessionData {
   endpoints?: SessionEndpoints;
   user?: SessionUser;
@@ -48,6 +51,7 @@ export interface SessionData {
     demo: boolean,
     [pluginName: string]: boolean
   };
+  config: SessionDataConfig;
 }
 export interface Diagnostics {
   deploymentType?: string;

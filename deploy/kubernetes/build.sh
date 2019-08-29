@@ -205,6 +205,12 @@ cp -R ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
 
 pushd ${DEST_HELM_CHART_PATH} > /dev/null
 
+# Run customization script if there is one
+if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
+  printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
+  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS_PATH}"
+fi
+
 # Fetch subcharts
 helm dependency update
 
