@@ -22,13 +22,13 @@ import { selectUpdateInfo, selectRequestInfo } from '../../../../store/src/selec
 @Injectable()
 export class UserProfileService {
 
+  public isError$: Observable<boolean>;
+
   isFetching$: Observable<boolean>;
 
   entityMonitor: EntityMonitor<UserProfileInfo>;
 
   userProfile$: Observable<UserProfileInfo>;
-
-  isError$: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
