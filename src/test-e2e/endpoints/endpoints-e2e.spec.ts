@@ -19,7 +19,7 @@ describe('Endpoints', () => {
 
         it('Should reach endpoints dashboard after log in', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
-          expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
+          expect(endpointsPage.isWelcomeMessageAdmin(false)).toBeTruthy();
           expect(endpointsPage.list.isPresent()).toBeFalsy();
         });
 
