@@ -1,14 +1,14 @@
 import {
   Component,
+  ComponentFactory,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Inject,
   NgZone,
   OnDestroy,
   OnInit,
   ViewChild,
   ViewContainerRef,
-  ComponentRef,
-  ComponentFactoryResolver,
-  Inject,
-  ComponentFactory
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
@@ -18,18 +18,19 @@ import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
+import { safeUnsubscribe } from '../../../core/utils.service';
 import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -71,7 +72,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
     ).subscribe();
   }
 
-  sub: Subscription;
+  sub: Subscription[] = [];
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
@@ -90,12 +91,14 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
-    // Use custom component if specified
-    this.customNoEndpointsContainer.clear();
-    if (this.customizations.noEndpointsComponent) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
-      this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
-    }
+    this.sub.push(this.endpointsService.haveRegistered$.subscribe(haveRegistered => {
+      // Use custom component if specified
+      this.customNoEndpointsContainer.clear();
+      if (!haveRegistered && this.customizations.noEndpointsComponent) {
+        const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
+        this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
+      }
+    }));
 
     this.endpointsService.checkAllEndpoints();
     this.store.select(selectDashboardState).pipe(
@@ -105,32 +108,11 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
         this.startEndpointHealthCheckPulse();
       }
     });
-    // Doesn't look like this is used (see connect-endpoint-dialog.component for actual handler)
-    // const params = queryParamMap();
-    // if (params.cnsi_guid) {
-    //   const guid = params.cnsi_guid;
-    //   window.history.pushState({}, '', '/endpoints');
-    //   this.sub = this.endpointsService.endpoints$.pipe(
-    //     delay(0),
-    //     filter(ep => !!ep[guid]),
-    //     map(ep => {
-    //       const endpoint = ep[guid];
-    //       if (endpoint.connectionStatus === 'connected') {
-    //         this.store.dispatch(new ShowSnackBar(`Connected endpoint '${endpoint.name}'`));
-    //       } else {
-    //         this.store.dispatch(new ShowSnackBar(`A problem occurred connecting endpoint ${endpoint.name}`));
-    //       }
-    //     }),
-    //     first(),
-    //   ).subscribe();
-    // }
   }
 
   ngOnDestroy() {
     this.stopEndpointHealthCheckPulse();
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
+    safeUnsubscribe(...this.sub);
     if (this.customContentComponentRef) {
       this.customContentComponentRef.destroy();
     }
