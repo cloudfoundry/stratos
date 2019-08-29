@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 const AuthConnectTypeKubeConfig = "kubeconfig"
@@ -29,6 +29,11 @@ func InitKubeConfigAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
 
 func (c *KubeConfigAuth) GetName() string {
 	return AuthConnectTypeKubeConfig
+}
+
+func (c *KubeConfigAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+	log.Error("KubeConfigAuth: AddAuthInfo: Not supported")
+	return fmt.Errorf("Not supported: %s", tokenRec.AuthType)
 }
 
 func (c *KubeConfigAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
@@ -61,18 +66,11 @@ func (c *KubeConfigAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Co
 
 	// Check for Token == CaaSP V4
 	if len(kubeConfigUser.User.Token) > 0 {
-		tokenRecord := c.portalProxy.InitEndpointTokenRecord(getLargeExpiryTime(), kubeConfigUser.User.Token, "__NONE__", false)
-		tokenRecord.AuthType = interfaces.AuthTypeOIDC
-
-		oauthMetadata := &interfaces.OAuth2Metadata{}
-		jsonString, err := json.Marshal(oauthMetadata)
-		if err == nil {
-			tokenRecord.Metadata = string(jsonString)
-		}
+		tokenRecord := NewKubeTokenAuthTokenRecord(c.portalProxy, kubeConfigUser.User.Token)
 
 		// Could try and make a K8S Api call to validate the token
 		// Or, maybe we can verify the access token with the auth URL ?
-		return &tokenRecord, &cnsiRecord, nil
+		return tokenRecord, &cnsiRecord, nil
 	}
 
 	return nil, nil, fmt.Errorf("OIDC: Unsupported authentication provider for user: %s", kubeConfigUser.User.AuthProvider.Name)
@@ -106,6 +104,7 @@ func (c *KubeConfigAuth) GetCertAuth(cnsiRecord interfaces.CNSIRecord, user *con
 
 	// Tokens lasts forever
 	disconnected := false
+
 	tokenRecord := c.portalProxy.InitEndpointTokenRecord(getLargeExpiryTime(), accessToken, refreshToken, disconnected)
 	tokenRecord.AuthType = authConnectTypeCertAuth
 	return &tokenRecord, &cnsiRecord, nil
