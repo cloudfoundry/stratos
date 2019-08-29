@@ -23,6 +23,7 @@ export interface EndpointMissingMessageParts {
 export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnInit {
 
   @Input() showToolbarHint = true;
+  @Input() showDirectToEndpointMessage = true;
 
   noContent$: Observable<EndpointMissingMessageParts>;
   snackBarText = {
