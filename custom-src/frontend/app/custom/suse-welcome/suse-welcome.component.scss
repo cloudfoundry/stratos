@@ -1,0 +1,45 @@
+@import '../../../sass/custom/suse-colors';
+
+.no-endpoints-message {
+  color: $suse-button-gray;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin: 40px 0;
+
+  &__icon {
+    font-size: 32px;
+    height: 32px;
+    width: 32px;
+  }
+
+  &__text {
+    font-size: 24px;
+    margin-left: 12px;
+  }
+}
+
+.messages {
+
+  &__title {
+    color: $suse-primary;
+    font-size: 20px;
+    font-weight: normal;
+    margin: 20px 0;
+  }
+
+  &__item {
+    font-size: 16px;
+    line-height: 22px;
+    margin-bottom: 12px;
+
+    mat-icon {
+      background-color: $suse-text-gray;
+      font-size: 16px;
+      height: 16px;
+      margin: 0 4px;
+      vertical-align: middle;
+      width: 16px;
+    }
+  }
+}

@@ -17,11 +17,13 @@ import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.compon
 import { SuseLoginComponent } from './suse-login/suse-login.component';
 import { HelmModule } from './helm/helm.module';
 import { HelmSetupModule } from './helm/helm.setup.module';
+import { SuseWelcomeComponent } from './suse-welcome/suse-welcome.component';
 
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
   hasEula: true,
   aboutInfoComponent: SuseAboutInfoComponent,
+  noEndpointsComponent: SuseWelcomeComponent,
   alwaysShowNavForEndpointTypes: (typ) => false,
 };
 
@@ -37,11 +39,13 @@ const SuseCustomizations: CustomizationsMetadata = {
   declarations: [
     SuseLoginComponent,
     SuseAboutInfoComponent,
+    SuseWelcomeComponent,
     DemoHelperComponent
   ],
   entryComponents: [
     SuseLoginComponent,
     SuseAboutInfoComponent,
+    SuseWelcomeComponent,
     DemoHelperComponent,
   ],
   providers: [
