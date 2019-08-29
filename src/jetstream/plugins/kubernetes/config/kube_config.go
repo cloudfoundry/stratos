@@ -8,7 +8,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 
 	"gopkg.in/yaml.v2"
-
 )
 
 type KubeConfigClusterDetail struct {
@@ -38,6 +37,7 @@ type KubeConfigUser struct {
 //ExtraScopes string `yaml:"extra-scopes"`
 
 type KubeConfigContexts struct {
+	Name    string `yaml:"name"`
 	Context struct {
 		Cluster string
 		User    string
@@ -45,11 +45,12 @@ type KubeConfigContexts struct {
 }
 
 type KubeConfigFile struct {
-	ApiVersion string               `yaml:"apiVersion"`
-	Kind       string               `yaml:"kind"`
-	Clusters   []KubeConfigCluster  `yaml:"clusters"`
-	Users      []KubeConfigUser     `yaml:"users"`
-	Contexts   []KubeConfigContexts `yaml:"contexts"`
+	ApiVersion     string               `yaml:"apiVersion"`
+	Kind           string               `yaml:"kind"`
+	Clusters       []KubeConfigCluster  `yaml:"clusters"`
+	Users          []KubeConfigUser     `yaml:"users"`
+	Contexts       []KubeConfigContexts `yaml:"contexts"`
+	CurrentContext string               `yaml:"current-context"`
 }
 
 func (k *KubeConfigFile) GetClusterByAPIEndpoint(endpoint string) (*KubeConfigCluster, error) {
@@ -61,9 +62,27 @@ func (k *KubeConfigFile) GetClusterByAPIEndpoint(endpoint string) (*KubeConfigCl
 	return nil, fmt.Errorf("Unable to find cluster")
 }
 
+func (k *KubeConfigFile) GetClusterByName(name string) (*KubeConfigCluster, error) {
+	for _, cluster := range k.Clusters {
+		if cluster.Name == name {
+			return &cluster, nil
+		}
+	}
+	return nil, fmt.Errorf("Unable to find cluster")
+}
+
 func (k *KubeConfigFile) GetClusterContext(clusterName string) (*KubeConfigContexts, error) {
 	for _, context := range k.Contexts {
 		if context.Context.Cluster == clusterName {
+			return &context, nil
+		}
+	}
+	return nil, fmt.Errorf("Unable to find context")
+}
+
+func (k *KubeConfigFile) GetContext(contextName string) (*KubeConfigContexts, error) {
+	for _, context := range k.Contexts {
+		if context.Name == contextName {
 			return &context, nil
 		}
 	}
@@ -80,14 +99,32 @@ func (k *KubeConfigFile) GetUser(userName string) (*KubeConfigUser, error) {
 }
 
 func (k *KubeConfigFile) GetUserForCluster(clusterEndpoint string) (*KubeConfigUser, error) {
-	cluster, err := k.GetClusterByAPIEndpoint(clusterEndpoint)
 
-	if err != nil {
-		return nil, errors.New("Unable to find cluster in kubeconfig")
+	var cluster *KubeConfigCluster
+	var err error
+
+	// Check to see if the current-context is for this endpoint, before going a search through all contexts
+	if len(k.CurrentContext) > 0 {
+		currentContext, err := k.GetContext(k.CurrentContext)
+		if err == nil {
+			c, err := k.GetClusterByName(currentContext.Context.Cluster)
+			if err == nil {
+				if c.Cluster.Server == clusterEndpoint {
+					// Cluster refrences the same Kube API Server
+					cluster = c
+				}
+			}
+		}
+	}
+
+	if cluster == nil {
+		cluster, err = k.GetClusterByAPIEndpoint(clusterEndpoint)
+		if err != nil {
+			return nil, errors.New("Unable to find cluster in kubeconfig")
+		}
 	}
 
 	clusterName := cluster.Name
-
 	if clusterName == "" {
 		return nil, errors.New("Unable to find cluster")
 	}
