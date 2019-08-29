@@ -1,11 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { CfEndpointsMissingComponent } from './cf-endpoints-missing.component';
-import { CoreModule } from '../../../core/core.module';
-
 import { RouterTestingModule } from '@angular/router/testing';
+
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../shared.module';
+import { CfEndpointsMissingComponent } from './cf-endpoints-missing.component';
 
 
 describe('CfEndpointsMissingComponent', () => {
