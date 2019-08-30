@@ -44,8 +44,6 @@ func (c *OIDCKubeAuth) GetName() string {
 }
 
 func (c *OIDCKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
-	log.Info("AddAuthInfo")
-
 	authInfo := &interfaces.OAuth2Metadata{}
 	err := json.Unmarshal([]byte(tokenRec.Metadata), &authInfo)
 	if err != nil {
@@ -88,8 +86,13 @@ func (c *OIDCKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Cont
 
 	// We only support OIDC auth provider at the moment
 	if kubeConfigUser.User.AuthProvider.Name != "oidc" {
-		return nil, nil, errors.New("Unsupported authentication provider")
+		return nil, nil, fmt.Errorf("OIDC: Unsupported authentication provider for user: %s", kubeConfigUser.User.AuthProvider.Name)
 	}
+
+	return c.GetTokenFromKubeConfigUser(cnsiRecord, kubeConfigUser)
+}
+
+func (c *OIDCKubeAuth) GetTokenFromKubeConfigUser(cnsiRecord interfaces.CNSIRecord, kubeConfigUser *config.KubeConfigUser) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
 
 	oidcConfig, err := c.GetOIDCConfig(kubeConfigUser)
 	if err != nil {
@@ -142,7 +145,7 @@ func (c *OIDCKubeAuth) GetOIDCConfig(k *config.KubeConfigUser) (*KubeConfigAuthP
 
 	expiry, ok := token.Claims().Expiration()
 	if !ok {
-		return nil, errors.New("Can not get Acces Token expiry time")
+		return nil, errors.New("Can not get Access Token expiry time")
 	}
 	OIDCConfig.Expiry = expiry
 

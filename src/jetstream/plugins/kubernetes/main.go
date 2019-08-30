@@ -57,6 +57,7 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 }
 
 func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+	log.Debugf("Validating Kubernetes endpoint connection for user: %s", userGUID)
 	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1", nil, nil)
 	if err != nil {
 		return err
@@ -95,6 +96,7 @@ func (c *KubernetesSpecification) Init() error {
 	c.AddAuthProvider(auth.InitAzureKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitOIDCKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitKubeConfigAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitKubeTokenAuth(c.portalProxy))
 
 	// Kube dashboard is enabled by Tech Preview mode
 	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
