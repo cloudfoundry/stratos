@@ -13,7 +13,6 @@
     }
     &__top {
       background-color: mat-color($side-nav-colors, background-top);
-      border-bottom: 1px solid $side-nav-hover-color;
     }
     &__item {
       color: mat-color($side-nav-colors, text);

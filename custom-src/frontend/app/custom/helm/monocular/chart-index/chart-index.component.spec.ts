@@ -2,6 +2,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
@@ -15,6 +16,13 @@ import { ChartIndexComponent } from './chart-index.component';
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
 // import { MainHeaderComponent } from '../main-header/main-header.component';
 // import { SeoService } from '../shared/services/seo.service';
+
+export class MockChartService {
+
+  public getCharts() {
+    return of([]);
+  }
+}
 
 describe('Component: ChartIndex', () => {
   beforeEach(() => {
@@ -32,7 +40,7 @@ describe('Component: ChartIndex', () => {
       providers: [
         ConfigService,
         MenuService,
-        { provide: ChartsService },
+        { provide: ChartsService, useValue: new MockChartService() },
         // { provide: SeoService },
         { provide: Router }
       ],

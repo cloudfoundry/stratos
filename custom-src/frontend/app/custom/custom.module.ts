@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
+import { GetSystemInfo } from '../../../store/src/actions/system.actions';
 import { AppState } from '../../../store/src/app-state';
 import { EndpointHealthCheck } from '../../endpoints-health-checks';
 import { CoreModule } from '../core/core.module';
@@ -20,7 +21,8 @@ import { HelmSetupModule } from './helm/helm.setup.module';
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
   hasEula: true,
-  aboutInfoComponent: SuseAboutInfoComponent
+  aboutInfoComponent: SuseAboutInfoComponent,
+  alwaysShowNavForEndpointTypes: (typ) => false,
 };
 
 @NgModule({
@@ -53,6 +55,13 @@ export class CustomModule {
   constructor(endpointService: EndpointsService, store: Store<AppState>, router: Router) {
     endpointService.registerHealthCheck(
       new EndpointHealthCheck('k8s', (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))
+    );
+    endpointService.registerHealthCheck(
+      new EndpointHealthCheck('helm', (endpoint) => {
+        if (endpoint.endpoint_metadata && endpoint.endpoint_metadata.status === 'Synchronizing') {
+          store.dispatch(new GetSystemInfo());
+        }
+      })
     );
     // Only update the routes once
     if (!CustomModule.init) {

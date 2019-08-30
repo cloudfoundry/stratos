@@ -3,6 +3,7 @@ package datastore
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -69,22 +70,48 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 	// If we found a service, then use it
 	if len(service.Name) > 0 {
 		dbCredentials := service.Credentials
+
+		log.Infof("Attempting to apply Cloud Foundry database service config from credentials")
+
+		// 1) Check db config in credentials
 		db.Username = fmt.Sprintf("%v", dbCredentials["username"])
 		db.Password = fmt.Sprintf("%v", dbCredentials["password"])
 		db.Host = fmt.Sprintf("%v", dbCredentials["hostname"])
 		db.SSLMode = "disable"
 		db.Port, _ = strconv.Atoi(fmt.Sprintf("%v", dbCredentials["port"]))
+		// Note - Both isPostgresService and isMySQLService look at the credentials uri & tags
 		if isPostgresService(service) {
 			db.DatabaseProvider = "pgsql"
 			db.Database = fmt.Sprintf("%v", dbCredentials["dbname"])
-			log.Infof("Discovered Cloud Foundry postgres service and applied config")
-			return true
 		} else if isMySQLService(service) {
 			db.DatabaseProvider = "mysql"
 			db.Database = fmt.Sprintf("%v", dbCredentials["name"])
-			log.Infof("Discovered Cloud Foundry mysql service and applied config")
-			return true
+		} else {
+			log.Infof("Cloud Foundry database service contains unsupported db type")
+			return false
 		}
+		err := validateRequiredDatabaseParams(db.Username, db.Password, db.Database, db.Host, db.Port)
+
+		if err != nil {
+			// 2) Check for db config in credentials uri
+			log.Infof("Failed to find required Cloud Foundry database service config, falling back on credential's `%v`", DB_URI)
+			uri := fmt.Sprintf("%v", dbCredentials[DB_URI])
+			if len(uri) == 0 {
+				log.Warnf("Failed to find Cloud Foundry service credential's `%v`", DB_URI)
+				return false
+			}
+
+			db.Username, db.Password, db.Host, db.Port, db.Database = findDatabaseConfigurationFromUri(uri)
+			err := validateRequiredDatabaseParams(db.Username, db.Password, db.Database, db.Host, db.Port)
+
+			if err != nil {
+				log.Warnf("Failed to find Cloud Foundry service config's from `%v`", DB_URI)
+				return false
+			}
+		}
+
+		log.Infof("Applied Cloud Foundry database service config (provider: %s)", db.DatabaseProvider)
+		return true
 	}
 	return false
 }
@@ -122,4 +149,23 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func findDatabaseConfigurationFromUri(uri string) (string, string, string, int, string) {
+	re := regexp.MustCompile(`(?P<provider>.+)://(?P<username>[^:]+)(?::(?P<password>.+))?@(?P<host>[^:]+)(?::(?P<port>.+))?\/(?P<dbname>.+)`)
+	n1 := re.SubexpNames()
+	r2 := re.FindAllStringSubmatch(uri, -1)[0]
+	md := map[string]string{}
+	for i, n := range r2 {
+		md[n1[i]] = n
+	}
+
+	username := md["username"]
+	password := md["password"]
+	host := md["host"]
+	port, _ := strconv.Atoi(fmt.Sprintf("%v", md["port"]))
+	dbname := md["dbname"]
+
+	return username, password, host, port, dbname
+
 }

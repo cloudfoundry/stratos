@@ -4,7 +4,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
-const AuthConnectTypeKubeConfig = "KubeConfig"
+const AuthConnectTypeKubeConfig = "kubeconfig"
 
 // KubeConfigAuth is same as OIDC with different name
 type KubeConfigAuth struct {

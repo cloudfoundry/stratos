@@ -1,7 +1,14 @@
-import { Component, OnInit, AfterContentInit, HostBinding, ContentChildren, QueryList, ViewEncapsulation } from '@angular/core';
+import {
+  AfterContentInit,
+  Component,
+  ContentChildren,
+  HostBinding,
+  OnInit,
+  QueryList,
+  ViewEncapsulation,
+} from '@angular/core';
 
-import { TileComponent} from '../tile/tile.component';
-import { Subscription } from 'rxjs';
+import { TileComponent } from '../tile/tile.component';
 
 @Component({
   selector: 'app-tile-group',
@@ -23,7 +30,7 @@ export class TileGroupComponent implements OnInit, AfterContentInit {
 
   @ContentChildren(TileComponent) tiles: QueryList<TileComponent>;
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   ngAfterContentInit() {
     this.isSixColumn = (this.tiles.length === 6);

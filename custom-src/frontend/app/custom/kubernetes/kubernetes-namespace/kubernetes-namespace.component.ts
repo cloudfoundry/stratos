@@ -33,8 +33,8 @@ import { KubernetesService } from '../services/kubernetes.service';
 export class KubernetesNamespaceComponent {
 
   tabLinks = [
-    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
-    { link: 'services', label: 'Services', matIcon: 'service', matIconFont: 'stratos-icons' }
+    { link: 'pods', label: 'Pods', icon: 'adjust' },
+    { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
   ];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

@@ -1,20 +1,17 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { filter, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../store/src/app-state';
+import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   CfAppMapRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../store/src/app-state';
 import { ApplicationService } from '../../application.service';
-import { FetchAllDomains } from '../../../../../../store/src/actions/domains.actions';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { entityFactory, domainSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 
 @Component({
   selector: 'app-map-routes',
@@ -53,18 +50,7 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
       )
       .subscribe();
 
-    const action = new FetchAllDomains(this.appService.cfGuid);
-    this.paginationSubscription = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          entityFactory(domainSchemaKey)
-        )
-      },
-      true
-    ).entities$.subscribe();
+    this.paginationSubscription = this.appService.orgDomains$.subscribe();
   }
 
   ngOnDestroy(): void {

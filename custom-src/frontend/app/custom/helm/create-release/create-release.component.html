@@ -15,7 +15,7 @@
       <br>
       <b>Specify name and namespace for the installation</b>
       <mat-form-field>
-        <input matInput placeholder="Name" name="releaseName" formControlName="releaseName" autocomplete="off">
+        <input #releaseNameInputField matInput placeholder="Name" name="releaseName" formControlName="releaseName" autocomplete="off">
       </mat-form-field>
 
       <mat-form-field>
@@ -25,12 +25,14 @@
     </form>
   </app-step>
   <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
-    <form [formGroup]="overrides" class="stepper-form">
-      <h3 class="helm-create-release">Enter YAML Value Overrides</h3>
-      <mat-form-field [floatLabel]="'always'">
+    <form [formGroup]="overrides" class="stepper-form overrides_form">
+      <div class="helm-create-release__heading">
+        <h3 class="helm-create-release__title">Enter YAML Value Overrides</h3>
+        <button (click)="useValuesYaml()" [disabled]="!valuesYaml" class="helm-create-release__button" mat-button color="primary">Copy from values.yaml</button>
+      </div>
+      <mat-form-field [floatLabel]="'always'" class="overrides_form-field">
         <mat-label>Values</mat-label>
-        <textarea #overridesYamlTextArea class="overrides__yaml" matInput formControlName="values" name="Values"
-          [matTextareaAutosize]="true" cdkAutosizeMinRows="6" cdkAutosizeMaxRows="8"></textarea>
+        <textarea #overridesYamlTextArea class="overrides__yaml" matInput formControlName="values" name="Values"  spellcheck="false"></textarea>
       </mat-form-field>
     </form>
   </app-step>

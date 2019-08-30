@@ -52,6 +52,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public endpointIds$: Observable<string[]>;
   public cardStatus$: Observable<StratosStatus>;
   private subs: Subscription[] = [];
+  public connectionStatus: string;
 
   private componentRef: ComponentRef<EndpointListDetailsComponent>;
 
@@ -76,7 +77,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.doesNotSupportConnect ?
       EndpointsService.getLinkForEndpoint(row) : null;
     this.updateInnerComponent();
-
+    this.connectionStatus = this.endpointConfig.doesNotSupportConnect ? 'connected' : row.connectionStatus;
   }
   get row(): EndpointModel {
     return this.pRow;

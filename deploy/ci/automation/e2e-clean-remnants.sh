@@ -40,6 +40,12 @@ function clean() {
   local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
   local NOW=$(date "+%s")
 
+  if [ -z "$4" ]; then
+    local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
+  else
+    local REGEX="$4"
+  fi
+
   while IFS= read -r line
   do
     NAME="${line%% *}"
@@ -47,6 +53,7 @@ function clean() {
       DS="${BASH_REMATCH[3]}"
       TS="${BASH_REMATCH[4]}"
       TS="${TS:0:6}"
+
       if [[ "$unamestr" == 'Darwin' ]]; then
         EPOCH=$(date -j -f "%Y%m%d:%H%M%S" "$DS:$TS" "+%s")
       else
@@ -83,5 +90,19 @@ clean "$APPS" "acceptance\.e2e\." "delete"
 echo "Cleaning old Service Instances in e2e org/space"
 SERVICES="$(cf services)"
 clean "$SERVICES" "acceptance\.e2e\." "delete-service"
+
+cf target -o e2e
+echo "Cleaning old Spaces in e2e org"
+SPACES="$(cf spaces)"
+clean "$SPACES" "acceptance\.e2e\." "delete-space"
+
+# Users
+echo "Cleaning test Users"
+USERS=$(cf space-users e2e e2e | grep "accept" | sed -e 's/^[[:space:]]*//')
+clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
+# user -a with org users so we get all users (including those without roles)
+USERS=$(cf org-users -a e2e | grep "accept" | sed -e 's/^[[:space:]]*//')
+clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 
 echo "Done"

@@ -35,7 +35,10 @@ interface BaseEndpointTypeConfig {
    * Indicates if this endpoint types can not be connected (optional - default is false)
    */
   doesNotSupportConnect?: boolean;
-
+  /**
+   * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
+   */
+  techPreview?: boolean;
 }
 
 /**

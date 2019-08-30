@@ -1,17 +1,17 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import {
   BaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
   MetadataCardTestComponents,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { CfOrgCardComponent } from '../../cf-orgs/cf-org-card/cf-org-card.component';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { CfOrgCardComponent } from '../../cf-orgs/cf-org-card/cf-org-card.component';
 
 describe('CfSpaceCardComponent', () => {
   let component: CfOrgCardComponent;
@@ -42,7 +42,9 @@ describe('CfSpaceCardComponent', () => {
             memory_limit: 1000,
             app_instance_limit: -1,
             instance_memory_limit: -1,
-            name: ''
+            name: '',
+            total_routes: -1,
+            total_services: -1,
           },
           metadata: null
         }

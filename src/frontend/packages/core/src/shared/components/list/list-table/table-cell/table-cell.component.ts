@@ -49,6 +49,7 @@ import {
 import {
   TableCellFeatureFlagStateComponent,
 } from '../../list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
+import { TableCellQuotaComponent } from '../../list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
 import {
   TableCellRouteAppsAttachedComponent,
 } from '../../list-types/cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
@@ -137,6 +138,7 @@ export const listTableCells = [
   TableCellCfCellComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRouteComponent,
+  TableCellQuotaComponent,
   TableCellTCPRouteComponent,
   TableCellAppInstancesComponent,
   TableCellRadioComponent,

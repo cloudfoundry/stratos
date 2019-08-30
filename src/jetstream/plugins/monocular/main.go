@@ -45,6 +45,9 @@ func (m *Monocular) GetChartStore() chartsvc.ChartSvcDatastore {
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
 
+	if !m.portalProxy.GetConfig().EnableTechPreview {
+		return errors.New("Feature is in Tech Preview")
+	}
 	m.ConfigureSQL()
 	m.chartSvcRoutes = chartsvc.GetRoutes()
 	m.InitSync()

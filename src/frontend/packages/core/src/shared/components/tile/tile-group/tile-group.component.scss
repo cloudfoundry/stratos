@@ -30,7 +30,8 @@ app-tile-group {
     margin-left: -$tile-grid-gutter;
 
     app-tile {
-      padding-left: $tile-grid-gutter;
+      // $top-bottom: $tile-grid-gutter / 2;
+      padding: 0 0 $tile-grid-gutter $tile-grid-gutter;
     }
   }
 }

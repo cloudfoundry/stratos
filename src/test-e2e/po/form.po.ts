@@ -78,6 +78,10 @@ export class FormComponent extends Component {
     return this.locator.all(by.tagName('input, mat-select, textarea'));
   }
 
+  getFieldsCount(): promise.Promise<any> {
+    return this.getFields().count();
+  }
+
   getFieldsMapped(): promise.Promise<FormItem[]> {
     return this.getFields().map(this.mapField);
   }

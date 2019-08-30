@@ -95,7 +95,7 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, nil
 	}
 
-	// Database Config validation - check requried values and the SSL Mode
+	// Database Config validation - check required values and the SSL Mode
 
 	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
 	if err != nil {
@@ -147,23 +147,41 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	}
 
-	// SQL Lite
+	// SQL Lite - SQLITE_DB_DIR env var allows directory for console db to be changed
 	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"), env.String("SQLITE_DB_DIR", "."))
 }
 
 // GetSQLLiteConnection returns an SQLite DB Connection
 func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
-	if !sqliteKeepDB {
-		os.Remove(SQLiteDatabaseFile)
-	}
 
 	dbFilePath := path.Join(sqlDbDir, SQLiteDatabaseFile)
 	log.Infof("SQLite Database file: %s", dbFilePath)
-	db, err := sql.Open("sqlite3", dbFilePath)
+
+	return GetSQLLiteConnectionWithPath(dbFilePath, sqliteKeepDB)
+}
+
+// GetSQLLiteConnectionWithPath returns an SQLite DB Connection
+func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.DB, error) {
+	if !sqliteKeepDB {
+		os.Remove(databaseFile)
+	}
+
+	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
 		return nil, err
 	}
 
+	conf := CreateFakeSQLiteGooseDriver()
+	err = ApplyMigrations(conf, db)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+// CreateFakeSQLiteGooseDriver creates a fake Goose Driver for SQLite
+func CreateFakeSQLiteGooseDriver() *goose.DBConf {
 	// Create fake goose db conf object for SQLite
 	d := goose.DBDriver{
 		Name:    "sqlite3",
@@ -174,13 +192,7 @@ func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
 	conf := &goose.DBConf{
 		Driver: d,
 	}
-
-	err = ApplyMigrations(conf, db)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return conf
 }
 
 func buildConnectionString(dc DatabaseConfig) string {

@@ -1,15 +1,17 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { delay, filter, map, pairwise, switchMap } from 'rxjs/operators';
+import { delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { HelmInstall } from '../store/helm.actions';
 import { helmReleaseSchemaKey } from '../store/helm.entities';
@@ -20,7 +22,14 @@ import { HELM_INSTALLING_KEY, HelmInstallValues } from '../store/helm.types';
   templateUrl: './create-release.component.html',
   styleUrls: ['./create-release.component.scss'],
 })
-export class CreateReleaseComponent {
+export class CreateReleaseComponent implements OnInit {
+
+  // Confirmation dialog
+  overwriteValuesConfirmation = new ConfirmationDialogConfig(
+    'Overwrite Values?',
+    'Are you sure you want to replace your values with those from values.yaml?',
+    'Overwrite'
+  );
 
   // isLoading$ = observableOf(false);
   paginationStateSub: Subscription;
@@ -32,14 +41,18 @@ export class CreateReleaseComponent {
   details: FormGroup;
   overrides: FormGroup;
 
+  @ViewChild('releaseNameInputField') releaseNameInputField: ElementRef;
   @ViewChild('overridesYamlTextArea') overridesYamlTextArea: ElementRef;
   @ViewChild(MatTextareaAutosize) overridesYamlAutosize: MatTextareaAutosize;
+
+  public valuesYaml = '';
 
   constructor(
     private route: ActivatedRoute,
     public endpointsService: EndpointsService,
     private store: Store<AppState>,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private confirmDialog: ConfirmationDialogService,
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
@@ -59,11 +72,50 @@ export class CreateReleaseComponent {
     this.validate$ = this.details.statusChanges.pipe(
       map(() => this.details.valid)
     );
+
+    // Fetch the values.yaml for the Chart
+    const valuesYamlUrl = `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.chartName}/versions/${chart.version}/values.yaml`;
+
+    this.httpClient.get(valuesYamlUrl, { responseType: 'text' }).subscribe(response => {
+      this.valuesYaml = response;
+    });
+  }
+
+  public useValuesYaml() {
+
+
+    if (this.overrides.value.values.length !== 0) {
+      this.confirmDialog.open(this.overwriteValuesConfirmation, () => {
+        this.replaceWithValuesYaml();
+      });
+
+    } else {
+      this.replaceWithValuesYaml();
+    }
+  }
+
+  private replaceWithValuesYaml() {
+    this.overrides.controls.values.setValue(this.valuesYaml, { onlySelf: true });
+  }
+
+  ngOnInit() {
+    // Auto select endpoint if there is only one
+    this.kubeEndpoints$.pipe(
+      first(),
+      tap(ep => {
+        if (ep.length === 1) {
+          this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
+          setTimeout(() => {
+            this.releaseNameInputField.nativeElement.focus();
+          }, 1);
+        }
+      })
+    ).subscribe();
   }
 
   onEnterOverrides = () => {
     setTimeout(() => {
-      this.overridesYamlAutosize.resizeToFitContent(true);
+      // this.overridesYamlAutosize.resizeToFitContent(true);
       this.overridesYamlTextArea.nativeElement.focus();
     }, 1);
   }

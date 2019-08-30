@@ -36,11 +36,11 @@ export class HelmReleaseTabBaseComponent {
   public title = '';
 
   tabLinks = [
-    { link: 'summary', label: 'Summary', matIcon: 'helm', matIconFont: 'stratos-icons' },
-    { link: 'notes', label: 'Notes', matIcon: 'subject' },
-    { link: 'values', label: 'Values', matIcon: 'list' },
-    { link: 'pods', label: 'Pods', matIcon: 'adjust' },
-    { link: 'services', label: 'Services', matIcon: 'service', matIconFont: 'stratos-icons' }
+    { link: 'summary', label: 'Summary', icon: 'helm', iconFont: 'stratos-icons' },
+    { link: 'notes', label: 'Notes', icon: 'subject' },
+    { link: 'values', label: 'Values', icon: 'list' },
+    { link: 'pods', label: 'Pods', icon: 'adjust' },
+    { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
   ];
   constructor(
     private helmRelease: HelmReleaseGuid,

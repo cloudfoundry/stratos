@@ -5,7 +5,7 @@
   <app-loader [loading]="loading">
     <div class="chart-details__wrapper">
       <app-entity-summary-title class="summary-title" *ngIf="chart" [title]="chart.attributes.name"
-        subTitle="{{ chart.attributes.repo.name }} {{ chart.attributes.repo.name }}"
+        subTitle="{{ chart.attributes.repo.name }}"
         [subText]="chart.attributes.description" [inlineImagePath]="iconUrl">
         <div class="chart-details__content">
           <article class="chart-details__content__docs">
