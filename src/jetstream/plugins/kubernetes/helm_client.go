@@ -30,8 +30,6 @@ func (c *KubernetesSpecification) GetHelmClient(endpointGUID, userID string) (he
 		return nil, nil, nil, errors.New("Helm: Can not get user token for endpoint")
 	}
 
-	log.Error("GetHelmClient (2)")
-
 	config, err := c.GetConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord)
 	if err != nil {
 		log.Errorf("Helm: Could not get config for endpoint: %s", err)
