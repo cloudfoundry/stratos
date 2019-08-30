@@ -1,12 +1,12 @@
 package main
 
 import (
-
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -20,8 +20,8 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -226,6 +226,22 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	return nil
 }
 
+// Use the appropriate login mechanism
+func (p *portalProxy) stratosLoginHandler(c echo.Context) error {
+	// Local login
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] == interfaces.Local {
+		return p.localLogin(c)
+	}
+
+	// UAA login
+	return p.loginToUAA(c)
+}
+
+// Use the appropriate logout mechanism
+func (p *portalProxy) stratosLogoutHandler(c echo.Context) error {
+	return p.logout(c)
+}
+
 func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 	log.Debug("doLoginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
@@ -306,8 +322,12 @@ func (p *portalProxy) localLogin(c echo.Context) error {
 		return err
 	}
 
+	var expiry int64
+	expiry = math.MaxInt64
+
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = userGUID
+	sessionValues["exp"] = expiry
 
 	// Ensure that login disregards cookies from the request
 	req := c.Request()
@@ -323,7 +343,7 @@ func (p *portalProxy) localLogin(c echo.Context) error {
 
 	resp := &interfaces.LoginRes{
 		Account:     username,
-		TokenExpiry: 0,
+		TokenExpiry: expiry,
 		APIEndpoint: nil,
 		Admin:       true,
 	}
@@ -343,22 +363,28 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
 
 	username := c.FormValue("username")
 	password := c.FormValue("password")
-	guid     := c.FormValue("guid")
 
-	if len(username) == 0 || len(password) == 0 || len(guid) == 0 {
-		return guid, username, errors.New("Needs username, password and guid")
+	if len(username) == 0 || len(password) == 0 {
+		return "", username, errors.New("Needs usernameand password")
 	}
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
-		return guid, username, err
+		return "", username, err
 	}
 
 	var scopeOK bool
 	var hash []byte
 	var authError error
 	var localUserScope string
+
+	// Get the GUID for the specified user
+	guid, err := localUsersRepo.FindUserGUID(username)
+	if err != nil {
+		return guid, username, fmt.Errorf("Can not find user")
+	}
+
 	//Attempt to find the password has for the given user
 	if hash, authError = localUsersRepo.FindPasswordHash(guid); authError != nil {
 		authError = fmt.Errorf("User not found.")
@@ -375,6 +401,7 @@ func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
 			//Update the last login time here if login was successful
 			loginTime := time.Now()
 			if updateLoginTimeErr := localUsersRepo.UpdateLastLoginTime(guid, loginTime); updateLoginTimeErr != nil {
+				log.Error(updateLoginTimeErr)
 				log.Errorf("Failed to update last login time for user: %s", guid)
 			}
 		}
@@ -1010,6 +1037,40 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] == interfaces.Local {
+		err = p.verifySessionLocal(c, sessionUser, sessionExpireTime)
+	} else {
+		err = p.verifySessionUAA(c, sessionUser, sessionExpireTime)
+	}
+
+	// Could not verify session
+	if err != nil {
+		log.Error(err)
+		return echo.NewHTTPError(http.StatusForbidden, "Could not verify user")
+	}
+
+	err = p.handleSessionExpiryHeader(c)
+	if err != nil {
+		return err
+	}
+
+	info, err := p.getInfo(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
+
+	err = c.JSON(http.StatusOK, info)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *portalProxy) verifySessionUAA(c echo.Context, sessionUser string, sessionExpireTime int64) error {
 	tr, err := p.GetUAATokenRecord(sessionUser)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find UAA Token: %s", err)
@@ -1050,26 +1111,20 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		}
 	}
 
-	err = p.handleSessionExpiryHeader(c)
-	if err != nil {
-		return err
-	}
-
-	info, err := p.getInfo(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	// Add XSRF Token
-	p.ensureXSRFToken(c)
-
-	err = c.JSON(http.StatusOK, info)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
+
+func (p *portalProxy) verifySessionLocal(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return err
+	}
+
+	_, err = localUsersRepo.FindPasswordHash(sessionUser)
+	return err
+}
+
 
 // Create a token for XSRF if needed, store it in the session and add the response header for the front-end to pick up
 func (p *portalProxy) ensureXSRFToken(c echo.Context) {
@@ -1135,6 +1190,18 @@ func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
 	return nil
 }
 
+func (p *portalProxy) GetStratosUser(userGUID string) (*interfaces.ConnectedUser, error) {
+	log.Debug("GetStratosUser")
+
+	// If configured for local users, use that instead
+	// This needs to be refactored
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] == interfaces.Local {
+		return p.getLocalUser(userGUID)
+	}
+
+	return p.GetUAAUser(userGUID)
+}
+
 func (p *portalProxy) GetUAAUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	log.Debug("getUAAUser")
 
@@ -1163,6 +1230,30 @@ func (p *portalProxy) GetUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 		Name:   userTokenInfo.UserName,
 		Admin:  uaaAdmin,
 		Scopes: userTokenInfo.Scope,
+	}
+
+	return uaaEntry, nil
+}
+
+func (p *portalProxy) getLocalUser(userGUID string) (*interfaces.ConnectedUser, error) {
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return nil, err
+	}
+
+	user, err := localUsersRepo.FindUser(userGUID)
+	if err != nil {
+		return nil, err
+	}
+
+	var scopes []string
+	uaaAdmin := (user.Scope == p.Config.ConsoleConfig.ConsoleAdminScope)
+	uaaEntry := &interfaces.ConnectedUser{
+		GUID:   userGUID,
+		Name:   user.Username,
+		Admin:  uaaAdmin,
+		Scopes: scopes,
 	}
 
 	return uaaEntry, nil
