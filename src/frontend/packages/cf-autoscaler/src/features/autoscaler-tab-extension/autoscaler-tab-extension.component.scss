@@ -17,6 +17,7 @@
   }
 
   &__latest-metrics {
+    flex: 2;
     min-height: 200px;
   }
 }
@@ -52,6 +53,13 @@ table {
 }
 
 .autoscaler-tile-events {
+  &__no-policy {
+    align-items: center;
+    display: flex;
+    margin-bottom: 12px;
+    padding: 14px;
+  }
+
   &__header {
     display: flex;
     flex: 1;
@@ -67,5 +75,18 @@ table {
       margin-right: -10px;
       margin-top: -10px;
     }
+  }
+}
+.nav-button-with-text {
+  margin: 0 10px 0 0;
+  padding: 0 5px;
+
+  &__span {
+    align-items: center;
+    display: flex;
+  }
+
+  &__icon {
+    margin-right: 5px;
   }
 }

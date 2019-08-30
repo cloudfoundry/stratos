@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { EntityService } from '../../../../core/src/core/entity-service';
@@ -100,13 +100,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
   appAutoscalerAppMetricNames$: Observable<string[]>;
 
+  public showNoPolicyMessage$: Observable<boolean>;
+  public showAutoscalerHistory$: Observable<boolean>;
+
+  public noPolicyMessageFirstLine = 'This application has no Autoscaler Policy';
+  public noPolicyMessageSecondLine = {
+    text: 'To create a policy click the + icon above'
+  };
+
   private appAutoscalerPolicyErrorSub: Subscription;
   private appAutoscalerScalingHistoryErrorSub: Subscription;
   private appAutoscalerPolicySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
   private appAutoscalerScalingHistorySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
   private scalingHistoryAction: GetAppAutoscalerScalingHistoryAction;
-
-  private detachConfirmOk = 0;
 
   appAutoscalerAppMetrics = {};
 
@@ -190,6 +196,24 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       refCount()
     );
     this.initErrorSub();
+
+    this.showAutoscalerHistory$ = combineLatest([
+      this.appAutoscalerPolicy$,
+      this.appAutoscalerScalingHistory$
+    ]).pipe(
+      map(([policy, history]) => !!policy || (!!history && history.total_results > 0)),
+      publishReplay(1),
+      refCount()
+    );
+
+    this.showNoPolicyMessage$ = combineLatest([
+      this.appAutoscalerPolicy$,
+      this.appAutoscalerScalingHistory$
+    ]).pipe(
+      map(([policy, history]) => !policy && (!history || history.total_results === 0)),
+      publishReplay(1),
+      refCount()
+    );
   }
 
   getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerPaginationParams) {
@@ -227,7 +251,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
 
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error),
+      filter(request => !!request.error && !request.response.noPolicy),
       map(request => {
         const msg = request.message;
         request.error = false;
@@ -259,14 +283,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   disableAutoscaler() {
     const confirmation = new ConfirmationDialogConfig(
-      'Detach And Delete Policy',
-      'Are you sure you want to detach and delete the policy?',
-      'Detach and Delete',
+      'Delete Policy',
+      'Are you sure you want to delete the policy?',
+      'Delete',
       true
     );
-    this.detachConfirmOk = this.detachConfirmOk === 1 ? 0 : 1;
     this.confirmDialog.open(confirmation, () => {
-      this.detachConfirmOk = 2;
       const doUpdate = () => this.detachPolicy();
       doUpdate().pipe(
         first(),
@@ -289,14 +311,18 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     return this.store.select(actionState).pipe(filter(item => !!item));
   }
 
-  updatePolicyPage = () => {
+  updatePolicyPage = (isCreate = false) => {
+    const query = isCreate ? {
+      create: isCreate
+    } : {};
     this.store.dispatch(new RouterNav({
       path: [
         'autoscaler',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
         'edit-autoscaler-policy'
-      ]
+      ],
+      query
     }));
   }
 
