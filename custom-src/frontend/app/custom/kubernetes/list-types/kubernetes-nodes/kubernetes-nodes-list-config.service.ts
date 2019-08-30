@@ -118,8 +118,13 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   ) {
     const transformEntities: DataFunction<KubernetesNode>[] = [
       (entities: KubernetesNode[], paginationState: PaginationEntityState) => {
+        const filterString = paginationState.clientPagination.filter.string;
+
+        if (!filterString) {
+          return entities;
+        }
+
         const filterKey = paginationState.clientPagination.filter.filterKey;
-        const filterString = paginationState.clientPagination.filter.string.toUpperCase();
 
         switch (filterKey) {
           case KubernetesNodesListFilterKeys.IP_ADDRESS:
