@@ -9,6 +9,7 @@ export interface CustomizationsMetadata {
   logoText?: string;
   aboutInfoComponent?: any;
   supportInfoComponent?: any;
+  noEndpointsComponent?: any;
   alwaysShowNavForEndpointTypes?: (epType) => boolean;
 }
 
