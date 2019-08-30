@@ -216,10 +216,3 @@
     </div>
   </ng-container>
 </div>
-
-<ng-template #refreshButton>
-  <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async"
-    (click)="refresh()">
-    <mat-icon aria-label="Refresh list data">refresh</mat-icon>
-  </button>
-</ng-template>

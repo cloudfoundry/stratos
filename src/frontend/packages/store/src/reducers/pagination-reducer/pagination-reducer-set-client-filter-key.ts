@@ -12,9 +12,6 @@ export function paginationSetClientFilterKey(state: PaginationEntityState, actio
             ...clientPagination,
             filter: {
                 ...clientPagination.filter,
-                items: {
-                    ...clientPagination.filter.items,
-                },
                 filterKey: action.filterKey,
             }
         }
