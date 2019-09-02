@@ -36,7 +36,10 @@
                 <mat-form-field>
                   <input matInput placeholder="Threshold" type="number" formControlName="threshold" required>
                 </mat-form-field>
-                {{getMetricUnit(rule.metric_type)}} for
+                <span class="autoscaler-policy-edit-trigger-item__unit">
+                  {{metricUnit$ | async}}
+                </span>
+                for
                 <mat-form-field>
                   <input matInput placeholder="Breach Duration" type="number" formControlName="breach_duration_secs">
                 </mat-form-field>

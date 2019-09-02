@@ -82,7 +82,6 @@ export class AutoscalerEffects {
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {
-            console.log(response);
             const autoscalerInfo = response.json();
             const mappedData = {
               entities: { [action.entityKey]: {} },
