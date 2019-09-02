@@ -3,7 +3,7 @@ import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
@@ -23,6 +23,7 @@ import { ActionState } from '../../../../store/src/reducers/api-request-reducer/
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
   AutoscalerPaginationParams,
@@ -33,9 +34,7 @@ import {
   UpdateAppAutoscalerPolicyAction,
 } from '../../store/app-autoscaler.actions';
 import {
-  AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
-  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppAutoscalerScalingHistory,
   AppScalingTrigger,
@@ -46,25 +45,6 @@ import {
   appAutoscalerScalingHistorySchemaKey,
 } from '../../store/autoscaler.store.module';
 
-const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
-  // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
-  const action = new GetAppAutoscalerPolicyAction(appGuid, endpointGuid);
-  const entityService = esf.create<AppAutoscalerPolicy>(action.entityKey, action.entity, action.guid, action);
-  return entityService.entityObs$.pipe(
-    filter(entityInfo =>
-      !!entityInfo && !!entityInfo.entityRequestInfo && !!entityInfo.entityRequestInfo.response &&
-      !entityInfo.entityRequestInfo.fetching),
-    map(entityInfo => {
-      // Autoscaler feature should be enabled if either ..
-      // 1) There's an autoscaler policy
-      // 2) There's a 404 no policy error (as opposed to a 404 url not found error)
-      const noPolicySet = (entityInfo.entityRequestInfo.response as AppAutoscalerFetchPolicyFailedResponse).noPolicy;
-      return !!entityInfo.entity || noPolicySet;
-    }),
-    startWith(true)
-  );
-};
-
 @StratosTab({
   type: StratosTabType.Application,
   label: 'Autoscale',
@@ -73,8 +53,7 @@ const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServ
   iconFont: 'stratos-icons',
   hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
-    const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
-    return enableAutoscaler(appGuid, endpointGuid, esf).pipe(map(enabled => !enabled));
+    return isAutoscalerEnabled(endpointGuid, esf).pipe(map(enabled => !enabled));
   }
 })
 @Component({

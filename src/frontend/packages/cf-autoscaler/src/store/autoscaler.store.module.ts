@@ -6,12 +6,18 @@ import { ExtensionEntitySchema } from '../../../core/src/core/extension/extensio
 import { getAPIResourceGuid } from '../../../store/src/selectors/api.selectors';
 
 export const appAutoscalerHealthSchemaKey = 'autoscalerHealth';
+export const appAutoscalerInfoSchemaKey = 'autoscalerInfo';
 export const appAutoscalerPolicySchemaKey = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerSchemaKey = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistorySchemaKey = 'autoscalerScalingHistory';
 export const appAutoscalerAppMetricSchemaKey = 'autoscalerAppMetric';
 
 export const autoscalerEntities: ExtensionEntitySchema[] = [
+  {
+    entityKey: appAutoscalerInfoSchemaKey,
+    definition: {},
+    options: { idAttribute: getAPIResourceGuid }
+  },
   {
     entityKey: appAutoscalerPolicySchemaKey,
     definition: {},
