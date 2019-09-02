@@ -157,9 +157,7 @@ function enterPaginationReducer(state: PaginationState, action, updatePagination
   if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
     if (!newState[entityKey]) {
-      logMissing(`entity type ''`, Object.keys(newState))
-    } else if (!newState[entityKey][paginationKey]) {
-      logMissing(`pagination section '${paginationKey}' for entity type '${entityKey}'`, Object.keys(newState[entityKey]))
+      logMissing(`entity type ''`, Object.keys(newState));
     }
     const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
     if (state[entityKey][paginationKey] === updatedPaginationState) {

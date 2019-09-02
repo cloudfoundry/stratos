@@ -59,7 +59,8 @@ export class EntitySchemaTreeBuilder {
     // Delete route, unbind route
     [routeEntityType]: [
       domainEntityType,
-      applicationEntityType
+      applicationEntityType,
+      spaceEntityType
     ],
     // Unbind service instance
     [serviceBindingEntityType]: [
