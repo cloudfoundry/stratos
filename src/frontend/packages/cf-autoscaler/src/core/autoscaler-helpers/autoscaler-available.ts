@@ -6,13 +6,6 @@ import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { GetAppAutoscalerInfoAction } from '../../store/app-autoscaler.actions';
 import { AutoscalerInfo } from '../../store/app-autoscaler.types';
 
-export const isAutoscalerEnabled = (endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
-  return fetchAutoscalerInfo(endpointGuid, esf).pipe(
-    map(entityInfo => !entityInfo.entityRequestInfo.error),
-    startWith(false)
-  );
-};
-
 export const fetchAutoscalerInfo = (
   endpointGuid: string,
   esf: EntityServiceFactory): Observable<EntityInfo<APIResource<AutoscalerInfo>>> => {
@@ -29,3 +22,9 @@ export const fetchAutoscalerInfo = (
   );
 };
 
+export const isAutoscalerEnabled = (endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
+  return fetchAutoscalerInfo(endpointGuid, esf).pipe(
+    map(entityInfo => !entityInfo.entityRequestInfo.error),
+    startWith(false)
+  );
+};
