@@ -9,7 +9,9 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModules,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { ServicesTabComponent } from './services-tab.component';
 
@@ -20,7 +22,7 @@ describe('ServicesTabComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ServicesTabComponent],
-      imports: [...BaseTestModules],
+      imports: generateCfBaseTestModules(),
       providers: [
         EntityMonitorFactory,
         generateTestApplicationServiceProvider('1', '1'),

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
@@ -17,27 +17,32 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
-import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
-import { EntityService } from '../../../../../core/src/core/entity-service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
+import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
+import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
+import { EntityService } from '../../../../../core/src/core/entity-service';
+import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
+import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
+import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
-import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -120,7 +125,9 @@ export class CloudFoundryEndpointService {
     private store: Store<CFAppState>,
     private entityServiceFactory: CFEntityServiceFactory,
     private cfUserService: CfUserService,
-    private pmf: PaginationMonitorFactory
+    private pmf: PaginationMonitorFactory,
+    private endpointService: EndpointsService,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
@@ -128,14 +135,12 @@ export class CloudFoundryEndpointService {
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       this.cfGuid,
-      new GetAllEndpoints(),
-      false
+      new GetAllEndpoints()
     );
 
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
-      new GetCFInfo(this.cfGuid),
-      false
+      new GetCFInfo(this.cfGuid)
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();
@@ -235,5 +240,36 @@ export class CloudFoundryEndpointService {
 
   fetchApps() {
     this.store.dispatch(this.getAllAppsAction);
+  }
+
+  hasCellMetrics(endpointId: string): Observable<boolean> {
+    return this.endpointService.hasMetrics(endpointId).pipe(
+      switchMap(hasMetrics => {
+        if (!hasMetrics) {
+          return of(false);
+        }
+
+        // Check that we successfully retrieve some stats. If the metric is unknown an empty list is returned
+        const action = new FetchCFCellMetricsPaginatedAction(
+          endpointId,
+          endpointId,
+          new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
+          MetricQueryType.QUERY
+        );
+
+        return getPaginationObservables<IMetrics>({
+          store: this.store,
+          action,
+          paginationMonitor: this.paginationMonitorFactory.create(
+            action.paginationKey,
+            action
+          )
+        }).entities$.pipe(
+          filter(entities => !!entities && !!entities.length),
+          map(entities => !!entities.find(entity => !!entity.data.result.length)),
+          first()
+        );
+      })
+    );
   }
 }

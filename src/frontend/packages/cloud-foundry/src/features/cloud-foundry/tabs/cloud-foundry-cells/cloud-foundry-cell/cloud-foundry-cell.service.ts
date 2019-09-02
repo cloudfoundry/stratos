@@ -9,9 +9,10 @@ import {
   MetricsChartHelpers,
 } from '../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
-import { FetchCFCellMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
 
 
@@ -109,7 +110,6 @@ export class CloudFoundryCellService {
     if (metric === CellMetrics.HEALTHY) {
       this.healthyMetricId = action.guid;
     }
-    // FIXME: Final solution for Metrics - STRAT-152
     return this.entityServiceFactory.create<IMetrics<IMetricVectorResult<IMetricCell>>>(
       action.guid,
       action,

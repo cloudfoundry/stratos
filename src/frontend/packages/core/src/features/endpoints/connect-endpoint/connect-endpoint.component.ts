@@ -81,7 +81,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   private init(config: ConnectEndpointConfig) {
     const endpoint = entityCatalogue.getEndpoint(config.type, config.subType);
-    const endpointType = endpoint.getTypeAndSubtype().type;
     // Populate the valid auth types for the endpoint that we want to connect to
 
     // Remove SSO if not allowed on this endpoint

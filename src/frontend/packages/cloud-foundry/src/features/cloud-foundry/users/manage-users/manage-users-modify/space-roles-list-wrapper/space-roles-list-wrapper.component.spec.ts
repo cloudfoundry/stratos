@@ -3,7 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper.component';
 
@@ -14,10 +14,9 @@ describe('SpaceRolesListWrapperComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        // CloudFoundryModule
+        ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
         NoopAnimationsModule
       ],
       providers: [

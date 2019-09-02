@@ -17,22 +17,22 @@ export class QParam {
         return split;
       }
       const testSplit = qString.split(joiner);
-      if (testSplit.length === 3) {
-        split = testSplit;
+      if (testSplit.length === 2) {
+        return [testSplit[0], testSplit[1], joiner];
       }
     }, null as []);
     if (qParamComponents && qParamComponents.length === 3) {
       return new QParam(
         qParamComponents[0],
-        qParamComponents[2],
-        qParamComponents[1]
+        qParamComponents[1],
+        qParamComponents[2]
       );
     }
     return null;
   }
 
   static fromStrings(qStrings: string[]) {
-    return qStrings.map(qString => QParam.fromString(qString));
+    return qStrings.map(qString => QParam.fromString(qString)).filter(qObject => !!qObject);
   }
 
   static keyFromString(qParamString: string): string {

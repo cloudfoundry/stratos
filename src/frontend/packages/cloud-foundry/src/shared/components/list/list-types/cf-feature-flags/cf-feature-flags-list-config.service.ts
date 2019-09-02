@@ -13,7 +13,7 @@ import { CfFeatureFlagsDataSource, FeatureFlagDescriptions } from './cf-feature-
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 
 @Injectable()
-export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResource<IFeatureFlag>> {
+export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFlag> {
   dataSource: CfFeatureFlagsDataSource;
   defaultView = 'table' as ListView;
   pageSizeOptions = [25, 50, 100];
@@ -25,26 +25,26 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
     noEntries: 'There are no feature flags'
   };
 
-  columns: Array<ITableColumn<APIResource<IFeatureFlag>>> = [
+  columns: Array<ITableColumn<IFeatureFlag>> = [
     {
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => `${row.entity.name}`
+        getValue: (row) => `${row.name}`
       },
       class: 'table-column-select',
       cellFlex: '2',
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'entity.name'
+        field: 'name'
       }
     },
     {
       columnId: 'description',
       headerCell: () => 'Description',
       cellDefinition: {
-        getValue: (row) => FeatureFlagDescriptions[row.entity.name]
+        getValue: (row) => FeatureFlagDescriptions[row.name]
       },
       class: 'table-column-select',
       cellFlex: '4'

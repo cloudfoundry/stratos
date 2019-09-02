@@ -13,20 +13,20 @@ import {
   tap,
 } from 'rxjs/operators';
 
+import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
-import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import {
   PaginatedAction,
   PaginationClientPagination,
   PaginationEntityState,
-  PaginationParam
+  PaginationParam,
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 
@@ -88,6 +88,7 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
+// TODO: This needs to be a service not just a function! - #3802
 export const getPaginationObservables = <T = any, Y extends AppState = AppState>(
   { store, action, paginationMonitor }: {
     store: Store<Y>,
@@ -99,7 +100,6 @@ export const getPaginationObservables = <T = any, Y extends AppState = AppState>
   const baseAction = Array.isArray(action) ? action[0] : action;
   const paginationKey = paginationMonitor.paginationKey;
   const entityKey = paginationMonitor.schema.key;
-
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
   if (baseAction.initialParams) {
@@ -208,7 +208,7 @@ function getObservables<T = any>(
   const entities$: Observable<T[]> =
     combineLatest(
       store.select(selectEntities(entityKey)),
-      fetchPagination$
+      fetchPagination$,
     )
       .pipe(
         filter(([ent, pagination]) => {
@@ -242,8 +242,8 @@ function getObservables<T = any>(
       // Entities will never fire in the event of a maxed list, so ensure we start with something
       startWith(false)
     ),
-    totalEntities$: combineLatest(pagination$, entities$).pipe(
-      map(([pag]) => pag.totalResults),
+    totalEntities$: pagination$.pipe(
+      map(pag => pag.totalResults),
       distinctUntilChanged()
     ),
     fetchingEntities$: paginationMonitor.fetchingCurrentPage$

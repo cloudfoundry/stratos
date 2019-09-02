@@ -14,7 +14,8 @@ import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
 
-
+// TODO: Remove this in favour of action builder config.
+// https://github.com/cloudfoundry-incubator/stratos/issues/3770
 @Injectable()
 export class GithubEffects {
   // FIXME: This should be removed in favour of entity action builder config.
@@ -44,11 +45,11 @@ export class GithubEffects {
       return scm.getRepository(action.stProject.deploySource.project).pipe(
         mergeMap(repoDetails => {
           const mappedData = {
-            entities: { gitRepo: {} },
+            entities: { cfGitRepo: {} },
             result: []
           } as NormalizedResponse;
           const id = scmType + '-' + repoDetails.full_name;
-          mappedData.entities.gitRepo[id] = {
+          mappedData.entities.cfGitRepo[id] = {
             entity: repoDetails,
             metadata: {}
           };

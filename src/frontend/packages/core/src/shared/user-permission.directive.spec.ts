@@ -1,8 +1,7 @@
-import { UserPermissionDirective } from './user-permission.directive';
-import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Component, TemplateRef } from '@angular/core';
-import { CoreModule } from '../core/core.module';
-import { BaseTestModules } from '../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { BaseTestModules } from '../../test-framework/core-test.helper';
 
 @Component({
   template: `<input type="text" appUserPermission>`

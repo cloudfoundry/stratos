@@ -8,10 +8,10 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
   catalogueEntity,
   requestType,
   action,
-  data,
+  result,
   recursivelyDeleting
 ) => {
-  const entityAction = catalogueEntity.getRequestAction('success', requestType, action, data);
+  const entityAction = catalogueEntity.getRequestAction('success', requestType, action, result.response);
   if (
     !action.updatingKey &&
     (requestType === 'create' || requestType === 'delete')
@@ -20,7 +20,11 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
     if (action.removeEntityOnDelete) {
       actionDispatcher(new ClearPaginationOfEntity(action, action.guid));
     } else {
-      actionDispatcher(new ClearPaginationOfType(action));
+      if (action.proxyPaginationEntityConfig) {
+        actionDispatcher(new ClearPaginationOfType(action.proxyPaginationEntityConfig));
+      } else {
+        actionDispatcher(new ClearPaginationOfType(action));
+      }
     }
 
     if (Array.isArray(action.clearPaginationEntityKeys)) {
@@ -29,7 +33,7 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
     }
   }
   actionDispatcher(entityAction);
-  actionDispatcher(new WrapperRequestActionSuccess(data, action, requestType));
+  actionDispatcher(new WrapperRequestActionSuccess(result.response, action, requestType, result.totalResults, result.totalPages));
   if (recursivelyDeleting) {
     actionDispatcher(
       new RecursiveDeleteComplete(

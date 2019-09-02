@@ -1,7 +1,7 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { inject, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
@@ -13,6 +13,7 @@ import {
 } from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { UserInviteService } from '../../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSpaceUsersListConfigService } from './cf-space-users-list-config.service';
 
 
@@ -27,9 +28,10 @@ describe('CfSpaceUsersListConfigService', () => {
         UserInviteService,
         HttpClient,
         HttpHandler,
-        CloudFoundryEndpointService
+        CloudFoundryEndpointService,
+        CfUserService
       ],
-      imports: [...BaseTestModules]
+      imports: generateCfBaseTestModules()
     });
   });
 

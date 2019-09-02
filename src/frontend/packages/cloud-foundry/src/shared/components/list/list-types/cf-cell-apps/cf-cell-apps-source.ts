@@ -16,12 +16,15 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
-import { FetchCFMetricsPaginatedAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
+import { FetchCFMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
 import { CFEntityServiceFactory } from '../../../../../cf-entity-service-factory.service';
 import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
+
+// TODO: Move file to CF package (#3769)
 
 export interface CfCellApp {
   metric: IMetricApplication;

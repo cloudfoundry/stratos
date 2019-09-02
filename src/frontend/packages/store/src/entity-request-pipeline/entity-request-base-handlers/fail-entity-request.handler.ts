@@ -13,7 +13,7 @@ export const failedEntityHandler: SucceedOrFailEntityRequestHandler = (
   const entityAction = catalogueEntity.getRequestAction('failure', requestType, action);
   actionDispatcher(entityAction);
   actionDispatcher(new WrapperRequestActionFailed('Api Request Failed', action, requestType));
-  if (recursivelyDeleting) {
+  if (recursivelyDeleting.response) {
     actionDispatcher(
       new RecursiveDeleteFailed(
         action.guid,

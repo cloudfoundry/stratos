@@ -6,9 +6,9 @@ import {
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import {
-  BaseTestModulesNoShared,
+  generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
-} from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
 import { CardCfInfoComponent } from './card-cf-info.component';
 
@@ -19,7 +19,7 @@ describe('CardCfInfoComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CardCfInfoComponent, MetadataItemComponent, BooleanIndicatorComponent],
-        imports: [...BaseTestModulesNoShared],
+        imports: generateCfBaseTestModulesNoShared(),
         providers: [generateTestCfEndpointService(), UserInviteService, ConfirmationDialogService]
       }).compileComponents();
     })

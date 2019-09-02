@@ -2,14 +2,15 @@ import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../tab-nav.service';
-import {
-  BaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+
 import {
   CfSpaceQuotasListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
 import { CloudFoundryOrganizationSpaceQuotasComponent } from './cloud-foundry-organization-space-quotas.component';
+import {
+  generateTestCfEndpointServiceProvider
+} from '../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
 
 describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
   let component: CloudFoundryOrganizationSpaceQuotasComponent;

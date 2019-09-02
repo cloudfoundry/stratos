@@ -4,15 +4,13 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import {
-  ServiceIconComponent,
-} from '../../../../../../../../core/src/shared/components/service-icon/service-icon.component';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
-  BaseTestModulesNoShared,
-  MetadataCardTestComponents,
-} from '../../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { CfServiceCardComponent } from './cf-service-card.component';
 
 describe('CfServiceCardComponent', () => {
@@ -29,7 +27,7 @@ describe('CfServiceCardComponent', () => {
         AppChipsComponent,
         ServiceIconComponent
       ],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         EntityMonitorFactory
       ]

@@ -7,13 +7,12 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { applicationEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
-import { endpointEntitySchema } from '../../../../../core/src/base-entity-schemas';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
-import { createEmptyStoreModule, getInitialTestStoreState } from '../../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { AppStoreExtensionsModule } from '../../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
@@ -21,9 +20,8 @@ import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-c
 describe('CfAppAutoscalerEventsConfigService', () => {
 
   beforeEach(() => {
-    const initialState = getInitialTestStoreState();
-    const cfGuid = Object.keys(initialState.requestData[endpointEntitySchema.key])[0];
-    const appGuid = Object.keys(initialState.requestData.cfApplication)[0];
+    const cfGuid = 'cfGuid';
+    const appGuid = 'appGuid';
 
     TestBed.configureTestingModule({
       providers: [

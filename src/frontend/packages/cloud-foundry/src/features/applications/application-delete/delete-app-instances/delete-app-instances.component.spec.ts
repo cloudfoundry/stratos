@@ -4,7 +4,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { GetApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
 import { applicationEntityType, cfEntityFactory } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../../core/test-framework/entity-service.helper';
 import {
   ApplicationEnvVarsHelper,
@@ -19,7 +19,7 @@ describe('DeleteAppInstancesComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [DeleteAppServiceInstancesComponent],
-      imports: BaseTestModules,
+      imports: generateCfBaseTestModules(),
       providers: [
         generateTestEntityServiceProvider(
           appId,

@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import {
   AppMetadataTypes,
   GetAppStatsAction,
@@ -28,8 +28,9 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { AppStat } from '../../../../cloud-foundry/src/store/types/app-metadata.types';
+import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import {
   ApplicationStateData,
@@ -39,6 +40,7 @@ import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
 import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -48,18 +50,14 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
-
-import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
+import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
+import { AppStat } from '../../store/types/app-metadata.types';
 import {
   ApplicationEnvVarsHelper,
-  EnvVarStratosProject
+  EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { rootUpdatingKey, ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
-
+import { getRoute, isTCPRoute } from './routes/routes.helper';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -177,7 +175,9 @@ export class ApplicationService {
         ).waitForEntity$.pipe(
           map(entityInfo => entityInfo.entity)
         );
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
     this.appOrg$ = moreWaiting$.pipe(
       first(),
@@ -261,18 +261,19 @@ export class ApplicationService {
     this.orgDomains$ = this.appOrg$.pipe(
       switchMap(org => {
         const domainsAction = new GetAllOrganizationDomains(org.metadata.guid, this.cfGuid);
+        const paginationMonitor = this.paginationMonitorFactory.create(
+          domainsAction.paginationKey,
+          domainsAction
+        );
         return getPaginationObservables<APIResource<IDomain>>(
           {
             store: this.store,
             action: domainsAction,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              domainsAction.paginationKey,
-              action
-            )
+            paginationMonitor
           },
           true
         ).entities$;
-      }),
+      })
     );
 
   }

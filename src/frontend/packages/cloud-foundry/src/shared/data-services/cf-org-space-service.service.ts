@@ -14,7 +14,9 @@ import {
 } from 'rxjs/operators';
 
 import { GetAllOrganizations } from '../../../../cloud-foundry/src/actions/organization.actions';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import {
@@ -25,18 +27,16 @@ import {
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import {
   getCurrentPageRequestInfo,
-  getPaginationObservables
+  getPaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
-import { QParam, QParamJoiners } from '../../../../store/src/q-param';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
@@ -111,10 +111,11 @@ export const createCfOrSpaceMultipleFilterFn = (
       return;
     }
     const qParamStrings = (params.q || []) as string[];
+    const qParamObject = QParam.fromStrings(qParamStrings);
 
     const startingCfGuid = valueOrCommonFalsy(action.endpointGuid);
-    const startingOrgGuid = valueOrCommonFalsy(qParamStrings.find((q: string) => q.startsWith('organization_guid')), {}).value;
-    const startingSpaceGuid = valueOrCommonFalsy(qParamStrings.find((q: string) => q.startsWith('space_guid')), {}).value;
+    const startingOrgGuid = valueOrCommonFalsy(qParamObject.find((q: QParam) => q.key === 'organization_guid'), {}).value;
+    const startingSpaceGuid = valueOrCommonFalsy(qParamObject.find((q: QParam) => q.key === 'space_guid'), {}).value;
 
     const qChanges = changes.reduce((qs: QParam[], change) => {
       switch (change.key) {
@@ -131,7 +132,7 @@ export const createCfOrSpaceMultipleFilterFn = (
           break;
       }
       return qs;
-    }, QParam.fromStrings(qParamStrings));
+    }, qParamObject);
 
     const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
     const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
@@ -175,12 +176,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.paginationAction.paginationKey,
       cfEntityFactory(this.paginationAction.entityType)
     )
-  });
+  }, true);
   private allOrgsLoading$ = this.allOrgs.pagination$.pipe(map(
     pag => getCurrentPageRequestInfo(pag).busy
   ));
 
-  private getEndpointsAndOrgs$: Observable<any>;
   private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
   private subs: Subscription[] = [];
 

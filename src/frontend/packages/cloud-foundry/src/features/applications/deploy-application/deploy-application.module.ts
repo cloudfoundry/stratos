@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
+import { CloudFoundryComponentsModule } from '../../../shared/components/components.module';
 import { CreateApplicationModule } from '../create-application/create-application.module';
 import {
   DeployApplicationOptionsStepComponent,
@@ -25,7 +26,8 @@ import { GithubProjectExistsDirective } from './github-project-exists.directive'
     CoreModule,
     SharedModule,
     CommonModule,
-    CreateApplicationModule
+    CreateApplicationModule,
+    CloudFoundryComponentsModule
   ],
   declarations: [
     DeployApplicationComponent,

@@ -8,7 +8,7 @@ import { CoreModule } from '../../../../../core/src/core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../core/src/core/github.helpers';
 import { GitSCMService } from '../../../../../core/src/shared/data-services/scm/scm.service';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CFAppState } from '../../../cf-app-state';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
@@ -17,10 +17,10 @@ describe('GithubProjectExistsDirective', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...generateCfStoreModules(),
         CommonModule,
         CoreModule,
         SharedModule,
-        createBasicStoreModule(),
         HttpClientModule,
         HttpClientTestingModule
       ],

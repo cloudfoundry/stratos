@@ -15,7 +15,12 @@ import { buildRequestEntityPipe } from './entity-request-base-handlers/build-ent
 import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
-import { BasePipelineConfig, EntityRequestPipeline, PagedJetstreamResponse } from './entity-request-pipeline.types';
+import {
+  BasePipelineConfig,
+  EntityRequestPipeline,
+  PagedJetstreamResponse,
+  PipelineResult,
+} from './entity-request-pipeline.types';
 import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
 import { mergeHttpParams, singleRequestToPaged } from './pipeline-helpers';
@@ -59,11 +64,12 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   store: Store<AppState>,
   httpClient: PipelineHttpClient,
   { action, requestType, catalogueEntity, appState }: PaginatedRequestPipelineConfig
-) => {
+): Observable<PipelineResult> => {
   const prePaginatedRequestFunction = getPrePaginatedRequestFunction(catalogueEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const entity = catalogueEntity as StratosCatalogueEntity;
-  const flattenerConfig = entity.definition.paginationConfig ? entity.definition.paginationConfig :
+  const flattenerConfig = entity.definition.paginationConfig ?
+    entity.definition.paginationConfig :
     entity.definition.endpoint ? entity.definition.endpoint.paginationConfig : null;
   const paramsFromStore = getPaginationParamsPipe(action, catalogueEntity, appState);
   const requestFromAction = buildRequestEntityPipe(requestType, action.options);
@@ -71,11 +77,13 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   const requestFromStore = requestFromAction.clone({
     params: allParams
   });
-  const request = prePaginatedRequestFunction ? prePaginatedRequestFunction(requestFromStore, action, catalogueEntity) : requestFromStore;
+  const request = prePaginatedRequestFunction ?
+    prePaginatedRequestFunction(requestFromStore, action, catalogueEntity, appState) :
+    requestFromStore;
 
   const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(
     action.options.url,
-    flattenerConfig.getEntitiesFromResponse
+    flattenerConfig
   );
   return getRequestObjectObservable(request).pipe(
     first(),
@@ -88,7 +96,9 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
         requestObject,
         pageIterator
       ).pipe(
+        // Convert { [endpointGuid]: <raw response> } to { { errors: [], successes: [] } }
         map(handleMultiEndpointsPipe),
+        // Convert { { errors: [], successes: [] } } to { response: NoramlisedResponse, success: boolean }
         map(multiEndpointResponses => mapMultiEndpointResponses(
           action,
           catalogueEntity,

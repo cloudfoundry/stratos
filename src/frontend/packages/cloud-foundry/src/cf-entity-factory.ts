@@ -315,7 +315,7 @@ const SecurityGroupSchema = new CFEntitySchema(securityGroupEntityType, {
 }, { idAttribute: getAPIResourceGuid });
 entityCache[securityGroupEntityType] = SecurityGroupSchema;
 
-const FeatureFlagSchema = new CFEntitySchema(featureFlagEntityType, {}, { idAttribute: getAPIResourceGuid });
+const FeatureFlagSchema = new CFEntitySchema(featureFlagEntityType, {}, { idAttribute: 'name' });
 entityCache[featureFlagEntityType] = FeatureFlagSchema;
 
 const SpaceEmptySchema = SpaceSchema.withEmptyDefinition();

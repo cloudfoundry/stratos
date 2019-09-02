@@ -7,6 +7,7 @@ import { MomentModule } from 'ngx-moment';
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { AuthGuardService } from './auth-guard.service';
+import { NotSetupGuardService } from './not-setup-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
@@ -63,6 +64,7 @@ import { WindowRef } from './window-ref/window-ref.service';
   ],
   providers: [
     AuthGuardService,
+    NotSetupGuardService,
     PageHeaderService,
     EventWatcherService,
     WindowRef,

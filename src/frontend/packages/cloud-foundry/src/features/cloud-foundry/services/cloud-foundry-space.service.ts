@@ -20,15 +20,15 @@ import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitor
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
+import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
+import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
-import { createEntityRelationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -170,7 +170,7 @@ export class CloudFoundrySpaceService {
           this.cfGuid,
           'organizations',
           this.orgGuid,
-          'space',
+          'spaces',
           this.spaceGuid,
           'space-quota'
         ];

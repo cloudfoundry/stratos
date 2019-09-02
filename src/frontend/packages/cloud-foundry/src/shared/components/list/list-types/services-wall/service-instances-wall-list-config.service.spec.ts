@@ -1,8 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ServiceInstancesWallListConfigService } from './service-instances-wall-list-config.service';
 
 describe('ServiceInstancesWallListConfigService', () => {
@@ -11,11 +12,10 @@ describe('ServiceInstancesWallListConfigService', () => {
       providers: [
         ServiceInstancesWallListConfigService,
         CfOrgSpaceDataService,
-        DatePipe
+        DatePipe,
+        ServiceActionHelperService
       ],
-      imports: [
-        BaseTestModules
-      ]
+      imports: generateCfBaseTestModules()
     });
   });
 

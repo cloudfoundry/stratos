@@ -28,8 +28,10 @@ function createEntity<T>(entity: T): APIResource<T> {
 }
 
 export class ApplicationServiceMock {
-  cfGuid = 'mockCfGuid';
-  appGuid = 'mockAppGuid';
+  static cfGuid = 'mockCfGuid';
+  static appGuid = 'mockAppGuid';
+  cfGuid = ApplicationServiceMock.cfGuid;
+  appGuid = ApplicationServiceMock.appGuid;
   application$: Observable<ApplicationData> = observableOf(({
     cf: {
       guid: 'mockCfGuid'
@@ -54,7 +56,7 @@ export class ApplicationServiceMock {
   } as EntityInfo<IAppSummary>);
   appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
-    observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });
+    observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '' }, deployOverrides: null });
   isFetchingApp$: Observable<boolean> = observableOf(false);
   isFetchingEnvVars$: Observable<boolean> = observableOf(false);
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);

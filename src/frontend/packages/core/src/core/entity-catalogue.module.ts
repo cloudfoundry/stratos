@@ -33,6 +33,7 @@ export class EntityCatalogueModule {
   // TODO: this does not allow for lazy loading, work out if we can allow this.
   // https://github.com/cloudfoundry-incubator/stratos/issues/3741
   static forFeature(entityFactory: () => StratosBaseCatalogueEntity[]): ModuleWithProviders {
+    // Note - If you place any code here before `return` you get funky errors.
     return {
       ngModule: EntityCatalogueFeatureModule,
       providers: [

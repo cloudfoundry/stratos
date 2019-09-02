@@ -9,7 +9,9 @@ import {
 import {
   ApplicationStateService,
 } from '../../../../../../../core/src/shared/components/application-state/application-state.service';
-import { BaseTestModulesNoShared } from '../../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { CompactAppCardComponent } from './compact-app-card.component';
 
@@ -24,7 +26,7 @@ describe('CompactAppCardComponent', () => {
         ApplicationStateIconComponent,
         ApplicationStateIconPipe
       ],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         ApplicationStateService,
         ActiveRouteCfOrgSpace

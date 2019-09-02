@@ -15,7 +15,7 @@ import { generateASEntities } from './store/autoscaler-entity-generator';
           testEntityCatalogue.clear();
           return [
             ...generateASEntities(),
-            ...generateCFEntities()
+            ...generateCFEntities()// depends on cf app type a lot
           ];
         }
       }

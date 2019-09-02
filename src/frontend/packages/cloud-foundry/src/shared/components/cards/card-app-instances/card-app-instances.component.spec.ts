@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import {
@@ -17,13 +17,11 @@ import {
 } from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  RunningInstancesComponent,
-} from '../../../../../../core/src/shared/components/running-instances/running-instances.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { CardAppInstancesComponent } from './card-app-instances.component';
 
 describe('CardAppInstancesComponent', () => {
@@ -43,8 +41,8 @@ describe('CardAppInstancesComponent', () => {
       imports: [
         CoreModule,
         CommonModule,
-        BrowserAnimationsModule,
-        createBasicStoreModule()
+        NoopAnimationsModule,
+        generateCfStoreModules()
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

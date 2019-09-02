@@ -21,63 +21,63 @@ import (
 )
 
 const (
-	setupRequestRegex       = "^/pp/v1/setup$"
-	setupUpdateRequestRegex = "^/pp/v1/setup/update$"
-	versionRequestRegex     = "^/pp/v1/version$"
-	backendRequestRegex     = "^/pp/v1/"
-	systemGroupName         = "env"
+	setupRequestRegex      = "^/pp/v1/setup$"
+	setupCheckRequestRegex = "^/pp/v1/setup/check$"
+	versionRequestRegex    = "^/pp/v1/version$"
+	backendRequestRegex    = "^/pp/v1/"
+	systemGroupName        = "env"
 )
 
-func (p *portalProxy) setupConsole(c echo.Context) error {
-
-	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "Failed to connect to Database!")
-	}
-
-	// Check if alerady set up
-	if p.GetConfig().ConsoleConfig.IsSetupComplete() {
-		return c.NoContent(http.StatusServiceUnavailable)
-	}
-
+func parseConsoleConfigFromForm(c echo.Context) (*interfaces.ConsoleConfig, error) {
 	consoleConfig := new(interfaces.ConsoleConfig)
 	url, err := url.Parse(c.FormValue("uaa_endpoint"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid UAA Endpoint value")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid UAA Endpoint value")
 	}
 
 	consoleConfig.UAAEndpoint = url
 	// Default auth endpoint to the same value as UAA Endpoint when setup via the UI setup (for now)
 	consoleConfig.AuthorizationEndpoint = url
-	username := c.FormValue("username")
-	password := c.FormValue("password")
 	consoleConfig.ConsoleClient = c.FormValue("console_client")
 	consoleConfig.ConsoleClientSecret = c.FormValue("console_client_secret")
 
 	skipSSLValidation, err := strconv.ParseBool(c.FormValue("skip_ssl_validation"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Skip SSL Validation value")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid Skip SSL Validation value")
 	}
 	consoleConfig.SkipSSLValidation = skipSSLValidation
 
 	ssoLogin, err := strconv.ParseBool(c.FormValue("use_sso"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Use SSO value")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid Use SSO value")
 	}
 	consoleConfig.UseSSO = ssoLogin
+	consoleConfig.ConsoleAdminScope = c.FormValue("console_admin_scope")
 
-	if err != nil {
-		return interfaces.NewHTTPShadowError(
-			http.StatusInternalServerError,
-			"Failed to store Console configuration data",
-			"Failed to establish DB connection due to %s", err)
+	return consoleConfig, nil
+}
+
+// Check the initial parameter set and fetch the list of available scopes
+// This does not persist the configuration to the database at this stage
+func (p *portalProxy) setupConsoleCheck(c echo.Context) error {
+
+	// Check if already set up
+	if p.GetConfig().ConsoleConfig.IsSetupComplete() {
+		return c.NoContent(http.StatusServiceUnavailable)
 	}
 
-	// Authenticate with UAA
-	authEndpoint := fmt.Sprintf("%s/oauth/token", url)
-	uaaRes, err := p.getUAATokenWithCreds(skipSSLValidation, username, password, consoleConfig.ConsoleClient, consoleConfig.ConsoleClientSecret, authEndpoint)
+	consoleConfig, err := parseConsoleConfigFromForm(c)
 	if err != nil {
+		return err
+	}
 
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	// Authenticate with UAA
+	authEndpoint := fmt.Sprintf("%s/oauth/token", consoleConfig.UAAEndpoint)
+	uaaRes, err := p.getUAATokenWithCreds(consoleConfig.SkipSSLValidation, username, password, consoleConfig.ConsoleClient, consoleConfig.ConsoleClientSecret, authEndpoint)
+	if err != nil {
 		errInfo, ok := err.(interfaces.ErrHTTPRequest)
 		if ok {
 			if errInfo.Status == 0 {
@@ -105,15 +105,6 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 			http.StatusBadRequest,
 			"Failed to authenticate with UAA - check Client ID, Secret and credentials",
 			"Failed to authenticate with UAA due to %s", err)
-	}
-
-	// Persist to database
-	err = saveConsoleConfig(consoleRepo, consoleConfig)
-	if err != nil {
-		return interfaces.NewHTTPShadowError(
-			http.StatusInternalServerError,
-			"Failed to store Console configuration data",
-			"Console configuration data storage failed due to %s", err)
 	}
 
 	c.JSON(http.StatusOK, userTokenInfo)
@@ -147,16 +138,15 @@ func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *int
 		return err
 	}
 
+	if err := consoleRepo.SetValue(systemGroupName, "CONSOLE_ADMIN_SCOPE", consoleConfig.ConsoleAdminScope); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func updateConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
-	log.Debugf("Update ConsoleConfig: %+v", consoleConfig)
-
-	return consoleRepo.SetValue(systemGroupName, "CONSOLE_ADMIN_SCOPE", consoleConfig.ConsoleAdminScope)
-}
-
-func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
+// Save the console setup
+func (p *portalProxy) setupConsole(c echo.Context) error {
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -168,24 +158,19 @@ func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
 		return c.NoContent(http.StatusServiceUnavailable)
 	}
 
-	consoleConfig := new(interfaces.ConsoleConfig)
-	consoleConfig.ConsoleAdminScope = c.FormValue("console_admin_scope")
-
+	consoleConfig, err := parseConsoleConfigFromForm(c)
 	if err != nil {
-		return fmt.Errorf("Unable to initialise console backend config due to: %+v", err)
-		return interfaces.NewHTTPShadowError(
-			http.StatusInternalServerError,
-			"Failed to store Console configuration data",
-			"Failed to establish DB connection due to %s", err)
+		return err
 	}
 
-	err = updateConsoleConfig(consoleRepo, consoleConfig)
+	err = saveConsoleConfig(consoleRepo, consoleConfig)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Failed to store Console configuration data",
 			"Console configuration data storage failed due to %s", err)
 	}
+
 	c.NoContent(http.StatusOK)
 	log.Infof("Updated Stratos setup")
 	return nil
@@ -305,7 +290,7 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 
 			isSetupRequest, _ := regexp.MatchString(setupRequestRegex, requestURLPath)
 			if !isSetupRequest {
-				isSetupRequest, _ = regexp.MatchString(setupUpdateRequestRegex, requestURLPath)
+				isSetupRequest, _ = regexp.MatchString(setupCheckRequestRegex, requestURLPath)
 			}
 			if isSetupRequest {
 				return h(c)

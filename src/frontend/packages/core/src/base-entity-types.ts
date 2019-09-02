@@ -1,9 +1,14 @@
+import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
+import {
+  addOrUpdateUserFavoriteMetadataReducer,
+  deleteUserFavoriteMetadataReducer,
+} from '../../store/src/reducers/favorite.reducer';
 import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
+  systemInfoEntitySchema,
   userFavoritesEntitySchema,
   userProfileEntitySchema,
-  systemInfoEntitySchema,
 } from './base-entity-schemas';
 import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
@@ -31,8 +36,12 @@ class DefaultEndpointCatalogueEntity extends StratosCatalogueEntity {
     super({
       schema: endpointEntitySchema,
       type: endpointEntitySchema.entityType,
-      endpoint: stratosType
-    });
+      endpoint: stratosType,
+    }, {
+        dataReducers: [
+          systemEndpointsReducer
+        ]
+      });
   }
 }
 
@@ -42,6 +51,11 @@ class UserFavoriteCatalogueEntity extends StratosCatalogueEntity {
       schema: userFavoritesEntitySchema,
       type: userFavoritesEntitySchema.entityType,
       endpoint: stratosType,
+    }, {
+      dataReducers: [
+        addOrUpdateUserFavoriteMetadataReducer,
+        deleteUserFavoriteMetadataReducer,
+      ]
     });
   }
 }
@@ -66,12 +80,13 @@ class SystemInfoCatalogueEntity extends StratosCatalogueEntity {
   }
 }
 
-export function baseStratosTypeFactory() {
+export function generateStratosEntities() {
   return [
     new DefaultEndpointCatalogueEntity(),
     new SystemInfoCatalogueEntity(),
     new UserFavoriteCatalogueEntity(),
     new UserProfileCatalogueEntity(),
+    // TODO: metrics location to be sorted - STRAT-152
     new StratosCatalogueEndpointEntity({
       type: 'metrics',
       label: 'Metrics',

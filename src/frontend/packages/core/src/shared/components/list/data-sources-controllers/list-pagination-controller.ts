@@ -12,6 +12,7 @@ import {
   SetClientPageSize,
   SetPage,
 } from '../../../../../../store/src/actions/pagination.actions';
+import { GeneralAppState } from '../../../../../../store/src/app-state';
 import {
   defaultClientPaginationPageSize,
 } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
@@ -19,7 +20,6 @@ import { PaginationClientFilter, PaginationEntityState } from '../../../../../..
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';
-import { GeneralAppState } from '../../../../../../store/src/app-state';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;

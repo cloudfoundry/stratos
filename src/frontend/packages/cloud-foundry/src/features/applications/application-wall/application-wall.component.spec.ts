@@ -1,12 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
+import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { ApplicationWallComponent } from './application-wall.component';
 
 describe('ApplicationWallComponent', () => {
@@ -15,17 +13,15 @@ describe('ApplicationWallComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ApplicationWallComponent],
-      imports: [
-        BrowserAnimationsModule,
-        createBasicStoreModule(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
+      declarations: [
+        ApplicationWallComponent,
+        CfEndpointsMissingComponent
       ],
+      imports: generateCfBaseTestModules(),
       providers: [
         DatePipe,
-        TabNavService
+        TabNavService,
+        CloudFoundryService,
       ]
     })
       .compileComponents();

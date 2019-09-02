@@ -66,7 +66,10 @@ export function selectRequestInfo(entityKeyOrConfig: string | EntityCatalogueEnt
 }
 
 export function selectEntities<T = APIResource>(entityKeys: string) {
-  return compose(getRequestEntityKey<T>(entityKeys), getAPIRequestDataState);
+  return compose(
+    getRequestEntityKey<T>(entityKeys),
+    getAPIRequestDataState
+  );
 }
 
 export function selectEntity<T = APIResource>(

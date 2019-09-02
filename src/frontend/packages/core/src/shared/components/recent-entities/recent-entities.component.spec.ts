@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { RecentEntitiesComponent } from './recent-entities.component';
@@ -12,7 +13,13 @@ describe('RecentEntitiesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule, CoreModule, CommonModule, createBasicStoreModule()]
+      imports: [
+        RouterTestingModule,
+        CoreModule,
+        CommonModule,
+        CoreTestingModule,
+        createBasicStoreModule()
+      ]
     })
       .compileComponents();
   }));

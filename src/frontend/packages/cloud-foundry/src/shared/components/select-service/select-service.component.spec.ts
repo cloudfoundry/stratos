@@ -30,14 +30,14 @@ import {
 import {
   MultilineTitleComponent,
 } from '../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { ServiceIconComponent } from '../../../../../core/src/shared/components/service-icon/service-icon.component';
 import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { BaseTestModulesNoShared } from '../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 import { CfOrgSpaceLinksComponent } from '../cf-org-space-links/cf-org-space-links.component';
 import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
+import { ServiceIconComponent } from '../service-icon/service-icon.component';
 import { SelectServiceComponent } from './select-service.component';
 
 describe('SelectServiceComponent', () => {
@@ -64,7 +64,7 @@ describe('SelectServiceComponent', () => {
         ApplicationStateIconPipe,
         MultilineTitleComponent
       ],
-      imports: [...BaseTestModulesNoShared],
+      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         PaginationMonitorFactory,
         ServicesWallService,
