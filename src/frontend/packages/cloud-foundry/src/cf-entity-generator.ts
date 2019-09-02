@@ -27,6 +27,7 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
