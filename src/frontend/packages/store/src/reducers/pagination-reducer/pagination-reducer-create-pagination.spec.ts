@@ -1,4 +1,4 @@
-import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CreatePagination } from '../../actions/pagination.actions';
 import { PaginationState } from '../../types/pagination.types';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
@@ -7,7 +7,7 @@ import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagi
 describe('CreatePaginationActionReducer', () => {
   const entityType = 'entityType';
   const endpointType = 'endpointType';
-  const entityKey = EntityCatalogueHelpers.buildEntityKey(entityType, endpointType);
+  const entityKey = entityCatalogue.getEntityKey(endpointType, entityType);
 
   it('should return exact state', () => {
     const paginationState: PaginationState = {

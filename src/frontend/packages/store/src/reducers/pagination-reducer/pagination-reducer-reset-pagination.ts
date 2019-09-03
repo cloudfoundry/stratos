@@ -1,4 +1,4 @@
-import { EntityCatalogueHelpers } from '../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ResetPagination } from '../../actions/pagination.actions';
 import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
@@ -31,7 +31,7 @@ export function getDefaultPaginationEntityState(): PaginationEntityState {
 }
 
 export function paginationResetPagination(state: PaginationState, action: ResetPagination): PaginationState {
-  const entityKey = EntityCatalogueHelpers.buildEntityKey(action.entityConfig.entityType, action.entityConfig.endpointType);
+  const entityKey = entityCatalogue.getEntityKey(action.entityConfig);
   if (!state[entityKey] || !state[entityKey][action.paginationKey]) {
     return state;
   }
