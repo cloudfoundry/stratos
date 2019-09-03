@@ -12,7 +12,7 @@ import {
   resultPerPageParamDefault,
 } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
+import { APIResource, NormalizedResponse, PaginationResponse } from '../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../store/src/types/pagination.types';
 import {
   StartRequestAction,
@@ -30,28 +30,29 @@ import {
   APP_AUTOSCALER_POLICY,
   APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
+  AUTOSCALER_INFO,
+  AutoscalerPaginationParams,
   AutoscalerQuery,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
   GetAppAutoscalerHealthAction,
+  GetAppAutoscalerInfoAction,
   GetAppAutoscalerMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
-  AutoscalerPaginationParams,
 } from './app-autoscaler.actions';
 import {
-  AppAutoscalerFetchPolicyFailedResponse,
-  AppAutoscalerMetricDataLocal,
-  AppScalingTrigger,
-  AppAutoscalerMetricData,
-  AppAutoscalerPolicyLocal,
   AppAutoscalerEvent,
+  AppAutoscalerFetchPolicyFailedResponse,
+  AppAutoscalerMetricData,
+  AppAutoscalerMetricDataLocal,
+  AppAutoscalerPolicyLocal,
+  AppScalingTrigger,
 } from './app-autoscaler.types';
-import { PaginationResponse } from '../../../store/src/types/api.types';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -67,6 +68,34 @@ export class AutoscalerEffects {
     private actions$: Actions,
     private store: Store<AppState>,
   ) { }
+
+  @Effect()
+  fetchAutoscalerInfo$ = this.actions$.pipe(
+    ofType<GetAppAutoscalerInfoAction>(AUTOSCALER_INFO),
+    mergeMap(action => {
+      const actionType = 'fetch';
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      const options = new RequestOptions();
+      options.url = `${commonPrefix}/info`;
+      options.method = 'get';
+      options.headers = this.addHeaders(action.endpointGuid);
+      return this.http
+        .request(new Request(options)).pipe(
+          mergeMap(response => {
+            const autoscalerInfo = response.json();
+            const mappedData = {
+              entities: { [action.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(action.entityKey, mappedData, action.endpointGuid, autoscalerInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch autoscaler info', err), action, actionType)
+          ]));
+    }));
 
   @Effect()
   fetchAppAutoscalerHealth$ = this.actions$.pipe(
@@ -86,7 +115,7 @@ export class AutoscalerEffects {
               entities: { [action.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformData(action.entityKey, mappedData, action.guid, healthInfo);
+            this.transformData(action.entityKey, mappedData, action.endpointGuid, healthInfo);
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -348,14 +377,14 @@ export class AutoscalerEffects {
     mappedData.result.push(id);
   }
 
-  transformData(key: string, mappedData: NormalizedResponse, appGuid: string, data: any) {
-    mappedData.entities[key][appGuid] = {
+  transformData(key: string, mappedData: NormalizedResponse, guid: string, data: any) {
+    mappedData.entities[key][guid] = {
       entity: data,
       metadata: {
-        guid: appGuid
+        guid
       }
     };
-    mappedData.result.push(appGuid);
+    mappedData.result.push(guid);
   }
 
   transformEventData(key: string, mappedData: NormalizedResponse, appGuid: string, data: PaginationResponse<AppAutoscalerEvent>) {

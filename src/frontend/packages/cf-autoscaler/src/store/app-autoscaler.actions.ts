@@ -9,6 +9,7 @@ import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.ty
 import {
   appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
+  appAutoscalerInfoSchemaKey,
   appAutoscalerPolicySchemaKey,
   appAutoscalerPolicyTriggerSchemaKey,
   appAutoscalerScalingHistorySchemaKey,
@@ -45,14 +46,28 @@ export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy'
 export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
 export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
 export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
+export const AUTOSCALER_INFO = '[Autoscaler] Fetch Info';
 
 export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Policy] Step';
 
-export class GetAppAutoscalerHealthAction implements IRequestAction {
+export class GetAppAutoscalerInfoAction implements IRequestAction {
+  public guid: string;
   constructor(
-    public guid: string,
     public endpointGuid: string,
   ) {
+    this.guid = endpointGuid;
+  }
+  type = AUTOSCALER_INFO;
+  entity = entityFactory(appAutoscalerInfoSchemaKey);
+  entityKey = appAutoscalerInfoSchemaKey;
+}
+
+export class GetAppAutoscalerHealthAction implements IRequestAction {
+  public guid: string;
+  constructor(
+    public endpointGuid: string,
+  ) {
+    this.guid = endpointGuid;
   }
   type = APP_AUTOSCALER_HEALTH;
   entity = entityFactory(appAutoscalerHealthSchemaKey);

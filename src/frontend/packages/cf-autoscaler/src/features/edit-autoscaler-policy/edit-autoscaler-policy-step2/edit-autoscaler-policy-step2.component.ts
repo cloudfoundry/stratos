@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import {
@@ -15,7 +16,11 @@ import {
   getThresholdMin,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
+import {
+  AppAutoscalerInvalidPolicyError,
+  AppAutoscalerPolicy,
+  AppAutoscalerPolicyLocal,
+} from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
@@ -31,6 +36,8 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
 
   policyAlert = PolicyAlert;
   metricTypes = AutoscalerConstants.MetricTypes;
+  private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
+  metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
   editTriggerForm: FormGroup;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
@@ -63,6 +70,13 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       ]],
       adjustment_type: [0, this.validateTriggerAdjustmentType()]
     });
+
+    this.metricUnit$ = this.metricUnitSubject.asObservable();
+
+    this.editTriggerForm.get('metric_type').valueChanges.pipe(
+      map(value => this.getMetricUnit(value)),
+      tap(unit => this.metricUnitSubject.next(unit))
+    ).subscribe();
   }
 
   addTrigger = () => {
@@ -92,6 +106,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs,
       adjustment_type: this.editAdjustmentType
     });
+    this.metricUnitSubject.next(this.getMetricUnit(this.editMetricType));
   }
 
   finishTrigger() {

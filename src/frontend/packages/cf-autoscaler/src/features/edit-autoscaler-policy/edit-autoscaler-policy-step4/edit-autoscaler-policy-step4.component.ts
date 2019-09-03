@@ -20,10 +20,11 @@ import {
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
+  AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
-  AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
+} from '../../../store/app-autoscaler.types';
 import { appAutoscalerPolicySchemaKey } from '../../../store/autoscaler.store.module';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
@@ -91,19 +92,12 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     const waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       filter(request => {
         if (request.message && request.message.indexOf('fetch policy') >= 0) {
-          request.message = '';
           return false;
         } else {
           return !!request.error || !!request.response;
         }
       }),
-      map(request => {
-        const msg = request.message;
-        request.error = false;
-        request.response = null;
-        request.message = '';
-        return msg;
-      }),
+      map(request => request.message),
       distinctUntilChanged(),
     ).pipe(map(
       errorMessage => {
@@ -127,7 +121,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   addSpecificDate = () => {
-    const {...newSchedule} = AutoscalerConstants.PolicyDefaultSpecificDate;
+    const { ...newSchedule } = AutoscalerConstants.PolicyDefaultSpecificDate;
     this.currentPolicy.schedules.specific_date.push(newSchedule);
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }

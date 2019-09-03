@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
@@ -23,6 +23,7 @@ import { ActionState } from '../../../../store/src/reducers/api-request-reducer/
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
   AutoscalerPaginationParams,
@@ -33,9 +34,7 @@ import {
   UpdateAppAutoscalerPolicyAction,
 } from '../../store/app-autoscaler.actions';
 import {
-  AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
-  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppAutoscalerScalingHistory,
   AppScalingTrigger,
@@ -46,25 +45,6 @@ import {
   appAutoscalerScalingHistorySchemaKey,
 } from '../../store/autoscaler.store.module';
 
-const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
-  // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
-  const action = new GetAppAutoscalerPolicyAction(appGuid, endpointGuid);
-  const entityService = esf.create<AppAutoscalerPolicy>(action.entityKey, action.entity, action.guid, action);
-  return entityService.entityObs$.pipe(
-    filter(entityInfo =>
-      !!entityInfo && !!entityInfo.entityRequestInfo && !!entityInfo.entityRequestInfo.response &&
-      !entityInfo.entityRequestInfo.fetching),
-    map(entityInfo => {
-      // Autoscaler feature should be enabled if either ..
-      // 1) There's an autoscaler policy
-      // 2) There's a 404 no policy error (as opposed to a 404 url not found error)
-      const noPolicySet = (entityInfo.entityRequestInfo.response as AppAutoscalerFetchPolicyFailedResponse).noPolicy;
-      return !!entityInfo.entity || noPolicySet;
-    }),
-    startWith(true)
-  );
-};
-
 @StratosTab({
   type: StratosTabType.Application,
   label: 'Autoscale',
@@ -73,8 +53,7 @@ const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServ
   iconFont: 'stratos-icons',
   hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
-    const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
-    return enableAutoscaler(appGuid, endpointGuid, esf).pipe(map(enabled => !enabled));
+    return isAutoscalerEnabled(endpointGuid, esf).pipe(map(enabled => !enabled));
   }
 })
 @Component({
@@ -100,13 +79,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
   appAutoscalerAppMetricNames$: Observable<string[]>;
 
+  public showNoPolicyMessage$: Observable<boolean>;
+  public showAutoscalerHistory$: Observable<boolean>;
+
+  public noPolicyMessageFirstLine = 'This application has no Autoscaler Policy';
+  public noPolicyMessageSecondLine = {
+    text: 'To create a policy click the + icon above'
+  };
+
   private appAutoscalerPolicyErrorSub: Subscription;
   private appAutoscalerScalingHistoryErrorSub: Subscription;
   private appAutoscalerPolicySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
   private appAutoscalerScalingHistorySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
   private scalingHistoryAction: GetAppAutoscalerScalingHistoryAction;
-
-  private detachConfirmOk = 0;
 
   appAutoscalerAppMetrics = {};
 
@@ -190,6 +175,24 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       refCount()
     );
     this.initErrorSub();
+
+    this.showAutoscalerHistory$ = combineLatest([
+      this.appAutoscalerPolicy$,
+      this.appAutoscalerScalingHistory$
+    ]).pipe(
+      map(([policy, history]) => !!policy || (!!history && history.total_results > 0)),
+      publishReplay(1),
+      refCount()
+    );
+
+    this.showNoPolicyMessage$ = combineLatest([
+      this.appAutoscalerPolicy$,
+      this.appAutoscalerScalingHistory$
+    ]).pipe(
+      map(([policy, history]) => !policy && (!history || history.total_results === 0)),
+      publishReplay(1),
+      refCount()
+    );
   }
 
   getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerPaginationParams) {
@@ -227,7 +230,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
 
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error),
+      filter(request => !!request.error && !request.response.noPolicy),
       map(request => {
         const msg = request.message;
         request.error = false;
@@ -259,14 +262,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   disableAutoscaler() {
     const confirmation = new ConfirmationDialogConfig(
-      'Detach And Delete Policy',
-      'Are you sure you want to detach and delete the policy?',
-      'Detach and Delete',
+      'Delete Policy',
+      'Are you sure you want to delete the policy?',
+      'Delete',
       true
     );
-    this.detachConfirmOk = this.detachConfirmOk === 1 ? 0 : 1;
     this.confirmDialog.open(confirmation, () => {
-      this.detachConfirmOk = 2;
       const doUpdate = () => this.detachPolicy();
       doUpdate().pipe(
         first(),
@@ -289,14 +290,18 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     return this.store.select(actionState).pipe(filter(item => !!item));
   }
 
-  updatePolicyPage = () => {
+  updatePolicyPage = (isCreate = false) => {
+    const query = isCreate ? {
+      create: isCreate
+    } : {};
     this.store.dispatch(new RouterNav({
       path: [
         'autoscaler',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
         'edit-autoscaler-policy'
-      ]
+      ],
+      query
     }));
   }
 
