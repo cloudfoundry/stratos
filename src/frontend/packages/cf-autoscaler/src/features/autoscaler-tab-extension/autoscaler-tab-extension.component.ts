@@ -3,7 +3,7 @@ import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
 
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
@@ -21,7 +21,7 @@ import { applicationSchemaKey, entityFactory } from '../../../../store/src/helpe
 import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
@@ -31,7 +31,6 @@ import {
   GetAppAutoscalerAppMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerScalingHistoryAction,
-  UpdateAppAutoscalerPolicyAction,
 } from '../../store/app-autoscaler.actions';
 import {
   AppAutoscalerMetricData,
@@ -230,13 +229,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
 
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error && !request.response.noPolicy),
-      map(request => {
-        const msg = request.message;
-        request.error = false;
-        request.message = '';
-        return msg;
-      }),
+      filter(response => !!response.error && (!response.response || !response.response.noPolicy)),
+      map(response => response.message),
       distinctUntilChanged(),
     ).subscribe(errorMessage => {
       if (this.appAutoscalerPolicySnackBarRef) {
@@ -268,8 +262,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       true
     );
     this.confirmDialog.open(confirmation, () => {
-      const doUpdate = () => this.detachPolicy();
-      doUpdate().pipe(
+      this.detachPolicy().pipe(
         first(),
       ).subscribe(actionState => {
         if (actionState.error) {
@@ -284,10 +277,11 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.store.dispatch(
       new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
-    const actionState = selectUpdateInfo(appAutoscalerPolicySchemaKey,
-      this.applicationService.appGuid,
-      UpdateAppAutoscalerPolicyAction.updateKey);
-    return this.store.select(actionState).pipe(filter(item => !!item));
+    return this.store.select(selectDeletionInfo(appAutoscalerPolicySchemaKey, this.applicationService.appGuid)).pipe(
+      pairwise(),
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV)
+    );
   }
 
   updatePolicyPage = (isCreate = false) => {
