@@ -35,10 +35,9 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   static createFetchServiceBinding = (cfGuid: string, serviceInstanceGuid: string): FetchAllServiceBindings => {
     const sgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
     const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    //TODO Kate
     const action = actionBuilder(
       cfGuid,
-      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid));
+      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid)) as FetchAllServiceBindings;
     action.initialParams['results-per-page'] = 1;
     action.initialParams.q = [
       new QParam('service_instance_guid', serviceInstanceGuid).toString(),

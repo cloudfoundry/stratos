@@ -142,9 +142,9 @@ export class CloudFoundryEndpointService {
     );
 
     const cfInfoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfInfoEntityType);
-    //TODO Kate const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get') as ;
-    //Use cfInfoEntity.getGUIFFromEntity for the missing arg?
-    const action = actionBuilder(this.cfGuid) as CfInfoDefinitionActionBuilders;
+    //TODO Kate 
+    const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get');
+    const action = actionBuilder(this.cfGuid,null);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
       new GetCFInfo(this.cfGuid),
@@ -228,11 +228,10 @@ export class CloudFoundryEndpointService {
   }
 
   public fetchDomains = () => {
-    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
-    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const domainEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
+    const actionBuilder = domainEntity.actionOrchestrator.getActionBuilder('getMultiple');
     //TODO kate
-    const action = actionBuilder(this.cfGuid) as PaginatedAction;
-    //const action = new FetchAllDomains(this.cfGuid);
+    const action = actionBuilder(this.cfGuid, null);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {
         store: this.store,

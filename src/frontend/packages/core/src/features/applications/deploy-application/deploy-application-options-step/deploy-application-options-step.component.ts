@@ -20,7 +20,7 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { stackEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
@@ -126,10 +126,10 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
     this.stacks$ = cfDetails$.pipe(
       switchMap(cfDetails => {
-        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
-        const getAllStacksActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+        const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
+        const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
         //TODO kate
-        const action = getAllStacksActionBuilder(cfDetails.cloudFoundry);  
+        const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null) as GetAllStacks;  
         return getPaginationObservables<APIResource<IDomain>>(
           {
             store: this.store,

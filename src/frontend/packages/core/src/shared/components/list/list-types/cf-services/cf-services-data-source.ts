@@ -21,10 +21,10 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
     const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     //TODO kate
-    const getServicesAction = actionBuilder(paginationKey);  
+    const getServicesAction = actionBuilder(endpointGuid, paginationKey);  
     super({
       store,
-      action: new GetAllServices(paginationKey),
+      action: getServicesAction,
       schema: entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema(),
       getRowUniqueId: getRowMetadata,
       paginationKey,

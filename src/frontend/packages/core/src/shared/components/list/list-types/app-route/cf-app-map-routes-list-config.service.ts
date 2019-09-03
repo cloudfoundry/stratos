@@ -34,12 +34,10 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
     const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
     const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    const action = actionBuilder(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid)) as PaginatedAction;
+    const action = actionBuilder(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid)) as GetSpaceRoutes;
     // If parentEntitySchema is set the entity validation process will look for the space routes in the parent space entity
     // In this case, we do have them however they're missing the route-->app relationship.. which means we fetch them at a rate of one per
     // route. For spaces with hundreds of routes this isn't acceptable, so remove the link to the parent and fetch the list afresh.
-
-    //TODO kate
     action.parentEntityConfig = null;
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, action, false);
 

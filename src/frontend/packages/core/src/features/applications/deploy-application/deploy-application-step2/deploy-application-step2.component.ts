@@ -234,10 +234,9 @@ export class DeployApplicationStep2Component
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
           const entityID = projectInfo.full_name + '-' + commitSha;
-          //TODO Kate
           const gitCommitEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, gitCommitEntityType);
           const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('fetchCommit');
-          const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name);
+          const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name) as FetchCommit;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             entityID,
             fetchCommitAction

@@ -32,11 +32,11 @@ export class ServicesWallService {
     const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     //TODO kate
-    const getServicesAction = actionBuilder(paginationKey);  
+    const getServicesAction = actionBuilder(null, paginationKey);  
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
-        action: new GetAllServices(paginationKey),
+        action: getServicesAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           cfEntityFactory(serviceEntityType)

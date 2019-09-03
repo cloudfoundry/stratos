@@ -108,21 +108,19 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
           false
         );
 
-        //TODO Kate
         const gitCommitEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, gitCommitEntityType);
         const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('get');
-        const fetchCommitAction = fetchCommitActionBuilder(scm, commitId, projectName);
+        const fetchCommitAction = fetchCommitActionBuilder(commitId, null, {projectName, scm});
         this.gitCommitEntityService = this.entityServiceFactory.create(
           commitEntityID,
           fetchCommitAction,
           false
         );
 
-        //TODO Kate
         const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
         const gitBranchesEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, gitBranchesEntityType);
         const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
-        const fetchBranchesAction = fetchBranchesActionBuilder(scm, projectName);
+        const fetchBranchesAction = fetchBranchesActionBuilder(branchID, null, {projectName, scm});
         this.gitBranchEntityService = this.entityServiceFactory.create(
           branchID,
           new FetchBranchesForProject(scm, projectName),

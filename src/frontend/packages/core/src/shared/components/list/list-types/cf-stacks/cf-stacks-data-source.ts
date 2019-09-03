@@ -12,10 +12,10 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 export class CfStacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
-    const getAllStacksActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
+    const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
     //TODO kate
-    const action = getAllStacksActionBuilder(cfGuid);  
+    const action = getAllStacksActionBuilder(cfGuid, null);  
     super({
       store,
       action,

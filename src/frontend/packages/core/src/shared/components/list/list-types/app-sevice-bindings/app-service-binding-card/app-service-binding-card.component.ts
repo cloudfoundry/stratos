@@ -147,9 +147,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsUserProvidedServiceInstance() {
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
-    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-    //TODO kate
+    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
     const getUserProvidedServiceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);  
     const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       this.row.entity.service_instance_guid,
