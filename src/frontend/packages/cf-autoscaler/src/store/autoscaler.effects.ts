@@ -5,6 +5,7 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
 import { AppState } from '../../../store/src/app-state';
@@ -52,7 +53,6 @@ import {
   AppAutoscalerPolicyLocal,
   AppScalingTrigger,
 } from './app-autoscaler.types';
-import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -205,13 +205,14 @@ export class AutoscalerEffects {
         options.params.set('order', options.params.get('order-direction'));
         options.params.delete('order-direction');
       }
-      if (metricConfig && metricConfig.params) {
-        options.params.set('start-time', metricConfig.params.start + '000000000');
-        options.params.set('end-time', metricConfig.params.end + '000000000');
-      } else if (action.query && action.query.params) {
-        options.params.set('start-time', action.query.params.start + '000000000');
-        options.params.set('end-time', action.query.params.end + '000000000');
-      }
+      // TODO this needs to be changed into a string key-value
+      // if (metricConfig && metricConfig.params) {
+      //   options.params.set('start-time', metricConfig.params.start + '000000000');
+      //   options.params.set('end-time', metricConfig.params.end + '000000000');
+      // } else if (action.query && action.query.params) {
+      //   options.params.set('start-time', action.query.params.start + '000000000');
+      //   options.params.set('end-time', action.query.params.end + '000000000');
+      // }
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {
@@ -410,17 +411,17 @@ export class AutoscalerEffects {
     const searchParams = new URLSearchParams();
     if (initialParams) {
       Object.keys(initialParams).forEach((key) => {
-        searchParams.set(key, initialParams[key]);
+        searchParams.set(key, initialParams[key].toString());
       });
     }
     if (params) {
       Object.keys(params).forEach((key) => {
-        searchParams.set(key, params[key]);
+        searchParams.set(key, params[key].toString());
       });
     }
     if (paginationParams) {
       Object.keys(paginationParams).forEach((key) => {
-        searchParams.set(key, paginationParams[key]);
+        searchParams.set(key, paginationParams[key].toString());
       });
     }
     return searchParams;
@@ -430,9 +431,6 @@ export class AutoscalerEffects {
     return paginationState
       ? {
         ...paginationState.params,
-        q: [
-          ...(paginationState.params.q || [])
-        ],
         page: paginationState.currentPage.toString(),
       }
       : {};

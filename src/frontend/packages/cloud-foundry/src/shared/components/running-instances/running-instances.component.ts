@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { AppStat } from '../../../store/types/app-metadata.types';
 
 @Component({
   selector: 'app-running-instances',
@@ -11,10 +12,9 @@ import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitor
   styleUrls: ['./running-instances.component.scss']
 })
 export class RunningInstancesComponent implements OnInit {
-
-  @Input() instances;
-  @Input() cfGuid;
-  @Input() appGuid;
+  @Input() instances: number;
+  @Input() cfGuid: string;
+  @Input() appGuid: string;
 
   // Observable on the running instances count for the application
   public runningInstances$: Observable<number>;
@@ -23,14 +23,14 @@ export class RunningInstancesComponent implements OnInit {
 
   ngOnInit() {
     const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);
-    const paginationMonitor = this.paginationMonitorFactory.create(
+    const paginationMonitor = this.paginationMonitorFactory.create<AppStat>(
       dummyAction.paginationKey,
       dummyAction
     );
     this.runningInstances$ = paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
         const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
-        return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
+        return allInstances.filter(stat => stat.state === 'RUNNING').length;
       })
     );
   }

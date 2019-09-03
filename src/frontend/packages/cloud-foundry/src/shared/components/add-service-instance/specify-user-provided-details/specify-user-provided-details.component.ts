@@ -13,28 +13,21 @@ import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  serviceBindingEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import {
-  selectCreateServiceInstance,
-} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
-import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
-import { environment } from '../../../../../../core/src/environments/environment.prod';
-import {
-  AppNameUniqueChecking,
-} from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
-import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { userProvidedServiceInstanceEntityType, serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCreateServiceInstance } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
+import { environment } from '../../../../../../core/src/environments/environment';
+import {
+  CloudFoundryUserProvidedServicesService
+} from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
+import { urlValidationExpression, safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
+import { AppNameUniqueChecking } from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
+import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
+import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 
 
 const { proxyAPIVersion, cfAPIVersion } = environment;

@@ -6,7 +6,7 @@ import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
 import { GitBranch, GitCommit } from '../store/types/git.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
@@ -77,7 +77,7 @@ export class SaveAppOverrides implements Action {
   type = SAVE_APP_OVERRIDE_DETAILS;
 }
 
-export class FetchCommit implements IRequestAction {
+export class FetchCommit implements EntityRequestAction {
   commit: GitCommit;
   public endpointType = CF_ENDPOINT_TYPE;
   constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }

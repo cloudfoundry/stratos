@@ -17,6 +17,10 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
@@ -27,10 +31,7 @@ import { MetricQueryType } from '../../../../../core/src/shared/services/metrics
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 import {
   getPaginationObservables,
   PaginationObservables,
@@ -38,7 +39,6 @@ import {
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
-import { QParam } from '../../../../../store/src/types/pagination.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -109,14 +109,13 @@ export class CloudFoundryEndpointService {
     const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
     const action = new GetAllApplications(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid);
-    action.initialParams = {
-      q: []
-    };
+    action.initialParams = {};
+    action.initialParams.q = [];
     if (orgGuid) {
-      action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
     }
     if (spaceGuid) {
-      action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
+      action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
     }
     return fetchTotalResults(action, store, pmf);
   }

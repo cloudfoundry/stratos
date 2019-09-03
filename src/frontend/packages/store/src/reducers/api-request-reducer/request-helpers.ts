@@ -1,6 +1,7 @@
 import { RequestMethod } from '@angular/http';
 import { Store } from '@ngrx/store';
 
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { pathGet } from '../../../../core/src/core/utils.service';
 import { APIResponse } from '../../actions/request.actions';
@@ -10,6 +11,7 @@ import { NormalizedResponse } from '../../types/api.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
   APISuccessOrFailedAction,
+  EntityRequestAction,
   ICFAction,
   InternalEndpointError,
   SingleEntityAction,
@@ -80,7 +82,7 @@ export function createRequestStateFromResponse(
 
 export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
-export function getRequestTypeFromMethod(action): ApiRequestTypes {
+export function getRequestTypeFromMethod(action: EntityRequestAction): ApiRequestTypes {
   let method = pathGet('options.method', action);
   if (typeof method === 'string') {
     method = method.toString().toLowerCase();
@@ -188,15 +190,17 @@ export function completeApiRequest<T extends GeneralAppState = GeneralAppState>(
 
 export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
   store: Store<T>,
-  apiAction: ICFAction | PaginatedAction,
+  apiAction: EntityRequestAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
+  catalogueEntity: StratosBaseCatalogueEntity,
   internalEndpointError?: InternalEndpointError
 ) {
   const actions = getFailApiRequestActions(
     apiAction,
     error,
     requestType,
+    catalogueEntity,
     internalEndpointError
   );
   store.dispatch(actions[0]);
@@ -204,13 +208,14 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
 }
 
 export function getFailApiRequestActions(
-  apiAction: ICFAction | PaginatedAction,
+  apiAction: EntityRequestAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
-  internalEndpointError?: InternalEndpointError
+  catalogueEntity: StratosBaseCatalogueEntity,
+  internalEndpointError?: InternalEndpointError,
 ) {
   return [
-    new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
+    new APISuccessOrFailedAction(catalogueEntity.getRequestAction('failure', requestType, apiAction).type, apiAction, error.message),
     new WrapperRequestActionFailed(
       error.message,
       apiAction,

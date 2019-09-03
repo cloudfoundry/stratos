@@ -1,9 +1,9 @@
 import { IAppSummary, IRoute } from '../../../../core/src/core/cf-api.types';
-import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/application-service-routes.actions';
-import { DeleteRoute, RouteEvents, UnmapRoute } from '../../actions/route.actions';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/application-service-routes.actions';
+import { DeleteRoute, RouteEvents, UnmapRoute } from '../../actions/route.actions';
 
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
@@ -31,7 +31,7 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>
       return state;
   }
 }
-export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<APIResource<IAppSummary>>, action: APISuccessOrFailedAction) {
+export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<IAppSummary>, action: APISuccessOrFailedAction) {
   let currentState;
   let routeGuid;
   switch (action.type) {
@@ -62,10 +62,10 @@ export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<API
 
 }
 function newState(
-  currentState: APIResource<IAppSummary>,
+  currentState: IAppSummary,
   appGuid: string,
   routeGuid: string,
-  state: IRequestEntityTypeState<APIResource<IAppSummary>>
+  state: IRequestEntityTypeState<IAppSummary>
 ) {
 
   if (!currentState) {
@@ -75,10 +75,7 @@ function newState(
     ...state,
     [appGuid]: {
       ...currentState,
-      entity: {
-        ...currentState.entity,
-        routes: currentState.entity.routes.filter(r => r.entity.guid !== routeGuid)
-      }
+      routes: currentState.routes.filter(r => r.guid !== routeGuid)
     }
   };
 }

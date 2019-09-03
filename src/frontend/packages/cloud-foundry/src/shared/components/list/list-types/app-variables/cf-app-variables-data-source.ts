@@ -7,7 +7,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GetAppEnvVarsAction } from '../../../../../actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../actions/app-variables.actions';

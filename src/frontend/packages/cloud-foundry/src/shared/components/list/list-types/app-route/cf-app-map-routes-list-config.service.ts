@@ -14,7 +14,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';

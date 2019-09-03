@@ -12,7 +12,7 @@ import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
 
 @NgModule({})
-export class EffectsFeatureModule {
+export class EntityCatalogueFeatureModule {
   constructor(
     store: Store<any>,
     reducerManager: ReducerManager,
@@ -35,7 +35,7 @@ export class EntityCatalogueModule {
   static forFeature(entityFactory: () => StratosBaseCatalogueEntity[]): ModuleWithProviders {
     // Note - If you place any code here before `return` you get funky errors.
     return {
-      ngModule: EffectsFeatureModule,
+      ngModule: EntityCatalogueFeatureModule,
       providers: [
         ReducerManager,
         Store,

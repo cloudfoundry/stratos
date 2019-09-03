@@ -23,9 +23,13 @@ import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
+import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
 
 
 @NgModule({
+  providers: [
+    PipelineHttpClient
+  ],
   imports: [
     AppReducersModule,
     HttpModule,

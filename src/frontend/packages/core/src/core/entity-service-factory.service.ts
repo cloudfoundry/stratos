@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { RequestSectionKeys, TRequestTypeKeys } from '../../../store/src/reducers/api-request-reducer/types';
-import { IRequestAction } from '../../../store/src/types/request.types';
-import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { EntityService } from './entity-service';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
+import { TRequestTypeKeys, RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
+import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 
 @Injectable()
 export class EntityServiceFactory {
@@ -19,7 +19,7 @@ export class EntityServiceFactory {
     // FIXME: Remove entityId and use action.guid (should be accessibly via IRequestAction-->SingleEntityAction) - STRAT-159
     // FIXME: Also we should bump this into the catalogue https://jira.capbristol.com/browse/STRAT-141
     entityId: string,
-    action: IRequestAction,
+    action: EntityRequestAction,
     validateRelations = true,
     entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {

@@ -119,7 +119,7 @@ export const testSessionData: SessionData = {
   plugins: {
     demo: false
   }
-}
+};
 
 function getDefaultInitialTestStratosStoreState() {
   return {
@@ -211,7 +211,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
     pagination: {
       system: {},
       stratosEndpoint: {
-        "endpoint-list": {
+        'endpoint-list': {
           pageCount: 1,
           currentPage: 1,
           totalResults: 0,

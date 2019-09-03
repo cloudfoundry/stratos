@@ -5,7 +5,7 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, tap } from 'rxjs/operators';
 
 import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { RestageApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
+import { RestageApplication, UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { IAppSummary } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
@@ -82,14 +82,14 @@ export class BuildTabComponent implements OnInit {
       combineLatest(
         this.applicationService.appSummary$
       ),
-      map(([app, appSummary]: [ApplicationData, EntityInfo<APIResource<IAppSummary>>]) => {
+      map(([app, appSummary]: [ApplicationData, EntityInfo<IAppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
 
     this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection['Updating-Existing-Application']);
+          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
         return { updating };
       }),
       startWith({ updating: true })

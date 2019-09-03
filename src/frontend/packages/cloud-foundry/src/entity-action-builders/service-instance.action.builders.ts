@@ -8,7 +8,6 @@ import {
 } from '../actions/service-instances.actions';
 import { GetServicePlanServiceInstances } from '../actions/service-plan.actions';
 import { GetServiceInstancesForSpace } from '../actions/space.actions';
-import { QParam } from '../../../store/src/types/pagination.types';
 
 export const serviceInstanceActionBuilders = {
   get: (
@@ -81,7 +80,7 @@ export const serviceInstanceActionBuilders = {
     spaceGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    qParams: QParam[],
+    qParams: string[],
     includeRelations?: string[],
     populateMissing?: boolean
   ) => new GetServiceInstancesForSpace(spaceGuid, endpointGuid, paginationKey, qParams, includeRelations, populateMissing)

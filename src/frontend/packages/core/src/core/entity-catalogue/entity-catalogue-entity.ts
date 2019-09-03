@@ -1,8 +1,12 @@
 import { ActionReducer, Store } from '@ngrx/store';
+import { normalize } from 'normalizr';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
 import { endpointEntitySchema } from '../../base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
@@ -15,9 +19,9 @@ import {
   IEntityMetadata,
   IStratosBaseEntityDefinition,
   IStratosEndpointDefinition,
-  IStratosEndpointWithoutSchemaDefinition,
   IStratosEntityBuilder,
   IStratosEntityDefinition,
+  StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
 
 export interface EntityCatalogueBuilders<
@@ -132,6 +136,42 @@ export class StratosBaseCatalogueEntity<
       subType
     };
   }
+  // Backward compatibility with the old actions.
+  // This should be removed after everything is based on the new flow
+  private getLegacyTypeFromAction(
+    action: EntityRequestAction,
+    actionString: 'start' | 'success' | 'failure' | 'complete'
+  ) {
+    if (action && action.actions) {
+      switch (actionString) {
+        case 'success':
+          return action.actions[1];
+        case 'failure':
+          return action.actions[2];
+        case 'start':
+          return action.actions[0];
+      }
+    }
+    return null;
+  }
+
+  public getRequestAction(
+    actionString: 'start' | 'success' | 'failure' | 'complete',
+    requestType: ApiRequestTypes,
+    action?: EntityRequestAction,
+    response?: any
+  ): APISuccessOrFailedAction {
+    const type = this.getLegacyTypeFromAction(action, actionString) || `@stratos/${this.entityKey}/${requestType}/${actionString}`;
+    return new APISuccessOrFailedAction(type, action, response);
+  }
+
+  public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {
+    const schema = this.getSchema(schemaKey);
+    if (Array.isArray(entities)) {
+      return normalize(entities, [schema]);
+    }
+    return normalize(entities, schema);
+  }
 
 }
 
@@ -140,7 +180,7 @@ export class StratosCatalogueEntity<
   Y = any,
   AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
   > extends StratosBaseCatalogueEntity<T, Y, AB> {
-  public definition: IStratosEntityDefinition<EntityCatalogueSchemas>;
+  public definition: IStratosEntityDefinition<EntityCatalogueSchemas, Y>;
   constructor(
     entity: IStratosEntityDefinition,
     config?: EntityCatalogueBuilders<T, Y, AB>
@@ -170,7 +210,7 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
   // This is needed here for typing
   public definition: IStratosEndpointDefinition;
   constructor(
-    entity: IStratosEndpointWithoutSchemaDefinition | IStratosEndpointDefinition,
+    entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string
   ) {
     const fullEntity = {

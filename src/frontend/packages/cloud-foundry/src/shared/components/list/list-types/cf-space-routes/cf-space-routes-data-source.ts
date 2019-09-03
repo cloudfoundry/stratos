@@ -16,7 +16,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 

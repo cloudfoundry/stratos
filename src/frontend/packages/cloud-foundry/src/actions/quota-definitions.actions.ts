@@ -4,10 +4,7 @@ import { IQuotaDefinition } from '../../../core/src/core/cf-api.types';
 import {
   QuotaFormValues,
 } from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
-import {
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
@@ -18,6 +15,7 @@ import {
   spaceQuotaEntityType,
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 
 export const GET_QUOTA_DEFINITION = '[QuotaDefinition] Get one';
 export const GET_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinition] Get one success';

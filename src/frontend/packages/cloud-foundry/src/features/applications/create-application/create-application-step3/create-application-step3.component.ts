@@ -23,10 +23,10 @@ import { IDomain } from '../../../../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { createGetApplicationAction } from '../../application.service';
+import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 
 
 @Component({

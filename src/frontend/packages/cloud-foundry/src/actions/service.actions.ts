@@ -2,14 +2,11 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { getActions } from '../../../store/src/actions/action.helper';
-import {
-  createEntityRelationKey,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { cfEntityFactory, serviceEntityType, servicePlanEntityType } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
+import { EntityInlineParentAction, createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
 export class GetAllServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(

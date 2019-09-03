@@ -9,9 +9,6 @@ import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
 import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import {
   ListPaginationMultiFilterChange,
   RowsState,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -25,6 +22,7 @@ import { PaginatedAction, PaginationParam } from '../../../../../../../store/src
 import { getRoute, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
+import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 
 export interface ListCfRoute extends IRoute {
   url: string;
@@ -37,7 +35,7 @@ function isListCfRoute(anything: any): boolean {
   return !!anything.url && !!anything.isTCPRoute;
 }
 
-export abstract class CfRoutesDataSourceBase extends ListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
+export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
 
   cfGuid: string;
   appGuid: string;

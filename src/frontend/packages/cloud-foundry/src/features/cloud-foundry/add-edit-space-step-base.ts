@@ -18,7 +18,7 @@ import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';

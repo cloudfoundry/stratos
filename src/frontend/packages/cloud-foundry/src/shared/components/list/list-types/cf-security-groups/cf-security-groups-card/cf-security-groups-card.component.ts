@@ -28,15 +28,13 @@ export class CfSecurityGroupsCardComponent extends CardCell<APIResource> impleme
   }
 
   ngOnInit() {
-    this.row.entity.rules.forEach(t => {
-      this.tags.push({
-        value: `${t.entity.protocol} ${this.getRuleString(t.entity)}`,
-        key: t,
-        color: this.typeColors[t.entity.protocol]
-      });
-    });
-
+    this.tags = this.row.entity.rules.map(t => ({
+      value: `${t.protocol} ${this.getRuleString(t)}`,
+      key: t,
+      color: this.typeColors[t.protocol]
+    }));
   }
+
   getSpaceUrl = (space: APIResource<ISpace>) => {
     return [
       '/cloud-foundry',

@@ -5,17 +5,15 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+
 import { GetAppStatsAction } from '../../../../../actions/app-metadata.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { applicationEntityType, appStatsEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
-import { AppStat } from '../../../../../store/types/app-metadata.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
+import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
+import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 
-export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
+export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStat> {
 
   constructor(
     store: Store<CFAppState>,
@@ -42,8 +40,8 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
           Object.keys(instances).forEach(key => {
             res.push({
               index: key,
-              usage: this.calcUsage(instances[key].entity),
-              value: instances[key].entity
+              usage: this.calcUsage(instances[key]),
+              value: instances[key]
             });
           });
           return res;

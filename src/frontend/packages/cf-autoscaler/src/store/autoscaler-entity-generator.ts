@@ -33,7 +33,8 @@ export function generateASEntities(): StratosBaseCatalogueEntity[] {
     iconFont: 'stratos-icons',
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [],
-  } as IStratosEndpointDefinition;
+    schema: undefined
+  };
   return [
     generatePolicyEntity(endpointDefinition),
     generatePolicyTriggerEntity(endpointDefinition),

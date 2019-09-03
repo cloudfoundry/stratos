@@ -40,13 +40,13 @@ import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers
 import { NormalizedResponse } from '../types/api.types';
 import { EndpointModel } from '../types/endpoint.types';
 import {
-  IRequestAction,
+  EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { DispatchOnlyAppState } from './../app-state';
 import { PaginatedAction } from './../types/pagination.types';
+import { DispatchOnlyAppState } from '../app-state';
 
 
 @Injectable()
@@ -252,7 +252,7 @@ export class EndpointsEffect {
       guid,
       type,
       updatingKey,
-    } as IRequestAction;
+    } as EntityRequestAction;
   }
 
   private getEndpointDeleteAction(guid, type) {
@@ -261,11 +261,11 @@ export class EndpointsEffect {
       entityType,
       guid,
       type,
-    } as IRequestAction;
+    } as EntityRequestAction;
   }
 
   private doEndpointAction(
-    apiAction: IRequestAction | PaginatedAction,
+    apiAction: EntityRequestAction | PaginatedAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',

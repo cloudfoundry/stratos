@@ -4,9 +4,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
-import { DeleteSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   domainEntityType,
   organizationEntityType,
@@ -31,12 +28,15 @@ import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitor
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
-import { createEntityRelationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { DeleteSpace } from '../../../actions/space.actions';
+import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
+import { GetOrganization } from '../../../actions/organization.actions';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,

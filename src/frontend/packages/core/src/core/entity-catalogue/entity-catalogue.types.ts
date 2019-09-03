@@ -1,10 +1,17 @@
 import { Observable } from 'rxjs';
 
+import {
+  PreApiRequest,
+  PrePaginationApiRequest,
+  SuccessfulApiResponseDataMapper,
+} from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import {
+  PaginationPageIteratorConfig,
+} from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { Omit } from '../utils.service';
-
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -47,6 +54,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly listDetailsComponent?: any;
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
+  readonly paginationConfig?: PaginationPageIteratorConfig;
 }
 
 
@@ -64,18 +72,37 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   readonly urlValidationRegexString?: string;
   readonly authTypes: EndpointAuthTypeConfig[];
   readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
+  // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
+  // This will be used for all entities with this endpoint type.
+  readonly globalSuccessfulRequestDataMapper?: SuccessfulApiResponseDataMapper;
+  // Allows an entity to manipulate the request object before it's sent.
+  // This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
+  readonly globalPreRequest?: PreApiRequest;
+  readonly globalPrePaginationRequest?: PrePaginationApiRequest;
 }
 
-export interface IStratosEndpointWithoutSchemaDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
+export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
 
 /**
  * Static information describing a stratos entity.
  *
  * @export
  */
-export interface IStratosEntityDefinition<T = EntitySchema | EntityCatalogueSchemas> extends IStratosBaseEntityDefinition<T> {
-  readonly endpoint: IStratosEndpointDefinition;
+export interface IStratosEntityDefinition<
+  T = EntitySchema | EntityCatalogueSchemas,
+  E = any,
+  I = E
+  > extends IStratosBaseEntityDefinition<T> {
+  readonly endpoint: StratosEndpointExtensionDefinition;
   readonly subTypes?: Omit<IStratosEntityDefinition, 'schema' | 'subTypes' | 'endpoint'>[];
+  // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
+  // This will override any globalSuccessfulRequestDataMapper found in the endpoint.
+  // TODO We should wrap this and the global version with immer to make them immutable.
+  readonly successfulRequestDataMapper?: SuccessfulApiResponseDataMapper<E, I> | 'false' | string;
+  // Allows an entity to manipulate the request object before it's sent.
+  // This will override any globalPreRequest found in the endpoint.
+  readonly preRequest?: PreApiRequest;
+  readonly prePaginationRequest?: PrePaginationApiRequest;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {
@@ -88,6 +115,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   getStatusObservable?(entity: Y): Observable<StratosStatus>;
+  // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
   getLink?(entityMetadata: T): string;
   getLines?(entityMetadata: T): [string, string | Observable<string>][];

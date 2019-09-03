@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import {
   AppMetadataTypes,
   GetAppStatsAction,
@@ -28,9 +28,8 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { AppStat } from '../../../../cloud-foundry/src/store/types/app-metadata.types';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import {
@@ -41,7 +40,6 @@ import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
 import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { createEntityRelationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getCurrentPageRequestInfo,
@@ -52,12 +50,14 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
+import { selectCfEntity } from '../../store/selectors/api.selectors';
+import { AppStat } from '../../store/types/app-metadata.types';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -84,7 +84,7 @@ export interface ApplicationData {
 export class ApplicationService {
 
   private appEntityService: EntityService<APIResource<IApp>>;
-  private appSummaryEntityService: EntityService<APIResource<IAppSummary>>;
+  private appSummaryEntityService: EntityService<IAppSummary>;
 
   constructor(
     @Inject(CF_GUID) public cfGuid: string,
@@ -99,7 +99,7 @@ export class ApplicationService {
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
     );
-    this.appSummaryEntityService = this.entityServiceFactory.create<APIResource<IAppSummary>>(
+    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
       false
@@ -125,8 +125,8 @@ export class ApplicationService {
 
   app$: Observable<EntityInfo<APIResource<IApp>>>;
   waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
-  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>>;
-  appStats$: Observable<APIResource<AppStat>[]>;
+  appSummary$: Observable<EntityInfo<IAppSummary>>;
+  appStats$: Observable<AppStat[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
   appOrg$: Observable<APIResource<IOrganization>>;
@@ -156,12 +156,7 @@ export class ApplicationService {
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
-        const appInstances = [].concat.apply([], Object.values(appInstancesPages))
-          .filter(apiResource => !!apiResource)
-          .map(apiResource => {
-            return apiResource.entity;
-          });
-        return appStateService.get(app, appInstances);
+        return appStateService.get(app, appInstancesPages);
       })
     ).pipe(publishReplay(1), refCount());
   }
@@ -181,7 +176,9 @@ export class ApplicationService {
         ).waitForEntity$.pipe(
           map(entityInfo => entityInfo.entity)
         );
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
     this.appOrg$ = moreWaiting$.pipe(
       first(),
@@ -234,7 +231,7 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$.pipe(
       combineLatest(this.store.select(endpointEntitiesSelector)),
-      filter(([{ entity }, endpoints]: [EntityInfo, any]) => {
+      filter(([{ entity }]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
       }),
       map(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]): ApplicationData => {
@@ -248,8 +245,8 @@ export class ApplicationService {
 
     this.applicationState$ = this.waitForAppEntity$.pipe(
       combineLatest(this.appStats$.pipe(startWith(null))),
-      map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStatsArray ? appStatsArray.map(apiResource => apiResource.entity) : null);
+      map(([appInfo, appStatsArray]: [EntityInfo, AppStat[]]) => {
+        return this.appStateService.get(appInfo.entity.entity, appStatsArray || null);
       }), publishReplay(1), refCount());
 
     this.applicationStratProject$ = this.appEnvVars.entities$.pipe(map(applicationEnvVars => {
@@ -308,13 +305,13 @@ export class ApplicationService {
     this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
       map(({ entity }) => entity),
       filter(app => !!app),
-      map(app => {
-        const routes = app.entity.routes ? app.entity.routes : [];
-        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p.entity.port));
+      map(applicationSummary => {
+        const routes = applicationSummary.routes ? applicationSummary.routes : [];
+        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p.port));
         return nonTCPRoutes[0] || null;
       }),
-      map(entRoute => !!entRoute && !!entRoute.entity && !!entRoute.entity.domain ?
-        getRoute(entRoute.entity.port, entRoute.entity.host, entRoute.entity.path, true, false, entRoute.entity.domain.name) :
+      map(entRoute => !!entRoute && !!entRoute && !!entRoute.domain ?
+        getRoute(entRoute.port, entRoute.host, entRoute.path, true, false, entRoute.domain.name) :
         null
       )
     );
@@ -344,10 +341,12 @@ export class ApplicationService {
     ));
 
     // Create an Observable that can be used to determine when the update completed
-    const actionState = selectUpdateInfo(applicationEntityType,
+    const actionState = selectUpdateInfo(
+      entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, applicationEntityType),
       this.appGuid,
-      UpdateExistingApplication.updateKey);
-    return this.store.select(actionState).pipe(filter(item => !item.busy));
+      UpdateExistingApplication.updateKey
+    );
+    return this.store.select(actionState).pipe(filter(item => !item.busy), first());
   }
 }
 

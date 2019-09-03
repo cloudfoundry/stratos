@@ -13,7 +13,7 @@ export class InternalEventMonitorFactory {
 
   private events$: Observable<InternalEventsState>;
 
-  constructor(private store: Store<InternalAppState>, private ngZone: NgZone) {
+  constructor(store: Store<InternalAppState>, private ngZone: NgZone) {
 
     this.events$ = store.select(internalEventStateSelector).pipe(
       distinctUntilChanged(),

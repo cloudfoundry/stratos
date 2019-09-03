@@ -52,7 +52,7 @@ import { PaginationMonitorFactory } from '../../../../../../core/src/shared/moni
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';

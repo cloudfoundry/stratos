@@ -10,7 +10,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 

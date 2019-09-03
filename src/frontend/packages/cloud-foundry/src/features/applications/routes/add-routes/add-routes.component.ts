@@ -11,7 +11,6 @@ import {
 } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
 import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
@@ -29,10 +28,11 @@ import {
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { createEntityRelationKey } from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../application.service';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;

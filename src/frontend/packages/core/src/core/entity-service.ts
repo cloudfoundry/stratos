@@ -12,7 +12,7 @@ import {
 } from '../../../store/src/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
-import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
+import { EntityRequestAction, ICFAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
@@ -22,8 +22,8 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   return entityRequestInfo.fetching ||
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
-    entityRequestInfo.deleting.deleted ||
-    entityRequestInfo.updating._root_.busy;
+    entityRequestInfo.deleting.deleted;
+  // TODO: RC test removal of updating._root_.busy
 }
 
 /**
@@ -34,7 +34,7 @@ export class EntityService<T = any> {
   constructor(
     private store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
-    public action: IRequestAction,
+    public action: EntityRequestAction,
     public validateRelations = true,
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
@@ -134,7 +134,8 @@ export class EntityService<T = any> {
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
-    return entity && !isEntityBlocked(entityRequestInfo);
+    const isBlocked = isEntityBlocked(entityRequestInfo);
+    return entity && !isBlocked;
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {

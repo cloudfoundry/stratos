@@ -19,7 +19,7 @@ import { PaginationMonitorFactory } from '../../../../../../core/src/shared/moni
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';

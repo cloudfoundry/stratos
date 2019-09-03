@@ -10,7 +10,6 @@ import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata
 import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
-import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../../../core/src/core/entity-service';
 import {
@@ -40,6 +39,8 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
+import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
+import { UpdateExistingApplication } from '../../../../actions/application.actions';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -261,7 +262,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection['Updating-Existing-Application']);
+          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
         return { updating };
       }),
       startWith({ updating: true })

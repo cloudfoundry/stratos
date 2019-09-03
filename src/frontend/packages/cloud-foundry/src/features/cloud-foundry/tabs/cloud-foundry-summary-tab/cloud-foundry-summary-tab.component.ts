@@ -20,6 +20,7 @@ export class CloudFoundrySummaryTabComponent {
     this.appLink = () => {
       goToAppWall(store, cfEndpointService.cfGuid);
     };
+
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(

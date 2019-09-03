@@ -39,6 +39,7 @@ export function selectUpdateInfo(
   entityGuid: string,
   updatingKey: string
 ) {
+
   return compose(
     getUpdateSectionById(updatingKey),
     getEntityUpdateSections,

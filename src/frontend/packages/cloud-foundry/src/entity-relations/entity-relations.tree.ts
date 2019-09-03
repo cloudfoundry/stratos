@@ -1,4 +1,4 @@
-import { EntitySchema } from '../entity-schema';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { createEntityRelationKey, EntityInlineParentAction, EntityTree } from './entity-relations.types';
 

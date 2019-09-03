@@ -1,22 +1,19 @@
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
+import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
+import { ISpace, IApp, IAppSummary, IDomain } from '../src/core/cf-api.types';
+import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
 import {
-  ApplicationEnvVarsHelper,
   EnvVarStratosProject,
+  ApplicationEnvVarsHelper
 } from '../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -54,10 +51,10 @@ export class ApplicationServiceMock {
   app$: Observable<EntityInfo<APIResource<IApp>>> = observableOf({
     entity: { entity: {} }
   } as EntityInfo<APIResource<IApp>>);
-  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
+  appSummary$: Observable<EntityInfo<IAppSummary>> = observableOf({
     entityRequestInfo: { fetching: false }
-  } as EntityInfo<APIResource<IAppSummary>>);
-  appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
+  } as EntityInfo<IAppSummary>);
+  appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '' }, deployOverrides: null });
   isFetchingApp$: Observable<boolean> = observableOf(false);

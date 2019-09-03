@@ -18,11 +18,12 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { createEntityRelationKey } from '../../../../../../../store/src/helpers/entity-relations/entity-relations.types';
+
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
 
 // TODO: Move file to CF package (#3769)
 

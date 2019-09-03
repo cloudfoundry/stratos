@@ -1,7 +1,7 @@
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { fetchEntityTree } from './entity-relations.tree';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CFEntitySchema } from '../cf-entity-factory';
 
 describe('Entity Relations - Tree', () => {
 
@@ -110,3 +110,4 @@ describe('Entity Relations - Tree', () => {
   });
 
 });
+

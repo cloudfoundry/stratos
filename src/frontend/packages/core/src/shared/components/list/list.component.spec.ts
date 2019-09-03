@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
@@ -21,6 +20,7 @@ import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers'
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
+import { InternalAppState, GeneralAppState } from '../../../../../store/src/app-state';
 
 class MockedNgZone {
   run = fn => fn();
@@ -64,7 +64,7 @@ describe('ListComponent', () => {
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (
-        iStore: Store<CFAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
+        iStore: Store<GeneralAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
       ) => {
         const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);

@@ -1,43 +1,31 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { GetOrganization } from '../../../../cloud-foundry/src/actions/organization.actions';
-import {
-  FetchRelationPaginatedAction,
-  FetchRelationSingleAction,
-} from '../../../../cloud-foundry/src/actions/relation.actions';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import {
-  cfEntityFactory,
-  organizationEntityType,
-  quotaDefinitionEntityType,
-  routeEntityType,
-  spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
-import { generateCFEntities } from '../../../../cloud-foundry/src/cf-entity-generator';
-import { CFRequestDataState } from '../../../../cloud-foundry/src/cf-entity-types';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../core/src/core/entity-catalogue-test.module';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import {
-  createBasicStoreModule,
-  createEntityStoreState,
-  TestStoreEntity,
-} from '../../../../core/test-framework/store-test-helper';
-import { SetInitialParams } from '../../actions/pagination.actions';
-import { APIResponse } from '../../actions/request.actions';
-import { InternalAppState, IRequestTypeState } from '../../app-state';
-import { IRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../types/request.types';
-import { EntityTreeRelation } from './entity-relation-tree';
-import { validateEntityRelations } from './entity-relations';
+import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../core/src/core/entity-catalogue-test.module';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../../core/test-framework/store-test-helper';
+import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
+import { APIResponse } from '../../../store/src/actions/request.actions';
+import { InternalAppState, IRequestTypeState } from '../../../store/src/app-state';
 import {
   entityRelationMissingQuotaGuid,
   entityRelationMissingQuotaUrl,
   entityRelationMissingSpacesUrl,
-  EntityRelationSpecHelper,
-} from './entity-relations-spec-helper';
+  EntityRelationSpecHelper
+} from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
+import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { GetOrganization } from '../actions/organization.actions';
+import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
+import { CFAppState } from '../cf-app-state';
+import { cfEntityFactory, organizationEntityType, quotaDefinitionEntityType, routeEntityType, spaceEntityType } from '../cf-entity-factory';
+import { generateCFEntities } from '../cf-entity-generator';
+import { CFRequestDataState } from '../cf-entity-types';
+import { EntityTreeRelation } from './entity-relation-tree';
+import { validateEntityRelations } from './entity-relations';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from './entity-relations.types';
+
+
 
 describe('Entity Relations - validate -', () => {
 
@@ -442,21 +430,24 @@ describe('Entity Relations - validate -', () => {
         [createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType)],
         true);
 
-      const associateAction = new WrapperRequestActionSuccess({
-        entities: {
-          [orgEntityKey]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
-        },
-        result: [orgGuid]
-      }, {
+      const associateAPIAction: EntityRequestAction = {
         endpointGuid: getOrgAction.endpointGuid,
         entity: getOrgAction.entity[0],
         entityLocation: RequestEntityLocation.OBJECT,
         guid: orgGuid,
         entityType: organizationEntityType,
         type: '[Entity] Associate with parent',
-        childEntityKey: quotaEntityKey,
+        // childEntityKey: quotaEntityKey, // TODO: RC Check
         endpointType: CF_ENDPOINT_TYPE
-      } as IRequestAction, 'fetch', 1, 1);
+      };
+
+      const associateAction = new WrapperRequestActionSuccess({
+        entities: {
+          [orgEntityKey]: { [orgGuid]: { entity: { quota_definition: quotaDefinition.metadata.guid }, } }
+        },
+        result: [orgGuid]
+      }, associateAPIAction, 'fetch', 1, 1);
+
 
       inject([Store], (iStore: Store<InternalAppState>) => {
         const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();

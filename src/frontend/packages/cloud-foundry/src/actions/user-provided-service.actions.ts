@@ -3,12 +3,8 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
-import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
+
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import {
   applicationEntityType,
@@ -20,6 +16,12 @@ import {
   userProvidedServiceInstanceEntityType,
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
+import {
+  createEntityRelationKey,
+  EntityInlineParentAction,
+  createEntityRelationPaginationKey
+} from '../entity-relations/entity-relations.types';
+import { QParamJoiners, QParam } from '../../../store/src/q-param';
 
 export const getUserProvidedServiceInstanceRelations = [
   createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
@@ -44,7 +46,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     if (spaceGuid) {
-      this.initialParams.q = [new QParam('space_guid', spaceGuid, ' IN ')];
+      this.initialParams.q = [new QParam('space_guid', spaceGuid, QParamJoiners.in).toString()];
     }
   }
   actions = getActions('User Provided Services', 'Get all User Provided Services');

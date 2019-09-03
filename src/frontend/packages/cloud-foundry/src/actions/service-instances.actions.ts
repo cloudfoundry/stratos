@@ -1,10 +1,7 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import {
-  createEntityRelationKey,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import {
@@ -20,6 +17,7 @@ import {
   spaceEntityType,
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
+import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];

@@ -1,5 +1,5 @@
 
-import {share, map} from 'rxjs/operators';
+import { share, map } from 'rxjs/operators';
 import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -80,8 +80,7 @@ export class ApplicationMonitorService {
       const statsCount = stats.length;
       let validStatsCount = 0;
 
-      stats.forEach(statEntity => {
-        const stat = statEntity.entity;
+      stats.forEach(stat => {
         // Inly include stats for Running Application Instances
         if (stat.stats && stat.state === 'RUNNING') {
           const usage = stat.stats.usage;
@@ -113,7 +112,7 @@ export class ApplicationMonitorService {
       res.status.instance = res.running === statsCount ? 'ok' : 'warning';
 
       return res;
-    }), share(), );
+    }), share());
   }
 
   roundFourPlaces(num: number): number {

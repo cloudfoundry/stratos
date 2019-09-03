@@ -5,14 +5,14 @@ import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+} from '../entity-relations/entity-relations.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../store/src/types/request.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
 import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -65,7 +65,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
 }
 // FIXME: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
 // a flag somewhere to handle that - https://jira.capbristol.com/browse/STRAT-119
-export class ChangeUserRole extends CFStartAction implements IRequestAction {
+export class ChangeUserRole extends CFStartAction implements EntityRequestAction {
   public endpointType = 'cf';
   constructor(
     public endpointGuid: string,

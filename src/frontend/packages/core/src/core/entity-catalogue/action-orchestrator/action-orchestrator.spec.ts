@@ -1,8 +1,8 @@
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../../../store/src/types/request.types';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator';
 import { getPaginationAction, getRequestAction, hasActions } from './action-orchestrator.spec.helpers';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 
 describe('ActionOrchestrator', () => {
   it('should not have action builders', () => {
@@ -24,7 +24,7 @@ describe('ActionOrchestrator', () => {
 
   it('should have custom actions builders', () => {
     interface Test1OrchestratedActionBuilders extends OrchestratedActionBuilders {
-      customAction202: (guid: string) => IRequestAction;
+      customAction202: (guid: string) => EntityRequestAction;
       customAction101: (guid: string) => PaginatedAction;
     }
     const actionBuilders: Test1OrchestratedActionBuilders = {
