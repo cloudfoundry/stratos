@@ -24,10 +24,10 @@ export function shouldValidate(shouldSkip: boolean, isValidated: boolean, entity
   if (!entityInfo || shouldSkip || isValidated) {
     return false;
   }
-  return entityInfo.fetching ||
-    entityInfo.error ||
-    entityInfo.deleting.busy ||
-    entityInfo.deleting.deleted;
+  return !entityInfo.fetching &&
+    !entityInfo.error &&
+    !entityInfo.deleting.busy &&
+    !entityInfo.deleting.deleted;
 }
 
 export function infoValidator(action: ICFAction, dispatcher) {
