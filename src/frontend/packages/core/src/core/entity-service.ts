@@ -47,7 +47,7 @@ export class EntityService<T = any> {
     store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
     actionOrConfig: EntityRequestAction | EntityActionBuilderEntityConfig,
-    @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandlerBuilder: EntityInfoHandler
+    @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandlerBuilder?: EntityInfoHandler
   ) {
     this.action = this.getAction(actionOrConfig);
     const actionInfoHandler = entityInfoHandlerBuilder ? entityInfoHandlerBuilder(

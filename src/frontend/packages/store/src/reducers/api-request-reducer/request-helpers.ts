@@ -192,8 +192,8 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
   store: Store<T>,
   apiAction: EntityRequestAction,
   error,
-  requestType: ApiRequestTypes = 'fetch',
   catalogueEntity: StratosBaseCatalogueEntity,
+  requestType: ApiRequestTypes = 'fetch',
   internalEndpointError?: InternalEndpointError
 ) {
   const actions = getFailApiRequestActions(

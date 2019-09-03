@@ -1,7 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { HttpModule, XHRBackend } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { APIResponse } from '../../../store/src/actions/request.actions';
@@ -9,10 +9,8 @@ import { GeneralAppState } from '../../../store/src/app-state';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import {
   completeApiRequest,
-  failApiRequest,
   startApiRequest,
 } from '../../../store/src/reducers/api-request-reducer/request-helpers';
-import { RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
 import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityCatalogueTestHelper } from '../../test-framework/entity-catalogue-test-helpers';
@@ -26,6 +24,15 @@ import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import {
+  successEntityHandler
+} from '../../../store/src/entity-request-pipeline/entity-request-base-handlers/success-entity-request.handler';
+
+function getActionDispatcher(store: Store<any>) {
+  return (action: Action) => {
+    store.dispatch(action);
+  };
+}
 
 const endpointType = 'endpoint1';
 const entitySchema = new EntitySchema('child2', endpointType);
@@ -73,7 +80,7 @@ describe('EntityServiceService', () => {
   ) {
 
     const entityMonitor = new EntityMonitor(store, guid, schema.key, schema);
-    return new EntityService(store, entityMonitor, action, false, RequestSectionKeys.CF);
+    return new EntityService(store, entityMonitor, action);
   }
 
   function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey: string) {
@@ -218,7 +225,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failApiRequest(store, action, res);
+      successEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
     })();
   });
 
@@ -240,7 +247,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failApiRequest(store, action, res);
+      successEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
     })();
   });
 
@@ -397,7 +404,7 @@ describe('EntityServiceService', () => {
         first(),
         tap(ent => {
           expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          failApiRequest(store, action, res, 'delete');
+          successEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
         })
       ).subscribe();
 
