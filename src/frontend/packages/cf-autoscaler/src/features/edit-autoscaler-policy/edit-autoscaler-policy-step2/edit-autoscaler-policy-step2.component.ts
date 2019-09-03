@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import {
   AutoscalerConstants,
@@ -15,7 +17,11 @@ import {
   getThresholdMin,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
+import {
+  AppAutoscalerInvalidPolicyError,
+  AppAutoscalerPolicy,
+  AppAutoscalerPolicyLocal,
+} from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
@@ -27,10 +33,12 @@ import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy implements OnInit {
+export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy implements OnInit, OnDestroy {
 
   policyAlert = PolicyAlert;
   metricTypes = AutoscalerConstants.MetricTypes;
+  private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
+  metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
   editTriggerForm: FormGroup;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
@@ -41,6 +49,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
   private editMetricType = '';
   private editScaleType = 'upper';
   private editAdjustmentType = 'value';
+  private subs: Subscription[] = [];
 
   constructor(
     public applicationService: ApplicationService,
@@ -63,6 +72,12 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       ]],
       adjustment_type: [0, this.validateTriggerAdjustmentType()]
     });
+
+    this.metricUnit$ = this.metricUnitSubject.asObservable();
+
+    this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
+      map(value => this.getMetricUnit(value)),
+    ).subscribe(unit => this.metricUnitSubject.next(unit)));
   }
 
   addTrigger = () => {
@@ -92,6 +107,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs,
       adjustment_type: this.editAdjustmentType
     });
+    this.metricUnitSubject.next(this.getMetricUnit(this.editMetricType));
   }
 
   finishTrigger() {
@@ -184,5 +200,9 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
 
   getMetricUnit(metricType: string) {
     return AutoscalerConstants.getMetricUnit(metricType);
+  }
+
+  ngOnDestroy() {
+    safeUnsubscribe(...this.subs);
   }
 }

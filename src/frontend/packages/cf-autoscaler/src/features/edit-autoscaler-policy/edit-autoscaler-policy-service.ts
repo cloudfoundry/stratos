@@ -8,7 +8,7 @@ import { entityFactory } from '../../../../store/src/helpers/entity-factory';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
+import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 import { appAutoscalerPolicySchemaKey } from '../../store/autoscaler.store.module';
 
 @Injectable()
@@ -47,13 +47,13 @@ export class EditAutoscalerPolicyService {
       first(),
     ).subscribe((({ entity }) => {
       if (entity && entity.entity) {
-        this.stateSubject.next(entity.entity);
+        this.setState(entity.entity);
       }
     }));
   }
 
   setState(state: AppAutoscalerPolicyLocal) {
-    const {...newState} = state;
+    const newState = JSON.parse(JSON.stringify(state));
     this.stateSubject.next(newState);
   }
 
