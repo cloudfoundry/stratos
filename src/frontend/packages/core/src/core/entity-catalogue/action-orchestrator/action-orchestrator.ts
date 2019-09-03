@@ -1,18 +1,16 @@
+import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import {
-  EntityRequestAction, StartAction,
-} from '../../../../../store/src/types/request.types';
-import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { EntityRequestAction, StartAction } from '../../../../../store/src/types/request.types';
 import { Omit } from '../../utils.service';
+import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
 
 // A function that returns a ICFAction
 export type OrchestratedActionBuilder<
-  T extends any[]= any[],
+  T extends any[] = any[],
   Y extends Action = Action
   > = (...args: T) => Y;
 
