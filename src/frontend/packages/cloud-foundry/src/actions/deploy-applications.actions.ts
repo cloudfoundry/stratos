@@ -1,12 +1,12 @@
 import { Action } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
-import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
-import { GitBranch, GitCommit } from '../store/types/git.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-factory';
+import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
+import { GitBranch, GitCommit } from '../store/types/git.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
@@ -55,7 +55,9 @@ export class ProjectExists implements Action {
 }
 
 export class FetchBranchesForProject implements PaginatedAction {
-  constructor(public scm: GitSCM, public projectName: string) { }
+  constructor(public scm: GitSCM, public projectName: string) {
+    this.paginationKey = FetchBranchesForProject.createPaginationKey(scm, projectName);
+  }
   actions = [
     FETCH_BRANCH_START,
     FETCH_BRANCH_SUCCESS,
@@ -64,7 +66,9 @@ export class FetchBranchesForProject implements PaginatedAction {
   public endpointType = CF_ENDPOINT_TYPE;
   type = FETCH_BRANCHES_FOR_PROJECT;
   entityType = gitBranchesEntityType;
-  paginationKey: 'branches';
+  paginationKey: string;
+
+  static createPaginationKey = (scm: GitSCM, projectName: string) => scm.getType() + ':' + projectName;
 }
 
 export class SaveAppDetails implements Action {

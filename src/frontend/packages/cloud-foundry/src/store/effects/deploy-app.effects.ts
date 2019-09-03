@@ -79,7 +79,7 @@ export class DeployAppEffects {
         entityType: gitBranchesEntityType,
         endpointType: CF_ENDPOINT_TYPE,
         type: action.type,
-        paginationKey: 'branches'
+        paginationKey: action.paginationKey
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getBranches(action.projectName).pipe(
@@ -95,10 +95,11 @@ export class DeployAppEffects {
             const id = `${scmType}-${action.projectName}-${b.name}`;
             b.projectId = action.projectName;
             b.entityId = id;
-            mappedData.entities[entityKey][id] = {
-              entity: b,
-              metadata: {}
-            };
+            // mappedData.entities[entityKey][id] = {
+            //   entity: b,
+            //   metadata: {}
+            // };
+            mappedData.entities[entityKey][id] = b;
             mappedData.result.push(id);
           });
           return [
@@ -171,10 +172,11 @@ export class DeployAppEffects {
 
   addCommit(entityKey: string, mappedData: NormalizedResponse, scmType: string, projectName: string, commit: GitCommit) {
     const id = scmType + '-' + projectName + '-' + commit.sha;
-    mappedData.entities[entityKey][id] = {
-      entity: commit,
-      metadata: {}
-    };
+    mappedData.entities[entityKey][id] = commit;
+    // mappedData.entities[entityKey][id] = {
+    //   entity: commit,
+    //   metadata: {}
+    // };
     mappedData.result.push(id);
   }
 

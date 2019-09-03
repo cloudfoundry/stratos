@@ -33,7 +33,7 @@ export class UpdateAppEffects {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app
-            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.endpointGuid as string));
+            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
           case AppMetadataTypes.STATS:
             const statsAction = new GetAppStatsAction(action.apiAction.guid, action.apiAction.endpointGuid as string);

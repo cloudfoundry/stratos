@@ -2,8 +2,13 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import { EntityCatalogueModule } from '../../core/src/core/entity-catalogue.module';
+import { ENTITY_INFO_HANDLER } from '../../core/src/core/entity-service';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
+import { ValidateEntitiesStart } from '../../store/src/actions/request.actions';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { EntityInfo } from '../../store/src/types/api.types';
+import { ICFAction } from '../../store/src/types/request.types';
 import { generateCFEntities } from './cf-entity-generator';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { CloudFoundryModule } from './features/cloud-foundry/cloud-foundry.module';
@@ -14,11 +19,6 @@ import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
-import { ENTITY_INFO_HANDLER } from '../../core/src/core/entity-service';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { ICFAction } from '../../store/src/types/request.types';
-import { EntityInfo } from '../../store/src/types/api.types';
-import { ValidateEntitiesStart } from '../../store/src/actions/request.actions';
 
 export function shouldValidate(shouldSkip: boolean, isValidated: boolean, entityInfo: RequestInfoState) {
   if (!entityInfo || shouldSkip || isValidated) {
@@ -38,13 +38,14 @@ export function infoValidator(action: ICFAction, dispatcher) {
         validated = true;
         dispatcher(new ValidateEntitiesStart(
           action,
-          [entityInfo.entity.metadata.guid],
+          // [entityInfo.entity.metadata.guid],
+          [action.guid],
           false
         ));
       }
     }
   };
-};
+}
 @NgModule({
   imports: [
     EntityCatalogueModule.forFeature(generateCFEntities),
