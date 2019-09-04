@@ -110,30 +110,30 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       }
     }));
 
-    const space$ = this.applicationService.orgDomains$.pipe(
-      // We don't need the domains, but we need them fetched first so we get the router_group_type
-      switchMap(() => this.appService.waitForAppEntity$
-        .pipe(
-          switchMap(app => {
-            this.spaceGuid = app.entity.entity.space_guid;
-            const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
-              this.spaceGuid,
-              new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)]),
-              true
-            );
-            return spaceService.waitForEntity$;
-          }),
-          filter(({ entity }) => !!entity.entity.domains),
-          tap(({ entity }) => {
-            this.domains = [];
-            const domains = entity.entity.domains;
-            domains.forEach(domain => {
-              this.domains.push(domain);
-            });
-            this.selectedDomain = Object.values(this.domains)[0];
-          })
-        )
-      ));
+
+    // const space$ = this.applicationService.orgDomains$.pipe(
+    //   // We don't need the domains, but we need them fetched first so we get the router_group_type
+    //   switchMap(() => this.appService.waitForAppEntity$
+    const space$ = this.appService.waitForAppEntity$.pipe(
+      switchMap(app => {
+        this.spaceGuid = app.entity.entity.space_guid;
+        const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
+          this.spaceGuid,
+          new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)]),
+          true
+        );
+        return spaceService.waitForEntity$;
+      }),
+      filter(({ entity }) => !!entity.entity.domains),
+      tap(({ entity }) => {
+        this.domains = [];
+        const domains = entity.entity.domains;
+        domains.forEach(domain => {
+          this.domains.push(domain);
+        });
+        this.selectedDomain = Object.values(this.domains)[0];
+      })
+    );
 
     this.subscriptions.push(space$.subscribe());
 

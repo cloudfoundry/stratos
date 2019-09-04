@@ -275,7 +275,9 @@ export class ApplicationService {
           },
           true
         ).entities$;
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
 
   }
