@@ -265,7 +265,7 @@ describe('Application Wall Tests -', () => {
 
   });
 
-  fdescribe('Multi Page -', () => {
+  describe('Multi Page -', () => {
     const orgName = E2EHelpers.createCustomName(customOrgSpacesLabel) + '-multi-page';
 
     let appNames;
