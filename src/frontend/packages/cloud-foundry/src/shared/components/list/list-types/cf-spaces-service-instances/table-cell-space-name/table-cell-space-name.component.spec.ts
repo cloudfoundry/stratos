@@ -6,8 +6,8 @@ import {
 import { TableCellSpaceNameComponent } from './table-cell-space-name.component';
 
 describe('TableCellSpaceNameComponent', () => {
-  let component: TableCellSpaceNameComponent<any>;
-  let fixture: ComponentFixture<TableCellSpaceNameComponent<any>>;
+  let component: TableCellSpaceNameComponent;
+  let fixture: ComponentFixture<TableCellSpaceNameComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

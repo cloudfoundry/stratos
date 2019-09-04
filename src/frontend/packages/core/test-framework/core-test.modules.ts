@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 
 import { generateStratosEntities } from '../../core/src/base-entity-types';
-import { CATALOGUE_ENTITIES, EffectsFeatureModule } from '../../core/src/core/entity-catalogue.module';
+import { CATALOGUE_ENTITIES, EntityCatalogueModule } from '../../core/src/core/entity-catalogue.module';
 import { entityCatalogue, TestEntityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @NgModule({
   imports: [
     {
-      ngModule: EffectsFeatureModule,
+      ngModule: EntityCatalogueModule,
       providers: [
         {
           provide: CATALOGUE_ENTITIES, useFactory: () => {

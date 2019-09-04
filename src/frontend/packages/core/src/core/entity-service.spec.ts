@@ -1,7 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { HttpModule, XHRBackend } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { APIResponse } from '../../../store/src/actions/request.actions';
@@ -9,7 +9,6 @@ import { GeneralAppState } from '../../../store/src/app-state';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import {
   completeApiRequest,
-  failApiRequest,
   startApiRequest,
 } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
@@ -26,6 +25,13 @@ import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { failedEntityHandler } from '../../../store/src/entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
+
+function getActionDispatcher(store: Store<any>) {
+  return (action: Action) => {
+    store.dispatch(action);
+  };
+}
 
 const endpointType = 'endpoint1';
 const entitySchema = new EntitySchema('child2', endpointType);
@@ -218,7 +224,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failApiRequest(store, action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
     })();
   });
 
@@ -240,7 +246,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failApiRequest(store, action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
     })();
   });
 
@@ -397,7 +403,7 @@ describe('EntityServiceService', () => {
         first(),
         tap(ent => {
           expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          failApiRequest(store, action, res, 'delete');
+          failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, res);
         })
       ).subscribe();
 

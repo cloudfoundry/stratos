@@ -24,17 +24,8 @@ describe('TableCellFeatureFlagStateComponent', () => {
     fixture = TestBed.createComponent(TableCellFeatureFlagStateComponent);
     component = fixture.componentInstance;
     component.row = {
-      entity: {
-        name: 'test',
-        enabled: true,
-
-      },
-      metadata: {
-        guid: 'test',
-        created_at: '',
-        updated_at: '',
-        url: ''
-      }
+      name: 'test',
+      enabled: true,
     };
     fixture.detectChanges();
   });
