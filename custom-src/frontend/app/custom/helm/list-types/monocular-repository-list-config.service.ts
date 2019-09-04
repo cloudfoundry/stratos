@@ -96,6 +96,5 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
   public getMultiActions = () => [];
   public getSingleActions = () => [];
   public getMultiFiltersConfigs = () => [];
-  public getFilters = () => [];
   public getDataSource = () => this.dataSource;
 }

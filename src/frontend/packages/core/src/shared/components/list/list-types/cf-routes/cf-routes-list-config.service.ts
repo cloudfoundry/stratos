@@ -69,7 +69,6 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
       createCfOrgSpaceFilterConfig('space', 'Space', cfOrgSpaceService.space),
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
-    this.getFilters = () => [];
     initCfOrgSpaceService(store, cfOrgSpaceService,
       this.dataSource.masterAction.entityKey,
       this.dataSource.masterAction.paginationKey).subscribe();

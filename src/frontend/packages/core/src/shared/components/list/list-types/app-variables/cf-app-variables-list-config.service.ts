@@ -131,7 +131,6 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   getColumns = () => this.columns;
   getDataSource = () => this.envVarsDataSource;
   getMultiFiltersConfigs = () => [];
-  getFilters = () => [];
 
   constructor(
     private store: Store<AppState>,

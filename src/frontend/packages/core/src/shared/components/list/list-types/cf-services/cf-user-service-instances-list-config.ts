@@ -197,7 +197,6 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
   getMultiActions = () => [];
   getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
-  getFilters = () => [];
   getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;
 

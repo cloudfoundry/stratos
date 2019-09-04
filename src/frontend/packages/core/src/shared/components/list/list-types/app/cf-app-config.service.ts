@@ -144,6 +144,5 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   getColumns = () => this.columns;
   getDataSource = () => this.appsDataSource;
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
-  getFilters = () => [];
   getInitialised = () => this.initialised$;
 }

@@ -103,7 +103,6 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
   getColumns = () => this.columns;
   getDataSource = () => this.podsDataSource;
   getMultiFiltersConfigs = () => [];
-  getFilters = () => [];
 
   constructor(
     store: Store<AppState>,

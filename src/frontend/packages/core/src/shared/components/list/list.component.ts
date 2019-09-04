@@ -49,7 +49,7 @@ import {
   ListView,
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
-import { SetPage, SetClientFilterKey } from '../../../../../store/src/actions/pagination.actions';
+import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -400,7 +400,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.headerSort.direction = sort.direction;
     }));
 
-    this.filterColumns = this.config.getFilters();
+    this.filterColumns = this.config.getFilters ? this.config.getFilters() : [];
 
     const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
       this.filterString = paginationFilter.string;

@@ -53,6 +53,5 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
   public getMultiActions = () => [];
   public getSingleActions = () => [];
   public getMultiFiltersConfigs = () => [];
-  public getFilters = () => [];
   public getDataSource = () => this.dataSource;
 }

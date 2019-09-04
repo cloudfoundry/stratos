@@ -107,7 +107,6 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
   getMultiActions = () => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
-  getFilters = () => [];
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
 }

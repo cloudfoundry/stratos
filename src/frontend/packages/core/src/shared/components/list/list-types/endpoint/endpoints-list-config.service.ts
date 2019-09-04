@@ -134,5 +134,4 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   public getColumns = () => this.columns;
   public getDataSource = () => this.dataSource;
   public getMultiFiltersConfigs = () => [];
-  public getFilters = () => [];
 }

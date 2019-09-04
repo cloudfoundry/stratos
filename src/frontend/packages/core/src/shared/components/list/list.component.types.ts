@@ -28,11 +28,11 @@ export interface IListConfig<T> {
   /**
    * List of actions that are presented as individual buttons when one or more rows are selected. For example `Delete` of selected rows.
    */
-  getMultiActions: (schemaKey: string) => IMultiListAction<T>[];
+  getMultiActions: () => IMultiListAction<T>[];
   /**
    * List of actions that are presented in a mat-menu for an individual entity. For example `unmap` an application route
    */
-  getSingleActions: (schemaKey: string) => IListAction<T>[];
+  getSingleActions: () => IListAction<T>[];
   /**
    * Collection of column definitions to show when the list is in table mode
    */
@@ -52,7 +52,7 @@ export interface IListConfig<T> {
    * When the filter is selected in a dropdown the filterString filters results using the chosen field.
    * Combined with a transformEntities DataFunction that consumes the filterKey.
    */
-  getFilters: () => IListFilter[];
+  getFilters?: () => IListFilter[];
   /**
    * Fetch an observable that will emit once the underlying config components have been created. For instance if the data source requires
    * something from the store which requires an async call

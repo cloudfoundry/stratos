@@ -74,7 +74,6 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
   getColumns = () => this.columns;
   getDataSource = () => this.podsDataSource;
   getMultiFiltersConfigs = () => [];
-  getFilters = () => [];
   getInitialised = () => this.initialised$;
 
   constructor(
