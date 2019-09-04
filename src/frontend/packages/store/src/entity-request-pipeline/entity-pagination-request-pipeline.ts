@@ -85,6 +85,10 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     action.options.url,
     flattenerConfig
   );
+
+  // Keep, helpful for debugging below chain via tap
+  // const debug = (val, location) => console.log(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);
+
   return getRequestObjectObservable(request).pipe(
     first(),
     switchMap(requestObject => {
@@ -105,7 +109,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
           requestType,
           multiEndpointResponses,
           actionDispatcher
-        ))
+        )),
       );
     })
   );
