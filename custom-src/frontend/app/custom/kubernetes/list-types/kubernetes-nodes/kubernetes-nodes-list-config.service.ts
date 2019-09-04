@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../../store/src/app-state';
-import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
-import { DataFunction } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+import { DataFunction } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
+import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, IListFilter, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { ConditionType, KubernetesNode } from '../../store/kube.types';
@@ -129,10 +129,10 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
         switch (filterKey) {
           case KubernetesNodesListFilterKeys.IP_ADDRESS:
             return entities.filter(node => {
-              const internalIP: string = node.status.addresses.find(address => {
-                return address.type === 'InternalIP';
-              }).address;
-              return internalIP.toUpperCase().includes(filterString);
+              const ipAddress =
+                node.status.addresses.find(address => address.type === 'InternalIP') ||
+                node.status.addresses.find(address => address.type === 'ExternalIP');
+              return ipAddress ? ipAddress.address.toUpperCase().includes(filterString) : false;
             });
 
           case KubernetesNodesListFilterKeys.LABELS:
