@@ -27,7 +27,9 @@ export function shouldValidate(shouldSkip: boolean, isValidated: boolean, entity
   return !entityInfo.fetching &&
     !entityInfo.error &&
     !entityInfo.deleting.busy &&
-    !entityInfo.deleting.deleted;
+    !entityInfo.deleting.deleted &&
+    // This is required to ensure that we don't continue trying to fetch missing relations when we're already fetching missing relations
+    !Object.keys(entityInfo.updating).find(key => entityInfo.updating[key].busy);
 }
 
 export function infoValidator(action: ICFAction, dispatcher) {
