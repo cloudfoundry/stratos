@@ -164,7 +164,11 @@ export class DeployApplicationStep3Component implements OnDestroy {
       // this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
 
       // Ensure the application package_state is correct
-      this.appCatalogueEntity.actionDispatchManager.dispatchGet(this.appGuid, cfGuid);
+      this.appCatalogueEntity.actionDispatchManager.dispatchGet(
+        this.appGuid,
+        cfGuid,
+        { includeRelations: [], populateMissing: false }
+      );
       // this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
       this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }

@@ -40,7 +40,6 @@ export function infoValidator(action: ICFAction, dispatcher) {
         validated = true;
         dispatcher(new ValidateEntitiesStart(
           action,
-          // [entityInfo.entity.metadata.guid],
           [action.guid],
           false
         ));
