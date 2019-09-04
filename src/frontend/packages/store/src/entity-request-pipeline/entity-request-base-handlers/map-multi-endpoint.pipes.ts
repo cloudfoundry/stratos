@@ -1,14 +1,19 @@
+import { Action } from '@ngrx/store';
+
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../../types/api.types';
+import { EntityRequestAction } from '../../types/request.types';
+import { PipelineResult } from '../entity-request-pipeline.types';
 import { getSuccessMapper } from '../pipeline-helpers';
+import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
+import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
 import { normalizeEntityPipeFactory } from './normalize-entity-request-response.pipe';
-import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
-import { EntityRequestAction } from '../../types/request.types';
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
-import { Action } from '@ngrx/store';
-import { NormalizedResponse } from '../../types/api.types';
+import { patchActionWithForcedConfig } from './forced-action-type.helpers';
+import { PaginatedAction } from '../../types/pagination.types';
+
 function getEntities(
   endpointResponse: {
     normalizedEntities: NormalizedResponse<any>;
@@ -33,14 +38,7 @@ function getEntities(
           const newGuid = entity ? innerCatalogueEntity.getGuidFromEntity(entity) || guid : guid;
           return {
             ...newEntitiesOfType,
-            [newGuid]: entitySuccessMapper(
-              endpointResponse.normalizedEntities.entities[entityKey][guid],
-              endpointResponse.endpointGuid,
-              guid,
-              entityKey,
-              action.endpointType,
-              action
-            )
+            [newGuid]: entity
           };
         }, {}
       ) : Object.values(endpointResponse.normalizedEntities[entityKey]);
@@ -57,8 +55,13 @@ export function mapMultiEndpointResponses(
   requestType: ApiRequestTypes,
   multiEndpointResponses: HandledMultiEndpointResponse,
   actionDispatcher: (actionToDispatch: Action) => void
-) {
-  const normalizeEntityPipe = normalizeEntityPipeFactory(catalogueEntity, action.schemaKey);
+): PipelineResult {
+  const normalizeEntityPipe = normalizeEntityPipeFactory(
+    catalogueEntity,
+    // Can this be done outside of the pipe?
+    // This pipe shouldn't have to worry about the multi entity lists.
+    patchActionWithForcedConfig(action).schemaKey
+  );
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   endpointErrorHandler(
     action,
@@ -66,7 +69,6 @@ export function mapMultiEndpointResponses(
     requestType,
     multiEndpointResponses.errors
   );
-  console.log(multiEndpointResponses);
   if (multiEndpointResponses.errors && multiEndpointResponses.errors.length) {
     return {
       success: false,
@@ -78,16 +80,21 @@ export function mapMultiEndpointResponses(
       const entities = getEntities(endpointResponse, action);
       const parentEntities = entities[catalogueEntity.entityKey];
       return {
-        entities,
-        // If we changed the guid of the entities then make sure this is reflected in the result array.
-        result: parentEntities ? Object.keys(parentEntities) : endpointResponse.normalizedEntities.result
+        response: {
+          entities,
+          // If we changed the guid of the entities then make sure this is reflected in the result array.
+          result: parentEntities ? Object.keys(parentEntities) : endpointResponse.normalizedEntities.result,
+        },
+        totalPages: endpointResponse.totalPages,
+        totalResults: endpointResponse.totalResults,
+        success: null
       };
     });
     // NormalizedResponse
     const response = multiEndpointResponseMergePipe(mapped);
     return {
+      ...response,
       success: true,
-      response
     };
   }
 }

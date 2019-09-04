@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap, withLatestFrom } from 'rxjs/operators';
+
 import { baseRequestPipelineFactory } from '../entity-request-pipeline/base-single-entity-request.pipeline';
 import { basePaginatedRequestPipeline } from '../entity-request-pipeline/entity-pagination-request-pipeline';
 import { apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
@@ -12,24 +12,9 @@ import { ICFAction } from '../types/request.types';
 import { ApiActionTypes } from './../actions/request.actions';
 import { InternalAppState } from './../app-state';
 
-interface APIErrorCheck {
-  error: boolean;
-  errorCode: string;
-  guid: string;
-  url: string;
-  errorResponse?: JetStreamCFErrorResponse;
-}
-
-interface JetStreamCFErrorResponse {
-  code: number;
-  description: string;
-  error_code: string;
-}
-
 @Injectable()
 export class APIEffect {
   constructor(
-    private http: Http,
     private actions$: Actions,
     private store: Store<InternalAppState>,
     private httpClient: PipelineHttpClient

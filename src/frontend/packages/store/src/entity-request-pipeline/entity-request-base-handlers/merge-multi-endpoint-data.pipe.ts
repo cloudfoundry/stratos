@@ -1,22 +1,32 @@
-import { NormalizedResponse } from '../../types/api.types';
 import { IRequestEntityTypeState } from '../../app-state';
+import { PipelineResult } from '../entity-request-pipeline.types';
 
 export const multiEndpointResponseMergePipe = (
-  normalizedData: NormalizedResponse[]
-): NormalizedResponse => {
-  return normalizedData.reduce((allEntities, endpointData) => {
-    const entities = mergeEntities(endpointData.entities, allEntities.entities);
+  results: PipelineResult[]
+): PipelineResult => {
+  return results.reduce((allEntities, endpointData) => {
+    const entities = mergeEntities(endpointData.response.entities, allEntities.response.entities);
     return {
-      entities,
-      result: [
-        ...allEntities.result,
-        ...endpointData.result
-      ]
+      success: null,
+      response: {
+        entities,
+        result: [
+          ...allEntities.response.result,
+          ...endpointData.response.result
+        ],
+      },
+      totalPages: allEntities.totalPages + endpointData.totalPages,
+      totalResults: allEntities.totalResults + endpointData.totalResults
     };
   }, {
-    entities: {},
-    result: []
-  } as NormalizedResponse);
+      success: null,
+      response: {
+        entities: {},
+        result: []
+      },
+      totalPages: 0,
+      totalResults: 0
+    });
 };
 
 

@@ -23,7 +23,9 @@ import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
+import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
+import { EntityCatalogueModule } from './core/entity-catalogue.module';
 import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
 import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
@@ -32,12 +34,10 @@ import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
-import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
-import { ServiceCatalogModule } from './features/service-catalog/service-catalog.module';
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
@@ -45,8 +45,6 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { EntityCatalogueModule } from './core/entity-catalogue.module';
-import { baseStratosTypeFactory } from './base-entity-types';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -76,6 +74,7 @@ export class CustomRouterStateSerializer
   }
 }
 
+
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -86,22 +85,19 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
-    EntityCatalogueModule.forFeature(baseStratosTypeFactory),
-    // This need to be first to initialize the entityCatalogue
+    EntityCatalogueModule.forFeature(generateStratosEntities),
     AppStoreExtensionsModule,
+    RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
     BrowserModule,
+    SharedModule,
     BrowserAnimationsModule,
     CoreModule,
-    SharedModule,
-    RouteModule,
-    ApplicationsModule,
     SetupModule,
     LoginModule,
     HomeModule,
     DashboardModule,
-    ServiceCatalogModule,
     StoreRouterConnectingModule, // Create action for router navigation
     AboutModule,
     CustomImportModule,

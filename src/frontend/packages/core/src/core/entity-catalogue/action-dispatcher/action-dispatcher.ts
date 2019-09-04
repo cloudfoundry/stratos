@@ -4,7 +4,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import {
   ActionOrchestrator,
   OrchestratedActionBuilder,
-  StratosOrchestratedActionBuilders,
+  OrchestratedActionBuilders,
 } from '../action-orchestrator/action-orchestrator';
 
 type ActionDispatcher = (action: Action) => void;
@@ -41,7 +41,7 @@ export class EntityActionDispatcher<
     return false;
   }
 }
-export class EntityActionDispatcherManager<T extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders> {
+export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   constructor(private actionDispatcher: (action: Action) => void, private actionOrchestrator: ActionOrchestrator<T>) { }
 
   public getActionDispatcher<Y extends keyof T>(actionType: Y) {
@@ -52,8 +52,8 @@ export class EntityActionDispatcherManager<T extends StratosOrchestratedActionBu
     );
   }
 
-  public getActionBuilder<Y extends keyof T>(actionType: Y) {
-    return this.actionOrchestrator.getActionBuilder(actionType) as T[Y];
+  public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
+    return this.actionOrchestrator.getActionBuilder(actionType);
   }
 
   public dispatchGet(...args: Parameters<T['get']>) {

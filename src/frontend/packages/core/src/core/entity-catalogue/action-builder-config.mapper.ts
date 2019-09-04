@@ -1,6 +1,6 @@
 import {
   OrchestratedActionBuilderConfig,
-  StratosOrchestratedActionBuilders,
+  OrchestratedActionBuilders,
   OrchestratedActionBuilder,
   EntityRequestActionConfig,
   PaginationRequestActionConfig,
@@ -24,17 +24,20 @@ export class ActionBuilderConfigMapper {
   };
 
   static getActionBuilders(
-    builders: StratosOrchestratedActionBuilders | OrchestratedActionBuilderConfig,
+    builders: OrchestratedActionBuilders | OrchestratedActionBuilderConfig,
     endpointType: string,
     entityType: string,
     schemaGetter: (schemaKey: string) => EntitySchema
-  ): StratosOrchestratedActionBuilders {
+  ): OrchestratedActionBuilders {
+    if (!builders) {
+      return {};
+    }
     return Object.keys(builders).reduce((actionBuilders, key) => {
       return {
         ...actionBuilders,
         [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key], key, endpointType, entityType, schemaGetter)
       };
-    }, {} as StratosOrchestratedActionBuilders);
+    }, {} as OrchestratedActionBuilders);
   }
 
   static getActionBuilder(
@@ -59,7 +62,7 @@ export class ActionBuilderConfigMapper {
           configOrBuilder.getUrl(...args),
           ActionBuilderConfigMapper.addHttpMethodFromActionKey(actionKey, configOrBuilder.requestConfig),
           meta,
-          !configOrBuilder.externalRequest
+          configOrBuilder.externalRequest
         );
       };
     }

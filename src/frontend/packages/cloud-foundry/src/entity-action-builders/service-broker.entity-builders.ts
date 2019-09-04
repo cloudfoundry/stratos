@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetServiceBroker, GetServiceBrokers } from '../actions/service-broker.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
@@ -18,4 +18,4 @@ export const serviceBrokerActionBuilders = {
     paginationKey,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetServiceBrokers(endpointGuid, paginationKey, includeRelations, populateMissing)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;

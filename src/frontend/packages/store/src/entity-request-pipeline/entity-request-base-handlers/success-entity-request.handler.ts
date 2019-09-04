@@ -1,17 +1,16 @@
-import { SucceedOrFailEntityRequestHandler } from '../entity-request-pipeline.types';
-import { WrapperRequestActionSuccess } from '../../types/request.types';
-import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
+import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
+import { WrapperRequestActionSuccess } from '../../types/request.types';
 
-export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
+export function successEntityHandler(
   actionDispatcher,
   catalogueEntity,
   requestType,
   action,
-  data,
-  recursivelyDeleting
-) => {
-  const entityAction = catalogueEntity.getRequestAction('success', requestType);
+  result,
+  recursivelyDeleting = false
+) {
+  const entityAction = catalogueEntity.getRequestAction('success', requestType, action, result.response);
   if (
     !action.updatingKey &&
     (requestType === 'create' || requestType === 'delete')
@@ -20,7 +19,11 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
     if (action.removeEntityOnDelete) {
       actionDispatcher(new ClearPaginationOfEntity(action, action.guid));
     } else {
-      actionDispatcher(new ClearPaginationOfType(action));
+      if (action.proxyPaginationEntityConfig) {
+        actionDispatcher(new ClearPaginationOfType(action.proxyPaginationEntityConfig));
+      } else {
+        actionDispatcher(new ClearPaginationOfType(action));
+      }
     }
 
     if (Array.isArray(action.clearPaginationEntityKeys)) {
@@ -29,7 +32,7 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
     }
   }
   actionDispatcher(entityAction);
-  actionDispatcher(new WrapperRequestActionSuccess(data, action, requestType));
+  actionDispatcher(new WrapperRequestActionSuccess(result.response, action, requestType, result.totalResults, result.totalPages));
   if (recursivelyDeleting) {
     actionDispatcher(
       new RecursiveDeleteComplete(
@@ -39,4 +42,4 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
       ),
     );
   }
-};
+}

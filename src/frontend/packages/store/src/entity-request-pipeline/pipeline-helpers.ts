@@ -1,6 +1,7 @@
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { HttpParams } from '@angular/common/http';
+
+import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipeline.types';
 
 export function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
@@ -13,8 +14,14 @@ export function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
 
 export function mergeHttpParams(params1: HttpParams, params2: HttpParams) {
   return params1.keys().reduce((allParams, paramKey) => {
-    // This does not allow for multiple params of the same type. This might become a problem.
-    return allParams.set(paramKey, params1.get(paramKey));
+    const allParamsOFKey = params1.getAll(paramKey) || [];
+    if (allParamsOFKey.length > 1) {
+      // There's multiple values for this param, ensure we append each one
+      return allParamsOFKey.reduce((b, c) => b.append(paramKey, c), allParams);
+    } else if (allParamsOFKey.length > 0) {
+      return allParams.set(paramKey, allParamsOFKey[0]);
+    }
+    return allParams;
   }, params2);
 }
 

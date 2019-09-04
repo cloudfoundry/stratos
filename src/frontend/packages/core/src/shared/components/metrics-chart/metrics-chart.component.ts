@@ -4,7 +4,6 @@ import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import {
   ChartSeries,
@@ -96,10 +95,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     this.committedAction = this.metricsConfig.metricsAction;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.guid,
-      {
-        entityType: metricEntityType,
-        endpointType: ''
-      }
+      this.committedAction
     );
 
     const baseResults$ = this.metricsMonitor.entity$.pipe(

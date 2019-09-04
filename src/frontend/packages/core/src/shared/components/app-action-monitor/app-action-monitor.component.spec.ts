@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { AppActionMonitorComponent } from './app-action-monitor.component';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('AppActionMonitorComponent', () => {
   let component: AppActionMonitorComponent<any>;

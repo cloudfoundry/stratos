@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllAppEvents } from '../actions/app-event.actions';
 
 export const applicationEventActionBuilders = {
@@ -7,4 +7,4 @@ export const applicationEventActionBuilders = {
     paginationKey,
     { applicationGuid }: { applicationGuid: string },
   ) => new GetAllAppEvents(paginationKey, endpointGuid, applicationGuid)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;

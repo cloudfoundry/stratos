@@ -6,13 +6,13 @@ import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
-import { ApplicationMonitorService } from '../../../../core/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
-import { getGuids } from '../../../../core/src/features/applications/application/application-base.component';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
@@ -20,7 +20,7 @@ import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
@@ -29,7 +29,6 @@ import {
   GetAppAutoscalerAppMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerScalingHistoryAction,
-  UpdateAppAutoscalerPolicyAction,
 } from '../../store/app-autoscaler.actions';
 import {
   AppAutoscalerFetchPolicyFailedResponse,
@@ -39,12 +38,10 @@ import {
   AppAutoscalerScalingHistory,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
-import {
-  appAutoscalerAppMetricEntityType,
-  appAutoscalerPolicyEntityType,
-  autoscalerEntityFactory,
-} from '../../store/autoscaler-entity-factory';
+import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { CFEntityServiceFactory } from '../../../../cloud-foundry/src/cf-entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 
 const enableAutoscaler = (appGuid: string, endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
   // This will eventual be moved out into a service and made generic to the cf (one call per cf, rather than one call per app - See #3583)
@@ -138,7 +135,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private applicationService: ApplicationService,
-    private entityServiceFactory: EntityServiceFactory,
+    private entityServiceFactory: CFEntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,
@@ -148,8 +145,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
-      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
-      false
+      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
       map(({ entity }) => entity ? entity.entity : null),
@@ -177,8 +173,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     );
     this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
-      this.scalingHistoryAction,
-      false
+      this.scalingHistoryAction
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
       map(({ entity }) => entity && entity.entity),
@@ -223,7 +218,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
 
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error),
+      filter(request => !!request.error && !request.fetching),
       map(request => {
         const msg = request.message;
         request.error = false;
@@ -276,13 +271,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   detachPolicy(): Observable<ActionState> {
-    this.store.dispatch(
-      new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-    );
-    const actionState = selectUpdateInfo(appAutoscalerPolicyEntityType,
-      this.applicationService.appGuid,
-      UpdateAppAutoscalerPolicyAction.updateKey);
-    return this.store.select(actionState).pipe(filter(item => !!item));
+    const action = new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid);
+    this.store.dispatch(action);
+
+    const catalogueEntity = entityCatalogue.getEntity(action);
+    const actionState = selectDeletionInfo(catalogueEntity.entityKey, this.applicationService.appGuid);
+    return this.store.select(actionState).pipe(filter(item => !item.deleted));
   }
 
   updatePolicyPage = () => {

@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllFeatureFlags } from '../actions/feature-flags.actions';
 
 export const featureFlagActionBuilders = {
@@ -6,4 +6,4 @@ export const featureFlagActionBuilders = {
     endpointGuid,
     paginationKey,
   ) => new GetAllFeatureFlags(endpointGuid, paginationKey)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;

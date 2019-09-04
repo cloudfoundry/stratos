@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { schema as normalizrSchema } from 'normalizr';
 import { EntityRequestAction } from '../../store/src/types/request.types';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import { RequestSectionKeys } from '../../store/src/reducers/api-request-reducer/types';
 import { ENTITY_SERVICE } from '../src/shared/entity.tokens';
 import { AppState } from '../../store/src/app-state';
 
@@ -17,9 +16,7 @@ export function generateTestEntityServiceProvider(
   ) {
     return entityServiceFactory.create(
       guid,
-      action,
-      false,
-      RequestSectionKeys.CF
+      action
     );
   }
 

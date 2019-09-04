@@ -1,4 +1,4 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import {
   GetOrganizationSpaceQuotaDefinitions,
   GetQuotaDefinitions,
@@ -30,6 +30,6 @@ export const quotaDefinitionActionBuilder = {
     includeRelations: string[] = [],
     populateMissing = true
   ) => new GetOrganizationSpaceQuotaDefinitions(paginationKey, orgGuid, endpointGuid, includeRelations, populateMissing)
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;
 
 

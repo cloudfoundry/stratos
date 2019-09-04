@@ -32,25 +32,49 @@ export type GetMultipleActionBuilder<T extends Record<any, any> = Record<any, an
   extraArgs?: T
 ) => PaginatedAction;
 
+export interface EntityRequestInfo {
+  requestConfig?: BaseEntityRequestConfig;
+  schemaKey?: string;
+  externalRequest?: boolean;
+}
+
 // This is used to create a basic single entity pipeline action.
 export class EntityRequestActionConfig<T extends OrchestratedActionBuilder> {
+  public requestConfig: BaseEntityRequestConfig;
+  public schemaKey: string;
+  public externalRequest: boolean;
   constructor(
     public getUrl: (...args: Parameters<T>) => string,
-    public requestConfig: BaseEntityRequestConfig = {},
-    public schemaKey: string = null,
-    public externalRequest: boolean = false
-  ) { }
+    {
+      requestConfig = {},
+      schemaKey = null,
+      externalRequest = false
+    }: EntityRequestInfo
+  ) {
+    this.requestConfig = requestConfig;
+    this.schemaKey = schemaKey;
+    this.externalRequest = externalRequest;
+  }
 }
 
 // This is used to create a basic pagination entity pipeline action.
 export class PaginationRequestActionConfig<T extends OrchestratedActionBuilder> {
+  public requestConfig: BaseEntityRequestConfig;
+  public schemaKey: string;
+  public externalRequest: boolean;
   constructor(
     public paginationKey: string,
     public getUrl: (...args: Parameters<T>) => string,
-    public requestConfig: BasePaginationRequestConfig = {},
-    public schemaKey: string = null,
-    public externalRequest: boolean = false
-  ) { }
+    {
+      requestConfig = {},
+      schemaKey = null,
+      externalRequest = false
+    }: EntityRequestInfo
+  ) {
+    this.requestConfig = requestConfig;
+    this.schemaKey = schemaKey;
+    this.externalRequest = externalRequest;
+  }
 }
 
 export interface BaseEntityRequestConfig {
@@ -103,9 +127,9 @@ export class BaseEntityRequestAction extends BasePipelineRequestAction implement
     url: string,
     requestConfig: BaseEntityRequestConfig,
     metadata: any[] = [],
-    jetstreamRequest: boolean = true
+    externalRequest: boolean = false
   ) {
-    super(entityType, endpointType, entity, endpointGuid, metadata, !jetstreamRequest);
+    super(entityType, endpointType, entity, endpointGuid, metadata, externalRequest);
     this.options = new HttpRequest(requestConfig.httpMethod || 'GET', url, requestConfig.requestBody, requestConfig.requestInit);
   }
 }
@@ -133,7 +157,7 @@ export class BasePaginationRequestAction extends BasePipelineRequestAction imple
 
 
 // A list of functions that can be used get interface with the entity
-export interface StratosOrchestratedActionBuilders {
+export interface OrchestratedActionBuilders {
   get?: KnownEntityActionBuilder;
   remove?: KnownEntityActionBuilder;
   update?: KnownEntityActionBuilder;
@@ -153,16 +177,16 @@ export interface OrchestratedActionBuilderConfig {
   PaginationRequestActionConfig<GetMultipleActionBuilder>;
 }
 
-export class OrchestratedActionBuildersClass implements StratosOrchestratedActionBuilders {
+export class OrchestratedActionBuildersClass implements OrchestratedActionBuilders {
   [actionType: string]: OrchestratedActionBuilder<any[], EntityRequestAction>;
 }
-export class ActionOrchestrator<T extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders> {
+export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
   public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
 
-  public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
-    return this.actionBuilders[actionType];
+  public getActionBuilder<M, Y extends keyof T>(actionType: Y): T[Y] {
+    return this.actionBuilders[actionType] as T[Y];
   }
 
   public hasActionBuilder(actionType: keyof T) {

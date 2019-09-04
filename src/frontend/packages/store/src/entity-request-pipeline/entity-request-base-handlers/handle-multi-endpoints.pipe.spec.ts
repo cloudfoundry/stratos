@@ -63,7 +63,12 @@ describe('handle-multi-endpoint-pipe', () => {
       [endpoint2Guid]: { entities: endpoint2Res },
       [endpoint4Guid]: { entities: [endpoint4Res, endpoint4Res] }
     } as JetstreamResponse;
-    const handled = handleMultiEndpointsPipeFactory(url, (res) => res.entities)(resData);
+    const handled = handleMultiEndpointsPipeFactory(url, {
+      getEntitiesFromResponse: (res) => res.entities,
+      getTotalEntities: (res) => res.entities.length,
+      getPaginationParameters: () => ({ page: '1' }),
+      getTotalPages: () => 4
+    })(resData);
     expect(handled.successes.length).toBe(2);
     expect(handled.successes[0].entities[0].data1).toBe(endpoint2Res.data1);
     expect(handled.successes[1].entities[0].data2).toBe(endpoint4Res.data2);

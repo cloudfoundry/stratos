@@ -33,6 +33,15 @@ export class ListTableComponent extends Component {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
   }
 
+  findRowByCellContent(content) {
+    const cell = this.locator.all(by.css('.app-table__cell')).filter(elem =>
+      elem.getText().then(text => text === content)
+    ).first();
+
+    browser.wait(until.presenceOf(cell));
+    return cell.element(by.xpath('ancestor::app-table-row'));;
+  }
+
   // Get the data in the table
   getTableDataRaw(): promise.Promise<any> {
     const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());

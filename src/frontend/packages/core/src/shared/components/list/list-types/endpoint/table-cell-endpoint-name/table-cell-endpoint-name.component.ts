@@ -35,8 +35,7 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     const id = row['endpointId'] || row['guid'];
     this.endpoint$ = this.entityServiceFactory.create(
       id,
-      new GetAllEndpoints(),
-      false
+      new GetAllEndpoints()
     ).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => {

@@ -4,11 +4,11 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
 import { Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
@@ -17,7 +17,7 @@ import {
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
   AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicy,
@@ -70,8 +70,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     super.ngOnInit();
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
-      false
+      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
   }
 
@@ -85,42 +84,29 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.store.dispatch(
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
-    const waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => {
-        if (request.message && request.message.indexOf('fetch policy') >= 0) {
-          request.message = '';
-          return false;
-        } else {
-          return !!request.error || !!request.response;
-        }
+
+    return this.updateAppAutoscalerPolicyService.entityMonitor.getUpdatingSection(
+      UpdateAppAutoscalerPolicyAction.updateKey
+    ).pipe(
+      pairwise(),
+      filter(([oldUpdateSection, newUpdateSection]) => {
+        return oldUpdateSection.busy && !newUpdateSection.busy;
       }),
+      map(([, newUpdateSection]) => {
+        return newUpdateSection;
+      }),
+      first(),
       map(request => {
-        const msg = request.message;
-        request.error = false;
-        request.response = null;
-        request.message = '';
-        return msg;
-      }),
-      distinctUntilChanged(),
-    ).pipe(map(
-      errorMessage => {
-        if (errorMessage) {
-          return {
-            success: false,
-            message: `Could not update policy: ${errorMessage}`,
-          };
-        } else {
-          return {
-            success: true,
-            redirect: true
-          };
+        if (!request.error) {
+          this.store.dispatch(new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid));
         }
-      }));
-    return waitForAppAutoscalerUpdateStatus$.pipe(take(1), map(res => {
-      return {
-        ...res,
-      };
-    }));
+        return {
+          success: !request.error,
+          redirect: !request.error,
+          message: request.error ? `Could not update policy: ${request.message}` : ''
+        };
+      })
+    );
   }
 
   addSpecificDate = () => {

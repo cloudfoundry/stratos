@@ -3,11 +3,6 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import {
-  FetchRelationAction,
-  FetchRelationPaginatedAction,
-  FetchRelationSingleAction,
-} from '../actions/relation.actions';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { isEntityBlocked } from '../../../core/src/core/entity-service';
 import { pathGet } from '../../../core/src/core/utils.service';
@@ -15,14 +10,19 @@ import { environment } from '../../../core/src/environments/environment';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { pick } from '../../../store/src/helpers/reducer.helper';
 import { RequestInfoState } from '../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { pick } from '../../../store/src/helpers/reducer.helper';
+import {
+  EntityRequestAction,
+  RequestEntityLocation,
+  WrapperRequestActionSuccess,
+} from '../../../store/src/types/request.types';
+import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { createValidationPaginationWatcher } from './entity-relation-tree.helpers';
 import { validationPostProcessor } from './entity-relations-post-processor';
@@ -100,7 +100,7 @@ function createPaginationAction(config: HandleRelationsConfig) {
     parentRelation,
     childRelation,
     includeRelations,
-    createEntityRelationPaginationKey(parentRelation.entityKey, parentGuid, childRelation.entity.relationKey),
+    createEntityRelationPaginationKey(parentRelation.entityType, parentGuid, childRelation.entity.relationKey),
     populateMissing,
     childEntitiesUrl
   );
@@ -191,7 +191,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
 
   if (!cfGuid) {
     throw Error(`No CF Guid provided when validating
-     ${parentRelation.entityKey} ${parentEntity.metadata.guid}'s ${childRelation.entityKey}`);
+     ${parentRelation.entityType} ${parentEntity.metadata.guid}'s ${childRelation.entityType}`);
   }
 
   // Have we failed to find some required missing entities?
@@ -235,7 +235,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
 
         if (childRelation.isArray) {
           const paginationState: PaginationEntityState = pathGet(
-            `${childRelation.entityKey}.${createEntityRelationPaginationKey(parentRelation.entityKey, entity.metadata.guid)}`,
+            `${childRelation.entityKey}.${createEntityRelationPaginationKey(parentRelation.entityType, entity.metadata.guid)}`,
             allPagination);
           childEntitiesAsArray = paginationState ? paginationState.ids[paginationState.currentPage] : null;
         } else {
@@ -336,6 +336,7 @@ function associateChildWithParent(
           guid: action.parentGuid,
           entityType: action.parentEntityConfig.entityType,
           endpointType: action.parentEntityConfig.endpointType,
+          // TODO: RC Check childEntityKEy
           type: '[Entity] Associate with parent',
         };
         if (!environment.production) {
@@ -419,7 +420,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
     config.action = {
       ...config.action,
       entity: [forcedSchema],
-      entityType: entityConfig.endpointType
+      entityType: entityConfig.entityType
     };
   }
   config.newEntities = config.apiResponse ? config.apiResponse.response.entities : null;
@@ -451,7 +452,6 @@ function getRelationAction(action: EntityRequestAction): EntityInlineParentActio
     const entity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType).getSchema(entityConfig.schemaKey);
     return {
       ...action,
-      entityType: entityConfig.entityType,
       entity
     } as EntityInlineParentAction;
   }
@@ -522,6 +522,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           if (!entity.entity[paramName]) {
             return;
           }
+
           const catalogueEntity = entityCatalogue.getEntity(eicAction);
           const entityKey = catalogueEntity.entityKey;
           const normedEntities = entity.entity[paramName].reduce((newNormedEntities, guidOrEntity) => {

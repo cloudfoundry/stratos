@@ -292,8 +292,8 @@ export class CFHelpers {
     return cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces', body);
   }
 
-  baseAddOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<IOrganization>> {
-    return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
+  baseAddOrg(cnsiGuid: string, orgName: string, options = {}): promise.Promise<APIResource<IOrganization>> {
+    return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName, ...options });
   }
 
   addRoute(cnsiGuid: string, spaceGuid: string, domainGuid: string, host: string, port?: number, path?: string)
@@ -508,5 +508,4 @@ export class CFHelpers {
     };
     return this.cfRequestHelper.sendCfPost<APIResource<ISpaceQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
   }
-
 }

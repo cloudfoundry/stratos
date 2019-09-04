@@ -7,7 +7,7 @@ export const startEntityHandler: StartEntityRequestHandler = (
   requestType,
   action
 ) => {
-  const entityAction = catalogueEntity.getRequestAction('start', requestType);
+  const entityAction = catalogueEntity.getRequestAction('start', requestType, action);
   actionDispatcher(new StartRequestAction(action, requestType));
   actionDispatcher(entityAction);
 };

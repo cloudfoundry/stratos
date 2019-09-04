@@ -1,3 +1,4 @@
+import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
@@ -7,7 +8,6 @@ import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
-import { HttpRequest } from '@angular/common/http';
 import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export interface SingleEntityAction {
@@ -31,7 +31,12 @@ export enum RequestEntityLocation {
 
 export type RequestActionEntity = EntitySchema | EntitySchema[];
 export interface EntityRequestAction extends EntityCatalogueEntityConfig, RequestAction {
-  entity?: EntitySchema | EntitySchema[];
+  /**
+   * This is just to maintain backwards compatibility while transitioning
+   * to entity pipeline proper usage
+   */
+  actions?: string[];
+  entity?: RequestActionEntity;
   /**
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section
@@ -117,6 +122,7 @@ export interface ICFAction extends EntityRequestAction {
   options: RequestOptions;
   actions: string[];
   skipValidation?: boolean;
+  validate?: boolean;
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {

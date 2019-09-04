@@ -1,15 +1,17 @@
-import { Store, Action } from '@ngrx/store';
-import { AppState, InternalAppState } from '../app-state';
+import { HttpRequest } from '@angular/common/http';
+import { RequestOptions } from '@angular/http';
+import { Action, Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
+import { AppState, InternalAppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { EntityRequestAction } from '../types/request.types';
-import { Observable } from 'rxjs';
-import { HttpRequest } from '@angular/common/http';
-import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
-import { RequestOptions } from '@angular/http';
-import { PipelineHttpClient } from './pipline-http-client.service';
 import { PaginatedAction } from '../types/pagination.types';
+import { EntityRequestAction } from '../types/request.types';
+import { PipelineHttpClient } from './pipline-http-client.service';
+
 export type ActionDispatcher<T extends Action = Action> = (action: T) => void;
 export interface JetstreamResponse<T = any> {
   [endpointGuid: string]: T;
@@ -27,7 +29,7 @@ export type SucceedOrFailEntityRequestHandler = (
   catalogueEntity: StratosBaseCatalogueEntity,
   requestType: ApiRequestTypes,
   action: EntityRequestAction,
-  response: NormalizedResponse,
+  response: PipelineResult,
   recursivelyDeleting: boolean
 ) => void;
 
@@ -70,6 +72,8 @@ export interface PipelineResult {
   success: boolean;
   errorMessage?: string;
   response?: NormalizedResponse;
+  totalResults?: number;
+  totalPages?: number;
 }
 
 export type EntityRequestPipeline<> = (
@@ -97,7 +101,8 @@ export type PreApiRequest = (
 export type PrePaginationApiRequest = (
   request: HttpRequest<any>,
   action: PaginatedAction,
-  catalogueEntity: StratosBaseCatalogueEntity
+  catalogueEntity: StratosBaseCatalogueEntity,
+  appState: InternalAppState
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
 
 export interface BasePipelineConfig<T extends AppState = InternalAppState, Y extends Action = Action> {

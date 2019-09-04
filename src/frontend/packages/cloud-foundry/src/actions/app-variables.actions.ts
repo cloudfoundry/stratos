@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
 import { UpdateApplication } from './application.actions';
-import { ListAppEnvVar } from '../../../core/src/shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+import { ListAppEnvVar } from '../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 
 export const AppVariables = {
   UPDATE: '[Application Variables] Update',

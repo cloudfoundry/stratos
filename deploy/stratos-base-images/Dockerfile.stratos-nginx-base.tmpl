@@ -1,7 +1,12 @@
 FROM {{BASE_IMAGE}}
 {{#IS_SLE}}
 RUN zypper addrepo -G -t yum -c 'http://nginx.org/packages/sles/12' nginx
+RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SERVER}}' smt_internal_server
 {{/IS_SLE}}
 RUN zypper -n ref && \
     zypper -n up && \
-    zypper in -y nginx
+    zypper in -y nginx apache2-utils
+
+{{#IS_SLE}}
+RUN zypper rr smt_internal_server
+{{/IS_SLE}}    

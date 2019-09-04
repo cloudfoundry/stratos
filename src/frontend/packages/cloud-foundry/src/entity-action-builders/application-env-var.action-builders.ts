@@ -1,6 +1,6 @@
-import { StratosOrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAppEnvVarsAction } from '../actions/app-metadata.actions';
-import { ListAppEnvVar } from '../../../core/src/shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+import { ListAppEnvVar } from '../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import { AppVariablesDelete, AppVariablesEdit, AppVariablesAdd } from '../actions/app-variables.actions';
 
 // App variables are a special case where the entities are actually embedded in an application.s
@@ -25,4 +25,4 @@ export const appEnvVarActionBuilders = {
     allEnvVars,
     newEnvVar
   )
-} as StratosOrchestratedActionBuilders;
+} as OrchestratedActionBuilders;

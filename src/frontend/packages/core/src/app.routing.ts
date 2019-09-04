@@ -14,10 +14,15 @@ import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
+import { NotSetupGuardService } from './core/not-setup-guard.service';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'uaa', component: ConsoleUaaWizardComponent },
+  {
+    path: 'uaa',
+    component: ConsoleUaaWizardComponent,
+    canActivate: [NotSetupGuardService]
+  },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
   { path: 'login', loadChildren: './features/login/login.module#LoginModule' },
@@ -27,7 +32,8 @@ const appRoutes: Routes = [
     canActivate: [AuthGuardService, EndpointsService],
     children: [
       {
-        path: 'home', component: HomePageComponent,
+        path: 'home',
+        component: HomePageComponent,
         data: {
           stratosNavigation: {
             label: 'Home',
@@ -39,7 +45,7 @@ const appRoutes: Routes = [
       },
       {
         path: 'applications',
-        loadChildren: './features/applications/applications.module#ApplicationsModule',
+        loadChildren: '../../cloud-foundry/src/features/applications/applications.module#ApplicationsModule',
         data: {
           stratosNavigation: {
             label: 'Applications',
@@ -68,7 +74,7 @@ const appRoutes: Routes = [
         }]
       },
       {
-        path: 'marketplace', loadChildren: './features/service-catalog/service-catalog.module#ServiceCatalogModule',
+        path: 'marketplace', loadChildren: '../../cloud-foundry/src/features/service-catalog/service-catalog.module#ServiceCatalogModule',
         data: {
           stratosNavigation: {
             label: 'Marketplace',
@@ -78,7 +84,7 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'services', loadChildren: './features/services/services.module#ServicesModule',
+        path: 'services', loadChildren: '../../cloud-foundry/src/features/services/services.module#ServicesModule',
         data: {
           stratosNavigation: {
             label: 'Services',
@@ -89,7 +95,7 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'cloud-foundry', loadChildren: './features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
+        path: 'cloud-foundry', loadChildren: '../../cloud-foundry/src/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
         data: {
           stratosNavigation: {
             label: 'Cloud Foundry',

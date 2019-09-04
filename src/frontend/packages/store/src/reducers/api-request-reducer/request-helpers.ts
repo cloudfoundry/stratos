@@ -1,6 +1,7 @@
 import { RequestMethod } from '@angular/http';
 import { Store } from '@ngrx/store';
 
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { pathGet } from '../../../../core/src/core/utils.service';
 import { APIResponse } from '../../actions/request.actions';
@@ -10,15 +11,14 @@ import { NormalizedResponse } from '../../types/api.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
   APISuccessOrFailedAction,
+  EntityRequestAction,
   ICFAction,
   InternalEndpointError,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-  EntityRequestAction,
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export function getEntityRequestState(
@@ -192,8 +192,8 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
   store: Store<T>,
   apiAction: EntityRequestAction,
   error,
-  requestType: ApiRequestTypes = 'fetch',
   catalogueEntity: StratosBaseCatalogueEntity,
+  requestType: ApiRequestTypes = 'fetch',
   internalEndpointError?: InternalEndpointError
 ) {
   const actions = getFailApiRequestActions(
@@ -215,7 +215,7 @@ export function getFailApiRequestActions(
   internalEndpointError?: InternalEndpointError,
 ) {
   return [
-    new APISuccessOrFailedAction(catalogueEntity.getRequestAction('failure', requestType).type, apiAction, error.message),
+    new APISuccessOrFailedAction(catalogueEntity.getRequestAction('failure', requestType, apiAction).type, apiAction, error.message),
     new WrapperRequestActionFailed(
       error.message,
       apiAction,

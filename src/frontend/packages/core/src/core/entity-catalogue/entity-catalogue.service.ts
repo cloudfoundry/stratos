@@ -1,14 +1,18 @@
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
-import { StratosBaseCatalogueEntity, StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
+import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import {
+  StratosBaseCatalogueEntity,
+  StratosCatalogueEndpointEntity,
+  StratosCatalogueEntity,
+} from './entity-catalogue-entity';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
-import { StratosOrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 
 class EntityCatalogue {
-  private entities: Map<string, StratosCatalogueEntity> = new Map();
-  private endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
+  protected entities: Map<string, StratosCatalogueEntity> = new Map();
+  protected endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
 
   private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
     if (this.endpoints.has(endpoint.entityKey)) {
@@ -97,16 +101,17 @@ class EntityCatalogue {
   public getEntityFromKey(entityKey: string) {
     return this.entities.get(entityKey) || this.endpoints.get(entityKey);
   }
+
   /* tslint:disable:max-line-length */
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders>(
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     entityConfig: EntityCatalogueEntityConfig
   ): StratosBaseCatalogueEntity<T, Y, AB>;
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders>(
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     endpointType: string,
     entityType: string,
     subType?: string
   ): StratosBaseCatalogueEntity<T, Y, AB>;
-  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends StratosOrchestratedActionBuilders = StratosOrchestratedActionBuilders>(
+  public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
     entityType?: string,
     subType?: string
@@ -116,6 +121,12 @@ class EntityCatalogue {
     const entityOfType = this.getEntityOfType(config.entityType, config.endpointType);
     if (subType) {
       return this.getEntitySubType(entityOfType, subType) as StratosBaseCatalogueEntity<T, Y, AB>;
+    }
+    if (!entityOfType) {
+      console.warn(
+        `Could not find catalogue entity for endpoint type '${config.endpointType}' and entity type '${config.entityType}'. Stack: `,
+        new Error().stack
+      );
     }
     return entityOfType as StratosBaseCatalogueEntity<T, Y, AB>;
   }
@@ -164,8 +175,9 @@ class EntityCatalogue {
   }
 
   public getAllEntityRequestDataReducers() {
-    const entities = Array.from(this.entities.values());
-    return entities.reduce((allEntityReducers, entity) => {
+    const entities = this.getAllEntitiesTypes();
+    const endpoints = this.getAllEndpointTypes();
+    return [...entities, ...endpoints].reduce((allEntityReducers, entity) => {
       if (entity.entityKey && entity.builders.dataReducers && entity.builders.dataReducers.length) {
         return {
           ...allEntityReducers,
@@ -178,6 +190,15 @@ class EntityCatalogue {
 }
 
 // Only to be used for tests
-export class TestEntityCatalogue extends EntityCatalogue { }
+export class TestEntityCatalogue extends EntityCatalogue {
+  public clear() {
+    this.endpoints.clear();
+    this.entities.clear();
+  }
+}
 
-export const entityCatalogue = new EntityCatalogue();
+// FIXME: This shouldn't make it into the production code. It's quite the anti pattern but fixes the tests for the time being.
+// https://github.com/cloudfoundry-incubator/stratos/issues/3753 - Reverting the entity catalogue to an Angular service
+// makes testing much easier and remove the need for this.
+/* tslint:disable-next-line:no-string-literal  */
+export const entityCatalogue = !!window['__karma__'] ? new TestEntityCatalogue() : new EntityCatalogue();

@@ -10,12 +10,12 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../cf-entity-factory';
-import { CFStartAction } from './cf-action.types';
 import {
-  EntityInlineParentAction,
   createEntityRelationKey,
-  createEntityRelationPaginationKey
+  createEntityRelationPaginationKey,
+  EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
+import { CFStartAction } from './cf-action.types';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -112,7 +112,7 @@ export class UnmapRoute extends BaseRouteAction {
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
   }
-  endpointTYpe = 'cf';
+  endpointType = 'cf';
   actions = [
     RouteEvents.UNMAP_ROUTE,
     RouteEvents.UNMAP_ROUTE_SUCCESS,

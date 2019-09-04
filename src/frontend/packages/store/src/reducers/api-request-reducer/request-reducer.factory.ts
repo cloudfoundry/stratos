@@ -1,19 +1,25 @@
+import { Action } from '@ngrx/store';
+
+import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
+import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 import {
   RECURSIVE_ENTITY_RESET,
   RECURSIVE_ENTITY_SET_DELETED,
   RECURSIVE_ENTITY_SET_DELETING,
   SetTreeDeleting,
 } from '../../effects/recursive-entity-delete.effect';
-import { StartRequestAction, ISuccessRequestAction, IFailedRequestAction, IUpdateRequestAction } from '../../types/request.types';
+import {
+  IFailedRequestAction,
+  ISuccessRequestAction,
+  IUpdateRequestAction,
+  StartRequestAction,
+} from '../../types/request.types';
 import { resetChildEntities, setChildEntitiesAsDeleted, setChildEntitiesAsDeleting } from './deleting-child-entities';
 import { failRequest } from './fail-request';
 import { startRequest } from './start-request';
 import { succeedRequest } from './succeed-request';
 import { IRequestArray } from './types';
 import { updateRequest } from './update-request';
-import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
-import { Action } from '@ngrx/store';
-import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
 
 export function requestReducerFactory(actions: IRequestArray) {
   const [startAction, successAction, failedAction, updateAction] = actions;

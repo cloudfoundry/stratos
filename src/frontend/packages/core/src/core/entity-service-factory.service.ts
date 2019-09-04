@@ -1,33 +1,53 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { EntityService } from './entity-service';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { TRequestTypeKeys, RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { EntityInfoHandler, EntityService, ENTITY_INFO_HANDLER } from './entity-service';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class EntityServiceFactory {
-
+  private isConfig(config: string | EntityActionBuilderEntityConfig) {
+    return !!(config as EntityActionBuilderEntityConfig).entityGuid;
+  }
   constructor(
     private store: Store<GeneralEntityAppState>,
-    private entityMonitorFactory: EntityMonitorFactory
+    private entityMonitorFactory: EntityMonitorFactory,
+    @Optional() @Inject(ENTITY_INFO_HANDLER) private entityInfoHandler: EntityInfoHandler
   ) { }
 
   create<T>(
+    entityConfig: EntityActionBuilderEntityConfig,
+  ): EntityService<T>;
+  create<T>(
+    entityId: string,
+    action: EntityRequestAction
+  ): EntityService<T>;
+  create<T>(
     // FIXME: Remove entityId and use action.guid (should be accessibly via IRequestAction-->SingleEntityAction) - STRAT-159
     // FIXME: Also we should bump this into the catalogue https://jira.capbristol.com/browse/STRAT-141
-    entityId: string,
-    action: EntityRequestAction,
-    validateRelations = true,
-    entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
-  ) {
+    entityIdOrConfig: string | EntityActionBuilderEntityConfig,
+    action?: EntityRequestAction
+  ): EntityService<T> {
+    const config = entityIdOrConfig as EntityActionBuilderEntityConfig;
+    const isConfig = this.isConfig(config);
+
     const entityMonitor = this.entityMonitorFactory.create<T>(
-      entityId,
-      action
+      isConfig ? config.entityGuid : entityIdOrConfig as string,
+      isConfig ? config : action
     );
-    return new EntityService<T>(this.store, entityMonitor, action, validateRelations, entitySection);
+    if (isConfig) {
+      // Get the get action from the entity catalogue.
+      const actionBuilder = entityCatalogue.getEntity(config.endpointType, config.entityType).actionOrchestrator.getActionBuilder('get');
+      return new EntityService<T>(this.store, entityMonitor, actionBuilder(
+        config.entityGuid,
+        config.endpointGuid,
+        config.actionMetadata || {}
+      ), this.entityInfoHandler);
+    }
+    return new EntityService<T>(this.store, entityMonitor, action, this.entityInfoHandler);
   }
 
 }

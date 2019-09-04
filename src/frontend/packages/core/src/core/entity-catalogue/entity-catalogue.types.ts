@@ -1,23 +1,38 @@
 import { Observable } from 'rxjs';
 
+import {
+  PreApiRequest,
+  PrePaginationApiRequest,
+  SuccessfulApiResponseDataMapper,
+} from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import {
+  PaginationPageIteratorConfig,
+} from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
-import {
-  SuccessfulApiResponseDataMapper,
-  PreApiRequest,
-  PrePaginationApiRequest
-} from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import {
-  PaginationPageIteratorConfig
-} from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { Omit } from '../utils.service';
+
 export interface EntityCatalogueEntityConfig {
   entityType: string;
   endpointType: string;
   subType?: string;
   schemaKey?: string;
 }
+
+export interface ActionBuilderConfig<T extends Record<any, any> = Record<any, any>> {
+  actionMetadata?: T;
+  entityGuid: string;
+  endpointGuid?: string;
+}
+
+export type EntityActionBuilderEntityConfig = EntityCatalogueEntityConfig & ActionBuilderConfig;
+
+export const extractEntityCatalogueEntityConfig = (ecec: Partial<EntityCatalogueEntityConfig>): EntityCatalogueEntityConfig => {
+  const { entityType, endpointType, subType, schemaKey } = ecec;
+  return { entityType, endpointType, subType, schemaKey };
+};
+
 export interface EntityCatalogueSchemas {
   default: EntitySchema;
   [schemaKey: string]: EntitySchema;
@@ -69,7 +84,7 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   // This will be used for all entities with this endpoint type.
   readonly globalSuccessfulRequestDataMapper?: SuccessfulApiResponseDataMapper;
   // Allows an entity to manipulate the request object before it's sent.
-  // This will be used for all entities with this endpoint type.
+  // This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
   readonly globalPreRequest?: PreApiRequest;
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
 }
