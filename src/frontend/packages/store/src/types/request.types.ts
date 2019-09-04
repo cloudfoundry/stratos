@@ -2,13 +2,13 @@ import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
+import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
-import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export interface SingleEntityAction {
   // For single entity requests

@@ -10,6 +10,7 @@ import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/t
 import { EntityInfo } from '../../store/src/types/api.types';
 import { ICFAction } from '../../store/src/types/request.types';
 import { generateCFEntities } from './cf-entity-generator';
+import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { CloudFoundryModule } from './features/cloud-foundry/cloud-foundry.module';
 import { ServiceCatalogModule } from './features/service-catalog/service-catalog.module';
@@ -20,8 +21,12 @@ import { CloudFoundryService } from './shared/data-services/cloud-foundry.servic
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
-export function shouldValidate(shouldSkip: boolean, isValidated: boolean, entityInfo: RequestInfoState) {
-  if (!entityInfo || shouldSkip || isValidated) {
+function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: RequestInfoState) {
+  const parentAction = isEntityInlineParentAction(action);
+  if (!parentAction) {
+    return false;
+  }
+  if (!entityInfo || action.skipValidation || isValidated || parentAction.includeRelations.length === 0) {
     return false;
   }
   return !entityInfo.fetching &&
@@ -32,11 +37,16 @@ export function shouldValidate(shouldSkip: boolean, isValidated: boolean, entity
     !Object.keys(entityInfo.updating).find(key => entityInfo.updating[key].busy);
 }
 
-export function infoValidator(action: ICFAction, dispatcher) {
+// TODO: RC make this into single action type ICFAction
+function infoValidator(action: ICFAction, dispatcher) {
+  if (!action.guid) {
+    // TODO: RC remove console logs
+    console.log(action);
+  }
   let validated = false;
   return (entityInfo: EntityInfo) => {
     if (!entityInfo || entityInfo.entity) {
-      if (shouldValidate(action.skipValidation, validated, entityInfo.entityRequestInfo)) {
+      if (shouldValidate(action, validated, entityInfo.entityRequestInfo)) {
         validated = true;
         dispatcher(new ValidateEntitiesStart(
           action,
