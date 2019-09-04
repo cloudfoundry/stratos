@@ -4,7 +4,7 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
 import { Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
@@ -20,10 +20,11 @@ import {
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
+  AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
-  AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
+} from '../../../store/app-autoscaler.types';
 import { appAutoscalerPolicySchemaKey } from '../../../store/autoscaler.store.module';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
@@ -88,46 +89,26 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.store.dispatch(
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
-    const waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => {
-        if (request.message && request.message.indexOf('fetch policy') >= 0) {
-          request.message = '';
-          return false;
-        } else {
-          return !!request.error || !!request.response;
-        }
-      }),
-      map(request => {
-        const msg = request.message;
-        request.error = false;
-        request.response = null;
-        request.message = '';
-        return msg;
-      }),
-      distinctUntilChanged(),
-    ).pipe(map(
-      errorMessage => {
-        if (errorMessage) {
-          return {
-            success: false,
-            message: `Could not update policy: ${errorMessage}`,
-          };
-        } else {
-          return {
-            success: true,
-            redirect: true
-          };
-        }
-      }));
-    return waitForAppAutoscalerUpdateStatus$.pipe(take(1), map(res => {
-      return {
-        ...res,
-      };
-    }));
+    return this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
+      pairwise(),
+      filter(([oldV, newV]) => (
+        oldV.updating[UpdateAppAutoscalerPolicyAction.updateKey] && oldV.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy
+      ) && (
+          newV.updating[UpdateAppAutoscalerPolicyAction.updateKey] && !newV.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy
+        )
+      ),
+      map(([, newV]) => newV.updating[UpdateAppAutoscalerPolicyAction.updateKey]),
+      map(request => ({
+        success: !request.error,
+        redirect: !request.error,
+        message: request.error ? `Could not update policy${request.message ? `: ${request.message}` : ''}` : null
+      })),
+      first(),
+    );
   }
 
   addSpecificDate = () => {
-    const {...newSchedule} = AutoscalerConstants.PolicyDefaultSpecificDate;
+    const { ...newSchedule } = AutoscalerConstants.PolicyDefaultSpecificDate;
     this.currentPolicy.schedules.specific_date.push(newSchedule);
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
