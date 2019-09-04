@@ -10,13 +10,6 @@ export function paginationRemoveParams(state: PaginationEntityState, action: Rem
       ...state.params,
     }
   };
-  // TODO We need to be able to do this. THe qparam is odd because the 'key' is always
-  // q with the actual keys in the q param string.
-  // if (state.params.q) {
-  //   removeParamsState.params.q = (state.params.q as string[]).filter((qs: string) => {
-  //     return !action.qs.find((removeParamKey: string) => QParam.keyFromString(qs) === removeParamKey);
-  //   });
-  // }
 
   action.params.forEach((key) => {
     if (removeParamsState.params.hasOwnProperty(key)) {
