@@ -215,7 +215,7 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
 }
 
 function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition<any, APIResource, any> = {
     type: appEnvVarsEntityType,
     schema: cfEntityFactory(appEnvVarsEntityType),
     endpoint: endpointDefinition,
@@ -226,21 +226,21 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
       getPaginationParameters: (page: number) => ({ page: '1' })
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
-      if (data) {
-        return {
-          entity: {
-            ...data,
-            cfGuid: endpointGuid
-          },
-          metadata: {
-            guid: action.guid
-          }
-        };
-      }
-      return {};
+      return {
+        entity: {
+          ...(data || {}),
+          cfGuid: endpointGuid
+        },
+        metadata: {
+          guid: action.guid,
+          created_at: '',
+          updated_at: '',
+          url: ''
+        }
+      };
     },
     // TODO: we need a envvar type
-  } as IStratosEntityDefinition<any, APIResource, any>;
+  };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
@@ -358,7 +358,7 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
 }
 
 function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition<any, AppStat> = {
     type: appStatsEntityType,
     schema: cfEntityFactory(appStatsEntityType),
     endpoint: endpointDefinition,
@@ -386,7 +386,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
       }
       return data;
     },
-  } as IStratosEntityDefinition<any, AppStat>;
+  };
   return new StratosCatalogueEntity<IFavoriteMetadata, AppStat>(definition, {
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
