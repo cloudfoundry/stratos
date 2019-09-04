@@ -31,7 +31,7 @@ describe('failedEntityHandlers', () => {
     );
     expect(spyDispatcher).toHaveBeenCalledTimes(2);
   });
-  it('Should dispatch actions', () => {
+  it('Should dispatch actions with recursive delete', () => {
     const catalogueEntity = new StratosBaseCatalogueEntity({
       type: 'test',
       schema: new EntitySchema(
