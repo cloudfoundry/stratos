@@ -1,5 +1,23 @@
 # Change Log
 
+## 2.5.1
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.0...2.5.1)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Allow DB directory to be specified for SQLite [\#194](https://github.com/SUSE/stratos/pull/193)
+
+**Improvements:**
+
+- Tech preview for helm feature [\#190](https://github.com/SUSE/stratos/pull/190)
+- Add custom welcome message on endpoints page [\#194](https://github.com/SUSE/stratos/pull/194)
+- Add support for connecting CaaSP V4 endpoints [\#191](https://github.com/SUSE/stratos/pull/191)
+- Refinements to the Autoscaler UI [\#196](https://github.com/SUSE/stratos/pull/196)
+> Note: Tech preview features can be enabled when deploying via Helm by setting the Helm chart value `console.techPreview` to `true` - e.g. add `--set console.techPreview=true` when installing.
+
 ## 2.5.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.4.0...2.5.0)
