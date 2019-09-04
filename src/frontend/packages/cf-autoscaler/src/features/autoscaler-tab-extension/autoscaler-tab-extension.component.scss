@@ -54,6 +54,8 @@ table {
 }
 
 .autoscaler-tile-events {
+  flex-direction: column;
+
   &__no-policy {
     align-items: center;
     display: flex;

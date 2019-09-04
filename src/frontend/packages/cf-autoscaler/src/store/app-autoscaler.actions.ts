@@ -93,6 +93,7 @@ export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
   ) { }
   type = UPDATE_APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerPolicySchemaKey;
+  updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
 }
 
 export class DetachAppAutoscalerPolicyAction implements IRequestAction {
