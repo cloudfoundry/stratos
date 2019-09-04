@@ -6,7 +6,6 @@ import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
-import { parseHttpPipeError } from '../../../../core/src/core/utils.service';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import {
@@ -34,6 +33,18 @@ import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
 import { entityCatalogue } from './../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from './../../../cf-types';
+
+function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
+  if (!res.status) {
+    return res;
+  }
+  try {
+    return res.json ? res.json() : res;
+  } catch (e) {
+    logger.warn('Failed to parse response body', e);
+  }
+  return {};
+}
 
 export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {
   const response = parseHttpPipeError(error, logger);
@@ -119,7 +130,7 @@ export class DeployAppEffects {
       const apiAction = {
         entityType: gitCommitEntityType,
         endpointType: CF_ENDPOINT_TYPE,
-        type: action.type
+        type: action.type,
       } as ICFAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getCommit(action.projectName, action.commitSha).pipe(

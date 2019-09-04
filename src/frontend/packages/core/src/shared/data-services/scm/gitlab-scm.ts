@@ -64,15 +64,15 @@ export class GitLabSCM implements GitSCM {
   }
 
   getCommit(projectName: string, commitSha: string): Observable<GitCommit> {
-    const prjNameEncoded = encodeURIComponent(projectName);
-    return this.httpClient.get(this.getCommitApiUrl(commitSha, projectName)).pipe(
+    return this.httpClient.get(this.getCommitApiUrl(projectName, commitSha)).pipe(
       map(data => {
         return this.convertCommit(projectName, data);
       })
     );
   }
 
-  getCommitApiUrl(commitSha: string, prjNameEncoded: string): string {
+  getCommitApiUrl(projectName: string, commitSha: string, ): string {
+    const prjNameEncoded = encodeURIComponent(projectName);
     return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
   }
 

@@ -1,8 +1,8 @@
 import {
-  OrchestratedActionBuilders,
-  OrchestratedActionBuilderConfig,
   EntityRequestActionConfig,
-  KnownEntityActionBuilder
+  KnownEntityActionBuilder,
+  OrchestratedActionBuilderConfig,
+  OrchestratedActionBuilders,
 } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { FetchBranchesForProject, FetchCommits } from '../actions/deploy-applications.actions';
