@@ -3,9 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelper } from './create-service-instance-helper.service';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 @Injectable()
 export class CreateServiceInstanceHelperServiceFactory {
@@ -15,7 +15,7 @@ export class CreateServiceInstanceHelperServiceFactory {
   } = {};
   constructor(
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) { }

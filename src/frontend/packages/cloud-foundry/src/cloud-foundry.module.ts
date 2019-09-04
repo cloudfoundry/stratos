@@ -22,13 +22,20 @@ import { ServiceActionHelperService } from './shared/data-services/service-actio
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
 function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: RequestInfoState) {
+  // Validate if..
+  // 1) The action is the correct type
   const parentAction = isEntityInlineParentAction(action);
   if (!parentAction) {
     return false;
   }
+  // 2) We have basic request info
+  // 3) The action states it should not be skipped
+  // 4) It's already been validated
+  // 5) There are actual relations to validate
   if (!entityInfo || action.skipValidation || isValidated || parentAction.includeRelations.length === 0) {
     return false;
   }
+  // 6) The entity isn't in the process of being updated
   return !entityInfo.fetching &&
     !entityInfo.error &&
     !entityInfo.deleting.busy &&

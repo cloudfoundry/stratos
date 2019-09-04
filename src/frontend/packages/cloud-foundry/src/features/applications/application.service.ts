@@ -32,6 +32,7 @@ import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/ap
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -50,7 +51,6 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
@@ -90,15 +90,14 @@ export class ApplicationService {
     @Inject(CF_GUID) public cfGuid: string,
     @Inject(APP_GUID) public appGuid: string,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
       appGuid,
-      createGetApplicationAction(appGuid, cfGuid),
-      true
+      createGetApplicationAction(appGuid, cfGuid)
     );
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
@@ -172,8 +171,7 @@ export class ApplicationService {
       switchMap(app => {
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           app.space_guid,
-          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)], true),
-          true
+          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)], true)
         ).waitForEntity$.pipe(
           map(entityInfo => entityInfo.entity)
         );

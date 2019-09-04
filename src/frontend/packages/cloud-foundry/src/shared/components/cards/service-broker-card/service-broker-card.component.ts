@@ -8,8 +8,8 @@ import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { IServiceBroker } from '../../../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 
 @Component({
   selector: 'app-service-broker-card',
@@ -24,7 +24,7 @@ export class ServiceBrokerCardComponent {
   constructor(
     private servicesService: ServicesService,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory
   ) {
     this.serviceBroker$ = this.servicesService.serviceBroker$;
 

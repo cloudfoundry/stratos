@@ -21,6 +21,7 @@ import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/ent
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain, ISpace } from '../../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { pathGet } from '../../../../../../core/src/core/utils.service';
 import {
   StepOnNextFunction,
@@ -29,7 +30,6 @@ import {
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 import { ApplicationService } from '../../application.service';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
@@ -66,7 +66,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   constructor(
     private applicationService: ApplicationService,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
@@ -119,8 +119,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         this.spaceGuid = app.entity.entity.space_guid;
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
           this.spaceGuid,
-          new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)]),
-          true
+          new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)])
         );
         return spaceService.waitForEntity$;
       }),

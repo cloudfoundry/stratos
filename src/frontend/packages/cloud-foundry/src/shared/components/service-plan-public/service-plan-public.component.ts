@@ -9,9 +9,9 @@ import {
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { IServiceBroker, IServicePlan } from '../../../../../core/src/core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 @Component({
   selector: 'app-service-plan-public',
@@ -50,7 +50,7 @@ export class ServicePlanPublicComponent {
 
   constructor(
     private servicesService: ServicesService,
-    private entityServiceFactory: CFEntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory
   ) {
   }
 

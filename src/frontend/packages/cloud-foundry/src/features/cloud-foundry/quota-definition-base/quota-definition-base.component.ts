@@ -11,12 +11,12 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 export class QuotaDefinitionBaseComponent {
@@ -32,7 +32,7 @@ export class QuotaDefinitionBaseComponent {
   orgSubscriber: Subscription;
 
   constructor(
-    protected entityServiceFactory: CFEntityServiceFactory,
+    protected entityServiceFactory: EntityServiceFactory,
     protected store: Store<AppState>,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     protected activatedRoute: ActivatedRoute,

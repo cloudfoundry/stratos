@@ -9,7 +9,6 @@ import {
 } from '../../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
@@ -17,7 +16,7 @@ export function applicationServiceFactory(
   cfId: string,
   id: string,
   store: Store<CFAppState>,
-  entityServiceFactoryInstance: CFEntityServiceFactory,
+  entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
   paginationMonitorFactory: PaginationMonitorFactory,
@@ -36,12 +35,11 @@ export function applicationServiceFactory(
 export function entityServiceFactory(
   cfId: string,
   id: string,
-  esf: CFEntityServiceFactory
+  esf: EntityServiceFactory
 ) {
   return esf.create(
     id,
-    createGetApplicationAction(id, cfId),
-    true
+    createGetApplicationAction(id, cfId)
   );
 }
 

@@ -51,10 +51,10 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
@@ -103,7 +103,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     private store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private csiGuidsService: CsiGuidsService,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     public modeService: CsiModeService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     route: ActivatedRoute
@@ -193,8 +193,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     this.bindAppStepperText = 'Binding Params (Optional)';
     const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
       appId,
-      new GetApplication(appId, cfId, [createEntityRelationKey(applicationEntityType, spaceEntityType)]),
-      true
+      new GetApplication(appId, cfId, [createEntityRelationKey(applicationEntityType, spaceEntityType)])
     );
     return entityService.waitForEntity$.pipe(
       filter(p => !!p),
@@ -257,8 +256,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {
     return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesEntityType,
-      new GetServiceInstance(serviceInstanceId, cfId),
-      true
+      new GetServiceInstance(serviceInstanceId, cfId)
     );
   }
 

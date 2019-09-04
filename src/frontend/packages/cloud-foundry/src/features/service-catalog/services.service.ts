@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   serviceBrokerEntityType,
@@ -19,17 +20,16 @@ import {
 } from '../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
 import { EntityService } from '../../../../core/src/core/entity-service';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { GetServicePlanVisibilities } from '../../actions/service-plan-visibility.actions';
 import { GetServiceBrokers } from '../../actions/service-broker.actions';
+import { GetServicePlanVisibilities } from '../../actions/service-plan-visibility.actions';
 import { GetSpace } from '../../actions/space.actions';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
+import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -63,7 +63,7 @@ export class ServicesService {
 
   constructor(
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     public activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory
 
@@ -213,8 +213,7 @@ export class ServicesService {
 
           const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
             spaceGuid,
-            new GetSpace(spaceGuid, this.cfGuid),
-            true
+            new GetSpace(spaceGuid, this.cfGuid)
           );
           return spaceEntityService.waitForEntity$.pipe(
             filter(o => !!o && !!o.entity),

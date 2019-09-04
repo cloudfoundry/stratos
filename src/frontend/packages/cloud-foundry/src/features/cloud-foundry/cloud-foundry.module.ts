@@ -42,7 +42,6 @@ import {
   EndpointsListConfigService,
 } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
 import {
   CFEndpointsListConfigService,
@@ -240,7 +239,6 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     // CfRolesService,
     CloudFoundryCellService,
     UserInviteService,
-    CFEntityServiceFactory
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent
