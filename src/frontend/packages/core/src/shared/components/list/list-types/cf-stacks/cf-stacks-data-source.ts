@@ -14,7 +14,7 @@ export class CfStacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
     const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    //TODO kate
+    //TODO kate verify OK
     const action = getAllStacksActionBuilder(cfGuid, null);  
     super({
       store,

@@ -132,7 +132,7 @@ export class CloudFoundryEndpointService {
     private pmf: PaginationMonitorFactory
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
+    this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid) as GetAllOrganizations;
     this.getAllAppsAction = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
@@ -142,7 +142,7 @@ export class CloudFoundryEndpointService {
     );
 
     const cfInfoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfInfoEntityType);
-    //TODO Kate 
+    //TODO kate verify OK
     const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(this.cfGuid,null);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
@@ -230,7 +230,7 @@ export class CloudFoundryEndpointService {
   public fetchDomains = () => {
     const domainEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
     const actionBuilder = domainEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    //TODO kate
+    //TODO kate verify OK
     const action = actionBuilder(this.cfGuid, null);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {
