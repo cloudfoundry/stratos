@@ -97,7 +97,8 @@ export class ApplicationService {
   ) {
     this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
       appGuid,
-      createGetApplicationAction(appGuid, cfGuid)
+      createGetApplicationAction(appGuid, cfGuid),
+      true
     );
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
@@ -171,7 +172,8 @@ export class ApplicationService {
       switchMap(app => {
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           app.space_guid,
-          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)], true)
+          new GetSpace(app.space_guid, app.cfGuid, [createEntityRelationKey(spaceEntityType, organizationEntityType)], true),
+          true
         ).waitForEntity$.pipe(
           map(entityInfo => entityInfo.entity)
         );

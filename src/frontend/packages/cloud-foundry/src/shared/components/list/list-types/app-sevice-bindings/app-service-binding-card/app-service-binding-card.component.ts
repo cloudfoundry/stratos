@@ -148,8 +148,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   private setupAsUserProvidedServiceInstance() {
     const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       this.row.entity.service_instance_guid,
-      new GetUserProvidedService(this.row.entity.service_instance_guid, this.appService.cfGuid),
-      true
+      new GetUserProvidedService(this.row.entity.service_instance_guid, this.appService.cfGuid)
     ).waitForEntity$;
     this.serviceInstance$ = userProvidedServiceInstance$;
     this.service$ = of(null);

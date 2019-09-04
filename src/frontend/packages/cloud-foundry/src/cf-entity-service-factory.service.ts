@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { EntityRequestAction, ICFAction } from '../../store/src/types/request.types';
+
 import { EntityServiceFactory } from '../../core/src/core/entity-service-factory.service';
+import { EntityRequestAction, ICFAction } from '../../store/src/types/request.types';
 
 @Injectable()
 export class CFEntityServiceFactory {

@@ -118,7 +118,6 @@ export class CloudFoundrySpaceService {
             createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.AUDITOR),
           );
         }
-        const getSpaceAction = new GetSpace(this.spaceGuid, this.cfGuid, relations);
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
           this.spaceGuid,
           new GetSpace(this.spaceGuid, this.cfGuid, relations),

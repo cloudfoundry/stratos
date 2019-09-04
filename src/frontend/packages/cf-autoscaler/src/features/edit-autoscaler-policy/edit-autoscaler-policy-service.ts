@@ -3,11 +3,11 @@ import * as moment from 'moment-timezone';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
-import { CFEntityServiceFactory } from '../../../../cloud-foundry/src/cf-entity-service-factory.service';
 
 @Injectable()
 export class EditAutoscalerPolicyService {
@@ -26,13 +26,12 @@ export class EditAutoscalerPolicyService {
   private stateSubject = new BehaviorSubject(this.initialState);
 
 
-  constructor(private entityServiceFactory: CFEntityServiceFactory) { }
+  constructor(private entityServiceFactory: EntityServiceFactory) { }
 
   updateFromStore(appGuid: string, cfGuid: string) {
     const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicyLocal>>(
       appGuid,
-      new GetAppAutoscalerPolicyAction(appGuid, cfGuid),
-      false
+      new GetAppAutoscalerPolicyAction(appGuid, cfGuid)
     );
 
     appAutoscalerPolicyService.entityObs$.pipe(

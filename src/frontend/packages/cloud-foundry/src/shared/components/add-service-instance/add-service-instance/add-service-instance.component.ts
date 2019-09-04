@@ -35,6 +35,10 @@ import {
   serviceInstancesEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getIdFromRoute } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import {
   servicesServiceFactoryProvider,
@@ -48,18 +52,14 @@ import {
 import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -255,20 +255,18 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   }
 
   private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {
-    const action = new GetServiceInstance(serviceInstanceId, cfId);
     return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstancesEntityType,
-      action,
+      new GetServiceInstance(serviceInstanceId, cfId),
       true
     );
   }
 
   private getSpaceEntityService(spaceGuid: string, cfGuid: string) {
-    const action = new GetSpace(spaceGuid, cfGuid);
     return this.entityServiceFactory.create<APIResource<ISpace>>(
       spaceEntityType,
-      new GetSpace(spaceGuid, cfGuid),
-      true);
+      new GetSpace(spaceGuid, cfGuid)
+    );
   }
 
   ngOnDestroy(): void {

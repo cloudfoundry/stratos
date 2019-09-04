@@ -16,8 +16,8 @@ import { AppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 export class QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
@@ -61,8 +61,7 @@ export class QuotaDefinitionBaseComponent {
     if (this.spaceGuid) {
       this.space$ = this.entityServiceFactory.create<APIResource<ISpace>>(
         this.spaceGuid,
-        new GetSpace(this.spaceGuid, this.cfGuid),
-        true
+        new GetSpace(this.spaceGuid, this.cfGuid)
       ).waitForEntity$.pipe(
         map(data => data.entity),
       );

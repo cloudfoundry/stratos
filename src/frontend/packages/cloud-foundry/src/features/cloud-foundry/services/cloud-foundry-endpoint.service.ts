@@ -135,12 +135,15 @@ export class CloudFoundryEndpointService {
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       this.cfGuid,
-      new GetAllEndpoints()
+      // TODO: RC Create issue. Typing should be improved such that .create can only take a 'single' endity action
+      new GetAllEndpoints(),
+      false
     );
 
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
-      new GetCFInfo(this.cfGuid)
+      new GetCFInfo(this.cfGuid),
+      false
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();

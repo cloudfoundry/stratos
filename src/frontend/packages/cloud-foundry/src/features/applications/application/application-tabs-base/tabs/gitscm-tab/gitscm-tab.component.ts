@@ -93,8 +93,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
           repoEntityID,
-          new FetchGitHubRepoInfo(stProject),
-          // false
+          new FetchGitHubRepoInfo(stProject)
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
