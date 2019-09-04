@@ -11,6 +11,20 @@ import { ApplicationService } from '../../../../../../../cloud-foundry/src/featu
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
+import { UtilsService } from '../../../../../../../core/src/core/utils.service';
+import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import {
+  getIntegerFieldSortFunction,
+} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
+import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import {
+  IListAction,
+  IListConfig,
+  ListViewTypes,
+} from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
@@ -18,16 +32,6 @@ import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
-import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
-import { IListConfig, ListViewTypes, IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  getIntegerFieldSortFunction
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { UtilsService } from '../../../../../../../core/src/core/utils.service';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 
 // TODO: Move file to CF package (#3769)
 export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {

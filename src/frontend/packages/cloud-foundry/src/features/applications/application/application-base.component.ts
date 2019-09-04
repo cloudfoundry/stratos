@@ -9,9 +9,9 @@ import {
 } from '../../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 
 export function applicationServiceFactory(
   cfId: string,
