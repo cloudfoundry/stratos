@@ -1,5 +1,7 @@
 // Stratos Core module
 
+export { CoreModule } from './core/core.module';
+
 // Customizations
 export * from './core/customizations.types';
 

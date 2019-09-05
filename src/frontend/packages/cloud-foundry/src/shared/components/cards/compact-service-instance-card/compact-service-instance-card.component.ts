@@ -1,7 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import {
+  AppChip,
+} from '@stratos/shared';
+
+
 import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
-import { AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 
 @Component({

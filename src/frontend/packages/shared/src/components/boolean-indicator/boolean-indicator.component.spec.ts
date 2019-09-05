@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CoreModule } from '../../../core/core.module';
+import { CoreModule } from '@stratos/core';
 import { BooleanIndicatorComponent, BooleanIndicatorType } from './boolean-indicator.component';
 
 describe('BooleanIndicatorComponent', () => {

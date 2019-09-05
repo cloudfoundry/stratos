@@ -19,13 +19,11 @@ import { ApplicationStateIconPipe } from './components/application-state/applica
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
 import { BlurDirective } from './components/blur.directive';
-import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
-import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 import { DateTimeComponent } from './components/date-time/date-time.component';
@@ -166,7 +164,6 @@ import { StratosComponentsModule } from '@stratos/shared';
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    BooleanIndicatorComponent,
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
@@ -270,7 +267,6 @@ import { StratosComponentsModule } from '@stratos/shared';
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserPermissionDirective,
-    BooleanIndicatorComponent,
     TableComponent,
     UserPermissionDirective,
     CapitalizeFirstPipe,

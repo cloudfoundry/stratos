@@ -1,5 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  AppChipsComponent,
+} from '@stratos/shared';
+
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import {
   ApplicationStateIconComponent,
@@ -7,11 +11,8 @@ import {
 import {
   ApplicationStateIconPipe,
 } from '../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { BooleanIndicatorComponent } from '@stratos/shared';
 import { CardStatusComponent } from '../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { AppChipsComponent } from '../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardComponent,
 } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';

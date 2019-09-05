@@ -1,9 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { BooleanIndicatorComponent } from '@stratos/shared';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { ListCfRoute } from '../cf-routes-data-source-base';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute.component';

@@ -2,12 +2,15 @@ import { Component } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
+import {
+  AppChip,
+} from '@stratos/shared';
+
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import {
   ServiceTag,
 } from '../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { IService } from '../../../../../../core/src/core/cf-api-svc.types';
-import { AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 
 

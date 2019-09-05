@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
+import {
+  AppChipsComponent,
+} from '@stratos/shared';
+
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';

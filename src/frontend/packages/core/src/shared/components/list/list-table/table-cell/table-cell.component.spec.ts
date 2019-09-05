@@ -1,6 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
+  AppChipsComponent,
+} from '@stratos/shared';
+
+import {
   CfOrgSpaceLinksComponent,
 } from '../../../../../../../cloud-foundry/src/shared/components/cf-org-space-links/cf-org-space-links.component';
 import {
@@ -29,8 +33,7 @@ import {
 import { ApplicationStateIconPipe } from '../../../application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from '../../../application-state/application-state.component';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
-import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
-import { AppChipsComponent } from '../../../chips/chips.component';
+import { BooleanIndicatorComponent } from '@stratos/shared';
 import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';

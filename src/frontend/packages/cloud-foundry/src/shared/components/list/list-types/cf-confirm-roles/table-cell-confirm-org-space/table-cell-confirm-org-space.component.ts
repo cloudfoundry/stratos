@@ -1,7 +1,10 @@
 import { Component, Input } from '@angular/core';
 
+import {
+  AppChip,
+} from '@stratos/shared';
+
 import { CfRoleChangeWithNames } from '../../../../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 
 @Component({

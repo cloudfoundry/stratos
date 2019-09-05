@@ -2,8 +2,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import {
+  AppChip,
+} from '@stratos/shared';
+
 import { CfRoute } from '../../../../../../../../cloud-foundry/src/store/types/route.types';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({

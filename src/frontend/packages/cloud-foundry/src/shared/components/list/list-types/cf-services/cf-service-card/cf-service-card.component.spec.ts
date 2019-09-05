@@ -1,9 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+  AppChipsComponent,
+} from '@stratos/shared';
+
+import { BooleanIndicatorComponent } from '@stratos/shared';
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {

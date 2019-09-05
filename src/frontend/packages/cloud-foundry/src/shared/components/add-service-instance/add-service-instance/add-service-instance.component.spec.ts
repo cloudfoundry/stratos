@@ -2,6 +2,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import {
+  AppChipsComponent,
+  BooleanIndicatorComponent,
+} from '@stratos/shared';
+
+import {
   AppNameUniqueDirective,
 } from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
 import {
@@ -10,11 +15,7 @@ import {
 import {
   ApplicationStateIconPipe,
 } from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
 import {
   CreateApplicationStep1Component,
 } from '../../create-application/create-application-step1/create-application-step1.component';

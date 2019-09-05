@@ -1,13 +1,16 @@
 import { NgModule } from '@angular/core';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
 
 @NgModule({
   imports: [],
   declarations: [
-    StratosTitleComponent
+    BooleanIndicatorComponent,
+    StratosTitleComponent,
   ],
   exports: [
-    StratosTitleComponent
+    BooleanIndicatorComponent,
+    StratosTitleComponent,
   ]
 })
 export class StratosComponentsModule {

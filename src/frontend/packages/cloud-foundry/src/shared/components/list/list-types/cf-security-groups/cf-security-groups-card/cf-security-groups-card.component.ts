@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
+import {
+  AppChip,
+} from '@stratos/shared';
+
 import { IRule, IRuleType, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import {

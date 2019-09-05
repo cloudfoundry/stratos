@@ -1,8 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { BooleanIndicatorComponent } from '@stratos/shared';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import {

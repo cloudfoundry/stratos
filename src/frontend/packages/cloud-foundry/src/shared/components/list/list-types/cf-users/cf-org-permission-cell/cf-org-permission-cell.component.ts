@@ -3,6 +3,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import {
+  AppChip,
+} from '@stratos/shared';
+
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -17,7 +21,6 @@ import { CurrentUserPermissions } from '../../../../../../../../core/src/core/cu
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';

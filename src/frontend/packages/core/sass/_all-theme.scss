@@ -17,11 +17,9 @@
 @import '../src/shared/components/ssh-viewer/ssh-viewer.component.theme';
 @import '../src/shared/components/list/list-table/table-row/table-row.component.theme';
 @import '../src/shared/components/no-content-message/no-content-message.component.theme';
-@import '../src/shared/components/boolean-indicator/boolean-indicator.component.theme';
 
 @import '../src/shared/components/loading-page/loading-page.component.theme';
 @import '../src/shared/components/log-viewer/log-viewer.component.theme';
-@import '../src/shared/components/chips/chips.component.theme';
 @import '../src/shared/components/cards/card-number-metric/card-number-metric.component.theme';
 @import '../src/shared/components/cards/card-boolean-metric/card-boolean-metric.component.theme';
 @import '../src/shared/components/simple-usage-chart/simple-usage-chart.component.theme';
@@ -92,7 +90,6 @@
   @include table-row-theme($theme, $app-theme);
   @include app-hyperlinks($theme, $app-theme);
   @include app-no-content-message-theme($theme, $app-theme);
-  @include app-boolean-indicator-theme($theme, $app-theme);
   @include cf-security-group-theme($theme);
   @include loading-page-theme($theme, $app-theme);
   @include app-log-viewer-theme($theme, $app-theme);
@@ -101,7 +98,6 @@
   @include app-card-number-metric-theme($theme, $app-theme);
   @include app-card-boolean-metric-theme($theme, $app-theme);
   @include app-dot-content($theme, $app-theme);
-  //@include stratos-title-component-theme($theme, $app-theme);
   @include app-page-header-theme($theme, $app-theme);
   @include app-page-header-events($theme, $app-theme);
   @include app-user-profile-banner-component-theme($theme, $app-theme);

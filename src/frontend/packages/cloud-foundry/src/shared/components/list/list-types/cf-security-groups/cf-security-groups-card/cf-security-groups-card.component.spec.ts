@@ -1,9 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
+  AppChipsComponent,
   BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+} from '@stratos/shared';
+
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
   generateCfBaseTestModulesNoShared,

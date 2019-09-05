@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../../test-framework/core-test.helper';
-import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
+import { BooleanIndicatorComponent } from '@stratos/shared';
 import { TableCellBooleanIndicatorComponent } from './table-cell-boolean-indicator.component';
 
 

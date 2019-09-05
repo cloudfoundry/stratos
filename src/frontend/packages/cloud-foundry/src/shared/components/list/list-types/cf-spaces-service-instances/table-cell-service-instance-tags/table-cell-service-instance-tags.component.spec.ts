@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import {
+  AppChipsComponent,
+} from '@stratos/shared';
+
 import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import {
   generateCfBaseTestModulesNoShared,

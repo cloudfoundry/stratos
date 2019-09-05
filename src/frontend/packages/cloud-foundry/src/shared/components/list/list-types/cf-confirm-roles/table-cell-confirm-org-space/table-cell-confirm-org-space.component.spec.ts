@@ -1,8 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import {
+  AppChipsComponent,
+} from '@stratos/shared';
+
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellConfirmOrgSpaceComponent } from './table-cell-confirm-org-space.component';
 
 describe('TableCellConfirmOrgSpaceComponent', () => {

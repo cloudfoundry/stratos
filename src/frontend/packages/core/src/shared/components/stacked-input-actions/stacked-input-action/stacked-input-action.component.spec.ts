@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
-import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
+import { BooleanIndicatorComponent } from '@stratos/shared';
 import { StackedInputActionComponent, StackedInputActionResult } from './stacked-input-action.component';
 
 describe('StackedInputActionComponent', () => {

@@ -3,10 +3,13 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import {
+  AppChip,
+} from '@stratos/shared';
+
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { AppChip } from '../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
