@@ -1,4 +1,4 @@
-import { ActionReducer, Store } from '@ngrx/store';
+import { Action, ActionReducer, Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
@@ -28,6 +28,11 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
+
+export interface RecursiveDeleteConfig {
+  excludes?: string[];
+  deleteSuccessApiActionGenerators?: (guid: string, endpointGuid: string) => Action;
+}
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,

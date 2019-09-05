@@ -38,7 +38,8 @@ export function successEntityHandler(
       new RecursiveDeleteComplete(
         action.guid,
         action.endpointGuid,
-        catalogueEntity.getSchema(action.schemaKey)
+        action.schemaKey,
+        catalogueEntity
       ),
     );
   }

@@ -17,7 +17,8 @@ export function failedEntityHandler(
       new RecursiveDeleteFailed(
         action.guid,
         action.endpointGuid,
-        catalogueEntity.getSchema(action.schemaKey)
+        action.schemaKey,
+        catalogueEntity
       ),
     );
   }

@@ -36,8 +36,10 @@ import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-aut
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
+import { APISuccessOrFailedAction, ICFAction } from '../../store/src/types/request.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { DELETE_SUCCESS, DeleteApplication } from './actions/application.actions';
 import {
   appEnvVarsEntityType,
   appEventEntityType,
@@ -351,6 +353,17 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
     label: 'User Provided Service Instance',
     labelPlural: 'User Provided Service Instances',
     endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        servicePlanEntityType,
+        // Service bindings
+        applicationEntityType,
+        serviceInstancesEntityType,
+        serviceEntityType,
+        organizationEntityType,
+        spaceEntityType
+      ],
+    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IUserProvidedServiceInstance>>(
     definition,
@@ -481,7 +494,14 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
     },
     label: 'Service Binding',
     labelPlural: 'Service Bindings',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        applicationEntityType,
+        serviceInstancesEntityType,
+        serviceEntityType
+      ],
+    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IServiceBinding>>(
     definition,
@@ -561,6 +581,15 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
     label: 'Marketplace Service Instance',
     labelPlural: 'Marketplace Service Instances',
     endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        servicePlanEntityType,
+        // Service bindings
+        applicationEntityType,
+        serviceInstancesEntityType,
+        serviceEntityType
+      ],
+    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IServiceInstance>>(
     definition,
@@ -587,6 +616,12 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
     label: 'User',
     labelPlural: 'Users',
     endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        organizationEntityType,
+        spaceEntityType
+      ],
+    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<CfUser>>(
     definition,
@@ -736,6 +771,13 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
     label: 'Application Route',
     labelPlural: 'Application Routes',
     endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        domainEntityType,
+        applicationEntityType,
+        spaceEntityType
+      ],
+    }
 
   };
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<IRoute>>(
@@ -840,6 +882,18 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
     label: 'Application',
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        stackEntityType,
+        spaceEntityType,
+        routeEntityType,
+        serviceBindingEntityType,
+        serviceInstancesEntityType
+      ],
+      deleteSuccessApiActionGenerators: (guid: string, endpointGuid: string) => {
+        return new APISuccessOrFailedAction(DELETE_SUCCESS, new DeleteApplication(guid, endpointGuid) as ICFAction);
+      }
+    }
   };
 
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
@@ -873,6 +927,16 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
     label: 'Space',
     labelPlural: 'Spaces',
     endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        domainEntityType,
+        // Service instance related
+        serviceEntityType,
+        servicePlanEntityType,
+        // App Related
+        stackEntityType
+      ],
+    }
   };
   return new StratosCatalogueEntity<ISpaceFavMetadata, APIResource<ISpace>>(
     spaceDefinition,
@@ -905,6 +969,13 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     label: 'Organization',
     labelPlural: 'Organizations',
     endpoint: endpointDefinition,
+    recursiveDelete: {
+      excludes: [
+        domainEntityType,
+        quotaDefinitionEntityType,
+        privateDomainsEntityType
+      ],
+    }
   };
   return new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(
     orgDefinition,

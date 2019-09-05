@@ -3,13 +3,11 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { DELETE_SUCCESS, DeleteApplication } from '../../../cloud-foundry/src/actions/application.actions';
+import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
-import { EntitySchema } from '../helpers/entity-schema';
 import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { APISuccessOrFailedAction, ICFAction } from '../types/request.types';
 
 
 export const RECURSIVE_ENTITY_DELETE = '[Entity] Recursive entity delete';
@@ -22,22 +20,38 @@ export const RECURSIVE_ENTITY_SET_DELETED = '[Entity] Recursive entity set delet
 
 export interface IRecursiveDelete {
   guid: string;
-  schema: EntitySchema;
+  // Keep this in case it's not the default associated with the entity config
+  schemaKey: string;
+  entityConfig: StratosBaseCatalogueEntity;
 }
 
 export class RecursiveDelete implements Action, IRecursiveDelete {
   public type = RECURSIVE_ENTITY_DELETE;
-  constructor(public guid: string, public schema: EntitySchema) { }
+  constructor(
+    public guid: string,
+    public schemaKey: string,
+    public entityConfig: StratosBaseCatalogueEntity
+  ) { }
 }
 
 export class RecursiveDeleteComplete implements Action, IRecursiveDelete {
   public type = RECURSIVE_ENTITY_DELETE_COMPLETE;
-  constructor(public guid: string, public endpointGuid: string, public schema: EntitySchema) { }
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public schemaKey: string,
+    public entityConfig: StratosBaseCatalogueEntity
+  ) { }
 }
 
 export class RecursiveDeleteFailed implements Action, IRecursiveDelete {
   public type = RECURSIVE_ENTITY_DELETE_FAILED;
-  constructor(public guid: string, public endpointGuid: string, public schema: EntitySchema) { }
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public schemaKey: string,
+    public entityConfig: StratosBaseCatalogueEntity
+  ) { }
 }
 
 export class SetTreeDeleting implements Action {
@@ -63,12 +77,6 @@ export class RecursiveDeleteEffect {
     private store: Store<GeneralEntityAppState>
   ) { }
 
-  private deleteSuccessApiActionGenerators = {
-    application: (guid: string, endpointGuid: string) => {
-      return new APISuccessOrFailedAction(DELETE_SUCCESS, new DeleteApplication(guid, endpointGuid) as ICFAction);
-    }
-  };
-
   @Effect()
   delete$ = this.actions$.pipe(
     ofType<RecursiveDelete>(RECURSIVE_ENTITY_DELETE),
@@ -87,10 +95,12 @@ export class RecursiveDeleteEffect {
       const tree = this.getTree(action, state);
       const actions = new Array<Action>().concat(...Object.keys(tree).map<Action[]>(key => {
         const keyActions = [];
-        if (this.deleteSuccessApiActionGenerators[key]) {
-          keyActions.push(this.deleteSuccessApiActionGenerators[key](action.guid, action.endpointGuid));
+        const deleteSuccessApiActionGenerators = action.entityConfig.definition.recursiveDelete ?
+          (action.entityConfig.definition.recursiveDelete.deleteSuccessApiActionGenerators || null) : null;
+        if (deleteSuccessApiActionGenerators) {
+          keyActions.push(deleteSuccessApiActionGenerators[key](action.guid, action.endpointGuid));
         }
-        keyActions.push(new ClearPaginationOfType(action.schema));
+        keyActions.push(new ClearPaginationOfType(action.entityConfig.getSchema(action.schemaKey)));
         return keyActions;
       }));
       actions.unshift(new SetTreeDeleted(action.guid, tree));

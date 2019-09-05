@@ -1,10 +1,10 @@
-import { EntityRequestAction } from '../../types/request.types';
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
-import { endpointSchemaKey } from '../../helpers/entity-factory';
-import { InternalEventSeverity } from '../../types/internal-events.types';
-import { getFailApiRequestActions, ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
+import { endpointSchemaKey } from '../../helpers/entity-factory';
+import { ApiRequestTypes, getFailApiRequestActions } from '../../reducers/api-request-reducer/request-helpers';
+import { InternalEventSeverity } from '../../types/internal-events.types';
+import { EntityRequestAction } from '../../types/request.types';
 import { ActionDispatcher } from '../entity-request-pipeline.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
 
@@ -42,7 +42,8 @@ export function jetstreamErrorHandler(
     actionDispatcher(new RecursiveDeleteFailed(
       action.guid,
       action.endpointGuid,
-      catalogueEntity.getSchema(action.schemaKey),
+      action.schemaKey,
+      catalogueEntity
     ));
   }
   return errorActions;
