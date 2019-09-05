@@ -42,11 +42,6 @@ export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
       externalRequest: true
     }
   ),
-  // get: (
-  //   commitSha: string,
-  //   endpointGuid: string,
-  //   commitMeta: GitMeta
-  // ) => new FetchCommit(commitMeta.scm, commitSha, commitMeta.projectName),
   getMultiple: (
     commitSha: string,
     endpointGuid: string,
