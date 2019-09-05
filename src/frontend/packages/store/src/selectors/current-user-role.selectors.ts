@@ -24,7 +24,7 @@ export const selectEntityWithRole = (role: PermissionStrings, type: RoleEntities
 
 export const selectCurrentUserRequestState = (state: ICurrentUserRolesState | ICfRolesState) => state.state;
 
-// TODO: CF code - needs to be moved out
+// TODO: CF code in this file - needs to be moved out - #3769
 export const selectCurrentUserCFGlobalHasScopes = (scope: ScopeStrings) => (scopes: ScopeStrings[]) => scopes.includes(scope);
 export const selectCurrentUserCFStratosScopesState = (state: IStratosRolesState) => state.scopes;
 

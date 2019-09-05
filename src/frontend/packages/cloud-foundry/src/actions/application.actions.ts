@@ -1,13 +1,13 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IApp } from '../../../core/src/core/cf-api.types';
-import { EntityInlineParentAction } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { pick } from '../../../store/src/helpers/reducer.helper';
 import { ActionMergeFunction } from '../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { applicationEntityType, appStatsEntityType, cfEntityFactory } from '../cf-entity-factory';
+import { EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { CFStartAction } from './cf-action.types';
 

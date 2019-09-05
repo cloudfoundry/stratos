@@ -3,6 +3,22 @@ import { Schema, schema } from 'normalizr';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
+function wrapSchema(definition: Schema) {
+  return {
+    metadata: {},
+    entity: definition
+  };
+}
+
+export class StratosEntitySchema extends schema.Entity {
+  constructor(
+    public definition?: Schema
+  ) {
+    super('stratosWrappedEntity', wrapSchema(definition));
+  }
+}
+
+
 /**
  * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
  *
@@ -28,8 +44,10 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
     public relationKey?: string,
     schemaKey?: string
   ) {
+    // Note - The core schema.Entity needs to be an entityKey or denormalize will fail
     super(endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
     this.schema = definition || {};
+    // Normally the entityType === schemaKey. Sometimes we can override that (space entity and space entity with spaceWithOrg schema)
     this.schemaKey = schemaKey;
   }
   public withEmptyDefinition() {

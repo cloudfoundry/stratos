@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../test-framework/core-test.helper';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';

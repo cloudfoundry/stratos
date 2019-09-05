@@ -6,20 +6,20 @@ import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
+import { getIdFromRoute } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
-import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
-import { ConnectEndpointConfig } from '../../connect.service';
-import { getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
+import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
-import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
+import { ConnectEndpointConfig } from '../../connect.service';
+import { getFullEndpointApiUrl } from '../../endpoint-helpers';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({

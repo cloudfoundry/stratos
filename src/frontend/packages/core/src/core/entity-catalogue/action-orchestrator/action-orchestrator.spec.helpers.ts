@@ -1,5 +1,5 @@
 import { ActionOrchestrator } from './action-orchestrator';
-import { IRequestAction } from '../../../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 
 const BASE_ACTIONS = [
@@ -40,7 +40,7 @@ export function hasActions<T extends ActionOrchestrator<any>>(actionOrchestrator
 }
 
 export function getRequestAction() {
-  return {} as IRequestAction;
+  return {} as EntityRequestAction;
 }
 
 export function getPaginationAction() {

@@ -1,11 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import {
@@ -15,6 +10,11 @@ import {
   routeEntityType,
   spaceEntityType,
 } from '../cf-entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+  EntityInlineParentAction,
+} from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 
 export const CREATE_ROUTE = '[Route] Create start';
@@ -112,7 +112,7 @@ export class UnmapRoute extends BaseRouteAction {
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
   }
-  endpointTYpe = 'cf';
+  endpointType = 'cf';
   actions = [
     RouteEvents.UNMAP_ROUTE,
     RouteEvents.UNMAP_ROUTE_SUCCESS,

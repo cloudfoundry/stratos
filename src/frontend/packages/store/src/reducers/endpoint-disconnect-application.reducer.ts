@@ -4,8 +4,8 @@ import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 
 // #3704 - These can be removed after this ticket is completed
-export function endpointDisconnectRemoveEntitiesReducer<T = IApp>() {
-  return (state: IRequestEntityTypeState<APIResource<T & StratosCFEntity>>, action: DisconnectEndpoint) => {
+export function endpointDisconnectRemoveEntitiesReducer() {
+  return (state: IRequestEntityTypeState<any>, action: DisconnectEndpoint) => {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
       case UNREGISTER_ENDPOINTS_SUCCESS:
@@ -15,10 +15,21 @@ export function endpointDisconnectRemoveEntitiesReducer<T = IApp>() {
   };
 }
 
-function deletionApplicationFromEndpoint<T extends StratosCFEntity>(state: IRequestEntityTypeState<APIResource<T>>, endpointGuid) {
-  return Object.values(state).reduce((newEntities, app) => {
-    if (app.entity.cfGuid !== endpointGuid && app.metadata.guid) {
-      newEntities[app.metadata.guid] = app;
+function deletionApplicationFromEndpoint(
+  state: IRequestEntityTypeState<APIResource<StratosCFEntity> | StratosCFEntity>,
+  endpointGuid: string
+) {
+  return Object.keys(state).reduce((newEntities, guid) => {
+    const entity = state[guid] as StratosCFEntity;
+    const apiEntity = state[guid] as APIResource<StratosCFEntity>;
+    if (apiEntity.entity) {
+      if (apiEntity.entity.cfGuid !== endpointGuid && apiEntity.metadata.guid) {
+        newEntities[guid] = entity;
+      }
+    } else {
+      if (entity.cfGuid !== endpointGuid) {
+        newEntities[guid] = entity;
+      }
     }
     return newEntities;
   }, {});

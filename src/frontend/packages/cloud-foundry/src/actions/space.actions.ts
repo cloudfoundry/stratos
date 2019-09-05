@@ -2,12 +2,8 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
-import {
-  createEntityRelationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
-import { PaginatedAction, QParam } from '../../../store/src/types/pagination.types';
+
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
 import {
@@ -26,6 +22,8 @@ import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
+import { QParam } from '../../../store/src/q-param';
+import { EntityInlineParentAction, EntityInlineChildAction, createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -259,7 +257,7 @@ export class GetServiceInstancesForSpace
     public spaceGuid: string,
     public endpointGuid: string,
     public paginationKey: string,
-    public q: QParam[] = null,
+    public q: string[] = null,
     public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true,
     public flattenPagination = true

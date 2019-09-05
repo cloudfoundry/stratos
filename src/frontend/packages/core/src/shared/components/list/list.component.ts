@@ -74,6 +74,7 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
+import { GeneralAppState } from '../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-list',
@@ -223,7 +224,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralAppState>,
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
     private ngZone: NgZone

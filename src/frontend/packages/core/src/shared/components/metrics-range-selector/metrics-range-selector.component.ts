@@ -55,9 +55,10 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     this.baseActionValue = action;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.guid,
+      // Look specifically for metrics entity type for the given endpoint. See #3783
       {
         entityType: metricEntityType,
-        endpointType: ''
+        endpointType: action.endpointType
       }
     );
     this.rangeSelectorManager.init(this.metricsMonitor, action);

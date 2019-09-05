@@ -1,6 +1,5 @@
 import { RequestOptions } from '@angular/http';
 
-import { createEntityRelationPaginationKey } from '../../../store/src/helpers/entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction, RequestEntityLocation } from '../../../store/src/types/request.types';
 import {
@@ -11,6 +10,7 @@ import {
   cfEntityFactory,
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
+import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
 
 export enum AppMetadataTypes {
   STATS,

@@ -12,25 +12,25 @@ import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import {
-  organizationEntityType,
-  serviceInstancesEntityType,
-  spaceEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { QParam } from '../../../../store/src/types/pagination.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { fetchTotalResults } from '../../features/cloud-foundry/cf.helpers';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import {
+  serviceInstancesEntityType,
+  spaceEntityType,
+  organizationEntityType,
+  userProvidedServiceInstanceEntityType
+} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 
 
 @Injectable()
@@ -76,10 +76,10 @@ export class CloudFoundryUserProvidedServicesService {
     const action = new GetAllUserProvidedServices(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid, [], false);
     action.initialParams.q = [];
     if (orgGuid) {
-      action.initialParams.q.push(new QParam('organization_guid', orgGuid, ' IN '));
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
     }
     if (spaceGuid) {
-      action.initialParams.q.push(new QParam('space_guid', spaceGuid, ' IN '));
+      action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
     }
     return fetchTotalResults(action, this.store, this.paginationMonitorFactory);
   }

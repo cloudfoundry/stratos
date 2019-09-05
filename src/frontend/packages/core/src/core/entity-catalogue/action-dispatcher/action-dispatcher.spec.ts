@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { IRequestAction } from '../../../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import { ActionOrchestrator, OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
 import { getPaginationAction, getRequestAction } from '../action-orchestrator/action-orchestrator.spec.helpers';
 import { EntityActionDispatcherManager } from './action-dispatcher';
@@ -17,7 +17,7 @@ describe('ActionDispatcher', () => {
   });
   it('should dispatch custom action', () => {
     interface CustomOrchestratedActionBuilders extends OrchestratedActionBuilders {
-      custom: (guid: string) => IRequestAction;
+      custom: (guid: string) => EntityRequestAction;
     }
     const actionBuilders = {
       custom: guid => getRequestAction(),
@@ -63,7 +63,7 @@ describe('ActionDispatcher', () => {
     const guid = 'guid';
     const endpointGuid = 'guid';
     const actionBuilders = {
-      remove: getActionBuilder
+      delete: getActionBuilder
     } as OrchestratedActionBuilders;
     const spy = spyOn(actionBuilders, 'delete');
     const actionOrchestrator = new ActionOrchestrator('delete', actionBuilders);

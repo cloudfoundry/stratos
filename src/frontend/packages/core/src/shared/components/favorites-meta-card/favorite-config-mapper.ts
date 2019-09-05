@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { IRequestAction } from '../../../../../store/src/types/request.types';
 import {
   IFavoriteMetadata,
   IFavoriteTypeInfo,
@@ -14,6 +12,8 @@ import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-ca
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { IEntityMetadata, IStratosEntityDefinition } from '../../../core/entity-catalogue/entity-catalogue.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 
 export interface IFavoriteTypes {
@@ -52,7 +52,7 @@ export class FavoriteConfig<T, Q extends IFavoriteMetadata> implements IFavorite
 
 export type TFavoriteMapperFunction<T extends IFavoriteMetadata> = (entity: T) => IFavoritesMetaCardConfig;
 
-export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => IRequestAction;
+export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => EntityRequestAction;
 
 export type TEntityToMetadata<T, Q extends IFavoriteMetadata> = (entity: T) => Q;
 export interface IFavoriteActionGenerators {

@@ -1,13 +1,11 @@
 import { RequestOptions } from '@angular/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import {
-  createEntityRelationKey,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory, securityGroupEntityType, spaceEntityType } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
+import { EntityInlineParentAction, createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
 export class GetAllSecurityGroups extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(

@@ -7,14 +7,15 @@ import { MatDialogModule } from '@angular/material';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 
-import { AppNameUniqueDirective } from './app-name-unique.directive';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { AppStoreModule } from '../../../../store/src/store.module';
-import { CoreModule } from '../../core/core.module';
-import { SharedModule } from '../shared.module';
+import { CoreTestingModule } from '../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { CoreModule } from '../../core/core.module';
 import { ExtensionService } from '../../core/extension/extension-service';
-import { GITHUB_API_URL, getGitHubAPIURL } from '../../core/github.helpers';
-import { CFAppState } from '../../../../store/src/app-state';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../core/github.helpers';
+import { SharedModule } from '../shared.module';
+import { AppNameUniqueDirective } from './app-name-unique.directive';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -27,6 +28,7 @@ describe('AppNameUniqueDirective', () => {
         SharedModule,
         RouterTestingModule,
         MatDialogModule,
+        CoreTestingModule,
         createBasicStoreModule(),
         HttpModule,
       ],

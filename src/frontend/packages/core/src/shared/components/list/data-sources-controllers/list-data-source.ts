@@ -34,7 +34,6 @@ import {
   PaginatedAction,
   PaginationEntityState,
   PaginationParam,
-  QParam,
 } from '../../../../../../store/src/types/pagination.types';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
@@ -51,6 +50,7 @@ import {
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { LocalPaginationHelpers } from './local-list.helpers';
+import { QParam } from '../../../../../../store/src/q-param';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -433,29 +433,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   }
 
-  protected setQParam(setQ: QParam, qs: QParam[]): boolean {
-    const existing = qs.find((q: QParam) => q.key === setQ.key);
-    let changed = true;
-    if (setQ.value && setQ.value.length) {
-      if (existing) {
-        // Set existing value
-        changed = existing.value !== setQ.value;
-        existing.value = setQ.value;
-      } else {
-        // Add new value
-        qs.push(setQ);
-      }
-    } else {
-      if (existing) {
-        // Remove existing
-        qs.splice(qs.indexOf(existing), 1);
-      } else {
-        changed = false;
-      }
-    }
-    return changed;
-  }
-
   public updateMetricsAction(newAction: MetricsAction) {
     this.metricsAction = newAction;
 
@@ -467,20 +444,22 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       ).subscribe(pag => {
         this.store.dispatch(new SetParams(newAction, this.paginationKey, {
           ...pag.params,
-          metricConfig: newAction.query
+          // TODO This needs to be a string key-value pair.
+          // metricConfig: newAction.query
         }, false, true));
       });
     }
   }
 
   private createSortObservable(): Observable<ListSort> {
+    // TODO Is this local only or are they some CF params?
     return this.pagination$.pipe(
       map(pag => ({
         direction: pag.params['order-direction'] as SortDirection,
         field: pag.params['order-direction-field']
       })),
       filter(x => !!x),
-      distinctUntilChanged((x, y) => x.direction === y.direction && x.field === y.field),
+      distinctUntilChanged((x: ListSort, y: ListSort) => x.direction === y.direction && x.field === y.field),
       tag('list-sort')
     );
   }

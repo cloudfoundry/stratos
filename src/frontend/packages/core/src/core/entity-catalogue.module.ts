@@ -1,16 +1,18 @@
-import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
-import { Store, ReducerManager } from '@ngrx/store';
-import { ModuleWithProviders, NgModule, Inject } from '@angular/core';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { chainApiReducers, requestActions } from '../../../store/src/reducers/api-request-reducers.generator.helpers';
-import { requestDataReducerFactory } from '../../../store/src/reducers/api-request-data-reducer/request-data-reducer.factory';
-import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
+import { Inject, ModuleWithProviders, NgModule } from '@angular/core';
+import { ReducerManager, Store } from '@ngrx/store';
 
+import {
+  requestDataReducerFactory,
+} from '../../../store/src/reducers/api-request-data-reducer/request-data-reducer.factory';
+import { chainApiReducers, requestActions } from '../../../store/src/reducers/api-request-reducers.generator.helpers';
+import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
+import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 
 export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
 
 @NgModule({})
-export class EffectsFeatureModule {
+export class EntityCatalogueFeatureModule {
   constructor(
     store: Store<any>,
     reducerManager: ReducerManager,
@@ -31,8 +33,9 @@ export class EntityCatalogueModule {
   // TODO: this does not allow for lazy loading, work out if we can allow this.
   // https://github.com/cloudfoundry-incubator/stratos/issues/3741
   static forFeature(entityFactory: () => StratosBaseCatalogueEntity[]): ModuleWithProviders {
+    // Note - If you place any code here before `return` you get funky errors.
     return {
-      ngModule: EffectsFeatureModule,
+      ngModule: EntityCatalogueFeatureModule,
       providers: [
         ReducerManager,
         Store,

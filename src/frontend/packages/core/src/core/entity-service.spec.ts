@@ -1,37 +1,50 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { HttpModule, XHRBackend } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { GetApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralAppState } from '../../../store/src/app-state';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import {
   completeApiRequest,
-  failApiRequest,
   startApiRequest,
 } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { RequestSectionKeys } from '../../../store/src/reducers/api-request-reducer/types';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
-import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
+import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityCatalogueTestHelper } from '../../test-framework/entity-catalogue-test-helpers';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { failedEntityHandler } from '../../../store/src/entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
+
+function getActionDispatcher(store: Store<any>) {
+  return (action: Action) => {
+    store.dispatch(action);
+  };
+}
 
 const endpointType = 'endpoint1';
 const entitySchema = new EntitySchema('child2', endpointType);
-
-const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
-const cfId = 'cf123';
+const createAction = (guid: string) => {
+  return {
+    actions: ['fa', 'k', 'e'],
+    options: {},
+    entityType: entitySchema.entityType,
+    endpointType: entitySchema.endpointType,
+    guid,
+    type: 'test-action'
+  } as ICFAction;
+};
 
 const entityType = 'key';
 
@@ -44,6 +57,7 @@ const catalogueEntity = new StratosBaseCatalogueEntity({
   label: 'Entity',
   labelPlural: 'Entities',
 });
+
 
 describe('EntityServiceService', () => {
   beforeAll(() => {
@@ -61,7 +75,7 @@ describe('EntityServiceService', () => {
     store: Store<GeneralAppState>,
     guid: string,
     schema: EntitySchema,
-    action: IRequestAction,
+    action: EntityRequestAction,
   ) {
 
     const entityMonitor = new EntityMonitor(store, guid, schema.key, schema);
@@ -77,14 +91,7 @@ describe('EntityServiceService', () => {
         }
       }
     };
-    const action = {
-      actions: ['fa', 'k', 'e'],
-      options: {},
-      entityType: entitySchema.entityType,
-      endpointType: entitySchema.endpointType,
-      guid,
-      type: 'test-action'
-    } as ICFAction;
+    const action = createAction(guid);
 
     const entityService = createTestService(
       store,
@@ -125,14 +132,19 @@ describe('EntityServiceService', () => {
         ]
       ]
     ]);
+
+
+
+
+    const action = createAction('123');
     TestBed.configureTestingModule({
       providers: [
         EntityServiceFactory,
         EntityMonitorFactory,
         generateTestEntityServiceProvider(
-          appId,
+          action.guid,
           entitySchema,
-          new GetApplication(appId, cfId)
+          action
         ),
         {
           provide: XHRBackend,
@@ -141,6 +153,16 @@ describe('EntityServiceService', () => {
       ],
       imports: [
         HttpModule,
+        {
+          ngModule: EffectsFeatureTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES, useValue: [
+                catalogueEntity
+              ]
+            }
+          ]
+        },
         createEntityStore(entityMap),
       ]
     });
@@ -202,7 +224,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failApiRequest(store, action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
     })();
   });
 
@@ -224,7 +246,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failApiRequest(store, action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
     })();
   });
 
@@ -381,7 +403,7 @@ describe('EntityServiceService', () => {
         first(),
         tap(ent => {
           expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          failApiRequest(store, action, res, 'delete');
+          failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, res);
         })
       ).subscribe();
 

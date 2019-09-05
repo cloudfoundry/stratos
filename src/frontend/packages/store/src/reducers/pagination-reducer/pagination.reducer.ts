@@ -1,3 +1,4 @@
+import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 import {
@@ -47,7 +48,6 @@ import { paginationSuccess } from './pagination-reducer-success';
 import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
-import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
 
 const getPaginationUpdater = (types: [string, string, string]) => {
   const [requestType, successType, failureType] = types;
@@ -143,12 +143,22 @@ function isEndpointAction(action) {
     action.type === UNREGISTER_ENDPOINTS;
 }
 
+function logMissing(missing: string, allKeys: any) {
+  console.warn(
+    `Missing ${missing} in store`,
+    allKeys
+  );
+}
+
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
   const actionType = getActionType(action);
   const entityKey = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);
   if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
+    if (!newState[entityKey]) {
+      logMissing(`entity type ''`, Object.keys(newState));
+    }
     const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
     if (state[entityKey][paginationKey] === updatedPaginationState) {
       return state;

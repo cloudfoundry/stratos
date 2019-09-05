@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
 
@@ -12,10 +12,10 @@ export type OrchestratedActionBuilder<
   > = (...args: T) => Y;
 
 
-type KnownEntityActionBuilder<T extends any[] = any[]> = (guid: string, endpointGuid: string, ...args: T) => IRequestAction;
+type KnownEntityActionBuilder<T extends any[] = any[]> = (guid: string, endpointGuid: string, ...args: T) => EntityRequestAction;
 // createTrackingId should be unique to the thing that's being created.
 // It is used to track the status of the entity creation.
-type CreateActionBuilder<T extends any[] = any[]> = (createTrackingId: string, endpointGuid: string, ...args: T) => IRequestAction;
+type CreateActionBuilder<T extends any[] = any[]> = (createTrackingId: string, endpointGuid: string, ...args: T) => EntityRequestAction;
 // paginationKey could be optional, we could give it a default value.
 type GetAllActionBuilder<T extends any[] = any[]> = (endpointGuid: string, paginationKey: string, ...args: T) => PaginatedAction;
 
@@ -30,7 +30,7 @@ export interface OrchestratedActionBuilders {
 }
 
 export class OrchestratedActionBuildersClass implements OrchestratedActionBuilders {
-  [actionType: string]: OrchestratedActionBuilder<any[], IRequestAction>;
+  [actionType: string]: OrchestratedActionBuilder<any[], EntityRequestAction>;
 }
 
 export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {

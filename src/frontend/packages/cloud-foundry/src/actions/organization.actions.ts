@@ -2,12 +2,7 @@ import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
-import { entityFactory } from '../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationPaginationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../../../store/src/helpers/entity-relations/entity-relations.types';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
@@ -21,6 +16,11 @@ import {
 } from '../cf-entity-factory';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
+import {
+  EntityInlineParentAction,
+  EntityInlineChildAction,
+  createEntityRelationPaginationKey
+} from '../entity-relations/entity-relations.types';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
@@ -121,7 +121,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
     this.parentGuid = orgGuid;
   }
   actions = [GET_ORGANIZATION_DOMAINS, GET_ORGANIZATION_DOMAINS_SUCCESS, GET_ORGANIZATION_DOMAINS_FAILED];
-  entity = entityFactory(domainEntityType);
+  entity = cfEntityFactory(domainEntityType);
   entityType = domainEntityType;
   options: RequestOptions;
   flattenPagination = true;

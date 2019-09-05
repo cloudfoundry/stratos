@@ -1,7 +1,7 @@
 import { domainEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { IDomain } from '../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../types/api.types';
-import { IRequestAction, ISuccessRequestAction } from '../../types/request.types';
+import { EntityRequestAction, ISuccessRequestAction } from '../../types/request.types';
 import { requestDataReducerFactory } from './request-data-reducer.factory';
 
 describe('RequestDataReducerFactory', () => {
@@ -35,7 +35,7 @@ describe('RequestDataReducerFactory', () => {
         entityType: entityKey,
         guid,
         actions: ['a', 'b', 'c'],
-      } as IRequestAction,
+      } as EntityRequestAction,
       requestType: 'fetch'
     } as ISuccessRequestAction;
     const reducer = requestDataReducerFactory(['a', successType, 'c', 'd']);

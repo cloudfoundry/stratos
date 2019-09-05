@@ -1,9 +1,13 @@
-import { IFailedRequestAction, IRequestAction } from '../../types/request.types';
-import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
+import { EntityRequestAction, IFailedRequestAction } from '../../types/request.types';
+import {
+  getEntityRequestState,
+  mergeUpdatingState,
+  setEntityRequestState,
+} from './request-helpers';
 
 export function failRequest(state, action: IFailedRequestAction) {
   if (action.apiAction.guid) {
-    const apiAction = action.apiAction as IRequestAction;
+    const apiAction = action.apiAction as EntityRequestAction;
     const requestFailedState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {
       requestFailedState.updating = mergeUpdatingState(

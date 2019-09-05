@@ -1,11 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { LogOutDialogComponent } from './log-out-dialog.component';
-import { CoreModule } from '../core.module';
-import { SharedModule } from '../../shared/shared.module';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+import { CoreTestingModule } from '../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { SharedModule } from '../../shared/shared.module';
+import { CoreModule } from '../core.module';
+import { LogOutDialogComponent } from './log-out-dialog.component';
 
 describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
@@ -29,6 +30,7 @@ describe('LogOutDialogComponent', () => {
         SharedModule,
         MatDialogModule,
         NoopAnimationsModule,
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     })

@@ -6,20 +6,21 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
-import { CFAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { ApplicationStateService } from '../application-state/application-state.service';
+import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
-import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
-import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
+import { InternalAppState, GeneralAppState } from '../../../../../store/src/app-state';
 
 class MockedNgZone {
   run = fn => fn();
@@ -50,10 +51,10 @@ describe('ListComponent', () => {
       };
     }
 
-    function setup(store: CFAppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
+    function setup(config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
       TestBed.configureTestingModule({
         imports: [
-          createBasicStoreModule(store),
+          createBasicStoreModule(),
         ],
         providers: [
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
@@ -63,7 +64,7 @@ describe('ListComponent', () => {
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (
-        iStore: Store<CFAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
+        iStore: Store<GeneralAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
       ) => {
         const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);
@@ -75,7 +76,7 @@ describe('ListComponent', () => {
 
       config.getInitialised = null;
 
-      setup(getInitialTestStoreState(), config, (component) => {
+      setup(config, (component) => {
         const componentDeTyped = (component as any);
         spyOn<any>(componentDeTyped, 'initialise');
         expect(componentDeTyped.initialise).not.toHaveBeenCalled();
@@ -95,7 +96,7 @@ describe('ListComponent', () => {
       const config = createBasicListConfig();
       spyOn<any>(config, 'getInitialised').and.returnValue(observableOf(true));
 
-      setup(getInitialTestStoreState(), config, (component) => {
+      setup(config, (component) => {
         const componentDeTyped = (component as any);
         spyOn<any>(componentDeTyped, 'initialise');
         expect(componentDeTyped.initialise).not.toHaveBeenCalled();
@@ -129,6 +130,7 @@ describe('ListComponent', () => {
         imports: [
           CoreModule,
           SharedModule,
+          CoreTestingModule,
           createBasicStoreModule(),
           NoopAnimationsModule
         ],

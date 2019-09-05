@@ -4,13 +4,13 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { getIdFromRoute } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 
 interface EndpointMetadata {
   type: string;

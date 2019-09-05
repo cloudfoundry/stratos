@@ -1,10 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MDAppModule } from '../../../core/md.module';
-import { LoadingPageComponent } from './loading-page.component';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { MDAppModule } from '../../../core/md.module';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { SharedModule } from '../../shared.module';
+import { LoadingPageComponent } from './loading-page.component';
 
 describe('LoadingPageComponent', () => {
   let component: LoadingPageComponent;
@@ -15,6 +16,7 @@ describe('LoadingPageComponent', () => {
       imports: [
         MDAppModule,
         SharedModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ],
       providers: [

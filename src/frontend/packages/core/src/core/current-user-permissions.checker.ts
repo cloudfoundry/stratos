@@ -5,6 +5,9 @@ import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
 import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import {
+  createCFFeatureFlagPaginationKey,
+} from '../../../cloud-foundry/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
   getCurrentUserCFGlobalState,
@@ -22,9 +25,6 @@ import {
 import { endpointsRegisteredEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../store/src/types/api.types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import {
-  createCFFeatureFlagPaginationKey,
-} from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { IFeatureFlag } from './cf-api.types';
 import {
@@ -190,7 +190,6 @@ export class CurrentUserPermissionsChecker {
 
   public getFeatureFlagChecks(configs: PermissionConfig[], endpointGuid?: string): Observable<boolean>[] {
     return configs.map(config => {
-      const { type } = config;
       return this.getFeatureFlagCheck(config, endpointGuid);
     });
   }
@@ -206,7 +205,8 @@ export class CurrentUserPermissionsChecker {
             key => new PaginationMonitor<APIResource<IFeatureFlag>>(
               this.store,
               key,
-              new CFEntityConfig(featureFlagEntityType)
+              new CFEntityConfig(featureFlagEntityType),
+              true
             ).currentPage$
           ));
       }),

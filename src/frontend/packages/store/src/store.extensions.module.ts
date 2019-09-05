@@ -1,8 +1,6 @@
 import { NgModule } from '@angular/core';
-// import { registerBaseStratosTypes } from '../../core/src/base-entity-types';
 
-// registerBaseStratosTypes();
-
+// TODO: NJ? Is this needed any more?
 @NgModule()
 export class AppStoreExtensionsModule {
 

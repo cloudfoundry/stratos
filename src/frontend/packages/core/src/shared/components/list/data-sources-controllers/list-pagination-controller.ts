@@ -4,7 +4,6 @@ import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ListFilter, ListPagination, ListSort } from '../../../../../../store/src/actions/list.actions';
 import {
   AddParams,
@@ -13,6 +12,7 @@ import {
   SetClientPageSize,
   SetPage,
 } from '../../../../../../store/src/actions/pagination.actions';
+import { GeneralAppState } from '../../../../../../store/src/app-state';
 import {
   defaultClientPaginationPageSize,
 } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
@@ -44,7 +44,7 @@ function onPaginationEntityState(
 
 export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralAppState>,
     public dataSource: IListDataSource<T>,
     private ngZone: NgZone
   ) {
@@ -191,7 +191,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     return dataSource.pagination$.pipe(
       filter(pag => !!pag),
       map(pag => {
-        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
+        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'] as number)
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
         // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;

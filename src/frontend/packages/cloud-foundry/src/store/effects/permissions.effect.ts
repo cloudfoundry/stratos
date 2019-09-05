@@ -3,20 +3,21 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, first, map, mergeMap, share, switchMap, tap, withLatestFrom, pairwise, skipWhile } from 'rxjs/operators';
+import {
+  catchError,
+  first,
+  map,
+  mergeMap,
+  pairwise,
+  share,
+  skipWhile,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
-import {
-  createCfFeatureFlagFetchAction,
-} from '../../../../core/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../../store/src/actions/endpoint.actions';
-import {
-  BaseHttpClientFetcher,
-  flattenPagination,
-  IPaginationFlattener,
-} from '../../../../store/src/helpers/paginated-request-helpers';
-import { endpointsRegisteredCFEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../../store/src/types/endpoint.types';
 import {
   GET_CURRENT_USER_CF_RELATIONS,
   GET_CURRENT_USER_CF_RELATIONS_FAILED,
@@ -32,15 +33,21 @@ import {
   UserRelationTypes,
 } from '../../actions/permissions.actions';
 import { CFAppState } from '../../cf-app-state';
+import {
+  createCfFeatureFlagFetchAction,
+} from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { CFResponse } from '../types/cf-api.types';
 import { BasePaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { BaseHttpClientFetcher, PaginationFlattener, flattenPagination } from '../../../../store/src/helpers/paginated-request-helpers';
+import { endpointsRegisteredCFEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
+import { INewlyConnectedEndpointInfo, EndpointModel } from '../../../../store/src/types/endpoint.types';
 
-class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements IPaginationFlattener<CFResponse, CFResponse> {
+class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
 
   constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any }) {
-    super(httpClient, requestOptions, url, 'page');
+    super(httpClient, url, requestOptions, 'page');
   }
   public getTotalPages = (res: CFResponse) => res.total_pages;
 
@@ -49,7 +56,6 @@ class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements I
     const final = res.reduce((finalRes, currentRes) => {
       finalRes.resources = [
         ...finalRes.resources,
-        ...currentRes.resources
       ];
       return finalRes;
     }, firstRes);
@@ -86,7 +92,11 @@ function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, htt
     url,
     params
   );
-  return flattenPagination(store, get$, new PermissionFlattener(httpClient, url, params)).pipe(
+  return flattenPagination(
+    (flatAction: Action) => this.store.dispatch(flatAction),
+    get$,
+    new PermissionFlattener(httpClient, url, params)
+  ).pipe(
     map(data => {
       store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
       return true;
