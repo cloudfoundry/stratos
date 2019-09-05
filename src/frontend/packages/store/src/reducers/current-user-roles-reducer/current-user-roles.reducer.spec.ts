@@ -11,13 +11,8 @@ import {
   ISpaceRoleState,
   RoleEntities,
 } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import {
-  getDefaultEndpointRoles,
-  getDefaultRolesRequestState,
-  ICurrentUserRolesState,
-} from '../../types/current-user-roles.types';
-import { currentUserRolesReducer } from './current-user-roles.reducer';
 import { getDefaultEndpointRoles, ICurrentUserRolesState, getDefaultRolesRequestState } from '../../types/current-user-roles.types';
+import { currentUserRolesReducer } from './current-user-roles.reducer';
 
 const testOrgGuid = 'org-1';
 const testSpaceGuid = 'space-1';
