@@ -3,7 +3,7 @@
 # Theme to use (default is @stratos/theme if not specified)
 #theme: '@stratos/theme'
 
-theme: '@acme/theme'
+#theme: '@acme/theme'
 
 title: 'V3 Stratos!'
 

@@ -35,7 +35,7 @@
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "gulp dev-setup",
+    "postinstall": "npm run build-tooles && gulp dev-setup",
     "build-tools": "cd src/frontend/packages/tools && npm run build",
     "build-builder": "cd src/frontend/packages/tools && npm run builder",
     "sdx": "node ./dist-tools/cli/cli.js"
