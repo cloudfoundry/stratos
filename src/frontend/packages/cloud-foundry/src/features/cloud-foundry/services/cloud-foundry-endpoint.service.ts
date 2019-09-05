@@ -135,7 +135,6 @@ export class CloudFoundryEndpointService {
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       this.cfGuid,
-      // TODO: RC Create issue. Typing should be improved such that .create can only take a 'single' endity action
       new GetAllEndpoints()
     );
 

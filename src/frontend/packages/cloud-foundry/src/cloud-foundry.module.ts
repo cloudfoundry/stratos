@@ -44,12 +44,7 @@ function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: Req
     !Object.keys(entityInfo.updating).find(key => entityInfo.updating[key].busy);
 }
 
-// TODO: RC make this into single action type ICFAction
 function infoValidator(action: ICFAction, dispatcher) {
-  if (!action.guid) {
-    // TODO: RC remove console logs
-    console.log(action);
-  }
   let validated = false;
   return (entityInfo: EntityInfo) => {
     if (!entityInfo || entityInfo.entity) {
