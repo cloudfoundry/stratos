@@ -155,7 +155,7 @@ entries:
     - https://github.com/cloudfoundry-incubator/stratos/releases/download/2.0.0-rc1/console-helm-chart-2.0.0-rc1.tgz
     version: 2.0.0-rc1
   - apiVersion: v1
-    created: "2019-09-04T01:21:30.276225017Z"
+    created: "2019-09-05T01:26:58.384586265Z"
     description: A Helm chart for deploying Stratos UI Console
     name: console
     urls:
