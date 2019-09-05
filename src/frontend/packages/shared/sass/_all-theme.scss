@@ -1,6 +1,7 @@
 @import '../src/components/boolean-indicator/boolean-indicator.component.theme';
 @import '../src/components/chips/chips.component.theme';
 @import '../src/components/stratos-title//stratos-title.component.theme';
+@import '../src/components/code-block/code-block.component.theme';
 
 @mixin apply-theme-stratos-shared($stratos-theme) {
 
@@ -8,5 +9,7 @@
   $app-theme: map-get($stratos-theme, app-theme);
   
   @include app-boolean-indicator-theme($theme, $app-theme);
+  @include code-block-theme($theme, $app-theme);
   @include stratos-title-component-theme($theme, $app-theme);
+
 }

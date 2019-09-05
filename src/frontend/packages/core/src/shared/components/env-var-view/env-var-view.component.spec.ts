@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
-import { CodeBlockComponent } from '../code-block/code-block.component';
+import { CodeBlockComponent } from '@stratos/shared';
 import { EnvVarViewComponent } from './env-var-view.component';
 
 describe('EnvVarViewComponent', () => {

@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
 
-import { LoggerService } from '../../../core/logger.service';
+import { LoggerService } from '../../../../core/src/core/logger.service';
 
 @Component({
   selector: 'app-code-block',

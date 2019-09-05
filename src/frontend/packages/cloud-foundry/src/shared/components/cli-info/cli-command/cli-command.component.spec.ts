@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { MDAppModule } from '../../../../../../core/src/core/md.module';
-import { CodeBlockComponent } from '../../../../../../core/src/shared/components/code-block/code-block.component';
+import { CodeBlockComponent } from '@stratos/shared';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CliCommandComponent } from './cli-command.component';
 

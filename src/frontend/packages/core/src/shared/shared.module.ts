@@ -24,7 +24,6 @@ import { CardBooleanMetricComponent } from './components/cards/card-boolean-metr
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
-import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
@@ -139,7 +138,6 @@ import { StratosComponentsModule } from '@stratos/shared';
     FocusDirective,
     BlurDirective,
     UniqueDirective,
-    CodeBlockComponent,
     LogViewerComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,
@@ -231,7 +229,6 @@ import { StratosComponentsModule } from '@stratos/shared';
     FocusDirective,
     BlurDirective,
     UniqueDirective,
-    CodeBlockComponent,
     LogViewerComponent,
     EndpointsMissingComponent,
     ApplicationStateComponent,
