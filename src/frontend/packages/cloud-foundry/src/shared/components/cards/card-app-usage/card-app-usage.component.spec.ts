@@ -3,6 +3,11 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
+
+import {
+  PercentagePipe
+} from '@stratos/shared';
+
 import {
   ApplicationStateIconComponent,
 } from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -19,7 +24,6 @@ import { CardStatusComponent } from '../../../../../../core/src/shared/component
 import {
   TableCellStatusDirective,
 } from '../../../../../../core/src/shared/components/list/list-table/table-cell-status.directive';
-import { PercentagePipe } from '../../../../../../core/src/shared/pipes/percentage.pipe';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';

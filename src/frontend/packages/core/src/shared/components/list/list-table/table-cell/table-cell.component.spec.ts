@@ -2,6 +2,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   AppChipsComponent,
+  PercentagePipe,
+  ValuesPipe,
 } from '@stratos/shared';
 
 import {
@@ -24,8 +26,6 @@ import {
 } from '../../../../../../../cloud-foundry/src/shared/components/service-plan-public/service-plan-public.component';
 import { CoreModule } from '../../../../../core/core.module';
 import { UtilsService } from '../../../../../core/utils.service';
-import { PercentagePipe } from '../../../../pipes/percentage.pipe';
-import { ValuesPipe } from '../../../../pipes/values.pipe';
 import { AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 import {
   ApplicationStateIconComponent,

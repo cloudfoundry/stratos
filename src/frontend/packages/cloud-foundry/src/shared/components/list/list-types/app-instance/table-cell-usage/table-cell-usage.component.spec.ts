@@ -1,9 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  PercentagePipe
+} from '@stratos/shared';
+
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { UtilsService } from '../../../../../../../../core/src/core/utils.service';
 import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/components/usage-gauge/usage-gauge.component';
-import { PercentagePipe } from '../../../../../../../../core/src/shared/pipes/percentage.pipe';
 import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { TableCellUsageComponent } from './table-cell-usage.component';
 

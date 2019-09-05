@@ -1,5 +1,4 @@
-import { SetupModule } from './../../../features/setup/setup.module';
-import { Component, OnInit, Output, OnDestroy, Input, EventEmitter } from '@angular/core';
+import { Component, Output, OnDestroy, Input, EventEmitter } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import * as moment from 'moment';
 import { tap, map, filter, shareReplay, debounceTime } from 'rxjs/operators';

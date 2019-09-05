@@ -1,6 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import {
+  UptimePipe
+} from '@stratos/shared';
+
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import {
@@ -17,7 +21,6 @@ import {
 } from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';

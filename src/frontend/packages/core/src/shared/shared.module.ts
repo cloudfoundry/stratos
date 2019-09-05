@@ -25,7 +25,6 @@ import { CardNumberMetricComponent } from './components/cards/card-number-metric
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
-import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
@@ -99,12 +98,6 @@ import { GitSCMService } from './data-services/scm/scm.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
-import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
-import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
-import { PercentagePipe } from './pipes/percentage.pipe';
-import { UptimePipe } from './pipes/uptime.pipe';
-import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
-import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
@@ -128,11 +121,6 @@ import { StratosComponentsModule } from '@stratos/shared';
     LoadingPageComponent,
     DisplayValueComponent,
     EditableDisplayValueComponent,
-    MbToHumanSizePipe,
-    PercentagePipe,
-    UptimePipe,
-    UsageBytesPipe,
-    ValuesPipe,
     LoadingPageComponent,
     DetailsCardComponent,
     FocusDirective,
@@ -178,9 +166,7 @@ import { StratosComponentsModule } from '@stratos/shared';
     UserProfileBannerComponent,
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
-    CapitalizeFirstPipe,
     RoutingIndicatorComponent,
-    DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
@@ -220,11 +206,6 @@ import { StratosComponentsModule } from '@stratos/shared';
     EditableDisplayValueComponent,
     DetailsCardComponent,
     SteppersModule,
-    MbToHumanSizePipe,
-    ValuesPipe,
-    PercentagePipe,
-    UsageBytesPipe,
-    UptimePipe,
     SteppersModule,
     FocusDirective,
     BlurDirective,
@@ -264,9 +245,7 @@ import { StratosComponentsModule } from '@stratos/shared';
     UserPermissionDirective,
     TableComponent,
     UserPermissionDirective,
-    CapitalizeFirstPipe,
     RoutingIndicatorComponent,
-    DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,

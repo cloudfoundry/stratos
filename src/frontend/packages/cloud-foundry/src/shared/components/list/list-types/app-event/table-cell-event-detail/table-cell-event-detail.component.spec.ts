@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
+import {
+  ValuesPipe
+} from '@stratos/shared';
+
 import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { TableCellEventDetailComponent } from './table-cell-event-detail.component';
 

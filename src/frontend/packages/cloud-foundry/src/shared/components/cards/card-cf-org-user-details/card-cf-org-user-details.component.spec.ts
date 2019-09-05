@@ -1,11 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  CapitalizeFirstPipe
+} from '@stratos/shared';
+
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { BooleanIndicatorComponent } from '@stratos/shared';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { CapitalizeFirstPipe } from '../../../../../../core/src/shared/pipes/capitalizeFirstLetter.pipe';
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
