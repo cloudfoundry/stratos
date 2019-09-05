@@ -85,10 +85,10 @@
                 <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}
                 </app-metadata-item>
                 <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
-                  {{(applicationService.appSummary$ | async)?.entity?.entity?.services?.length || '0' }}
+                  {{(applicationService.appSummary$ | async)?.entity?.services?.length || '0' }}
                 </app-metadata-item>
                 <app-metadata-item icon="network_route" iconFont="stratos-icons" label="Routes">
-                  {{(applicationService.appSummary$ | async)?.entity?.entity?.routes?.length || '0' }}
+                  {{(applicationService.appSummary$ | async)?.entity?.routes?.length || '0' }}
                 </app-metadata-item>
               </div>
             </div>

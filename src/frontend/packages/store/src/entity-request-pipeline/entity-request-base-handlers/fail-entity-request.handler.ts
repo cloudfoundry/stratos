@@ -1,19 +1,18 @@
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
 import { WrapperRequestActionFailed } from '../../types/request.types';
-import { SucceedOrFailEntityRequestHandler } from '../entity-request-pipeline.types';
 
-// This might not be needed
-export const failedEntityHandler: SucceedOrFailEntityRequestHandler = (
+export function failedEntityHandler(
   actionDispatcher,
   catalogueEntity,
   requestType,
   action,
-  recursivelyDeleting
-) => {
+  response,
+  recursivelyDeleting = false
+) {
   const entityAction = catalogueEntity.getRequestAction('failure', requestType, action);
   actionDispatcher(entityAction);
-  actionDispatcher(new WrapperRequestActionFailed('Api Request Failed', action, requestType));
-  if (recursivelyDeleting.response) {
+  actionDispatcher(new WrapperRequestActionFailed('Api Request Failed', action, requestType, null, response));
+  if (recursivelyDeleting) {
     actionDispatcher(
       new RecursiveDeleteFailed(
         action.guid,

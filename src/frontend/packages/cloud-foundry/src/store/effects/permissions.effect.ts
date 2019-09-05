@@ -55,6 +55,7 @@ class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements P
     const firstRes = res.shift();
     const final = res.reduce((finalRes, currentRes) => {
       finalRes.resources = [
+        ...finalRes.resources,
       ];
       return finalRes;
     }, firstRes);
