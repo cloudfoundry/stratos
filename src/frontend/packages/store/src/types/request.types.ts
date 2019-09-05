@@ -61,6 +61,10 @@ export interface EntityRequestAction extends EntityCatalogueEntityConfig, Reques
    */
   removeEntityOnDelete?: boolean;
   options?: RequestOptions | HttpRequest<any>;
+  /**
+   * Override the default `requestType` of `create`, `update`, `delete`, etc
+   */
+  requestTypeLabel?: string;
 }
 
 export interface IUpdateRequestAction {

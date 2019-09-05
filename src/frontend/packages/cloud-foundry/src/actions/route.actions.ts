@@ -112,13 +112,13 @@ export class UnmapRoute extends BaseRouteAction {
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
   }
-  endpointType = 'cf';
   actions = [
     RouteEvents.UNMAP_ROUTE,
     RouteEvents.UNMAP_ROUTE_SUCCESS,
     RouteEvents.UNMAP_ROUTE_FAILED
   ];
   updatingKey = 'unmapping';
+  requestTypeLabel = 'unmap';
 }
 
 export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {

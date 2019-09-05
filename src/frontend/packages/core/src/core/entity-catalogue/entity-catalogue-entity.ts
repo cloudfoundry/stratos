@@ -16,7 +16,7 @@ import { EntityActionDispatcherManager } from './action-dispatcher/action-dispat
 import {
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
-  OrchestratedActionBuilders
+  OrchestratedActionBuilders,
 } from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
@@ -175,13 +175,24 @@ export class StratosBaseCatalogueEntity<
     return null;
   }
 
+  private getTypeLabel(
+    actionString: 'start' | 'success' | 'failure' | 'complete',
+    requestType: ApiRequestTypes,
+    action?: EntityRequestAction,
+  ) {
+    const requestTypeLabel = (action ? action.requestTypeLabel : null) || requestType;
+    return `@stratos/${this.entityKey}/${requestTypeLabel}/${actionString}`;
+  }
+
   public getRequestAction(
     actionString: 'start' | 'success' | 'failure' | 'complete',
     requestType: ApiRequestTypes,
     action?: EntityRequestAction,
     response?: any
   ): APISuccessOrFailedAction {
-    const type = this.getLegacyTypeFromAction(action, actionString) || `@stratos/${this.entityKey}/${requestType}/${actionString}`;
+    const type =
+      this.getLegacyTypeFromAction(action, actionString) ||
+      this.getTypeLabel(actionString, requestType, action);
     return new APISuccessOrFailedAction(type, action, response);
   }
 
