@@ -12,7 +12,7 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "customWebpackConfig": {
-              "path": "./custom-webpack.config.js"
+              "path": "./dist-tools/build/main.js"
             },            
             "preserveSymlinks": true,
             "outputPath": "dist",
@@ -229,6 +229,37 @@
         }
       }
     },
+    "shared": {
+      "root": "src/frontend/packages/shared",
+      "sourceRoot": "src/frontend/packages/shared/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "src/frontend/packages/shared/tsconfig.lib.json",
+            "project": "src/frontend/packages/shared/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/shared/src/test.ts",
+            "tsConfig": "src/frontend/packages/shared/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/shared/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": ["src/tsconfig.json"],
+            "tslintConfig": "src/frontend/packages/shared/tslint.json",
+            "files": ["src/frontend/packages/shared/src/**/*.ts"]
+          }
+        }
+      }
+    },
     "store-helpers": {
       "root": "src/frontend/packages/store-helpers",
       "sourceRoot": "src/frontend/packages/store-helpers/src",
@@ -260,6 +291,20 @@
         }
       }
     },
+    "theme": {
+      "root": "src/frontend/packages/theme",
+      "sourceRoot": "src/frontend/packages/theme/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@stratos/builder:theme",
+          "options": {
+            "dist": "./dist/theme"
+          }
+        }
+      }
+    },    
     "cloud-foundry": {
       "root": "src/frontend/packages/cloud-foundry",
       "sourceRoot": "src/frontend/packages/cloud-foundry/src",

@@ -1,0 +1,24 @@
+import {Builder, BuilderConfiguration, BuilderContext, BuildEvent} from '@angular-devkit/architect';
+import {bindNodeCallback, Observable, of} from 'rxjs';
+import {catchError, map, tap} from 'rxjs/operators';
+import {getSystemPath} from '@angular-devkit/core';
+import {writeFile} from 'fs';
+
+
+export interface StratosThemeSchema {
+  dist: string;
+}
+
+export default class StratosThemeBuilder implements Builder<any> {
+  constructor(private context: BuilderContext) {
+  }
+
+  run(builderConfig: BuilderConfiguration<Partial<any>>): Observable<BuildEvent> {
+    // const root = this.context.workspace.root;
+    // //const {path, format} = builderConfig.options;
+    // console.log('HELLO - CUSTOM BUILDER');
+
+    return null;
+  }
+
+}

@@ -4,7 +4,7 @@ import { CustomImportModule } from '../../custom-import.module';
 import { SharedModule } from '../../shared/shared.module';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { AboutRoutingModule } from './about.routing';
-import { EulaPageComponent, EulaPageContentComponent } from './eula-page/eula-page.component';
+import { EulaPageComponent } from './eula-page/eula-page.component';
 import { DiagnosticsPageComponent } from './diagnostics-page/diagnostics-page.component';
 import { StratosComponentsModule } from '@stratos/shared';
 
@@ -20,7 +20,6 @@ import { StratosComponentsModule } from '@stratos/shared';
   ],
   declarations: [
     AboutPageComponent,
-    EulaPageContentComponent,
     EulaPageComponent,
     DiagnosticsPageComponent
   ]

@@ -2,8 +2,15 @@
   "name": "@stratos/theme",
   "version": "0.0.1",
   "stratos": {
-    "theme": true
+    "assets": {
+      "assets/core": "core/assets",
+      "assets/favicon.ico": "favico.ico"
+    }
   },
   "peerDependencies": {
+  },
+  "scripts": {
+    "build": "rm -rf ../../../../dist/theme && mkdir -p ../../../../dist/theme && cp -R * ../../../../dist/theme",
+    "build2": "echo 'NEIL'"
   }
 }

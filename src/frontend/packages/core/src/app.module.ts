@@ -47,7 +47,6 @@ import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
 import { EntityCatalogueModule } from './core/entity-catalogue.module';
 import { baseStratosTypeFactory } from './base-entity-types';
-import { StratosExtensionsModule } from '@stratos/core/default-extension.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -106,7 +105,6 @@ export class CustomRouterStateSerializer
     StoreRouterConnectingModule, // Create action for router navigation
     AboutModule,
     CustomImportModule,
-    StratosExtensionsModule,
     XSRFModule,
     CfAutoscalerModule,
   ],

@@ -28,8 +28,9 @@
     ],
     "preserveSymlinks": true,
     "paths": {
-      "__@stratos/shared": ["frontend/packages/shared/src/public-api.ts"],
-      "@stratos/core/default-extension.module" : ["frontend/packages/core/src/core/extension/default-extension.module.ts"]
+      "@acme/extensions": ["frontend/packages/acme_extensions/src/public-api.ts"],
+      "@stratos/core": ["frontend/packages/core/src/public-api.ts"],
+      "@stratos/shared": ["frontend/packages/shared/src/public-api.ts"],
     }
   }
 }

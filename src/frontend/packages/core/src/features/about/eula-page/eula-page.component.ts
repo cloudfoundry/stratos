@@ -1,17 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-
-@Component({
-  selector: 'app-eula-content',
-  templateUrl: '../../../../assets/eula.html'
-})
-export class EulaPageContentComponent { }
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-eula-page',
   templateUrl: './eula-page.component.html',
   styleUrls: ['./eula-page.component.scss']
 })
-export class EulaPageComponent implements OnInit {
+
+export class EulaPageComponent {
 
   public breadcrumbs = [
     {
@@ -19,10 +15,13 @@ export class EulaPageComponent implements OnInit {
     }
   ];
 
-  constructor() { }
+  public eulaHtml = '';
 
-  ngOnInit() {
-
+  constructor(http: HttpClient) {
+    http.get('/core/assets/eula.html', {responseType: 'text'}).subscribe(
+      html => this.eulaHtml = html,
+      () => this.eulaHtml = 'An error occurred retrieving the EULA'
+    );
   }
 
 }

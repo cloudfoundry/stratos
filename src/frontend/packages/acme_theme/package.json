@@ -5,7 +5,7 @@
     "@stratos/theme": "0.0.1"
   },
   "stratos": {
-    "isTheme": true,
+    "ignore": true,
     "assets": {
       "assets/core": "core"
     }

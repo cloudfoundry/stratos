@@ -21,7 +21,8 @@
 
 // Get the theme
 $stratos-theme: stratos-theme();
-@debug $stratos-theme;
+
+// TODO: Check that we have a theme
 $theme: map-get($stratos-theme, theme);
 
 // Apply the theme

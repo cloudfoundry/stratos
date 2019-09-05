@@ -19,8 +19,6 @@ $oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-wa
 // Helper to create a Stratos theme ffrom color palettes
 @function stratos-theme-helper($theme: $oss-theme, $nav-theme: null, $status-theme: null) {
 
-  @debug "*** >> stratos-theme-helper";
-
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
   $is-dark: map-get($theme, is-dark);

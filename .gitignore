@@ -1,5 +1,6 @@
 # compiled output
 /dist
+/dist-tools
 .dist
 /tmp
 /out-tsc
@@ -93,17 +94,18 @@ src/jetstream/config.properties
 
 # Customisations
 
-src/frontend/packages/core/favicon.ico
+# src/frontend/packages/core/favicon.ico
 src/frontend/packages/core/sass/custom.scss
 src/frontend/packages/core/assets/eula.html
-src/frontend/packages/core/assets/logo.png
-src/frontend/packages/core/assets/nav-logo.png
-src/frontend/packages/core/assets/login-bg.jpg
-src/frontend/packages/core/src/custom-import.module.ts
+# src/frontend/packages/core/assets/logo.png
+# src/frontend/packages/core/assets/nav-logo.png
+# src/frontend/packages/core/assets/login-bg.jpg
+# src/frontend/packages/core/src/custom-import.module.ts
 src/frontend/packages/core/src/custom
 src/frontend/packages/core/assets/custom
 src/frontend/packages/core/sass/custom
-src/frontend/packages/core/src/index.html
+
+#src/frontend/packages/core/src/index.html
 
 # Prebuild package
 
@@ -112,3 +114,5 @@ stratos-frontend-prebuild.zip
 src/frontend/assets
 src/frontend/sass
 go-vendor-*.tgz
+
+_custom-imort.module.ts
