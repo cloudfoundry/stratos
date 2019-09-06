@@ -26,28 +26,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type localAuth  struct {
+	databaseConnectionPool *sql.DB
+	localUserScope         string
+	p                      *portalProxyImpl
+}
 
-func (a *AuthInterface) Login(c echo.Context) {
+func (a *localAuth) Login(c echo.Context) {
 	return a.localLogin(c echo.Context)
 }
 
-func (a *AuthInterface) Logout(c echo.Context) {
+func (a *localAuth) Logout(c echo.Context) {
 	return a.logout(c echo.Context)
 }
 
-func (a *AuthInterface) localLogin(c echo.Context) error {
+func (a *localAuth) localLogin(c echo.Context) error {
 	log.Debug("localLogin")
 
-	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
-		err := interfaces.NewHTTPShadowError(
-			http.StatusNotFound,
-			"Local Login is not enabled",
-			"Local Login is not enabled")
-		return err
-	}
-
 	//Perform the login and fetch session values if successful
-	userGUID, username, err := p.doLocalLogin(c)
+	userGUID, username, err := a.doLocalLogin(c)
 	if err != nil {
 		//Login failed, return response.
 		errMessage := err.Error()
@@ -68,12 +65,12 @@ func (a *AuthInterface) localLogin(c echo.Context) error {
 	// Ensure that login disregards cookies from the request
 	req := c.Request()
 	req.Header.Set("Cookie", "")
-	if err = p.setSessionValues(c, sessionValues); err != nil {
+	if err = a.p.setSessionValues(c, sessionValues); err != nil {
 		return err
 	}
 
 	//Makes sure the client gets the right session expiry time
-	if err = p.handleSessionExpiryHeader(c); err != nil {
+	if err = a.p.handleSessionExpiryHeader(c); err != nil {
 		return err
 	}
 
@@ -94,7 +91,7 @@ func (a *AuthInterface) localLogin(c echo.Context) error {
 	return err
 }
 
-func (a *AuthInterface) doLocalLogin(c echo.Context) (string, string, error) {
+func (a *localAuth) doLocalLogin(c echo.Context) (string, string, error) {
 	log.Debug("doLocalLogin")
 
 	username := c.FormValue("username")
@@ -104,7 +101,7 @@ func (a *AuthInterface) doLocalLogin(c echo.Context) (string, string, error) {
 		return "", username, errors.New("Needs usernameand password")
 	}
 
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
 		return "", username, err
@@ -130,7 +127,7 @@ func (a *AuthInterface) doLocalLogin(c echo.Context) (string, string, error) {
 	} else {
 		//Ensure the local user has some kind of admin role configured and we check for it here
 		localUserScope, authError = localUsersRepo.FindUserScope(guid)
-		scopeOK = strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope)
+		scopeOK = strings.Contains(localUserScope, a.LocalUserScope)
 		if (authError != nil) || (!scopeOK) {
 			authError = fmt.Errorf("Access Denied - User scope invalid")
 		} else {
@@ -145,22 +142,17 @@ func (a *AuthInterface) doLocalLogin(c echo.Context) (string, string, error) {
 	return guid, username, authError
 }
 
-func (a *AuthInterface) logout(c echo.Context) error {
+func (a *localAuth) logout(c echo.Context) error {
 	log.Debug("logout")
 
-	p.removeEmptyCookie(c)
+	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	p.unsetSessionValue(c, XSRFTokenSessionName)
+	a.p.unsetSessionValue(c, XSRFTokenSessionName)
 
-	err := p.clearSession(c)
+	err := a.p.clearSession(c)
 	if err != nil {
 		log.Errorf("Unable to clear session: %v", err)
-	}
-
-	// Send JSON document
-	resp := &LogoutResponse{
-		IsSSO: p.Config.SSOLogin,
 	}
 
 	return c.JSON(http.StatusOK, resp)

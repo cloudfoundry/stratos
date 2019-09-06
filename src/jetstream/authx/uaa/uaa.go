@@ -26,16 +26,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type uaaAuth  struct {
+	databaseConnectionPool *sql.DB
+    //MORE FIELDS HERE
+	p                      *portalProxyImpl
+}
 
-func (a *AuthInterface) Login(c echo.Context) {
+func (a *Auth) Login(c echo.Context) {
 	return a.loginToUAA(c echo.Context)
 }
 
-func (a *AuthInterface) Logout(c echo.Context) {
+func (a *Auth) Logout(c echo.Context) {
 	return a.logout(c echo.Context)
 }
 
-func (a *AuthInterface) loginToUAA(c echo.Context) error {
+func (a *Auth) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
 
 	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
@@ -65,7 +70,7 @@ func (a *AuthInterface) loginToUAA(c echo.Context) error {
 	return nil
 }
 
-func (a *AuthInterface) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
+func (a *Auth) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 	log.Debug("doLoginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
@@ -122,7 +127,7 @@ func (a *AuthInterface) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, erro
 	return resp, nil
 }
 
-func (a *AuthInterface) logout(c echo.Context) error {
+func (a *Auth) logout(c echo.Context) error {
 	log.Debug("logout")
 
 	p.removeEmptyCookie(c)
