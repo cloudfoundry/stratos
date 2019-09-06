@@ -205,14 +205,7 @@ export class AutoscalerEffects {
         options.params.set('order', options.params.get('order-direction'));
         options.params.delete('order-direction');
       }
-      // TODO this needs to be changed into a string key-value
-      // if (metricConfig && metricConfig.params) {
-      //   options.params.set('start-time', metricConfig.params.start + '000000000');
-      //   options.params.set('end-time', metricConfig.params.end + '000000000');
-      // } else if (action.query && action.query.params) {
-      //   options.params.set('start-time', action.query.params.start + '000000000');
-      //   options.params.set('end-time', action.query.params.end + '000000000');
-      // }
+
       return this.http
         .request(new Request(options)).pipe(
           mergeMap(response => {

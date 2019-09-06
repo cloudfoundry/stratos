@@ -7,11 +7,9 @@ import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
 
 
-
 export interface PaginationParam {
   [entityKey: string]: string | string[] | number;
 }
-// metricConfig?: MetricQueryConfig
 
 export interface PaginationClientFilter {
   string: string;

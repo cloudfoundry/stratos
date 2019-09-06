@@ -1,4 +1,4 @@
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
@@ -95,6 +95,13 @@ export interface IListDataSourceConfig<A, T> {
    * A function that will be called instead of the default refresh
    */
   refresh?: () => void;
+
+  /**
+   * A function that will be called instead of the default update metrics action
+   *
+   * This will only be called when metrics-range-selector component is enabled/used
+   */
+  handleTimeWindowChange?: (action: Action) => void;
 
   /**
    * A function which fetches an observable containing a specific row's state
