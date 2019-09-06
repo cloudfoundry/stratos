@@ -775,20 +775,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
-	pp.POST("/v1/auth/login/uaa", p.stratosLoginHandler)
-	pp.POST("/v1/auth/logout", p.logout)
-
-	// SSO Routes will only respond if SSO is enabled
-	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
-	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
-
-	// Local User login/logout
-	// pp.POST("/v1/auth/local_login", p.localLogin)
-	// pp.POST("/v1/auth/local_logout", p.logout)
-
-	// Callback is used by both login to Stratos and login to an Endpoint
-	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
-
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
 
@@ -796,6 +782,18 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	sessionGroup := pp.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
 	sessionGroup.Use(p.xsrfMiddleware)
+	
+	authGroup = sessionGroup.Group("/auth")
+
+	authGroup.POST("/login/uaa", p.Login)
+	authGroup.POST("/logout", p.Logout)
+
+	// SSO Routes will only respond if SSO is enabled
+	authGroup.GET("/sso_login", p.initSSOlogin)
+	authGroup.GET("/sso_logout", p.ssoLogoutOfUAA)
+
+	// Callback is used by both login to Stratos and login to an Endpoint
+	authGroup.GET("/sso_login_callback", p.ssoLoginToUAA)
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
