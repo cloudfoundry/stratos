@@ -1,5 +1,6 @@
 import { NormalizedResponse } from '../../types/api.types';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
+import { PipelineResult } from '../entity-request-pipeline.types';
 
 describe('merge-multi-endpoint-data', () => {
   it('should merge correctly', () => {
@@ -35,17 +36,23 @@ describe('merge-multi-endpoint-data', () => {
       entity3: new Set(['guid1', 'guid2'])
     };
     const expectedResult = new Set(['guid1', 'guid2', 'guid3', 'guid4']);
-    const merged = multiEndpointResponseMergePipe([data1, data2]);
+    const merged = multiEndpointResponseMergePipe([{
+      response: data1,
+      success: true
+    }, {
+      response: data2,
+      success: true
+    }]);
 
-    Object.keys(merged.entities).forEach(entityKey => {
-      const entities = merged.entities[entityKey];
+    Object.keys(merged.response.entities).forEach(entityKey => {
+      const entities = merged.response.entities[entityKey];
       const expectedEntitiesSet = expectedEntities[entityKey] as Set<string>;
       Object.keys(entities).forEach(entityGuid => {
         expectedEntitiesSet.delete(entityGuid);
       });
 
     });
-    merged.result.forEach((key) => {
+    merged.response.result.forEach((key) => {
       expectedResult.delete(key);
     });
     Object.values(expectedEntities).forEach(set => {
