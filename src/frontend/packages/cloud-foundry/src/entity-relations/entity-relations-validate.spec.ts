@@ -422,7 +422,7 @@ describe('Entity Relations - validate -', () => {
         const org = store.requestData[orgEntityKey][orgGuid];
         org.entity.quota_definition_guid = quotaDefinition.metadata.guid;
         return store;
-      });
+    });
 
       const getOrgAction = new GetOrganization(
         orgGuid,

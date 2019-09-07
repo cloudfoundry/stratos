@@ -68,7 +68,7 @@ export class AddEditSpaceStepBase {
 
     const quotaPaginationKey = createEntityRelationPaginationKey(organizationEntityType, this.orgGuid);
     
-    const spaceQuotaEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, spaceQuotaEntityType);
+    const spaceQuotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
     const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('getOrganizationSpaceQuotaDefinitions');
     const getOrganizationSpaceQuotaDefnitionsAction = actionBuilder(quotaPaginationKey, this.orgGuid, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<ISpaceQuotaDefinition>>(

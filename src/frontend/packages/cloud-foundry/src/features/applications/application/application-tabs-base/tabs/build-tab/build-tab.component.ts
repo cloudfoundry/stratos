@@ -229,7 +229,7 @@ export class BuildTabComponent implements OnInit {
     this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
       // On app reaching the 'STOPPED' state clear the app's stats pagination section
       const { cfGuid, appGuid } = this.applicationService;
-      const appStatsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appStatsEntityType);
+      const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
       const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
       const getAppStatsAction = actionBuilder(appGuid, cfGuid) as GetAppStatsAction;
       this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));

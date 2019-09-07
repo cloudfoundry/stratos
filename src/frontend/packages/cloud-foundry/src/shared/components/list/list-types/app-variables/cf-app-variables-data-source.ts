@@ -63,7 +63,7 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   }
 
   saveAdd() {
-    const appEnvVarsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
     const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('addNewToApplication');
     const appVariablesAddAction = actionBuilder(this.cfGuid, this.appGuid, this.transformedEntities, this.addItem);
 
@@ -76,7 +76,7 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   }
 
   saveEdit() {
-    const appEnvVarsEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
     const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('editInApplication');
     const appVariablesEditAction = actionBuilder(this.cfGuid, this.appGuid, this.transformedEntities, this.editRow);
     

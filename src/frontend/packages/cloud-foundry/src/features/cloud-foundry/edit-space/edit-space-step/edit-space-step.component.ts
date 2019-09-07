@@ -129,7 +129,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     let spaceQuotaQueryGuid;
     let action: AssociateSpaceQuota | DisassociateSpaceQuota;
 
-    const spaceQuotaEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, spaceQuotaEntityType);
+    const spaceQuotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
     if (spaceQuotaGuid) {
       spaceQuotaQueryGuid = spaceQuotaGuid;
       const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('associateSpaceQuota');

@@ -95,7 +95,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const repoEntityID = `${scmType}-${projectName}`;
         const commitEntityID = `${repoEntityID}-${commitId}`;
 
-        const gitRepoEntity = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, gitRepoEntityType);
+        const gitRepoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitRepoEntityType);
         const getRepoActionBuilder = gitRepoEntity.actionOrchestrator.getActionBuilder('getRepoInfo');
         const getRepoAction = getRepoActionBuilder(stProject)  as FetchGitHubRepoInfo;
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
