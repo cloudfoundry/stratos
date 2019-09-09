@@ -31,7 +31,7 @@ var updateChart = `UPDATE charts
 
 var insertChartFile = `INSERT INTO chart_files (id, filename, chart_id, name, repo_name, digest, content) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 var updateChartFile = `UPDATE chart_files SET chart_id = $1, name = $2, repo_name = $3, digest = $4, content = $5 WHERE id = $6 AND filename = $7`
-var countChartFile = `SELECT COUNT(*) FROM chart_Files WHERE id = $1 AND filename = $2`
+var countChartFile = `SELECT COUNT(*) FROM chart_files WHERE id = $1 AND filename = $2`
 
 var deleteChartFiles = `DELETE FROM chart_files WHERE (name, repo_name) IN (SELECT name, repo_name FROM charts WHERE repo_name = $1 AND update_batch != $2)`
 var deleteCharts = `DELETE FROM charts WHERE repo_name = $1 AND update_batch != $2`
@@ -151,7 +151,7 @@ func (s *SQLDBCMonocularDatastore) ImportCharts(charts []chartrepo.Chart) error 
 		return fmt.Errorf("Unable to delete chart files: %v", err)
 	}
 
-	if _, err := s.db.Exec(deleteChart, repoName, updateBatchID); err != nil {
+	if _, err := s.db.Exec(deleteChart, repoName); err != nil {
 		return fmt.Errorf("Unable to delete charts: %v", err)
 	}
 
