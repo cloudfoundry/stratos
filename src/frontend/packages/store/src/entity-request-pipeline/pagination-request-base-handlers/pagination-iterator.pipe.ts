@@ -83,17 +83,23 @@ export class PaginationPageIterator<R = any, E = any> {
   }
 
   private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number) {
-    const maxCount = action.flattenPaginationMax;
-    // We're maxed so only respond with the first page of results.
-    if (maxCount < totalResults) {
-      const { entityType, endpointType, paginationKey, __forcedPageEntityConfig__ } = action;
-      const forcedEntityKey = entityCatalogue.getEntityKey(__forcedPageEntityConfig__);
-      this.actionDispatcher(
-        new UpdatePaginationMaxedState(maxCount, totalResults, entityType, endpointType, paginationKey, forcedEntityKey)
-      );
-      of([initialResponse]);
+    f(totalResults > 0) {
+      const maxCount = action.flattenPaginationMax;
+      // We're maxed so only respond with the first page of results.
+      if (maxCount < totalResults) {
+        const { entityType, endpointType, paginationKey, __forcedPageEntityConfig__ } = action;
+        const forcedEntityKey = entityCatalogue.getEntityKey(__forcedPageEntityConfig__);
+        this.actionDispatcher(
+          new UpdatePaginationMaxedState(maxCount, totalResults, entityType, endpointType, paginationKey, forcedEntityKey)
+        );
+        of([initialResponse]);
+      }
     }
     return combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
+  }
+
+  private getValidNumber(num: number) {
+    return typeof num === 'number' && !isNaN(num) ? num : 0;
   }
 
   public mergeAllPagesEntities(): Observable<PagedJetstreamResponse> {
@@ -105,10 +111,10 @@ export class PaginationPageIterator<R = any, E = any> {
         return this.handleRequests(
           initialResponse,
           this.action,
-          totalPages,
-          totalResults
+          this.getValidNumber(totalPages),
+          this.getValidNumber(totalResults)
         ).pipe(
-          map(([initialRequestResponse, othersResponse]) => [initialRequestResponse, ...othersResponse]),
+          map(([initialRequestResponse]) => [initialRequestResponse]),
           map(responsePages => this.reducePages(responsePages)),
         );
       })
