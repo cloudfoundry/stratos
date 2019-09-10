@@ -1,9 +1,0 @@
-{
-  "name": "@stratos/builder",
-  "version": "1.0.0",
-  "description": "Builder for Stratos",
-  "builders": "builders.json",
-  "devDependencies": {
-    "@angular-devkit/architect": "^1.0.0"
-  }
-}

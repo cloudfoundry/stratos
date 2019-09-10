@@ -1,9 +1,0 @@
-{
-  "builders": {
-    "theme": {
-      "class": "./theme.js",
-      "schema": "./schema.json",
-      "description": "Stratos theme builder"
-    }
-  }
-}

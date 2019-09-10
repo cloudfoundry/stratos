@@ -30,7 +30,7 @@
     "paths": {
       "@acme/extensions": ["frontend/packages/acme_extensions/src/public-api.ts"],
       "@stratos/core": ["frontend/packages/core/src/public-api.ts"],
-      "@stratos/shared": ["frontend/packages/shared/src/public-api.ts"],
+      "@stratos/shared": ["frontend/packages/shared/src/public-api.ts"]
     }
   }
 }
