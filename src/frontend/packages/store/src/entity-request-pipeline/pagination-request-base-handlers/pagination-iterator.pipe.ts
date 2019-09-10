@@ -83,7 +83,7 @@ export class PaginationPageIterator<R = any, E = any> {
   }
 
   private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number) {
-    f(totalResults > 0) {
+    if (totalResults > 0) {
       const maxCount = action.flattenPaginationMax;
       // We're maxed so only respond with the first page of results.
       if (maxCount < totalResults) {
