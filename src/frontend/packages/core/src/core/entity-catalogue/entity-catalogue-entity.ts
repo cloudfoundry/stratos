@@ -56,6 +56,7 @@ export class StratosBaseCatalogueEntity<
     this.type = this.definition.type || this.definition.schema.default.entityType;
     const baseEntity = definition as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
+    // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
@@ -100,8 +101,9 @@ export class StratosBaseCatalogueEntity<
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }
-    const entityCatalogue = this.definition as IStratosEntityDefinition;
-    const tempId = EntityCatalogueHelpers.buildEntityKey(schemaKey, entityCatalogue.endpoint.type);
+    const entityDefinition = this.definition as IStratosEntityDefinition;
+    // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
+    const tempId = EntityCatalogueHelpers.buildEntityKey(schemaKey, entityDefinition.endpoint.type);
     if (!catalogueSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogueSchema.default;
