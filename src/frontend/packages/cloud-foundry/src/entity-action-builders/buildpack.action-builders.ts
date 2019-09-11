@@ -2,7 +2,7 @@ import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalo
 import { FetchAllBuildpacks } from '../actions/buildpack.action';
 
 export const buildpackActionBuilders = {
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
   ) => new FetchAllBuildpacks(endpointGuid, paginationKey)

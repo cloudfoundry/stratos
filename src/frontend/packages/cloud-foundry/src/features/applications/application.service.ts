@@ -28,6 +28,7 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
@@ -51,7 +52,6 @@ import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoi
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { selectCfEntity } from '../../store/selectors/api.selectors';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
   ApplicationEnvVarsHelper,
@@ -102,7 +102,6 @@ export class ApplicationService {
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
-      false
     );
 
     this.constructCoreObservables();
@@ -274,7 +273,9 @@ export class ApplicationService {
           },
           true
         ).entities$;
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
 
   }

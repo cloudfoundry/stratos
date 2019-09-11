@@ -25,8 +25,8 @@ import { StepOnNextFunction } from '../../../../../../core/src/shared/components
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { createGetApplicationAction } from '../../application.service';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
+import { createGetApplicationAction } from '../../application.service';
 
 
 @Component({
@@ -164,8 +164,7 @@ export class CreateApplicationStep3Component implements OnInit {
           state.cloudFoundryDetails.org,
           new GetOrganization(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
             createEntityRelationKey(organizationEntityType, domainEntityType)
-          ]),
-          true
+          ])
         );
         return orgEntService.waitForEntity$.pipe(
           map(({ entity }) => {

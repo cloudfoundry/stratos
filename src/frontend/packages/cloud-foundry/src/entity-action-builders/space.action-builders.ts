@@ -2,13 +2,13 @@ import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalo
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { GetSpace, GetAllSpaces, DeleteSpace, CreateSpace, UpdateSpace } from '../actions/space.actions';
 import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const spaceActionBuilders = {
   get: (
     guid: string,
     endpointGuid: string,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetSpace(
     guid,
     endpointGuid,
@@ -18,7 +18,7 @@ export const spaceActionBuilders = {
   remove: (
     guid,
     endpointGuid,
-    orgGuid
+    { orgGuid }: { orgGuid: string }
   ) => new DeleteSpace(
     guid,
     orgGuid,
@@ -27,8 +27,7 @@ export const spaceActionBuilders = {
   create: (
     id: string,
     endpointGuid: string,
-    orgGuid: string,
-    createSpace: IUpdateSpace
+    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace }
   ) => new CreateSpace(
     endpointGuid,
     orgGuid,
@@ -44,11 +43,10 @@ export const spaceActionBuilders = {
     endpointGuid,
     updatedSpace
   ),
-  getAll: (
+  getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetAllSpaces(
     paginationKey,
     endpointGuid,
@@ -59,7 +57,6 @@ export const spaceActionBuilders = {
     orgGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    includeRelations?: any[],
-    populateMissing?: boolean
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetAllOrganizationSpaces(paginationKey, orgGuid, endpointGuid, includeRelations, populateMissing)
 } as OrchestratedActionBuilders;

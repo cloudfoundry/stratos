@@ -13,7 +13,8 @@ import {
   organizationEntityType,
   spaceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
-
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import {
   CfUser,
   createUserRoleInOrg,
@@ -23,6 +24,9 @@ import {
   UserRoleInOrg,
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
+import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
   PaginationObservables,
@@ -42,11 +46,6 @@ import {
   isSpaceManager,
   waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 
 @Injectable()
 export class CfUserService {
@@ -58,7 +57,7 @@ export class CfUserService {
     private store: Store<CFAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
   ) { }
 
   getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> =>
@@ -90,8 +89,7 @@ export class CfUserService {
         if (!this.users[userGuid]) {
           this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
             userGuid,
-            new GetUser(endpointGuid, userGuid),
-            true
+            new GetUser(endpointGuid, userGuid)
           ).waitForEntity$.pipe(
             filter(entity => !!entity),
             map(entity => entity.entity)

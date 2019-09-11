@@ -78,7 +78,7 @@ describe('ActionDispatcher', () => {
     }
     const guid = 'guid';
     const endpointGuid = 'guid';
-    const arbData = 'arb';
+    const arbData = { arb: true };
     const actionBuilders = {
       update: getActionBuilder
     } as OrchestratedActionBuilders;
@@ -111,7 +111,7 @@ describe('ActionDispatcher', () => {
     }
 
     const actionBuilders = {
-      getAll: getActionBuilder
+      getMultiple: getActionBuilder
     } as OrchestratedActionBuilders;
     const endpointGuid = 'guid';
     const paginationKey = 'pagKey';

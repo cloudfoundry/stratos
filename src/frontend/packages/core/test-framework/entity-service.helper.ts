@@ -4,7 +4,6 @@ import { EntityRequestAction } from '../../store/src/types/request.types';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
 import { ENTITY_SERVICE } from '../src/shared/entity.tokens';
 import { AppState } from '../../store/src/app-state';
-import { RequestSectionKeys } from '../../store/src/reducers/api-request-reducer/types';
 
 export function generateTestEntityServiceProvider(
   guid: string,
@@ -17,9 +16,7 @@ export function generateTestEntityServiceProvider(
   ) {
     return entityServiceFactory.create(
       guid,
-      action,
-      false,
-      RequestSectionKeys.CF
+      action
     );
   }
 

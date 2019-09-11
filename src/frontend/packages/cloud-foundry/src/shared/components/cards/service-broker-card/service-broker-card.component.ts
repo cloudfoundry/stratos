@@ -37,8 +37,7 @@ export class ServiceBrokerCardComponent {
       switchMap(spaceGuid => {
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
           spaceGuid,
-          new GetSpace(spaceGuid, this.servicesService.cfGuid),
-          true,
+          new GetSpace(spaceGuid, this.servicesService.cfGuid)
         );
         return spaceService.waitForEntity$;
       }),

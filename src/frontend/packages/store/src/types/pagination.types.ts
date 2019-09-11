@@ -2,6 +2,7 @@ import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
+import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
@@ -56,14 +57,12 @@ export function isPaginatedAction(obj: any): PaginatedAction {
   return obj && Object.keys(obj).indexOf('paginationKey') >= 0 ? obj as PaginatedAction : null;
 }
 
-export interface BasePaginatedAction extends Action {
-  entityType: string;
-  endpointType: string;
+export interface BasePaginatedAction extends BasePipelineRequestAction, Action {
   paginationKey: string;
 }
 
 export interface PaginatedAction extends BasePaginatedAction, EntityRequestAction {
-  actions: string[];
+  actions?: string[];
   /*
    * Fetch all pages and add them to a single page
    */

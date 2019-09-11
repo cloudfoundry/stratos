@@ -31,8 +31,7 @@ export class EditAutoscalerPolicyService {
   updateFromStore(appGuid: string, cfGuid: string) {
     const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicyLocal>>(
       appGuid,
-      new GetAppAutoscalerPolicyAction(appGuid, cfGuid),
-      false
+      new GetAppAutoscalerPolicyAction(appGuid, cfGuid)
     );
 
     appAutoscalerPolicyService.entityObs$.pipe(

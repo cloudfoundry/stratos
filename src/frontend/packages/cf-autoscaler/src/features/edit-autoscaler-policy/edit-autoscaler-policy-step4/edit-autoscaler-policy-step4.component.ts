@@ -70,8 +70,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     super.ngOnInit();
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
-      false
+      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
   }
 

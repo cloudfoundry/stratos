@@ -70,8 +70,7 @@ export class DetachServiceInstanceComponent {
 
     const serviceBindingEntityService = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       serviceInstanceId,
-      new GetServiceInstance(serviceInstanceId, this.cfGuid),
-      true
+      new GetServiceInstance(serviceInstanceId, this.cfGuid)
     );
     this.title$ = serviceBindingEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),

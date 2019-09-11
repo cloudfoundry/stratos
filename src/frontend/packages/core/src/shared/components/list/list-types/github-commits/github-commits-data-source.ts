@@ -1,17 +1,16 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { CFEntitySchema, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { FetchCommits } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CFEntitySchema, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 
 
-export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {
+export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
   store: Store<CFAppState>;
 
   /**
@@ -21,7 +20,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
    */
   constructor(
     store: Store<CFAppState>,
-    listConfig: IListConfig<APIResource<GitCommit>>,
+    listConfig: IListConfig<GitCommit>,
     scm: GitSCM,
     projectName: string,
     sha: string,
@@ -38,7 +37,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
       store,
       action,
       schema: new CFEntitySchema(gitCommitEntityType),
-      getRowUniqueId: object => object.entity.sha,
+      getRowUniqueId: (object: GitCommit) => object.sha,
       paginationKey,
       isLocal: true,
       transformEntities: [],

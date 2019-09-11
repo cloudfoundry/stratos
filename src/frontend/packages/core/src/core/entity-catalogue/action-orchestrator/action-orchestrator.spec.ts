@@ -1,8 +1,9 @@
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator';
 import { getPaginationAction, getRequestAction, hasActions } from './action-orchestrator.spec.helpers';
-import { EntityRequestAction } from '../../../../../store/src/types/request.types';
+
 
 describe('ActionOrchestrator', () => {
   it('should not have action builders', () => {
@@ -16,7 +17,7 @@ describe('ActionOrchestrator', () => {
       remove: guid => getRequestAction(),
       update: guid => getRequestAction(),
       create: () => getRequestAction(),
-      getAll: () => getPaginationAction()
+      getMultiple: () => getPaginationAction()
     };
     const actionOrchestrator = new ActionOrchestrator('Base', actionBuilders);
     hasActions(actionOrchestrator, ['get', 'remove', 'update', 'create', 'getAll']);
@@ -41,7 +42,7 @@ describe('ActionOrchestrator', () => {
       remove: guid => getRequestAction(),
       update: guid => getRequestAction(),
       create: () => getRequestAction(),
-      getAll: () => getPaginationAction(),
+      getMultiple: () => getPaginationAction(),
       customAction101: () => getPaginationAction(),
       customAction202: guid => getRequestAction()
     };
@@ -55,7 +56,7 @@ describe('ActionOrchestrator', () => {
       remove: guid => getRequestAction(),
       update: guid => getRequestAction(),
       create: () => getRequestAction(),
-      getAll: () => getPaginationAction(),
+      getMultiple: () => getPaginationAction(),
       customAction101: () => getPaginationAction(),
       customAction202: guid => getRequestAction()
     };

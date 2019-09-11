@@ -39,8 +39,7 @@ export function entityServiceFactory(
 ) {
   return esf.create(
     id,
-    createGetApplicationAction(id, cfId),
-    true
+    createGetApplicationAction(id, cfId)
   );
 }
 

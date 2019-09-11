@@ -5,13 +5,13 @@ import {
   AssociateSpaceQuota,
   DisassociateSpaceQuota
 } from '../actions/quota-definitions.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const quotaDefinitionActionBuilder = {
-  getAll: (
+  getMultiple: (
     paginationKey: string,
     endpointGuid: string,
-    includeRelations = [],
-    populateMissing = false
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => new GetQuotaDefinitions(paginationKey, endpointGuid, includeRelations, populateMissing),
   associateSpaceQuota: (
     spaceGuid: string,

@@ -8,11 +8,16 @@ import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
-import { endpointEntitySchema } from '../../base-entity-schemas';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
-import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import {
+  ActionOrchestrator,
+  OrchestratedActionBuilderConfig,
+  OrchestratedActionBuilders
+} from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
   EntityCatalogueSchemas,
@@ -27,7 +32,7 @@ import {
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders
   > {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
   // Allows extensions to modify entities data in the store via none API Effect or unrelated actions.
@@ -40,14 +45,17 @@ type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
 export class StratosBaseCatalogueEntity<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilderConfig,
+  // This typing may cause an issue down the line.
+  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders
   > {
   public readonly entityKey: string;
   public readonly type: string;
   public readonly definition: DefinitionTypes;
   public readonly isEndpoint: boolean;
-  public readonly actionDispatchManager: EntityActionDispatcherManager<AB>;
-  public readonly actionOrchestrator: ActionOrchestrator<AB>;
+  public readonly actionDispatchManager: EntityActionDispatcherManager<ABC>;
+  public readonly actionOrchestrator: ActionOrchestrator<ABC>;
+  public readonly endpointType: string;
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
     public readonly builders: EntityCatalogueBuilders<T, Y, AB> = {}
@@ -56,11 +64,18 @@ export class StratosBaseCatalogueEntity<
     this.type = this.definition.type || this.definition.schema.default.entityType;
     const baseEntity = definition as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
+    this.endpointType = this.getEndpointType(baseEntity);
     // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
-    this.actionOrchestrator = new ActionOrchestrator<AB>(this.entityKey, this.builders.actionBuilders);
+    const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(
+      this.builders.actionBuilders,
+      this.endpointType,
+      this.type,
+      (schemaKey: string) => this.getSchema(schemaKey)
+    );
+    this.actionOrchestrator = new ActionOrchestrator<ABC>(this.entityKey, actionBuilders as ABC);
     this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
   }
 
@@ -75,6 +90,11 @@ export class StratosBaseCatalogueEntity<
     }, {
         default: entitySchemas.default
       });
+  }
+
+  private getEndpointType(definition: IStratosBaseEntityDefinition) {
+    const entityDef = definition as IStratosEntityDefinition;
+    return entityDef.endpoint ? entityDef.endpoint.type : STRATOS_ENDPOINT_TYPE;
   }
 
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
@@ -174,15 +194,15 @@ export class StratosBaseCatalogueEntity<
     }
     return normalize(entities, schema);
   }
-
 }
 
 export class StratosCatalogueEntity<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
+  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders
   > extends StratosBaseCatalogueEntity<T, Y, AB> {
-  public definition: IStratosEntityDefinition<EntityCatalogueSchemas, Y>;
+  public definition: IStratosEntityDefinition<EntityCatalogueSchemas, Y, ABC>;
   constructor(
     entity: IStratosEntityDefinition,
     config?: EntityCatalogueBuilders<T, Y, AB>

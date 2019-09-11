@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
@@ -11,12 +10,14 @@ import {
 } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
 import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain, ISpace } from '../../../../../../core/src/core/cf-api.types';
@@ -26,13 +27,10 @@ import {
   StepOnNextFunction,
   StepOnNextResult,
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../application.service';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
@@ -66,11 +64,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   addRouteMode: RouteMode;
   useRandomPort = false;
   constructor(
-    private route: ActivatedRoute,
     private applicationService: ApplicationService,
     private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
-    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
@@ -114,30 +110,29 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       }
     }));
 
-    const space$ = this.applicationService.orgDomains$.pipe(
-      // We don't need the domains, but we need them fetched first so we get the router_group_type
-      switchMap(() => this.appService.waitForAppEntity$
-        .pipe(
-          switchMap(app => {
-            this.spaceGuid = app.entity.entity.space_guid;
-            const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
-              this.spaceGuid,
-              new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)]),
-              true
-            );
-            return spaceService.waitForEntity$;
-          }),
-          filter(({ entity }) => !!entity.entity.domains),
-          tap(({ entity }) => {
-            this.domains = [];
-            const domains = entity.entity.domains;
-            domains.forEach(domain => {
-              this.domains.push(domain);
-            });
-            this.selectedDomain = Object.values(this.domains)[0];
-          })
-        )
-      ));
+
+    // const space$ = this.applicationService.orgDomains$.pipe(
+    //   // We don't need the domains, but we need them fetched first so we get the router_group_type
+    //   switchMap(() => this.appService.waitForAppEntity$
+    const space$ = this.appService.waitForAppEntity$.pipe(
+      switchMap(app => {
+        this.spaceGuid = app.entity.entity.space_guid;
+        const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
+          this.spaceGuid,
+          new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceEntityType, domainEntityType)])
+        );
+        return spaceService.waitForEntity$;
+      }),
+      filter(({ entity }) => !!entity.entity.domains),
+      tap(({ entity }) => {
+        this.domains = [];
+        const domains = entity.entity.domains;
+        domains.forEach(domain => {
+          this.domains.push(domain);
+        });
+        this.selectedDomain = Object.values(this.domains)[0];
+      })
+    );
 
     this.subscriptions.push(space$.subscribe());
 

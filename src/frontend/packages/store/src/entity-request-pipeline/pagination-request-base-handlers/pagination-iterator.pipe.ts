@@ -13,6 +13,7 @@ import {
 } from '../entity-request-pipeline.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
 
+
 export interface PaginationPageIteratorConfig<R = any, E = any> {
   // TODO This should also pass page size for apis that use start=&end= params.
   getPaginationParameters: (page: number) => Record<string, string>;
@@ -35,7 +36,8 @@ export class PaginationPageIterator<R = any, E = any> {
     return this.httpClient.pipelineRequest<JetstreamResponse<R>>(
       httpRequest,
       this.action.endpointType,
-      this.action.endpointGuid
+      this.action.endpointGuid,
+      this.action.externalRequest
     );
   }
 

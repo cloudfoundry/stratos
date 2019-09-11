@@ -18,7 +18,6 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
@@ -85,8 +84,7 @@ export class CfCellAppsDataSource
         new GetApplication(appGuid, cfGuid, [
           createEntityRelationKey(applicationEntityType, spaceEntityType),
           createEntityRelationKey(spaceEntityType, organizationEntityType)
-        ]),
-        true
+        ])
       ).waitForEntity$.pipe(
         map(entityInfo => entityInfo.entity)
       );

@@ -48,7 +48,8 @@ export type MakeEntityRequestPipe<
     httpClient: PipelineHttpClient,
     request: HttpRequest<any> | Observable<HttpRequest<any>>,
     endpointType: string,
-    endpointGuids: string | string[]
+    endpointGuids: string | string[],
+    externalRequest?: boolean
   ) => Observable<JetstreamResponse<T>>;
 
 export type BuildEntityRequestPipe = (

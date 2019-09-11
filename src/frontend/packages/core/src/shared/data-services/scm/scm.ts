@@ -19,6 +19,7 @@ export interface GitSCM {
   getCommits(projectName: string, commitSha: string): Observable<GitCommit[]>;
   getCloneURL(projectName: string): string;
   getCommitURL(projectName: string, commitSha: string): string;
+  getCommitApiUrl(projectName: string, commitSha: string): string;
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): string;
   getMatchingRepositories(projectName: string): Observable<string[]>;
 }

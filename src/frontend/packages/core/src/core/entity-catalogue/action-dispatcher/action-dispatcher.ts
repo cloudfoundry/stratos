@@ -52,8 +52,8 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
     );
   }
 
-  public getActionBuilder<Y extends keyof T>(actionType: Y) {
-    return this.actionOrchestrator.getActionBuilder(actionType) as T[Y];
+  public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
+    return this.actionOrchestrator.getActionBuilder(actionType);
   }
 
   public dispatchGet(...args: Parameters<T['get']>) {

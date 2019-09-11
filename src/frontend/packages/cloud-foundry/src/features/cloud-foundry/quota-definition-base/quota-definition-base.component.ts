@@ -61,8 +61,7 @@ export class QuotaDefinitionBaseComponent {
     if (this.spaceGuid) {
       this.space$ = this.entityServiceFactory.create<APIResource<ISpace>>(
         this.spaceGuid,
-        new GetSpace(this.spaceGuid, this.cfGuid),
-        true
+        new GetSpace(this.spaceGuid, this.cfGuid)
       ).waitForEntity$.pipe(
         map(data => data.entity),
       );

@@ -140,7 +140,7 @@ export class CloudFoundryEndpointService {
 
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
-      new GetCFInfo(this.cfGuid)
+      new GetCFInfo(this.cfGuid),
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();

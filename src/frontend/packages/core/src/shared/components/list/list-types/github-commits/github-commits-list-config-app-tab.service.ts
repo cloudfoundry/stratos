@@ -17,9 +17,8 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
+import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
@@ -31,7 +30,7 @@ import { GithubCommitsListConfigServiceBase } from './github-commits-list-config
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
 
-  private listActionRedeploy: IListAction<APIResource<GitCommit>> = {
+  private listActionRedeploy: IListAction<GitCommit> = {
     action: (commitEntity) => {
       // set CF data
       this.store.dispatch(
@@ -56,7 +55,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       // Set branch
       this.store.dispatch(new SetDeployBranch(this.branchName));
       // Set Commit
-      this.store.dispatch(new SetDeployCommit(commitEntity.entity.sha));
+      this.store.dispatch(new SetDeployCommit(commitEntity.sha));
 
       this.store.dispatch(
         new RouterNav({
@@ -69,20 +68,20 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     description: ``,
   };
 
-  private listActionCompare: IListAction<APIResource<GitCommit>> = {
+  private listActionCompare: IListAction<GitCommit> = {
     action: (compareToCommit) => {
-      window.open(this.getCompareURL(compareToCommit.entity.sha), '_blank');
+      window.open(this.getCompareURL(compareToCommit.sha), '_blank');
     },
     label: 'Compare',
     description: '',
-    createEnabled: (commit$: Observable<APIResource<GitCommit>>) => {
+    createEnabled: (commit$: Observable<GitCommit>) => {
       return commit$.pipe(map(commit => {
-        const isDeployedCommit = commit.entity.sha === this.deployedCommitSha;
+        const isDeployedCommit = commit.sha === this.deployedCommitSha;
         if (!isDeployedCommit) {
           // The github url will show 'no change' if the compare to commit is earlier in the tree than the deployed commit. We could swap
           // these around for those cases... however the diff +/- is then incorrect. So until we have a better way of doing this disable
           // the button instead
-          return this.deployedTime < moment(commit.entity.commit.author.date).unix();
+          return this.deployedTime < moment(commit.commit.author.date).unix();
         }
         return false;
       }));
@@ -132,15 +131,14 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
       const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
-      const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
+      const gitBranchEntityService = this.entityServiceFactory.create<GitBranch>(
         branchKey,
-        new FetchBranchesForProject(this.scm, this.projectName),
-        false
+        new FetchBranchesForProject(this.scm, this.projectName)
       );
       gitBranchEntityService.waitForEntity$.pipe(
         first(),
       ).subscribe(branch => {
-        this.branchName = branch.entity.entity.name;
+        this.branchName = branch.entity.name;
         this.dataSource = new GithubCommitsDataSource(
           this.store, this, this.scm, this.projectName, this.branchName, this.deployedCommitSha);
         this.initialised.next(true);
@@ -157,11 +155,10 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private setDeployedCommitDetails() {
     const scmType = this.scm.getType();
     this.store.select(
-      selectCfEntity<APIResource<GitCommit>>(gitCommitEntityType, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
+      selectCfEntity<GitCommit>(gitCommitEntityType, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
       .pipe(
         filter(deployedCommit => !!deployedCommit),
         first(),
-        map(deployedCommit => deployedCommit.entity)
       ).subscribe(deployedCommit => {
         this.deployedCommit = deployedCommit;
         this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();
