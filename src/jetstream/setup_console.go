@@ -200,20 +200,18 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 			}
 		} else if val == interfaces.Remote {
 			// Auth endpoint type is set to "remote", so need to load local user config vars
-			// Nothing to do
+			// Default authorization endpoint to be UAA endpoint
+			if consoleConfig.AuthorizationEndpoint == nil {
+				// No Authorization endpoint
+				consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
+				log.Infof("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
+			}
 		} else {
 			//Auth endpoint type has been set to an invalid value
 			return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE must be set to either \"local\" or \"remote\"")
 		}
 	} else {
 		return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
-	}
-
-	// Default authorization endpoint to be UAA endpoint
-	if consoleConfig.AuthorizationEndpoint == nil {
-		// No Authorization endpoint
-		consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
-		log.Infof("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
 	}
 
 	return consoleConfig, nil

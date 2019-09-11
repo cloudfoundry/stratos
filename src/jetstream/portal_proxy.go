@@ -22,6 +22,7 @@ type portalProxy struct {
 	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers
 	AuthProviders          map[string]interfaces.AuthProvider
 	env                    *env.VarSet
+	AuthService            interfaces.Auth
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions

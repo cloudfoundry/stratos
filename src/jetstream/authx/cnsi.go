@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -21,7 +22,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -54,28 +54,6 @@ const XSRFTokenSessionName = "xsrf_token"
 //It contains a flag to indicate whether or not the user was signed in with SSO
 type LogoutResponse struct {
 	IsSSO bool `json:"isSSO"`
-}
-
-func (p *portalProxy) InitAuthService(t interfaces.AuthEndpointType) error {
-	var auth interfaces.Auth
-	switch t {
-		case interfaces.Local:
-			auth = &localAuth{
-				databaseConnectionPool: p.DatabaseConnectionPool,
-				localUserScope:         p.Config.ConsoleConfig.LocalUserScope,
-				p:                      p,
-			}
-		case interfaces.Remote:
-			auth = &uaaAuth{
-				databaseConnectionPool: p.DatabaseConnectionPool,
-				p:                      p,
-			}
-		default:
-			err := fmt.Errorf("Invalid auth endpoint type: %v", t)
-			return err
-	}
-	p.AuthService = auth
-	return nil
 }
 
 func (p *portalProxy) getUAAIdentityEndpoint() string {
@@ -173,11 +151,11 @@ func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 
 func (p *portalProxy) hasSSOOption(option string) bool {
 	// Remove all spaces
-	opts := stringutils.RemoveSpaces(p.Config.SSOOptions)
+	opts := RemoveSpaces(p.Config.SSOOptions)
 
 	// Split based on ','
 	options := strings.Split(opts, ",")
-	return stringutils.ArrayContainsString(options, option)
+	return ArrayContainsString(options, option)
 }
 
 // Callback - invoked after the UAA login flow has completed and during logout
@@ -216,6 +194,219 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, state)
+}
+
+func (p *portalProxy) loginToUAA(c echo.Context) error {
+	log.Debug("loginToUAA")
+
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"UAA Login is not enabled",
+			"UAA Login is not enabled")
+		return err
+	}
+
+	resp, err := p.doLoginToUAA(c)
+	if err != nil {
+		return err
+	}
+
+	jsonString, err := json.Marshal(resp)
+	if err != nil {
+		return err
+	}
+
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+
+	return nil
+}
+
+// Use the appropriate login mechanism
+func (p *portalProxy) stratosLoginHandler(c echo.Context) error {
+	// Local login
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] == interfaces.Local {
+		return p.localLogin(c)
+	}
+
+	// UAA login
+	return p.loginToUAA(c)
+}
+
+// Use the appropriate logout mechanism
+func (p *portalProxy) stratosLogoutHandler(c echo.Context) error {
+	return p.logout(c)
+}
+
+func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
+	log.Debug("doLoginToUAA")
+	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	if err != nil {
+		// Check the Error
+		errMessage := "Access Denied"
+		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
+			// Try and parse the Response into UAA error structure
+			authError := &interfaces.UAAErrorResponse{}
+			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
+				errMessage = authError.ErrorDescription
+			}
+		}
+
+		err = interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			errMessage,
+			"UAA Login failed: %s: %v", errMessage, err)
+		return nil, err
+	}
+
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = u.UserGUID
+	sessionValues["exp"] = u.TokenExpiry
+
+	// Ensure that login disregards cookies from the request
+	req := c.Request()
+	req.Header.Set("Cookie", "")
+	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return nil, err
+	}
+
+	err = p.handleSessionExpiryHeader(c)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.ExecuteLoginHooks(c)
+	if err != nil {
+		log.Warnf("Login hooks failed: %v", err)
+	}
+
+	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
+	resp := &interfaces.LoginRes{
+		Account:     u.UserName,
+		TokenExpiry: u.TokenExpiry,
+		APIEndpoint: nil,
+		Admin:       uaaAdmin,
+	}
+	return resp, nil
+}
+
+func (p *portalProxy) localLogin(c echo.Context) error {
+	log.Debug("localLogin")
+
+	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"Local Login is not enabled",
+			"Local Login is not enabled")
+		return err
+	}
+
+	//Perform the login and fetch session values if successful
+	userGUID, username, err := p.doLocalLogin(c)
+	if err != nil {
+		//Login failed, return response.
+		errMessage := err.Error()
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			errMessage,
+			"Login failed: %s: %v", errMessage, err)
+		return err
+	}
+
+	var expiry int64
+	expiry = math.MaxInt64
+
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = userGUID
+	sessionValues["exp"] = expiry
+
+	// Ensure that login disregards cookies from the request
+	req := c.Request()
+	req.Header.Set("Cookie", "")
+	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return err
+	}
+
+	//Makes sure the client gets the right session expiry time
+	if err = p.handleSessionExpiryHeader(c); err != nil {
+		return err
+	}
+
+	resp := &interfaces.LoginRes{
+		Account:     username,
+		TokenExpiry: expiry,
+		APIEndpoint: nil,
+		Admin:       true,
+	}
+
+	if jsonString, err := json.Marshal(resp); err == nil {
+		// Add XSRF Token
+		p.ensureXSRFToken(c)
+		c.Response().Header().Set("Content-Type", "application/json")
+		c.Response().Write(jsonString)
+	}
+
+	return err
+}
+
+func (p *portalProxy) doLocalLogin(c echo.Context) (string, string, error) {
+	log.Debug("doLocalLogin")
+
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	if len(username) == 0 || len(password) == 0 {
+		return "", username, errors.New("Needs usernameand password")
+	}
+
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return "", username, err
+	}
+
+	var scopeOK bool
+	var hash []byte
+	var authError error
+	var localUserScope string
+
+	// Get the GUID for the specified user
+	guid, err := localUsersRepo.FindUserGUID(username)
+	if err != nil {
+		return guid, username, fmt.Errorf("Can not find user")
+	}
+
+	//Attempt to find the password has for the given user
+	if hash, authError = localUsersRepo.FindPasswordHash(guid); authError != nil {
+		authError = fmt.Errorf("User not found.")
+		//Check the password hash
+	} else if authError = CheckPasswordHash(password, hash); authError != nil {
+		authError = fmt.Errorf("Access Denied - Invalid username/password credentials")
+	} else {
+		//Ensure the local user has some kind of admin role configured and we check for it here
+		localUserScope, authError = localUsersRepo.FindUserScope(guid)
+		scopeOK = strings.Contains(localUserScope, p.Config.ConsoleConfig.LocalUserScope)
+		if (authError != nil) || (!scopeOK) {
+			authError = fmt.Errorf("Access Denied - User scope invalid")
+		} else {
+			//Update the last login time here if login was successful
+			loginTime := time.Now()
+			if updateLoginTimeErr := localUsersRepo.UpdateLastLoginTime(guid, loginTime); updateLoginTimeErr != nil {
+				log.Error(updateLoginTimeErr)
+				log.Errorf("Failed to update last login time for user: %s", guid)
+			}
+		}
+	}
+	return guid, username, authError
 }
 
 //HashPassword accepts a plaintext password string and generates a salted hash
@@ -658,6 +849,27 @@ func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResp
 	return uaaRes, u, nil
 }
 
+func (p *portalProxy) logout(c echo.Context) error {
+	log.Debug("logout")
+
+	p.removeEmptyCookie(c)
+
+	// Remove the XSRF Token from the session
+	p.unsetSessionValue(c, XSRFTokenSessionName)
+
+	err := p.clearSession(c)
+	if err != nil {
+		log.Errorf("Unable to clear session: %v", err)
+	}
+
+	// Send JSON document
+	resp := &LogoutResponse{
+		IsSSO: p.Config.SSOLogin,
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
 func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*interfaces.UAAResponse, error) {
 	log.Debug("getUAATokenWithAuthorizationCode")
 
@@ -912,6 +1124,7 @@ func (p *portalProxy) verifySessionLocal(c echo.Context, sessionUser string, ses
 	_, err = localUsersRepo.FindPasswordHash(sessionUser)
 	return err
 }
+
 
 // Create a token for XSRF if needed, store it in the session and add the response header for the front-end to pick up
 func (p *portalProxy) ensureXSRFToken(c echo.Context) {

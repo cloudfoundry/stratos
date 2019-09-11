@@ -23,11 +23,12 @@ type portalProxyImpl struct {
 	SessionCookieName      string
 	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers
 	env                    *env.VarSet
-	AuthService            *Auth
+	AuthService            AuthInterface
 }
 
 type PortalProxyInterface interface {
-	
+	AuthInterface
+
 	GetHttpClient(skipSSLValidation bool) http.Client
 	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error

@@ -27,20 +27,44 @@ import (
 )
 
 
-type Auth interface {
+type AuthInterface interface {
 
-	Login(c echo.Context)
-	Logout(c echo.Context)
-	
+	Login() error
+	Logout() error
+
+	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
+	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
+
+	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
+	DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)
+	DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIrecord CNSIRecord) error
+
+	// UAA Token
+	GetUAATokenRecord(userGUID string) (TokenRecord, error)
+	RefreshUAAToken(userGUID string) (TokenRecord, error)
+
+	GetUsername(userid string) (string, error)
+	RefreshUAALogin(username, password string, store bool) error
+	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
+	GetUAAUser(userGUID string) (*ConnectedUser, error)
+
+	// Tokens - lower-level access
+	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
+	DeleteEndpointToken(cnsiGUID string, userGUID string) error
 }
 
-func NewAuth(AuthEndpointType t, *portalProxy p) (*Auth, error) {
+type AuthImpl {
+	AuthProviders          			map[string]interfaces.AuthProvider
+	SSOLogin                        bool     `configName:"SSO_LOGIN"`
+	SSOOptions                      string   `configName:"SSO_OPTIONS"`
+	AuthEndpointType                string   `configName:"AUTH_ENDPOINT_TYPE"`
+}
+
+func NewAuthService(AuthEndpointType t) (*Auth, error) {
 	switch t {
 		case Local:
 			auth := &LocalAuth{
-				databaseConnectionPool : p.DatabaseConnectionPool
-				localUserScope         : p.Config.ConsoleConfig.LocalUserScope
-				p                      *portalProxyImpl
+				
 			}
 		case Remote:
 			auth := &UAAAuth{
@@ -53,11 +77,3 @@ func NewAuth(AuthEndpointType t, *portalProxy p) (*Auth, error) {
 		return auth, nil
 	}
 }
-
-
-//Init the auth service startup
-
-Auth *authService
-authService, err := NewAuth(authEndpointType, p)
-
-portalProxy.AuthService, err := NewAuth(authEndpointType, portalProxy)

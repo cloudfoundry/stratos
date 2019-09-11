@@ -126,6 +126,10 @@ func (ch *CFHosting) Init() error {
 
 		//Force auth endpoint type to remote (CF UAA)
 		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = "remote"
+		err := ch.portalProxy.InitAuthService(interfaces.Remote)
+		if(err != nil) {
+			return fmt.Errorf("Could not initialise auth service: %v", err)
+		}
 
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
@@ -154,7 +158,7 @@ func (ch *CFHosting) Init() error {
 		var appData interfaces.VCapApplicationData
 		vCapApp, _ := ch.portalProxy.Env().Lookup(VCapApplication)
 		data := []byte(vCapApp)
-		err := json.Unmarshal(data, &appData)
+		err = json.Unmarshal(data, &appData)
 		if err != nil {
 			log.Fatalf("Could not get the Cloud Foundry API URL: %+v", err)
 			return nil

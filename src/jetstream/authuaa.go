@@ -1,46 +1,33 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base64"
+	"database/sql"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"math"
 	"net/http"
-	"net/url"
-	"strconv"
 	"strings"
-	"time"
-
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
-type uaaAuth  struct {
+type uaaAuth struct {
 	databaseConnectionPool *sql.DB
-    //MORE FIELDS HERE
-	p                      *portalProxyImpl
+	//MORE FIELDS HERE
+	p *portalProxy
 }
 
-func (a *Auth) Login(c echo.Context) {
-	return a.loginToUAA(c echo.Context)
+func (a *uaaAuth) Login(c echo.Context) error {
+	return a.p.loginToUAA(c)
 }
 
-func (a *Auth) Logout(c echo.Context) {
-	return a.logout(c echo.Context)
+func (a *uaaAuth) Logout(c echo.Context) error {
+	return a.logout(c)
 }
 
-func (a *Auth) loginToUAA(c echo.Context) error {
+func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
 
 	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
@@ -70,7 +57,7 @@ func (a *Auth) loginToUAA(c echo.Context) error {
 	return nil
 }
 
-func (a *Auth) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
+func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 	log.Debug("doLoginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
@@ -127,39 +114,23 @@ func (a *Auth) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 	return resp, nil
 }
 
-func (a *Auth) logout(c echo.Context) error {
+func (a *uaaAuth) logout(c echo.Context) error {
 	log.Debug("logout")
 
-	p.removeEmptyCookie(c)
+	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	p.unsetSessionValue(c, XSRFTokenSessionName)
+	a.p.unsetSessionValue(c, XSRFTokenSessionName)
 
-	err := p.clearSession(c)
+	err := a.p.clearSession(c)
 	if err != nil {
 		log.Errorf("Unable to clear session: %v", err)
 	}
 
 	// Send JSON document
 	resp := &LogoutResponse{
-		IsSSO: p.Config.SSOLogin,
+		IsSSO: a.p.Config.SSOLogin,
 	}
 
 	return c.JSON(http.StatusOK, resp)
 }
-
-//HashPassword accepts a plaintext password string and generates a salted hash
-func HashPassword(password string) ([]byte, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return bytes, err
-}
-
-//CheckPasswordHash accepts a bcrypt salted hash and plaintext password.
-//It verifies the password against the salted hash
-func CheckPasswordHash(password string, hash []byte) error {
-	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
-	return err
-}
-
-
-

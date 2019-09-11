@@ -10,6 +10,8 @@ import (
 	"github.com/labstack/echo"
 )
 
+
+
 type PortalProxy interface {
 	GetHttpClient(skipSSLValidation bool) http.Client
 	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client
@@ -20,6 +22,7 @@ type PortalProxy interface {
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
 	// Auth
+	InitAuthService(t AuthEndpointType) error
 	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
 	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
 
