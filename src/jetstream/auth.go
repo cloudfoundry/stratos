@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 
@@ -19,7 +17,6 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
 
@@ -78,6 +75,10 @@ func (p *portalProxy) InitAuthService(t interfaces.AuthEndpointType) error {
 	return nil
 }
 
+func (p *portalProxy) GetAuthService() interfaces.Auth {
+	return p.AuthService
+}
+
 func (p *portalProxy) getUAAIdentityEndpoint() string {
 	log.Debug("getUAAIdentityEndpoint")
 	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
@@ -88,21 +89,6 @@ func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 	originalCookie := req.Header.Get("Cookie")
 	cleanCookie := p.EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
 	req.Header.Set("Cookie", cleanCookie)
-}
-
-// Get the user name for the specified user
-func (p *portalProxy) GetUsername(userid string) (string, error) {
-	tr, err := p.GetUAATokenRecord(userid)
-	if err != nil {
-		return "", err
-	}
-
-	u, userTokenErr := p.GetUserTokenInfo(tr.AuthToken)
-	if userTokenErr != nil {
-		return "", userTokenErr
-	}
-
-	return u.UserName, nil
 }
 
 // Login via UAA
@@ -343,7 +329,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 	// Register as a system endpoint?
 	if systemSharedToken {
 		// User needs to be an admin
-		user, err := p.GetUAAUser(userID)
+		user, err := p.AuthService.GetStratosUser(userID)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect System Shared endpoint - could not check user")
 		}
@@ -555,7 +541,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	tr, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if ok && tr.SystemShared {
 		// User needs to be an admin
-		user, err := p.GetUAAUser(userGUID)
+		user, err := p.AuthService.GetStratosUser(userGUID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Can not disconnect System Shared endpoint - could not check user")
 		}
@@ -749,7 +735,7 @@ func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok strin
 	return tokenRecord, nil
 }
 
-// Helper to initialzie a token record using the specified parameters
+// Helper to initialize a token record using the specified parameters
 func (p *portalProxy) InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) interfaces.TokenRecord {
 	tokenRecord := interfaces.TokenRecord{
 		AuthToken:    authTok,
@@ -808,132 +794,6 @@ func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) er
 	return nil
 }
 
-func (p *portalProxy) verifySession(c echo.Context) error {
-	log.Debug("verifySession")
-
-	sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
-	if err != nil {
-		msg := "Could not find session date"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
-
-	sessionUser, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		msg := "Could not find user_id in Session"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
-
-	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] == interfaces.Local {
-		err = p.verifySessionLocal(c, sessionUser, sessionExpireTime)
-	} else {
-		err = p.verifySessionUAA(c, sessionUser, sessionExpireTime)
-	}
-
-	// Could not verify session
-	if err != nil {
-		log.Error(err)
-		return echo.NewHTTPError(http.StatusForbidden, "Could not verify user")
-	}
-
-	err = p.handleSessionExpiryHeader(c)
-	if err != nil {
-		return err
-	}
-
-	info, err := p.getInfo(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	// Add XSRF Token
-	p.ensureXSRFToken(c)
-
-	err = c.JSON(http.StatusOK, info)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *portalProxy) verifySessionUAA(c echo.Context, sessionUser string, sessionExpireTime int64) error {
-	tr, err := p.GetUAATokenRecord(sessionUser)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to find UAA Token: %s", err)
-		log.Error(msg, err)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
-
-	// Check if UAA token has expired
-	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
-
-		// UAA Token has expired, refresh the token, if that fails, fail the request
-		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, tr.RefreshToken, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
-		if tokenErr != nil {
-			msg := "Could not refresh UAA token"
-			log.Error(msg, tokenErr)
-			return echo.NewHTTPError(http.StatusForbidden, msg)
-		}
-
-		u, userTokenErr := p.GetUserTokenInfo(uaaRes.AccessToken)
-		if userTokenErr != nil {
-			return userTokenErr
-		}
-
-		if _, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {
-			return err
-		}
-		sessionValues := make(map[string]interface{})
-		sessionValues["user_id"] = u.UserGUID
-		sessionValues["exp"] = u.TokenExpiry
-
-		if err = p.setSessionValues(c, sessionValues); err != nil {
-			return err
-		}
-	} else {
-		// Still need to extend the expires_on of the Session
-		if err = p.setSessionValues(c, nil); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (p *portalProxy) verifySessionLocal(c echo.Context, sessionUser string, sessionExpireTime int64) error {
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
-	if err != nil {
-		log.Errorf("Database error getting repo for Local users: %v", err)
-		return err
-	}
-
-	_, err = localUsersRepo.FindPasswordHash(sessionUser)
-	return err
-}
-
-// Create a token for XSRF if needed, store it in the session and add the response header for the front-end to pick up
-func (p *portalProxy) ensureXSRFToken(c echo.Context) {
-	token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
-	if err != nil || len(token) == 0 {
-		// Need a new token
-		tokenBytes, err := generateRandomBytes(32)
-		if err == nil {
-			token = base64.StdEncoding.EncodeToString(tokenBytes)
-		} else {
-			token = ""
-		}
-		sessionValues := make(map[string]interface{})
-		sessionValues[XSRFTokenSessionName] = token
-		p.setSessionValues(c, sessionValues)
-	}
-
-	if len(token) > 0 {
-		c.Response().Header().Set(XSRFTokenHeader, token)
-	}
-}
-
 // See: https://github.com/gorilla/csrf/blob/a8abe8abf66db8f4a9750d76ba95b4021a354757/helpers.go
 // generateRandomBytes returns securely generated random bytes.
 // It will return an error if the system's secure random number generator fails to function correctly.
@@ -947,103 +807,6 @@ func generateRandomBytes(n int) ([]byte, error) {
 
 	return b, nil
 
-}
-
-func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
-
-	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
-	// the Set-Cookie header and session cookie expires_on from client side javascript
-	expOn, err := p.GetSessionValue(c, "expires_on")
-	if err != nil {
-		msg := "Could not get session expiry"
-		log.Error(msg+" - ", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, msg)
-	}
-	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
-
-	expiry := expOn.(time.Time)
-	expiryDuration := expiry.Sub(time.Now())
-
-	// Subtract time now to get the duration add this to the time provided by the client
-	clientDate := c.Request().Header.Get(ClientRequestDateHeader)
-	if len(clientDate) > 0 {
-		clientDateInt, err := strconv.ParseInt(clientDate, 10, 64)
-		if err == nil {
-			clientDateInt += int64(expiryDuration.Seconds())
-			c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(clientDateInt, 10))
-		}
-	}
-
-	return nil
-}
-
-func (p *portalProxy) GetStratosUser(userGUID string) (*interfaces.ConnectedUser, error) {
-	log.Debug("GetStratosUser")
-
-	// If configured for local users, use that instead
-	// This needs to be refactored
-	if interfaces.AuthEndpointTypes[p.Config.ConsoleConfig.AuthEndpointType] == interfaces.Local {
-		return p.getLocalUser(userGUID)
-	}
-
-	return p.GetUAAUser(userGUID)
-}
-
-func (p *portalProxy) GetUAAUser(userGUID string) (*interfaces.ConnectedUser, error) {
-	log.Debug("getUAAUser")
-
-	// get the uaa token record
-	uaaTokenRecord, err := p.GetUAATokenRecord(userGUID)
-	if err != nil {
-		msg := "Unable to retrieve UAA token record."
-		log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
-
-	// get the scope out of the JWT token data
-	userTokenInfo, err := p.GetUserTokenInfo(uaaTokenRecord.AuthToken)
-	if err != nil {
-		msg := "Unable to find scope information in the UAA Auth Token: %s"
-		log.Errorf(msg, err)
-		return nil, fmt.Errorf(msg, err)
-	}
-
-	// is the user a UAA admin?
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.ConsoleConfig.ConsoleAdminScope)
-
-	// add the uaa entry to the output
-	uaaEntry := &interfaces.ConnectedUser{
-		GUID:   userGUID,
-		Name:   userTokenInfo.UserName,
-		Admin:  uaaAdmin,
-		Scopes: userTokenInfo.Scope,
-	}
-
-	return uaaEntry, nil
-}
-
-func (p *portalProxy) getLocalUser(userGUID string) (*interfaces.ConnectedUser, error) {
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
-	if err != nil {
-		log.Errorf("Database error getting repo for Local users: %v", err)
-		return nil, err
-	}
-
-	user, err := localUsersRepo.FindUser(userGUID)
-	if err != nil {
-		return nil, err
-	}
-
-	var scopes []string
-	uaaAdmin := (user.Scope == p.Config.ConsoleConfig.ConsoleAdminScope)
-	uaaEntry := &interfaces.ConnectedUser{
-		GUID:   userGUID,
-		Name:   user.Username,
-		Admin:  uaaAdmin,
-		Scopes: scopes,
-	}
-
-	return uaaEntry, nil
 }
 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {

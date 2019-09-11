@@ -136,7 +136,9 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: mockEncryptionKey,
 		CFAdminIdentifier:    CFAdminIdentifier,
+		AuthEndpointType:     "remote",
 	}
+
 
 	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)

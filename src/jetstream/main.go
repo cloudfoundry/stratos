@@ -596,21 +596,20 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
+	err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
+	if(err != nil) {
+		log.Warnf("Defaulting to UAA authentication: %v", err)
+		err = pp.InitAuthService(interfaces.Remote)
+		if(err != nil) {
+			log.Fatalf("Could not initialise auth service. %v", err)
+		}
+	}
+
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
 		Handler: pp.doOidcFlowRequest,
 	})
-	
-	//Init the auth service startup
-	err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
-	if(err != nil) {
-		log.Warnf("%v, defaulting to auth type: remote", err)
-		err = pp.InitAuthService(interfaces.Remote)
-		if(err != nil) {
-			log.Fatalf("Could not initialise auth service: %v", err)
-		}
-	}
-	
+
 	return pp
 }
 
@@ -785,6 +784,16 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
+	pp.POST("/v1/auth/login/uaa", p.AuthService.Login)
+	pp.POST("/v1/auth/logout", p.AuthService.Logout)
+
+	// SSO Routes will only respond if SSO is enabled
+	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
+	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
+
+	// Callback is used by both login to Stratos and login to an Endpoint
+	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
+
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
 
@@ -792,30 +801,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	sessionGroup := pp.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
 	sessionGroup.Use(p.xsrfMiddleware)
-	
-	authGroup := sessionGroup.Group("/auth")
-
-	authGroup.POST("/login/uaa", p.AuthService.Login)
-	authGroup.POST("/logout", p.AuthService.Logout)
-
-	// SSO Routes will only respond if SSO is enabled
-	authGroup.GET("/sso_login", p.initSSOlogin)
-	authGroup.GET("/sso_logout", p.ssoLogoutOfUAA)
-
-	// Connect to endpoint
-	authGroup.POST("/login/cnsi", p.loginToCNSI)
-
-	// Connect to Enpoint (SSO)
-	authGroup.GET("/login/cnsi", p.ssoLoginToCNSI)
-
-	// Disconnect endpoint
-	authGroup.POST("/logout/cnsi", p.logoutOfCNSI)
-
-	// Verify Session
-	authGroup.GET("/session/verify", p.verifySession)
-
-	// Callback is used by both login to Stratos and login to an Endpoint
-	authGroup.GET("/sso_login_callback", p.ssoLoginToUAA)
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
@@ -825,6 +810,18 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		}
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
+
+	// Connect to endpoint
+	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
+
+	// Connect to Enpoint (SSO)
+	sessionGroup.GET("/auth/login/cnsi", p.ssoLoginToCNSI)
+
+	// Disconnect endpoint
+	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
+
+	// Verify Session
+	sessionGroup.GET("/auth/session/verify", p.AuthService.VerifySession)
 
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)

@@ -32,6 +32,61 @@ func (a *localAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
 
+func (a *localAuth) GetStratosUser(userGUID string) (*interfaces.ConnectedUser, error) {
+	log.Debug("GetStratosUser")
+
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return nil, err
+	}
+
+	user, err := localUsersRepo.FindUser(userGUID)
+	if err != nil {
+		return nil, err
+	}
+
+	uaaAdmin := (user.Scope == a.p.Config.ConsoleConfig.ConsoleAdminScope)
+	connectdUser := &interfaces.ConnectedUser{
+		GUID:   userGUID,
+		Name:   user.Username,
+		Admin:  uaaAdmin,
+		Scopes: []string{user.Scope},
+	}
+
+	return connectdUser, nil
+}
+
+// Get the user name for the specified user
+func (a *localAuth) GetStratosUsername(userid string) (string, error) {
+	log.Debug("GetUsername")
+
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return "", err
+	}
+
+	localUser, err := localUsersRepo.FindUser(userid)
+	if err != nil {
+		log.Errorf("Error fetching username for local user %s: %v", userid, err)
+		return "", err
+	}
+
+	return localUser.Username, nil
+}
+
+func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return err
+	}
+
+	_, err = localUsersRepo.FindPasswordHash(sessionUser)
+	return err
+}
+
 func (a *localAuth) localLogin(c echo.Context) error {
 	log.Debug("localLogin")
 

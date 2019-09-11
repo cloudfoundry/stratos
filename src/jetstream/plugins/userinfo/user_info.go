@@ -36,7 +36,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	target = target[(len(path) - 1):]
 	url := fmt.Sprintf("%s/%s", uaaEndpoint, target)
 
-	username, err := userInfo.portalProxy.GetUsername(sessionUser)
+	username, err := userInfo.portalProxy.GetAuthService().GetStratosUsername(sessionUser)
 	if err != nil {
 		return err
 	}
