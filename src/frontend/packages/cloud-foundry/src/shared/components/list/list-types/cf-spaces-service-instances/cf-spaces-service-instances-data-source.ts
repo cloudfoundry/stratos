@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
 
-import { GetServiceInstancesForSpace } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
@@ -22,9 +21,10 @@ import {
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {

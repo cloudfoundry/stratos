@@ -13,7 +13,6 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { GetAllOrganizations } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
@@ -165,20 +164,13 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public space: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
-  public paginationAction: PaginatedAction;
-
+  public paginationAction = this.createPaginationAction();
 
   /**
    * This will contain all org and space data
    */
-  private allOrgs = getPaginationObservables<APIResource<IOrganization>>({
-    store: this.store,
-    action: this.paginationAction,
-    paginationMonitor: this.paginationMonitorFactory.create(
-      this.paginationAction.paginationKey,
-      cfEntityFactory(this.paginationAction.entityType)
-    )
-  }, true);
+  private allOrgs = this.getAllOrgsObservable();
+
   private allOrgsLoading$ = this.allOrgs.pagination$.pipe(map(
     pag => getCurrentPageRequestInfo(pag).busy
   ));
@@ -193,7 +185,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.createCf();
     this.createOrg();
     this.createSpace();
-    this.createPaginationAction();
 
     // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
     this.org.list$.pipe(
@@ -212,6 +203,17 @@ export class CfOrgSpaceDataService implements OnDestroy {
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
     );
 
+  }
+
+  private getAllOrgsObservable() {
+    return getPaginationObservables<APIResource<IOrganization>>({
+      store: this.store,
+      action: this.paginationAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.paginationAction.paginationKey,
+        cfEntityFactory(this.paginationAction.entityType)
+      )
+    }, true);
   }
 
   private createCf() {
@@ -297,10 +299,10 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private createPaginationAction() {
     const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getAllOrganizationsAction = actionBuilder(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
+    const getAllOrganizationsAction = actionBuilder(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, [
       createEntityRelationKey(organizationEntityType, spaceEntityType),
     ]);
-    this.paginationAction = getAllOrganizationsAction;
+    return getAllOrganizationsAction;
   }
 
   public getEndpointOrgs(endpointGuid: string) {

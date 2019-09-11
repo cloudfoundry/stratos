@@ -89,14 +89,16 @@ export class CloudFoundryEndpointService {
     const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(paginationKey,
-      cfGuid, { includeRelations: [
-        createEntityRelationKey(organizationEntityType, spaceEntityType),
-        createEntityRelationKey(organizationEntityType, domainEntityType),
-        createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
-        createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
-        createEntityRelationKey(spaceEntityType, routeEntityType), // Not really needed at top level, but if we drop down into an org with
-        // lots of spaces it saves spaces x routes requests
-      ], populateMissing: false}) as PaginatedAction;
+      cfGuid, {
+        includeRelations: [
+          createEntityRelationKey(organizationEntityType, spaceEntityType),
+          createEntityRelationKey(organizationEntityType, domainEntityType),
+          createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
+          createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
+          createEntityRelationKey(spaceEntityType, routeEntityType), // Not really needed at top level, but if we drop down into an org with
+          // lots of spaces it saves spaces x routes requests
+        ], populateMissing: false
+      }) as PaginatedAction;
     return getAllOrganizationsAction;
   }
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
@@ -106,9 +108,11 @@ export class CloudFoundryEndpointService {
     const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(paginationKey,
-      cfGuid, {includeRelations: [
-        createEntityRelationKey(organizationEntityType, spaceEntityType),
-      ]}) as PaginatedAction;
+      cfGuid, {
+        includeRelations: [
+          createEntityRelationKey(organizationEntityType, spaceEntityType),
+        ]
+      }) as PaginatedAction;
     return getAllOrganizationsAction;
   }
 
@@ -149,7 +153,7 @@ export class CloudFoundryEndpointService {
     const cfInfoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfInfoEntityType);
     //TODO kate verify OK
     const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get');
-    const action = actionBuilder(this.cfGuid,null);
+    const action = actionBuilder(this.cfGuid, null);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
       new GetCFInfo(this.cfGuid)

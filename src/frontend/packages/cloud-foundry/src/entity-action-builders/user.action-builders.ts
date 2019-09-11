@@ -13,7 +13,7 @@ export const userActionBuilders = {
   getMultiple: (
     paginationKey: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllUsersAsAdmin(endpointGuid, includeRelations, populateMissing, paginationKey),
   getAllInOrganization: (
     guid: string,

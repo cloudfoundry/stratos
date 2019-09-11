@@ -381,8 +381,7 @@ export class CfUserService {
     return this.createSpaceGetUsersAction(isAdmin, cfGuid, spaceGuid);
   }
 
-  private createCfGetUsersAction = (cfGuid: string): PaginatedAction =>
-  {
+  private createCfGetUsersAction = (cfGuid: string): PaginatedAction => {
     const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const action = actionBuilder(null, cfGuid, {}) as GetAllUsersAsAdmin;
@@ -390,8 +389,7 @@ export class CfUserService {
     return action;
   }
 
-  private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction =>
-  {
+  private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction => {
     const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
     const action = actionBuilder(
@@ -403,8 +401,7 @@ export class CfUserService {
     return action;
   }
 
-  private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction =>
-  {
+  private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction => {
     const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
     const action = actionBuilder(

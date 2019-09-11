@@ -70,6 +70,7 @@ export class ApplicationPollingService {
 
   public poll(withApp = false) {
     const { cfGuid, appGuid } = this.applicationService;
+    const actionDispatcher = (action) => this.store.dispatch(action);
     if (withApp) {
       const updatingApp = {
         ...this.entityService.action,
@@ -81,14 +82,12 @@ export class ApplicationPollingService {
       first(),
     ).subscribe(resource => {
       const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
-      const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
-      const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
-      this.store.dispatch(getAppSummaryAction);
+      const appSummaryActionDispatcher = appSummaryEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
+      appSummaryActionDispatcher.dispatchGet(appGuid, cfGuid);
       if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
         const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
-        const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-        const getAppStatsAction = actionBuilder(appGuid, cfGuid);
-        this.store.dispatch(getAppStatsAction);
+        const appStatsActionDispatcher = appStatsEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
+        appStatsActionDispatcher.dispatchGet(appGuid, cfGuid);
       }
     });
   }

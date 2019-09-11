@@ -6,7 +6,7 @@ export const serviceBrokerActionBuilders = {
   get: (
     guid,
     endpointGuid,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceBroker(
     guid,
     endpointGuid,
@@ -16,6 +16,6 @@ export const serviceBrokerActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceBrokers(endpointGuid, paginationKey, includeRelations, populateMissing)
 } as OrchestratedActionBuilders;

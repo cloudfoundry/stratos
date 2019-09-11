@@ -11,7 +11,7 @@ export const securityGroupBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, flatten }: CFBasePipelineRequestActionMeta
+    { includeRelations, flatten }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllSecurityGroups(endpointGuid, paginationKey, includeRelations, flatten)
 } as OrchestratedActionBuilders;
 
