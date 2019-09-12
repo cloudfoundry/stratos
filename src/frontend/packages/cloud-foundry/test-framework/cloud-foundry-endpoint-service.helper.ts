@@ -9,6 +9,7 @@ import { EntityServiceFactory } from '../../core/src/core/entity-service-factory
 import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../core/src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../core/src/shared/shared.module';
+import { testSCFEndpointGuid } from '../../core/test-framework/store-test-helper';
 import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
@@ -21,8 +22,6 @@ import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
 import { createUserRoleInOrg } from '../src/store/types/user.types';
-import { CFEntityServiceFactory } from '../src/cf-entity-service-factory.service';
-import { testSCFEndpointGuid } from '../../core/test-framework/store-test-helper';
 
 
 export const cfEndpointServiceProviderDeps = [
@@ -74,7 +73,7 @@ export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
     useFactory: (
       store: Store<CFAppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
-      entityServiceFactory: CFEntityServiceFactory
+      entityServiceFactory: EntityServiceFactory
     ) => {
       return new CfUserService(
         store,
@@ -83,7 +82,7 @@ export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
         entityServiceFactory,
       );
     },
-    deps: [Store, PaginationMonitorFactory, CFEntityServiceFactory, Http]
+    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, Http]
   };
 }
 

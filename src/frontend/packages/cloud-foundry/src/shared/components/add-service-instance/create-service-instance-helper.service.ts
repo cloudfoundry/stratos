@@ -3,31 +3,29 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   serviceInstancesEntityType,
   servicePlanVisibilityEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { GetServiceInstances } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
-import { GetServicePlanVisibilities } from '../../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
-import { GetServicePlanServiceInstances } from '../../../../../cloud-foundry/src/actions/service-plan.actions';
-import { GetServiceInstancesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../store/src/types/api.types';
-
-import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
-import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
+  IService,
+  IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
   IServicePlanVisibility,
-  IService, IServiceBroker, IServicePlan, IServiceInstance
 } from '../../../../../core/src/core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 
 export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -40,7 +38,7 @@ export class CreateServiceInstanceHelper {
     private store: Store<CFAppState>,
     public serviceGuid: string,
     @Inject(CF_GUID) public cfGuid: string,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.initBaseObservables();

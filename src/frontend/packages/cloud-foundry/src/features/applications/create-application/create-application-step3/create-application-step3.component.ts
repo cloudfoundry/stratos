@@ -20,15 +20,15 @@ import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/eff
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { createGetApplicationAction } from '../../application.service';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
-import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { createGetApplicationAction } from '../../application.service';
 
 
 @Component({
@@ -43,7 +43,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   setDomainHost: FormGroup;
 
-  constructor(private store: Store<CFAppState>, private entityServiceFactory: CFEntityServiceFactory) {
+  constructor(private store: Store<CFAppState>, private entityServiceFactory: EntityServiceFactory) {
     this.setDomainHost = new FormGroup({
       domain: new FormControl('', [Validators.required]),
       host: new FormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),
@@ -120,7 +120,7 @@ export class CreateApplicationStep3Component implements OnInit {
     if (shouldCreate) {
       const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
       const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('create');
-      const createRouteAction = actionBuilder( newRouteGuid,
+      const createRouteAction = actionBuilder(newRouteGuid,
         cloudFoundry,
         {
           space_guid: space,
@@ -168,13 +168,12 @@ export class CreateApplicationStep3Component implements OnInit {
         this.newAppData = state;
         const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
         const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-        const getOrgAction = getOrgActionBuilder( state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
-                                                  createEntityRelationKey(organizationEntityType, domainEntityType) ]);
-  
+        const getOrgAction = getOrgActionBuilder(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
+          createEntityRelationKey(organizationEntityType, domainEntityType)]);
+
         const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
           state.cloudFoundryDetails.org,
-          getOrgAction,
-          true
+          getOrgAction
         );
         return orgEntService.waitForEntity$.pipe(
           map(({ entity }) => {

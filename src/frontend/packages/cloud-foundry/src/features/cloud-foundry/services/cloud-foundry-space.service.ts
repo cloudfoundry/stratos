@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
@@ -16,12 +15,12 @@ import {
 import { SpaceUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
+import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
@@ -64,7 +63,7 @@ export class CloudFoundrySpaceService {
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,
@@ -122,11 +121,10 @@ export class CloudFoundrySpaceService {
         }
         const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-        const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, { includeRelations: relations});
+        const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, { includeRelations: relations });
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
           this.spaceGuid,
-          getSpaceAction,
-          true
+          getSpaceAction
         );
         return spaceEntityService.entityObs$.pipe(filter(o => !!o && !!o.entity));
       }),

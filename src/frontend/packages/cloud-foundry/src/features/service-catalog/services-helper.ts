@@ -2,41 +2,36 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
-import { APIResource } from '../../../../store/src/types/api.types';
-import {
-  IServicePlan,
-  IServiceBroker,
-  IServicePlanVisibility,
-  IServiceInstance,
-  IService,
-  IServicePlanExtra
-} from '../../../../core/src/core/cf-api-svc.types';
-import { getIdFromRoute, fetchTotalResults } from '../cloud-foundry/cf.helpers';
-import { CFAppState } from '../../cf-app-state';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 
-import {
-  serviceInstancesEntityType,
-  spaceEntityType,
-  organizationEntityType,
-  servicePlanEntityType,
-  cfEntityFactory,
-  serviceBrokerEntityType,
-  serviceEntityType
-} from '../../cf-entity-factory';
-import { GetServiceInstances } from '../../actions/service-instances.actions';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
-
-import { GetServicePlansForService, GetService } from '../../actions/service.actions';
-import { ServicePlanAccessibility } from './services.service';
-import { StratosStatus } from '../../../../core/src/shared/shared.types';
-import { safeStringToObj } from '../../../../core/src/core/utils.service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
+import {
+  IService,
+  IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanExtra,
+  IServicePlanVisibility,
+} from '../../../../core/src/core/cf-api-svc.types';
 import { EntityService } from '../../../../core/src/core/entity-service';
-import { GetServiceBroker } from '../../actions/service-broker.actions';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
+import { safeStringToObj } from '../../../../core/src/core/utils.service';
+import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { StratosStatus } from '../../../../core/src/shared/shared.types';
+import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { CFAppState } from '../../cf-app-state';
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  serviceInstancesEntityType,
+  servicePlanEntityType,
+  serviceBrokerEntityType,
+  serviceEntityType,
+  spaceEntityType
+} from '../../cf-entity-factory';
+import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { ServicePlanAccessibility } from './services.service';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
@@ -213,10 +208,22 @@ export const populateServicePlanExtraTyped = (servicePlan: APIResource<IServiceP
   };
 };
 
+export const getEntityService = <T extends IService | IServiceBroker>(
+  serviceGuid: string,
+  entityRequestAction: EntityRequestAction,
+  entityServiceFactory: EntityServiceFactory
+): EntityService<APIResource<T>> => {
+  return entityServiceFactory.create<APIResource<T>>(
+    serviceGuid,
+    entityRequestAction
+  );
+};
+
 export const getServiceBroker = (
   serviceBrokerGuid: string,
   cfGuid: string,
-  entityServiceFactory: EntityServiceFactory | CFEntityServiceFactory): EntityService<APIResource<IServiceBroker>> => {
+  entityServiceFactory: EntityServiceFactory
+): EntityService<APIResource<IServiceBroker>> => {
   const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
   const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('get');
   const getServiceBrokerAction = actionBuilder(serviceBrokerGuid, cfGuid);
@@ -226,27 +233,10 @@ export const getServiceBroker = (
 export const getCfService = (
   serviceGuid: string,
   cfGuid: string,
-  entityServiceFactory: EntityServiceFactory | CFEntityServiceFactory): EntityService<APIResource<IService>> => {
+  entityServiceFactory: EntityServiceFactory
+): EntityService<APIResource<IService>> => {
   const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
   const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
   const getServiceAction = actionBuilder(serviceGuid, cfGuid);
-
   return getEntityService(serviceGuid, getServiceAction, entityServiceFactory);
-};
-
-export const getEntityService = <T extends IService | IServiceBroker>(
-  serviceGuid: string,
-  entityRequestAction: EntityRequestAction,
-  entityServiceFactory: EntityServiceFactory | CFEntityServiceFactory): EntityService<APIResource<T>> => {
-
-  if (entityServiceFactory instanceof EntityServiceFactory) {
-    return entityServiceFactory.create<APIResource<T>>(
-      serviceGuid,
-      entityRequestAction
-    );
-  }
-  return entityServiceFactory.create<APIResource<T>>(
-    serviceGuid,
-    entityRequestAction
-  );
 };

@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
@@ -35,6 +34,7 @@ import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
+import { DispatchOnlyAppState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
@@ -46,7 +46,6 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { PaginatedAction } from './../types/pagination.types';
-import { DispatchOnlyAppState } from '../app-state';
 
 
 @Injectable()
@@ -274,7 +273,7 @@ export class EndpointsEffect {
     body?: string,
     errorMessageHandler?: (e: any) => string,
   ) {
-    const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(apiAction.entityType, apiAction.endpointType);
+    const endpointEntityKey = entityCatalogue.getEntityKey(apiAction);
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));

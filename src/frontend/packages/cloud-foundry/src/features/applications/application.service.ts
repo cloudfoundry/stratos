@@ -5,9 +5,7 @@ import { combineLatest, filter, first, map, publishReplay, refCount, startWith, 
 
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import {
-  AppMetadataTypes,
-  GetAppStatsAction,
-  GetAppSummaryAction,
+  AppMetadataTypes
 } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   GetApplication,
@@ -15,7 +13,6 @@ import {
   UpdateExistingApplication,
 } from '../../../../cloud-foundry/src/actions/application.actions';
 import { GetAllOrganizationDomains } from '../../../../cloud-foundry/src/actions/organization.actions';
-import { GetSpace } from '../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   appEnvVarsEntityType,
@@ -33,6 +30,7 @@ import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/ap
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -51,7 +49,6 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState, PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
@@ -91,7 +88,7 @@ export class ApplicationService {
     @Inject(CF_GUID) public cfGuid: string,
     @Inject(APP_GUID) public appGuid: string,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -105,8 +102,7 @@ export class ApplicationService {
     const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
       appGuid,
-      getAppSummaryAction,
-      false
+      getAppSummaryAction
     );
 
     this.constructCoreObservables();
@@ -178,7 +174,11 @@ export class ApplicationService {
       switchMap(app => {
         const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-        const getSpaceAction = actionBuilder(app.space_guid, app.cfGuid, {includeRelations: [createEntityRelationKey(spaceEntityType, organizationEntityType)], populateMissing: true});  
+        const getSpaceAction = actionBuilder(
+          app.space_guid,
+          app.cfGuid,
+          { includeRelations: [createEntityRelationKey(spaceEntityType, organizationEntityType)], populateMissing: true }
+        );
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           app.space_guid,
           getSpaceAction
@@ -285,7 +285,9 @@ export class ApplicationService {
           },
           true
         ).entities$;
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
 
   }

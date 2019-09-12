@@ -4,15 +4,11 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
 import {
-  AppMetadataTypes,
-  GetAppEnvVarsAction,
-  GetAppStatsAction,
-  GetAppSummaryAction,
+  AppMetadataTypes
 } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { appStatsEntityType, appSummaryEntityType, appEnvVarsEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
@@ -45,7 +41,7 @@ export class UpdateAppEffects {
           case AppMetadataTypes.STATS:
             const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
             const appStatsActionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-            const statsAction  = appStatsActionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
+            const statsAction = appStatsActionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
             // Application has changed and the associated app stats need to also be updated.
             // Apps that are started can just make the stats call to update cached stats, however this call will fail for stopped apps.
             // For those cases create a fake stats request response that should result in the same thing
@@ -63,9 +59,6 @@ export class UpdateAppEffects {
             break;
         }
       });
-
-
       return actions;
     }));
-
 }

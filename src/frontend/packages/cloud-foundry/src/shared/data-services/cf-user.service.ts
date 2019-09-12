@@ -3,19 +3,13 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetAllOrgUsers } from '../../../../cloud-foundry/src/actions/organization.actions';
-import { GetAllSpaceUsers } from '../../../../cloud-foundry/src/actions/space.actions';
-import { GetAllUsersAsAdmin, GetUser } from '../../../../cloud-foundry/src/actions/users.actions';
+import { GetAllUsersAsAdmin, } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-  userProvidedServiceInstanceEntityType,
-  spaceWithOrgEntityType,
-  serviceBindingEntityType,
-  applicationEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
@@ -29,6 +23,7 @@ import {
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
@@ -36,7 +31,6 @@ import {
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 import {
   fetchTotalResults,
@@ -63,7 +57,7 @@ export class CfUserService {
     private store: Store<CFAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
   ) { }
 
   getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> =>
@@ -98,8 +92,7 @@ export class CfUserService {
           const getUserAction = actionBuilder(endpointGuid, userGuid);
           this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
             userGuid,
-            getUserAction,
-            true
+            getUserAction
           ).waitForEntity$.pipe(
             filter(entity => !!entity),
             map(entity => entity.entity)

@@ -541,7 +541,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
             parentEntities: null,
             entities: entity.entity[paramName],
             childEntities: entity.entity[paramName],
-            cfGuid: action.endpointGuid as string,
+            cfGuid: action.endpointGuid,
             parentRelation: new EntityTreeRelation(parentEntitySchema, false, null, null, []),
             includeRelations: [createEntityRelationKey(parentEntitySchema.entityType, action.entityType)],
             parentEntity: entity,

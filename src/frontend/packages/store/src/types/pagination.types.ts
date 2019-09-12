@@ -2,10 +2,10 @@ import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
+import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
-import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 
 

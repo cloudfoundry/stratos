@@ -6,32 +6,29 @@ import { debounceTime, filter, map } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import {
   CreateUserProvidedServiceInstance,
-  GetAllUserProvidedServices,
-  GetUserProvidedService,
   getUserProvidedServiceInstanceRelations,
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import {
+  organizationEntityType,
+  serviceInstancesEntityType,
+  spaceEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { QParam, QParamJoiners } from '../../../../store/src/q-param';
-import {
-  serviceInstancesEntityType,
-  spaceEntityType,
-  organizationEntityType,
-  userProvidedServiceInstanceEntityType,
-  applicationEntityType
-} from '../../../../cloud-foundry/src/cf-entity-factory';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
-import { CFEntityServiceFactory } from '../../../../cloud-foundry/src/cf-entity-service-factory.service';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 
 
@@ -45,7 +42,7 @@ export class CloudFoundryUserProvidedServicesService {
 
   constructor(
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
 
@@ -100,8 +97,7 @@ export class CloudFoundryUserProvidedServicesService {
     const getUserProvidedServiceAction = actionBuilder(upsGuid, cfGuid);
     const service = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       upsGuid,
-      getUserProvidedServiceAction,
-      true
+      getUserProvidedServiceAction
     );
     return service.waitForEntity$.pipe(
       map(e => e.entity)

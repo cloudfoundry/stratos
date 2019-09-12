@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { LoggerService } from './logger.service';
-
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export const urlValidationExpression =
@@ -237,17 +235,7 @@ export function pathSet(path: string, object: any, value: any) {
   }
 }
 
-export function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
-  if (!res.status) {
-    return res;
-  }
-  try {
-    return res.json();
-  } catch (e) {
-    logger.warn('Failed to parse response body', e);
-  }
-  return {};
-}
+
 
 export function safeStringToObj<T = object>(value: string): T {
   try {

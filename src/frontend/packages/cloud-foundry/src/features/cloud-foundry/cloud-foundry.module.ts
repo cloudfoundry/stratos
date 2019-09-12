@@ -91,7 +91,6 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
-
 import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
@@ -125,7 +124,6 @@ import { QuotaDefinitionFormComponent } from '../../../../core/src/features/clou
 import { SpaceQuotaDefinitionFormComponent } from '../../../../core/src/features/cloud-foundry/space-quota-definition-form/space-quota-definition-form.component';
 import { CreateQuotaStepComponent } from '../../../../core/src/features/cloud-foundry/add-quota/create-quota-step/create-quota-step.component';
 import { CreateSpaceQuotaStepComponent } from '../../../../core/src/features/cloud-foundry/add-space-quota/create-space-quota-step/create-space-quota-step.component';
-import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service';
 
 @NgModule({
   imports: [
@@ -203,7 +201,6 @@ import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service'
   ],
   providers: [
     CFEndpointsListConfigService,
-    CFEntityServiceFactory,
     // TODO: check if belongs to here
     EndpointListHelper,
     EndpointsListConfigService,
@@ -219,11 +216,10 @@ import { CFEntityServiceFactory } from '../../cf-entity-service-factory.service'
     CloudFoundryEndpointService,
     // CfRolesService,
     CloudFoundryCellService,
-    UserInviteService
+    UserInviteService,
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent
   ]
-
 })
 export class CloudFoundryModule { }

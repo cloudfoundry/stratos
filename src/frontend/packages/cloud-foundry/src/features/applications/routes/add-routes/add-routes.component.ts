@@ -1,38 +1,33 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
 import {
-  AssignRouteToApplication,
-  GetAppRoutes,
+  AssignRouteToApplication
 } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
-import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain, ISpace } from '../../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { pathGet } from '../../../../../../core/src/core/utils.service';
 import {
   StepOnNextFunction,
   StepOnNextResult,
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../application.service';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
@@ -68,11 +63,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   addRouteMode: RouteMode;
   useRandomPort = false;
   constructor(
-    private route: ActivatedRoute,
     private applicationService: ApplicationService,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private entityServiceFactory: EntityServiceFactory,
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
@@ -123,12 +116,15 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           switchMap(app => {
             const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
             const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-            const getSpaceAction = actionBuilder(app.entity.entity.space_guid, app.entity.entity.cfGuid, {includeRelations: [createEntityRelationKey(spaceEntityType, domainEntityType)]});      
+            const getSpaceAction = actionBuilder(
+              app.entity.entity.space_guid,
+              app.entity.entity.cfGuid,
+              { includeRelations: [createEntityRelationKey(spaceEntityType, domainEntityType)] }
+            );
             this.spaceGuid = app.entity.entity.space_guid;
             const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
               this.spaceGuid,
-              getSpaceAction,
-              true
+              getSpaceAction
             );
             return spaceService.waitForEntity$;
           }),
@@ -269,7 +265,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
     return this.selectedRoute$.pipe(
-//KATE TODO - route?
+      //KATE TODO - route?
       tap(route => this.store.dispatch(new AssignRouteToApplication(this.appGuid, route.metadata.guid, this.cfGuid))),
       switchMap(() => this.appService.app$),
       map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),

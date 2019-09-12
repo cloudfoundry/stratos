@@ -1,11 +1,12 @@
 import { Inject, Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
+
 import { GeneralEntityAppState } from '../../../store/src/app-state';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
-import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
-import { EntityInfoHandler, EntityService, ENTITY_INFO_HANDLER } from './entity-service';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { ENTITY_INFO_HANDLER, EntityInfoHandler, EntityService } from './entity-service';
 
 @Injectable()
 export class EntityServiceFactory {
@@ -18,6 +19,7 @@ export class EntityServiceFactory {
     @Optional() @Inject(ENTITY_INFO_HANDLER) private entityInfoHandler: EntityInfoHandler
   ) { }
 
+  // FIXME: See #3833. Improve typing of action passed to entity service factory create
   create<T>(
     entityConfig: EntityActionBuilderEntityConfig,
   ): EntityService<T>;

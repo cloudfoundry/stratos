@@ -3,13 +3,12 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { GetSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { IServiceBroker } from '../../../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CFEntityServiceFactory } from '../../../../cf-entity-service-factory.service';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { spaceEntityType } from '../../../../cf-entity-factory';
@@ -27,10 +26,10 @@ export class ServiceBrokerCardComponent {
   constructor(
     private servicesService: ServicesService,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory
   ) {
     this.serviceBroker$ = this.servicesService.serviceBroker$;
-
+    // TODO NJ This could leak subscriptions if the requests keeps failing.
     this.serviceBroker$.pipe(
       filter(o => !!o),
       map(o => o.entity.space_guid),
@@ -40,11 +39,10 @@ export class ServiceBrokerCardComponent {
       switchMap(spaceGuid => {
         const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-        const getSpaceAction = actionBuilder(spaceGuid, this.servicesService.cfGuid);  
+        const getSpaceAction = actionBuilder(spaceGuid, this.servicesService.cfGuid);
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
           spaceGuid,
-          getSpaceAction,
-          true,
+          getSpaceAction
         );
         return spaceService.waitForEntity$;
       }),

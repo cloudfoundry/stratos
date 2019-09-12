@@ -144,7 +144,7 @@ export class EntityService<T = any> {
       return action;
     } else {
       const {
-        // TODO: Use this schema key
+        // TODO: Schema should be passed to the action builders #3846.
         schemaKey,
         entityGuid,
         endpointGuid,

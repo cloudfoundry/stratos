@@ -1,8 +1,8 @@
 import {
-  OrchestratedActionBuilders,
-  OrchestratedActionBuilderConfig,
   EntityRequestActionConfig,
-  KnownEntityActionBuilder
+  KnownEntityActionBuilder,
+  OrchestratedActionBuilderConfig,
+  OrchestratedActionBuilders,
 } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { FetchBranchesForProject, FetchCommits } from '../actions/deploy-applications.actions';
@@ -42,11 +42,6 @@ export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
       externalRequest: true
     }
   ),
-  // get: (
-  //   commitSha: string,
-  //   endpointGuid: string,
-  //   commitMeta: GitMeta
-  // ) => new FetchCommit(commitMeta.scm, commitSha, commitMeta.projectName),
   getMultiple: (
     commitSha: string,
     endpointGuid: string,

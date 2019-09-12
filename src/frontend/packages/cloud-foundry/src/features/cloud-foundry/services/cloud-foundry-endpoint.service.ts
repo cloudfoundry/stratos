@@ -26,6 +26,7 @@ import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { EntityService } from '../../../../../core/src/core/entity-service';
+import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
@@ -40,7 +41,6 @@ import { APIResource, EntityInfo } from '../../../../../store/src/types/api.type
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
-import { CFEntityServiceFactory } from '../../../cf-entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
@@ -135,7 +135,7 @@ export class CloudFoundryEndpointService {
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory,
     private endpointService: EndpointsService,
@@ -156,7 +156,7 @@ export class CloudFoundryEndpointService {
     const action = actionBuilder(this.cfGuid, null);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
-      new GetCFInfo(this.cfGuid)
+      new GetCFInfo(this.cfGuid),
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();

@@ -9,7 +9,21 @@ import {
   Subscription,
   timer as observableTimer,
 } from 'rxjs';
-import { catchError, filter, first, map, pairwise, startWith, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  catchError,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  pairwise,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
@@ -39,8 +53,7 @@ import { GitSCM } from '../../../../../../core/src/shared/data-services/scm/scm'
 import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { EntityInfo } from '../../../../../../store/src/types/api.types';
 import {
   DEPLOY_TYPES_IDS,
   getApplicationDeploySourceTypes,
@@ -59,7 +72,6 @@ export class DeployApplicationStep2Component
 
   @Input() isRedeploy = false;
 
-  branchesSubscription: Subscription;
   commitInfo: GitCommit;
   sourceTypes: SourceType[] = getApplicationDeploySourceTypes();
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
@@ -104,9 +116,6 @@ export class DeployApplicationStep2Component
     this.subscriptions.forEach(p => p.unsubscribe());
     if (this.commitSubscription) {
       this.commitSubscription.unsubscribe();
-    }
-    if (this.branchesSubscription) {
-      this.branchesSubscription.unsubscribe();
     }
   }
 
@@ -162,36 +171,6 @@ export class DeployApplicationStep2Component
       map(type => type.id === DEPLOY_TYPES_IDS.FOLDER || type.id === DEPLOY_TYPES_IDS.FILE)
     );
 
-    const fetchBranches = this.store
-      .select(selectProjectExists)
-      .pipe(
-        filter(state => state && !state.checking && !state.error && state.exists),
-        tap(state => {
-          if (this.branchesSubscription) {
-            this.branchesSubscription.unsubscribe();
-          }
-          const fetchBranchesAction = new FetchBranchesForProject(this.scm, state.name);
-          this.branchesSubscription = getPaginationObservables<APIResource>(
-            {
-              store: this.store,
-              action: fetchBranchesAction,
-              paginationMonitor: this.paginationMonitorFactory.create(
-                fetchBranchesAction.paginationKey,
-                new CFEntityConfig(gitBranchesEntityType)
-              )
-            },
-            true
-          ).entities$.subscribe();
-        })
-      )
-      .subscribe();
-
-    this.subscriptions.push(fetchBranches);
-
-    const paginationAction = {
-      entityType: gitBranchesEntityType,
-      paginationKey: 'branches'
-    } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
       filter(p => !!p),
       map(p => (!!p.exists && !!p.data) ? p.data : null),
@@ -205,22 +184,39 @@ export class DeployApplicationStep2Component
     const deployBranchName$ = this.store.select(selectDeployBranchName);
     const deployCommit$ = this.store.select(selectNewProjectCommit);
 
-    const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
-      paginationAction.paginationKey,
-      new CFEntityConfig(gitBranchesEntityType)
-    );
-
-    this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(
-      map(branches => branches.map(branch => branch.entity)),
-      withLatestFrom(deployBranchName$),
-      filter(([branches, branchName]) => !!branchName),
-      tap(([branches, branchName]) => {
-        this.repositoryBranch = branches.find(
-          branch => branch.name === branchName
-        );
-      }),
-      map(([p, q]) => p)
-    );
+    this.repositoryBranches$ = this.store
+      .select(selectProjectExists)
+      .pipe(
+        // Wait for a new project name change
+        filter(state => state && !state.checking && !state.error && state.exists),
+        distinctUntilChanged((x, y) => x.name === y.name),
+        // Convert project name into branches pagination observable
+        switchMap(state => {
+          const fetchBranchesAction = new FetchBranchesForProject(this.scm, state.name);
+          return getPaginationObservables<GitBranch>(
+            {
+              store: this.store,
+              action: fetchBranchesAction,
+              paginationMonitor: this.paginationMonitorFactory.create(
+                fetchBranchesAction.paginationKey,
+                new CFEntityConfig(gitBranchesEntityType)
+              )
+            },
+            true
+          ).entities$;
+        }),
+        // Find the specific branch we're interested inS
+        withLatestFrom(deployBranchName$),
+        filter(([branches, branchName]) => !!branchName),
+        tap(([branches, branchName]) => {
+          this.repositoryBranch = branches.find(
+            branch => branch.name === branchName
+          );
+        }),
+        map(([p, q]) => p),
+        publishReplay(1),
+        refCount()
+      );
 
     const updateBranchAndCommit = observableCombineLatest(
       this.repositoryBranches$,
