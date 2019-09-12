@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetAllUsersAsAdmin, GetUser } from '../../../../cloud-foundry/src/actions/users.actions';
+import { GetAllUsersAsAdmin } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
@@ -48,7 +48,7 @@ import {
   fetchTotalResults,
   waitForCFPermissions
 } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
-import { CFEntityServiceFactory } from '../../../../cloud-foundry/src/cf-entity-service-factory.service';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 
 @Injectable()
 export class CfUserService {
@@ -60,7 +60,7 @@ export class CfUserService {
     private store: Store<CFAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private entityServiceFactory: CFEntityServiceFactory,
+    private entityServiceFactory: EntityServiceFactory,
     private http: Http,
   ) { }
 
@@ -96,8 +96,7 @@ export class CfUserService {
           const getUserAction = actionBuilder(endpointGuid, userGuid);
           this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
             userGuid,
-            getUserAction,
-            true
+            getUserAction
           ).waitForEntity$.pipe(
             filter(entity => !!entity),
             map(entity => entity.entity)
@@ -392,8 +391,8 @@ export class CfUserService {
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
     const action = actionBuilder(
       orgGuid,
-      createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       cfGuid,
+      createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       isAdmin
     ) as PaginatedAction;
     return action;
@@ -404,8 +403,8 @@ export class CfUserService {
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
     const action = actionBuilder(
       spaceGuid,
-      createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       cfGuid,
+      createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       isAdmin
     ) as PaginatedAction;
     return action;

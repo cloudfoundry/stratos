@@ -24,7 +24,6 @@ import {
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ApplicationService } from '../../application.service';
 import { QParam } from '../../../../../../store/src/q-param';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {

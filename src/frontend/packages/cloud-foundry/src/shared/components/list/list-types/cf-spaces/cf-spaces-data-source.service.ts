@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
 
-import { GetAllOrganizationSpaces } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
@@ -27,9 +26,9 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
     const paginationKey = createEntityRelationPaginationKey(organizationEntityType, orgGuid);
     const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const getAllSpaceActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
-    const action = getAllSpaceActionBuilder(paginationKey, orgGuid, cfGuid, [
+    const action = getAllSpaceActionBuilder(orgGuid, cfGuid, paginationKey, [
       createEntityRelationKey(spaceEntityType, spaceQuotaEntityType),
-    ]) as PaginatedAction;  
+    ]) as PaginatedAction;
     super({
       store,
       action,

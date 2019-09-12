@@ -142,8 +142,6 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
     public populateMissing = true
   ) {
     super();
-    console.log(paginationKey);
-    console.log(endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'organizations';
     this.options.method = 'get';
