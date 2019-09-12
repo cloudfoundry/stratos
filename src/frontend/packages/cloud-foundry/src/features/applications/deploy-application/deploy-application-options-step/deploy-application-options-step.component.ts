@@ -20,9 +20,8 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { stackEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Component({
@@ -129,7 +128,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
         const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
         //TODO kate verify OK
-        const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null) as GetAllStacks;  
+        const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null) as GetAllStacks;
         return getPaginationObservables<APIResource<IDomain>>(
           {
             store: this.store,

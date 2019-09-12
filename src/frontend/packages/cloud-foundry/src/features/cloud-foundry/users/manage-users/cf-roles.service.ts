@@ -234,7 +234,7 @@ export class CfRolesService {
   fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
     const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-    const getOrgAction = getOrgActionBuilder(orgGuid, cfGuid, {includeRelations: [], populateMissing: false });
+    const getOrgAction = getOrgActionBuilder(orgGuid, cfGuid, { includeRelations: [], populateMissing: false });
     return this.entityServiceFactory.create<APIResource<IOrganization>>(
       orgGuid,
       getOrgAction,
@@ -254,10 +254,15 @@ export class CfRolesService {
       const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
       const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
       const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
-      const getAllOrganizationsAction = actionBuilder(paginationKey,
-        cfGuid, { includeRelations: [
-          createEntityRelationKey(organizationEntityType, spaceEntityType)
-        ], populateMissing: true});
+      const getAllOrganizationsAction = actionBuilder(
+        cfGuid,
+        paginationKey,
+        {
+          includeRelations: [
+            createEntityRelationKey(organizationEntityType, spaceEntityType)
+          ], populateMissing: true
+        }
+      );
       const orgs$ = getPaginationObservables<APIResource<IOrganization>>({
         store: this.store,
         action: getAllOrganizationsAction,

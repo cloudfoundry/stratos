@@ -107,7 +107,11 @@ export const fetchServiceInstancesCount = (
   const uniqueKey = spaceGuid || orgGuid || cfGuid;
   const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
   const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
-  const action = actionBuilder(cfGuid, createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), {includeRelations: [], populateMissing: false});
+  const action = actionBuilder(
+    cfGuid,
+    createEntityRelationPaginationKey(parentSchemaKey, uniqueKey),
+    { includeRelations: [], populateMissing: false }
+  );
   action.initialParams.q = [];
   if (orgGuid) {
     action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
@@ -213,10 +217,10 @@ export const getServiceBroker = (
   serviceBrokerGuid: string,
   cfGuid: string,
   entityServiceFactory: EntityServiceFactory | CFEntityServiceFactory): EntityService<APIResource<IServiceBroker>> => {
-    const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
-    const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('get');
-    const getServiceBrokerAction = actionBuilder(serviceBrokerGuid, cfGuid);  
-    return getEntityService(serviceBrokerGuid, getServiceBrokerAction, entityServiceFactory);
+  const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
+  const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('get');
+  const getServiceBrokerAction = actionBuilder(serviceBrokerGuid, cfGuid);
+  return getEntityService(serviceBrokerGuid, getServiceBrokerAction, entityServiceFactory);
 };
 
 export const getCfService = (

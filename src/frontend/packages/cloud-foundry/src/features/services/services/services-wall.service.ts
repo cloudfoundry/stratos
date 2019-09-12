@@ -32,7 +32,7 @@ export class ServicesWallService {
     const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     //TODO kate verify OK
-    const getServicesAction = actionBuilder(null, paginationKey);  
+    const getServicesAction = actionBuilder(null, paginationKey);
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
@@ -62,7 +62,7 @@ export class ServicesWallService {
     const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
     const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    const getAllServicesForSpaceAction = actionBuilder(paginationKey, cfGuid, spaceGuid) as PaginatedAction;  
+    const getAllServicesForSpaceAction = actionBuilder(paginationKey, cfGuid, spaceGuid) as PaginatedAction;
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,

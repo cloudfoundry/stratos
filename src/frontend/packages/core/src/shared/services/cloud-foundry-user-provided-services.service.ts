@@ -79,7 +79,11 @@ export class CloudFoundryUserProvidedServicesService {
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
     const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
     const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid, {includeRelatons: [], populateMissing: false}) as PaginatedAction;
+    const action = actionBuilder(
+      cfGuid,
+      createEntityRelationPaginationKey(parentSchemaKey, uniqueKey),
+      { includeRelations: [], populateMissing: false }
+    ) as PaginatedAction;
     action.initialParams.q = [];
     if (orgGuid) {
       action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
@@ -93,7 +97,7 @@ export class CloudFoundryUserProvidedServicesService {
   public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedServiceInstance>> {
     const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
     const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('get');
-    const getUserProvidedServiceAction = actionBuilder(upsGuid, cfGuid);  
+    const getUserProvidedServiceAction = actionBuilder(upsGuid, cfGuid);
     const service = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       upsGuid,
       getUserProvidedServiceAction,
@@ -126,7 +130,7 @@ export class CloudFoundryUserProvidedServicesService {
     const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
     const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('update');
     //TODO kate verify OK
-    const updateAction = actionBuilder(cfGuid, guid, {existingUserProvidedServiceInstance: data, proxyPaginationEntityConfig: this.serviceInstancesEntityConfig});  
+    const updateAction = actionBuilder(cfGuid, guid, { existingUserProvidedServiceInstance: data, proxyPaginationEntityConfig: this.serviceInstancesEntityConfig });
     //const updateAction = new UpdateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
     const catalogueEntity = entityCatalogue.getEntity({
       entityType: userProvidedServiceInstanceEntityType,

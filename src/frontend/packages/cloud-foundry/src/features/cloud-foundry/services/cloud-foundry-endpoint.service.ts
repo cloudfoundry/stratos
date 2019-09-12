@@ -88,8 +88,8 @@ export class CloudFoundryEndpointService {
       : createEntityRelationPaginationKey(endpointSchemaKey);
     const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getAllOrganizationsAction = actionBuilder(paginationKey,
-      cfGuid, {
+    const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
+      {
         includeRelations: [
           createEntityRelationKey(organizationEntityType, spaceEntityType),
           createEntityRelationKey(organizationEntityType, domainEntityType),
@@ -107,8 +107,8 @@ export class CloudFoundryEndpointService {
       : createEntityRelationPaginationKey(endpointSchemaKey);
     const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getAllOrganizationsAction = actionBuilder(paginationKey,
-      cfGuid, {
+    const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
+      {
         includeRelations: [
           createEntityRelationKey(organizationEntityType, spaceEntityType),
         ]

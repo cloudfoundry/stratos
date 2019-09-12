@@ -48,8 +48,8 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
     const appEventEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEventEntityType);
-    const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple')
-    const action = actionBuilder(paginationKey, appGuid, { cfGuid });
+    const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(cfGuid, paginationKey, { appGuid });
 
     super(
       {

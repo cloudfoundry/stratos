@@ -112,7 +112,7 @@ export class ServicesService {
     const paginationKey = createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid);
     const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
     const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getServiceBrokersAction = actionBuilder(this.cfGuid, paginationKey); 
+    const getServiceBrokersAction = actionBuilder(this.cfGuid, paginationKey);
     return getPaginationObservables<APIResource<IServiceBroker>>(
       {
         store: this.store,
@@ -222,7 +222,7 @@ export class ServicesService {
         } else {
           const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
           const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-          const getSpaceAction = actionBuilder(spaceGuid, this.cfGuid);            
+          const getSpaceAction = actionBuilder(spaceGuid, this.cfGuid);
           const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
             spaceGuid,
             getSpaceAction,
