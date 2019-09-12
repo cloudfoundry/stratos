@@ -381,7 +381,19 @@ export class AutoscalerEffects {
           return res;
         }),
         catchError(err => {
-          const noPolicy = err.status === 404 && err._body === '{}';
+          const noPolicy = (() => {
+            if (err.status === 404 && err._body) {
+              if (err._body === '{}') {
+                return true;
+              } else {
+                const response404: AppAutoscalerFetchPolicyFailedResponse = JSON.parse(err._body) as AppAutoscalerFetchPolicyFailedResponse;
+                if (response404.code === 'Not Found') {
+                  return true;
+                }
+              }
+            }
+            return false;
+          })();
           if (noPolicy) {
             err._body = 'No policy is defined for this application.';
           }

@@ -142,6 +142,8 @@ export interface AppAutoscalerMetricBasicInfo {
 export interface AppAutoscalerFetchPolicyFailedResponse {
   status: number;
   noPolicy: boolean;
+  code?: string;
+  message?: string;
 }
 
 export interface AppAutoscalerInvalidPolicyError {
