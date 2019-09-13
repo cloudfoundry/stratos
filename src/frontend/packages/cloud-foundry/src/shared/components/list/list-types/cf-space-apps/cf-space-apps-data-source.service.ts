@@ -26,7 +26,7 @@ export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, cfSpaceService.spaceGuid) + '-tab';
     const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    const action = actionBuilder(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey, [], false, false) as PaginatedAction;
+    const action = actionBuilder(cfSpaceService.spaceGuid,cfSpaceService.cfGuid, paginationKey, [], false, false) as PaginatedAction;
     super({
       store,
       action,

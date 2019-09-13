@@ -47,7 +47,7 @@ export class AddEditSpaceStepBase {
     const paginationKey = getPaginationKey('cf-space', this.orgGuid);
     const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const getAllSpaceActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
-    const action = getAllSpaceActionBuilder(paginationKey, this.orgGuid, this.cfGuid) as PaginatedAction;  
+    const action = getAllSpaceActionBuilder(this.orgGuid, this.cfGuid, paginationKey) as PaginatedAction;  
 
     this.allSpacesInOrg$ = getPaginationObservables<APIResource, CFAppState>(
       {

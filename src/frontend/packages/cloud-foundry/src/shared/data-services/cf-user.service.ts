@@ -89,7 +89,7 @@ export class CfUserService {
         if (!this.users[userGuid]) {
           const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
           const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('get');
-          const getUserAction = actionBuilder(endpointGuid, userGuid);
+          const getUserAction = actionBuilder(userGuid, endpointGuid);
           this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
             userGuid,
             getUserAction
@@ -377,8 +377,7 @@ export class CfUserService {
   private createCfGetUsersAction = (cfGuid: string): PaginatedAction => {
     const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(cfGuid, null) as GetAllUsersAsAdmin;
-    //TODO kate verify OK
+    const action = actionBuilder(null, cfGuid) as GetAllUsersAsAdmin;
     return action;
   }
 
@@ -387,8 +386,8 @@ export class CfUserService {
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
     const action = actionBuilder(
       orgGuid,
-      createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       cfGuid,
+      createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       isAdmin
     ) as PaginatedAction;
     return action;
