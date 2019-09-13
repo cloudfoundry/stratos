@@ -5,7 +5,7 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { spaceEntityType, cfEntityFactory, organizationEntityType } from '../cf-entity-factory';
 import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../core/src/core/entity-catalogue-test.module';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from '../../../core/src/core/entity-catalogue-test.module';
 import { generateCFEntities } from '../cf-entity-generator';
 import { createBasicStoreModule, TestStoreEntity, createEntityStoreState } from '../../../core/test-framework/store-test-helper';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
@@ -32,7 +32,7 @@ describe('Entity Relations - populate from parent', () => {
     TestBed.configureTestingModule({
       imports: [
         {
-          ngModule: EffectsFeatureTestModule,
+          ngModule: EntityCatalogueTestModule,
           providers: [
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]

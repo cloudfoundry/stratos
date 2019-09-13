@@ -10,7 +10,7 @@ import { CloudFoundryOrganizationSpaceQuotasComponent } from './cloud-foundry-or
 import {
   generateTestCfEndpointServiceProvider
 } from '../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
+import { CFBaseTestModules } from '../../../../../../../cloud-foundry/test-framework/cf-test-helper';
 
 describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
   let component: CloudFoundryOrganizationSpaceQuotasComponent;
@@ -20,7 +20,7 @@ describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationSpaceQuotasComponent],
       providers: [CfSpaceQuotasListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
-      imports: [...BaseTestModules]
+      imports: [...CFBaseTestModules]
     })
       .compileComponents();
   }));

@@ -6,6 +6,7 @@ import { createBasicStoreModule } from '../../../../../../../test-framework/stor
 import { CoreModule } from '../../../../../../core/core.module';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
+import { CFBaseTestModules } from '../../../../../../../../cloud-foundry/test-framework/cf-test-helper';
 
 describe('TableCellEndpointNameComponent', () => {
   let component: TableCellEndpointNameComponent;
@@ -17,9 +18,12 @@ describe('TableCellEndpointNameComponent', () => {
       imports: [
         CoreModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        // createBasicStoreModule(),
+        ...CFBaseTestModules
       ],
-      providers: [EntityMonitorFactory]
+      providers: [
+        EntityMonitorFactory,
+      ]
     })
       .compileComponents();
   }));

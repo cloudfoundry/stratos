@@ -60,6 +60,9 @@ function mapResponses(
 }
 
 function getAllEntitiesFromResponses(response: any[], getEntitiesFromResponse?: (response: any) => any) {
+  if (!Array.isArray(response)) {
+    return response;
+  }
   if (getEntitiesFromResponse) {
     return response.reduce((merged, res) => {
       const entities = getEntitiesFromResponse(res);

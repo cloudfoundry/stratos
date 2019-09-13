@@ -1,5 +1,5 @@
 import { Inject, NgModule } from '@angular/core';
-import { ReducerManager } from '@ngrx/store';
+import { ReducerManager, Store } from '@ngrx/store';
 
 import {
   requestDataReducerFactory,
@@ -7,12 +7,14 @@ import {
 import { chainApiReducers, requestActions } from '../../../store/src/reducers/api-request-reducers.generator.helpers';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue, TestEntityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
 
 export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
 
 @NgModule({})
-export class EffectsFeatureTestModule {
+export class EntityCatalogueTestModule {
   constructor(
+    store: Store<any>,
     reducerManager: ReducerManager,
     @Inject(TEST_CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogueEntity[],
   ) {
@@ -26,5 +28,6 @@ export class EffectsFeatureTestModule {
     const extraReducers = entityCatalogue.getAllEntityRequestDataReducers();
     const chainedReducers = chainApiReducers(dataReducer, extraReducers);
     reducerManager.addReducer('requestData', chainedReducers);
+    store.dispatch(new InitCatalogueEntitiesAction(entities));
   }
 }

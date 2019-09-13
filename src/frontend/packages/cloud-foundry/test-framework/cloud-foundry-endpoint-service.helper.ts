@@ -28,7 +28,6 @@ export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
   CfOrgSpaceDataService,
   CfUserService,
-  CFEntityServiceFactory,
   PaginationMonitorFactory,
   EntityMonitorFactory,
   UserInviteService,

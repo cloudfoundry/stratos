@@ -4,7 +4,7 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { SpaceQuotaDefinitionFormComponent } from '../space-quota-definition-form/space-quota-definition-form.component';
 import { EditSpaceQuotaStepComponent } from './edit-space-quota-step/edit-space-quota-step.component';
 import { EditSpaceQuotaComponent } from './edit-space-quota.component';
-import { BaseTestModules } from '../../../../test-framework/core-test.helper';
+import { CFBaseTestModules } from '../../../../../cloud-foundry/test-framework/cf-test-helper';
 
 describe('EditSpaceQuotaComponent', () => {
   let component: EditSpaceQuotaComponent;
@@ -13,7 +13,7 @@ describe('EditSpaceQuotaComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceQuotaComponent, EditSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
-      imports: [...BaseTestModules],
+      imports: [...CFBaseTestModules],
       providers: [TabNavService]
     })
       .compileComponents();

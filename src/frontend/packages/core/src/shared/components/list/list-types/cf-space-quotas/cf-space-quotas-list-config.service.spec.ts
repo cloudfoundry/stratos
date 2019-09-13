@@ -5,14 +5,14 @@ import { CfSpaceQuotasListConfigService } from './cf-space-quotas-list-config.se
 import {
   generateTestCfEndpointServiceProvider
 } from '../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
+import { CFBaseTestModules } from '../../../../../../../cloud-foundry/test-framework/cf-test-helper';
 
 describe('CfSpaceQuotasListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [...generateTestCfEndpointServiceProvider(), CfSpaceQuotasListConfigService, DatePipe],
       imports: [
-        ...BaseTestModules
+        ...CFBaseTestModules
       ]
 
     });

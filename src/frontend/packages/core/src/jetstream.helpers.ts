@@ -16,6 +16,9 @@ export function getJetStreamError(obj: Partial<JetStreamErrorResponse>): JetStre
 // TODO It would be nice if the BE could return a unique para for us to check for.
 // There is always a chance that this will return a false positive (more so with extensions).
 export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]) {
+  if (!pages || !pages.length) {
+    return false;
+  }
   return pages.find(page => {
     return !!(
       page &&

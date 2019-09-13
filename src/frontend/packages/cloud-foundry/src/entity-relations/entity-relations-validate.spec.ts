@@ -1,6 +1,6 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../core/src/core/entity-catalogue-test.module';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from '../../../core/src/core/entity-catalogue-test.module';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../../core/test-framework/store-test-helper';
@@ -48,7 +48,7 @@ describe('Entity Relations - validate -', () => {
     TestBed.configureTestingModule({
       imports: [
         {
-          ngModule: EffectsFeatureTestModule,
+          ngModule: EntityCatalogueTestModule,
           providers: [
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]
@@ -422,7 +422,7 @@ describe('Entity Relations - validate -', () => {
         const org = store.requestData[orgEntityKey][orgGuid];
         org.entity.quota_definition_guid = quotaDefinition.metadata.guid;
         return store;
-    });
+      });
 
       const getOrgAction = new GetOrganization(
         orgGuid,

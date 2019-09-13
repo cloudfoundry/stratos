@@ -46,7 +46,7 @@ export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => st
 export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => state[role] || false;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
-export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state.scopes;
+export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state ? state.scopes : [];
 
 export const selectCurrentUserCFSpaceRolesState = (spaceId: string) => (state: ISpacesRoleState) => state[spaceId];
 export const selectCurrentUserCFOrgRolesState = (orgId: string) => (state: IOrgsRoleState) => state[orgId];
