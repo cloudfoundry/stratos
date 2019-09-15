@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 )
 
 const (
@@ -185,7 +187,7 @@ func (p *portalProxy) ensureXSRFToken(c echo.Context) {
 	token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
 	if err != nil || len(token) == 0 {
 		// Need a new token
-		tokenBytes, err := generateRandomBytes(32)
+		tokenBytes, err := crypto.GenerateRandomBytes(32)
 		if err == nil {
 			token = base64.StdEncoding.EncodeToString(tokenBytes)
 		} else {

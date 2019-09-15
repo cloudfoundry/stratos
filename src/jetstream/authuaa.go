@@ -17,12 +17,37 @@ import (
 
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
-	//MORE FIELDS HERE
 	p *portalProxy
 }
 
 func (a *uaaAuth) Login(c echo.Context) error {
-	return a.loginToUAA(c)
+
+	//This check will remain in until auth is factored down into its own package
+	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"UAA Login is not enabled",
+			"UAA Login is not enabled")
+		return err
+	}
+
+	resp, err := a.p.loginToUAA(c)
+	if err != nil {
+		return err
+	}
+
+	jsonString, err := json.Marshal(resp)
+	if err != nil {
+		return err
+	}
+
+	// Add XSRF Token
+	a.p.ensureXSRFToken(c)
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+
+	return nil
 }
 
 func (a *uaaAuth) Logout(c echo.Context) error {
@@ -120,37 +145,7 @@ func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpir
 	return nil
 }
 
-func (a *uaaAuth) loginToUAA(c echo.Context) error {
-	log.Debug("loginToUAA")
-
-	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
-		err := interfaces.NewHTTPShadowError(
-			http.StatusNotFound,
-			"UAA Login is not enabled",
-			"UAA Login is not enabled")
-		return err
-	}
-
-	resp, err := a.p.doLoginToUAA(c)
-	if err != nil {
-		return err
-	}
-
-	jsonString, err := json.Marshal(resp)
-	if err != nil {
-		return err
-	}
-
-	// Add XSRF Token
-	a.p.ensureXSRFToken(c)
-
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-
-	return nil
-}
-
-func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
+func (p *portalProxy) loginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 	log.Debug("doLoginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
@@ -227,3 +222,126 @@ func (a *uaaAuth) logout(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp)
 }
+
+func (p *portalProxy) getUAAIdentityEndpoint() string {
+	log.Debug("getUAAIdentityEndpoint")
+	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
+}
+
+func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
+	log.Debug("saveAuthToken")
+
+	key := u.UserGUID
+	tokenRecord := interfaces.TokenRecord{
+		AuthToken:    authTok,
+		RefreshToken: refreshTok,
+		TokenExpiry:  u.TokenExpiry,
+		AuthType:     interfaces.AuthTypeOAuth2,
+	}
+
+	err := p.setUAATokenRecord(key, tokenRecord)
+	if err != nil {
+		return tokenRecord, err
+	}
+
+	return tokenRecord, nil
+}
+
+// Callback - invoked after the UAA login flow has completed and during logout
+// We use a single callback so this can be whitelisted in the client
+func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
+	state := c.QueryParam("state")
+	if len(state) == 0 {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: State parameter missing",
+			"SSO Login: State parameter missing")
+		return err
+	}
+
+	// We use the same callback URL for both UAA and endpoint login
+	// Check if it is an endpoint login and dens to the right handler
+	endpointGUID := c.QueryParam("guid")
+	if len(endpointGUID) > 0 {
+		return p.ssoLoginToCNSI(c)
+	}
+
+	if state == "logout" {
+		return c.Redirect(http.StatusTemporaryRedirect, "/login?SSO_Message=You+have+been+logged+out")
+	}
+	_, err := p.loginToUAA(c)
+	if err != nil {
+		// Send error as query string param
+		msg := err.Error()
+		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
+			msg = httpError.UserFacingError
+		}
+		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
+			msg = httpError.Response
+		}
+		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, state)
+}
+
+// Logout of the UAA
+func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"SSO Login is not enabled",
+			"SSO Login is not enabled")
+		return err
+	}
+
+	state := c.QueryParam("state")
+	if len(state) == 0 {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: State parameter missing",
+			"SSO Login: State parameter missing")
+		return err
+	}
+
+	// Redirect to the UAA to logout of the UAA session as well (if configured to do so), otherwise redirect back to the UI login page
+	var redirectURL string
+	if p.hasSSOOption("logout") {
+		redirectURL = fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout", "")))
+	} else {
+		redirectURL = "/login?SSO_Message=You+have+been+logged+out"
+	}
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+}
+
+func (p *portalProxy) hasSSOOption(option string) bool {
+	// Remove all spaces
+	opts := stringutils.RemoveSpaces(p.Config.SSOOptions)
+
+	// Split based on ','
+	options := strings.Split(opts, ",")
+	return stringutils.ArrayContainsString(options, option)
+}
+
+func (p *portalProxy) RefreshUAALogin(username, password string, store bool) error {
+	log.Debug("RefreshUAALogin")
+	uaaRes, err := p.getUAATokenWithCreds(p.Config.ConsoleConfig.SkipSSLValidation, username, password, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	if err != nil {
+		return err
+	}
+
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return err
+	}
+
+	if store {
+		_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+

@@ -14,7 +14,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
@@ -83,7 +83,7 @@ func TestLocalLogin(t *testing.T) {
 		scope := "stratos.admin"
 
 		//Hash the password
-		passwordHash, _ := HashPassword(password)
+		passwordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
@@ -140,7 +140,7 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 		scope := "stratos.admin"
 
 		//Hash the password
-		passwordHash, _ := HashPassword(password)
+		passwordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
@@ -190,7 +190,7 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 		password := "localuserpass"
 
 		//Hash the password
-		passwordHash, _ := HashPassword(password)
+		passwordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()

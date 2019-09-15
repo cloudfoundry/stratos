@@ -14,6 +14,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
@@ -248,7 +249,7 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 
 	userGUID := uuid.NewV4().String()
 	password := localUserPassword
-	passwordHash, err := HashPassword(password)
+	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
 		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
 		return err

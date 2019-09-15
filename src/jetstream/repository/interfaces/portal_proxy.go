@@ -10,16 +10,12 @@ import (
 	"github.com/labstack/echo"
 )
 
-
-
 type PortalProxy interface {
 
 	GetHttpClient(skipSSLValidation bool) http.Client
 	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
-
 	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, fetchInfo InfoFunc) (CNSIRecord, error)
-
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
 	// Auth
@@ -73,7 +69,6 @@ type PortalProxy interface {
 	// Tokens - lower-level access
 	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
 	DeleteEndpointToken(cnsiGUID string, userGUID string) error
-
 	AddLoginHook(priority int, function LoginHookFunc) error
 	ExecuteLoginHooks(c echo.Context) error
 

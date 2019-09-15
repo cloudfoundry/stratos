@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/rand"
+
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -20,7 +20,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
 
-	"golang.org/x/crypto/bcrypt"
 )
 
 // LoginHookFunc - function that can be hooked into a successful user login
@@ -79,11 +78,6 @@ func (p *portalProxy) GetAuthService() interfaces.Auth {
 	return p.AuthService
 }
 
-func (p *portalProxy) getUAAIdentityEndpoint() string {
-	log.Debug("getUAAIdentityEndpoint")
-	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
-}
-
 func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 	req := c.Request()
 	originalCookie := req.Header.Get("Cookie")
@@ -128,94 +122,9 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 	return returnURL
 }
 
-// Logout of the UAA
-func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
-	if !p.Config.SSOLogin {
-		err := interfaces.NewHTTPShadowError(
-			http.StatusNotFound,
-			"SSO Login is not enabled",
-			"SSO Login is not enabled")
-		return err
-	}
 
-	state := c.QueryParam("state")
-	if len(state) == 0 {
-		err := interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"SSO Login: State parameter missing",
-			"SSO Login: State parameter missing")
-		return err
-	}
 
-	// Redirect to the UAA to logout of the UAA session as well (if configured to do so), otherwise redirect back to the UI login page
-	var redirectURL string
-	if p.hasSSOOption("logout") {
-		redirectURL = fmt.Sprintf("%s/logout.do?client_id=%s&redirect=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, "logout", "")))
-	} else {
-		redirectURL = "/login?SSO_Message=You+have+been+logged+out"
-	}
-	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-}
 
-func (p *portalProxy) hasSSOOption(option string) bool {
-	// Remove all spaces
-	opts := stringutils.RemoveSpaces(p.Config.SSOOptions)
-
-	// Split based on ','
-	options := strings.Split(opts, ",")
-	return stringutils.ArrayContainsString(options, option)
-}
-
-// Callback - invoked after the UAA login flow has completed and during logout
-// We use a single callback so this can be whitelisted in the client
-func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
-	state := c.QueryParam("state")
-	if len(state) == 0 {
-		err := interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"SSO Login: State parameter missing",
-			"SSO Login: State parameter missing")
-		return err
-	}
-
-	// We use the same callback URL for both UAA and endpoint login
-	// Check if it is an endpoint login and dens to the right handler
-	endpointGUID := c.QueryParam("guid")
-	if len(endpointGUID) > 0 {
-		return p.ssoLoginToCNSI(c)
-	}
-
-	if state == "logout" {
-		return c.Redirect(http.StatusTemporaryRedirect, "/login?SSO_Message=You+have+been+logged+out")
-	}
-	_, err := p.doLoginToUAA(c)
-	if err != nil {
-		// Send error as query string param
-		msg := err.Error()
-		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
-			msg = httpError.UserFacingError
-		}
-		if httpError, ok := err.(interfaces.ErrHTTPRequest); ok {
-			msg = httpError.Response
-		}
-		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
-	}
-
-	return c.Redirect(http.StatusTemporaryRedirect, state)
-}
-
-//HashPassword accepts a plaintext password string and generates a salted hash
-func HashPassword(password string) ([]byte, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return bytes, err
-}
-
-//CheckPasswordHash accepts a bcrypt salted hash and plaintext password.
-//It verifies the password against the salted hash
-func CheckPasswordHash(password string, hash []byte) error {
-	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
-	return err
-}
 
 // Start SSO flow for an Endpoint
 func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
@@ -577,28 +486,6 @@ func (p *portalProxy) ClearCNSIToken(cnsiRecord interfaces.CNSIRecord, userGUID 
 	return nil
 }
 
-func (p *portalProxy) RefreshUAALogin(username, password string, store bool) error {
-	log.Debug("RefreshUAALogin")
-	uaaRes, err := p.getUAATokenWithCreds(p.Config.ConsoleConfig.SkipSSLValidation, username, password, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
-	if err != nil {
-		return err
-	}
-
-	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
-	if err != nil {
-		return err
-	}
-
-	if store {
-		_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	if c.Request().Method == http.MethodGet {
@@ -716,25 +603,6 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	return &response, nil
 }
 
-func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
-	log.Debug("saveAuthToken")
-
-	key := u.UserGUID
-	tokenRecord := interfaces.TokenRecord{
-		AuthToken:    authTok,
-		RefreshToken: refreshTok,
-		TokenExpiry:  u.TokenExpiry,
-		AuthType:     interfaces.AuthTypeOAuth2,
-	}
-
-	err := p.setUAATokenRecord(key, tokenRecord)
-	if err != nil {
-		return tokenRecord, err
-	}
-
-	return tokenRecord, nil
-}
-
 // Helper to initialize a token record using the specified parameters
 func (p *portalProxy) InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) interfaces.TokenRecord {
 	tokenRecord := interfaces.TokenRecord{
@@ -792,21 +660,6 @@ func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) er
 	}
 
 	return nil
-}
-
-// See: https://github.com/gorilla/csrf/blob/a8abe8abf66db8f4a9750d76ba95b4021a354757/helpers.go
-// generateRandomBytes returns securely generated random bytes.
-// It will return an error if the system's secure random number generator fails to function correctly.
-func generateRandomBytes(n int) ([]byte, error) {
-	b := make([]byte, n)
-	_, err := rand.Read(b)
-	// err == nil only if len(b) == n
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
-
 }
 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {
