@@ -6,9 +6,6 @@ dist: bionic
 services:
 - docker
 addons:
-  apt:
-    packages:
-      - dpkg
   chrome: stable
 before_install:
 - export DISPLAY=:99.0
