@@ -57,7 +57,9 @@ pushd src/jetstream
 ./jetstream > backend.log &
 popd
 
-E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
+npm run update-webdriver
+
+E2E_TARGET="e2e -- --no-webdriver-update --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then
