@@ -596,10 +596,10 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
-	err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
+	err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
 	if(err != nil) {
 		log.Warnf("Defaulting to UAA authentication: %v", err)
-		err = pp.InitAuthService(interfaces.Remote)
+		err = pp.InitStratosAuthService(interfaces.Remote)
 		if(err != nil) {
 			log.Fatalf("Could not initialise auth service. %v", err)
 		}
@@ -784,8 +784,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
-	pp.POST("/v1/auth/login/uaa", p.AuthService.Login)
-	pp.POST("/v1/auth/logout", p.AuthService.Logout)
+	pp.POST("/v1/auth/login/uaa", p.StratosAuthService.Login)
+	pp.POST("/v1/auth/logout", p.StratosAuthService.Logout)
 
 	// SSO Routes will only respond if SSO is enabled
 	pp.GET("/v1/auth/sso_login", p.initSSOlogin)

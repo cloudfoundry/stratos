@@ -126,7 +126,7 @@ func (ch *CFHosting) Init() error {
 
 		//Force auth endpoint type to remote (CF UAA)
 		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = "remote"
-		err := ch.portalProxy.InitAuthService(interfaces.Remote)
+		err := ch.portalProxy.InitStratosAuthService(interfaces.Remote)
 		if(err != nil) {
 			return fmt.Errorf("Could not initialise auth service: %v", err)
 		}

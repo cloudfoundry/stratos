@@ -19,8 +19,8 @@ type PortalProxy interface {
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
 	// Auth
-	InitAuthService(t AuthEndpointType) error
-	GetAuthService() Auth
+	InitStratosAuthService(t AuthEndpointType) error
+	GetStratosAuthService() StratosAuth
 	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
 	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
 

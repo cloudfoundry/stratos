@@ -1,10 +1,14 @@
 package main
 
 import (
+
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -13,7 +17,12 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
+
+// UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
+const UAAAdminIdentifier = "stratos.admin"
 
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
@@ -55,7 +64,7 @@ func (a *uaaAuth) Logout(c echo.Context) error {
 }
 
 // Get the user name for the specified user
-func (a *uaaAuth) GetStratosUsername(userid string) (string, error) {
+func (a *uaaAuth) GetUsername(userid string) (string, error) {
 	tr, err := a.p.GetUAATokenRecord(userid)
 	if err != nil {
 		return "", err
@@ -67,8 +76,8 @@ func (a *uaaAuth) GetStratosUsername(userid string) (string, error) {
 	return u.UserName, nil
 }
 
-func (a *uaaAuth) GetStratosUser(userGUID string) (*interfaces.ConnectedUser, error) {
-	log.Debug("GetStratosUser")
+func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
+	log.Debug("GetUser")
 	
 	// get the uaa token record
 	uaaTokenRecord, err := a.p.GetUAATokenRecord(userGUID)
@@ -343,5 +352,207 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 	}
 
 	return nil
+}
+
+// Login via UAA
+func (p *portalProxy) initSSOlogin(c echo.Context) error {
+	if !p.Config.SSOLogin {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"SSO Login is not enabled",
+			"SSO Login is not enabled")
+		return err
+	}
+
+	state := c.QueryParam("state")
+	if len(state) == 0 {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: State parameter missing",
+			"SSO Login: State parameter missing")
+		return err
+	}
+
+	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
+	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+	return nil
+}
+
+func getSSORedirectURI(base string, state string, endpointGUID string) string {
+	baseURL, _ := url.Parse(base)
+	baseURL.Path = ""
+	baseURL.RawQuery = ""
+	baseURLString := strings.TrimRight(baseURL.String(), "?")
+
+	returnURL := fmt.Sprintf("%s/pp/v1/auth/sso_login_callback?state=%s", baseURLString, url.QueryEscape(state))
+	if len(endpointGUID) > 0 {
+		returnURL = fmt.Sprintf("%s&guid=%s", returnURL, endpointGUID)
+	}
+	return returnURL
+}
+
+func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
+
+	uaaRes, u, err := p.loginHTTPBasic(c)
+
+	if err != nil {
+		return nil, nil, nil, interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"Login failed",
+			"Login failed: %v", err)
+	}
+	return uaaRes, u, &cnsiRecord, nil
+}
+
+func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
+	log.Debug("login")
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	if len(username) == 0 || len(password) == 0 {
+		return uaaRes, u, errors.New("Needs username and password")
+	}
+
+	authString := fmt.Sprintf("%s:%s", username, password)
+	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
+
+	uaaRes.AccessToken = fmt.Sprintf("Basic %s", base64EncodedAuthString)
+	return uaaRes, u, nil
+}
+
+func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*interfaces.UAAResponse, error) {
+	log.Debug("getUAATokenWithAuthorizationCode")
+
+	body := url.Values{}
+	body.Set("grant_type", "authorization_code")
+	body.Set("code", code)
+	body.Set("client_id", client)
+	body.Set("client_secret", clientSecret)
+	body.Set("redirect_uri", getSSORedirectURI(state, state, cnsiGUID))
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+}
+
+func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
+	log.Debug("getUAATokenWithCreds")
+
+	body := url.Values{}
+	body.Set("grant_type", "password")
+	body.Set("username", username)
+	body.Set("password", password)
+	body.Set("response_type", "token")
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+}
+
+func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*interfaces.UAAResponse, error) {
+	log.Debug("getUAATokenWithRefreshToken")
+
+	body := url.Values{}
+	body.Set("grant_type", "refresh_token")
+	body.Set("refresh_token", refreshToken)
+	body.Set("response_type", "token")
+
+	if len(scopes) > 0 {
+		body.Set("scope", scopes)
+	}
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+}
+
+func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
+	log.WithField("authEndpoint", authEndpoint).Debug("getUAAToken")
+	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
+	if err != nil {
+		msg := "Failed to create request for UAA: %v"
+		log.Errorf(msg, err)
+		return nil, fmt.Errorf(msg, err)
+	}
+
+	req.SetBasicAuth(client, clientSecret)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+
+	var h = p.GetHttpClientForRequest(req, skipSSLValidation)
+	res, err := h.Do(req)
+	if err != nil || res.StatusCode != http.StatusOK {
+		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		return nil, interfaces.LogHTTPError(res, err)
+	}
+
+	defer res.Body.Close()
+
+	var response interfaces.UAAResponse
+
+	dec := json.NewDecoder(res.Body)
+	if err = dec.Decode(&response); err != nil {
+		log.Errorf("Error decoding response: %v", err)
+		return nil, fmt.Errorf("getUAAToken Decode: %s", err)
+	}
+
+	return &response, nil
+}
+
+func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
+	log.Debug("GetUAATokenRecord")
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for UAA token: %v", err)
+		return interfaces.TokenRecord{}, err
+	}
+
+	tr, err := tokenRepo.FindAuthToken(userGUID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		log.Errorf("Database error finding UAA token: %v", err)
+		return interfaces.TokenRecord{}, err
+	}
+
+	return tr, nil
+}
+
+func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) error {
+	log.Debug("setUAATokenRecord")
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
+	}
+
+	err = tokenRepo.SaveAuthToken(key, t, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return fmt.Errorf("Database error saving UAA token: %v", err)
+	}
+
+	return nil
+}
+
+// Refresh the UAA Token for the user
+func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord, err error) {
+	log.Debug("RefreshUAAToken")
+
+	userToken, err := p.GetUAATokenRecord(userGUID)
+	if err != nil {
+		return t, fmt.Errorf("UAA Token info could not be found for user with GUID %s", userGUID)
+	}
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, userToken.RefreshToken,
+		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
+	if err != nil {
+		return t, fmt.Errorf("UAA Token refresh request failed: %v", err)
+	}
+
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return t, fmt.Errorf("Could not get user token info from access token")
+	}
+
+	u.UserGUID = userGUID
+
+	t, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	if err != nil {
+		return t, fmt.Errorf("Couldn't save new UAA token: %v", err)
+	}
+
+	return t, nil
 }
 

@@ -49,7 +49,7 @@ func TestLoginToUAA(t *testing.T) {
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
 		//Init the auth service
-		err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
 		if err != nil {
 			log.Fatalf("Could not initialise auth service: %v", err)
 		}
@@ -60,7 +60,7 @@ func TestLoginToUAA(t *testing.T) {
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
-		loginErr := pp.AuthService.Login(ctx)
+		loginErr := pp.StratosAuthService.Login(ctx)
 
 		Convey("Should not fail to login", func() {
 			So(loginErr, ShouldBeNil)
@@ -100,7 +100,7 @@ func TestLocalLogin(t *testing.T) {
 
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 		//Init the auth service
-		err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
 		if err != nil {
 			log.Fatalf("Could not initialise auth service: %v", err)
 		}
@@ -117,7 +117,7 @@ func TestLocalLogin(t *testing.T) {
 		//Expect exec to update local login time
 		mock.ExpectExec(updateLastLoginTime).WillReturnResult(sqlmock.NewResult(1, 1))
 
-		loginErr := pp.AuthService.Login(ctx)
+		loginErr := pp.StratosAuthService.Login(ctx)
 
 		Convey("Should not fail to login", func() {
 			So(loginErr, ShouldBeNil)
@@ -158,7 +158,7 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 		//Init the auth service
-		err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
 		if err != nil {
 			log.Fatalf("Could not initialise auth service: %v", err)
 		}
@@ -169,7 +169,7 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 		rows = sqlmock.NewRows([]string{"password_hash"}).AddRow(passwordHash)
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
-		loginErr := pp.AuthService.Login(ctx)
+		loginErr := pp.StratosAuthService.Login(ctx)
 
 		Convey("Should fail to login", func() {
 			So(loginErr, ShouldNotBeNil)
@@ -216,7 +216,7 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 		pp.Config.ConsoleConfig.LocalUserScope = "stratos.admin"
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 		//Init the auth service
-		err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
 		if err != nil {
 			log.Fatalf("Could not initialise auth service: %v", err)
 		}
@@ -225,7 +225,7 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 		rows = sqlmock.NewRows([]string{"scope"}).AddRow(wrongScope)
 		mock.ExpectQuery(findUserScope).WithArgs(userGUID).WillReturnRows(rows)
 
-		loginErr := pp.AuthService.Login(ctx)
+		loginErr := pp.StratosAuthService.Login(ctx)
 
 		Convey("Should fail to login", func() {
 			So(loginErr, ShouldNotBeNil)
@@ -263,12 +263,12 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
 		//Init the auth service
-		err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
 		if err != nil {
 			log.Fatalf("Could not initialise auth service: %v", err)
 		}
 
-		err = pp.AuthService.Login(ctx)
+		err = pp.StratosAuthService.Login(ctx)
 		Convey("Login to UAA should fail", func() {
 			So(err, ShouldNotBeNil)
 		})
@@ -309,7 +309,7 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
 		//Init the auth service
-		err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
 		if err != nil {
 			log.Fatalf("Could not initialise auth service: %v", err)
 		}
@@ -322,7 +322,7 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 
-		loginErr := pp.AuthService.Login(ctx)
+		loginErr := pp.StratosAuthService.Login(ctx)
 		Convey("Should not fail to login", func() {
 			So(loginErr, ShouldNotBeNil)
 		})
@@ -576,16 +576,16 @@ func TestLogout(t *testing.T) {
 
 		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
 		//Init the auth service
-		err := pp.InitAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
 		if err != nil {
 			log.Warnf("%v, defaulting to auth type: remote", err)
-			err = pp.InitAuthService(interfaces.Remote)
+			err = pp.InitStratosAuthService(interfaces.Remote)
 			if err != nil {
 				log.Fatalf("Could not initialise auth service: %v", err)
 			}
 		}
 
-		pp.AuthService.Logout(ctx)
+		pp.StratosAuthService.Logout(ctx)
 
 		header := res.Header()
 		setCookie := header.Get("Set-Cookie")

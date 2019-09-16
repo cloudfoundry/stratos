@@ -19,6 +19,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
+//localAuth provides 
 type localAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string
@@ -49,8 +50,8 @@ func (a *localAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
 
-func (a *localAuth) GetStratosUser(userGUID string) (*interfaces.ConnectedUser, error) {
-	log.Debug("GetStratosUser")
+func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
+	log.Debug("GetUser")
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.p.DatabaseConnectionPool)
 	if err != nil {
@@ -75,7 +76,7 @@ func (a *localAuth) GetStratosUser(userGUID string) (*interfaces.ConnectedUser, 
 }
 
 // Get the user name for the specified user
-func (a *localAuth) GetStratosUsername(userid string) (string, error) {
+func (a *localAuth) GetUsername(userid string) (string, error) {
 	log.Debug("GetUsername")
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
