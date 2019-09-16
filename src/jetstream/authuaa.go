@@ -29,6 +29,7 @@ type uaaAuth struct {
 	p *portalProxy
 }
 
+//Login provides UAA-auth specific Stratos login
 func (a *uaaAuth) Login(c echo.Context) error {
 
 	//This check will remain in until auth is factored down into its own package
@@ -59,11 +60,12 @@ func (a *uaaAuth) Login(c echo.Context) error {
 	return nil
 }
 
+//Logout provides UAA-auth specific Stratos login
 func (a *uaaAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
 
-// Get the user name for the specified user
+//GetUsername gets the user name for the specified UAA user
 func (a *uaaAuth) GetUsername(userid string) (string, error) {
 	tr, err := a.p.GetUAATokenRecord(userid)
 	if err != nil {
@@ -76,6 +78,7 @@ func (a *uaaAuth) GetUsername(userid string) (string, error) {
 	return u.UserName, nil
 }
 
+//GetUser gets the user guid for the specified UAA user
 func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	log.Debug("GetUser")
 	
@@ -110,6 +113,7 @@ func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	
 }
 
+//VerifySession verifies the session the specified UAA user and refreshes the token if necessary
 func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
 	tr, err := a.p.GetUAATokenRecord(sessionUser)
 	if err != nil {
@@ -154,8 +158,31 @@ func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpir
 	return nil
 }
 
+//logout performs the underlying logout from the UAA endpoint
+func (a *uaaAuth) logout(c echo.Context) error {
+	log.Debug("logout")
+
+	a.p.removeEmptyCookie(c)
+
+	// Remove the XSRF Token from the session
+	a.p.unsetSessionValue(c, XSRFTokenSessionName)
+
+	err := a.p.clearSession(c)
+	if err != nil {
+		log.Errorf("Unable to clear session: %v", err)
+	}
+
+	// Send JSON document
+	resp := &LogoutResponse{
+		IsSSO: a.p.Config.SSOLogin,
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+//loginToUAA performs the underlying login to the UAA endpoint
 func (p *portalProxy) loginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
-	log.Debug("doLoginToUAA")
+	log.Debug("loginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
 		// Check the Error
@@ -211,32 +238,13 @@ func (p *portalProxy) loginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 	return resp, nil
 }
 
-func (a *uaaAuth) logout(c echo.Context) error {
-	log.Debug("logout")
-
-	a.p.removeEmptyCookie(c)
-
-	// Remove the XSRF Token from the session
-	a.p.unsetSessionValue(c, XSRFTokenSessionName)
-
-	err := a.p.clearSession(c)
-	if err != nil {
-		log.Errorf("Unable to clear session: %v", err)
-	}
-
-	// Send JSON document
-	resp := &LogoutResponse{
-		IsSSO: a.p.Config.SSOLogin,
-	}
-
-	return c.JSON(http.StatusOK, resp)
-}
-
+//getUAAIdentityEndpoint gets the token endpoint for the UAA
 func (p *portalProxy) getUAAIdentityEndpoint() string {
 	log.Debug("getUAAIdentityEndpoint")
 	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
 }
 
+//saveAuthToken stores the UAA token for a given user
 func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
 	log.Debug("saveAuthToken")
 
@@ -256,7 +264,176 @@ func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok strin
 	return tokenRecord, nil
 }
 
-// Callback - invoked after the UAA login flow has completed and during logout
+//setUAATokenRecord saves the uaa token for the given user, to our store
+func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) error {
+	log.Debug("setUAATokenRecord")
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
+	}
+
+	err = tokenRepo.SaveAuthToken(key, t, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return fmt.Errorf("Database error saving UAA token: %v", err)
+	}
+
+	return nil
+}
+
+//RefreshUAALogin refreshes the UAA login and optionally stores the new token
+func (p *portalProxy) RefreshUAALogin(username, password string, store bool) error {
+	log.Debug("RefreshUAALogin")
+	uaaRes, err := p.getUAATokenWithCreds(p.Config.ConsoleConfig.SkipSSLValidation, username, password, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	if err != nil {
+		return err
+	}
+
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return err
+	}
+
+	if store {
+		_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+//getUAATokenWithAuthorizationCode 
+func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*interfaces.UAAResponse, error) {
+	log.Debug("getUAATokenWithAuthorizationCode")
+
+	body := url.Values{}
+	body.Set("grant_type", "authorization_code")
+	body.Set("code", code)
+	body.Set("client_id", client)
+	body.Set("client_secret", clientSecret)
+	body.Set("redirect_uri", getSSORedirectURI(state, state, cnsiGUID))
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+}
+
+//getUAATokenWithCreds
+func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
+	log.Debug("getUAATokenWithCreds")
+
+	body := url.Values{}
+	body.Set("grant_type", "password")
+	body.Set("username", username)
+	body.Set("password", password)
+	body.Set("response_type", "token")
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+}
+
+//getUAATokenWithRefreshToken
+func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*interfaces.UAAResponse, error) {
+	log.Debug("getUAATokenWithRefreshToken")
+
+	body := url.Values{}
+	body.Set("grant_type", "refresh_token")
+	body.Set("refresh_token", refreshToken)
+	body.Set("response_type", "token")
+
+	if len(scopes) > 0 {
+		body.Set("scope", scopes)
+	}
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+}
+
+//getUAAToken
+func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
+	log.WithField("authEndpoint", authEndpoint).Debug("getUAAToken")
+	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
+	if err != nil {
+		msg := "Failed to create request for UAA: %v"
+		log.Errorf(msg, err)
+		return nil, fmt.Errorf(msg, err)
+	}
+
+	req.SetBasicAuth(client, clientSecret)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+
+	var h = p.GetHttpClientForRequest(req, skipSSLValidation)
+	res, err := h.Do(req)
+	if err != nil || res.StatusCode != http.StatusOK {
+		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		return nil, interfaces.LogHTTPError(res, err)
+	}
+
+	defer res.Body.Close()
+
+	var response interfaces.UAAResponse
+
+	dec := json.NewDecoder(res.Body)
+	if err = dec.Decode(&response); err != nil {
+		log.Errorf("Error decoding response: %v", err)
+		return nil, fmt.Errorf("getUAAToken Decode: %s", err)
+	}
+
+	return &response, nil
+}
+
+//GetUAATokenRecord fetched the uaa token for the given user, from our store
+func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
+	log.Debug("GetUAATokenRecord")
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for UAA token: %v", err)
+		return interfaces.TokenRecord{}, err
+	}
+
+	tr, err := tokenRepo.FindAuthToken(userGUID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		log.Errorf("Database error finding UAA token: %v", err)
+		return interfaces.TokenRecord{}, err
+	}
+
+	return tr, nil
+}
+
+
+
+//RefreshUAAToken refreshes the UAA Token for the user using the refresh token, then updates our store
+func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord, err error) {
+	log.Debug("RefreshUAAToken")
+
+	userToken, err := p.GetUAATokenRecord(userGUID)
+	if err != nil {
+		return t, fmt.Errorf("UAA Token info could not be found for user with GUID %s", userGUID)
+	}
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, userToken.RefreshToken,
+		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
+	if err != nil {
+		return t, fmt.Errorf("UAA Token refresh request failed: %v", err)
+	}
+
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return t, fmt.Errorf("Could not get user token info from access token")
+	}
+
+	u.UserGUID = userGUID
+
+	t, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	if err != nil {
+		return t, fmt.Errorf("Couldn't save new UAA token: %v", err)
+	}
+
+	return t, nil
+}
+
+//SSO
+
+// ssoLoginToUAA is a callback invoked after the UAA login flow has completed and during logout
 // We use a single callback so this can be whitelisted in the client
 func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 	state := c.QueryParam("state")
@@ -294,7 +471,7 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, state)
 }
 
-// Logout of the UAA
+//ssoLogoutOfUAA performs SSO logout from the UAA
 func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 	if !p.Config.SSOLogin {
 		err := interfaces.NewHTTPShadowError(
@@ -323,6 +500,7 @@ func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
+//hasSSOOption returns whether or not SSO is enabled
 func (p *portalProxy) hasSSOOption(option string) bool {
 	// Remove all spaces
 	opts := stringutils.RemoveSpaces(p.Config.SSOOptions)
@@ -332,29 +510,7 @@ func (p *portalProxy) hasSSOOption(option string) bool {
 	return stringutils.ArrayContainsString(options, option)
 }
 
-func (p *portalProxy) RefreshUAALogin(username, password string, store bool) error {
-	log.Debug("RefreshUAALogin")
-	uaaRes, err := p.getUAATokenWithCreds(p.Config.ConsoleConfig.SkipSSLValidation, username, password, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
-	if err != nil {
-		return err
-	}
-
-	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
-	if err != nil {
-		return err
-	}
-
-	if store {
-		_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// Login via UAA
+//initSSOlogin performs SSO Login via UAA
 func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	if !p.Config.SSOLogin {
 		err := interfaces.NewHTTPShadowError(
@@ -378,6 +534,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	return nil
 }
 
+//getSSORedirectURI gets the SSO redirect uri for the given endpoint and state
 func getSSORedirectURI(base string, state string, endpointGUID string) string {
 	baseURL, _ := url.Parse(base)
 	baseURL.Path = ""
@@ -391,6 +548,9 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 	return returnURL
 }
 
+//HTTP Basic
+
+//fetchHTTPBasicToken currently unused? 
 func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 
 	uaaRes, u, err := p.loginHTTPBasic(c)
@@ -404,6 +564,7 @@ func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 	return uaaRes, u, &cnsiRecord, nil
 }
 
+//fetchHTTPBasicToken currently unused? 
 func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
@@ -419,140 +580,3 @@ func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResp
 	uaaRes.AccessToken = fmt.Sprintf("Basic %s", base64EncodedAuthString)
 	return uaaRes, u, nil
 }
-
-func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*interfaces.UAAResponse, error) {
-	log.Debug("getUAATokenWithAuthorizationCode")
-
-	body := url.Values{}
-	body.Set("grant_type", "authorization_code")
-	body.Set("code", code)
-	body.Set("client_id", client)
-	body.Set("client_secret", clientSecret)
-	body.Set("redirect_uri", getSSORedirectURI(state, state, cnsiGUID))
-
-	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
-}
-
-func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
-	log.Debug("getUAATokenWithCreds")
-
-	body := url.Values{}
-	body.Set("grant_type", "password")
-	body.Set("username", username)
-	body.Set("password", password)
-	body.Set("response_type", "token")
-
-	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
-}
-
-func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*interfaces.UAAResponse, error) {
-	log.Debug("getUAATokenWithRefreshToken")
-
-	body := url.Values{}
-	body.Set("grant_type", "refresh_token")
-	body.Set("refresh_token", refreshToken)
-	body.Set("response_type", "token")
-
-	if len(scopes) > 0 {
-		body.Set("scope", scopes)
-	}
-
-	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
-}
-
-func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*interfaces.UAAResponse, error) {
-	log.WithField("authEndpoint", authEndpoint).Debug("getUAAToken")
-	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
-	if err != nil {
-		msg := "Failed to create request for UAA: %v"
-		log.Errorf(msg, err)
-		return nil, fmt.Errorf(msg, err)
-	}
-
-	req.SetBasicAuth(client, clientSecret)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
-
-	var h = p.GetHttpClientForRequest(req, skipSSLValidation)
-	res, err := h.Do(req)
-	if err != nil || res.StatusCode != http.StatusOK {
-		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		return nil, interfaces.LogHTTPError(res, err)
-	}
-
-	defer res.Body.Close()
-
-	var response interfaces.UAAResponse
-
-	dec := json.NewDecoder(res.Body)
-	if err = dec.Decode(&response); err != nil {
-		log.Errorf("Error decoding response: %v", err)
-		return nil, fmt.Errorf("getUAAToken Decode: %s", err)
-	}
-
-	return &response, nil
-}
-
-func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
-	log.Debug("GetUAATokenRecord")
-
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
-	if err != nil {
-		log.Errorf("Database error getting repo for UAA token: %v", err)
-		return interfaces.TokenRecord{}, err
-	}
-
-	tr, err := tokenRepo.FindAuthToken(userGUID, p.Config.EncryptionKeyInBytes)
-	if err != nil {
-		log.Errorf("Database error finding UAA token: %v", err)
-		return interfaces.TokenRecord{}, err
-	}
-
-	return tr, nil
-}
-
-func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) error {
-	log.Debug("setUAATokenRecord")
-
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
-	if err != nil {
-		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
-	}
-
-	err = tokenRepo.SaveAuthToken(key, t, p.Config.EncryptionKeyInBytes)
-	if err != nil {
-		return fmt.Errorf("Database error saving UAA token: %v", err)
-	}
-
-	return nil
-}
-
-// Refresh the UAA Token for the user
-func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord, err error) {
-	log.Debug("RefreshUAAToken")
-
-	userToken, err := p.GetUAATokenRecord(userGUID)
-	if err != nil {
-		return t, fmt.Errorf("UAA Token info could not be found for user with GUID %s", userGUID)
-	}
-
-	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, userToken.RefreshToken,
-		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
-	if err != nil {
-		return t, fmt.Errorf("UAA Token refresh request failed: %v", err)
-	}
-
-	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
-	if err != nil {
-		return t, fmt.Errorf("Could not get user token info from access token")
-	}
-
-	u.UserGUID = userGUID
-
-	t, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
-	if err != nil {
-		return t, fmt.Errorf("Couldn't save new UAA token: %v", err)
-	}
-
-	return t, nil
-}
-
