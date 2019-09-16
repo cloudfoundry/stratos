@@ -18,7 +18,6 @@ export const selectCurrentUserStratosRoles = (role: PermissionValues) => (state:
 };
 
 export const selectEntityWithRole = (role: PermissionStrings, type: RoleEntities) => (state: ICfRolesState) => {
-  console.log(type)
   const entityType = state[type];
   return Object.keys(entityType).filter(entity => entityType[entity][role]);
 };

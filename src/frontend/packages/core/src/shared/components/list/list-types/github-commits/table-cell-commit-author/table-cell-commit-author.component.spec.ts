@@ -20,11 +20,9 @@ describe('TableCellCommitAuthorComponent', () => {
     fixture = TestBed.createComponent(TableCellCommitAuthorComponent);
     component = fixture.componentInstance;
     component.row = {
-      entity: {
-        commit: {
-          author: {
-            name: 'author_name'
-          }
+      commit: {
+        author: {
+          name: 'author_name'
         }
       }
     };

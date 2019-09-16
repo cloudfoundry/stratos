@@ -1,6 +1,5 @@
 import { NormalizedResponse } from '../../types/api.types';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
-import { PipelineResult } from '../entity-request-pipeline.types';
 
 describe('merge-multi-endpoint-data', () => {
   it('should merge correctly', () => {
