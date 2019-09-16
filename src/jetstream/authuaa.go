@@ -27,6 +27,9 @@ const UAAAdminIdentifier = "stratos.admin"
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
 	p *portalProxy
+	skipSSLValidation bool
+	consoleClient string
+	consoleClientSecret string
 }
 
 //Login provides UAA-auth specific Stratos login
