@@ -57,7 +57,10 @@ pushd src/jetstream
 ./jetstream > backend.log &
 popd
 
-npm run update-webdriver
+CHROME_VERSION=$(google-chrome --version | grep -iEo "[0-9.]{10,20}")
+echo "Chrome version: ${CHROME_VERSION}"
+
+npm run update-webdriver -- --versions.chrome=${CHROME_VERSION}
 
 E2E_TARGET="e2e -- --no-webdriver-update --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
 
