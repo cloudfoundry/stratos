@@ -23,11 +23,22 @@ import (
 type localAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string
+	consoleAdminScope	   string
 	p                      *portalProxy
 }
 
+//Login provides Local-auth specific Stratos login
 func (a *localAuth) Login(c echo.Context) error {
 	
+	//This check will remain in until auth is factored down into its own package
+	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusNotFound,
+			"Local Login is not enabled",
+			"Local Login is not enabled")
+		return err
+	}
+
 	//Perform the login and fetch session values if successful
 	userGUID, username, err := a.localLogin(c)
 
@@ -46,14 +57,35 @@ func (a *localAuth) Login(c echo.Context) error {
 	return err
 }
 
+//Logout provides Local-auth specific Stratos login
 func (a *localAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
 
+//GetUsername gets the user name for the specified local user
+func (a *localAuth) GetUsername(userid string) (string, error) {
+	log.Debug("GetUsername")
+
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
+	if err != nil {
+		log.Errorf("Database error getting repo for Local users: %v", err)
+		return "", err
+	}
+
+	localUser, err := localUsersRepo.FindUser(userid)
+	if err != nil {
+		log.Errorf("Error fetching username for local user %s: %v", userid, err)
+		return "", err
+	}
+
+	return localUser.Username, nil
+}
+
+//GetUser gets the user guid for the specified local user
 func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	log.Debug("GetUser")
 
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.p.DatabaseConnectionPool)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
 		return nil, err
@@ -75,27 +107,9 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 	return connectdUser, nil
 }
 
-// Get the user name for the specified user
-func (a *localAuth) GetUsername(userid string) (string, error) {
-	log.Debug("GetUsername")
-
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
-	if err != nil {
-		log.Errorf("Database error getting repo for Local users: %v", err)
-		return "", err
-	}
-
-	localUser, err := localUsersRepo.FindUser(userid)
-	if err != nil {
-		log.Errorf("Error fetching username for local user %s: %v", userid, err)
-		return "", err
-	}
-
-	return localUser.Username, nil
-}
-
+//VerifySession verifies the session the specified local user, currently just verifies user exists
 func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
-	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.p.DatabaseConnectionPool)
+	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
 		return err
@@ -105,6 +119,7 @@ func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExp
 	return err
 }
 
+//localLogin verifies local user credentials against our DB
 func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 	log.Debug("doLocalLogin")
 
@@ -156,6 +171,7 @@ func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 	return guid, username, authError
 }
 
+//generateLoginSuccessResponse
 func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, username string) error {
 	log.Debug("generateLoginResponse")
 
@@ -196,6 +212,7 @@ func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string
 	return err
 }
 
+//logout
 func (a *localAuth) logout(c echo.Context) error {
 	log.Debug("logout")
 
