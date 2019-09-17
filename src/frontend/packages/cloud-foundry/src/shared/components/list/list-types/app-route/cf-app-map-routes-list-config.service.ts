@@ -3,23 +3,23 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { spaceEntityType, routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { routeEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   TableCellRadioComponent,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
@@ -35,7 +35,11 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
     const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
     const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    const action = actionBuilder(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid)) as GetSpaceRoutes;
+    const action = actionBuilder(
+      spaceGuid,
+      appService.cfGuid,
+      createEntityRelationPaginationKey(spaceEntityType, spaceGuid)
+    ) as GetSpaceRoutes;
     // If parentEntitySchema is set the entity validation process will look for the space routes in the parent space entity
     // In this case, we do have them however they're missing the route-->app relationship.. which means we fetch them at a rate of one per
     // route. For spaces with hundreds of routes this isn't acceptable, so remove the link to the parent and fetch the list afresh.

@@ -6,13 +6,16 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GetAllOrganizationDomains } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { GetAllStacks } from '../../../../../../cloud-foundry/src/actions/stack.action';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { selectCfDetails } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -20,9 +23,6 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-deploy-application-options-step',
@@ -127,7 +127,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       switchMap(cfDetails => {
         const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
         const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
-        //TODO kate verify OK
+        // TODO kate verify OK
         const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null) as GetAllStacks;
         return getPaginationObservables<APIResource<IDomain>>(
           {

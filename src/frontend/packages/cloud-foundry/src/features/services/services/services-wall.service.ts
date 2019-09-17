@@ -3,18 +3,16 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { GetAllServices } from '../../../../../cloud-foundry/src/actions/service.actions';
-import { GetAllServicesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory, serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
 @Injectable()
 export class ServicesWallService {
@@ -31,7 +29,7 @@ export class ServicesWallService {
     const paginationKey = createEntityRelationPaginationKey(serviceEntityType);
     const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    //TODO kate verify OK
+    // TODO kate verify OK
     const getServicesAction = actionBuilder(null, paginationKey);
     return getPaginationObservables<APIResource<IService>>(
       {

@@ -24,12 +24,12 @@ import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 
 
 @Injectable()
@@ -125,9 +125,13 @@ export class CloudFoundryUserProvidedServicesService {
   ): Observable<RequestInfoState> {
     const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
     const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('update');
-    //TODO kate verify OK
-    const updateAction = actionBuilder(cfGuid, guid, { existingUserProvidedServiceInstance: data, proxyPaginationEntityConfig: this.serviceInstancesEntityConfig });
-    //const updateAction = new UpdateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
+    // TODO kate verify OK
+    const updateAction = actionBuilder(
+      cfGuid,
+      guid,
+      { existingUserProvidedServiceInstance: data, proxyPaginationEntityConfig: this.serviceInstancesEntityConfig }
+    );
+    // const updateAction = new UpdateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
     const catalogueEntity = entityCatalogue.getEntity({
       entityType: userProvidedServiceInstanceEntityType,
       endpointType: CF_ENDPOINT_TYPE

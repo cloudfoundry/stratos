@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
 
-import { CreateServiceBinding } from '../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { getIdFromRoute } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
@@ -133,7 +132,7 @@ export class CsiModeService {
     const createServiceBindingAction = actionBuilder(
       cfGuid,
       guid,
-      { applicationGuid: appGuid, serviceInstanceGuid: serviceInstanceGuid, params: params }
+      { applicationGuid: appGuid, serviceInstanceGuid, params }
     );
     this.store.dispatch(createServiceBindingAction);
 

@@ -14,6 +14,7 @@ import { PaginationMonitorFactory } from '../../../../../../core/src/shared/moni
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
+
 @Component({
   selector: 'app-create-space-step',
   templateUrl: './create-space-step.component.html',
@@ -81,7 +82,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     //   organization_guid: this.orgGuid,
     //   space_quota_definition_guid: this.quotaDefinition.value
     // });
-    // this.store.dispatch(createSpaceAction);
+    // this.store.dispatch(createSpaceAction); //TODO: commented out??
 
     return this.store.select(selectCfRequestInfo(spaceEntityType, `${this.orgGuid}-${this.spaceName.value}`)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),

@@ -5,22 +5,21 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
   AssociateSpaceQuota,
   DisassociateSpaceQuota,
 } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { spaceEntityType, spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
-import { spaceQuotaEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../../core/src/base-entity-schemas';
 
 
 @Component({
@@ -115,7 +114,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     const updateSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
       allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
-    });  
+    });
     this.store.dispatch(updateSpaceAction);
 
     return this.store.select(selectRequestInfo(updateSpaceAction, this.spaceGuid)).pipe(
