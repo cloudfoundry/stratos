@@ -1,3 +1,4 @@
+import { StratosCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
 import { EntitySchemaTreeBuilder } from './schema-tree-traverse';
@@ -9,6 +10,35 @@ describe('SchemaTreeTraversal', () => {
   const childKey = 'childKey1';
   const grandChildKey = 'grandChild1';
   const greatGrandChildKey = 'greatGrandChild1';
+
+  function generateEntityConfig(schema: EntitySchema, excludes: string[] = []): StratosCatalogueEntity {
+    return new StratosCatalogueEntity(
+      {
+        type: schema.entityType,
+        schema: {
+          default: schema,
+        },
+        label: 'Space',
+        labelPlural: 'Spaces',
+        endpoint: {
+          authTypes: [],
+          logoUrl: '',
+        },
+        recursiveDelete: {
+          excludes,
+        }
+      },
+      {
+        actionBuilders: null,
+        dataReducers: [],
+        entityBuilder: {
+          getGuid: a => a.name,
+          getMetadata: a => a
+        }
+      }
+    );
+  }
+
 
   beforeEach(() => {
     entitySchemaTreeBuilder = new EntitySchemaTreeBuilder();
@@ -46,9 +76,7 @@ describe('SchemaTreeTraversal', () => {
         }
       }
     };
-    const action = new RecursiveDelete(parentId, null, {
-      ...parentSchema
-    );
+    const action = new RecursiveDelete(parentId, null, generateEntityConfig(parentSchema));
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
       [childSchema.key]: new Set([
@@ -94,7 +122,7 @@ describe('SchemaTreeTraversal', () => {
         }
       }
     };
-    const action = new RecursiveDelete(parentId, parentSchema);
+    const action = new RecursiveDelete(parentId, null, generateEntityConfig(parentSchema));
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
       [childSchema.key]: new Set([
@@ -159,7 +187,7 @@ describe('SchemaTreeTraversal', () => {
         }
       }
     };
-    const action = new RecursiveDelete(parentId, parentSchema);
+    const action = new RecursiveDelete(parentId, null, generateEntityConfig(parentSchema));
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
       [childSchema.key]: new Set([
@@ -182,7 +210,7 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey);
+    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey, '');
     const grandChildSchema = new EntitySchema(grandChildKey, '', {
       [greatGrandChildSchema.entityType]: [greatGrandChildSchema]
     });
@@ -234,7 +262,7 @@ describe('SchemaTreeTraversal', () => {
         }
       }
     };
-    const action = new RecursiveDelete(parentId, parentSchema);
+    const action = new RecursiveDelete(parentId, null, generateEntityConfig(parentSchema));
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
       [childSchema.key]: new Set([
@@ -268,12 +296,6 @@ describe('SchemaTreeTraversal', () => {
     });
     const parentSchema = new EntitySchema(parentKey, '', {
       [childSchema.entityType]: childSchema
-    });
-
-    entitySchemaTreeBuilder = new EntitySchemaTreeBuilder({
-      [parentSchema.entityType]: [
-        grandChildSchema.entityType
-      ]
     });
 
     const state = {
@@ -316,7 +338,9 @@ describe('SchemaTreeTraversal', () => {
         }
       }
     };
-    const action = new RecursiveDelete(parentId, parentSchema);
+    const action = new RecursiveDelete(parentId, null, generateEntityConfig(parentSchema, [
+      grandChildSchema.key
+    ]));
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
       [childSchema.key]: new Set([
