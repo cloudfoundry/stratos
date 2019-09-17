@@ -26,7 +26,6 @@
 @import '../src/shared/components/cards/card-boolean-metric/card-boolean-metric.component.theme';
 @import '../src/shared/components/simple-usage-chart/simple-usage-chart.component.theme';
 @import '../src/core/dot-content/dot-content.component.theme';
-//@import '../src/shared/components/stratos-title/stratos-title.component.theme';
 @import '../src/shared/components/page-header/page-header.component.theme';
 @import '../src/shared/components/page-header/page-header-events/page-header-events.component.theme';
 @import '../src/shared/components/user-profile-banner/user-profile-banner.component.theme';
@@ -101,7 +100,6 @@
   @include app-card-number-metric-theme($theme, $app-theme);
   @include app-card-boolean-metric-theme($theme, $app-theme);
   @include app-dot-content($theme, $app-theme);
-  //@include stratos-title-component-theme($theme, $app-theme);
   @include app-page-header-theme($theme, $app-theme);
   @include app-page-header-events($theme, $app-theme);
   @include app-user-profile-banner-component-theme($theme, $app-theme);
