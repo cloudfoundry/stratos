@@ -243,15 +243,19 @@
 
     // Read in the stored Git metadata if it is there, default to empty metadata
     var gitMetadata = {
-      project: process.env.project || '',
-      branch: process.env.branch || '',
-      commit: process.env.commit || ''
+      project: process.env.project || process.env.STRATOS_PROJECT || '',
+      branch: process.env.branch || process.env.STRATOS_BRANCH || '',
+      commit: process.env.commit || process.env.STRATOS_COMMIT || ''
     };
 
     if (fs.existsSync(GIT_METADATA)) {
       gitMetadata = JSON.parse(fs.readFileSync(GIT_METADATA));
-      console.log("  + Project Metadata: " + JSON.stringify(gitMetadata));
+      console.log('  + Project Metadata file read OK');
+    } else {
+      console.log('  + Project Metadata file does not exist');
     }
+
+    console.log("  + Project Metadata: " + JSON.stringify(gitMetadata));
 
     // Git Information
     replace.sync({ files: INDEX_HTML, from: '@@stratos_git_project@@', to: gitMetadata.project });
@@ -268,6 +272,7 @@
   function storeGitRepositoryMetadata() {
     // Do we have a git folder?
     if (!fs.existsSync(GIT_FOLDER)) {
+      console.log('  + Unable to store git repository metadata - .git folder not found');
       return;
     }
     var gitMetadata = {
