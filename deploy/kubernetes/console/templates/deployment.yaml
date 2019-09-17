@@ -181,6 +181,24 @@ spec:
         - name: LOG_LEVEL
           value: {{.Values.console.backendLogLevel}}
         {{- end }}
+        # Local admin user
+        {{- if .Values.console.localAdminPassword }}
+        - name: CONSOLE_CLIENT 
+          value: cf
+        - name: CONSOLE_ADMIN_SCOPE 
+          value: stratos.admin
+        - name: SKIP_SSL_VALIDATION 
+          value: "true"
+        - name: AUTH_ENDPOINT_TYPE 
+          value: local
+        - name: LOCAL_USER 
+          value: admin
+        - name: LOCAL_USER_PASSWORD 
+          value: "{{.Values.console.localAdminPassword}}"
+        - name: LOCAL_USER_SCOPE 
+          value: stratos.admin
+        {{- else }}
+        # UAA
         {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
@@ -207,6 +225,7 @@ spec:
           value: {{.Values.uaa.consoleAdminIdentifier}}
         - name: SKIP_SSL_VALIDATION 
           value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
+        {{- end }}
         {{- end }}
         {{- if .Values.console.cookieDomain }}{{ if ne .Values.console.cookieDomain "-" }}
         - name: COOKIE_DOMAIN

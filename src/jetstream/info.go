@@ -42,7 +42,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		return nil, errors.New("Could not find session user_id")
 	}
 
-	uaaUser, err := p.GetUAAUser(userGUID)
+	uaaUser, err := p.GetStratosUser(userGUID)
 	if err != nil {
 		return nil, errors.New("Could not load session user data")
 	}

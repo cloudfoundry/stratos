@@ -148,5 +148,3 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     this.showSnackBar(false);
   }
 }
-
-
