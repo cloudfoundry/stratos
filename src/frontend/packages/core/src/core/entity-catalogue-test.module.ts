@@ -40,7 +40,6 @@ function baseEntityCatalogueSetup(
   reducerManager: ReducerManager,
   entityGroups: StratosBaseCatalogueEntity[]
 ) {
-  console.log('AHSEHRER');
   const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
   testEntityCatalogue.clear();
 
