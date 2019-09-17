@@ -291,20 +291,6 @@
         }
       }
     },
-    "theme": {
-      "root": "src/frontend/packages/theme",
-      "sourceRoot": "src/frontend/packages/theme/src",
-      "projectType": "library",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@stratos/builder:theme",
-          "options": {
-            "dist": "./dist/theme"
-          }
-        }
-      }
-    },    
     "cloud-foundry": {
       "root": "src/frontend/packages/cloud-foundry",
       "sourceRoot": "src/frontend/packages/cloud-foundry/src",

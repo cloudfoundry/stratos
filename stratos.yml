@@ -5,14 +5,14 @@
 
 theme: '@acme/theme'
 
-title: 'V3 Stratos!'
+title: 'Stratos (V3)'
 
-extensions:
-  include:
-    - '@acme/extensions'
-  _exclude:
-    - one
-    - two
+# extensions:
+#   include:
+#     - '@acme/extensions'
+#   _exclude:
+#     - one
+#     - two
 
 resolve: local
 
