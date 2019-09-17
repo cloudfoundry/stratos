@@ -1,9 +1,18 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from '../../../core/src/core/entity-catalogue-test.module';
+
+import {
+  EntityCatalogueTestModuleManualStore,
+  TEST_CATALOGUE_ENTITIES,
+} from '../../../core/src/core/entity-catalogue-test.module';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../../core/test-framework/store-test-helper';
+import { environment } from '../../../core/src/environments/environment';
+import {
+  createBasicStoreModule,
+  createEntityStoreState,
+  TestStoreEntity,
+} from '../../../core/test-framework/store-test-helper';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { InternalAppState, IRequestTypeState } from '../../../store/src/app-state';
@@ -11,20 +20,29 @@ import {
   entityRelationMissingQuotaGuid,
   entityRelationMissingQuotaUrl,
   entityRelationMissingSpacesUrl,
-  EntityRelationSpecHelper
+  EntityRelationSpecHelper,
 } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
-import { EntityRequestAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
+import {
+  EntityRequestAction,
+  RequestEntityLocation,
+  WrapperRequestActionSuccess,
+} from '../../../store/src/types/request.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { GetOrganization } from '../actions/organization.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { CFAppState } from '../cf-app-state';
-import { cfEntityFactory, organizationEntityType, quotaDefinitionEntityType, routeEntityType, spaceEntityType } from '../cf-entity-factory';
+import {
+  cfEntityFactory,
+  organizationEntityType,
+  quotaDefinitionEntityType,
+  routeEntityType,
+  spaceEntityType,
+} from '../cf-entity-factory';
 import { generateCFEntities } from '../cf-entity-generator';
 import { CFRequestDataState } from '../cf-entity-types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validateEntityRelations } from './entity-relations';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from './entity-relations.types';
-
 
 
 describe('Entity Relations - validate -', () => {
@@ -48,7 +66,7 @@ describe('Entity Relations - validate -', () => {
     TestBed.configureTestingModule({
       imports: [
         {
-          ngModule: EntityCatalogueTestModule,
+          ngModule: EntityCatalogueTestModuleManualStore,
           providers: [
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]
@@ -437,9 +455,13 @@ describe('Entity Relations - validate -', () => {
         guid: orgGuid,
         entityType: organizationEntityType,
         type: '[Entity] Associate with parent',
-        // childEntityKey: quotaEntityKey, // TODO: RC Check
         endpointType: CF_ENDPOINT_TYPE
       };
+      if (!environment.production) {
+        // Add for easier debugging
+        /* tslint:disable-next-line:no-string-literal  */
+        associateAPIAction['childEntityKey'] = quotaEntityKey;
+      }
 
       const associateAction = new WrapperRequestActionSuccess({
         entities: {

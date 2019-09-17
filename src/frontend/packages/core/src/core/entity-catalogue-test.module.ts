@@ -5,29 +5,55 @@ import {
   requestDataReducerFactory,
 } from '../../../store/src/reducers/api-request-data-reducer/request-data-reducer.factory';
 import { chainApiReducers, requestActions } from '../../../store/src/reducers/api-request-reducers.generator.helpers';
+import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue, TestEntityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
 
 export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
 
-@NgModule({})
+@NgModule()
 export class EntityCatalogueTestModule {
   constructor(
     store: Store<any>,
     reducerManager: ReducerManager,
     @Inject(TEST_CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogueEntity[],
   ) {
-    const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
-    testEntityCatalogue.clear();
+    baseEntityCatalogueSetup(store, reducerManager, entityGroups);
+  }
+}
 
-    const entities = [].concat.apply([], entityGroups) as StratosBaseCatalogueEntity[];
-    entities.forEach(entity => entityCatalogue.register(entity));
+/**
+ * To be used in conjunction with `createBasicStoreModule` and `createEntityStoreState`
+ */
+@NgModule()
+export class EntityCatalogueTestModuleManualStore {
+  constructor(
+    reducerManager: ReducerManager,
+    @Inject(TEST_CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogueEntity[],
+  ) {
+    baseEntityCatalogueSetup(null, reducerManager, entityGroups);
+  }
+}
 
-    const dataReducer = requestDataReducerFactory(requestActions);
-    const extraReducers = entityCatalogue.getAllEntityRequestDataReducers();
-    const chainedReducers = chainApiReducers(dataReducer, extraReducers);
-    reducerManager.addReducer('requestData', chainedReducers);
+function baseEntityCatalogueSetup(
+  store: Store<any>,
+  reducerManager: ReducerManager,
+  entityGroups: StratosBaseCatalogueEntity[]
+) {
+  console.log('AHSEHRER');
+  const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
+  testEntityCatalogue.clear();
+
+  const entities = [].concat.apply([], entityGroups) as StratosBaseCatalogueEntity[];
+  entities.forEach(entity => entityCatalogue.register(entity));
+
+  const dataReducer = requestDataReducerFactory(requestActions);
+  const extraReducers = entityCatalogue.getAllEntityRequestDataReducers();
+  const chainedReducers = chainApiReducers(dataReducer, extraReducers);
+  reducerManager.removeReducer('requestData');
+  reducerManager.addReducer('requestData', chainedReducers);
+
+  if (store) {
     store.dispatch(new InitCatalogueEntitiesAction(entities));
   }
 }
