@@ -2,7 +2,7 @@ import { handleMultiEndpointsPipeFactory, JetstreamError } from './handle-multi-
 import { JetstreamResponse } from '../entity-request-pipeline.types';
 import { JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 
-fdescribe('handle-multi-endpoint-pipe', () => {
+describe('handle-multi-endpoint-pipe', () => {
   it(' should handle error and success', () => {
     const url = 'url123';
     const endpoint1Guid = 'endpoint1';
@@ -62,13 +62,13 @@ fdescribe('handle-multi-endpoint-pipe', () => {
       total: 15
     };
     const resData = {
-      [endpoint2Guid]: [[endpoint2Res]],
-      [endpoint4Guid]: [[endpoint4Res, endpoint4Res]]
+      [endpoint2Guid]: [endpoint2Res],
+      [endpoint4Guid]: [endpoint4Res, endpoint4Res]
     } as JetstreamResponse;
     const handled = handleMultiEndpointsPipeFactory(url, {
-      getEntitiesFromResponse: (res) => res.reduce((entities, page) => {
-        return [...entities, ...page.entities];
-      }, []),
+      getEntitiesFromResponse: (page) => {
+        return page.entities;
+      },
       getTotalEntities: (res) => Object.values(res).reduce((total, pages) => {
         return total + pages[0].total;
       }, 0),
@@ -76,9 +76,8 @@ fdescribe('handle-multi-endpoint-pipe', () => {
       getTotalPages: () => 4
     })(resData);
     expect(handled.successes.length).toBe(2);
-    console.log(handled.successes[1].entities);
     expect(handled.successes[0].entities[0]).toBe(endpoint2Res.entities[0]);
-    expect(handled.successes[1].entities[0]).toBe(endpoint4Res.entities[1]);
-    expect(handled.successes[1].entities[1]).toBe(endpoint4Res.entities[1]);
+    expect(handled.successes[1].entities[0]).toBe(endpoint4Res.entities[0]);
+    expect(handled.successes[1].entities[1]).toBe(endpoint4Res.entities[0]);
   });
 });

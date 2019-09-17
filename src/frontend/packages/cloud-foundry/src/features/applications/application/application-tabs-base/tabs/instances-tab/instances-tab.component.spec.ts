@@ -44,7 +44,7 @@ describe('InstancesTabComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         AppStoreModule,
         ApplicationStateService,
-        ApplicationEnvVarsHelper
+        ApplicationEnvVarsHelper,
       ]
     })
       .compileComponents();

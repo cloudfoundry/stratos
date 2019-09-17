@@ -87,11 +87,9 @@ function postProcessSuccessResponses(
   flattenerConfig: PaginationPageIteratorConfig<any, any>
 ): MultiEndpointResponse<any> {
   const entities = getAllEntitiesFromResponses(response, flattenerConfig ? flattenerConfig.getEntitiesFromResponse : null);
-
   const jetStreamResponse = {
     [endpointGuid]: response
   };
-
   if (Array.isArray(entities)) {
     return {
       endpointGuid,

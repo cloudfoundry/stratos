@@ -11,6 +11,7 @@ import {
   organizationEntityType,
   spaceEntityType,
   spaceQuotaEntityType,
+  quotaDefinitionEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
@@ -64,8 +65,9 @@ export class AddEditSpaceStepBase {
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(organizationEntityType, this.orgGuid);
-    const spaceQuotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
-    const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
+
+    const quotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const actionBuilder = quotaEntity.actionOrchestrator.getActionBuilder('getOrganizationSpaceQuotaDefinitions');
     const getOrganizationSpaceQuotaDefnitionsAction = actionBuilder(quotaPaginationKey, this.orgGuid, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<ISpaceQuotaDefinition>>(
       {
