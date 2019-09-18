@@ -125,13 +125,11 @@ export class CloudFoundryUserProvidedServicesService {
   ): Observable<RequestInfoState> {
     const userProvidedServiceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
     const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('update');
-    // TODO kate verify OK
     const updateAction = actionBuilder(
-      cfGuid,
       guid,
+      cfGuid,
       { existingUserProvidedServiceInstance: data, proxyPaginationEntityConfig: this.serviceInstancesEntityConfig }
     );
-    // const updateAction = new UpdateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
     const catalogueEntity = entityCatalogue.getEntity({
       entityType: userProvidedServiceInstanceEntityType,
       endpointType: CF_ENDPOINT_TYPE

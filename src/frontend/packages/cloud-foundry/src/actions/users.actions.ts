@@ -13,6 +13,7 @@ import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityT
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
+import { threadId } from 'worker_threads';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -36,13 +37,15 @@ export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org su
 
 export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   isGetAllUsersAsAdmin = true;
+  paginationKey: string;
   constructor(
     public endpointGuid: string,
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true,
-    public paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid)
+    paginationKey?: string
   ) {
     super();
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid)
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';

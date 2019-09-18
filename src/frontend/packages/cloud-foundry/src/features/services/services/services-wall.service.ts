@@ -29,7 +29,6 @@ export class ServicesWallService {
     const paginationKey = createEntityRelationPaginationKey(serviceEntityType);
     const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    // TODO kate verify OK
     const getServicesAction = actionBuilder(null, paginationKey);
     return getPaginationObservables<APIResource<IService>>(
       {

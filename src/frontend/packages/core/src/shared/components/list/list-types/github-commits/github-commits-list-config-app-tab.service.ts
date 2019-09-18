@@ -132,10 +132,9 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
       const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
-      // TODO Kate verify OK
       const gitBranchesEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
       const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
-      const fetchBranchesAction = fetchBranchesActionBuilder(null, null, { scm: this.scm, projectName: this.projectName });
+      const fetchBranchesAction = fetchBranchesActionBuilder(this.projectName, this.cfGuid, { scm: this.scm, projectName: this.projectName });
       const gitBranchEntityService = this.entityServiceFactory.create<GitBranch>(
         branchKey,
         fetchBranchesAction

@@ -380,8 +380,7 @@ export class CfUserService {
     const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const action = actionBuilder(cfGuid, null);
-    // TODO kate
-    return new GetAllUsersAsAdmin(cfGuid);
+    return action;
   }
 
   private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction => {

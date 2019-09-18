@@ -46,6 +46,7 @@ import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.a
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
+import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -149,13 +150,12 @@ export class CloudFoundryEndpointService {
       new GetAllEndpoints()
     );
 
-    const cfInfoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfInfoEntityType);
-    // TODO kate verify OK
-    const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get');
-    const action = actionBuilder(this.cfGuid, null);
+    const cfInfoEntity = entityCatalogue.getEntity<any, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType);
+    const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get') ;
+    const action = actionBuilder(this.cfGuid);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,
-      new GetCFInfo(this.cfGuid),
+      action,
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();
@@ -237,7 +237,6 @@ export class CloudFoundryEndpointService {
   public fetchDomains = () => {
     const domainEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
     const actionBuilder = domainEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    // TODO kate verify OK
     const action = actionBuilder(this.cfGuid, null);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {

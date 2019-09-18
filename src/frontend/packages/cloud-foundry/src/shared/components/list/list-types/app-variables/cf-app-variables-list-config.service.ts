@@ -91,7 +91,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
     const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('removeFromApplication');
     const action = actionBuilder(
-      this.envVarsDataSource.cfGuid, // TODO: Kate - from Rich - This doesn't look right
+      this.envVarsDataSource.appGuid,
       this.envVarsDataSource.cfGuid,
       this.envVarsDataSource.transformedEntities,
       newValues

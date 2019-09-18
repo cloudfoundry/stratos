@@ -22,7 +22,6 @@ export class CfRoutesDataSource extends CfRoutesDataSourceBase implements IListD
   ) {
     const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
     const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    // TODO kate verify OK
     const createRouteAction = actionBuilder(cfGuid, null);
     super(store, listConfig, cfGuid, createRouteAction, true);
   }

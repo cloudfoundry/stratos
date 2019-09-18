@@ -262,9 +262,15 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
+
     return this.selectedRoute$.pipe(
-      // TODO kate - route?
-      tap(route => this.store.dispatch(new AssignRouteToApplication(this.appGuid, route.metadata.guid, this.cfGuid))),
+      tap(route => 
+        {
+          const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+          const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
+          const assignRoutesAction = actionBuilder(this.cfGuid, route.metadata.guid, this.appGuid);
+          this.store.dispatch(assignRoutesAction)
+        }),
       switchMap(() => this.appService.app$),
       map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),
       filter(requestInfo => !requestInfo.busy),

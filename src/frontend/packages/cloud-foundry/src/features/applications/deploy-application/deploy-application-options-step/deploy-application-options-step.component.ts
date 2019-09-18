@@ -127,8 +127,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       switchMap(cfDetails => {
         const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
         const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
-        // TODO kate verify OK
-        const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null) as GetAllStacks;
+        const action = getAllStacksActionBuilder(cfDetails.cloudFoundry,null);
         return getPaginationObservables<APIResource<IDomain>>(
           {
             store: this.store,
