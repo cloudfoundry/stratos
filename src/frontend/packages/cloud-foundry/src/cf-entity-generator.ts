@@ -36,10 +36,8 @@ import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-aut
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
-import { APISuccessOrFailedAction, ICFAction } from '../../store/src/types/request.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { DELETE_SUCCESS, DeleteApplication } from './actions/application.actions';
 import {
   appEnvVarsEntityType,
   appEventEntityType,
@@ -113,7 +111,6 @@ import { stackActionBuilders } from './entity-action-builders/stack-action-build
 import { userProvidedServiceActionBuilder } from './entity-action-builders/user-provided-service.action-builders';
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import { spaceApplicationAddRemoveReducer } from './store/reducers/application-add-remove-reducer';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
@@ -131,7 +128,6 @@ export interface CFBasePipelineRequestActionMeta {
   populateMissing?: boolean;
   flatten?: boolean;
 }
-// class CFBasePipelineRequestAction = BasePipelineRequestAction < { entity } >
 
 export function registerCFEntities() {
   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
@@ -216,7 +212,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
 }
 
 function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: quotaDefinitionEntityType,
     schema: cfEntityFactory(quotaDefinitionEntityType),
     endpoint: endpointDefinition
@@ -272,7 +268,7 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
 }
 
 function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: appSummaryEntityType,
     schema: cfEntityFactory(appSummaryEntityType),
     endpoint: endpointDefinition,
@@ -294,7 +290,7 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
 }
 
 function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: spaceQuotaEntityType,
     schema: cfEntityFactory(spaceQuotaEntityType),
     endpoint: endpointDefinition
@@ -308,7 +304,7 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
 }
 
 function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: privateDomainsEntityType,
     schema: cfEntityFactory(privateDomainsEntityType),
     endpoint: endpointDefinition
@@ -321,7 +317,7 @@ function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtens
 }
 
 function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const cfInfoDefinition = {
+  const cfInfoDefinition: IStratosEntityDefinition = {
     type: cfInfoEntityType,
     schema: cfEntityFactory(cfInfoEntityType),
     label: 'Cloud Foundry Info',
@@ -347,23 +343,12 @@ function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefini
 }
 
 function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: userProvidedServiceInstanceEntityType,
     schema: cfEntityFactory(userProvidedServiceInstanceEntityType),
     label: 'User Provided Service Instance',
     labelPlural: 'User Provided Service Instances',
     endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        servicePlanEntityType,
-        // Service bindings
-        applicationEntityType,
-        serviceInstancesEntityType,
-        serviceEntityType,
-        organizationEntityType,
-        spaceEntityType
-      ],
-    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IUserProvidedServiceInstance>>(
     definition,
@@ -428,7 +413,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
 }
 
 function generateCFBuildPackEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: buildpackEntityType,
     schema: cfEntityFactory(buildpackEntityType),
     endpoint: endpointDefinition
@@ -442,7 +427,7 @@ function generateCFBuildPackEntity(endpointDefinition: StratosEndpointExtensionD
 }
 
 function generateCFServiceBrokerEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: serviceBrokerEntityType,
     schema: cfEntityFactory(serviceBrokerEntityType),
     endpoint: endpointDefinition
@@ -456,7 +441,7 @@ function generateCFServiceBrokerEntity(endpointDefinition: StratosEndpointExtens
 }
 
 function generateCFServicePlanVisibilityEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: servicePlanVisibilityEntityType,
     schema: cfEntityFactory(servicePlanVisibilityEntityType),
     endpoint: endpointDefinition
@@ -470,7 +455,7 @@ function generateCFServicePlanVisibilityEntity(endpointDefinition: StratosEndpoi
 }
 
 function generateCFSecurityGroupEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: securityGroupEntityType,
     schema: cfEntityFactory(securityGroupEntityType),
     label: 'Security Group',
@@ -486,7 +471,7 @@ function generateCFSecurityGroupEntity(endpointDefinition: StratosEndpointExtens
 }
 
 function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: serviceBindingEntityType,
     schema: {
       default: cfEntityFactory(serviceBindingEntityType),
@@ -495,13 +480,6 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
     label: 'Service Binding',
     labelPlural: 'Service Bindings',
     endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        applicationEntityType,
-        serviceInstancesEntityType,
-        serviceEntityType
-      ],
-    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IServiceBinding>>(
     definition,
@@ -521,7 +499,7 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
 }
 
 function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: serviceEntityType,
     schema: cfEntityFactory(serviceEntityType),
     label: 'Service',
@@ -546,7 +524,7 @@ function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDef
 }
 
 function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: servicePlanEntityType,
     schema: cfEntityFactory(servicePlanEntityType),
     label: 'Service Plan',
@@ -571,7 +549,7 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
 }
 
 function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: serviceInstancesEntityType,
     schema: {
       default: cfEntityFactory(serviceInstancesEntityType),
@@ -581,15 +559,6 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
     label: 'Marketplace Service Instance',
     labelPlural: 'Marketplace Service Instances',
     endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        servicePlanEntityType,
-        // Service bindings
-        applicationEntityType,
-        serviceInstancesEntityType,
-        serviceEntityType
-      ],
-    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IServiceInstance>>(
     definition,
@@ -610,18 +579,12 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
 }
 
 function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: cfUserEntityType,
     schema: cfEntityFactory(cfUserEntityType),
     label: 'User',
     labelPlural: 'Users',
     endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        organizationEntityType,
-        spaceEntityType
-      ],
-    }
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<CfUser>>(
     definition,
@@ -639,7 +602,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
 }
 
 function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: domainEntityType,
     schema: cfEntityFactory(domainEntityType),
     label: 'Domain',
@@ -664,7 +627,7 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
 }
 
 function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: gitCommitEntityType,
     schema: cfEntityFactory(gitCommitEntityType),
     label: 'Git Commit',
@@ -689,7 +652,7 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
 }
 
 function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: gitRepoEntityType,
     schema: cfEntityFactory(gitRepoEntityType),
     label: 'Git Repository',
@@ -714,7 +677,7 @@ function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefin
 }
 
 function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: gitBranchesEntityType,
     schema: cfEntityFactory(gitBranchesEntityType),
     label: 'Git Branch',
@@ -740,7 +703,7 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
 }
 
 function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: appEventEntityType,
     schema: cfEntityFactory(appEventEntityType),
     label: 'Application Event',
@@ -765,20 +728,12 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
 }
 
 function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: routeEntityType,
     schema: cfEntityFactory(routeEntityType),
     label: 'Application Route',
     labelPlural: 'Application Routes',
-    endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        domainEntityType,
-        applicationEntityType,
-        spaceEntityType
-      ],
-    }
-
+    endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource<IRoute>>(
     definition,
@@ -800,7 +755,7 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
 }
 
 function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: stackEntityType,
     schema: cfEntityFactory(stackEntityType),
     label: 'Stack',
@@ -826,7 +781,7 @@ function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinit
 }
 
 function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const featureFlagDefinition = {
+  const featureFlagDefinition: IStratosEntityDefinition = {
     type: featureFlagEntityType,
     schema: cfEntityFactory(featureFlagEntityType),
     label: 'Feature Flag',
@@ -876,24 +831,12 @@ function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDe
 }
 
 function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const applicationDefinition = {
+  const applicationDefinition: IStratosEntityDefinition = {
     type: applicationEntityType,
     schema: cfEntityFactory(applicationEntityType),
     label: 'Application',
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        stackEntityType,
-        spaceEntityType,
-        routeEntityType,
-        serviceBindingEntityType,
-        serviceInstancesEntityType
-      ],
-      deleteSuccessApiActionGenerators: (guid: string, endpointGuid: string) => {
-        return new APISuccessOrFailedAction(DELETE_SUCCESS, new DeleteApplication(guid, endpointGuid) as ICFAction);
-      }
-    }
   };
 
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
@@ -918,7 +861,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
 }
 
 function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const spaceDefinition = {
+  const spaceDefinition: IStratosEntityDefinition = {
     type: spaceEntityType,
     schema: {
       default: cfEntityFactory(spaceEntityType),
@@ -927,16 +870,6 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
     label: 'Space',
     labelPlural: 'Spaces',
     endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        domainEntityType,
-        // Service instance related
-        serviceEntityType,
-        servicePlanEntityType,
-        // App Related
-        stackEntityType
-      ],
-    }
   };
   return new StratosCatalogueEntity<ISpaceFavMetadata, APIResource<ISpace>>(
     spaceDefinition,
@@ -945,7 +878,6 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
       dataReducers: [
         updateSpaceQuotaReducer,
         endpointDisconnectRemoveEntitiesReducer(),
-        spaceApplicationAddRemoveReducer(),
         userSpaceOrgReducer(true)
       ],
       entityBuilder: {
@@ -963,19 +895,12 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
 }
 
 function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const orgDefinition = {
+  const orgDefinition: IStratosEntityDefinition = {
     type: organizationEntityType,
     schema: cfEntityFactory(organizationEntityType),
     label: 'Organization',
     labelPlural: 'Organizations',
     endpoint: endpointDefinition,
-    recursiveDelete: {
-      excludes: [
-        domainEntityType,
-        quotaDefinitionEntityType,
-        privateDomainsEntityType
-      ],
-    }
   };
   return new StratosCatalogueEntity<IOrgFavMetadata, APIResource<IOrganization>>(
     orgDefinition,
@@ -1009,7 +934,7 @@ function getOrgStatus(org: APIResource<IOrganization>) {
 }
 
 function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: metricEntityType,
     schema: cfEntityFactory(metricEntityType),
     label: 'CF Metric',

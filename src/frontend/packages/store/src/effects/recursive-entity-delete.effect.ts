@@ -93,16 +93,9 @@ export class RecursiveDeleteEffect {
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     mergeMap(([action, state]) => {
       const tree = this.getTree(action, state);
-      const actions = new Array<Action>().concat(...Object.keys(tree).map<Action[]>(key => {
-        const keyActions = [];
-        const deleteSuccessApiActionGenerators = action.entityConfig.definition.recursiveDelete ?
-          (action.entityConfig.definition.recursiveDelete.deleteSuccessApiActionGenerators || null) : null;
-        if (deleteSuccessApiActionGenerators) {
-          keyActions.push(deleteSuccessApiActionGenerators[key](action.guid, action.endpointGuid));
-        }
-        keyActions.push(new ClearPaginationOfType(action.entityConfig.getSchema(action.schemaKey)));
-        return keyActions;
-      }));
+      const actions = new Array<Action>().concat(...Object.keys(tree).map<Action[]>(key =>
+        [new ClearPaginationOfType(action.entityConfig.getSchema(action.schemaKey))]
+      ));
       actions.unshift(new SetTreeDeleted(action.guid, tree));
       return actions;
     })

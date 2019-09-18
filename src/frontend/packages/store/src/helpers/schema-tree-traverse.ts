@@ -20,7 +20,7 @@ export class EntitySchemaTreeBuilder {
     const schema = entityConfig.getSchema(treeDefinition.schemaKey);
     const denormed = denormalize(guid, schema, state);
     this.entityConfig = treeDefinition.entityConfig;
-    this.entityExcludes = this.entityConfig.definition.recursiveDelete ? this.entityConfig.definition.recursiveDelete.excludes : [];
+    this.entityExcludes = schema.excludeFromRecursiveDelete || [];
     return this.build(schema, denormed, undefined, true);
   }
 
