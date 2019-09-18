@@ -25,9 +25,11 @@ export class EntityActionDispatcher<
     private actionDispatcher?: ActionDispatcher,
     private actionBuilder?: T
   ) { }
-  public dispatch(...args: Parameters<T>) {
+  public dispatch(actionType, ...args: Parameters<T>) {
     if (this.actionBuilder) {
       const action = this.actionBuilder(...args);
+      /* tslint:disable-next-line:no-string-literal  */
+      action['requestTypeLabel'] = actionType;
       if (this.actionDispatcher) {
         this.actionDispatcher(action);
       } else if (EntityActionDispatcher.STORE && EntityActionDispatcher.STORE.dispatch) {
@@ -57,26 +59,26 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
   }
 
   public dispatchGet(...args: Parameters<T['get']>) {
-    return this.getActionDispatcher('get').dispatch(...args);
+    return this.getActionDispatcher('get').dispatch('get', ...args);
   }
 
   public dispatchDelete(...args: Parameters<T['delete']>) {
-    return this.getActionDispatcher('delete').dispatch(...args);
+    return this.getActionDispatcher('delete').dispatch('delete', ...args);
   }
 
   public dispatchUpdate(...args: Parameters<T['update']>) {
-    return this.getActionDispatcher('update').dispatch(...args);
+    return this.getActionDispatcher('update').dispatch('update', ...args);
   }
 
   public dispatchCreate(...args: Parameters<T['create']>) {
-    return this.getActionDispatcher('create').dispatch(...args);
+    return this.getActionDispatcher('create').dispatch('create', ...args);
   }
 
   public dispatchGetAll(...args: Parameters<T['getAll']>) {
-    return this.getActionDispatcher('getAll').dispatch(...args);
+    return this.getActionDispatcher('getAll').dispatch('getAll', ...args);
   }
 
   public dispatchAction<K extends keyof T>(actionType: K, ...args: Parameters<T[K]>) {
-    return this.getActionDispatcher(actionType).dispatch(...args);
+    return this.getActionDispatcher(actionType).dispatch(actionType, ...args);
   }
 }

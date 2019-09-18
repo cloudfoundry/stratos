@@ -182,12 +182,18 @@ export class StratosBaseCatalogueEntity<
     return null;
   }
 
+  private getTypeFromAction(action?: EntityRequestAction) {
+    if (action) {
+      return action.requestTypeLabel || action.updatingKey;
+    }
+  }
+
   private getTypeLabel(
     actionString: 'start' | 'success' | 'failure' | 'complete',
     requestType: ApiRequestTypes,
     action?: EntityRequestAction,
   ) {
-    const requestTypeLabel = (action ? action.requestTypeLabel : null) || requestType;
+    const requestTypeLabel = this.getTypeFromAction(action) || requestType;
     return `@stratos/${this.entityKey}/${requestTypeLabel}/${actionString}`;
   }
 

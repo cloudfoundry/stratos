@@ -1,10 +1,11 @@
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
 
 export function successEntityHandler(
   actionDispatcher,
-  catalogueEntity,
+  catalogueEntity: StratosBaseCatalogueEntity,
   requestType,
   action,
   result,
