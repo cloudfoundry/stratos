@@ -34,8 +34,6 @@ export function addEndpoint(state: ICurrentUserRolesState, action: EndpointActio
   };
 }
 
-
-
 export function removeSpaceRoles(state: ICurrentUserRolesState, action: APISuccessOrFailedAction) {
   const { endpointGuid, guid } = action.apiAction;
   const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid as string, guid, 'spaces');
@@ -73,8 +71,8 @@ export function removeOrgRoles(state: ICurrentUserRolesState, action: APISuccess
   }
   // const spaceIds = state.cf[endpointGuid].organizations[guid].spaceIds;
   const spaceIds = [];
-  const newState = removeOrgOrSpaceRoles(state, endpointGuid as string, guid, 'organizations');
-  return cleanUpOrgSpaces(newState, spaceIds, endpointGuid as string);
+  const newState = removeOrgOrSpaceRoles(state, endpointGuid, guid, 'organizations');
+  return cleanUpOrgSpaces(newState, spaceIds, endpointGuid);
 }
 
 function removeOrgOrSpaceRoles(

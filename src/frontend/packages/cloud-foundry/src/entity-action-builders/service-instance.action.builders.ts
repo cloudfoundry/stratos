@@ -38,7 +38,7 @@ export const serviceInstanceActionBuilders = {
   ) => new CreateServiceInstance(
     createId,
     endpointGuid,
-    name,
+    meta.name,
     meta.servicePlanGuid,
     meta.spaceGuid,
     meta.params,
@@ -51,7 +51,7 @@ export const serviceInstanceActionBuilders = {
   ) => new UpdateServiceInstance(
     guid,
     endpointGuid,
-    name,
+    meta.name,
     meta.servicePlanGuid,
     meta.spaceGuid,
     meta.params,

@@ -50,7 +50,6 @@ export class ActionBuilderConfigMapper {
     schemaGetter: (schemaKey: string) => EntitySchema
   ): OrchestratedActionBuilder {
     if (configOrBuilder instanceof EntityRequestActionConfig) {
-      // TODO We need to pass schemaKey
       return (...args: Parameters<KnownEntityActionBuilder>) => {
         const [guid, endpointGuid, ...meta] = args;
         return new BaseEntityRequestAction(
