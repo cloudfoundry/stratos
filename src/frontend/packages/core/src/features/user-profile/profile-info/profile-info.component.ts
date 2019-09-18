@@ -26,6 +26,7 @@ export class ProfileInfoComponent implements OnInit {
     map(dashboardState => dashboardState.pollingEnabled ? 'true' : 'false'),
   );
 
+  isError$: Observable<boolean>;
   userProfile$: Observable<UserProfileInfo>;
 
   primaryEmailAddress$: Observable<string>;
@@ -58,6 +59,7 @@ export class ProfileInfoComponent implements OnInit {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
   ) {
+    this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;
 
     this.primaryEmailAddress$ = this.userProfile$.pipe(
