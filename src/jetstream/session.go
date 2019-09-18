@@ -250,26 +250,28 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	// Could not verify session
 	if err != nil {
 		log.Error(err)
-		return echo.NewHTTPError(http.StatusForbidden, "Could not verify user")
+		err = echo.NewHTTPError(http.StatusForbidden, "Could not verify user")
+
+	} else {
+
+		err = p.handleSessionExpiryHeader(c)
+		if err != nil {
+			return err
+		}
+
+		info, err := p.getInfo(c)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		// Add XSRF Token
+		p.ensureXSRFToken(c)
+
+		err = c.JSON(http.StatusOK, info)
+		if err != nil {
+			return err
+		}
 	}
-
-	err = p.handleSessionExpiryHeader(c)
-	if err != nil {
-		return err
-	}
-
-	info, err := p.getInfo(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	// Add XSRF Token
-	p.ensureXSRFToken(c)
-
-	err = c.JSON(http.StatusOK, info)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	
+	return err
 }

@@ -117,7 +117,9 @@ func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 
 //VerifySession verifies the session the specified UAA user and refreshes the token if necessary
 func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+
 	tr, err := a.p.GetUAATokenRecord(sessionUser)
+
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find UAA Token: %s", err)
 		log.Error(msg, err)
@@ -201,43 +203,44 @@ func (p *portalProxy) loginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 			http.StatusUnauthorized,
 			errMessage,
 			"UAA Login failed: %s: %v", errMessage, err)
-		return nil, err
-	}
 
-	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = u.UserGUID
-	sessionValues["exp"] = u.TokenExpiry
+	} else { //Login succes
 
-	// Ensure that login disregards cookies from the request
-	req := c.Request()
-	req.Header.Set("Cookie", "")
-	if err = p.setSessionValues(c, sessionValues); err != nil {
-		return nil, err
-	}
+		sessionValues := make(map[string]interface{})
+		sessionValues["user_id"] = u.UserGUID
+		sessionValues["exp"] = u.TokenExpiry
 
-	err = p.handleSessionExpiryHeader(c)
-	if err != nil {
-		return nil, err
-	}
+		// Ensure that login disregards cookies from the request
+		req := c.Request()
+		req.Header.Set("Cookie", "")
+		if err = p.setSessionValues(c, sessionValues); err != nil {
+			return nil, err
+		}
 
-	_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
-	if err != nil {
-		return nil, err
-	}
+		err = p.handleSessionExpiryHeader(c)
+		if err != nil {
+			return nil, err
+		}
 
-	err = p.ExecuteLoginHooks(c)
-	if err != nil {
-		log.Warnf("Login hooks failed: %v", err)
-	}
+		_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
 
-	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
-	resp := &interfaces.LoginRes{
-		Account:     u.UserName,
-		TokenExpiry: u.TokenExpiry,
-		APIEndpoint: nil,
-		Admin:       uaaAdmin,
+		err = p.ExecuteLoginHooks(c)
+		if err != nil {
+			log.Warnf("Login hooks failed: %v", err)
+		}
+
+		uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
+		resp := &interfaces.LoginRes{
+			Account:     u.UserName,
+			TokenExpiry: u.TokenExpiry,
+			APIEndpoint: nil,
+			Admin:       uaaAdmin,
+		}
 	}
-	return resp, nil
+	return resp, err
 }
 
 //getUAAIdentityEndpoint gets the token endpoint for the UAA
@@ -415,22 +418,21 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord
 	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, userToken.RefreshToken,
 		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
 	if err != nil {
-		return t, fmt.Errorf("UAA Token refresh request failed: %v", err)
+		err = fmt.Errorf("UAA Token refresh request failed: %v", err)
+	} else {
+		u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
+		if err != nil {
+			return t, fmt.Errorf("Could not get user token info from access token")
+		}
+
+		u.UserGUID = userGUID
+
+		t, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+		if err != nil {
+			return t, fmt.Errorf("Couldn't save new UAA token: %v", err)
+		}
 	}
-
-	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
-	if err != nil {
-		return t, fmt.Errorf("Could not get user token info from access token")
-	}
-
-	u.UserGUID = userGUID
-
-	t, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
-	if err != nil {
-		return t, fmt.Errorf("Couldn't save new UAA token: %v", err)
-	}
-
-	return t, nil
+	return t, err
 }
 
 //SSO
