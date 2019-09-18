@@ -23,6 +23,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   editProfileForm: FormGroup;
 
+  needsPasswordForEmailChange: boolean;
+
   constructor(
     private userProfileService: UserProfileService,
     private fb: FormBuilder,
@@ -36,6 +38,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       newPassword: '',
       confirmPassword: '',
     });
+
+    this.needsPasswordForEmailChange = false;
   }
 
   private sub: Subscription;
@@ -56,6 +60,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.userProfileService.fetchUserProfile();
     this.userProfileService.userProfile$.pipe(first()).subscribe(profile => {
+      // UAA needs the user's password for email changes. Local user does not
+      // Both need it for password change
+      this.needsPasswordForEmailChange = (profile.origin === 'uaa');
       this.profile = profile;
       this.emailAddress = this.userProfileService.getPrimaryEmailAddress(profile);
       this.editProfileForm.setValue({
