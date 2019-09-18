@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import {
   ListDataSource,
@@ -9,6 +9,7 @@ import {
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
 

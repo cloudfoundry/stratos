@@ -2,12 +2,13 @@ import { Store } from '@ngrx/store';
 
 import { GetAllStacks } from '../../../../../../../cloud-foundry/src/actions/stack.action';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, stackEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { stackEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfStacksDataSource extends ListDataSource<APIResource> {

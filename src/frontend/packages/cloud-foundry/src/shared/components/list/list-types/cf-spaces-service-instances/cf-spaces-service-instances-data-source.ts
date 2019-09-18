@@ -4,23 +4,23 @@ import { GetServiceInstancesForSpace } from '../../../../../../../cloud-foundry/
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  cfEntityFactory,
   serviceBindingEntityType,
   serviceEntityType,
   serviceInstancesEntityType,
   serviceInstancesWithSpaceEntityType,
   servicePlanEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import {
+  ListDataSource,
+} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {

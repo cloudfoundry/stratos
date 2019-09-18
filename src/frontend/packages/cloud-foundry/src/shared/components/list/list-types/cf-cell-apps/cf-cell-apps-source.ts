@@ -6,10 +6,9 @@ import { GetApplication } from '../../../../../../../cloud-foundry/src/actions/a
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  cfEntityFactory,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IApp } from '../../../../../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 import {
@@ -22,6 +21,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
 
 // TODO: Move file to CF package (#3769)

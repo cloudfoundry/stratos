@@ -1,4 +1,4 @@
-import { cfUserEntityType } from '../../cf-entity-factory';
+import { cfUserEntityType } from '../../cf-entity-schema-types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../../actions/organization.actions';

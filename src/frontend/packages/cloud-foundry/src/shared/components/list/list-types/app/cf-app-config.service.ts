@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IApp } from '../../../../../../../core/src/core/cf-api.types';
 import { UtilsService } from '../../../../../../../core/src/core/utils.service';
 import {

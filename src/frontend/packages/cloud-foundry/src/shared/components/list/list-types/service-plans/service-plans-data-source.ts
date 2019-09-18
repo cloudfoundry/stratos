@@ -3,11 +3,14 @@ import { Store } from '@ngrx/store';
 import { GetServicePlansForService } from '../../../../../../../cloud-foundry/src/actions/service.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   serviceEntityType,
   serviceInstancesEntityType,
   servicePlanEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import {
   populateServicePlanExtraTyped,
@@ -17,11 +20,8 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class ServicePlansDataSource extends ListDataSource<APIResource<IServicePlan>> {
   constructor(

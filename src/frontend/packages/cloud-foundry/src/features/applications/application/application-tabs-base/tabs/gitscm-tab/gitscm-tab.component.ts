@@ -17,7 +17,7 @@ import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shar
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';
 import { CFAppState } from '../../../../../../cf-app-state';
-import { gitCommitEntityType } from '../../../../../../cf-entity-factory';
+import { gitCommitEntityType } from '../../../../../../cf-entity-schema-types';
 import { GitBranch } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';

@@ -7,7 +7,7 @@ import { first, map } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { FetchAllServiceBindings } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';

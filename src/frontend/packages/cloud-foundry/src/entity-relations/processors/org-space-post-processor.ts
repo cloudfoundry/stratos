@@ -8,7 +8,7 @@ import {
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../cf-entity-factory';
+} from '../../cf-entity-schema-types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { APIResponse } from '../../../../store/src/actions/request.actions';

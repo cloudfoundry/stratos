@@ -9,10 +9,9 @@ import { GetServicePlanServiceInstances } from '../../../../../cloud-foundry/src
 import { GetServiceInstancesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   serviceInstancesEntityType,
   servicePlanVisibilityEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   IService,
@@ -27,6 +26,7 @@ import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitor
 import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../cf-entity-factory';
 import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
 
 export class CreateServiceInstanceHelper {

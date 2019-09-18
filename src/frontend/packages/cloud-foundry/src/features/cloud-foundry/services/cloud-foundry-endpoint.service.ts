@@ -9,14 +9,13 @@ import { FetchAllDomains } from '../../../../../cloud-foundry/src/actions/domain
 import { DeleteOrganization, GetAllOrganizations } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   domainEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../cloud-foundry/src/cf-entity-schema-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -40,6 +39,7 @@ import { APIResource, EntityInfo } from '../../../../../store/src/types/api.type
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
+import { cfEntityFactory } from '../../../cf-entity-factory';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';

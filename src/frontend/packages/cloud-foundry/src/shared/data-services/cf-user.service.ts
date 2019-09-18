@@ -8,11 +8,10 @@ import { GetAllSpaceUsers } from '../../../../cloud-foundry/src/actions/space.ac
 import { GetAllUsersAsAdmin, GetUser } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../cloud-foundry/src/cf-entity-schema-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import {
@@ -33,6 +32,7 @@ import {
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../../cf-entity-factory';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 import {
   fetchTotalResults,

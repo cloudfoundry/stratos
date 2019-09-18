@@ -38,6 +38,8 @@ import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducer
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { cfEntityFactory } from './cf-entity-factory';
+import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {
   appEnvVarsEntityType,
   appEventEntityType,
@@ -45,7 +47,6 @@ import {
   appStatsEntityType,
   appSummaryEntityType,
   buildpackEntityType,
-  cfEntityFactory,
   cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
@@ -73,8 +74,7 @@ import {
   spaceWithOrgEntityType,
   stackEntityType,
   userProvidedServiceInstanceEntityType,
-} from './cf-entity-factory';
-import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
+} from './cf-entity-schema-types';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';

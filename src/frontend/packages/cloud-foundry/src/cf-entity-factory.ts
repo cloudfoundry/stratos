@@ -1,53 +1,50 @@
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { APIResource } from '../../store/src/types/api.types';
 import {
+  appEnvVarsEntityType,
+  appEventEntityType,
+  applicationEntityType,
+  appStatsEntityType,
+  appSummaryEntityType,
+  buildpackEntityType,
   CFApplicationEntitySchema,
   CFEntitySchema,
+  cfInfoEntityType,
   CFOrgEntitySchema,
   CFRouteEntitySchema,
   CFServiceBindingEntitySchema,
   CFServiceInstanceEntitySchema,
   CFSpaceEntitySchema,
   CFUserEntitySchema,
+  cfUserEntityType,
+  domainEntityType,
+  featureFlagEntityType,
+  gitBranchesEntityType,
+  gitCommitEntityType,
+  gitRepoEntityType,
+  metricEntityType,
+  organizationEntityType,
+  privateDomainsEntityType,
+  quotaDefinitionEntityType,
+  routeEntityType,
+  securityGroupEntityType,
+  serviceBindingEntityType,
+  serviceBindingNoBindingsEntityType,
+  serviceBrokerEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  serviceInstancesWithNoBindingsEntityType,
+  serviceInstancesWithSpaceEntityType,
+  servicePlanEntityType,
+  servicePlanVisibilityEntityType,
+  spaceEntityType,
+  spaceQuotaEntityType,
+  spaceWithOrgEntityType,
+  stackEntityType,
+  userProvidedServiceInstanceEntityType,
 } from './cf-entity-schema-types';
 import { getAPIResourceGuid } from './store/selectors/api.selectors';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/user.types';
-
-export const applicationEntityType = 'application';
-export const stackEntityType = 'stack';
-export const spaceEntityType = 'space';
-export const routeEntityType = 'route';
-export const domainEntityType = 'domain';
-export const organizationEntityType = 'organization';
-export const quotaDefinitionEntityType = 'quota_definition';
-export const appEventEntityType = 'applicationEvent';
-export const cfInfoEntityType = 'cloudFoundryInfo';
-export const cfUserEntityType = 'user';
-export const appSummaryEntityType = 'applicationSummary';
-export const appStatsEntityType = 'applicationStats';
-export const appEnvVarsEntityType = 'environmentVars';
-export const gitBranchesEntityType = 'gitBranches';
-export const gitRepoEntityType = 'gitRepo';
-export const gitCommitEntityType = 'gitCommits';
-export const serviceEntityType = 'service';
-export const serviceBindingEntityType = 'serviceBinding';
-export const servicePlanEntityType = 'servicePlan';
-export const serviceInstancesEntityType = 'serviceInstance';
-export const buildpackEntityType = 'buildpack';
-export const securityGroupEntityType = 'securityGroup';
-export const featureFlagEntityType = 'featureFlag';
-export const privateDomainsEntityType = 'private_domains';
-export const spaceQuotaEntityType = 'space_quota_definition';
-export const metricEntityType = 'metrics';
-export const servicePlanVisibilityEntityType = 'servicePlanVisibility';
-export const serviceBrokerEntityType = 'serviceBroker';
-export const userProvidedServiceInstanceEntityType = 'userProvidedServiceInstance';
-
-export const spaceWithOrgEntityType = 'spaceWithOrg';
-export const serviceInstancesWithSpaceEntityType = 'serviceInstancesWithSpace';
-export const serviceInstancesWithNoBindingsEntityType = 'serviceInstanceWithNoBindings';
-export const serviceBindingNoBindingsEntityType = 'serviceBindingNoBindings';
-
 
 const entityCache: {
   [key: string]: EntitySchema

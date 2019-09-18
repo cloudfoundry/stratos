@@ -3,7 +3,7 @@ import { of as observableOf } from 'rxjs';
 
 import { FetchCommits } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CFEntitySchema, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CFEntitySchema, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';

@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { GetAllServices } from '../../../../../../../cloud-foundry/src/actions/service.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   ListDataSource,

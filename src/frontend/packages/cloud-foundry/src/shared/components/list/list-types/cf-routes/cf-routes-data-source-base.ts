@@ -4,7 +4,7 @@ import { map, switchMap, tap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
@@ -17,12 +17,13 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationMonitor } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
+import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRoute, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
-import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 
 export interface ListCfRoute extends IRoute {
   url: string;

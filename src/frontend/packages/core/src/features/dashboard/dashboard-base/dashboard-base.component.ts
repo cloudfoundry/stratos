@@ -9,7 +9,7 @@ import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rx
 
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
-import { cfInfoEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfInfoEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
 import {
   CfInfoDefinitionActionBuilders,
 } from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';

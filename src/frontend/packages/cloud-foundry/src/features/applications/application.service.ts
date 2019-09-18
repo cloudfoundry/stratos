@@ -27,7 +27,7 @@ import {
   serviceBindingEntityType,
   spaceEntityType,
   stackEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../cloud-foundry/src/cf-entity-schema-types';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';

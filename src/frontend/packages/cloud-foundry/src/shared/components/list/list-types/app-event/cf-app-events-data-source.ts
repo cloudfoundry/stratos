@@ -5,14 +5,15 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
+import { QParam, QParamJoiners } from '../../../../../../../store/src/q-param';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { GetAllAppEvents } from '../../../../../actions/app-event.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { appEventEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { appEventEntityType } from '../../../../../cf-entity-schema-types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { QParamJoiners, QParam } from '../../../../../../../store/src/q-param';
 
 export class CfAppEventsDataSource extends ListDataSource<APIResource> {
 

@@ -1,20 +1,17 @@
 import { Store } from '@ngrx/store';
 
 import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ListServiceBindingsForInstance } from '../../../../../actions/service-instances.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import {
-  cfEntityFactory,
-  serviceBindingEntityType,
-  serviceBindingNoBindingsEntityType,
-} from '../../../../../cf-entity-factory';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { serviceBindingEntityType, serviceBindingNoBindingsEntityType } from '../../../../../cf-entity-schema-types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class DetachAppsDataSource extends ListDataSource<APIResource> {

@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
@@ -21,12 +20,8 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import {
-  cfEntityFactory,
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../../../../../cf-entity-factory';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-schema-types';
 import {
   TableCellConfirmOrgSpaceComponent,
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
@@ -37,6 +32,7 @@ import { CfUserService } from '../../../../../shared/data-services/cf-user.servi
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 
+/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 
 @Component({

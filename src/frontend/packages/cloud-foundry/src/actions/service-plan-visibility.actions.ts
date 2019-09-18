@@ -2,15 +2,15 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../cf-entity-factory';
 import {
-  cfEntityFactory,
   organizationEntityType,
   servicePlanEntityType,
   servicePlanVisibilityEntityType,
   spaceEntityType,
-} from '../cf-entity-factory';
-import { CFStartAction } from './cf-action.types';
+} from '../cf-entity-schema-types';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
+import { CFStartAction } from './cf-action.types';
 
 export class GetServicePlanVisibilities extends CFStartAction implements PaginatedAction {
   constructor(

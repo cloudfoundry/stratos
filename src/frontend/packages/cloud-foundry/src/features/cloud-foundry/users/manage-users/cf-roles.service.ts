@@ -33,7 +33,8 @@ import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.t
 import { GetAllOrganizations, GetOrganization } from '../../../../actions/organization.actions';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
-import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cf-entity-factory';
+import { cfEntityFactory } from '../../../../cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-schema-types';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';

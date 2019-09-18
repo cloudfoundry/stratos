@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -11,6 +11,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> {
@@ -22,6 +23,7 @@ export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> 
     rowStateManager: TableRowStateManager,
     destroy: () => void
   ) {
+
     super({
       store,
       action: getAllUsersAction,

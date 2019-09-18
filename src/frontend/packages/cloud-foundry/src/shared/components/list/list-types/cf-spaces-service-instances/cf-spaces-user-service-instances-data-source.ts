@@ -4,13 +4,16 @@ import { GetAllUserProvidedServices } from '../../../../../../../cloud-foundry/s
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  cfEntityFactory,
   organizationEntityType,
   serviceBindingEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -18,11 +21,8 @@ import {
   defaultPaginationPageSizeOptionsTable,
   IListConfig,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {

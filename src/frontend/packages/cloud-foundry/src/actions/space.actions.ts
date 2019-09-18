@@ -2,13 +2,12 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
-
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
+import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
-  cfEntityFactory,
   domainEntityType,
   routeEntityType,
   serviceEntityType,
@@ -17,13 +16,16 @@ import {
   servicePlanEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
-} from '../cf-entity-factory';
+} from '../cf-entity-schema-types';
+import {
+  createEntityRelationKey,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+} from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
-import { QParam } from '../../../store/src/q-param';
-import { EntityInlineParentAction, EntityInlineChildAction, createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';

@@ -4,12 +4,15 @@ import { GetAppServiceBindings } from '../../../../../../../cloud-foundry/src/ac
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  cfEntityFactory,
   serviceBindingEntityType,
   serviceEntityType,
   serviceInstancesEntityType,
   servicePlanEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
@@ -17,11 +20,8 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {
   static createGetAllServiceBindings(appGuid: string, cfGuid: string) {

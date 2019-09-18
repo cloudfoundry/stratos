@@ -1,17 +1,17 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-
 import { GetAppStatsAction } from '../../../../../actions/app-metadata.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { applicationEntityType, appStatsEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
-import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
-import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { applicationEntityType, appStatsEntityType } from '../../../../../cf-entity-schema-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
+import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStat> {
 

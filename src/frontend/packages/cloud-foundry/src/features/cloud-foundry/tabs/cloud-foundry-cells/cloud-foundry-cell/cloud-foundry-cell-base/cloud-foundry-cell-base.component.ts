@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { cfEntityFactory, metricEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { metricEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
+import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';

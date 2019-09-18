@@ -6,10 +6,9 @@ import { combineLatest, filter, first, map, publishReplay, refCount, switchMap }
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   serviceBrokerEntityType,
   servicePlanVisibilityEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../cloud-foundry/src/cf-entity-schema-types';
 import {
   IService,
   IServiceBroker,
@@ -27,6 +26,7 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { GetServiceBrokers } from '../../actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../actions/service-plan-visibility.actions';
 import { GetSpace } from '../../actions/space.actions';
+import { cfEntityFactory } from '../../cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';

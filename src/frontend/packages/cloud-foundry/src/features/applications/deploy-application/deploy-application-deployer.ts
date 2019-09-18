@@ -4,7 +4,7 @@ import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { selectCfEntity } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import {

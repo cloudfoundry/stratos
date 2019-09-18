@@ -1,6 +1,6 @@
 import { RequestOptions } from '@angular/http';
 
-import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-schema-types';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';

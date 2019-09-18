@@ -3,18 +3,25 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import {
+  TableCellEditComponent,
+} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
+import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import {
+  IListAction,
+  IListConfig,
+  IMultiListAction,
+  ListViewTypes,
+} from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { AppVariablesDelete } from '../../../../../actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { applicationEntityType } from '../../../../../cf-entity-factory';
+import { applicationEntityType } from '../../../../../cf-entity-schema-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TableCellEditComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 

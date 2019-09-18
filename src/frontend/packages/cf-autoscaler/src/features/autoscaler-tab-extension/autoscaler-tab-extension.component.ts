@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
-import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-schema-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';

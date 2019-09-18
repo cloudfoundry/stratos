@@ -24,13 +24,13 @@ import { GetServiceBroker } from '../../actions/service-broker.actions';
 import { GetServiceInstances } from '../../actions/service-instances.actions';
 import { GetService, GetServicePlansForService } from '../../actions/service.actions';
 import { CFAppState } from '../../cf-app-state';
+import { cfEntityFactory } from '../../cf-entity-factory';
 import {
-  cfEntityFactory,
   organizationEntityType,
   serviceInstancesEntityType,
   servicePlanEntityType,
   spaceEntityType,
-} from '../../cf-entity-factory';
+} from '../../cf-entity-schema-types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 

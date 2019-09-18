@@ -7,7 +7,7 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import {
   servicePlanEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IServicePlan } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';

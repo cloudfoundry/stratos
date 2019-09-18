@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { organizationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IApp, IOrganization } from '../../../../../core/src/core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
 import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';

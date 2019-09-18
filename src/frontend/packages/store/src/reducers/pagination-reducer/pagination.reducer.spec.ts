@@ -1,8 +1,9 @@
 import { RequestOptions } from '@angular/http';
 
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { applicationEntityType, cfEntityFactory, CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
+import { applicationEntityType, CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-schema-types';
 import { RequestTypes } from '../../actions/request.actions';
 import { PaginatedAction } from '../../types/pagination.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../types/request.types';

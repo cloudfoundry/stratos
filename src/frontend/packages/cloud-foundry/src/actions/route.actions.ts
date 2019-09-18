@@ -3,13 +3,8 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import {
-  applicationEntityType,
-  cfEntityFactory,
-  domainEntityType,
-  routeEntityType,
-  spaceEntityType,
-} from '../cf-entity-factory';
+import { cfEntityFactory } from '../cf-entity-factory';
+import { applicationEntityType, domainEntityType, routeEntityType, spaceEntityType } from '../cf-entity-schema-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

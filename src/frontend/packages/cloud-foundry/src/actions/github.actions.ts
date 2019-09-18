@@ -1,5 +1,5 @@
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { gitRepoEntityType } from '../cf-entity-factory';
+import { gitRepoEntityType } from '../cf-entity-schema-types';
 import {
   EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';

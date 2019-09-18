@@ -10,7 +10,7 @@ import {
   StoreCFSettings,
 } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
 import {
   selectApplicationSource,

@@ -4,7 +4,7 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { createUserRoleInOrg } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IApp, IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../../../core/src/core/cf.helpers';
@@ -28,6 +28,7 @@ import { RouterNav } from '../../../../../../../../store/src/actions/router.acti
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,

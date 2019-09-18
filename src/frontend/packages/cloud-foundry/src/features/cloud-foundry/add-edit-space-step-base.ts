@@ -9,18 +9,18 @@ import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   organizationEntityType,
   spaceEntityType,
   spaceQuotaEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../cloud-foundry/src/cf-entity-schema-types';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../cf-entity-factory';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export class AddEditSpaceStepBase {

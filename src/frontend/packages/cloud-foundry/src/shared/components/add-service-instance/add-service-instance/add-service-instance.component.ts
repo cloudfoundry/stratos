@@ -31,10 +31,9 @@ import { GetAllAppsInSpace, GetSpace } from '../../../../../../cloud-foundry/src
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  cfEntityFactory,
   serviceInstancesEntityType,
   spaceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -55,6 +54,7 @@ import { EntityServiceFactory } from '../../../../../../core/src/core/entity-ser
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../cf-entity-factory';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';

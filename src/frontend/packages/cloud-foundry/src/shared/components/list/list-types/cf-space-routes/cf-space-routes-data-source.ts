@@ -7,7 +7,7 @@ import {
   domainEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
 import {
   IListDataSource,

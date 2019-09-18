@@ -1,9 +1,10 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { appEventEntityType, cfEntityFactory } from '../cf-entity-factory';
-import { CFStartAction } from './cf-action.types';
 import { QParam, QParamJoiners } from '../../../store/src/q-param';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../cf-entity-factory';
+import { appEventEntityType } from '../cf-entity-schema-types';
+import { CFStartAction } from './cf-action.types';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',

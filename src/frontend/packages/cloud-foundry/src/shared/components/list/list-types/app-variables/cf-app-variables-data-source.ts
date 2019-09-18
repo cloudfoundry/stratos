@@ -2,17 +2,18 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GetAppEnvVarsAction } from '../../../../../actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../actions/app-variables.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { appEnvVarsEntityType, applicationEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-schema-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 

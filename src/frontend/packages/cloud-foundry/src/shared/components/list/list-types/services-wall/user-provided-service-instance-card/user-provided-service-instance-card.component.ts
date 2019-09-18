@@ -3,10 +3,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  cfEntityFactory,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { IUserProvidedServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
@@ -18,6 +15,7 @@ import { CardCell } from '../../../../../../../../core/src/shared/components/lis
 import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 
 

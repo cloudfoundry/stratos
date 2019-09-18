@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { GetAppEnvVarsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
