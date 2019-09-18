@@ -20,7 +20,7 @@
     "start-prod-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve --prod",
     "start-dev": "ng serve --aot=false",
     "test": "run-s test-frontend:* --continue-on-error",
-    "test-frontend:core": "ng test core --code-coverage --watch=true",
+    "test-frontend:core": "ng test core --code-coverage --watch=false",
     "test-frontend:store": "ng test store --code-coverage --watch=false",
     "test-frontend:cloud-foundry": "ng test cloud-foundry --code-coverage --watch=false",
     "test-frontend:cf-autoscaler": "ng test cf-autoscaler --code-coverage --watch=false",
