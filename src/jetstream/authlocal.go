@@ -19,7 +19,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
-//localAuth provides 
+//More fields will be moved into here as global portalProxy struct is phased out
 type localAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string

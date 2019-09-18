@@ -24,12 +24,11 @@ import (
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
 const UAAAdminIdentifier = "stratos.admin"
 
+//More fields will be moved into here as global portalProxy struct is phased out
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
 	p *portalProxy
 	skipSSLValidation bool
-	consoleClient string
-	consoleClientSecret string
 }
 
 //Login provides UAA-auth specific Stratos login
@@ -435,6 +434,7 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord
 }
 
 //SSO
+//SSO Login will be refactored at a later date
 
 // ssoLoginToUAA is a callback invoked after the UAA login flow has completed and during logout
 // We use a single callback so this can be whitelisted in the client

@@ -784,15 +784,16 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
-	pp.POST("/v1/auth/login/uaa", p.StratosAuthService.Login)
-	pp.POST("/v1/auth/logout", p.StratosAuthService.Logout)
+	loginAuthGroup := pp.Group("/v1/auth")
+	loginAuthGroup.POST("/login/uaa", p.StratosAuthService.Login)
+	loginAuthGroup.POST("/logout", p.StratosAuthService.Logout)
 
 	// SSO Routes will only respond if SSO is enabled
-	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
-	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
+	loginAuthGroup.GET("/sso_login", p.initSSOlogin)
+	loginAuthGroup.GET("/sso_logout", p.ssoLogoutOfUAA)
 
 	// Callback is used by both login to Stratos and login to an Endpoint
-	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
+	loginAuthGroup.GET("/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
@@ -811,17 +812,19 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
+	sessionAuthGroup := sessionGroup.Group("/auth")
+
 	// Connect to endpoint
-	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
+	sessionAuthGroup.POST("/login/cnsi", p.loginToCNSI)
 
 	// Connect to Enpoint (SSO)
-	sessionGroup.GET("/auth/login/cnsi", p.ssoLoginToCNSI)
+	sessionAuthGroup.GET("/login/cnsi", p.ssoLoginToCNSI)
 
 	// Disconnect endpoint
-	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
+	sessionAuthGroup.POST("/logout/cnsi", p.logoutOfCNSI)
 
 	// Verify Session
-	sessionGroup.GET("/auth/session/verify", p.verifySession)
+	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)
