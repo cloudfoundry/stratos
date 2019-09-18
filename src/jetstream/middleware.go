@@ -73,6 +73,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 		// Don't log an error if we are verifying the session, as a failure is not an error
 		isVerify := strings.HasSuffix(c.Request().RequestURI, "/auth/session/verify")
+		log.Error(c.Request().RequestURI)
 		if isVerify {
 			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)

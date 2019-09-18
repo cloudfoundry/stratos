@@ -188,6 +188,7 @@ func (a *uaaAuth) logout(c echo.Context) error {
 func (p *portalProxy) loginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 	log.Debug("loginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	var resp *interfaces.LoginRes
 	if err != nil {
 		// Check the Error
 		errMessage := "Access Denied"
@@ -233,7 +234,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) (*interfaces.LoginRes, error) {
 		}
 
 		uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
-		resp := &interfaces.LoginRes{
+		resp = &interfaces.LoginRes{
 			Account:     u.UserName,
 			TokenExpiry: u.TokenExpiry,
 			APIEndpoint: nil,
