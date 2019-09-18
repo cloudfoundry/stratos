@@ -49,6 +49,9 @@ console:
   # Enable/disable Tech Preview
   techPreview: false
 
+  # Use local admin user instead of UAA - set to a password to enable
+  localAdminPassword: ~
+
 images:
   console: stratos-console
   proxy: stratos-jetstream
@@ -99,6 +102,8 @@ env:
   DOMAIN:
   UAA_HOST: 
   UAA_PORT: 2793
+  # UAA Zone (namespace cf ias deployed to when deployed to Kubernetes)
+  UAA_ZONE: scf
 
   # SMTP Settings for Email Sending (User Invites)
   # If true, authenticate against the SMTP server using AUTH command.
