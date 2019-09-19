@@ -39,7 +39,6 @@ export class CreateQuotaStepComponent {
     const formValues = this.form.formGroup.value;
     const action = new CreateQuotaDefinition(this.cfGuid, formValues);
     this.store.dispatch(action);
-
     return this.store.select(selectRequestInfo(action, formValues.name)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.creating),
       map(requestInfo => ({

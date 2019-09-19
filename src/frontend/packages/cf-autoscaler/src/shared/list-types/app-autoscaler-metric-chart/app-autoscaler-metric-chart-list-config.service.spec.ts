@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
@@ -15,6 +16,9 @@ import { generateTestApplicationServiceProvider } from '../../../../../core/test
 import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartListConfigService } from './app-autoscaler-metric-chart-list-config.service';
+
+
+/* tslint:enable:max-line-length */
 
 describe('AppAutoscalerMetricChartListConfigService', () => {
   beforeEach(() => {

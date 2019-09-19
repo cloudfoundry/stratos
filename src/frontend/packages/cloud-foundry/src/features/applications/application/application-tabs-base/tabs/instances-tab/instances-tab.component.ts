@@ -25,7 +25,6 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
       useClass: CfAppInstancesConfigService,
     },
     ApplicationMonitorService,
-
   ]
 })
 export class InstancesTabComponent {

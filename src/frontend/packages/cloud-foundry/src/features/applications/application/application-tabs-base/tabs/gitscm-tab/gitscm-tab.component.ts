@@ -17,10 +17,11 @@ import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shar
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';
 import { CFAppState } from '../../../../../../cf-app-state';
-import { gitCommitEntityType } from '../../../../../../cf-entity-factory';
+import { gitCommitEntityType, gitRepoEntityType, gitBranchesEntityType } from '../../../../../../cf-entity-factory';
 import { GitBranch } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-gitscm-tab',
@@ -91,9 +92,12 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const repoEntityID = `${scmType}-${projectName}`;
         const commitEntityID = `${repoEntityID}-${commitId}`;
 
+        const gitRepoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitRepoEntityType);
+        const getRepoActionBuilder = gitRepoEntity.actionOrchestrator.getActionBuilder('getRepoInfo');
+        const getRepoAction = getRepoActionBuilder(stProject) as FetchGitHubRepoInfo;
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
           repoEntityID,
-          new FetchGitHubRepoInfo(stProject)
+          getRepoAction
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
@@ -102,13 +106,14 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
             entityType: gitCommitEntityType,
             actionMetadata: { projectName: stProject.deploySource.project, scm, commitId },
             entityGuid: commitEntityID,
-          },
-          // commitEntityID,
-          // new FetchCommit(scm, commitId, projectName)
+          }
         );
 
         const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
-        this.gitBranchEntityService = this.entityServiceFactory.create<GitBranch>(
+        const gitBranchesEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
+        const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
+        const fetchBranchesAction = fetchBranchesActionBuilder(branchID, null, { projectName, scm });
+        this.gitBranchEntityService = this.entityServiceFactory.create(
           branchID,
           new FetchBranchesForProject(scm, projectName)
         );

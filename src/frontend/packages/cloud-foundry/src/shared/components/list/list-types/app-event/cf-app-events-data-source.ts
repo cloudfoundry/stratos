@@ -13,6 +13,7 @@ import { CFAppState } from '../../../../../cf-app-state';
 import { appEventEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { QParamJoiners, QParam } from '../../../../../../../store/src/q-param';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export class CfAppEventsDataSource extends ListDataSource<APIResource> {
 
@@ -46,7 +47,9 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
-    const action = new GetAllAppEvents(paginationKey, appGuid, cfGuid);
+    const appEventEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEventEntityType);
+    const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(cfGuid, paginationKey, { appGuid });
 
     super(
       {

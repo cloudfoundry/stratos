@@ -22,17 +22,23 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {
   static createGetAllServiceBindings(appGuid: string, cfGuid: string) {
     const paginationKey = createEntityRelationPaginationKey(serviceBindingEntityType, appGuid);
-    return new GetAppServiceBindings(
+    const serviceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = serviceBindingEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
+    const getAppServiceBindingsAction = actionBuilder(
       appGuid, cfGuid, paginationKey, [
         createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
         createEntityRelationKey(serviceInstancesEntityType, serviceEntityType),
         createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
         createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
-      ]);
+      ]) as PaginatedAction;
+    return getAppServiceBindingsAction;
   }
 
   constructor(store: Store<CFAppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource<IServiceBinding>>) {

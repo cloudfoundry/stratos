@@ -7,12 +7,12 @@ export const organizationActionBuilders = {
   get: (
     guid,
     endpointGuid,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetOrganization(guid, endpointGuid, includeRelations, populateMissing),
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllOrganizations(paginationKey, endpointGuid, includeRelations, populateMissing),
   remove: (guid, endpointGuid) => new DeleteOrganization(guid, endpointGuid),
   update: (guid, endpointGuid, updatedOrg: IUpdateOrganization) => new UpdateOrganization(

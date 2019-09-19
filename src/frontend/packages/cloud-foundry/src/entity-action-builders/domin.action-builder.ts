@@ -12,7 +12,7 @@ export const domainActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { flatten }: CFBasePipelineRequestActionMeta
+    { flatten }: CFBasePipelineRequestActionMeta = {}
   ) => new FetchAllDomains(endpointGuid, paginationKey, flatten)
 } as OrchestratedActionBuilders;
 

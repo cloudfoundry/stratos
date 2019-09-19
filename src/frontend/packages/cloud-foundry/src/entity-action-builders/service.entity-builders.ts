@@ -7,7 +7,7 @@ export const serviceActionBuilders = {
   get: (
     guid,
     endpointGuid,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetService(
     guid,
     endpointGuid,
@@ -17,7 +17,7 @@ export const serviceActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllServices(paginationKey, endpointGuid, includeRelations, populateMissing),
   getAllInSpace: (
     endpointGuid: string,

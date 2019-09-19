@@ -56,6 +56,6 @@ describe('failedEntityHandlers', () => {
       },
       true
     );
-    expect(spyDispatcher).toHaveBeenCalledWith(3);
+    expect(spyDispatcher).toHaveBeenCalledTimes(3);
   });
 });

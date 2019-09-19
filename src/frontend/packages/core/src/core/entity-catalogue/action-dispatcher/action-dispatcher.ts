@@ -73,7 +73,7 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
   }
 
   public dispatchGetAll(...args: Parameters<T['getAll']>) {
-    return this.getActionDispatcher('getAll').dispatch(...args);
+    return this.getActionDispatcher('getMultiple').dispatch(...args);
   }
 
   public dispatchAction<K extends keyof T>(actionType: K, ...args: Parameters<T[K]>) {

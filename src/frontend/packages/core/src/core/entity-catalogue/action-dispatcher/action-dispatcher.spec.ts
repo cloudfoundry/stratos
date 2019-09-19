@@ -105,7 +105,7 @@ describe('ActionDispatcher', () => {
     expect(spy).toHaveBeenCalledWith(endpointGuid, aString);
   });
 
-  it('should dispatch getAll action', () => {
+  it('should dispatch getMultiple action', () => {
     function getActionBuilder() {
       return getPaginationAction();
     }
@@ -115,8 +115,8 @@ describe('ActionDispatcher', () => {
     } as OrchestratedActionBuilders;
     const endpointGuid = 'guid';
     const paginationKey = 'pagKey';
-    const spy = spyOn(actionBuilders, 'getAll');
-    const actionOrchestrator = new ActionOrchestrator('getAll', actionBuilders);
+    const spy = spyOn(actionBuilders, 'getMultiple');
+    const actionOrchestrator = new ActionOrchestrator('getMultiple', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
     expect(entityActionDispatcher.dispatchGetAll(endpointGuid, paginationKey)).toBe(true);
     expect(spy).toHaveBeenCalledWith(endpointGuid, paginationKey);

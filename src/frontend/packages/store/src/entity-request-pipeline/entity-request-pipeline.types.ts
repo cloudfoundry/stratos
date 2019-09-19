@@ -112,5 +112,5 @@ export interface BasePipelineConfig<T extends AppState = InternalAppState, Y ext
   appState: T;
 }
 export interface PagedJetstreamResponse<T = any> {
-  [endpointId: string]: T[] | JetStreamErrorResponse;
+  [endpointId: string]: T[] | JetStreamErrorResponse[];
 }

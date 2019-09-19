@@ -7,7 +7,7 @@ const BASE_ACTIONS = [
   'delete',
   'update',
   'create',
-  'getAll'
+  'getMultiple'
 ];
 const fakeActions = [
   'myMadeUpAction1',

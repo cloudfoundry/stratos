@@ -123,6 +123,7 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
+import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -718,6 +719,7 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
       dataReducers: [
         endpointDisconnectRemoveEntitiesReducer()
       ],
+      actionBuilders: applicationEventActionBuilders,
       entityBuilder: {
         getMetadata: app => ({
           guid: app.metadata.guid,

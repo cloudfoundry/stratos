@@ -13,11 +13,15 @@ import {
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 
 export class CfSecurityGroupsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-    const action = new GetAllSecurityGroups(cfGuid, paginationKey);
+    const sgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, securityGroupEntityType);
+    const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(cfGuid, paginationKey);
     super({
       store,
       action,

@@ -12,6 +12,9 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../application.service';
+import { appSummaryEntityType, appStatsEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class ApplicationPollingService {
@@ -67,6 +70,7 @@ export class ApplicationPollingService {
 
   public poll(withApp = false) {
     const { cfGuid, appGuid } = this.applicationService;
+    const actionDispatcher = (action) => this.store.dispatch(action);
     if (withApp) {
       const updatingApp = {
         ...this.entityService.action,
@@ -77,9 +81,13 @@ export class ApplicationPollingService {
     this.entityService.entityObs$.pipe(
       first(),
     ).subscribe(resource => {
-      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+      const appSummaryActionDispatcher = appSummaryEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
+      appSummaryActionDispatcher.dispatchGet(appGuid, cfGuid);
       if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
-        this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+        const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+        const appStatsActionDispatcher = appStatsEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
+        appStatsActionDispatcher.dispatchGet(appGuid, cfGuid);
       }
     });
   }

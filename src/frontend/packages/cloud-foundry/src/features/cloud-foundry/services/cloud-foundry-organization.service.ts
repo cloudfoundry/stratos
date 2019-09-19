@@ -30,13 +30,13 @@ import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { GetOrganization } from '../../../actions/organization.actions';
-import { DeleteSpace } from '../../../actions/space.actions';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,
@@ -100,7 +100,10 @@ export class CloudFoundryOrganizationService {
   }
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
-    this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('remove');
+    const deleteSpaceAction = actionBuilder(spaceGuid, endpointGuid, { orgGuid });
+    this.store.dispatch(deleteSpaceAction);
   }
 
   public fetchApps() {
@@ -128,9 +131,12 @@ export class CloudFoundryOrganizationService {
             createEntityRelationKey(organizationEntityType, OrgUserRoleNames.AUDITOR),
           );
         }
+        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, relations);
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(
           this.orgGuid,
-          new GetOrganization(this.orgGuid, this.cfGuid, relations)
+          getOrgAction
         );
         return orgEntityService.waitForEntity$;
       }),

@@ -22,7 +22,7 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
@@ -918,7 +918,7 @@ describe('CurrentUserPermissionsService', () => {
       imports: [
         AppStoreExtensionsModule,
         {
-          ngModule: EffectsFeatureTestModule,
+          ngModule: EntityCatalogueTestModule,
           providers: [
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [

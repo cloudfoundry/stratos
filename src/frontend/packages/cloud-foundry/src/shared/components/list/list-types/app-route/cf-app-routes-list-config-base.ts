@@ -14,6 +14,9 @@ import { PaginatedAction } from '../../../../../../../store/src/types/pagination
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfigBase implements IListConfig<APIResource> {
 
@@ -61,10 +64,13 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
     this.getDataSource = () => {
       // Lazy init so that any changes to the columns & data functions (like sort) are correctly applied
       if (!this.dataSource) {
+        const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+        const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
+        const getAppRoutesAction = actionBuilder(appService.appGuid, appService.cfGuid) as PaginatedAction;
         this.dataSource = new CfAppRoutesDataSource(
           store,
           appService,
-          getRoutesAction || new GetAppRoutes(appService.appGuid, appService.cfGuid),
+          getRoutesAction || getAppRoutesAction,
           this,
           genericRouteState
         );

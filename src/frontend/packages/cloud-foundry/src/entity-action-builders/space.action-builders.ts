@@ -8,7 +8,7 @@ export const spaceActionBuilders = {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetSpace(
     guid,
     endpointGuid,
@@ -46,7 +46,7 @@ export const spaceActionBuilders = {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllSpaces(
     paginationKey,
     endpointGuid,
@@ -57,6 +57,6 @@ export const spaceActionBuilders = {
     orgGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllOrganizationSpaces(paginationKey, orgGuid, endpointGuid, includeRelations, populateMissing)
 } as OrchestratedActionBuilders;
