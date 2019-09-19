@@ -8,9 +8,6 @@ import {
 } from '../action-orchestrator/action-orchestrator';
 
 type ActionDispatcher = (action: Action) => void;
-type a = [string, string, number];
-// const list = ['a', 'b', 'c'] as const; // TS3.4 syntax
-// type NeededUnionType = typeof list[0 | 2];
 export class EntityActionDispatcher<
   T extends OrchestratedActionBuilder<any[], Action> =
   OrchestratedActionBuilder<any[], Action>,
@@ -25,11 +22,9 @@ export class EntityActionDispatcher<
     private actionDispatcher?: ActionDispatcher,
     private actionBuilder?: T
   ) { }
-  public dispatch(actionType, ...args: Parameters<T>) {
+  public dispatch(...args: Parameters<T>) {
     if (this.actionBuilder) {
       const action = this.actionBuilder(...args);
-      /* tslint:disable-next-line:no-string-literal  */
-      action['requestTypeLabel'] = actionType;
       if (this.actionDispatcher) {
         this.actionDispatcher(action);
       } else if (EntityActionDispatcher.STORE && EntityActionDispatcher.STORE.dispatch) {
@@ -59,26 +54,26 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
   }
 
   public dispatchGet(...args: Parameters<T['get']>) {
-    return this.getActionDispatcher('get').dispatch('get', ...args);
+    return this.getActionDispatcher('get').dispatch(...args);
   }
 
   public dispatchDelete(...args: Parameters<T['delete']>) {
-    return this.getActionDispatcher('delete').dispatch('delete', ...args);
+    return this.getActionDispatcher('delete').dispatch(...args);
   }
 
   public dispatchUpdate(...args: Parameters<T['update']>) {
-    return this.getActionDispatcher('update').dispatch('update', ...args);
+    return this.getActionDispatcher('update').dispatch(...args);
   }
 
   public dispatchCreate(...args: Parameters<T['create']>) {
-    return this.getActionDispatcher('create').dispatch('create', ...args);
+    return this.getActionDispatcher('create').dispatch(...args);
   }
 
   public dispatchGetAll(...args: Parameters<T['getAll']>) {
-    return this.getActionDispatcher('getAll').dispatch('getAll', ...args);
+    return this.getActionDispatcher('getAll').dispatch(...args);
   }
 
   public dispatchAction<K extends keyof T>(actionType: K, ...args: Parameters<T[K]>) {
-    return this.getActionDispatcher(actionType).dispatch(actionType, ...args);
+    return this.getActionDispatcher(actionType).dispatch(...args);
   }
 }

@@ -17,6 +17,7 @@ import {
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
+  ActionBuilderAction,
 } from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
@@ -184,7 +185,8 @@ export class StratosBaseCatalogueEntity<
 
   private getTypeFromAction(action?: EntityRequestAction) {
     if (action) {
-      return action.requestTypeLabel || action.updatingKey;
+      const actionBuilderAction = action as ActionBuilderAction;
+      return actionBuilderAction.actionBuilderActionType || action.updatingKey;
     }
   }
 
