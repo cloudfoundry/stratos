@@ -83,7 +83,10 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   onChanges() {
     this.sub = this.editProfileForm.valueChanges.subscribe(values => {
-      const required = values.emailAddress !== this.emailAddress || values.newPassword.length;
+      // Old password is required if either email or new pw is specified (uaa)
+      // or only if new pw is specified (local account)
+      const required = this.needsPasswordForEmailChange ?
+        values.emailAddress !== this.emailAddress || values.newPassword.length : values.newPassword.length;
       this.passwordRequired = !!required;
       if (required !== this.lastRequired) {
         this.lastRequired = required;

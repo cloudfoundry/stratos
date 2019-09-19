@@ -27,7 +27,7 @@
         <div *ngIf="(canChangePassword | async)" class="edit-profile__group">
           <p>Change Password (Leave blank to keep current password)</p>
           <mat-form-field *ngIf="!needsPasswordForEmailChange">
-            <input matInput placeholder="Current Password" type="password" formControlName="currentPassword" required="true">
+            <input matInput placeholder="Current Password" type="password" formControlName="currentPassword" [required]="passwordRequired">
           </mat-form-field>
           <mat-form-field>
             <input matInput placeholder="New Password" type="password" formControlName="newPassword">
