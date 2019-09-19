@@ -1,23 +1,30 @@
 import { RequestMethod } from '@angular/http';
-import { IRequestTypeState, AppState } from '../../app-state';
+import { Store } from '@ngrx/store';
+
+import { pathGet } from '../../../../core/src/core/utils.service';
+import { APIResponse } from '../../actions/request.actions';
+import { AppState, IRequestTypeState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
 import { IRequestDataState } from '../../types/entity.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
+  APISuccessOrFailedAction,
   ICFAction,
+  InternalEndpointError,
   IRequestAction,
   SingleEntityAction,
   StartRequestAction,
-  APISuccessOrFailedAction,
-  WrapperRequestActionSuccess,
   WrapperRequestActionFailed,
-  InternalEndpointError
+  WrapperRequestActionSuccess,
 } from '../../types/request.types';
-import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { APIResponse } from '../../actions/request.actions';
-import { pathGet } from '../../../../core/src/core/utils.service';
-import { Store } from '@ngrx/store';
+import {
+  defaultDeletingActionState,
+  getDefaultActionState,
+  getDefaultRequestState,
+  RequestInfoState,
+  rootUpdatingKey,
+} from './types';
 
 
 export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {

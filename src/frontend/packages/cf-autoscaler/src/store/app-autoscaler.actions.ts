@@ -41,6 +41,7 @@ export const AppAutoscalerMetricEvents = {
 
 export const APP_AUTOSCALER_POLICY = '[New App Autoscaler] Fetch policy';
 export const APP_AUTOSCALER_POLICY_TRIGGER = '[New App Autoscaler] Fetch policy trigger';
+export const CREATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Create policy';
 export const UPDATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Update policy';
 export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy';
 export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
@@ -84,15 +85,19 @@ export class GetAppAutoscalerPolicyAction implements IRequestAction {
   entityKey = appAutoscalerPolicySchemaKey;
 }
 
-export class UpdateAppAutoscalerPolicyAction implements IRequestAction {
-  static updateKey = 'Updating-Existing-Application-Policy';
+export class CreateAppAutoscalerPolicyAction implements IRequestAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
     public policy: AppAutoscalerPolicyLocal,
   ) { }
-  type = UPDATE_APP_AUTOSCALER_POLICY;
+  type = CREATE_APP_AUTOSCALER_POLICY;
   entityKey = appAutoscalerPolicySchemaKey;
+}
+
+export class UpdateAppAutoscalerPolicyAction extends CreateAppAutoscalerPolicyAction {
+  static updateKey = 'Updating-Existing-Application-Policy';
+  type = UPDATE_APP_AUTOSCALER_POLICY;
   updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
 }
 

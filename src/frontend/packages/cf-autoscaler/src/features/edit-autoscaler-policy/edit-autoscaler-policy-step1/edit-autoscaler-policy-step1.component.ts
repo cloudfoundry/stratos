@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -32,9 +33,10 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicy imp
   constructor(
     public applicationService: ApplicationService,
     private fb: FormBuilder,
-    service: EditAutoscalerPolicyService
+    service: EditAutoscalerPolicyService,
+    route: ActivatedRoute
   ) {
-    super(service);
+    super(service, route);
     this.editLimitForm = this.fb.group({
       instance_min_count: [0, [Validators.required, this.validateGlobalLimitMin()]],
       instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]],
