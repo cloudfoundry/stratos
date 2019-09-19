@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -22,10 +23,11 @@ import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-c
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
+/* tslint:enable:max-line-length */
+
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;
   let fixture: ComponentFixture<AppAutoscalerMetricChartCardComponent>;
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [

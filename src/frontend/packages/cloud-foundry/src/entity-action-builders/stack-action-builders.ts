@@ -8,7 +8,7 @@ export const stackActionBuilders = {
     guid: string,
     endpointGuid: string,
   ) => new GetStack(guid, endpointGuid),
-  getAll: (
+  getMultiple: (
     endpointGuid: string,
   ) => new GetAllStacks(endpointGuid),
 

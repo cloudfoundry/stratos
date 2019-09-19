@@ -3,8 +3,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { GetOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
-import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import {
   IOrganization,
   IOrgQuotaDefinition,
@@ -18,6 +16,9 @@ import { endpointEntitiesSelector } from '../../../../../store/src/selectors/end
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
 
 export class QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
@@ -48,9 +49,12 @@ export class QuotaDefinitionBaseComponent {
 
   setupOrgObservable() {
     if (this.orgGuid) {
+      const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+      const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+      const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid);
       this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
         this.orgGuid,
-        new GetOrganization(this.orgGuid, this.cfGuid)
+        getOrgAction
       ).waitForEntity$.pipe(
         map(data => data.entity),
       );
@@ -59,10 +63,12 @@ export class QuotaDefinitionBaseComponent {
 
   setupSpaceObservable() {
     if (this.spaceGuid) {
+      const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+      const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+      const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid);
       this.space$ = this.entityServiceFactory.create<APIResource<ISpace>>(
         this.spaceGuid,
-        new GetSpace(this.spaceGuid, this.cfGuid),
-        true
+        getSpaceAction
       ).waitForEntity$.pipe(
         map(data => data.entity),
       );
@@ -88,7 +94,6 @@ export class QuotaDefinitionBaseComponent {
     org: APIResource<IOrganization>,
     space: APIResource<ISpace>
   ) {
-    throw new Error('Method not implemented.');
     return null;
   }
 }

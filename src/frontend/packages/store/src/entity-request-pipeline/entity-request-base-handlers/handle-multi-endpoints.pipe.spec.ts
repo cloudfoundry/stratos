@@ -16,21 +16,21 @@ describe('handle-multi-endpoint-pipe', () => {
       data2: 'ThisIsData5'
     };
     const resData = {
-      [endpoint1Guid]: {
+      [endpoint1Guid]: [{
         error: {
           statusCode: 1,
           status: '123'
         },
         errorResponse: 'test'
-      } as JetStreamErrorResponse,
-      [endpoint3Guid]: {
+      } as JetStreamErrorResponse],
+      [endpoint3Guid]: [{
         error: {
           statusCode: 12,
           status: '4'
         },
         errorResponse: 'test4324'
-      } as JetStreamErrorResponse,
-      [endpoint2Guid]: endpoint2Res,
+      } as JetStreamErrorResponse],
+      [endpoint2Guid]: [endpoint2Res],
       [endpoint4Guid]: [endpoint4Res, endpoint4Res]
     } as JetstreamResponse;
     const handled = handleMultiEndpointsPipeFactory(url)(resData);
@@ -54,24 +54,30 @@ describe('handle-multi-endpoint-pipe', () => {
     const endpoint2Guid = 'endpoint2';
     const endpoint4Guid = 'endpoint4';
     const endpoint2Res = {
-      data1: 'ThisIsData'
+      entities: [{ data1: 'ThisIsData', }],
+      total: 10
     };
     const endpoint4Res = {
-      data2: 'ThisIsData5'
+      entities: [{ data2: 'ThisIsData5' }],
+      total: 15
     };
     const resData = {
-      [endpoint2Guid]: { entities: endpoint2Res },
-      [endpoint4Guid]: { entities: [endpoint4Res, endpoint4Res] }
+      [endpoint2Guid]: [endpoint2Res],
+      [endpoint4Guid]: [endpoint4Res, endpoint4Res]
     } as JetstreamResponse;
     const handled = handleMultiEndpointsPipeFactory(url, {
-      getEntitiesFromResponse: (res) => res.entities,
-      getTotalEntities: (res) => res.entities.length,
+      getEntitiesFromResponse: (page) => {
+        return page.entities;
+      },
+      getTotalEntities: (res) => Object.values(res).reduce((total, pages) => {
+        return total + pages[0].total;
+      }, 0),
       getPaginationParameters: () => ({ page: '1' }),
       getTotalPages: () => 4
     })(resData);
     expect(handled.successes.length).toBe(2);
-    expect(handled.successes[0].entities[0].data1).toBe(endpoint2Res.data1);
-    expect(handled.successes[1].entities[0].data2).toBe(endpoint4Res.data2);
-    expect(handled.successes[1].entities[1].data2).toBe(endpoint4Res.data2);
+    expect(handled.successes[0].entities[0]).toBe(endpoint2Res.entities[0]);
+    expect(handled.successes[1].entities[0]).toBe(endpoint4Res.entities[0]);
+    expect(handled.successes[1].entities[1]).toBe(endpoint4Res.entities[0]);
   });
 });

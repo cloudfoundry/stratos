@@ -7,7 +7,7 @@ import { first, map } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { FetchAllServiceBindings } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceEntityType, serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -32,10 +32,11 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   obsCache: { [serviceGuid: string]: Observable<RowState> } = {};
 
   static createFetchServiceBinding = (cfGuid: string, serviceInstanceGuid: string): FetchAllServiceBindings => {
-    const action = new FetchAllServiceBindings(
+    const sgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(
       cfGuid,
-      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid),
-    );
+      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid)) as FetchAllServiceBindings;
     action.initialParams['results-per-page'] = 1;
     action.initialParams.q = [
       new QParam('service_instance_guid', serviceInstanceGuid).toString(),

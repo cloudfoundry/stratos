@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 import {
   StackedInputActionResult,
@@ -15,11 +16,9 @@ import {
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFEntityConfig } from '../../../../../../cf-types';
-import { GetOrganization } from '../../../../../actions/organization.actions';
-import { GetSpace } from '../../../../../actions/space.actions';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
-import { cfUserEntityType } from '../../../../../cf-entity-factory';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-factory';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -70,15 +69,29 @@ export class InviteUsersCreateComponent implements OnInit {
 
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
+    const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+    const getOrgAction = getOrgActionBuilder(
+      this.activeRouteCfOrgSpace.orgGuid,
+      this.activeRouteCfOrgSpace.cfGuid,
+      { includeRelations: [], populateMissing: false }
+    );
     this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
       this.activeRouteCfOrgSpace.orgGuid,
-      new GetOrganization(this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.cfGuid, [], false)
+      getOrgAction
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     );
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+    const getSpaceAction = actionBuilder(
+      this.activeRouteCfOrgSpace.spaceGuid,
+      this.activeRouteCfOrgSpace.cfGuid,
+      { includeRelations: [], populateMissing: false }
+    );
     this.space$ = this.isSpace ? this.entityServiceFactory.create<APIResource<ISpace>>(
       this.activeRouteCfOrgSpace.spaceGuid,
-      new GetSpace(this.activeRouteCfOrgSpace.spaceGuid, this.activeRouteCfOrgSpace.cfGuid, [], false)
+      getSpaceAction
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     ) : observableOf(null);

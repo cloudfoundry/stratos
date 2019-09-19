@@ -2,6 +2,7 @@ import { HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
+import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { EntitySchema } from '../helpers/entity-schema';
@@ -10,14 +11,11 @@ import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
 
 export interface SingleEntityAction {
-  entityType: string;
-  endpointType: string;
   // For single entity requests
   guid?: string;
 }
 
-export interface RequestAction extends Action, SingleEntityAction {
-  endpointGuid?: string;
+export interface RequestAction extends Action, BasePipelineRequestAction, SingleEntityAction {
   updatingKey?: string;
 }
 
@@ -124,6 +122,7 @@ export interface ICFAction extends EntityRequestAction {
   options: RequestOptions;
   actions: string[];
   skipValidation?: boolean;
+  validate?: boolean;
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {

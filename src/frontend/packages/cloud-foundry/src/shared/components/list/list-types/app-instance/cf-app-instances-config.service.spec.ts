@@ -4,10 +4,15 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { CustomImportModule } from '../../../../../../../core/src/custom-import.module';
+import { CF_GUID } from '../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../core/test-framework/entity-service.helper';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { testSCFEndpointGuid } from '../../../../../../../core/test-framework/store-test-helper';
+import {
+  generateCfStoreModules,
+  generateTestCfEndpointServiceProvider,
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { GetApplication } from '../../../../../actions/application.actions';
 import { applicationEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
 import { ApplicationsModule } from '../../../../../features/applications/applications.module';
@@ -27,7 +32,12 @@ describe('CfAppInstancesConfigService', () => {
           cfEntityFactory(applicationEntityType),
           new GetApplication(appGuid, cfGuid)
         ),
-        generateTestApplicationServiceProvider(appGuid, cfGuid)
+        generateTestApplicationServiceProvider(appGuid, cfGuid),
+        generateTestCfEndpointServiceProvider(),
+        {
+          provide: CF_GUID,
+          useValue: testSCFEndpointGuid,
+        },
       ],
       imports: [
         generateCfStoreModules(),

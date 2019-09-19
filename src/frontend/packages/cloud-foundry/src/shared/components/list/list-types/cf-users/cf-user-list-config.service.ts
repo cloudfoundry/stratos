@@ -10,7 +10,7 @@ import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { EntityCatalogueHelpers } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListAction,
@@ -243,7 +243,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   }
 
   private initialiseMultiFilter(action: PaginatedAction) {
-    const entityKey = EntityCatalogueHelpers.buildEntityKey(action.entityType, action.endpointType);
+    const entityKey = entityCatalogue.getEntityKey(action);
     this.store.select(selectPaginationState(entityKey, action.paginationKey)).pipe(
       filter((pag) => !!pag),
       first(),

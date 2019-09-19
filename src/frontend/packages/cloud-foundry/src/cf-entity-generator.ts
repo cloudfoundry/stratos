@@ -27,6 +27,7 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
@@ -91,6 +92,7 @@ import {
   gitBranchActionBuilders,
   GitCommitActionBuilders,
   gitCommitActionBuilders,
+  GitCommitActionBuildersConfig,
   gitRepoActionBuilders,
 } from './entity-action-builders/git-action-builder';
 import { organizationActionBuilders } from './entity-action-builders/organization.action-builders';
@@ -121,6 +123,18 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
+import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
+
+export interface CFBasePipelineRequestActionMeta {
+  includeRelations?: string[];
+  populateMissing?: boolean;
+  flatten?: boolean;
+}
+// class CFBasePipelineRequestAction = BasePipelineRequestAction < { entity } >
+
+export function registerCFEntities() {
+  generateCFEntities().forEach(entity => entityCatalogue.register(entity));
+}
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
@@ -623,7 +637,7 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     labelPlural: 'Git Commits',
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<GitCommit>, GitCommitActionBuilders>(
+  return new StratosCatalogueEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
     definition,
     {
       dataReducers: [
@@ -632,7 +646,7 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
       actionBuilders: gitCommitActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
-          name: ent.entity.commit ? ent.entity.commit.message || ent.entity.sha : ent.entity.sha
+          name: ent.commit ? ent.commit.message || ent.sha : ent.sha
         }),
         getGuid: metadata => metadata.guid,
       }
@@ -705,6 +719,7 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
       dataReducers: [
         endpointDisconnectRemoveEntitiesReducer()
       ],
+      actionBuilders: applicationEventActionBuilders,
       entityBuilder: {
         getMetadata: app => ({
           guid: app.metadata.guid,

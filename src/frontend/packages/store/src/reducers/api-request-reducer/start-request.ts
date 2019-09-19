@@ -5,12 +5,13 @@ import {
   modifyRequestWithRequestType,
   setEntityRequestState,
 } from './request-helpers';
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export function startRequest(state, action: IStartRequestAction) {
   if (!action.apiAction.guid) {
     return state;
   }
-  const apiAction = action.apiAction as EntityRequestAction;
+  const apiAction = action.apiAction as BaseEntityRequestAction;
   let requestState = getEntityRequestState(state, apiAction);
 
   if (apiAction.updatingKey) {
@@ -29,5 +30,5 @@ export function startRequest(state, action: IStartRequestAction) {
       action.requestType
     );
   }
-  return setEntityRequestState(state, requestState, action.apiAction);
+  return setEntityRequestState(state, requestState, apiAction);
 }

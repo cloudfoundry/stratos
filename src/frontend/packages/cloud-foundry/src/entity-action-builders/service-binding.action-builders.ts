@@ -1,16 +1,14 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAppServiceBindings } from '../actions/application-service-routes.actions';
 import { CreateServiceBinding, DeleteServiceBinding, FetchAllServiceBindings } from '../actions/service-bindings.actions';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { ListServiceBindingsForInstance } from '../actions/service-instances.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const serviceBindingActionBuilders = {
   create: (
     id,
     endpointGuid,
-    applicationGuid: string,
-    serviceInstanceGuid: string,
-    params: object
+    { applicationGuid, serviceInstanceGuid, params }: { applicationGuid: string, serviceInstanceGuid: string, params: object }
   ) => new CreateServiceBinding(
     endpointGuid,
     id,
@@ -21,13 +19,12 @@ export const serviceBindingActionBuilders = {
   remove: (
     guid,
     endpointGuid,
-    serviceInstanceGuid: string
+    { serviceInstanceGuid }: { serviceInstanceGuid: string }
   ) => new DeleteServiceBinding(endpointGuid, guid, serviceInstanceGuid),
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
-    includeRelations?,
-    populateMissing?
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new FetchAllServiceBindings(
     endpointGuid,
     paginationKey,
@@ -37,15 +34,14 @@ export const serviceBindingActionBuilders = {
   getAllForApplication: (
     applicationGuid: string,
     endpointGuid: string,
-    paginationKey?: string,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    paginationKey: string,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAppServiceBindings(applicationGuid, endpointGuid, paginationKey, includeRelations, populateMissing),
   getAllForServiceInstance: (
     serviceInstanceGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    includeRelations?: string[]
+    { includeRelations }: CFBasePipelineRequestActionMeta = {}
   ) => new ListServiceBindingsForInstance(
     endpointGuid,
     serviceInstanceGuid,

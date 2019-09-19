@@ -1,10 +1,8 @@
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { RequestOptions } from '@angular/http';
 
-import { environment } from '../../../../core/src/environments/environment';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
 
 export function getRequestTypeFromRequestType(requestType: ApiRequestTypes) {
   if (requestType === 'update') {
@@ -35,13 +33,12 @@ function getHttpParams(options: RequestOptions) {
 // This will convert the old style RequestOptions into a new HttpRequest
 function getRequestFromLegacyOptions(
   options: RequestOptions,
-  requestType: ApiRequestTypes,
-  url: string
+  requestType: ApiRequestTypes
 ) {
   const method = getRequestTypeFromRequestType(requestType);
   return new HttpRequest(
     method,
-    url,
+    options.url,
     options.body,
     {
       headers: new HttpHeaders(options.headers ? options.headers.toJSON() : null),
@@ -57,13 +54,10 @@ export const buildRequestEntityPipe = (
   requestType: ApiRequestTypes,
   requestOptions: RequestOptions | HttpRequest<any>
 ): HttpRequest<any> => {
-  const url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${requestOptions.url}`;
   if (requestOptions instanceof HttpRequest) {
-    return requestOptions.clone({
-      url
-    });
+    return requestOptions;
   }
-  return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType, url);
+  return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType);
 };
 
 

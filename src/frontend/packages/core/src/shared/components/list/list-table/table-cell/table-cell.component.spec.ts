@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
@@ -34,6 +35,8 @@ import { AppChipsComponent } from '../../../chips/chips.component';
 import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';
+
+/* tslint:enable:max-line-length */
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;

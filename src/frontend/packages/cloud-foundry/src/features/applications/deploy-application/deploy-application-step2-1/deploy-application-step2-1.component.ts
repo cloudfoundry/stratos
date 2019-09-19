@@ -29,7 +29,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 export class DeployApplicationStep21Component {
 
   validate: Observable<boolean>;
-  selectedCommit$: Observable<APIResource<GitCommit>>;
+  selectedCommit$: Observable<GitCommit>;
 
   @ViewChild('target', { read: ViewContainerRef })
   target: ViewContainerRef;
@@ -63,7 +63,7 @@ export class DeployApplicationStep21Component {
     return this.selectedCommit$.pipe(
       first(),
       tap(commit => {
-        this.store.dispatch(new SetDeployCommit(commit.entity.sha));
+        this.store.dispatch(new SetDeployCommit(commit.sha));
       }),
       map(() => ({ success: true }))
     );

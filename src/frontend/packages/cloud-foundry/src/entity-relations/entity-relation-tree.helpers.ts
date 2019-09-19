@@ -5,7 +5,7 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
-import { EntityInlineParentAction, ValidateResultFetchingState } from './entity-relations.types';
+import { ValidateResultFetchingState } from './entity-relations.types';
 
 export function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
   Observable<ValidateResultFetchingState> {
@@ -17,9 +17,3 @@ export function createValidationPaginationWatcher(store, paramPaginationAction: 
     })
   );
 }
-
-
-export function isEntityInlineParentAction(anything: any): EntityInlineParentAction {
-  return anything && !!anything.includeRelations && anything.populateMissing !== undefined ? anything as EntityInlineParentAction : null;
-}
-

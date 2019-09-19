@@ -21,7 +21,6 @@ import { getAPIRequestDataState, selectEntities } from '../../../../store/src/se
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { StratosBaseCatalogueEntity } from '../../core/entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
 import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
@@ -251,7 +250,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       map(([pagination]) => {
         return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
           const { entityConfig } = pageRequest;
-          const key = EntityCatalogueHelpers.buildEntityKey(entityConfig.entityType, entityConfig.endpointType);
+          const key = entityCatalogue.getEntityKey(entityConfig);
           if (key && !entityKeys.includes(key)) {
             entityKeys.push(key);
           }

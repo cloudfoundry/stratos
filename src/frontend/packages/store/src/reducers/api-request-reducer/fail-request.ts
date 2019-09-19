@@ -4,10 +4,11 @@ import {
   mergeUpdatingState,
   setEntityRequestState,
 } from './request-helpers';
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export function failRequest(state, action: IFailedRequestAction) {
   if (action.apiAction.guid) {
-    const apiAction = action.apiAction as EntityRequestAction;
+    const apiAction = action.apiAction as BaseEntityRequestAction;
     const requestFailedState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {
       requestFailedState.updating = mergeUpdatingState(

@@ -336,7 +336,6 @@ function associateChildWithParent(
           guid: action.parentGuid,
           entityType: action.parentEntityConfig.entityType,
           endpointType: action.parentEntityConfig.endpointType,
-          // TODO: RC Check childEntityKEy
           type: '[Entity] Associate with parent',
         };
         if (!environment.production) {

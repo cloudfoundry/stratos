@@ -9,7 +9,6 @@ import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../core/test-framework/application-service-helper';
 import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
-import { AppStoreExtensionsModule } from '../../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-step1.component';
@@ -22,7 +21,6 @@ describe('EditAutoscalerPolicyStep1Component', () => {
     TestBed.configureTestingModule({
       declarations: [EditAutoscalerPolicyStep1Component],
       imports: [
-        AppStoreExtensionsModule,
         CfAutoscalerTestingModule,
         NoopAnimationsModule,
         createEmptyStoreModule(),

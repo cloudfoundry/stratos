@@ -4,23 +4,24 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
-import { GetAllOrganizationSpaces } from '../../../../cloud-foundry/src/actions/organization.actions';
-import { GetOrganizationSpaceQuotaDefinitions } from '../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   cfEntityFactory,
   organizationEntityType,
   spaceEntityType,
   spaceQuotaEntityType,
+  quotaDefinitionEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export class AddEditSpaceStepBase {
@@ -42,8 +43,9 @@ export class AddEditSpaceStepBase {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     const paginationKey = getPaginationKey('cf-space', this.orgGuid);
-
-    const action = new GetAllOrganizationSpaces(paginationKey, this.orgGuid, this.cfGuid);
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const getAllSpaceActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
+    const action = getAllSpaceActionBuilder(this.orgGuid, this.cfGuid, paginationKey) as PaginatedAction;
 
     this.allSpacesInOrg$ = getPaginationObservables<APIResource, CFAppState>(
       {
@@ -63,10 +65,14 @@ export class AddEditSpaceStepBase {
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(organizationEntityType, this.orgGuid);
+
+    const quotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const actionBuilder = quotaEntity.actionOrchestrator.getActionBuilder('getOrganizationSpaceQuotaDefinitions');
+    const getOrganizationSpaceQuotaDefnitionsAction = actionBuilder(quotaPaginationKey, this.orgGuid, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<ISpaceQuotaDefinition>>(
       {
         store: this.store,
-        action: new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, this.orgGuid, this.cfGuid),
+        action: getOrganizationSpaceQuotaDefnitionsAction as PaginatedAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(spaceQuotaEntityType)

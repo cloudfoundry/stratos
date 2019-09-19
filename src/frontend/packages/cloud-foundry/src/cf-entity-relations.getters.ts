@@ -11,9 +11,8 @@ import { QParam } from '../../store/src/q-param';
 import { selectPaginationState } from '../../store/src/selectors/pagination.selectors';
 import { isPaginatedAction, PaginatedAction, PaginationParam } from '../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../store/src/types/request.types';
-import { isEntityInlineParentAction } from './entity-relations/entity-relation-tree.helpers';
 import { listEntityRelations } from './entity-relations/entity-relations';
-import { EntityInlineParentAction } from './entity-relations/entity-relations.types';
+import { EntityInlineParentAction, isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 
 export function getEntityRelationsForEntityRequest(action: EntityInlineParentAction & EntityRequestAction) {
   return listEntityRelations(

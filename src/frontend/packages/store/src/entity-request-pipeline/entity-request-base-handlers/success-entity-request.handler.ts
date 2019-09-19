@@ -1,16 +1,15 @@
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
-import { SucceedOrFailEntityRequestHandler } from '../entity-request-pipeline.types';
 
-export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
+export function successEntityHandler(
   actionDispatcher,
   catalogueEntity,
   requestType,
   action,
   result,
-  recursivelyDeleting
-) => {
+  recursivelyDeleting = false
+) {
   const entityAction = catalogueEntity.getRequestAction('success', requestType, action, result.response);
   if (
     !action.updatingKey &&
@@ -43,4 +42,4 @@ export const successEntityHandler: SucceedOrFailEntityRequestHandler = (
       ),
     );
   }
-};
+}

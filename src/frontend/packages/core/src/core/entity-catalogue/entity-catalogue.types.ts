@@ -20,6 +20,14 @@ export interface EntityCatalogueEntityConfig {
   schemaKey?: string;
 }
 
+export interface ActionBuilderConfig<T extends Record<any, any> = Record<any, any>> {
+  actionMetadata?: T;
+  entityGuid: string;
+  endpointGuid?: string;
+}
+
+export type EntityActionBuilderEntityConfig = EntityCatalogueEntityConfig & ActionBuilderConfig;
+
 export const extractEntityCatalogueEntityConfig = (ecec: Partial<EntityCatalogueEntityConfig>): EntityCatalogueEntityConfig => {
   const { entityType, endpointType, subType, schemaKey } = ecec;
   return { entityType, endpointType, subType, schemaKey };
