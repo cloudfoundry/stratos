@@ -25,7 +25,7 @@ export class DetachAppsDataSource extends ListDataSource<APIResource> {
     const paginationKey = createEntityRelationPaginationKey(serviceBindingEntityType, serviceInstanceGuid);
     const serviceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
     const actionBuilder = serviceBindingEntity.actionOrchestrator.getActionBuilder('getAllForServiceInstance');
-    const getAppServiceBindingsAction = actionBuilder(cfGuid, serviceInstanceGuid, paginationKey) as PaginatedAction;
+    const getAppServiceBindingsAction = actionBuilder(serviceInstanceGuid, cfGuid, paginationKey) as PaginatedAction;
     super({
       store,
       action: getAppServiceBindingsAction,

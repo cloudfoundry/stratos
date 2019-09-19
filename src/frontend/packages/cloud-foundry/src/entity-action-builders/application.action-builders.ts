@@ -49,9 +49,9 @@ export const applicationActionBuilder = {
   ) => new GetAllApplications(paginationKey, endpointGuid, includeRelations, populateMissing),
   restage: (guid: string, endpointGuid: string) => new RestageApplication(guid, endpointGuid),
   assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => new AssignRouteToApplication(
-    endpointGuid,
+    applicationGuid,
     routeGuid,
-    applicationGuid
+    endpointGuid
   ),
   getAllInSpace: (
     spaceGuid: string,

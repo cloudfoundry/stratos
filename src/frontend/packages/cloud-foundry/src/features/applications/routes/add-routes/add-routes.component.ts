@@ -222,7 +222,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       path = '/' + path;
     }
 
-    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
     const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('create');
     const createRouteAction = actionBuilder(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port));
 
@@ -243,7 +243,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
     const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
-    const assignRouteAction = actionBuilder(this.appGuid, routeGuid, this.cfGuid);
+    const assignRouteAction = actionBuilder(this.cfGuid, routeGuid, this.appGuid);
     this.store.dispatch(assignRouteAction);
     return this.store.select(selectCfRequestInfo(applicationEntityType, this.appGuid)).pipe(
       pairwise(),

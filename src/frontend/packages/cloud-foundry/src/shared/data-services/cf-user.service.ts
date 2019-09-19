@@ -398,8 +398,8 @@ export class CfUserService {
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
     const action = actionBuilder(
       spaceGuid,
-      createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       cfGuid,
+      createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       isAdmin
     ) as PaginatedAction;
     return action;
