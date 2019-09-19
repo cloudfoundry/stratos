@@ -117,6 +117,9 @@ export const testSessionData: SessionData = {
   sessionExpiresOn: 1000,
   plugins: {
     demo: false
+  },
+  config: {
+    enableTechPreview: false
   }
 };
 

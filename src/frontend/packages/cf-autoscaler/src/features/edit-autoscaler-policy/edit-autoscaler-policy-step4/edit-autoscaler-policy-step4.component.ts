@@ -3,7 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
-import { Observable, of as observableOf } from 'rxjs';
+import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
@@ -17,10 +17,9 @@ import {
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
   AppAutoscalerInvalidPolicyError,
-  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
 } from '../../../store/app-autoscaler.types';
@@ -39,7 +38,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private updateAppAutoscalerPolicyService: EntityService;
   public currentPolicy: AppAutoscalerPolicyLocal;
@@ -84,28 +82,21 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.store.dispatch(
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
-
-    return this.updateAppAutoscalerPolicyService.entityMonitor.getUpdatingSection(
-      UpdateAppAutoscalerPolicyAction.updateKey
-    ).pipe(
+    return this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       pairwise(),
-      filter(([oldUpdateSection, newUpdateSection]) => {
-        return oldUpdateSection.busy && !newUpdateSection.busy;
-      }),
-      map(([, newUpdateSection]) => {
-        return newUpdateSection;
-      }),
+      filter(([oldV, newV]) => (
+        oldV.updating[UpdateAppAutoscalerPolicyAction.updateKey] && oldV.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy
+      ) && (
+          newV.updating[UpdateAppAutoscalerPolicyAction.updateKey] && !newV.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy
+        )
+      ),
+      map(([, newV]) => newV.updating[UpdateAppAutoscalerPolicyAction.updateKey]),
+      map(request => ({
+        success: !request.error,
+        redirect: !request.error,
+        message: request.error ? `Could not update policy${request.message ? `: ${request.message}` : ''}` : null
+      })),
       first(),
-      map(request => {
-        if (!request.error) {
-          this.store.dispatch(new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid));
-        }
-        return {
-          success: !request.error,
-          redirect: !request.error,
-          message: request.error ? `Could not update policy: ${request.message}` : ''
-        };
-      })
     );
   }
 

@@ -32,12 +32,14 @@ import {
   APP_AUTOSCALER_POLICY,
   APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
+  AUTOSCALER_INFO,
   AutoscalerPaginationParams,
   AutoscalerQuery,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
   GetAppAutoscalerHealthAction,
+  GetAppAutoscalerInfoAction,
   GetAppAutoscalerMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
@@ -70,6 +72,35 @@ export class AutoscalerEffects {
   ) { }
 
   @Effect()
+  fetchAutoscalerInfo$ = this.actions$.pipe(
+    ofType<GetAppAutoscalerInfoAction>(AUTOSCALER_INFO),
+    mergeMap(action => {
+      const actionType = 'fetch';
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      const options = new RequestOptions();
+      options.url = `${commonPrefix}/info`;
+      options.method = 'get';
+      options.headers = this.addHeaders(action.endpointGuid);
+      return this.http
+        .request(new Request(options)).pipe(
+          mergeMap(response => {
+            const autoscalerInfo = response.json();
+            const entityKey = entityCatalogue.getEntityKey(action);
+            const mappedData = {
+              entities: { [entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(entityKey, mappedData, action.endpointGuid, autoscalerInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch autoscaler info', err), action, actionType)
+          ]));
+    }));
+
+  @Effect()
   fetchAppAutoscalerHealth$ = this.actions$.pipe(
     ofType<GetAppAutoscalerHealthAction>(APP_AUTOSCALER_HEALTH),
     mergeMap(action => {
@@ -88,7 +119,7 @@ export class AutoscalerEffects {
               entities: { [entity.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformData(entity.entityKey, mappedData, action.guid, healthInfo);
+            this.transformData(entity.entityKey, mappedData, action.endpointGuid, healthInfo);
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -357,14 +388,14 @@ export class AutoscalerEffects {
     mappedData.result.push(id);
   }
 
-  transformData(key: string, mappedData: NormalizedResponse, appGuid: string, data: any) {
-    mappedData.entities[key][appGuid] = {
+  transformData(key: string, mappedData: NormalizedResponse, guid: string, data: any) {
+    mappedData.entities[key][guid] = {
       entity: data,
       metadata: {
-        guid: appGuid
+        guid
       }
     };
-    mappedData.result.push(appGuid);
+    mappedData.result.push(guid);
   }
 
   transformEventData(key: string, mappedData: NormalizedResponse, appGuid: string, data: PaginationResponse<AppAutoscalerEvent>) {

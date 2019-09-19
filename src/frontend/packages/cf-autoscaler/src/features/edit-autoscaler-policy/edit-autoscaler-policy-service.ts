@@ -42,13 +42,13 @@ export class EditAutoscalerPolicyService {
       first(),
     ).subscribe((({ entity }) => {
       if (entity && entity.entity) {
-        this.stateSubject.next(entity.entity);
+        this.setState(entity.entity);
       }
     }));
   }
 
   setState(state: AppAutoscalerPolicyLocal) {
-    const { ...newState } = state;
+    const newState = JSON.parse(JSON.stringify(state));
     this.stateSubject.next(newState);
   }
 

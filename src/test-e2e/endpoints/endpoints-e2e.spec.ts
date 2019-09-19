@@ -25,7 +25,7 @@ describe('Endpoints', () => {
 
         it('Should reach endpoints dashboard after log in', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
-          expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
+          expect(endpointsPage.isWelcomeMessageAdmin(false)).toBeTruthy();
           expect(endpointsPage.list.isPresent()).toBeFalsy();
         });
 
@@ -121,8 +121,8 @@ describe('Endpoints', () => {
                 const menu = new MenuComponent();
                 menu.waitUntilShown();
                 menu.getItemMap().then(items => {
-                  expect(items['connect']).toBeDefined();
-                  expect(items['disconnect']).not.toBeDefined();
+                  expect(items.connect).toBeDefined();
+                  expect(items.disconnect).not.toBeDefined();
                 });
                 return menu.close();
               });

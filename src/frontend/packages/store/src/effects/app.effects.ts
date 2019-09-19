@@ -17,7 +17,7 @@ import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
-// TODO: RC Move this file to cf package - #3769
+// TODO: Move this file to cf package - #3769
 @Injectable()
 export class AppEffects {
 

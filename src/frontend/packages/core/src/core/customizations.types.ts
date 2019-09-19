@@ -9,6 +9,8 @@ export interface CustomizationsMetadata {
   logoText?: string;
   aboutInfoComponent?: any;
   supportInfoComponent?: any;
+  noEndpointsComponent?: any;
+  alwaysShowNavForEndpointTypes?: (epType) => boolean;
 }
 
 export const Customizations = new InjectionToken<CustomizationsMetadata>('Stratos customizations');

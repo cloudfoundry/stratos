@@ -122,9 +122,12 @@ export class EndpointsPage extends Page {
     });
   }
 
-  isWelcomeMessageAdmin() {
+  isWelcomeMessageAdmin(shouldHavePrompt = true) {
     return this.isWelcomeMessageNonAdmin().then(okay => {
-      return okay ? this.isWelcomePromptAdmin() : false;
+      if (okay) {
+        return shouldHavePrompt ? this.isWelcomePromptAdmin() : true;
+      }
+      return false;
     });
   }
 

@@ -6,35 +6,39 @@ import { Schema, schema } from 'normalizr';
 export type EndpointType = 'cf' | 'metrics' | string;
 
 // interface BaseEndpointTypeConfig {
-//   type?: EndpointType;
-//   subType?: string;
-//   label: string;
-//   urlValidation?: string;
-//   allowTokenSharing?: boolean;
-//   icon?: string;
-//   iconFont?: string;
-//   imagePath?: string;
-//   authTypes?: string[];
-//   /**
-//    * Get the link to the home page for the given endpoint GUID
-//    */
-//   homeLink?: (s) => string[];
-//   /**
-//    * Schema keys associated with this endpoint type (used when clearing pagination)
-//    */
-//   entitySchemaKeys?: string[];
-//   /**
-//    * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
-//    */
-//   listDetailsComponent?: any;
-//   /**
-//    * When all endpoints are displayed together use the order to define the position. Lower number = earlier position
-//    */
-//   order?: number;
-//   /**
-//    * Indicates if this endpoint types can not be connected (optional - default is false)
-//    */
-//   doesNotSupportConnect?: boolean;
+// type?: EndpointType;
+// subType?: string;
+// label: string;
+// urlValidation?: string;
+// allowTokenSharing?: boolean;
+// icon?: string;
+// iconFont?: string;
+// imagePath?: string;
+// authTypes?: string[];
+// /**
+//  * Get the link to the home page for the given endpoint GUID
+//  */
+// homeLink?: (s) => string[];
+// /**
+//  * Schema keys associated with this endpoint type (used when clearing pagination)
+//  */
+// entitySchemaKeys?: string[];
+// /**
+//  * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
+//  */
+// listDetailsComponent?: any;
+// /**
+//  * When all endpoints are displayed together use the order to define the position. Lower number = earlier position
+//  */
+// order?: number;
+// /**
+//  * Indicates if this endpoint types can not be connected (optional - default is false)
+//  */
+// doesNotSupportConnect?: boolean;
+// /**
+//  * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
+//  */
+// techPreview?: boolean;
 
 // }
 
