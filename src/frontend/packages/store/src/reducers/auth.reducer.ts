@@ -74,7 +74,8 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
           domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null,
           plugins: {
             demo: false
-          }
+          },
+          config: {}
         },
         verifying: false
       };

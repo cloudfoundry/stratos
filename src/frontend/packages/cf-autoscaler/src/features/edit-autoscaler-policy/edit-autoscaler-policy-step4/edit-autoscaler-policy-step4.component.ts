@@ -17,7 +17,7 @@ import {
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
   AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicy,
@@ -85,28 +85,21 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.store.dispatch(
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
-
-    return this.updateAppAutoscalerPolicyService.entityMonitor.getUpdatingSection(
-      UpdateAppAutoscalerPolicyAction.updateKey
-    ).pipe(
+    return this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       pairwise(),
-      filter(([oldUpdateSection, newUpdateSection]) => {
-        return oldUpdateSection.busy && !newUpdateSection.busy;
-      }),
-      map(([, newUpdateSection]) => {
-        return newUpdateSection;
-      }),
+      filter(([oldV, newV]) => (
+        oldV.updating[UpdateAppAutoscalerPolicyAction.updateKey] && oldV.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy
+      ) && (
+          newV.updating[UpdateAppAutoscalerPolicyAction.updateKey] && !newV.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy
+        )
+      ),
+      map(([, newV]) => newV.updating[UpdateAppAutoscalerPolicyAction.updateKey]),
+      map(request => ({
+        success: !request.error,
+        redirect: !request.error,
+        message: request.error ? `Could not update policy${request.message ? `: ${request.message}` : ''}` : null
+      })),
       first(),
-      map(request => {
-        if (!request.error) {
-          this.store.dispatch(new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid));
-        }
-        return {
-          success: !request.error,
-          redirect: !request.error,
-          message: request.error ? `Could not update policy: ${request.message}` : ''
-        };
-      })
     );
   }
 

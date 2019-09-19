@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
@@ -56,6 +56,30 @@ export class CreateEndpointBaseStepComponent {
         }
       );
     });
+    // TODO: RC
+    //     // Need to filter the endpoint types on the tech preview flag
+    //     store.select('auth').pipe(
+    //       map(auth => auth.sessionData),
+    //       first(),
+    //     ).subscribe(sessionData => {
+    //       const techPreviewIsEnabled = sessionData.config.enableTechPreview || false;
+    //       this.tileSelectorConfig = getEndpointTypes(techPreviewIsEnabled).map(et => {
+    //         return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
+    //           et.label,
+    //           et.imagePath ? {
+    //             location: et.imagePath
+    //           } : {
+    //               matIcon: et.icon,
+    //               matIconFont: et.iconFont
+    //             },
+    //           {
+    //             type: et.type,
+    //             subType: et.subType
+    //           }
+    //         );
+    //       });
+    // >>>>>>> origin/v2-master
+    //     });
   }
 
 }

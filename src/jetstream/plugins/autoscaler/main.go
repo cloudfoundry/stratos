@@ -39,6 +39,7 @@ func (a *Autoscaler) AddAdminGroupRoutes(echoGroup *echo.Group) {
 
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (a *Autoscaler) AddSessionGroupRoutes(echoGroup *echo.Group) {
+	echoGroup.GET("/autoscaler/info", a.getAutoscalerInfo)
 	echoGroup.GET("/autoscaler/health", a.getAutoscalerHealth)
 	echoGroup.GET("/autoscaler/apps/:appId/policy", a.getAutoscalerPolicy)
 	echoGroup.PUT("/autoscaler/apps/:appId/policy", a.attachAutoscalerPolicy)

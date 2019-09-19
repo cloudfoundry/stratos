@@ -37,7 +37,7 @@ describe('Endpoints', () => {
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
             endpointsPage.list.waitForNoLoadingIndicator();
             // Should have removed the only row, so we should see welcome message again
-            expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
+            expect(endpointsPage.isWelcomeMessageAdmin(false)).toBeTruthy();
           });
         });
       });
