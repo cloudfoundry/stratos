@@ -161,14 +161,10 @@ class EntityCatalogue {
     return Array.from(this.endpoints.values());
   }
 
-  public getAllEndpointTypes() {
-    const baseEndpoints = Array.from(this.endpoints.values());
+  public getAllEndpointTypes(techPreviewEnabled = false) {
+    const baseEndpoints = Array.from(this.endpoints.values())
+      .filter(item => !item.definition.techPreview || item.definition.techPreview && techPreviewEnabled);
     return baseEndpoints.reduce((allEndpoints, baseEndpoint) => {
-      // TODO: RC gate on tech preview
-      // export function getEndpointTypes(techPreviewEnabled = false) {
-      //   // Filter out endpoints in tech preview if needed
-      //   return endpointTypes.filter(item => !item.techPreview || item.techPreview && techPreviewEnabled);
-      // }
       allEndpoints.push(baseEndpoint);
       if (baseEndpoint.definition.subTypes) {
         baseEndpoint.definition.subTypes.forEach(subType => {

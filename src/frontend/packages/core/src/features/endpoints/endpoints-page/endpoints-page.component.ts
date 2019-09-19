@@ -58,7 +58,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
   constructor(
     public endpointsService: EndpointsService,
-    public store: Store<EndpointOnlyAppState>, // TODO: RC must include dashboard state
+    public store: Store<EndpointOnlyAppState>,
     private ngZone: NgZone,
     private resolver: ComponentFactoryResolver,
     private snackBar: MatSnackBar,
