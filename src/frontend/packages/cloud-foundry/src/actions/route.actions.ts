@@ -119,7 +119,6 @@ export class UnmapRoute extends BaseRouteAction {
     RouteEvents.UNMAP_ROUTE_FAILED
   ];
   updatingKey = 'unmapping';
-  requestTypeLabel = 'unmap';
 }
 
 export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {

@@ -186,29 +186,36 @@ export class StratosBaseCatalogueEntity<
   private getTypeFromAction(action?: EntityRequestAction) {
     if (action) {
       const actionBuilderAction = action as ActionBuilderAction;
-      return actionBuilderAction.actionBuilderActionType || action.updatingKey;
+      return actionBuilderAction.actionBuilderActionType || null;
     }
+    return null;
   }
 
-  private getTypeLabel(
+  public getRequestType(
     actionString: 'start' | 'success' | 'failure' | 'complete',
-    requestType: ApiRequestTypes,
-    action?: EntityRequestAction,
+    actionOrActionBuilderKey?: EntityRequestAction | string,
+    requestType: string = 'request'
   ) {
-    const requestTypeLabel = this.getTypeFromAction(action) || requestType;
+    const requestTypeLabel = typeof actionOrActionBuilderKey === 'string' ?
+      actionOrActionBuilderKey :
+      this.getTypeFromAction(actionOrActionBuilderKey) || requestType;
     return `@stratos/${this.entityKey}/${requestTypeLabel}/${actionString}`;
   }
 
   public getRequestAction(
     actionString: 'start' | 'success' | 'failure' | 'complete',
-    requestType: ApiRequestTypes,
-    action?: EntityRequestAction,
+    actionOrActionBuilderKey?: EntityRequestAction | string,
+    requestType?: string,
     response?: any
   ): APISuccessOrFailedAction {
+    if (typeof actionOrActionBuilderKey === 'string') {
+      return new APISuccessOrFailedAction(this.getRequestType(actionString, actionOrActionBuilderKey), null, response);
+    }
     const type =
-      this.getLegacyTypeFromAction(action, actionString) ||
-      this.getTypeLabel(actionString, requestType, action);
-    return new APISuccessOrFailedAction(type, action, response);
+      this.getLegacyTypeFromAction(actionOrActionBuilderKey, actionString) ||
+      this.getRequestType(actionString, actionOrActionBuilderKey, requestType);
+    return new APISuccessOrFailedAction(type, actionOrActionBuilderKey, response);
+
   }
 
   public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {

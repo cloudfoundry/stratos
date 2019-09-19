@@ -11,7 +11,7 @@ export function successEntityHandler(
   result,
   recursivelyDeleting = false
 ) {
-  const entityAction = catalogueEntity.getRequestAction('success', requestType, action, result.response);
+  const entityAction = catalogueEntity.getRequestAction('success', action, requestType, result.response);
   if (
     !action.updatingKey &&
     (requestType === 'create' || requestType === 'delete')
