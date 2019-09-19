@@ -10,6 +10,7 @@ import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
@@ -39,7 +40,6 @@ import {
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
-import { appAutoscalerPolicySchemaKey } from '../../store/autoscaler.store.module';
 
 @StratosTab({
   type: StratosTabType.Application,
@@ -265,10 +265,11 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   detachPolicy(): Observable<ActionState> {
-    this.store.dispatch(
-      new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-    );
-    return this.store.select(selectDeletionInfo(appAutoscalerPolicySchemaKey, this.applicationService.appGuid)).pipe(
+    const action = new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid);
+    this.store.dispatch(action);
+    const entityKey = entityCatalogue.getEntityKey(action);
+
+    return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV)

@@ -17,6 +17,7 @@ import {
 import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerHealthEntityType,
+  appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
@@ -37,6 +38,7 @@ export function generateASEntities(): StratosBaseCatalogueEntity[] {
   };
   return [
     generatePolicyEntity(endpointDefinition),
+    generateInfoEntity(endpointDefinition),
     generatePolicyTriggerEntity(endpointDefinition),
     generateHealthEntity(endpointDefinition),
     generateScalingEntity(endpointDefinition),
@@ -52,6 +54,15 @@ function generatePolicyEntity(endpointDefinition: IStratosEndpointDefinition) {
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
+}
+
+function generateInfoEntity(endpointDefinition: IStratosEndpointDefinition) {
+  const definition = {
+    type: appAutoscalerInfoEntityType,
+    schema: autoscalerEntityFactory(appAutoscalerInfoEntityType),
+    endpoint: endpointDefinition
+  };
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<AppScalingTrigger>>(definition);
 }
 
 function generatePolicyTriggerEntity(endpointDefinition: IStratosEndpointDefinition) {

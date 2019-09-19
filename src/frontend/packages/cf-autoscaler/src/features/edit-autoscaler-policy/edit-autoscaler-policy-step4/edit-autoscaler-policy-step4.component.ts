@@ -3,7 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
-import { Observable, of as observableOf } from 'rxjs';
+import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
@@ -20,7 +20,6 @@ import {
 import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
   AppAutoscalerInvalidPolicyError,
-  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
 } from '../../../store/app-autoscaler.types';
@@ -39,7 +38,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private updateAppAutoscalerPolicyService: EntityService;
   public currentPolicy: AppAutoscalerPolicyLocal;

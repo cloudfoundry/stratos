@@ -13,7 +13,7 @@ import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoin
 import { EndpointOnlyAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
-// TODO: RC Move this file to cf package - #3769
+// TODO: Move this file to cf package - #3769
 @Injectable()
 export class AppEffects {
 

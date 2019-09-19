@@ -2,7 +2,6 @@ import { RequestOptions } from '@angular/http';
 
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityFactory } from '../../../store/src/helpers/entity-factory';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
@@ -10,13 +9,13 @@ import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.ty
 import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerHealthEntityType,
+  appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
-import { appAutoscalerInfoSchemaKey, appAutoscalerPolicySchemaKey } from './autoscaler.store.module';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -61,8 +60,8 @@ export class GetAppAutoscalerInfoAction implements EntityRequestAction {
     this.guid = endpointGuid;
   }
   type = AUTOSCALER_INFO;
-  entity = entityFactory(appAutoscalerInfoSchemaKey);
-  entityType = appAutoscalerInfoSchemaKey;
+  entity = autoscalerEntityFactory(appAutoscalerInfoEntityType);
+  entityType = appAutoscalerInfoEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
@@ -99,7 +98,7 @@ export class UpdateAppAutoscalerPolicyAction implements EntityRequestAction {
   ) { }
   updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
   type = UPDATE_APP_AUTOSCALER_POLICY;
-  entityType = appAutoscalerPolicySchemaKey;
+  entityType = appAutoscalerPolicyEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 

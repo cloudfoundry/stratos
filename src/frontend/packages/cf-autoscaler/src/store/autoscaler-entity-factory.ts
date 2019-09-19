@@ -1,8 +1,9 @@
 import { Schema, schema } from 'normalizr';
 
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
+export const appAutoscalerInfoEntityType = 'autoscalerInfo';
 export const appAutoscalerHealthEntityType = 'autoscalerHealth';
 export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
@@ -32,6 +33,12 @@ export class AutoscalerEntitySchema extends EntitySchema {
     super(entityKey, AUTOSCALER_ENDPOINT_TYPE, definition, options, relationKey);
   }
 }
+
+entityCache[appAutoscalerInfoEntityType] = new AutoscalerEntitySchema(
+  appAutoscalerInfoEntityType,
+  {},
+  { idAttribute: getAPIResourceGuid }
+);
 
 entityCache[appAutoscalerPolicyEntityType] = new AutoscalerEntitySchema(
   appAutoscalerPolicyEntityType,

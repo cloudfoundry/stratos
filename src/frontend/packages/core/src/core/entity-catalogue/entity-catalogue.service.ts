@@ -164,6 +164,11 @@ class EntityCatalogue {
   public getAllEndpointTypes() {
     const baseEndpoints = Array.from(this.endpoints.values());
     return baseEndpoints.reduce((allEndpoints, baseEndpoint) => {
+      // TODO: RC gate on tech preview
+      // export function getEndpointTypes(techPreviewEnabled = false) {
+      //   // Filter out endpoints in tech preview if needed
+      //   return endpointTypes.filter(item => !item.techPreview || item.techPreview && techPreviewEnabled);
+      // }
       allEndpoints.push(baseEndpoint);
       if (baseEndpoint.definition.subTypes) {
         baseEndpoint.definition.subTypes.forEach(subType => {
