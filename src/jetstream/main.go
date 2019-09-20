@@ -934,6 +934,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 // EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
 // i.e. no wrapping in 'message' JSON object
 func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+
 	code := http.StatusInternalServerError
 	msg := http.StatusText(code)
 	if he, ok := err.(*echo.HTTPError); ok {
@@ -957,7 +958,9 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 		}
 	}
 
-	if err != nil {
+	//Only log if there is a message to log
+	he, _  := err.(*echo.HTTPError)
+	if err != nil && he.Message.(string) != "" {
 		c.Logger().Error(err)
 	}
 }
