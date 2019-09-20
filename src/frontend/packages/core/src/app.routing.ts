@@ -65,14 +65,14 @@ const appRoutes: Routes = [
           }
         },
         children: [{
-          path: '',
-          loadChildren: './features/endpoints/endpoints.module#EndpointsModule',
-        },
-        {
           path: 'metrics',
           loadChildren: './features/metrics/metrics.module#MetricsModule',
-        }]
-      },
+        },
+        {
+          path: '',
+          loadChildren: './features/endpoints/endpoints.module#EndpointsModule',
+        }
+]      },
       {
         path: 'marketplace', loadChildren: './features/service-catalog/service-catalog.module#ServiceCatalogModule',
         data: {
