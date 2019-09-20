@@ -8,7 +8,7 @@ import {
   serviceEntityType,
   serviceInstancesEntityType,
   servicePlanEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

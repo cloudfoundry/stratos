@@ -6,7 +6,7 @@ import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators
 import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
-import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-schema-types';
+import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import {
   getCurrentUserCFEndpointRolesState,
 } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';

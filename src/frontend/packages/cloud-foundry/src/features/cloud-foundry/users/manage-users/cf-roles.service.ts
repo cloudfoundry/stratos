@@ -34,7 +34,7 @@ import { GetAllOrganizations, GetOrganization } from '../../../../actions/organi
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
-import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-schema-types';
+import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';

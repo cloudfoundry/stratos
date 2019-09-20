@@ -7,7 +7,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { spaceQuotaEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { spaceQuotaEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';

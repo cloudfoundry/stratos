@@ -6,7 +6,7 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { GetServiceInstance } from '../../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { GetUserProvidedService } from '../../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationService } from '../../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { getCfService } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';

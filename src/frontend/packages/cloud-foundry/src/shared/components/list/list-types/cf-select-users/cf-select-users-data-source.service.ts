@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

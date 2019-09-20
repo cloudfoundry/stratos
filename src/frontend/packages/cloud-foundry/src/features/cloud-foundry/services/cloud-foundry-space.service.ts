@@ -12,7 +12,7 @@ import {
   serviceInstancesEntityType,
   spaceEntityType,
   spaceQuotaEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../cloud-foundry/src/cf-entity-types';
 import { SpaceUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';

@@ -1,5 +1,5 @@
 import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
-import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-schema-types';
+import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
 import { IOrganization } from '../../../core/src/core/cf-api.types';
 import {

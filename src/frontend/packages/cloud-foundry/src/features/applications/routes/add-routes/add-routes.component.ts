@@ -16,7 +16,7 @@ import {
   domainEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';

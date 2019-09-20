@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 
-import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';

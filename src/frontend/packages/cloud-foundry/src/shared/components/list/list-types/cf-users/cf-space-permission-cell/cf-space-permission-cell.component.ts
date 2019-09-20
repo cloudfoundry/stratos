@@ -6,7 +6,7 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   CfUser,

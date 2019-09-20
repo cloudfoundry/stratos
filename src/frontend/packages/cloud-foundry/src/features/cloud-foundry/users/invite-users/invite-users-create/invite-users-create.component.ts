@@ -19,7 +19,7 @@ import { CFEntityConfig } from '../../../../../../cf-types';
 import { GetOrganization } from '../../../../../actions/organization.actions';
 import { GetSpace } from '../../../../../actions/space.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { cfUserEntityType } from '../../../../../cf-entity-schema-types';
+import { cfUserEntityType } from '../../../../../cf-entity-types';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';

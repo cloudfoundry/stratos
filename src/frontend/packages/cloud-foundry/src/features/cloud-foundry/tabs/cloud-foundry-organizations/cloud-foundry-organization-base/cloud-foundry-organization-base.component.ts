@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IOrgFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
 import {
   getActionsFromExtensions,

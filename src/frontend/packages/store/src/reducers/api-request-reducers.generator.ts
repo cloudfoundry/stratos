@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { appStatsEntityType } from '../../../cloud-foundry/src/cf-entity-schema-types';
+import { appStatsEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { IRequestEntityTypeState } from '../app-state';
 import { IRequestState } from '../types/entity.types';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';

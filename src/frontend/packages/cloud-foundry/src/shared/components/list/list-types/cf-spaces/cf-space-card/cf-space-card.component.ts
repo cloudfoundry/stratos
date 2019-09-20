@@ -4,7 +4,7 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { IApp, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../../../core/src/core/cf.helpers';

@@ -11,7 +11,7 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityFactory } from '../../../cf-entity-factory';
-import { serviceEntityType } from '../../../cf-entity-schema-types';
+import { serviceEntityType } from '../../../cf-entity-types';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import {
   selectCreateServiceInstanceCfGuid,

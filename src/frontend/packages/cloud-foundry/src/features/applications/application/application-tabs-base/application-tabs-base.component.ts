@@ -5,7 +5,7 @@ import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/o
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
 import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';

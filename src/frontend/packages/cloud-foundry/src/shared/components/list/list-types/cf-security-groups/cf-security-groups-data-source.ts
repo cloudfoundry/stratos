@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { GetAllSecurityGroups } from '../../../../../../../cloud-foundry/src/actions/security-groups-actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { securityGroupEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { securityGroupEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';

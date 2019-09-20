@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IFeatureFlag } from '../../../../../../../core/src/core/cf-api.types';
 import {
   ListDataSource,

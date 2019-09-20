@@ -11,7 +11,7 @@ import {
   serviceInstancesEntityType,
   servicePlanEntityType,
   spaceEntityType,
-} from '../cf-entity-schema-types';
+} from '../cf-entity-types';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 

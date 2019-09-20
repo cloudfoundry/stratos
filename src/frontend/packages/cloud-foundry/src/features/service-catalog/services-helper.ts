@@ -30,7 +30,7 @@ import {
   serviceInstancesEntityType,
   servicePlanEntityType,
   spaceEntityType,
-} from '../../cf-entity-schema-types';
+} from '../../cf-entity-types';
 import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 

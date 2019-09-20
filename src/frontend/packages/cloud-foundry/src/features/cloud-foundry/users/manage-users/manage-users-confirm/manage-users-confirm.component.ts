@@ -21,7 +21,7 @@ import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.a
 import { ChangeUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-schema-types';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import {
   TableCellConfirmOrgSpaceComponent,
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';

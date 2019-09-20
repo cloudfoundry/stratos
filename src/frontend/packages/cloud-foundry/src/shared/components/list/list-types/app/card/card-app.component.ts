@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { IApp, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { getFavoriteFromCfEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';

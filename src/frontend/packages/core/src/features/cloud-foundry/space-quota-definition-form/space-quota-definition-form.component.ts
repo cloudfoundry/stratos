@@ -7,7 +7,7 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';

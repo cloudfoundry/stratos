@@ -1,21 +1,23 @@
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { APIResource } from '../../store/src/types/api.types';
 import {
-  appEnvVarsEntityType,
-  appEventEntityType,
-  applicationEntityType,
-  appStatsEntityType,
-  appSummaryEntityType,
-  buildpackEntityType,
   CFApplicationEntitySchema,
   CFEntitySchema,
-  cfInfoEntityType,
   CFOrgEntitySchema,
   CFRouteEntitySchema,
   CFServiceBindingEntitySchema,
   CFServiceInstanceEntitySchema,
   CFSpaceEntitySchema,
   CFUserEntitySchema,
+} from './cf-entity-schema-types';
+import {
+  appEnvVarsEntityType,
+  appEventEntityType,
+  applicationEntityType,
+  appStatsEntityType,
+  appSummaryEntityType,
+  buildpackEntityType,
+  cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
   featureFlagEntityType,
@@ -42,7 +44,7 @@ import {
   spaceWithOrgEntityType,
   stackEntityType,
   userProvidedServiceInstanceEntityType,
-} from './cf-entity-schema-types';
+} from './cf-entity-types';
 import { getAPIResourceGuid } from './store/selectors/api.selectors';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/user.types';
 

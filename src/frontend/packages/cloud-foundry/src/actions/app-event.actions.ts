@@ -3,7 +3,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { QParam, QParamJoiners } from '../../../store/src/q-param';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import { appEventEntityType } from '../cf-entity-schema-types';
+import { appEventEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
 
 export const AppGetAllEvents = {

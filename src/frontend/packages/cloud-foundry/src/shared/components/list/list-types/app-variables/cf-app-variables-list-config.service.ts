@@ -20,7 +20,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { AppVariablesDelete } from '../../../../../actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { applicationEntityType } from '../../../../../cf-entity-schema-types';
+import { applicationEntityType } from '../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';

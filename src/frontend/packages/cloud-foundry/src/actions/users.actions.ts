@@ -6,7 +6,7 @@ import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-schema-types';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
 import { CFStartAction } from './cf-action.types';

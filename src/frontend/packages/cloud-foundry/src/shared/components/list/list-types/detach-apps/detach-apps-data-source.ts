@@ -11,7 +11,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ListServiceBindingsForInstance } from '../../../../../actions/service-instances.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { serviceBindingEntityType, serviceBindingNoBindingsEntityType } from '../../../../../cf-entity-schema-types';
+import { serviceBindingEntityType, serviceBindingNoBindingsEntityType } from '../../../../../cf-entity-types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class DetachAppsDataSource extends ListDataSource<APIResource> {

@@ -8,7 +8,7 @@ import { filter, map } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 import { GetServiceInstance } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ServiceActionHelperService,
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';

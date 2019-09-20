@@ -12,7 +12,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { GetAllAppEvents } from '../../../../../actions/app-event.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { appEventEntityType } from '../../../../../cf-entity-schema-types';
+import { appEventEntityType } from '../../../../../cf-entity-types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfAppEventsDataSource extends ListDataSource<APIResource> {

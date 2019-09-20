@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { GetServiceInstances } from '../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { GetAllUserProvidedServices } from '../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { serviceInstancesEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

@@ -8,7 +8,7 @@ import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   serviceBrokerEntityType,
   servicePlanVisibilityEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../cloud-foundry/src/cf-entity-types';
 import {
   IService,
   IServiceBroker,

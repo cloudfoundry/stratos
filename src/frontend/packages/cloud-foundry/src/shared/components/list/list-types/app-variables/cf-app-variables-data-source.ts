@@ -13,7 +13,7 @@ import { GetAppEnvVarsAction } from '../../../../../actions/app-metadata.actions
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../actions/app-variables.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-schema-types';
+import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 

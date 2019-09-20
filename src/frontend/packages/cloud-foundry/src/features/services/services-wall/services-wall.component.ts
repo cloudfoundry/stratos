@@ -4,7 +4,7 @@ import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { serviceInstancesEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ServiceInstancesWallListConfigService,
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/services-wall/service-instances-wall-list-config.service';

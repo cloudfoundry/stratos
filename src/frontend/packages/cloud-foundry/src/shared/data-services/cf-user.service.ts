@@ -11,7 +11,7 @@ import {
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import {

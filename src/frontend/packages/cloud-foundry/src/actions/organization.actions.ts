@@ -12,7 +12,7 @@ import {
   organizationEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
-} from '../cf-entity-schema-types';
+} from '../cf-entity-types';
 import {
   createEntityRelationPaginationKey,
   EntityInlineChildAction,

@@ -7,7 +7,7 @@ import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity
 import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
   CardMultiActionComponents,

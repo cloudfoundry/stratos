@@ -4,7 +4,7 @@ import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import { serviceBindingEntityType } from '../cf-entity-schema-types';
+import { serviceBindingEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
 
 export const DELETE_SERVICE_BINDING_ACTION = '[ Service Instances ] Delete Service Binding';

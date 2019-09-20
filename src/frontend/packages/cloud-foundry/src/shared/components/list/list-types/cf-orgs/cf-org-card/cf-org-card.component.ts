@@ -4,7 +4,7 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createUserRoleInOrg } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 import { IApp, IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../../../../core/src/core/cf.helpers';

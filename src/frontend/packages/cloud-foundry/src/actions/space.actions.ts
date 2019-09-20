@@ -16,7 +16,7 @@ import {
   servicePlanEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
-} from '../cf-entity-schema-types';
+} from '../cf-entity-types';
 import {
   createEntityRelationKey,
   EntityInlineChildAction,

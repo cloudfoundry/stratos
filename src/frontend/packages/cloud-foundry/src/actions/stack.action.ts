@@ -7,7 +7,7 @@ import { createEntityRelationKey } from '../entity-relations/entity-relations.ty
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { stackEntityType } from '../cf-entity-schema-types';
+import { stackEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
 
 export const GET = '[Stack] Get one';

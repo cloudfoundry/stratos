@@ -15,7 +15,7 @@ import {
 
 import { GetAllOrganizations } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-schema-types';
+import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';

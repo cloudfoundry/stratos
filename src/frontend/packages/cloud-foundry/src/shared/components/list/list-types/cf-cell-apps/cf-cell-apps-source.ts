@@ -8,7 +8,7 @@ import {
   applicationEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 import {

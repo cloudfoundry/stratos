@@ -6,7 +6,7 @@ import { DeleteServiceBinding } from '../../../../cloud-foundry/src/actions/serv
 import { DeleteServiceInstance } from '../../../../cloud-foundry/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-schema-types';
+import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding } from '../../../../core/src/core/cf-api-svc.types';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';

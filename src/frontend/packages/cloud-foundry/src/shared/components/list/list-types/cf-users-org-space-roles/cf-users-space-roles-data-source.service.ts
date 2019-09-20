@@ -6,7 +6,7 @@ import {
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';

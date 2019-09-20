@@ -6,7 +6,7 @@ import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 import { GetAllServices } from '../../../../../cloud-foundry/src/actions/service.actions';
 import { GetAllServicesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

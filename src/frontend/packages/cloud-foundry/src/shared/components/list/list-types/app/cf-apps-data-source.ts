@@ -11,7 +11,7 @@ import {
   organizationEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
 import {

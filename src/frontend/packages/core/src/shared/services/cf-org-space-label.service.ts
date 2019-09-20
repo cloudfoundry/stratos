@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-schema-types';
+import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { haveMultiConnectedCfs } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';

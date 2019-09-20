@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 
 import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {

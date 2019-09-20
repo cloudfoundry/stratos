@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { GetAllStacks } from '../../../../../../../cloud-foundry/src/actions/stack.action';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { stackEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { stackEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

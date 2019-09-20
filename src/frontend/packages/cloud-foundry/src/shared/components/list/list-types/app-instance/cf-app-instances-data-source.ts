@@ -9,7 +9,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { GetAppStatsAction } from '../../../../../actions/app-metadata.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { applicationEntityType, appStatsEntityType } from '../../../../../cf-entity-schema-types';
+import { applicationEntityType, appStatsEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 

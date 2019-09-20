@@ -3,7 +3,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import { buildpackEntityType } from '../cf-entity-schema-types';
+import { buildpackEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
 
 export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction {

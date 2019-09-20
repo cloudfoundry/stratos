@@ -8,7 +8,7 @@ import {
   applicationEntityType,
   appStatsEntityType,
   appSummaryEntityType,
-} from '../cf-entity-schema-types';
+} from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 

@@ -4,7 +4,7 @@ import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-schema-types';
+import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-types';
 import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
 import { GitBranch, GitCommit } from '../store/types/git.types';
 

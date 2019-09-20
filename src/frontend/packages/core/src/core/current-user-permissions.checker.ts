@@ -3,7 +3,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFEntityConfig } from '../../../cloud-foundry/cf-types';
-import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-schema-types';
+import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import {
   createCFFeatureFlagPaginationKey,
 } from '../../../cloud-foundry/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';

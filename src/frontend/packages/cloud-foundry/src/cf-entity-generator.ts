@@ -74,7 +74,7 @@ import {
   spaceWithOrgEntityType,
   stackEntityType,
   userProvidedServiceInstanceEntityType,
-} from './cf-entity-schema-types';
+} from './cf-entity-types';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';

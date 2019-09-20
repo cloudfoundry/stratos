@@ -11,7 +11,7 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   serviceInstancesEntityType,
   servicePlanVisibilityEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-schema-types';
+} from '../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   IService,

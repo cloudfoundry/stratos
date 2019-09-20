@@ -14,7 +14,7 @@ import {
   spaceEntityType,
   spaceWithOrgEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../cf-entity-schema-types';
+} from '../cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
