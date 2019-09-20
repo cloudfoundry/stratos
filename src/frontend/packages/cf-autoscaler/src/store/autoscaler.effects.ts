@@ -37,7 +37,6 @@ import {
   AutoscalerPaginationParams,
   AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
-  CreateAppAutoscalerPolicyAction,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
@@ -49,6 +48,7 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
+  CreateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
   AppAutoscalerEvent,
@@ -320,15 +320,16 @@ export class AutoscalerEffects {
     options.method = 'put';
     options.headers = this.addHeaders(action.endpointGuid);
     options.body = autoscalerTransformMapToArray(action.policy);
+    const entity = entityCatalogue.getEntity(action);
     return this.http
       .request(new Request(options)).pipe(
         mergeMap(response => {
           const policyInfo = autoscalerTransformArrayToMap(response.json());
           const mappedData = {
-            entities: { [action.entityKey]: {} },
+            entities: { [entity.entityKey]: {} },
             result: []
           } as NormalizedResponse;
-          this.transformData(action.entityKey, mappedData, action.guid, policyInfo);
+          this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
