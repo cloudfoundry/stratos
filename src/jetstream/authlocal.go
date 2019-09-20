@@ -48,7 +48,7 @@ func (a *localAuth) Login(c echo.Context) error {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			errMessage,
-			"Login failed: %s: %v", errMessage, err)
+			"Login failed: %v", err)
 		return err
 	}
 
@@ -144,12 +144,12 @@ func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 	// Get the GUID for the specified user
 	guid, err := localUsersRepo.FindUserGUID(username)
 	if err != nil {
-		return guid, username, fmt.Errorf("Can not find user")
+		return guid, username, fmt.Errorf("Access Denied - Invalid username/password credentials")
 	}
 
 	//Attempt to find the password has for the given user
 	if hash, authError = localUsersRepo.FindPasswordHash(guid); authError != nil {
-		authError = fmt.Errorf("User not found.")
+		authError = fmt.Errorf("Access Denied - Invalid username/password credentials")
 		//Check the password hash
 	} else if authError = crypto.CheckPasswordHash(password, hash); authError != nil {
 		authError = fmt.Errorf("Access Denied - Invalid username/password credentials")
