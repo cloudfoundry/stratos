@@ -1,12 +1,12 @@
 /* eslint-disable no-sync */
-(function() {
+(function () {
   'use strict';
 
   var fs = require('fs-extra');
   var path = require('path');
   var gulp = require('gulp');
   var _ = require('lodash');
-  var mergeDirs = require('stratos-merge-dirs');
+  // var mergeDirs = require('stratos-merge-dirs');
   var Q = require('q');
 
   var conf = require('./bk-conf');
@@ -37,12 +37,12 @@
     }
 
     var promise = Q.resolve();
-    _.each(enabledPlugins, function(pluginInfo) {
+    _.each(enabledPlugins, function (pluginInfo) {
       var glidePluginPath = path.join(pluginInfo.srcPath, 'glide.yaml');
 
       if (fs.existsSync(glidePluginPath)) {
         promise = promise
-          .then(function() {
+          .then(function () {
             return buildUtils.runGlideInstall(pluginInfo.srcPath);
           });
       }
@@ -67,40 +67,40 @@
     // Plugins
     var promise = Q.resolve();
     var promises = [];
-    _.each(enabledPlugins, function(pluginInfo) {
+    _.each(enabledPlugins, function (pluginInfo) {
       var pluginVendorPath = path.join(pluginInfo.srcPath, 'vendor');
       var pluginCheckedInVendorPath = path.join(pluginInfo.srcPath, '__vendor');
 
       // sequentially chain promise
       promise
-        .then(function() {
+        .then(function () {
           fs.removeSync(conf.getVendorPath(prepareBuild.getSourcePath()));
           return Q.resolve();
         })
-        .then(function() {
+        .then(function () {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           if (fs.existsSync(pluginVendorPath)) {
-            mergeDirs.default(pluginVendorPath, goSrc);
+            // mergeDirs.default(pluginVendorPath, goSrc);
           }
           // If checked in vendors exist, merge does in as well
           if (fs.existsSync(pluginCheckedInVendorPath)) {
-            mergeDirs.default(pluginCheckedInVendorPath, goSrc);
+            // mergeDirs.default(pluginCheckedInVendorPath, goSrc);
           }
           // Promise did not guarantee that the operation completed
           fs.removeSync(pluginVendorPath);
           return Q.resolve();
         })
-        .catch(function(err) {
+        .catch(function (err) {
           done(err);
         });
       promises.push(promise);
     });
 
     Q.all(promises)
-      .then(function() {
+      .then(function () {
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   }));
@@ -109,10 +109,10 @@
     buildUtils.init();
     var promise = Q.resolve();
     // Include all plugins
-    _.each(enabledPlugins, function(pluginInfo) {
+    _.each(enabledPlugins, function (pluginInfo) {
       if (!pluginInfo.isMain) {
         var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.name);
-        promise = promise.then(function() {
+        promise = promise.then(function () {
           return buildUtils.buildPlugin(fullPluginPath, pluginInfo.name);
         });
       }
@@ -120,16 +120,16 @@
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     if (fs.existsSync(corePath)) {
-      promise = promise.then(function() {
+      promise = promise.then(function () {
         // Build app-core
         return buildUtils.build(corePath, conf.coreName);
       });
     }
     promise
-      .then(function() {
+      .then(function () {
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });
@@ -137,13 +137,13 @@
   gulp.task('run-tests', gulp.series('build-all', function (done) {
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     buildUtils.test(corePath)
-      .then(function() {
+      .then(function () {
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
-    }));
+  }));
 
   gulp.task('copy-artefacts', gulp.series('build-all', function (done) {
     var outputPath = conf.outputPath + path.sep;
@@ -155,21 +155,21 @@
 
     if (fs.existsSync(corePath)) {
       promise = promise
-        .then(function() {
+        .then(function () {
           return fsMoveQ(corePath, outputCorePath);
         });
     }
 
     promise
-      .then(function() {
+      .then(function () {
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   }));
 
-  gulp.task('local-dev-build', function(done) {
+  gulp.task('local-dev-build', function (done) {
     if (!buildUtils.isLocalDevBuild()) {
       return done();
     } else {
