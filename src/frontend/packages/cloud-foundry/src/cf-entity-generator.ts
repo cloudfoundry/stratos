@@ -124,6 +124,7 @@ import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
 import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
+import { urlValidationExpression } from '../../core/src/core/utils.service';
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -138,6 +139,7 @@ export function registerCFEntities() {
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
+    urlValidationRegexString: urlValidationExpression,
     type: CF_ENDPOINT_TYPE,
     label: 'Cloud Foundry',
     labelPlural: 'Cloud Foundry',
