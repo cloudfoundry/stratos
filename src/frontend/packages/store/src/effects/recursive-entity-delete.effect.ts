@@ -3,7 +3,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
 import { EntitySchema } from '../helpers/entity-schema';
@@ -78,9 +77,9 @@ export class RecursiveDeleteEffect {
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     mergeMap(([action, state]) => {
       const tree = this.getTree(action, state);
-      const actions = new Array<Action>().concat(...Object.keys(tree).map<Action[]>(key =>
-        [new ClearPaginationOfType(entityCatalogue.getEntity(key).getSchema())]
-      ));
+      const actions: Action[] = Object.values(tree).map(value => {
+        return new ClearPaginationOfType(value.schema);
+      });
       actions.unshift(new SetTreeDeleted(action.guid, tree));
       return actions;
     })

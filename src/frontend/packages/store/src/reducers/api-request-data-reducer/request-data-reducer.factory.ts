@@ -40,7 +40,7 @@ function cleanStateFromFlatTree(state: Record<string, any>, action: SetTreeDelet
 
 function reduceTreeToState(tree: IFlatTree) {
   return (state: Record<string, any>, entityKey: string) => {
-    const ids = tree[entityKey];
+    const ids = tree[entityKey].ids;
     return Array.from(ids).reduce(reduceIdsToState(entityKey), state);
   };
 }

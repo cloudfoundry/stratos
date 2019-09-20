@@ -1,13 +1,15 @@
 import { denormalize } from 'normalizr';
 
-import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
 
 export interface IFlatTree {
-  [{ endpointType: string, entityKey: string }]: Set<string>;
+  [entityKey: string]: {
+    schema: EntitySchema,
+    ids: Set<string>;
+  };
 }
 
 export class EntitySchemaTreeBuilder {
@@ -51,7 +53,7 @@ export class EntitySchemaTreeBuilder {
     }
     // Don't add the root element to the tree to avoid duplication actions whe consuming tree
     if (!root) {
-      flatTree = this.addIdToTree(flatTree, schema.entityType, schema.getId(entity), schema.endpointType);
+      flatTree = this.addIdToTree(flatTree, schema.entityType, schema.getId(entity), schema);
     }
     if (!keys) {
       return flatTree;
@@ -67,10 +69,15 @@ export class EntitySchemaTreeBuilder {
     }, flatTree);
   }
 
-  private addIdToTree(flatTree: IFlatTree, key: string, newId: string, endpointType: string) {
-    const entityKey = EntityCatalogueHelpers.buildEntityKey(key, endpointType);
-    const ids = flatTree[entityKey] || new Set<string>();
-    flatTree[getCFEntityKey(key)] = ids.add(newId);
+  private addIdToTree(flatTree: IFlatTree, key: string, newId: string, schema: EntitySchema) {
+    const entityKey = entityCatalogue.getEntityKey(schema);
+    if (!flatTree[entityKey]) {
+      flatTree[entityKey] = {
+        schema,
+        ids: new Set<string>()
+      };
+    }
+    flatTree[entityKey].ids = flatTree[entityKey].ids.add(newId);
     return flatTree;
   }
 
@@ -89,14 +96,14 @@ export class EntitySchemaTreeBuilder {
       return this.build(entityDefinition, entity, flatTree);
     }
     const id = entityDefinition.getId(entity);
-    const entityKeys = flatTree[key];
+    const entityKeys = flatTree[key].ids;
     if (!id || (entityKeys && entityKeys.has(id))) {
       if (entityDefinition.definition) {
         return this.build(entityDefinition.definition as EntitySchema, entity, flatTree);
       }
       return flatTree;
     }
-    flatTree = this.addIdToTree(flatTree, key, id, entityDefinition.endpointType);
+    flatTree = this.addIdToTree(flatTree, key, id, entityDefinition);
     const subKeys = Object.keys(entityDefinition);
     if (subKeys.length > 0) {
       return this.build(entityDefinition, entity, flatTree);
