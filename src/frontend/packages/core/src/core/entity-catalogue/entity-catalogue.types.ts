@@ -12,7 +12,6 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { Omit } from '../utils.service';
-import { RecursiveDeleteConfig } from './entity-catalogue-entity';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -66,7 +65,6 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
-  readonly recursiveDelete?: RecursiveDeleteConfig;
 }
 
 
@@ -119,7 +117,6 @@ export interface IStratosEntityDefinition<
   // This will override any globalPreRequest found in the endpoint.
   readonly preRequest?: PreApiRequest;
   readonly prePaginationRequest?: PrePaginationApiRequest;
-  readonly recursiveDelete?: RecursiveDeleteConfig;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {

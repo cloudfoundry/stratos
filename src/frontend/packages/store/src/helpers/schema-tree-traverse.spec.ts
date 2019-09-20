@@ -1,5 +1,5 @@
+import { CFEntitySchema } from '../../../cloud-foundry/src/cf-entity-factory';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
-import { EntitySchema } from './entity-schema';
 import { EntitySchemaTreeBuilder } from './schema-tree-traverse';
 
 
@@ -19,11 +19,11 @@ describe('SchemaTreeTraversal', () => {
     const childId = '2';
     const grandchildId = '3';
 
-    const grandChildSchema = new EntitySchema(grandChildKey, '');
-    const childSchema = new EntitySchema(childKey, '', {
+    const grandChildSchema = new CFEntitySchema(grandChildKey);
+    const childSchema = new CFEntitySchema(childKey, {
       [grandChildSchema.entityType]: grandChildSchema
     });
-    const parentSchema = new EntitySchema(parentKey, '', {
+    const parentSchema = new CFEntitySchema(parentKey, {
       [childSchema.entityType]: childSchema
     });
 
@@ -46,9 +46,7 @@ describe('SchemaTreeTraversal', () => {
         }
       }
     };
-    const action = new RecursiveDelete(parentId, null, {
-      ...parentSchema
-    );
+    const action = new RecursiveDelete(parentId, parentSchema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
     expect(build).toEqual({
       [childSchema.key]: new Set([
@@ -65,11 +63,11 @@ describe('SchemaTreeTraversal', () => {
     const childId = '2';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const grandChildSchema = new EntitySchema(grandChildKey, '');
-    const childSchema = new EntitySchema(childKey, '', {
+    const grandChildSchema = new CFEntitySchema(grandChildKey);
+    const childSchema = new CFEntitySchema(childKey, {
       [grandChildSchema.entityType]: [grandChildSchema]
     });
-    const parentSchema = new EntitySchema(parentKey, '', {
+    const parentSchema = new CFEntitySchema(parentKey, {
       [childSchema.entityType]: childSchema
     });
     const state = {
@@ -113,14 +111,14 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey, '');
-    const grandChildSchema = new EntitySchema(grandChildKey, '', {
+    const greatGrandChildSchema = new CFEntitySchema(greatGrandChildKey);
+    const grandChildSchema = new CFEntitySchema(grandChildKey, {
       [greatGrandChildSchema.entityType]: [greatGrandChildSchema]
     });
-    const childSchema = new EntitySchema(childKey, '', {
+    const childSchema = new CFEntitySchema(childKey, {
       [grandChildSchema.entityType]: [grandChildSchema]
     });
-    const parentSchema = new EntitySchema(parentKey, '', {
+    const parentSchema = new CFEntitySchema(parentKey, {
       [childSchema.entityType]: childSchema
     });
     const state = {
@@ -182,16 +180,16 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey);
-    const grandChildSchema = new EntitySchema(grandChildKey, '', {
+    const greatGrandChildSchema = new CFEntitySchema(greatGrandChildKey);
+    const grandChildSchema = new CFEntitySchema(grandChildKey, {
       [greatGrandChildSchema.entityType]: [greatGrandChildSchema]
     });
-    const childSchema = new EntitySchema(childKey, '', {
+    const childSchema = new CFEntitySchema(childKey, {
       entity: {
         [grandChildSchema.entityType]: [grandChildSchema]
       }
     });
-    const parentSchema = new EntitySchema(parentKey, '', {
+    const parentSchema = new CFEntitySchema(parentKey, {
       [childSchema.entityType]: childSchema
     });
     const state = {
@@ -257,16 +255,16 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey, '');
-    const grandChildSchema = new EntitySchema(grandChildKey, '', {
+    const greatGrandChildSchema = new CFEntitySchema(greatGrandChildKey);
+    const grandChildSchema = new CFEntitySchema(grandChildKey, {
       [greatGrandChildSchema.entityType]: [greatGrandChildSchema]
     });
-    const childSchema = new EntitySchema(childKey, '', {
+    const childSchema = new CFEntitySchema(childKey, {
       entity: {
         [grandChildSchema.entityType]: [grandChildSchema]
       }
     });
-    const parentSchema = new EntitySchema(parentKey, '', {
+    const parentSchema = new CFEntitySchema(parentKey, {
       [childSchema.entityType]: childSchema
     });
 

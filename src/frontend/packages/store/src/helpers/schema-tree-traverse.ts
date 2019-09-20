@@ -1,7 +1,23 @@
 import { denormalize } from 'normalizr';
 
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import {
+  applicationEntityType,
+  appStatsEntityType,
+  cfUserEntityType,
+  domainEntityType,
+  organizationEntityType,
+  privateDomainsEntityType,
+  quotaDefinitionEntityType,
+  routeEntityType,
+  serviceBindingEntityType,
+  serviceEntityType,
+  serviceInstancesEntityType,
+  servicePlanEntityType,
+  spaceEntityType,
+  stackEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../cloud-foundry/src/cf-entity-factory';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
@@ -10,17 +26,77 @@ export interface IFlatTree {
   [entityKey: string]: Set<string>;
 }
 
+interface IExcludes {
+  [entityKey: string]: string[];
+}
 export class EntitySchemaTreeBuilder {
+  constructor(private excludes: IExcludes = {
+    // Delete org
+    [organizationEntityType]: [
+      domainEntityType,
+      quotaDefinitionEntityType,
+      privateDomainsEntityType,
+    ],
+    // Delete space
+    [spaceEntityType]: [
+      domainEntityType,
+      // Service instance related
+      serviceEntityType,
+      servicePlanEntityType,
+      // App Related
+      stackEntityType
+    ],
+    // Delete app
+    [applicationEntityType]: [
+      stackEntityType,
+      spaceEntityType,
+      routeEntityType,
+      serviceBindingEntityType,
+      serviceInstancesEntityType
+    ],
+    // Terminate app instance
+    [appStatsEntityType]: [],
+    // Delete route, unbind route
+    [routeEntityType]: [
+      domainEntityType,
+      applicationEntityType,
+      spaceEntityType
+    ],
+    // Unbind service instance
+    [serviceBindingEntityType]: [
+      applicationEntityType,
+      serviceInstancesEntityType,
+      serviceEntityType
+    ],
+    // Delete service instance
+    [serviceInstancesEntityType]: [
+      servicePlanEntityType,
+      // Service bindings
+      applicationEntityType,
+      serviceInstancesEntityType,
+      serviceEntityType
+    ],
+    [userProvidedServiceInstanceEntityType]: [
+      servicePlanEntityType,
+      // Service bindings
+      applicationEntityType,
+      serviceInstancesEntityType,
+      serviceEntityType,
+      organizationEntityType,
+      spaceEntityType
+    ],
+    // Remove a user role
+    [cfUserEntityType]: [
+      organizationEntityType,
+      spaceEntityType
+    ]
+  }) { }
 
   private entityExcludes: string[];
-  private entityConfig: StratosBaseCatalogueEntity;
-
   public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
-    const { entityConfig, guid } = treeDefinition;
-    const schema = entityConfig.getSchema(treeDefinition.schemaKey);
+    const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
-    this.entityConfig = treeDefinition.entityConfig;
-    this.entityExcludes = this.entityConfig.definition.recursiveDelete ? this.entityConfig.definition.recursiveDelete.excludes : [];
+    this.entityExcludes = this.excludes[schema.entityType] || [];
     return this.build(schema, denormed, undefined, true);
   }
 
@@ -72,9 +148,8 @@ export class EntitySchemaTreeBuilder {
   }
 
   private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
-    const entityKey = EntityCatalogueHelpers.buildEntityKey(key, this.entityConfig.endpointType);
-    const ids = flatTree[entityKey] || new Set<string>();
-    flatTree[entityKey] = ids.add(newId);
+    const ids = flatTree[getCFEntityKey(key)] || new Set<string>();
+    flatTree[getCFEntityKey(key)] = ids.add(newId);
     return flatTree;
   }
 
