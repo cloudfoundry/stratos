@@ -41,7 +41,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     paginationKey?: string
   ) {
     super();
-    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid)
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';

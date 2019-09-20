@@ -264,13 +264,12 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   private mapRouteSubmit(): Observable<StepOnNextResult> {
 
     return this.selectedRoute$.pipe(
-      tap(route => 
-        {
-          const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-          const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
-          const assignRoutesAction = actionBuilder(this.cfGuid, route.metadata.guid, this.appGuid);
-          this.store.dispatch(assignRoutesAction)
-        }),
+      tap(route => {
+        entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType)
+          .actionOrchestrator
+          .getEntityActionDispatcher((action) => this.store.dispatch(action))
+          .dispatchAction('assignRoute', this.cfGuid, route.metadata.guid, this.appGuid);
+      }),
       switchMap(() => this.appService.app$),
       map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),
       filter(requestInfo => !requestInfo.busy),
