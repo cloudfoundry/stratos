@@ -1,8 +1,8 @@
-import { getCFEntityKey } from '../../cf-entity-helpers';
 import { IOrganization } from '../../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { getCFEntityKey } from '../../cf-entity-helpers';
 
 type entityOrgType = APIResource<IOrganization<string>>;
 export function updateOrganizationQuotaReducer(
@@ -10,6 +10,7 @@ export function updateOrganizationQuotaReducer(
   action: APISuccessOrFailedAction<NormalizedResponse>
 ) {
   switch (action.type) {
+    // TODO: This action type is not strictly defined anywhere
     case '[Organizations] Update Org success':
       const response = action.response;
       const entityKey = getCFEntityKey(action.apiAction.entityType);

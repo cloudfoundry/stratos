@@ -91,6 +91,7 @@ export class DeleteRoute extends BaseRouteAction {
   ];
   removeEntityOnDelete = true;
 }
+
 export class UnmapRoute extends BaseRouteAction {
   /**
    * The key of the pagination section to remove the route from. Note, this should not be called `paginationKey`
@@ -113,7 +114,6 @@ export class UnmapRoute extends BaseRouteAction {
     RouteEvents.UNMAP_ROUTE_FAILED
   ];
   updatingKey = 'unmapping';
-  requestTypeLabel = 'unmap';
 }
 
 export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {

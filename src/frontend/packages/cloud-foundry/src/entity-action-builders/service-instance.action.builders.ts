@@ -20,7 +20,7 @@ export const serviceInstanceActionBuilders = {
   get: (
     guid,
     endpointGuid,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceInstance(
     guid,
     endpointGuid,
@@ -38,7 +38,7 @@ export const serviceInstanceActionBuilders = {
   ) => new CreateServiceInstance(
     createId,
     endpointGuid,
-    name,
+    meta.name,
     meta.servicePlanGuid,
     meta.spaceGuid,
     meta.params,
@@ -51,7 +51,7 @@ export const serviceInstanceActionBuilders = {
   ) => new UpdateServiceInstance(
     guid,
     endpointGuid,
-    name,
+    meta.name,
     meta.servicePlanGuid,
     meta.spaceGuid,
     meta.params,
@@ -60,13 +60,13 @@ export const serviceInstanceActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceInstances(endpointGuid, paginationKey, includeRelations, populateMissing),
   getAllInServicePlan: (
     servicePlanGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations }: CFBasePipelineRequestActionMeta
+    { includeRelations }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServicePlanServiceInstances(
     servicePlanGuid,
     endpointGuid,
@@ -78,6 +78,6 @@ export const serviceInstanceActionBuilders = {
     endpointGuid: string,
     paginationKey: string,
     qParams: string[],
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceInstancesForSpace(spaceGuid, endpointGuid, paginationKey, qParams, includeRelations, populateMissing)
 } as CFOrchestratedActionBuilders;

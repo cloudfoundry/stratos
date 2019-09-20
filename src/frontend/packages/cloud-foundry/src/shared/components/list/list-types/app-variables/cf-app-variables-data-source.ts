@@ -4,13 +4,14 @@ import { map } from 'rxjs/operators';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GetAppEnvVarsAction } from '../../../../../actions/app-metadata.actions';
-import { AppVariablesAdd, AppVariablesEdit } from '../../../../../actions/app-variables.actions';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
@@ -32,9 +33,12 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
     appService: ApplicationService,
     listConfig: IListConfig<ListAppEnvVar>
   ) {
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+    const getAppEnvVarsAction = actionBuilder(appService.appGuid, appService.cfGuid) as PaginatedAction;
     super({
       store,
-      action: new GetAppEnvVarsAction(appService.appGuid, appService.cfGuid),
+      action: getAppEnvVarsAction,
       schema: cfEntityFactory(appEnvVarsEntityType),
       getRowUniqueId: object => object.name,
       getEmptyType: () => ({ name: '', value: '', }),
@@ -57,7 +61,11 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   }
 
   saveAdd() {
-    this.store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.transformedEntities, this.addItem));
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('addNewToApplication');
+    const appVariablesAddAction = actionBuilder(this.cfGuid, this.appGuid, this.transformedEntities, this.addItem);
+
+    this.store.dispatch(appVariablesAddAction);
     super.saveAdd();
   }
 
@@ -66,7 +74,11 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   }
 
   saveEdit() {
-    this.store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.transformedEntities, this.editRow));
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('editInApplication');
+    const appVariablesEditAction = actionBuilder(this.cfGuid, this.appGuid, this.transformedEntities, this.editRow);
+
+    this.store.dispatch(appVariablesEditAction);
     super.saveEdit();
   }
 

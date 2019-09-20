@@ -7,23 +7,23 @@ import { first, map } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { FetchAllServiceBindings } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
+import { serviceBindingEntityType, serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { QParam } from '../../../../../../store/src/q-param';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   AppServiceBindingListConfigService,
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ApplicationService } from '../../application.service';
-import { QParam } from '../../../../../../store/src/q-param';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
@@ -32,10 +32,11 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   obsCache: { [serviceGuid: string]: Observable<RowState> } = {};
 
   static createFetchServiceBinding = (cfGuid: string, serviceInstanceGuid: string): FetchAllServiceBindings => {
-    const action = new FetchAllServiceBindings(
+    const sgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(
       cfGuid,
-      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid),
-    );
+      createEntityRelationPaginationKey(serviceEntityType, serviceInstanceGuid)) as FetchAllServiceBindings;
     action.initialParams['results-per-page'] = 1;
     action.initialParams.q = [
       new QParam('service_instance_guid', serviceInstanceGuid).toString(),

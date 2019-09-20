@@ -15,7 +15,6 @@ import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../store/src/types/entity.types';
 import { WrapperRequestActionSuccess } from '../../store/src/types/request.types';
 import { endpointEntitySchema } from '../src/base-entity-schemas';
-import { EntityCatalogueHelpers } from '../src/core/entity-catalogue/entity-catalogue.helper';
 import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
 
@@ -118,6 +117,9 @@ export const testSessionData: SessionData = {
   sessionExpiresOn: 1000,
   plugins: {
     demo: false
+  },
+  config: {
+    enableTechPreview: false
   }
 };
 
@@ -368,7 +370,6 @@ export interface TestStoreEntity {
  */
 export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>) {
   return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
-    // const initialState = entityMap.entries()..reduce((state, entityConfig) => {
     const entities = entityMap.get(entityConfig);
     const entityKey = entityCatalogue.getEntityKey(entityConfig);
     return {
@@ -395,10 +396,7 @@ export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Ar
 
 export function populateStoreWithTestEndpoint(): EndpointModel {
   const stratosEndpointEntityConfig: EntityCatalogueEntityConfig = endpointEntitySchema;
-  const stratosEndpointEntityKey = EntityCatalogueHelpers.buildEntityKey(
-    stratosEndpointEntityConfig.entityType,
-    stratosEndpointEntityConfig.endpointType
-  );
+  const stratosEndpointEntityKey = entityCatalogue.getEntityKey(stratosEndpointEntityConfig);
   const mappedData = {
     entities: {
       [stratosEndpointEntityKey]: {

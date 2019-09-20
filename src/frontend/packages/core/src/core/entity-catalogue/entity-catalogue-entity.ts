@@ -17,6 +17,7 @@ import {
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
+  ActionBuilderAction,
 } from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
@@ -65,6 +66,7 @@ export class StratosBaseCatalogueEntity<
     const baseEntity = definition as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
     this.endpointType = this.getEndpointType(baseEntity);
+    // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
     this.entityKey = this.isEndpoint ?
       EntityCatalogueHelpers.buildEntityKey(EntityCatalogueHelpers.endpointType, baseEntity.type) :
       EntityCatalogueHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
@@ -120,8 +122,9 @@ export class StratosBaseCatalogueEntity<
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }
-    const entityCatalogue = this.definition as IStratosEntityDefinition;
-    const tempId = EntityCatalogueHelpers.buildEntityKey(schemaKey, entityCatalogue.endpoint.type);
+    const entityDefinition = this.definition as IStratosEntityDefinition;
+    // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
+    const tempId = EntityCatalogueHelpers.buildEntityKey(schemaKey, entityDefinition.endpoint.type);
     if (!catalogueSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogueSchema.default;
@@ -175,25 +178,39 @@ export class StratosBaseCatalogueEntity<
     return null;
   }
 
-  private getTypeLabel(
+  private getTypeFromAction(action?: EntityRequestAction) {
+    if (action) {
+      const actionBuilderAction = action as ActionBuilderAction;
+      return actionBuilderAction.actionBuilderActionType || null;
+    }
+    return null;
+  }
+
+  public getRequestType(
     actionString: 'start' | 'success' | 'failure' | 'complete',
-    requestType: ApiRequestTypes,
-    action?: EntityRequestAction,
+    actionOrActionBuilderKey?: EntityRequestAction | string,
+    requestType: string = 'request'
   ) {
-    const requestTypeLabel = (action ? action.requestTypeLabel : null) || requestType;
+    const requestTypeLabel = typeof actionOrActionBuilderKey === 'string' ?
+      actionOrActionBuilderKey :
+      this.getTypeFromAction(actionOrActionBuilderKey) || requestType;
     return `@stratos/${this.entityKey}/${requestTypeLabel}/${actionString}`;
   }
 
   public getRequestAction(
     actionString: 'start' | 'success' | 'failure' | 'complete',
-    requestType: ApiRequestTypes,
-    action?: EntityRequestAction,
+    actionOrActionBuilderKey?: EntityRequestAction | string,
+    requestType?: string,
     response?: any
   ): APISuccessOrFailedAction {
+    if (typeof actionOrActionBuilderKey === 'string') {
+      return new APISuccessOrFailedAction(this.getRequestType(actionString, actionOrActionBuilderKey), null, response);
+    }
     const type =
-      this.getLegacyTypeFromAction(action, actionString) ||
-      this.getTypeLabel(actionString, requestType, action);
-    return new APISuccessOrFailedAction(type, action, response);
+      this.getLegacyTypeFromAction(actionOrActionBuilderKey, actionString) ||
+      this.getRequestType(actionString, actionOrActionBuilderKey, requestType);
+    return new APISuccessOrFailedAction(type, actionOrActionBuilderKey, response);
+
   }
 
   public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {

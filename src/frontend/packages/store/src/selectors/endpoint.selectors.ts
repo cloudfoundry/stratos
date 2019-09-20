@@ -11,6 +11,7 @@ import { selectEntities, selectEntity, selectRequestInfo } from './api.selectors
 export const endpointStatusSelector = (state: InternalAppState): EndpointState => state.endpoints;
 
 // All endpoint request data
+// Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
 const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 

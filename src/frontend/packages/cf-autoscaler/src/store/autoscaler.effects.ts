@@ -9,6 +9,7 @@ import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-ap
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
 import { AppState } from '../../../store/src/app-state';
+import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
   resultPerPageParam,
   resultPerPageParamDefault,
@@ -32,18 +33,22 @@ import {
   APP_AUTOSCALER_POLICY,
   APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
+  AUTOSCALER_INFO,
   AutoscalerPaginationParams,
   AutoscalerQuery,
+  CREATE_APP_AUTOSCALER_POLICY,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
   GetAppAutoscalerHealthAction,
+  GetAppAutoscalerInfoAction,
   GetAppAutoscalerMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
+  CreateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
   AppAutoscalerEvent,
@@ -70,6 +75,35 @@ export class AutoscalerEffects {
   ) { }
 
   @Effect()
+  fetchAutoscalerInfo$ = this.actions$.pipe(
+    ofType<GetAppAutoscalerInfoAction>(AUTOSCALER_INFO),
+    mergeMap(action => {
+      const actionType = 'fetch';
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      const options = new RequestOptions();
+      options.url = `${commonPrefix}/info`;
+      options.method = 'get';
+      options.headers = this.addHeaders(action.endpointGuid);
+      return this.http
+        .request(new Request(options)).pipe(
+          mergeMap(response => {
+            const autoscalerInfo = response.json();
+            const entityKey = entityCatalogue.getEntityKey(action);
+            const mappedData = {
+              entities: { [entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(entityKey, mappedData, action.endpointGuid, autoscalerInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch autoscaler info', err), action, actionType)
+          ]));
+    }));
+
+  @Effect()
   fetchAppAutoscalerHealth$ = this.actions$.pipe(
     ofType<GetAppAutoscalerHealthAction>(APP_AUTOSCALER_HEALTH),
     mergeMap(action => {
@@ -88,7 +122,7 @@ export class AutoscalerEffects {
               entities: { [entity.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformData(entity.entityKey, mappedData, action.guid, healthInfo);
+            this.transformData(entity.entityKey, mappedData, action.endpointGuid, healthInfo);
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -97,6 +131,11 @@ export class AutoscalerEffects {
             new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch health info', err), action, actionType)
           ]));
     }));
+
+  @Effect()
+  createAppAutoscalerPolicy$ = this.actions$.pipe(
+    ofType<CreateAppAutoscalerPolicyAction>(CREATE_APP_AUTOSCALER_POLICY),
+    mergeMap(action => this.createUpdatePolicy(action)));
 
   @Effect()
   updateAppAutoscalerPolicy$ = this.actions$.pipe(
@@ -271,6 +310,35 @@ export class AutoscalerEffects {
           ]));
     }));
 
+  private createUpdatePolicy(
+    action: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction,
+    actionType: ApiRequestTypes = 'create'
+  ): Observable<Action> {
+    this.store.dispatch(new StartRequestAction(action, actionType));
+    const options = new RequestOptions();
+    options.url = `${commonPrefix}/apps/${action.guid}/policy`;
+    options.method = 'put';
+    options.headers = this.addHeaders(action.endpointGuid);
+    options.body = autoscalerTransformMapToArray(action.policy);
+    const entity = entityCatalogue.getEntity(action);
+    return this.http
+      .request(new Request(options)).pipe(
+        mergeMap(response => {
+          const policyInfo = autoscalerTransformArrayToMap(response.json());
+          const mappedData = {
+            entities: { [entity.entityKey]: {} },
+            result: []
+          } as NormalizedResponse;
+          this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
+          return [
+            new WrapperRequestActionSuccess(mappedData, action, actionType)
+          ];
+        }),
+        catchError(err => [
+          new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
+        ]));
+  }
+
   private fetchPolicy(
     getPolicyAction: GetAppAutoscalerPolicyAction,
     getPolicyTriggerAction?: GetAppAutoscalerPolicyTriggerAction): Observable<Action> {
@@ -357,14 +425,14 @@ export class AutoscalerEffects {
     mappedData.result.push(id);
   }
 
-  transformData(key: string, mappedData: NormalizedResponse, appGuid: string, data: any) {
-    mappedData.entities[key][appGuid] = {
+  transformData(key: string, mappedData: NormalizedResponse, guid: string, data: any) {
+    mappedData.entities[key][guid] = {
       entity: data,
       metadata: {
-        guid: appGuid
+        guid
       }
     };
-    mappedData.result.push(appGuid);
+    mappedData.result.push(guid);
   }
 
   transformEventData(key: string, mappedData: NormalizedResponse, appGuid: string, data: PaginationResponse<AppAutoscalerEvent>) {

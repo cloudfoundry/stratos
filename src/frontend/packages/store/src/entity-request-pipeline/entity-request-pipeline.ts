@@ -7,15 +7,15 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 import { AppState, InternalAppState } from '../app-state';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
-import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 import { failedEntityHandler } from './entity-request-base-handlers/fail-entity-request.handler';
-import { patchActionWithForcedConfig } from './entity-request-base-handlers/forced-action-type.helpers';
 import { jetstreamErrorHandler } from './entity-request-base-handlers/jetstream-error.handler';
 import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
 import { EntityRequestPipeline, PreApiRequest, SuccessfulApiResponseDataMapper } from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
+import { patchActionWithForcedConfig } from './entity-request-base-handlers/forced-action-type.helpers';
+import { PaginatedAction } from '../types/pagination.types';
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
   store: Store<AppState>;
@@ -51,7 +51,7 @@ export const apiRequestPipelineFactory = (
 
   if (recursivelyDelete) {
     store.dispatch(
-      new RecursiveDelete(action.guid, action.schemaKey, catalogueEntity),
+      new RecursiveDelete(action.guid, catalogueEntity.getSchema(patchedAction.schemaKey)),
     );
   }
 
@@ -70,8 +70,9 @@ export const apiRequestPipelineFactory = (
         failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response, recursivelyDelete);
       }
     }),
-    map(() => catalogueEntity.getRequestAction('complete', requestType, action)),
+    map(() => catalogueEntity.getRequestAction('complete', action, requestType)),
     catchError(error => {
+      failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, null, recursivelyDelete);
       // TODO We should pass the endpoint ids to this so we can correctly map the error to the endpoint.
       jetstreamErrorHandler(
         error,

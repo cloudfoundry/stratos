@@ -1,5 +1,6 @@
 import { Store } from '@ngrx/store';
 
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -9,7 +10,6 @@ import { QParam, QParamJoiners } from '../../../../../../../store/src/q-param';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { GetAllAppEvents } from '../../../../../actions/app-event.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { appEventEntityType } from '../../../../../cf-entity-types';
@@ -47,7 +47,9 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
-    const action = new GetAllAppEvents(paginationKey, appGuid, cfGuid);
+    const appEventEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEventEntityType);
+    const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(cfGuid, paginationKey, { appGuid });
 
     super(
       {

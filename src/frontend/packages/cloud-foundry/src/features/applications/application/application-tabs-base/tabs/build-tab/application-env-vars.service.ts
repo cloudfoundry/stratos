@@ -13,6 +13,7 @@ import {
   PaginationObservables,
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
 
 
 export interface EnvVarStratosProject {
@@ -40,7 +41,8 @@ export class ApplicationEnvVarsHelper {
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
     const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-    const action = new GetAppEnvVarsAction(appGuid, cfGuid);
+    const actionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('get');
+    const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     return getPaginationObservables<APIResource>({
       store: this.store,
       action,

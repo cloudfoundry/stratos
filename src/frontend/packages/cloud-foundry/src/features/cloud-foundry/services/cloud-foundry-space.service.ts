@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
@@ -29,6 +28,8 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -118,9 +119,12 @@ export class CloudFoundrySpaceService {
             createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.AUDITOR),
           );
         }
+        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+        const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
+        const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, { includeRelations: relations });
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(
           this.spaceGuid,
-          new GetSpace(this.spaceGuid, this.cfGuid, relations)
+          getSpaceAction
         );
         return spaceEntityService.entityObs$.pipe(filter(o => !!o && !!o.entity));
       }),

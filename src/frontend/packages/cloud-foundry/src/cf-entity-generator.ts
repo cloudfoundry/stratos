@@ -77,6 +77,7 @@ import {
 } from './cf-entity-types';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
+import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
 import { applicationActionBuilder } from './entity-action-builders/application.action-builders';
@@ -479,7 +480,7 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
     },
     label: 'Service Binding',
     labelPlural: 'Service Bindings',
-    endpoint: endpointDefinition,
+    endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<IServiceBinding>>(
     definition,
@@ -716,6 +717,7 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
       dataReducers: [
         endpointDisconnectRemoveEntitiesReducer()
       ],
+      actionBuilders: applicationEventActionBuilders,
       entityBuilder: {
         getMetadata: app => ({
           guid: app.metadata.guid,

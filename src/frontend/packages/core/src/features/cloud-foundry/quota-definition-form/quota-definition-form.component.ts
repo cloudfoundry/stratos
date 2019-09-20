@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { GetQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { quotaDefinitionEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
@@ -14,6 +14,7 @@ import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-facto
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
@@ -78,10 +79,13 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
 
   fetchQuotasDefinitions() {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    const quotaDefinitionEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getQuotaDefnitionsAction = actionBuilder(this.cfGuid, quotaPaginationKey);
     this.quotaDefinitions$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
-        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        action: getQuotaDefnitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(quotaDefinitionEntityType)

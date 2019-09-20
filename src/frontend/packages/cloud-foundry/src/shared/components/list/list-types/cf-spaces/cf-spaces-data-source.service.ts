@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
 
-import { GetAllOrganizationSpaces } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   organizationEntityType,
@@ -18,13 +17,18 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(organizationEntityType, orgGuid);
-    const action = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const getAllSpaceActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
+    const action = getAllSpaceActionBuilder(orgGuid, cfGuid, paginationKey, [
       createEntityRelationKey(spaceEntityType, spaceQuotaEntityType),
-    ]);
+    ]) as PaginatedAction;
     super({
       store,
       action,

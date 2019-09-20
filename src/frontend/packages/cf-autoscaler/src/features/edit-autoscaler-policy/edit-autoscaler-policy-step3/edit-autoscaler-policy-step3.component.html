@@ -1,4 +1,6 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
+  <p>Add schedules that reoccur to overwrite the default instance limits for specific time periods. During these time
+    periods, all dynamic scaling rules are still effective.</p>
   <app-tile-grid class="app-autoscaler-tile-grid-100">
     <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.recurring_schedule; let index = index">
       <app-tile>

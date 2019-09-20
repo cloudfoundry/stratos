@@ -1,20 +1,21 @@
 import { RequestOptions } from '@angular/http';
 
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerHealthEntityType,
+  appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
-import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -42,19 +43,35 @@ export const AppAutoscalerMetricEvents = {
 
 export const APP_AUTOSCALER_POLICY = '[New App Autoscaler] Fetch policy';
 export const APP_AUTOSCALER_POLICY_TRIGGER = '[New App Autoscaler] Fetch policy trigger';
+export const CREATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Create policy';
 export const UPDATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Update policy';
 export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy';
 export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
 export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
 export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
+export const AUTOSCALER_INFO = '[Autoscaler] Fetch Info';
 
 export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Policy] Step';
 
-export class GetAppAutoscalerHealthAction implements EntityRequestAction {
+export class GetAppAutoscalerInfoAction implements EntityRequestAction {
+  public guid: string;
   constructor(
-    public guid: string,
     public endpointGuid: string,
   ) {
+    this.guid = endpointGuid;
+  }
+  type = AUTOSCALER_INFO;
+  entity = autoscalerEntityFactory(appAutoscalerInfoEntityType);
+  entityType = appAutoscalerInfoEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
+}
+
+export class GetAppAutoscalerHealthAction implements EntityRequestAction {
+  public guid: string;
+  constructor(
+    public endpointGuid: string,
+  ) {
+    this.guid = endpointGuid;
   }
   type = APP_AUTOSCALER_HEALTH;
   entity = autoscalerEntityFactory(appAutoscalerHealthEntityType);
@@ -73,15 +90,21 @@ export class GetAppAutoscalerPolicyAction implements EntityRequestAction {
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
-export class UpdateAppAutoscalerPolicyAction implements EntityRequestAction {
-  static updateKey = 'Updating-Existing-Application-Policy';
+export class CreateAppAutoscalerPolicyAction implements EntityRequestAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
     public policy: AppAutoscalerPolicyLocal,
   ) { }
-  updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
+  type = CREATE_APP_AUTOSCALER_POLICY;
+  entityType = appAutoscalerPolicyEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
+}
+
+export class UpdateAppAutoscalerPolicyAction extends CreateAppAutoscalerPolicyAction {
+  static updateKey = 'Updating-Existing-Application-Policy';
   type = UPDATE_APP_AUTOSCALER_POLICY;
+  updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
   entityType = appAutoscalerPolicyEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }

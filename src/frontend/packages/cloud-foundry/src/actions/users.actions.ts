@@ -34,13 +34,15 @@ export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org su
 
 export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   isGetAllUsersAsAdmin = true;
+  paginationKey: string;
   constructor(
     public endpointGuid: string,
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true,
-    public paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid)
+    paginationKey?: string
   ) {
     super();
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';
@@ -148,12 +150,12 @@ export class RemoveUserRole extends ChangeUserRole {
 export class GetUser extends CFStartAction {
   constructor(
     public endpointGuid: string,
-    public userGuid: string,
+    public guid: string,
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true) {
     super();
     this.options = new RequestOptions();
-    this.options.url = 'users/' + userGuid;
+    this.options.url = 'users/' + guid;
     this.options.method = 'get';
   }
   actions = getActions('Users', 'Fetch User');

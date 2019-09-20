@@ -3,14 +3,15 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { GetAllServices } from '../../../../../cloud-foundry/src/actions/service.actions';
-import { GetAllServicesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
@@ -27,10 +28,13 @@ export class ServicesWallService {
 
   initServicesObservable = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceEntityType);
+    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
+    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getServicesAction = actionBuilder(null, paginationKey);
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
-        action: new GetAllServices(paginationKey),
+        action: getServicesAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           cfEntityFactory(serviceEntityType)
@@ -54,10 +58,13 @@ export class ServicesWallService {
 
   getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
     const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
+    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
+    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+    const getAllServicesForSpaceAction = actionBuilder(cfGuid, paginationKey, spaceGuid) as PaginatedAction;
     return getPaginationObservables<APIResource<IService>>(
       {
         store: this.store,
-        action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
+        action: getAllServicesForSpaceAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           cfEntityFactory(serviceEntityType)

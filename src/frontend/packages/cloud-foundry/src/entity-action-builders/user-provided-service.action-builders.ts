@@ -13,7 +13,7 @@ export const userProvidedServiceActionBuilder = {
   get: (
     guid,
     endpointGuid,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetUserProvidedService(guid, endpointGuid, includeRelations, populateMissing),
   remove: (guid: string, endpointGuid: string) => new DeleteApplication(guid, endpointGuid),
   update: (
@@ -30,7 +30,7 @@ export const userProvidedServiceActionBuilder = {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllUserProvidedServices(paginationKey, endpointGuid, includeRelations, populateMissing),
   getAllInSpace: (
     spaceGuid: string,

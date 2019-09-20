@@ -1,12 +1,8 @@
 import { Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetServiceInstances } from '../../../../../cloud-foundry/src/actions/service-instances.actions';
-import { GetServicePlanVisibilities } from '../../../../../cloud-foundry/src/actions/service-plan-visibility.actions';
-import { GetServicePlanServiceInstances } from '../../../../../cloud-foundry/src/actions/service-plan.actions';
-import { GetServiceInstancesForSpace } from '../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   serviceInstancesEntityType,
@@ -23,11 +19,13 @@ import {
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
 
 export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -65,10 +63,13 @@ export class CreateServiceInstanceHelper {
     );
 
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
+    const servicePlanVisibilityEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
+    const actionBuilder = servicePlanVisibilityEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getServicePlanVisibilitiesAction = actionBuilder(this.cfGuid, paginationKey);
     this.servicePlanVisibilities$ = getPaginationObservables<APIResource<IServicePlanVisibility>>(
       {
         store: this.store,
-        action: new GetServicePlanVisibilities(this.cfGuid, paginationKey),
+        action: getServicePlanVisibilitiesAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
           cfEntityFactory(servicePlanVisibilityEntityType)
@@ -184,16 +185,20 @@ export class CreateServiceInstanceHelper {
   getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null, cfGuid: string = null) => {
     let action;
     let paginationKey;
+    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, `${spaceGuid}-${servicePlanGuid}`);
       const q = [new QParam('service_plan_guid', servicePlanGuid, QParamJoiners.colon).toString()];
-      action = new GetServiceInstancesForSpace(spaceGuid, cfGuid, paginationKey, q);
+      const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+      action = actionBuilder(spaceGuid, cfGuid, paginationKey, q);
     } else if (servicePlanGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, servicePlanGuid);
-      action = new GetServicePlanServiceInstances(servicePlanGuid, cfGuid, paginationKey);
+      const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getAllInServicePlan');
+      action = actionBuilder(servicePlanGuid, cfGuid, paginationKey);
     } else {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
-      action = new GetServiceInstances(cfGuid, paginationKey);
+      const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
+      action = actionBuilder(cfGuid, paginationKey);
     }
     return getPaginationObservables<APIResource<IServiceInstance>>({
       store: this.store,
@@ -204,7 +209,8 @@ export class CreateServiceInstanceHelper {
       )
     }, true)
       .entities$.pipe(
-        share()
+        publishReplay(1),
+        refCount()
       );
   }
 

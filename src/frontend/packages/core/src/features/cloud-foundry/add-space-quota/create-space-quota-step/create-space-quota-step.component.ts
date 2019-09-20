@@ -40,7 +40,7 @@ export class CreateSpaceQuotaStepComponent {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-    const action = new CreateSpaceQuotaDefinition(this.cfGuid, this.orgGuid, formValues)
+    const action = new CreateSpaceQuotaDefinition(this.cfGuid, this.orgGuid, formValues);
     this.store.dispatch(action);
 
     return this.store.select(selectRequestInfo(action, formValues.name)).pipe(

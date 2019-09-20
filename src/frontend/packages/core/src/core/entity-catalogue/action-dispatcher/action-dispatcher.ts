@@ -8,9 +8,6 @@ import {
 } from '../action-orchestrator/action-orchestrator';
 
 type ActionDispatcher = (action: Action) => void;
-type a = [string, string, number];
-// const list = ['a', 'b', 'c'] as const; // TS3.4 syntax
-// type NeededUnionType = typeof list[0 | 2];
 export class EntityActionDispatcher<
   T extends OrchestratedActionBuilder<any[], Action> =
   OrchestratedActionBuilder<any[], Action>,
@@ -73,7 +70,7 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
   }
 
   public dispatchGetAll(...args: Parameters<T['getAll']>) {
-    return this.getActionDispatcher('getAll').dispatch(...args);
+    return this.getActionDispatcher('getMultiple').dispatch(...args);
   }
 
   public dispatchAction<K extends keyof T>(actionType: K, ...args: Parameters<T[K]>) {

@@ -11,7 +11,7 @@ export const quotaDefinitionActionBuilder = {
   getMultiple: (
     paginationKey: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetQuotaDefinitions(paginationKey, endpointGuid, includeRelations, populateMissing),
   associateSpaceQuota: (
     spaceGuid: string,

@@ -25,7 +25,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -36,7 +36,7 @@ import {
   SetDeployBranch,
 } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { gitBranchesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   selectDeployBranchName,
   selectNewProjectCommit,
@@ -47,6 +47,7 @@ import {
 import { GitAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { GitCommit, GitRepo } from '../../../../../../cloud-foundry/src/store/types/git.types';
 import { GitBranch } from '../../../../../../cloud-foundry/src/store/types/github.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { GitSCM } from '../../../../../../core/src/shared/data-services/scm/scm';
@@ -228,9 +229,12 @@ export class DeployApplicationStep2Component
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
           const entityID = projectInfo.full_name + '-' + commitSha;
+          const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
+          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('fetchCommit');
+          const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name) as FetchCommit;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             entityID,
-            new FetchCommit(this.scm, commitSha, projectInfo.full_name),
+            fetchCommitAction
           );
 
           if (this.commitSubscription) {

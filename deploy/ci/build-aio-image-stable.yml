@@ -101,3 +101,4 @@ jobs:
       tag_as_latest: true
       labels_file: image-tag/image-labels
       additional_tags: image-tag/v2-version      
+      build_args_file: image-tag/ui-build-args

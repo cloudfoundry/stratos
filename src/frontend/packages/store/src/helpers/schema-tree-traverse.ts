@@ -1,7 +1,6 @@
 import { denormalize } from 'normalizr';
 
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
@@ -13,13 +12,9 @@ export interface IFlatTree {
 export class EntitySchemaTreeBuilder {
 
   private entityExcludes: string[];
-  private entityConfig: StratosBaseCatalogueEntity;
-
   public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
-    const { entityConfig, guid } = treeDefinition;
-    const schema = entityConfig.getSchema(treeDefinition.schemaKey);
+    const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
-    this.entityConfig = treeDefinition.entityConfig;
     this.entityExcludes = schema.excludeFromRecursiveDelete || [];
     return this.build(schema, denormed, undefined, true);
   }
@@ -72,9 +67,8 @@ export class EntitySchemaTreeBuilder {
   }
 
   private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
-    const entityKey = EntityCatalogueHelpers.buildEntityKey(key, this.entityConfig.endpointType);
-    const ids = flatTree[entityKey] || new Set<string>();
-    flatTree[entityKey] = ids.add(newId);
+    const ids = flatTree[getCFEntityKey(key)] || new Set<string>();
+    flatTree[getCFEntityKey(key)] = ids.add(newId);
     return flatTree;
   }
 

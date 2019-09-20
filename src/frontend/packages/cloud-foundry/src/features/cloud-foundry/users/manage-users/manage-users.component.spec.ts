@@ -7,8 +7,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserServiceTestProvider } from '../../../../../../core/test-framework/user-service-helper';
+import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from './cf-roles.service';
 import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
@@ -26,7 +26,8 @@ describe('UsersRolesComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),CoreModule,
+        ...generateCfStoreModules(),
+        CoreModule,
         SharedModule,
         NoopAnimationsModule,
         RouterTestingModule,

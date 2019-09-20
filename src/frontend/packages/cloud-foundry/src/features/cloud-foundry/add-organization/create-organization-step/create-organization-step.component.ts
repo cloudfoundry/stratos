@@ -79,10 +79,13 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     );
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    const quotaDefinitionEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getQuotaDefinitionsAction = actionBuilder(this.cfGuid, quotaPaginationKey);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,
-        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        action: getQuotaDefinitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(quotaDefinitionEntityType)

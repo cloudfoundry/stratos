@@ -60,6 +60,9 @@ function mapResponses(
 }
 
 function getAllEntitiesFromResponses(response: any[], getEntitiesFromResponse?: (response: any) => any) {
+  if (!Array.isArray(response)) {
+    return response;
+  }
   if (getEntitiesFromResponse) {
     return response.reduce((merged, res) => {
       const entities = getEntitiesFromResponse(res);
@@ -84,11 +87,9 @@ function postProcessSuccessResponses(
   flattenerConfig: PaginationPageIteratorConfig<any, any>
 ): MultiEndpointResponse<any> {
   const entities = getAllEntitiesFromResponses(response, flattenerConfig ? flattenerConfig.getEntitiesFromResponse : null);
-
   const jetStreamResponse = {
     [endpointGuid]: response
   };
-
   if (Array.isArray(entities)) {
     return {
       endpointGuid,

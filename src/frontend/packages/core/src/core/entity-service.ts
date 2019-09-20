@@ -1,20 +1,17 @@
+import { Inject, Optional } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import {
-  RequestInfoState,
-  UpdatingSection,
-} from '../../../store/src/reducers/api-request-reducer/types';
+import { ActionDispatcher } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { RequestInfoState, UpdatingSection } from '../../../store/src/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { Optional, Inject } from '@angular/core';
-import { ActionDispatcher } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
 
 export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
 
@@ -144,7 +141,7 @@ export class EntityService<T = any> {
       return action;
     } else {
       const {
-        // TODO: Use this schema key
+        // TODO: Schema should be passed to the action builders #3846.
         schemaKey,
         entityGuid,
         endpointGuid,

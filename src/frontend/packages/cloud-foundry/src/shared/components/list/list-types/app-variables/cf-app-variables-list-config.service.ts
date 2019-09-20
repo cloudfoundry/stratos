@@ -17,10 +17,9 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { AppVariablesDelete } from '../../../../../actions/app-variables.actions';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { applicationEntityType } from '../../../../../cf-entity-types';
+import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
@@ -88,11 +87,15 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     const confirmation = this.getConfirmationModal(newValues);
-    const action = new AppVariablesDelete(
-      this.envVarsDataSource.cfGuid,
+
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('removeFromApplication');
+    const action = actionBuilder(
       this.envVarsDataSource.appGuid,
+      this.envVarsDataSource.cfGuid,
       this.envVarsDataSource.transformedEntities,
-      newValues);
+      newValues
+    );
 
     const entityReq$ = this.getEntityMonitor();
     const trigger$ = new Subject();

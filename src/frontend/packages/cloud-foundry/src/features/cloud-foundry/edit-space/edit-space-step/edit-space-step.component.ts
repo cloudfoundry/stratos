@@ -5,12 +5,15 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
   AssociateSpaceQuota,
   DisassociateSpaceQuota,
 } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { spaceEntityType, spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
@@ -106,13 +109,15 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   }
 
   updateSpace$() {
-    const updateAction = new UpdateSpace(this.spaceGuid, this.cfGuid, {
+    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('update');
+    const updateSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
       allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
     });
-    this.store.dispatch(updateAction);
+    this.store.dispatch(updateSpaceAction);
 
-    return this.store.select(selectRequestInfo(updateAction, this.spaceGuid)).pipe(
+    return this.store.select(selectRequestInfo(updateSpaceAction, this.spaceGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map((state) => state.updating[UpdateSpace.UpdateExistingSpace])
     );
@@ -123,12 +128,17 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     let spaceQuotaQueryGuid;
     let action: AssociateSpaceQuota | DisassociateSpaceQuota;
 
+    const spaceQuotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
     if (spaceQuotaGuid) {
       spaceQuotaQueryGuid = spaceQuotaGuid;
-      action = new AssociateSpaceQuota(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
+      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('associateSpaceQuota');
+      const associateSpaceQuotaAction = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
+      action = associateSpaceQuotaAction as AssociateSpaceQuota;
     } else {
       spaceQuotaQueryGuid = this.originalSpaceQuotaGuid;
-      action = new DisassociateSpaceQuota(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid);
+      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('disassociateSpaceQuota');
+      const disassociateSpaceQuotaAction = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
+      action = disassociateSpaceQuotaAction as AssociateSpaceQuota;
     }
     this.store.dispatch(action);
 

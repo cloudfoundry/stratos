@@ -6,6 +6,6 @@ export const servicePlanVisibilityActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServicePlanVisibilities(endpointGuid, paginationKey, includeRelations, populateMissing)
 } as OrchestratedActionBuilders;
