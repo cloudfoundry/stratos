@@ -3,7 +3,7 @@ import { first, tap } from 'rxjs/operators';
 
 import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { generateCFEntities } from '../../../cloud-foundry/src/cf-entity-generator';
-import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-schema-types';
+import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { AppState } from '../../../store/src/app-state';
 import { AppStoreExtensionsModule } from '../../../store/src/store.extensions.module';
 import { APIResource } from '../../../store/src/types/api.types';
