@@ -2,17 +2,14 @@ import { RequestOptions } from '@angular/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationPaginationKey,
-  EntityInlineParentAction,
-} from '../entity-relations/entity-relations.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory, cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { createEntityRelationPaginationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -36,13 +33,15 @@ export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org su
 
 export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   isGetAllUsersAsAdmin = true;
+  paginationKey: string;
   constructor(
     public endpointGuid: string,
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true,
-    public paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid)
+    paginationKey?: string
   ) {
     super();
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';
@@ -150,12 +149,12 @@ export class RemoveUserRole extends ChangeUserRole {
 export class GetUser extends CFStartAction {
   constructor(
     public endpointGuid: string,
-    public userGuid: string,
+    public guid: string,
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true) {
     super();
     this.options = new RequestOptions();
-    this.options.url = 'users/' + userGuid;
+    this.options.url = 'users/' + guid;
     this.options.method = 'get';
   }
   actions = getActions('Users', 'Fetch User');

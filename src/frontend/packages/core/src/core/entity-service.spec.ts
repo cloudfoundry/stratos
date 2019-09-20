@@ -13,17 +13,17 @@ import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { completeApiRequest, startApiRequest } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
 import { EntityRequestAction, ICFAction } from '../../../store/src/types/request.types';
-import { EntityCatalogueTestHelper } from '../../test-framework/entity-catalogue-test-helpers';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 
 function getActionDispatcher(store: Store<any>) {
   return (action: Action) => {
@@ -32,7 +32,8 @@ function getActionDispatcher(store: Store<any>) {
 }
 
 const endpointType = 'endpoint1';
-const entitySchema = new EntitySchema('child2', endpointType);
+const entityType = 'entity1';
+const entitySchema = new EntitySchema(entityType, endpointType);
 const createAction = (guid: string) => {
   return {
     actions: ['fa', 'k', 'e'],
@@ -44,74 +45,73 @@ const createAction = (guid: string) => {
   } as ICFAction;
 };
 
-const entityType = 'key';
+
+const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
+  type: endpointType,
+  schema: new EntitySchema(
+    endpointType,
+    STRATOS_ENDPOINT_TYPE
+  ),
+  label: 'Endpoint',
+  labelPlural: 'Endpoints',
+});
+
 
 const catalogueEntity = new StratosBaseCatalogueEntity({
+  endpoint: catalogueEndpointEntity,
   type: entityType,
   schema: new EntitySchema(
     entityType,
-    'endpoint'
+    endpointType
   ),
   label: 'Entity',
   labelPlural: 'Entities',
 });
 
+function createTestService(
+  store: Store<GeneralAppState>,
+  guid: string,
+  schema: EntitySchema,
+  action: EntityRequestAction,
+) {
+  const entityMonitor = new EntityMonitor(store, guid, schema.key, schema);
+  return new EntityService(store, entityMonitor, action);
+}
+
+function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey: string) {
+  const entities = {
+    [entitySchema.key]: {
+      [guid]: {
+        guid,
+        test: 123
+      }
+    }
+  };
+  const action = createAction(guid);
+
+  const entityService = createTestService(
+    store,
+    guid,
+    entitySchema,
+    action
+  );
+
+  const data = {
+    entities,
+    result: [guid]
+  } as NormalizedResponse;
+  const res = new APIResponse();
+  res.response = data;
+  return {
+    action,
+    entities,
+    entitySchema,
+    entityService,
+    res
+  };
+}
 
 describe('EntityServiceService', () => {
-  beforeAll(() => {
-    const helper = new EntityCatalogueTestHelper(
-      spyOn,
-      {
-        catalogueEntities: [
-          [entitySchema, catalogueEntity]
-        ]
-      }
-    );
-    helper.mockGetEntityResponses();
-  });
-  function createTestService(
-    store: Store<GeneralAppState>,
-    guid: string,
-    schema: EntitySchema,
-    action: EntityRequestAction,
-  ) {
-
-    const entityMonitor = new EntityMonitor(store, guid, schema.key, schema);
-    return new EntityService(store, entityMonitor, action);
-  }
-
-  function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey: string) {
-    const entities = {
-      [entitySchema.key]: {
-        [guid]: {
-          guid,
-          test: 123
-        }
-      }
-    };
-    const action = createAction(guid);
-
-    const entityService = createTestService(
-      store,
-      guid,
-      entitySchema,
-      action
-    );
-
-    const data = {
-      entities,
-      result: [guid]
-    } as NormalizedResponse;
-    const res = new APIResponse();
-    res.response = data;
-    return {
-      action,
-      entities,
-      entitySchema,
-      entityService,
-      res
-    };
-  }
   beforeEach(() => {
     const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
       [
@@ -131,9 +131,6 @@ describe('EntityServiceService', () => {
       ]
     ]);
 
-
-
-
     const action = createAction('123');
     TestBed.configureTestingModule({
       providers: [
@@ -151,8 +148,9 @@ describe('EntityServiceService', () => {
       ],
       imports: [
         HttpModule,
+        createEntityStore(entityMap),
         {
-          ngModule: EffectsFeatureTestModule,
+          ngModule: EntityCatalogueTestModule,
           providers: [
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [
@@ -161,7 +159,6 @@ describe('EntityServiceService', () => {
             }
           ]
         },
-        createEntityStore(entityMap),
       ]
     });
   });
@@ -404,8 +401,6 @@ describe('EntityServiceService', () => {
           failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, res);
         })
       ).subscribe();
-
     })();
   });
-
 });

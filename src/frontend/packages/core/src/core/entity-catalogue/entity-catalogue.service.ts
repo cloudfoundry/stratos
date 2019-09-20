@@ -161,8 +161,9 @@ class EntityCatalogue {
     return Array.from(this.endpoints.values());
   }
 
-  public getAllEndpointTypes() {
-    const baseEndpoints = Array.from(this.endpoints.values());
+  public getAllEndpointTypes(techPreviewEnabled = false) {
+    const baseEndpoints = Array.from(this.endpoints.values())
+      .filter(item => !item.definition.techPreview || item.definition.techPreview && techPreviewEnabled);
     return baseEndpoints.reduce((allEndpoints, baseEndpoint) => {
       allEndpoints.push(baseEndpoint);
       if (baseEndpoint.definition.subTypes) {

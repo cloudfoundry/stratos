@@ -20,7 +20,7 @@ describe('ActionOrchestrator', () => {
       getMultiple: () => getPaginationAction()
     };
     const actionOrchestrator = new ActionOrchestrator('Base', actionBuilders);
-    hasActions(actionOrchestrator, ['get', 'remove', 'update', 'create', 'getAll']);
+    hasActions(actionOrchestrator, ['get', 'remove', 'update', 'create', 'getMultiple']);
   });
 
   it('should have custom actions builders', () => {
@@ -47,7 +47,7 @@ describe('ActionOrchestrator', () => {
       customAction202: guid => getRequestAction()
     };
     const actionOrchestrator = new ActionOrchestrator('BasePlusCustom', actionBuilders);
-    hasActions(actionOrchestrator, ['get', 'remove', 'update', 'create', 'getAll', 'customAction101', 'customAction202']);
+    hasActions(actionOrchestrator, ['get', 'remove', 'update', 'create', 'getMultiple', 'customAction101', 'customAction202']);
   });
 
   it('should get entity action dispatcher', () => {

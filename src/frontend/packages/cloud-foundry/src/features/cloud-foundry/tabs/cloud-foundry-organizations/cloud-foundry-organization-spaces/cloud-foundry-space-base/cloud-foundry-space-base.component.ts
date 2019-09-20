@@ -115,6 +115,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       map(space => space.entity.entity.name),
       first()
     );
+
     this.setUpBreadcrumbs(cfEndpointService, cfOrgService);
 
     this.deleteRedirectSub = this.cfSpaceService.space$.pipe(
@@ -183,35 +184,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     );
   }
 
-
   ngOnDestroy() {
     this.deleteRedirectSub.unsubscribe();
     this.quotaLinkSub.unsubscribe();
   }
-
-  deleteSpaceWarn = () => {
-    // .first within name$
-    this.name$.pipe(
-      first()
-    ).subscribe(name => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Delete Space',
-        {
-          textToMatch: name
-        },
-        'Delete',
-        true,
-      );
-      this.confirmDialog.open(confirmation, this.deleteSpace);
-    });
-  }
-
-  deleteSpace = () => {
-    this.cfOrgService.deleteSpace(
-      this.cfSpaceService.spaceGuid,
-      this.cfSpaceService.orgGuid,
-      this.cfSpaceService.cfGuid
-    );
-  }
-
 }

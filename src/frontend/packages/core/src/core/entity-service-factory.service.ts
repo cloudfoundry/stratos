@@ -11,7 +11,10 @@ import { ENTITY_INFO_HANDLER, EntityInfoHandler, EntityService } from './entity-
 @Injectable()
 export class EntityServiceFactory {
   private isConfig(config: string | EntityActionBuilderEntityConfig) {
-    return !!(config as EntityActionBuilderEntityConfig).entityGuid;
+    if (config) {
+      return !!(config as EntityActionBuilderEntityConfig).entityGuid;
+    }
+    return false;
   }
   constructor(
     private store: Store<GeneralEntityAppState>,

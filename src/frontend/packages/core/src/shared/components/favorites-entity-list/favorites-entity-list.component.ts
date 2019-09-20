@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, scan, startWith } from 'rxjs/operators';
 
@@ -11,7 +11,7 @@ import { FavoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/fa
   templateUrl: './favorites-entity-list.component.html',
   styleUrls: ['./favorites-entity-list.component.scss']
 })
-export class FavoritesEntityListComponent implements AfterViewInit {
+export class FavoritesEntityListComponent implements OnInit {
 
   constructor(private favoritesConfigMapper: FavoritesConfigMapper) { }
 
@@ -50,6 +50,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
   public set searchValue(searchValue: string) {
     this.searchValueSubject.next(searchValue);
   }
+
   public hasEntities = false;
   public typeSubject = new ReplaySubject<string>();
   private entitiesSubject = new ReplaySubject<IFavoriteEntity[]>();
@@ -98,7 +99,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
     return entity.favorite.guid;
   }
 
-  ngAfterViewInit() {
+  ngOnInit() {
     const searchValue$ = this.searchValueSubject.pipe(startWith(''), distinctUntilChanged());
     const type$ = this.typeSubject.asObservable().pipe(startWith(null));
     const typesEntities$ = combineLatest(
@@ -126,6 +127,7 @@ export class FavoritesEntityListComponent implements AfterViewInit {
       }),
       map(searchEntities => searchEntities || [])
     );
+
     this.limitedEntities$ = combineLatest(
       this.searchedEntities$,
       this.limitToggle$
@@ -139,7 +141,8 @@ export class FavoritesEntityListComponent implements AfterViewInit {
       type$,
       this.limitedEntities$,
     ).pipe(
-      map(([nameSearch, type, entities]) => entities.length === 0 && (!!nameSearch || !!type))
+      map(([nameSearch, type, entities]) => entities.length === 0 && (!!nameSearch || !!type)),
+      startWith(false)
     );
   }
 }

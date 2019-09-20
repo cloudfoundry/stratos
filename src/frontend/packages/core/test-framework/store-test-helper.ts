@@ -117,6 +117,9 @@ export const testSessionData: SessionData = {
   sessionExpiresOn: 1000,
   plugins: {
     demo: false
+  },
+  config: {
+    enableTechPreview: false
   }
 };
 
@@ -367,7 +370,6 @@ export interface TestStoreEntity {
  */
 export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>) {
   return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
-    // const initialState = entityMap.entries()..reduce((state, entityConfig) => {
     const entities = entityMap.get(entityConfig);
     const entityKey = entityCatalogue.getEntityKey(entityConfig);
     return {

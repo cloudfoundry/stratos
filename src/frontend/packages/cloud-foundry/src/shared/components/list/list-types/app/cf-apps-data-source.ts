@@ -3,17 +3,19 @@ import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
-import { GetAppStatsAction } from '../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
+  appStatsEntityType,
   cfEntityFactory,
   organizationEntityType,
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   distinctPageUntilChanged,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -23,12 +25,12 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MultiActionListEntity } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
-import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
 
 // export function createGetAllAppAction(paginationKey): GetAllApplications {
 //   return new GetAllApplications(paginationKey, null, [
@@ -112,9 +114,12 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           if (appState === 'STARTED') {
+            const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+            const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+            const getAction = actionBuilder(appGuid, cfGuid);
             actions.push({
               id: appGuid,
-              action: new GetAppStatsAction(appGuid, cfGuid)
+              action: getAction
             });
           }
         });

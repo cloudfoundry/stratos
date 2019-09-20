@@ -13,11 +13,16 @@ import {
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-    const action = new FetchAllBuildpacks(cfGuid, paginationKey);
+    const buildpackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, buildpackEntityType);
+    const actionBuilder = buildpackEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const action = actionBuilder(cfGuid, paginationKey) as PaginatedAction;
     super({
       store,
       action,

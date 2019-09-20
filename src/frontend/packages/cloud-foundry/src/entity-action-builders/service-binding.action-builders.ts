@@ -24,7 +24,7 @@ export const serviceBindingActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new FetchAllServiceBindings(
     endpointGuid,
     paginationKey,
@@ -35,13 +35,13 @@ export const serviceBindingActionBuilders = {
     applicationGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAppServiceBindings(applicationGuid, endpointGuid, paginationKey, includeRelations, populateMissing),
   getAllForServiceInstance: (
     serviceInstanceGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations }: CFBasePipelineRequestActionMeta
+    { includeRelations }: CFBasePipelineRequestActionMeta = {}
   ) => new ListServiceBindingsForInstance(
     endpointGuid,
     serviceInstanceGuid,

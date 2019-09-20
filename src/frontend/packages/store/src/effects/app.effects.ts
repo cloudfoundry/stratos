@@ -12,8 +12,12 @@ import {
 import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointOnlyAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
-// TODO: RC Move this file to cf package - #3769
+// TODO: Move this file to cf package - #3769
 @Injectable()
 export class AppEffects {
 
@@ -25,7 +29,10 @@ export class AppEffects {
   @Effect({ dispatch: false }) updateSummary$ = this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
     map(action => {
-      this.store.dispatch(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
+      const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+      const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
+      const getAppSummaryAction = actionBuilder(action.apiAction.guid, action.apiAction.endpointGuid);
+      this.store.dispatch(getAppSummaryAction);
     }),
   );
 

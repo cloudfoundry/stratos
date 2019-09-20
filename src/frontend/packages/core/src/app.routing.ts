@@ -50,6 +50,7 @@ const appRoutes: Routes = [
           stratosNavigation: {
             label: 'Applications',
             matIcon: 'apps',
+            requiresEndpointType: 'cf',
             position: 20
           }
         },
@@ -79,6 +80,7 @@ const appRoutes: Routes = [
           stratosNavigation: {
             label: 'Marketplace',
             matIcon: 'store',
+            requiresEndpointType: 'cf',
             position: 30
           }
         },
@@ -90,6 +92,7 @@ const appRoutes: Routes = [
             label: 'Services',
             matIcon: 'service',
             matIconFont: 'stratos-icons',
+            requiresEndpointType: 'cf',
             position: 40
           }
         },
@@ -101,6 +104,7 @@ const appRoutes: Routes = [
             label: 'Cloud Foundry',
             matIcon: 'cloud_foundry',
             matIconFont: 'stratos-icons',
+            requiresEndpointType: 'cf',
             position: 50
           }
         },

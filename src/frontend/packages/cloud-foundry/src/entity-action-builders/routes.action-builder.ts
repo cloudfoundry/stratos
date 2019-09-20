@@ -28,7 +28,7 @@ export const routesActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllRoutes(endpointGuid, includeRelations, populateMissing),
   unmap: (
     guid: string,

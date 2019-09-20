@@ -7,6 +7,10 @@
   </div>
 </app-page-header>
 <div class="user-profile">
+  <app-no-content-message *ngIf="isError$ | async"
+    [icon]="'error'" [firstLine]="'An error occurred retrieving the User Profile'" [secondLine]="{
+    text: ''
+  }"></app-no-content-message>
   <app-user-profile-banner *ngIf="userProfile$ | async as profile"
     name="{{ profile.name.givenName }} {{ profile.name.familyName }}" email="{{ primaryEmailAddress$ | async }}">
   </app-user-profile-banner>

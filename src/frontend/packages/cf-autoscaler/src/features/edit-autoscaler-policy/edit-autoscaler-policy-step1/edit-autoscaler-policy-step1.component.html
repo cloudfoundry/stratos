@@ -1,4 +1,6 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
+  Use minimum and maximum instance counts to provide default values for your policy.
+  <!-- Instance counts are used to define the default minimal and maximal instance number of your application. -->
   <form [formGroup]="editLimitForm" validate class="stepper-form">
     <mat-form-field>
       <input matInput placeholder="Minimum Instance Count" formControlName="instance_min_count" type="number" required>

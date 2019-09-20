@@ -25,7 +25,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -36,7 +36,7 @@ import {
   SetDeployBranch,
 } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { gitBranchesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   selectDeployBranchName,
   selectNewProjectCommit,
@@ -59,6 +59,8 @@ import {
   getApplicationDeploySourceTypes,
   getAutoSelectedDeployType,
 } from '../deploy-application-steps.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../../core/src/base-entity-schemas';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -228,9 +230,12 @@ export class DeployApplicationStep2Component
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
           const entityID = projectInfo.full_name + '-' + commitSha;
+          const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
+          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('fetchCommit');
+          const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name) as FetchCommit;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             entityID,
-            new FetchCommit(this.scm, commitSha, projectInfo.full_name),
+            fetchCommitAction
           );
 
           if (this.commitSubscription) {

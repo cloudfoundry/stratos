@@ -1,22 +1,30 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { spaceEntityType, cfEntityFactory, organizationEntityType } from '../cf-entity-factory';
-import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from '../../../core/src/core/entity-catalogue-test.module';
-import { generateCFEntities } from '../cf-entity-generator';
-import { createBasicStoreModule, TestStoreEntity, createEntityStoreState } from '../../../core/test-framework/store-test-helper';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { CFAppState } from '../cf-app-state';
-import { GetAllOrganizationSpaces } from '../actions/organization.actions';
-import { populatePaginationFromParent } from './entity-relations';
-import { APIResource } from '../../../store/src/types/api.types';
+
 import { ISpace } from '../../../core/src/core/cf-api.types';
-import { AppState } from '../../../store/src/app-state';
-import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
+import {
+  EntityCatalogueTestModuleManualStore,
+  TEST_CATALOGUE_ENTITIES,
+} from '../../../core/src/core/entity-catalogue-test.module';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import {
+  createBasicStoreModule,
+  createEntityStoreState,
+  TestStoreEntity,
+} from '../../../core/test-framework/store-test-helper';
 import { RequestTypes } from '../../../store/src/actions/request.actions';
+import { AppState } from '../../../store/src/app-state';
+import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
+import { APIResource } from '../../../store/src/types/api.types';
+import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { GetAllOrganizationSpaces } from '../actions/organization.actions';
+import { CFAppState } from '../cf-app-state';
+import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { generateCFEntities } from '../cf-entity-generator';
+import { populatePaginationFromParent } from './entity-relations';
 
 
 describe('Entity Relations - populate from parent', () => {
@@ -32,7 +40,7 @@ describe('Entity Relations - populate from parent', () => {
     TestBed.configureTestingModule({
       imports: [
         {
-          ngModule: EffectsFeatureTestModule,
+          ngModule: EntityCatalogueTestModuleManualStore,
           providers: [
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]

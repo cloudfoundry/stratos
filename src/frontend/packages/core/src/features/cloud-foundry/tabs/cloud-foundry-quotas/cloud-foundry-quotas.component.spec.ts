@@ -10,7 +10,7 @@ import {
 import {
   generateTestCfEndpointServiceProvider
 } from '../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseTestModules } from '../../../../../test-framework/core-test.helper';
+import { CFBaseTestModules } from '../../../../../../cloud-foundry/test-framework/cf-test-helper';
 
 describe('CloudFoundryQuotasComponent', () => {
   let component: CloudFoundryQuotasComponent;
@@ -20,7 +20,7 @@ describe('CloudFoundryQuotasComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryQuotasComponent],
       providers: [CfOrgsListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
-      imports: [...BaseTestModules]
+      imports: [...CFBaseTestModules]
     })
       .compileComponents();
   }));

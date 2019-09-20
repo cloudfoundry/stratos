@@ -4,9 +4,12 @@ import { MatDialog } from '@angular/material';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { GetServiceInstance } from '../../../../../../../../cloud-foundry/src/actions/service-instances.actions';
-import { GetUserProvidedService } from '../../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { cfEntityFactory, serviceBindingEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  cfEntityFactory,
+  serviceBindingEntityType,
+  serviceInstancesEntityType,
+  userProvidedServiceInstanceEntityType
+} from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { ApplicationService } from '../../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { getCfService } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
@@ -31,6 +34,8 @@ import {
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 
 interface EnvVarData {
   key: string;
@@ -112,9 +117,12 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsServiceInstance() {
+    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
+    const getServiceInstanceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
     const serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       this.row.entity.service_instance_guid,
-      new GetServiceInstance(this.row.entity.service_instance_guid, this.appService.cfGuid)
+      getServiceInstanceAction
     ).waitForEntity$;
     this.serviceInstance$ = serviceInstance$;
     this.service$ = serviceInstance$.pipe(
@@ -145,9 +153,12 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsUserProvidedServiceInstance() {
+    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
+    const getUserProvidedServiceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
     const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
       this.row.entity.service_instance_guid,
-      new GetUserProvidedService(this.row.entity.service_instance_guid, this.appService.cfGuid)
+      getUserProvidedServiceAction
     ).waitForEntity$;
     this.serviceInstance$ = userProvidedServiceInstance$;
     this.service$ = of(null);
