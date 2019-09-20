@@ -1,7 +1,7 @@
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
 import { WrapperRequestActionFailed, EntityRequestAction } from '../../types/request.types';
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { ActionDispatcher, PipelineResult } from '../entity-request-pipeline.types';
+import { ActionDispatcher } from '../entity-request-pipeline.types';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 
 export function failedEntityHandler(
@@ -9,7 +9,7 @@ export function failedEntityHandler(
   catalogueEntity: StratosBaseCatalogueEntity,
   requestType: ApiRequestTypes,
   action: EntityRequestAction,
-  response: PipelineResult,
+  response: any,
   recursivelyDeleting: boolean = false
 ) {
   const entityAction = catalogueEntity.getRequestAction('failure', action, requestType);

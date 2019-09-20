@@ -188,9 +188,15 @@ export class ActionOrchestrator<T extends OrchestratedActionBuilders = Orchestra
   }
 
   public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
+    const actionBuilderForType = this.actionBuilders[actionType];
+    if (!actionBuilderForType) {
+      return null;
+    }
     const actionBuilder: T[Y] = (...args: Parameters<T[Y]>) => {
-      const action = this.actionBuilders[actionType](...args) as ActionBuilderAction;
-      action.actionBuilderActionType = actionType as string;
+      const action = actionBuilderForType(...args) as ActionBuilderAction;
+      if (action) {
+        action.actionBuilderActionType = actionType as string;
+      }
       return action;
     };
     return actionBuilder;
