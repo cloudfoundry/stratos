@@ -1,12 +1,13 @@
 import { denormalize } from 'normalizr';
 
 import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
+import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
 import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
 
 export interface IFlatTree {
-  [entityKey: string]: Set<string>;
+  [{ endpointType: string, entityKey: string }]: Set<string>;
 }
 
 export class EntitySchemaTreeBuilder {
@@ -50,7 +51,7 @@ export class EntitySchemaTreeBuilder {
     }
     // Don't add the root element to the tree to avoid duplication actions whe consuming tree
     if (!root) {
-      flatTree = this.addIdToTree(flatTree, schema.entityType, schema.getId(entity));
+      flatTree = this.addIdToTree(flatTree, schema.entityType, schema.getId(entity), schema.endpointType);
     }
     if (!keys) {
       return flatTree;
@@ -66,13 +67,14 @@ export class EntitySchemaTreeBuilder {
     }, flatTree);
   }
 
-  private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
-    const ids = flatTree[getCFEntityKey(key)] || new Set<string>();
+  private addIdToTree(flatTree: IFlatTree, key: string, newId: string, endpointType: string) {
+    const entityKey = EntityCatalogueHelpers.buildEntityKey(key, endpointType);
+    const ids = flatTree[entityKey] || new Set<string>();
     flatTree[getCFEntityKey(key)] = ids.add(newId);
     return flatTree;
   }
 
-  private getDefinition(definition) {
+  private getDefinition(definition): EntitySchema {
     if (Array.isArray(definition)) {
       return definition[0];
     }
@@ -94,7 +96,7 @@ export class EntitySchemaTreeBuilder {
       }
       return flatTree;
     }
-    flatTree = this.addIdToTree(flatTree, key, id);
+    flatTree = this.addIdToTree(flatTree, key, id, entityDefinition.endpointType);
     const subKeys = Object.keys(entityDefinition);
     if (subKeys.length > 0) {
       return this.build(entityDefinition, entity, flatTree);
