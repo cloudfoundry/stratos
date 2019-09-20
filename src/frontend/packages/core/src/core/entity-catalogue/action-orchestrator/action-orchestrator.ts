@@ -7,6 +7,9 @@ import { EntityRequestAction, StartAction } from '../../../../../store/src/types
 import { Omit } from '../../utils.service';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
+export interface ActionBuilderAction extends EntityRequestAction {
+  actionBuilderActionType: string;
+}
 
 // A function that returns a ICFAction
 export type OrchestratedActionBuilder<
@@ -179,12 +182,18 @@ export class OrchestratedActionBuildersClass implements OrchestratedActionBuilde
   [actionType: string]: OrchestratedActionBuilder<any[], EntityRequestAction>;
 }
 export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
+
   public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
 
-  public getActionBuilder<M, Y extends keyof T>(actionType: Y): T[Y] {
-    return this.actionBuilders[actionType] as T[Y];
+  public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
+    const actionBuilder: T[Y] = (...args: Parameters<T[Y]>) => {
+      const action = this.actionBuilders[actionType](...args) as ActionBuilderAction;
+      action.actionBuilderActionType = actionType as string;
+      return action;
+    };
+    return actionBuilder;
   }
 
   public hasActionBuilder(actionType: keyof T) {

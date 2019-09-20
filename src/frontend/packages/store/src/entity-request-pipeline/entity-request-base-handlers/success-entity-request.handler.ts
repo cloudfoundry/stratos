@@ -1,16 +1,17 @@
+import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
 
 export function successEntityHandler(
   actionDispatcher,
-  catalogueEntity,
+  catalogueEntity: StratosBaseCatalogueEntity,
   requestType,
   action,
   result,
   recursivelyDeleting = false
 ) {
-  const entityAction = catalogueEntity.getRequestAction('success', requestType, action, result.response);
+  const entityAction = catalogueEntity.getRequestAction('success', action, requestType, result.response);
   if (
     !action.updatingKey &&
     (requestType === 'create' || requestType === 'delete')

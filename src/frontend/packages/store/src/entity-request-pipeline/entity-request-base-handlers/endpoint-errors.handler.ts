@@ -14,7 +14,7 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
   errors: JetstreamError[]
 ) => {
   errors.forEach(error => {
-    const entityErrorAction = catalogueEntity.getRequestAction('failure', requestType, action);
+    const entityErrorAction = catalogueEntity.getRequestAction('failure', action, requestType);
     // Dispatch a error action for the specific endpoint that's failed
     const fakedAction = { ...action, endpointGuid: error.guid };
     const errorMessage = error.errorResponse

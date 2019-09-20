@@ -215,7 +215,7 @@ export function getFailApiRequestActions(
   internalEndpointError?: InternalEndpointError,
 ) {
   return [
-    new APISuccessOrFailedAction(catalogueEntity.getRequestAction('failure', requestType, apiAction).type, apiAction, error.message),
+    new APISuccessOrFailedAction(catalogueEntity.getRequestType('failure', apiAction), apiAction, error.message),
     new WrapperRequestActionFailed(
       error.message,
       apiAction,

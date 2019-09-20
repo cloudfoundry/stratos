@@ -16,7 +16,8 @@ import { EntityActionDispatcherManager } from './action-dispatcher/action-dispat
 import {
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
-  OrchestratedActionBuilders
+  OrchestratedActionBuilders,
+  ActionBuilderAction,
 } from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
@@ -177,14 +178,39 @@ export class StratosBaseCatalogueEntity<
     return null;
   }
 
+  private getTypeFromAction(action?: EntityRequestAction) {
+    if (action) {
+      const actionBuilderAction = action as ActionBuilderAction;
+      return actionBuilderAction.actionBuilderActionType || null;
+    }
+    return null;
+  }
+
+  public getRequestType(
+    actionString: 'start' | 'success' | 'failure' | 'complete',
+    actionOrActionBuilderKey?: EntityRequestAction | string,
+    requestType: string = 'request'
+  ) {
+    const requestTypeLabel = typeof actionOrActionBuilderKey === 'string' ?
+      actionOrActionBuilderKey :
+      this.getTypeFromAction(actionOrActionBuilderKey) || requestType;
+    return `@stratos/${this.entityKey}/${requestTypeLabel}/${actionString}`;
+  }
+
   public getRequestAction(
     actionString: 'start' | 'success' | 'failure' | 'complete',
-    requestType: ApiRequestTypes,
-    action?: EntityRequestAction,
+    actionOrActionBuilderKey?: EntityRequestAction | string,
+    requestType?: string,
     response?: any
   ): APISuccessOrFailedAction {
-    const type = this.getLegacyTypeFromAction(action, actionString) || `@stratos/${this.entityKey}/${requestType}/${actionString}`;
-    return new APISuccessOrFailedAction(type, action, response);
+    if (typeof actionOrActionBuilderKey === 'string') {
+      return new APISuccessOrFailedAction(this.getRequestType(actionString, actionOrActionBuilderKey), null, response);
+    }
+    const type =
+      this.getLegacyTypeFromAction(actionOrActionBuilderKey, actionString) ||
+      this.getRequestType(actionString, actionOrActionBuilderKey, requestType);
+    return new APISuccessOrFailedAction(type, actionOrActionBuilderKey, response);
+
   }
 
   public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {

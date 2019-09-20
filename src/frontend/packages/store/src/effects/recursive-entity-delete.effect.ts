@@ -3,10 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
-import { DELETE_SUCCESS } from '../../../cloud-foundry/src/actions/application.actions';
-import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { DELETE_SUCCESS, DeleteApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
 import { EntitySchema } from '../helpers/entity-schema';
@@ -68,10 +65,7 @@ export class RecursiveDeleteEffect {
 
   private deleteSuccessApiActionGenerators = {
     application: (guid: string, endpointGuid: string) => {
-      const applicationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-      const actionBuilder = applicationEntity.actionOrchestrator.getActionBuilder('remove');
-      const deleteApplicationAction = actionBuilder(guid, endpointGuid) as ICFAction;
-      return new APISuccessOrFailedAction(DELETE_SUCCESS, deleteApplicationAction);
+      return new APISuccessOrFailedAction(DELETE_SUCCESS, new DeleteApplication(guid, endpointGuid) as ICFAction);
     }
   };
 
