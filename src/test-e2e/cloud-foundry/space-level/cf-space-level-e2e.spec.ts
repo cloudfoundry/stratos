@@ -1,6 +1,9 @@
+import { by, element, protractor } from 'protractor';
+
 import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
-import { ConsoleUserType } from '../../helpers/e2e-helpers';
+import { CFHelpers } from '../../helpers/cf-helpers';
+import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { CFPage } from '../../po/cf-page.po';
 import { ListComponent } from '../../po/list.po';
 import { MetaCardTitleType } from '../../po/meta-card.po';
@@ -11,9 +14,14 @@ import { CfSpaceLevelPage } from './cf-space-level-page.po';
 
 
 describe('CF - Space Level -', () => {
-
   let spacePage: CfSpaceLevelPage;
   let defaultCf: E2EConfigCloudFoundry;
+  let cfGuid: string;
+  let orgGuid: string;
+  let spaceGuid: string;
+  let spaceName: string;
+  let cfHelper: CFHelpers;
+
   function testBreadcrumb() {
     spacePage.breadcrumbs.waitUntilShown();
     spacePage.breadcrumbs.getBreadcrumbs().then(breadcrumbs => {
@@ -68,14 +76,27 @@ describe('CF - Space Level -', () => {
     });
   }
 
-
   beforeAll(() => {
     defaultCf = e2e.secrets.getDefaultCFEndpoint();
-    e2e.setup(ConsoleUserType.admin)
+    const e2eSetup = e2e.setup(ConsoleUserType.admin)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
       .connectAllEndpoints(ConsoleUserType.admin)
-      .connectAllEndpoints(ConsoleUserType.user);
+      .connectAllEndpoints(ConsoleUserType.user)
+      .getInfo(ConsoleUserType.admin);
+
+    return protractor.promise.controlFlow().execute(() => {
+      cfHelper = new CFHelpers(e2eSetup);
+      cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
+      spaceName = E2EHelpers.createCustomName(E2EHelpers.e2eItemPrefix + 'space');
+
+      return cfHelper.fetchDefaultOrgGuid(true)
+        .then((oGuid) => {
+          orgGuid = oGuid;
+          return cfHelper.baseAddSpace(cfGuid, orgGuid, spaceName);
+        })
+        .then(space => spaceGuid = space.metadata.guid);
+    });
   });
 
   describe('As Admin -', () => {
@@ -90,6 +111,18 @@ describe('CF - Space Level -', () => {
       it('Breadcrumb', testBreadcrumb);
 
       it('Walk Tabs', testTabs);
+    });
+
+    describe('#destroy', () => {
+      beforeEach(() => {
+        spacePage = CfSpaceLevelPage.forEndpoint(cfGuid, orgGuid, spaceGuid);
+        spacePage.navigateTo();
+      });
+
+      it('- should delete space', () => {
+        spacePage.deleteSpace(spaceName);
+        expect(element(by.tagName('app-cards')).getText()).not.toContain(spaceName);
+      });
     });
 
   });
@@ -109,4 +142,7 @@ describe('CF - Space Level -', () => {
     });
   });
 
+  afterAll(() => {
+    return cfHelper.deleteSpaceIfExisting(cfGuid, orgGuid, spaceName);
+  });
 });

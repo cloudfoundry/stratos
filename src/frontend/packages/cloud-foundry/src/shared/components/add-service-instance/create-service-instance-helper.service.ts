@@ -1,7 +1,7 @@
 import { Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -209,7 +209,8 @@ export class CreateServiceInstanceHelper {
       )
     }, true)
       .entities$.pipe(
-        share()
+        publishReplay(1),
+        refCount()
       );
   }
 

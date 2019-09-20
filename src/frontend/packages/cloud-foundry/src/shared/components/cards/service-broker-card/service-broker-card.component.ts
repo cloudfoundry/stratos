@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Component, OnDestroy } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
@@ -12,25 +11,28 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { spaceEntityType } from '../../../../cf-entity-factory';
+import { Store } from '@ngrx/store';
+import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 
 @Component({
   selector: 'app-service-broker-card',
   templateUrl: './service-broker-card.component.html',
   styleUrls: ['./service-broker-card.component.scss']
 })
-export class ServiceBrokerCardComponent {
+export class ServiceBrokerCardComponent implements OnDestroy {
 
   spaceName: string;
   spaceLink: string[];
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
+  subs: Subscription[] = [];
+
   constructor(
     private servicesService: ServicesService,
     private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory
   ) {
     this.serviceBroker$ = this.servicesService.serviceBroker$;
-    // TODO NJ This could leak subscriptions if the requests keeps failing.
-    this.serviceBroker$.pipe(
+    this.subs.push(this.serviceBroker$.pipe(
       filter(o => !!o),
       map(o => o.entity.space_guid),
       take(1),
@@ -48,7 +50,7 @@ export class ServiceBrokerCardComponent {
       }),
       tap(space => {
         this.spaceLink = ['/cloud-foundry',
-          this.servicesService.cfGuid,
+          servicesService.cfGuid,
           'organizations',
           space.entity.entity.organization_guid,
           'spaces',
@@ -57,6 +59,10 @@ export class ServiceBrokerCardComponent {
         ];
         this.spaceName = space.entity.entity.name;
       })
-    ).subscribe();
+    ).subscribe());
+  }
+
+  ngOnDestroy() {
+    safeUnsubscribe(...this.subs);
   }
 }

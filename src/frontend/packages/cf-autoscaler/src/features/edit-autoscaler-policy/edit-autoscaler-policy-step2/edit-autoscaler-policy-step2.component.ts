@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
+import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
   AutoscalerConstants,
   getAdjustmentType,
@@ -28,7 +30,7 @@ import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy implements OnInit {
+export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy implements OnInit, OnDestroy {
 
   policyAlert = PolicyAlert;
   metricTypes = AutoscalerConstants.MetricTypes;
@@ -44,13 +46,15 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
   private editMetricType = '';
   private editScaleType = 'upper';
   private editAdjustmentType = 'value';
+  private subs: Subscription[] = [];
 
   constructor(
     public applicationService: ApplicationService,
     private fb: FormBuilder,
-    service: EditAutoscalerPolicyService
+    service: EditAutoscalerPolicyService,
+    route: ActivatedRoute
   ) {
-    super(service);
+    super(service, route);
     this.editTriggerForm = this.fb.group({
       metric_type: [0, this.validateTriggerMetricType()],
       operator: [0, this.validateTriggerOperator()],
@@ -69,10 +73,9 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
 
     this.metricUnit$ = this.metricUnitSubject.asObservable();
 
-    this.editTriggerForm.get('metric_type').valueChanges.pipe(
+    this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
       map(value => this.getMetricUnit(value)),
-      tap(unit => this.metricUnitSubject.next(unit))
-    ).subscribe();
+    ).subscribe(unit => this.metricUnitSubject.next(unit)));
   }
 
   addTrigger = () => {
@@ -195,5 +198,9 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
 
   getMetricUnit(metricType: string) {
     return AutoscalerConstants.getMetricUnit(metricType);
+  }
+
+  ngOnDestroy() {
+    safeUnsubscribe(...this.subs);
   }
 }

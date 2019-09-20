@@ -25,7 +25,6 @@ import {
 } from 'rxjs/operators';
 
 import {
-  SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServicePlan,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
@@ -80,10 +79,6 @@ export class SelectPlanStepComponent implements OnDestroy {
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
     });
-
-    if (modeService.isMarketplaceMode()) {
-      this.store.dispatch(new SetCreateServiceInstanceCFDetails(activatedRoute.snapshot.params.endpointId));
-    }
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),
