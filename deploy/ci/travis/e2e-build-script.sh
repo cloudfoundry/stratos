@@ -17,7 +17,6 @@ GIT_REPO="${GIT_REPO//\@/_}"
 GIT_REPO="${GIT_REPO//\//_}"
 GIT_REPO=${GIT_REPO%.git}
 
-
 # Get commit ID
 GIT_COMMIT=$(git log --pretty=format:'%h' -n 1)
 
