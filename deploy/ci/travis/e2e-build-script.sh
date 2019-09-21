@@ -66,7 +66,7 @@ go version
 npm run build
 npm run build-backend
 
-set +e2e
+set +e
 tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
 
 # Upload
