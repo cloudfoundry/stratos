@@ -51,10 +51,9 @@ fi
 
 if [ "${LOCAL_BUILD}" == "false" ]; then
   echo "Downloaded and unpacked an existing build - no need to build locally"
-  exit 0
-fi
+else
 
-set -e
+  set -e
 
 # Get go
 curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
@@ -65,8 +64,10 @@ go version
 npm run build
 npm run build-backend
 
-set +e
-tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
+  set +e
+  tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
 
 # Upload
-mc cp -q --insecure ${GZIP_NAME} ${MC_HOST}/${S3_BUILDS_BUCKET}
+  mc cp -q --insecure ${GZIP_NAME} ${MC_HOST}/${S3_BUILDS_BUCKET}
+
+fi
