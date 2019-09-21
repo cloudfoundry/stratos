@@ -28,6 +28,7 @@ cache:
   - node_modules
 stages:
 - Lint
+- Build
 - Test
 jobs:
   include:
