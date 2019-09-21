@@ -12,11 +12,8 @@ else
 
   mc -install -y >/dev/null 2>&1
 
-  MC_HOST=$(mc config host ls | grep s3 -c)
-  if [ "$MC_HOST" -eq 0 ]; then
-    echo "Configuring mc client"
-    mc config host add s3 ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
-  fi
+  echo "Configuring mc client"
+  mc config host add s3 ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
 
   echo "mc command ready"
 fi
