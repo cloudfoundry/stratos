@@ -41,11 +41,13 @@ fi
 echo "Using local deployment for e2e tests"
 # Quick deploy locally
 # Start a local UAA - this will take a few seconds to come up in the background
-docker run -d -p 8080:8080 splatform/stratos-uaa
+docker run -d -p 8080:8080 splatform/stratos-
 
 # Build if needed or use existing build for this commit
 DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+set +e
 source "${DIRNAME}/e2e-build-script.sh"
+set -e
 
 # Copy travis config.properties file
 cp deploy/ci/travis/config.properties src/jetstream/
