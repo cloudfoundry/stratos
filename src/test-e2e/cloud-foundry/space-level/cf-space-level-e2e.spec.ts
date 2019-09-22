@@ -129,8 +129,8 @@ describe('CF - Space Level -', () => {
 
   describe('As User -', () => {
     beforeAll(() => {
-      e2e.setup(ConsoleUserType.admin)
-        .loginAs(ConsoleUserType.admin);
+      e2e.setup(ConsoleUserType.user)
+        .loginAs(ConsoleUserType.user);
     });
 
     describe('Basic Tests -', () => {
