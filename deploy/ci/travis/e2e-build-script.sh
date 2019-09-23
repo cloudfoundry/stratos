@@ -7,20 +7,23 @@ MC_HOST="s3"
 
 LOCAL_BUILD="true"
 
-STRATOS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
+# Use Travis env vars:
+# TRAVIS_PULL_REQUEST
+# TRAVIS_REPO_SLUG
+# TRAVIS_COMMIT
 
-# Check git folder
-GIT_URL=$(git config --get remote.origin.url)
+if [ -z "$TRAVIS_REPO_SLUG" ]; then
+  echo "Need to be running in Trvis"
+  exit 1
+fi
 
-GIT_REPO="${GIT_URL//:/_}"
-GIT_REPO="${GIT_REPO//\@/_}"
-GIT_REPO="${GIT_REPO//\//_}"
-GIT_REPO=${GIT_REPO%.git}
+if [ -z "$TRAVIS_COMMIT" ]; then
+  echo "Need to be running in Trvis"
+  exit 1
+fi
 
-# Get commit ID
-GIT_COMMIT=$(git log --pretty=format:'%h' -n 1)
-
-GIT_ID="${GIT_REPO}__${GIT_COMMIT}"
+GIT_ID="${TRAVIS_REPO_SLUG}_${TRAVIS_COMMIT}_${TRAVIS_PULL_REQUEST}"
+GIT_ID="${GIT_ID//\//_}"
 echo $GIT_ID
 
 TAR_NAME="${GIT_ID}.tar"
