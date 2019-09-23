@@ -105,4 +105,14 @@ clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[
 USERS=$(cf org-users -a e2e | grep "accept" | sed -e 's/^[[:space:]]*//')
 clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 
+# Users without roles
+echo "Cleaning users without roles"
+USERS=$(cf curl "/v2/users?results-per-page=100" | jq -r .resources[].entity.username)
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travis)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
+
 echo "Done"
+
+# Get users without usernames
+#cf curl "/v2/users?results-per-page=10" | jq '.resources[] | { "username": .entity.username, "guid": .metadata.guid, "created": .metadata.created_at }' | jq 'select(.username==null)' | jq '. | select(.guid|match("^[0-9a-z]*-[0-9a-z]*-[0-9a-z]*[0-9a-z]*"))'
