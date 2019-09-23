@@ -7,6 +7,7 @@ import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEntity,
 } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
@@ -44,7 +45,7 @@ function getRequestObservable(
   const initialRequest = makeRequestEntityPipe(
     httpClient,
     request,
-    action.endpointType,
+    entityCatalogue.getEndpoint(action.endpointType, action.subType),
     action.endpointGuid,
     action.externalRequest
   );

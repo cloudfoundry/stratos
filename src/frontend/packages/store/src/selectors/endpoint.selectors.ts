@@ -1,4 +1,4 @@
-import { createSelector } from '@ngrx/store';
+import { compose, createSelector } from '@ngrx/store';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
@@ -24,23 +24,37 @@ export const endpointOfTypeSelector = (type: string) =>
       return endpointsOfType;
     }, {});
   };
-// TODO More this #3769
+
+// TODO: Move this #3769
 export const cfEndpointEntitiesSelector = endpointOfTypeSelector('cf');
 
-export const getRegisteredEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) => {
-  const registered = {} as IRequestEntityTypeState<EndpointModel>;
-  Object.values(endpoints).map(endpoint => {
+export const getRegisteredEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) =>
+  Object.values(endpoints).reduce((registered, endpoint) => {
     if (endpoint.registered) {
       registered[endpoint.guid] = endpoint;
     }
     return registered;
-  });
-  return registered;
-};
+  }, {} as IRequestEntityTypeState<EndpointModel>);
+
+export const getConnectedEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) =>
+  Object.values(endpoints).reduce((connected, endpoint) => {
+    if (endpoint.connectionStatus === 'connected') {
+      connected[endpoint.guid] = endpoint;
+    }
+    return connected;
+  }, {} as IRequestEntityTypeState<EndpointModel>);
+
 // All Registered  endpoint request data
 export const endpointsRegisteredEntitiesSelector = createSelector(
   endpointEntitiesSelector,
   getRegisteredEndpoints
+);
+
+export const connectedEndpointsOfTypesSelector = (endpointType: string) => compose(
+  getConnectedEndpoints,
+  endpointOfTypeSelector(endpointType),
+  getRegisteredEndpoints,
+  endpointEntitiesSelector,
 );
 
 export const registeredEndpointsOfTypesSelector = (endpointType: string) => createSelector(
@@ -49,11 +63,13 @@ export const registeredEndpointsOfTypesSelector = (endpointType: string) => crea
   getRegisteredEndpoints
 );
 
+// TODO: Move this #3769
 export const endpointsCFEntitiesSelector = createSelector(
   endpointEntitiesSelector,
   cfEndpointEntitiesSelector
 );
 
+// TODO: Move this #3769
 export const endpointsRegisteredCFEntitiesSelector = createSelector(
   endpointsCFEntitiesSelector,
   getRegisteredEndpoints
