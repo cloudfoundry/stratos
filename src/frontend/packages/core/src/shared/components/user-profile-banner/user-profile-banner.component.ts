@@ -7,8 +7,16 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class UserProfileBannerComponent implements OnInit {
 
-  @Input() name: string;
+  private uName: string;
+
+  @Input()
+  get name(): string { return this.uName; }
+  set name(name: string) {
+    this.uName = name.trim();
+  }
+
   @Input() email: string;
+  @Input() username: string;
 
   constructor() { }
 

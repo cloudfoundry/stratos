@@ -1,6 +1,7 @@
 package userinfo
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -8,86 +9,114 @@ import (
 
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
-func (userInfo *UserInfo) uaa(c echo.Context) error {
+// UaaUserInfo for UAA User Info
+type UaaUserInfo struct {
+	portalProxy interfaces.PortalProxy
+	echo        echo.Context
+}
+
+// InitUaaUserInfo creates a new UAA user info provider
+func InitUaaUserInfo(portalProxy interfaces.PortalProxy, c echo.Context) Provider {
+	return &UaaUserInfo{portalProxy: portalProxy, echo: c}
+}
+
+// GetUserInfo gets info for the specified user
+func (userInfo *UaaUserInfo) GetUserInfo(id string) (int, []byte, error) {
+	target := fmt.Sprintf("Users/%s", id)
+	return userInfo.uaa(target, nil)
+}
+
+// UpdateUserInfo updates the user's info
+func (userInfo *UaaUserInfo) UpdateUserInfo(profile *uaaUser) (error) {
+	target := fmt.Sprintf("Users/%s", profile.ID)
+	_, _, err := userInfo.uaa(target, profile.Raw)
+	return err
+}
+
+// UpdatePassword updates the user's password
+func (userInfo *UaaUserInfo) UpdatePassword(id string, passwordInfo *passwordChangeInfo) (error) {
+	target := fmt.Sprintf("Users/%s/password", id)
+	_, _, err := userInfo.uaa(target, passwordInfo.Raw)
+	return err
+}
+
+func (userInfo *UaaUserInfo) uaa(target string, body []byte) (int, []byte, error)  {
 	log.Debug("uaa request")
 
 	// Check session
-	_, err := userInfo.portalProxy.GetSessionInt64Value(c, "exp")
+	_, err := userInfo.portalProxy.GetSessionInt64Value(userInfo.echo, "exp")
 	if err != nil {
 		msg := "Could not find session date"
 		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
+		return http.StatusForbidden, nil, echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	sessionUser, err := userInfo.portalProxy.GetSessionStringValue(c, "user_id")
+	sessionUser, err := userInfo.portalProxy.GetSessionStringValue(userInfo.echo, "user_id")
 	if err != nil {
 		msg := "Could not find user_id in Session"
 		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
+		return http.StatusForbidden, nil, echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
 	uaaEndpoint := userInfo.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint
-	path := c.Path()
 
 	// Now get the URL of the request and remove the path to give the path of the API that is being requested
-	target := c.Request().URL.Path
-	target = target[(len(path) - 1):]
 	url := fmt.Sprintf("%s/%s", uaaEndpoint, target)
 
 	username, err := userInfo.portalProxy.GetUsername(sessionUser)
 	if err != nil {
-		return err
+		return http.StatusInternalServerError, nil, err
 	}
 
 	// Check for custom header - if present, verify the user's password before making the request
-	password := c.Request().Header.Get("x-stratos-password")
+	password := userInfo.echo.Request().Header.Get("x-stratos-password")
 	if len(password) > 0 {
 		// Need to verify the user's login
 		err := userInfo.portalProxy.RefreshUAALogin(username, password, false)
 		if err != nil {
-			return err
+			return  http.StatusInternalServerError, nil, err
 		}
 	}
 
-	statusCode, body, err := userInfo.doAPIRequest(sessionUser, url, c.Request())
+	statusCode, body, err := userInfo.doAPIRequest(sessionUser, url, userInfo.echo.Request(), body)
 	if err != nil {
-		return err
+		return http.StatusInternalServerError, nil, err
 	}
 
 	// Refresh the access token
 	if statusCode == 401 {
 		_, err := userInfo.portalProxy.RefreshUAAToken(sessionUser)
 		if err != nil {
-			return err
+			return  http.StatusInternalServerError, nil, err
 		}
-		statusCode, body, err = userInfo.doAPIRequest(sessionUser, url, c.Request())
+		statusCode, body, err = userInfo.doAPIRequest(sessionUser, url, userInfo.echo.Request(), body)
 		if err != nil {
-			return err
+			return  http.StatusInternalServerError, nil, err
 		}
 	}
 
 	// If we have the user's password, log them in again
 	// This is used when the API call that is being made revokes the current access and refresh tokens
 	if len(password) > 0 {
-		newPassword := c.Request().Header.Get("x-stratos-password-new")
+		newPassword := userInfo.echo.Request().Header.Get("x-stratos-password-new")
 		if len(newPassword) > 0 {
 			password = newPassword
 		}
 		err := userInfo.portalProxy.RefreshUAALogin(username, password, true)
 		if err != nil {
-			return err
+			return  http.StatusInternalServerError, nil, err
 		}
 	}
 
-	c.Response().WriteHeader(statusCode)
-	_, _ = c.Response().Write(body)
+	return statusCode, body, nil
 
-	return nil
 }
 
-func (userInfo *UserInfo) doAPIRequest(sessionUser string, url string, echoReq *http.Request) (stausCode int, body []byte, err error) {
+func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoReq *http.Request, body []byte) (int, []byte, error) {
 	// Proxy the request to the UAA on behalf of the user
 	log.Debugf("doAPIRequest: %s", url)
 
@@ -100,7 +129,7 @@ func (userInfo *UserInfo) doAPIRequest(sessionUser string, url string, echoReq *
 	var res *http.Response
 	var req *http.Request
 
-	req, err = http.NewRequest(echoReq.Method, url, echoReq.Body)
+	req, err = http.NewRequest(echoReq.Method, url, bytes.NewReader(body))
 	if err != nil {
 		return 0, nil, err
 	}

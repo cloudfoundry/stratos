@@ -257,13 +257,13 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 	}
 	scope := localUserScope
 	email := ""
-	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: localUserName, Email: email, Scope: scope}
+	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: localUserName, Email: email, Scope: scope, GivenName: "Admin", FamilyName: "User"}
 
-	// Don't add the user if they already exist - update instead
-	guid, err := localUsersRepo.FindUserGUID(localUserName)
+	// Don't add the user if they already exist
+	_, err = localUsersRepo.FindUserGUID(localUserName)
 	if err == nil {
-		user.UserGUID = guid
-		return localUsersRepo.UpdateLocalUser(user)
+		// Can't modify the user once created else we loose any updates that might have neen made
+		return nil
 	}
 
 	err = localUsersRepo.AddLocalUser(user)
