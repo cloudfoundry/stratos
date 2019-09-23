@@ -1,17 +1,15 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { FetchCommits } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CFEntitySchema, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 
 
 export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
@@ -31,8 +29,12 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
     commitSha?: string,
   ) {
     const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
-    const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('fetchCommit');
-    const fetchCommitAction = fetchCommitActionBuilder(scm, projectName, sha) as PaginatedAction;
+    const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const fetchCommitAction = fetchCommitActionBuilder(sha, null, {
+      scm,
+      projectName,
+      commitId: sha
+    }) as PaginatedAction;
     const action = fetchCommitAction;
     const paginationKey = action.paginationKey;
     const rowsState = observableOf(commitSha ? {

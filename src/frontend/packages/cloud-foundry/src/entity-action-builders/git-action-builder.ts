@@ -13,8 +13,6 @@ import {
 
 export const gitRepoActionBuilders = {
   getRepoInfo: (
-    repoEntityID: string,
-    endpointGuid: string,
     projectEnvVars: EnvVarStratosProject
   ) => new FetchGitHubRepoInfo(projectEnvVars)
 } as OrchestratedActionBuilders;
