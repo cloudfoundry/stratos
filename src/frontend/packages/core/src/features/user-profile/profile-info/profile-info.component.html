@@ -12,7 +12,7 @@
     text: ''
   }"></app-no-content-message>
   <app-user-profile-banner *ngIf="userProfile$ | async as profile"
-    name="{{ profile.name.givenName }} {{ profile.name.familyName }}" email="{{ primaryEmailAddress$ | async }}">
+    name="{{ profile.name.givenName }} {{ profile.name.familyName }}" email="{{ primaryEmailAddress$ | async }}" username="{{ profile.userName }}">
   </app-user-profile-banner>
   <div class="user-profile__info" *ngIf="userProfile$ | async as profile">
     <div class="user-profile__content">
@@ -24,11 +24,17 @@
           <div class="app-metadata">
             <div class="app-metadata__two-cols">
               <app-metadata-item icon="person" label="User id">{{ profile.userName }}</app-metadata-item>
-              <app-metadata-item icon="title" label="Name">{{ profile.name.givenName }} {{ profile.name.familyName }}
-              </app-metadata-item>
-              <app-metadata-item icon="email" label="Email">{{ primaryEmailAddress$ | async }}</app-metadata-item>
+              <app-metadata-item *ngIf="(profile.name.givenName || profile.name.familyName); else noName" icon="title" label="Name">{{ profile.name.givenName }} {{ profile.name.familyName }}</app-metadata-item>
+              <ng-template #noName>
+                <app-metadata-item icon="title" label="Name">No Name</app-metadata-item>
+              </ng-template>
+              <app-metadata-item *ngIf="primaryEmailAddress$ | async; else noEmail" icon="email" label="Email">{{ primaryEmailAddress$ | async }}</app-metadata-item>
+              <ng-template #noEmail>
+                <app-metadata-item icon="email" label="Email">No Email Address</app-metadata-item>
+              </ng-template>
+              <app-metadata-item *ngIf="(this.userService.isAdmin$ | async)" icon="security" label="User Type">Administrator</app-metadata-item>
             </div>
-            <div class="app-metadata__two-cols">
+            <div class="app-metadata__two-cols" *ngIf="profile.origin === 'uaa'">
               <app-metadata-item icon="date_range" label="Account Created">{{ profile.meta.created | date:'medium' }}
               </app-metadata-item>
               <app-metadata-item icon="date_range" label="Account Last Modified">
@@ -77,12 +83,12 @@
               [color]="pollingEnabled === 'true' ? 'warn' : 'primary'">
               {{ pollingEnabled === 'true' ? 'Disable' : 'Enable' }} polling
             </button>
-            <div class="user-profile__option-subtext">Disabling polling wil result in some pages not automatically
+            <div class="user-profile__option-subtext">Disabling polling will result in some views not automatically
               updating.</div>
           </div>
         </div>
       </mat-card>
-      <mat-card>
+      <mat-card *ngIf="profile.origin === 'uaa'">
         <mat-card-header>
           <mat-card-title>Groups</mat-card-title>
         </mat-card-header>

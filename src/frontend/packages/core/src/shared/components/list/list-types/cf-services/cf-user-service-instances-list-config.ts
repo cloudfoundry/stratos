@@ -137,11 +137,15 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
 
   private listActionEdit: IListAction<APIResource> = {
     action: (item: APIResource<IUserProvidedServiceInstance>) =>
-      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid, {
-        [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
-        [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid,
-        [CANCEL_USER_PROVIDED]: true
-      }, true),
+      this.serviceActionHelperService.editServiceBinding(
+        item.metadata.guid,
+        item.entity.cfGuid,
+        {
+          [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
+          [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid,
+          [CANCEL_USER_PROVIDED]: true
+        },
+        true),
     label: 'Edit',
     description: 'Edit Service Instance',
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>

@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -17,11 +18,7 @@ import {
   getThresholdMin,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import {
-  AppAutoscalerInvalidPolicyError,
-  AppAutoscalerPolicy,
-  AppAutoscalerPolicyLocal,
-} from '../../../store/app-autoscaler.types';
+import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
@@ -41,7 +38,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
   metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
   editTriggerForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   public currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
@@ -54,9 +51,10 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
   constructor(
     public applicationService: ApplicationService,
     private fb: FormBuilder,
-    service: EditAutoscalerPolicyService
+    service: EditAutoscalerPolicyService,
+    route: ActivatedRoute
   ) {
-    super(service);
+    super(service, route);
     this.editTriggerForm = this.fb.group({
       metric_type: [0, this.validateTriggerMetricType()],
       operator: [0, this.validateTriggerOperator()],

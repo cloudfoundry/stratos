@@ -24,10 +24,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import {
-  SetCreateServiceInstanceCFDetails,
-  SetCreateServiceInstanceServicePlan,
-} from '../../../../../../store/src/actions/create-service-instance.actions';
+import { SetCreateServiceInstanceServicePlan } from '../../../../../../store/src/actions/create-service-instance.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectCreateServiceInstance } from '../../../../../../store/src/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -78,10 +75,6 @@ export class SelectPlanStepComponent implements OnDestroy {
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
     });
-
-    if (modeService.isMarketplaceMode()) {
-      this.store.dispatch(new SetCreateServiceInstanceCFDetails(activatedRoute.snapshot.params.endpointId));
-    }
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),

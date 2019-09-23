@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
+import { DeleteServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
 import { DeleteServiceInstance } from '../../../../store/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../store/src/actions/user-provided-service.actions';
 import { AppState } from '../../../../store/src/app-state';
@@ -13,7 +14,6 @@ import {
 } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
-import { DeleteServiceBinding } from '../../../../store/src/actions/service-bindings.actions';
 
 
 @Injectable()
