@@ -43,14 +43,12 @@ echo "Using local deployment for e2e tests"
 # Start a local UAA - this will take a few seconds to come up in the background
 docker run -d -p 8080:8080 splatform/stratos-uaa
 
-# Get go
-curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-chmod +x ~/bin/gimme
-eval "$(gimme 1.12.4)"
-go version
+# Build if needed or use existing build for this commit
+DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+set +e
+source "${DIRNAME}/e2e-build-script.sh"
+set -e
 
-npm run build
-npm run build-backend
 # Copy travis config.properties file
 cp deploy/ci/travis/config.properties src/jetstream/
 pushd src/jetstream
