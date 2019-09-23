@@ -1,12 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
+import {
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
-import { BaseTestModulesNoShared, MetadataCardTestComponents } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../chips/chips.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
 import { ServiceSummaryCardComponent } from './service-summary-card.component';
-import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 
 
 describe('ServiceSummaryCardComponent', () => {
