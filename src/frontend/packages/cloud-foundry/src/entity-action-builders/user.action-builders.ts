@@ -8,7 +8,7 @@ export const userActionBuilders = {
   get: (
     guid,
     endpointGuid
-  ) => new GetUser(guid, endpointGuid),
+  ) => new GetUser(endpointGuid, guid),
   // Must be admin user for this to succeed.
   getMultiple: (
     paginationKey: string,
