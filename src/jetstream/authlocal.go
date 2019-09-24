@@ -23,13 +23,13 @@ import (
 type localAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string
-	consoleAdminScope	   string
+	consoleAdminScope      string
 	p                      *portalProxy
 }
 
 //Login provides Local-auth specific Stratos login
 func (a *localAuth) Login(c echo.Context) error {
-	
+
 	//This check will remain in until auth is factored down into its own package
 	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
 		err := interfaces.NewHTTPShadowError(
@@ -97,11 +97,17 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 	}
 
 	uaaAdmin := (user.Scope == a.p.Config.ConsoleConfig.ConsoleAdminScope)
+
+	var scopes []string
+	scopes = make([]string, 2)
+	scopes[0] = user.Scope
+	scopes[1] = "password.write"
+
 	connectdUser := &interfaces.ConnectedUser{
 		GUID:   userGUID,
 		Name:   user.Username,
 		Admin:  uaaAdmin,
-		Scopes: []string{user.Scope},
+		Scopes: scopes,
 	}
 
 	return connectdUser, nil

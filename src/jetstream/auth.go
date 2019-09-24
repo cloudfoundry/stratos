@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"errors"
 	"fmt"
 	"net/http"
@@ -26,20 +25,20 @@ type LogoutResponse struct {
 func (p *portalProxy) InitStratosAuthService(t interfaces.AuthEndpointType) error {
 	var auth interfaces.StratosAuth
 	switch t {
-		case interfaces.Local:
-			auth = &localAuth{
-				databaseConnectionPool: p.DatabaseConnectionPool,
-				localUserScope:         p.Config.ConsoleConfig.LocalUserScope,
-				p:                      p,
-			}
-		case interfaces.Remote:
-			auth = &uaaAuth{
-				databaseConnectionPool: p.DatabaseConnectionPool,
-				p:                      p,
-			}
-		default:
-			err := fmt.Errorf("Invalid auth endpoint type: %v", t)
-			return err
+	case interfaces.Local:
+		auth = &localAuth{
+			databaseConnectionPool: p.DatabaseConnectionPool,
+			localUserScope:         p.Config.ConsoleConfig.LocalUserScope,
+			p:                      p,
+		}
+	case interfaces.Remote:
+		auth = &uaaAuth{
+			databaseConnectionPool: p.DatabaseConnectionPool,
+			p:                      p,
+		}
+	default:
+		err := fmt.Errorf("Invalid auth endpoint type: %v", t)
+		return err
 	}
 	p.StratosAuthService = auth
 	return nil
@@ -79,6 +78,3 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 
 	return uaaRes, u, nil
 }
-	scopes = make([]string, 2)
-	scopes[0] = user.Scope
-	scopes[1] = "password.write"
