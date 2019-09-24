@@ -67,7 +67,7 @@ stratos-ui-ext    NodePort    10.108.70.55   <none>        443:31091/TCP   20s
 
 Open a web browser and navigate to the Stratos https service.
 
-Login with the username `admin` and the password you set when installing (the default used about was `changeme`. When you first login, you'll see a welcome screen.
+Login with the username `admin` and the password you set when installing (the default used about was `changeme`). When you first login, you'll see a welcome screen.
 
 You'll want to register and connect endpoints into Stratos in order to be able to view them.
 
@@ -91,5 +91,5 @@ Select `Helm Repository` and enter a name for the endpoint and the URl of a Helm
 
 For example, to add the stable charts repository, enter the name `stable` and the URL `https://kubernetes-charts.storage.googleapis.com`.
 
-Click `Finish` and the Helm repository will be synchronized into Stratos and the Helm functionality will appear in the left-hand side navigation. rom here you can explore the Helm functionality in Stratos.
+Click `Finish` and the Helm repository will be synchronized into Stratos and the Helm functionality will appear in the left-hand side navigation. From here you can explore the Helm functionality in Stratos.
 
