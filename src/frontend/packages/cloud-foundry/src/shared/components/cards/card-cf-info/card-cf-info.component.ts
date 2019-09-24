@@ -45,6 +45,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
       map(entity => this.getDescription(entity))
     );
 
+    // FIXME: CF should not depend on autoscaler. See #3916
     this.autoscalerVersion$ = fetchAutoscalerInfo(this.cfEndpointService.cfGuid, this.esf).pipe(
       map(e => e.entityRequestInfo.error ?
         null :
