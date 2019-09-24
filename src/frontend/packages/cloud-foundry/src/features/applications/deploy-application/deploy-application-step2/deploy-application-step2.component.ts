@@ -236,7 +236,6 @@ export class DeployApplicationStep2Component
             projectName: projectInfo.full_name,
             commitId: commitSha
           }) as FetchCommit;
-          // const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name) as FetchCommit;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             entityID,
             fetchCommitAction
