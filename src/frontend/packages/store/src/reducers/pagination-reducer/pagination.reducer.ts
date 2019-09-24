@@ -100,7 +100,7 @@ function paginate(action, state = {}, updatePagination) {
   }
 
   if (action.type === InitCatalogueEntitiesAction.ACTION_TYPE) {
-    return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
+    return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
   }
 
   if (action.type === CREATE_PAGINATION) {

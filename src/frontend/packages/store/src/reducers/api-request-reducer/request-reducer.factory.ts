@@ -26,7 +26,7 @@ export function requestReducerFactory(actions: IRequestArray) {
   return function apiRequestReducer(state = {}, action: Action) {
     switch (action.type) {
       case InitCatalogueEntitiesAction.ACTION_TYPE:
-        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
+        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
       case startAction:
         return startRequest(state, action as StartRequestAction);
       case successAction:
