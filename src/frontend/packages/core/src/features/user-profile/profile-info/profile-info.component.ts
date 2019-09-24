@@ -10,6 +10,7 @@ import { UserProfileInfo } from '../../../../../store/src/types/user-profile.typ
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { UserProfileService } from '../user-profile.service';
+import { UserService } from '../../../core/user.service';
 
 @Component({
   selector: 'app-profile-info',
@@ -58,6 +59,7 @@ export class ProfileInfoComponent implements OnInit {
     private userProfileService: UserProfileService,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
+    public userService: UserService,
   ) {
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;

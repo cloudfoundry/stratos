@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"reflect"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
@@ -55,7 +56,7 @@ type KubeConfigFile struct {
 
 func (k *KubeConfigFile) GetClusterByAPIEndpoint(endpoint string) (*KubeConfigCluster, error) {
 	for _, cluster := range k.Clusters {
-		if cluster.Cluster.Server == endpoint {
+		if compareURL(cluster.Cluster.Server, endpoint) {
 			return &cluster, nil
 		}
 	}
@@ -109,7 +110,7 @@ func (k *KubeConfigFile) GetUserForCluster(clusterEndpoint string) (*KubeConfigU
 		if err == nil {
 			c, err := k.GetClusterByName(currentContext.Context.Cluster)
 			if err == nil {
-				if c.Cluster.Server == clusterEndpoint {
+				if compareURL(c.Cluster.Server, clusterEndpoint) {
 					// Cluster refrences the same Kube API Server
 					cluster = c
 				}
@@ -188,4 +189,38 @@ func UnMarshalHelper(values map[string]interface{}, intf interface{}) error {
 	}
 
 	return nil
+}
+
+// Compare two URLs, taking into account default HTTP/HTTPS ports and ignoring query string
+func compareURL(a, b string) bool {
+
+	ua, err := url.Parse(a)
+	if err != nil {
+		return false
+	}
+
+	ub, err := url.Parse(b)
+	if err != nil {
+		return false
+	}
+
+	aPort := getPort(ua)
+	bPort := getPort(ub)
+	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && ua.Path == ub.Path
+}
+
+func getPort(u *url.URL) string {
+	port := u.Port()
+	if len(port) == 0 {
+		switch u.Scheme {
+		case "http":
+			port = "80"
+		case "https":
+			port = "443"
+		default:
+			port = ""
+		}
+	}
+
+	return port
 }
