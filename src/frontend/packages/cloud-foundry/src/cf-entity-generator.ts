@@ -32,7 +32,11 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import {
+  JetstreamError,
+} from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
@@ -77,6 +81,7 @@ import {
 import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
+import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
 import { applicationActionBuilder } from './entity-action-builders/application.action-builders';
@@ -123,8 +128,35 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
-import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
-import { urlValidationExpression } from '../../core/src/core/utils.service';
+
+
+// TODO: RC Location
+interface CfErrorObject {
+  code: number;
+  description: string;
+  error_code: string;
+}
+
+type CfErrorResponse = CfErrorObject | string | any;
+
+// TODO: RC location
+function isCfError(errorResponse: CfErrorResponse): CfErrorObject {
+  return !!errorResponse.code && !!errorResponse.description && !!errorResponse.error_code ? errorResponse as CfErrorObject : null;
+}
+
+function getCfError(errorResponse: CfErrorResponse): string {
+  const cfError = isCfError(errorResponse);
+  if (cfError) {
+    // TODO: RC test
+    return `${cfError.description}. Code: ${cfError.error_code}`;
+  } else if (typeof errorResponse === 'string') {
+    // TODO: RC test
+    return errorResponse;
+  } else {
+    // TODO: RC test
+    return `Unknown Cloud Foundry Error`;
+  }
+}
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -167,6 +199,26 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
       }
       return data;
     },
+    globalErrorMessageHandler: (errors: JetstreamError[]) => {
+      if (!errors || errors.length === 0) {
+        return 'No errors in response';
+      }
+
+      if (errors.length === 1) {
+        return getCfError(errors[0].jetstreamErrorResponse.errorResponse);
+      }
+
+      return errors.reduce((message, error) => {
+        message += `\n${getCfError(error.jetstreamErrorResponse.errorResponse)}`;
+        return message;
+      }, 'Multiple Cloud Foundry Errors. ');
+    },
+    // TODO: this is the `response`
+    //       errorMessage: "Request Failed"
+    // success: false
+
+    // TODO: Push jetstream part into core failure handler
+    // const jetstreamError = getJetStreamError(response);
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
       getTotalPages: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>

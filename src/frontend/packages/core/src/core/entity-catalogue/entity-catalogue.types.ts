@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 
 import {
+  ApiErrorMessageHandler,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -93,6 +94,7 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   // This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
   readonly globalPreRequest?: PreApiRequest;
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
+  readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
@@ -117,6 +119,7 @@ export interface IStratosEntityDefinition<
   // This will override any globalPreRequest found in the endpoint.
   readonly preRequest?: PreApiRequest;
   readonly prePaginationRequest?: PrePaginationApiRequest;
+  readonly errorMessageHandler?: ApiErrorMessageHandler;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {

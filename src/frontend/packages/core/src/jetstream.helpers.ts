@@ -1,3 +1,6 @@
+/**
+ * Actual error response from stratos
+ */
 export interface JetStreamErrorResponse {
   error: {
     status: string;
@@ -15,9 +18,9 @@ export function getJetStreamError(obj: Partial<JetStreamErrorResponse>): JetStre
 
 // TODO It would be nice if the BE could return a unique para for us to check for.
 // There is always a chance that this will return a false positive (more so with extensions).
-export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]) {
+export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): JetStreamErrorResponse {
   if (!pages || !pages.length) {
-    return false;
+    return null;
   }
   return pages.find(page => {
     return !!(
@@ -27,6 +30,6 @@ export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]) {
       page.error.statusCode &&
       'errorResponse' in page
     );
-  });
+  }) as JetStreamErrorResponse;
 }
 
