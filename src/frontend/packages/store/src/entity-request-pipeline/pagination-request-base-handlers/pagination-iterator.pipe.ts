@@ -35,7 +35,7 @@ export class PaginationPageIterator<R = any, E = any> {
   private makeRequest(httpRequest: HttpRequest<JetstreamResponse<R>>) {
     return this.httpClient.pipelineRequest<JetstreamResponse<R>>(
       httpRequest,
-      this.action.endpointType,
+      entityCatalogue.getEndpoint(this.action.endpointType, this.action.subType),
       this.action.endpointGuid,
       this.action.externalRequest
     );
