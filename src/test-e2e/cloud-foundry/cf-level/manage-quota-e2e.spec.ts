@@ -6,6 +6,7 @@ import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 import { QuotaFormPage } from './quota-form-page.po';
+import { TableComponent } from '../../po/table.po';
 
 describe('Manage Quota', () => {
   let e2eSetup;
@@ -103,6 +104,9 @@ describe('Manage Quota', () => {
     it('- should not delete quota if attached to org', () => {
       expect(element(by.tagName('app-table')).getText()).toContain(quotaName);
       cfTopLevelPage.deleteQuota(quotaName, false);
+      // Wait until the delete operation has finished
+      const table = new TableComponent();
+      table.waitUntilNotBusy();
       expect(element(by.css('.table-row__error')).getText()).toContain('Please delete the organization associations');
     });
   });

@@ -1,12 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServiceRecentInstancesCardComponent } from './service-recent-instances-card.component';
-import { BaseTestModulesNoShared, MetadataCardTestComponents } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { StatefulIconComponent } from '../../../../core/stateful-icon/stateful-icon.component';
-import { CompactServiceInstanceCardComponent } from '../compact-service-instance-card/compact-service-instance-card.component';
+import {
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { AppChipsComponent } from '../../chips/chips.component';
+import {
+  CompactServiceInstanceCardComponent,
+} from '../compact-service-instance-card/compact-service-instance-card.component';
+import { ServiceRecentInstancesCardComponent } from './service-recent-instances-card.component';
 
 describe('ServiceRecentInstancesCardComponent', () => {
   let component: ServiceRecentInstancesCardComponent;

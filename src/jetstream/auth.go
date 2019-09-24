@@ -79,3 +79,6 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 
 	return uaaRes, u, nil
 }
+	scopes = make([]string, 2)
+	scopes[0] = user.Scope
+	scopes[1] = "password.write"

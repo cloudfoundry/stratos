@@ -17,8 +17,6 @@ import {
 } from '../../../../../../core/extension/extension-service';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { environment } from '../../../../../../environments/environment.prod';
-import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
@@ -99,7 +97,6 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     public cfSpaceService: CloudFoundrySpaceService,
     public cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService
   ) {
     this.favorite$ = cfSpaceService.space$.pipe(
       map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey))
@@ -111,6 +108,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       map(space => space.entity.entity.name),
       first()
     );
+
     this.setUpBreadcrumbs(cfEndpointService, cfOrgService);
 
     this.deleteRedirectSub = this.cfSpaceService.space$.pipe(
@@ -179,35 +177,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     );
   }
 
-
   ngOnDestroy() {
     this.deleteRedirectSub.unsubscribe();
     this.quotaLinkSub.unsubscribe();
   }
-
-  deleteSpaceWarn = () => {
-    // .first within name$
-    this.name$.pipe(
-      first()
-    ).subscribe(name => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Delete Space',
-        {
-          textToMatch: name
-        },
-        'Delete',
-        true,
-      );
-      this.confirmDialog.open(confirmation, this.deleteSpace);
-    });
-  }
-
-  deleteSpace = () => {
-    this.cfOrgService.deleteSpace(
-      this.cfSpaceService.spaceGuid,
-      this.cfSpaceService.orgGuid,
-      this.cfSpaceService.cfGuid
-    );
-  }
-
 }
