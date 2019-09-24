@@ -2,18 +2,24 @@ import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
   GetQuotaDefinition,
   UpdateQuotaDefinition,
 } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  QuotaDefinitionActionBuilder,
+} from '../../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 import { ActiveRouteCfOrgSpace } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/src/app-state';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -68,18 +74,21 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-    const action = new UpdateQuotaDefinition(this.quotaGuid, this.cfGuid, formValues);
-    this.store.dispatch(action);
-
-    return this.store.select(selectRequestInfo(action, this.quotaGuid)).pipe(
-      filter(o => !!o && !o.updating[UpdateQuotaDefinition.UpdateExistingQuota].busy),
-      map(o => o.updating[UpdateQuotaDefinition.UpdateExistingQuota]),
-      map(requestInfo => ({
-        success: !requestInfo.error,
-        redirect: !requestInfo.error,
-        message: requestInfo.error ? `Failed to update quota: ${requestInfo.message}` : ''
-      }))
-    );
+    const entityConfig =
+      entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    entityConfig.actionDispatchManager.dispatchUpdate(this.quotaGuid, this.cfGuid, formValues);
+    return entityConfig
+      .getEntityMonitor(this.store, this.quotaGuid)
+      .getUpdatingSection(UpdateQuotaDefinition.UpdateExistingQuota).pipe(
+        pairwise(),
+        filter(([oldV, newV]) => oldV.busy && !newV.busy),
+        map(([, newV]) => newV),
+        map(requestInfo => ({
+          success: !requestInfo.error,
+          redirect: !requestInfo.error,
+          message: requestInfo.error ? `Failed to update quota: ${requestInfo.message}` : ''
+        }))
+      );
   }
 
   ngOnDestroy() {

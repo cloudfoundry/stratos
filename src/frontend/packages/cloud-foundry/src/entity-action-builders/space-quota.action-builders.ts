@@ -1,7 +1,62 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { GetOrganizationSpaceQuotaDefinitions, AssociateSpaceQuota, DisassociateSpaceQuota } from '../actions/quota-definitions.actions';
+import {
+  QuotaFormValues,
+} from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
+import {
+  AssociateSpaceQuota,
+  CreateSpaceQuotaDefinition,
+  DisassociateSpaceQuota,
+  GetOrganizationSpaceQuotaDefinitions,
+  UpdateSpaceQuotaDefinition,
+} from '../actions/quota-definitions.actions';
 
-export const spaceQuotaDefinitionActionBuilders = {
+export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBuilders {
+  create: (
+    id: string,
+    endpointGuid: string,
+    args: {
+      orgGuid: string
+      createQuota: QuotaFormValues
+    },
+  ) => CreateSpaceQuotaDefinition;
+  update: (
+    guid: string,
+    endpointGuid: string,
+    updateQuota: QuotaFormValues
+  ) => UpdateSpaceQuotaDefinition;
+  getAllInOrganization: (
+    orgGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    includeRelations: string[],
+    populateMissing,
+  ) => GetOrganizationSpaceQuotaDefinitions;
+  associateWithSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    spaceQuotaGuid: string
+  ) => AssociateSpaceQuota;
+  disassociateFromSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    spaceQuotaGuid: string
+  ) => DisassociateSpaceQuota;
+}
+
+export const spaceQuotaDefinitionActionBuilders: SpaceQuotaDefinitionActionBuilders = {
+  create: (
+    id: string,
+    endpointGuid: string,
+    args: {
+      orgGuid: string
+      createQuota: QuotaFormValues
+    }
+  ) => new CreateSpaceQuotaDefinition(id, endpointGuid, args.orgGuid, args.createQuota),
+  update: (
+    guid: string,
+    endpointGuid: string,
+    updateQuota: QuotaFormValues
+  ) => new UpdateSpaceQuotaDefinition(guid, endpointGuid, updateQuota),
   getAllInOrganization: (
     orgGuid: string,
     endpointGuid: string,
@@ -33,4 +88,4 @@ export const spaceQuotaDefinitionActionBuilders = {
     endpointGuid,
     spaceQuotaGuid
   )
-} as OrchestratedActionBuilders;
+};

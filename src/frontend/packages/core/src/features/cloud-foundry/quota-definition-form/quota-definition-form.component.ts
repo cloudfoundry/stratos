@@ -4,18 +4,22 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
+
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { cfEntityFactory, quotaDefinitionEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  QuotaDefinitionActionBuilder,
+} from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
+import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { GetQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { quotaDefinitionEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 
 export interface QuotaFormValues {
   name: string;
@@ -78,13 +82,14 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
 
   fetchQuotasDefinitions() {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const quotaDefinitionEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const quotaDefinitionEntity =
+      entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
     const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getQuotaDefnitionsAction = actionBuilder(this.cfGuid, quotaPaginationKey);
+    const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid, {});
     this.quotaDefinitions$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
-        action: getQuotaDefnitionsAction,
+        action: getQuotaDefinitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(quotaDefinitionEntityType)
