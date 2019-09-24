@@ -25,7 +25,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CFEntityConfig, CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -47,6 +47,7 @@ import {
 import { GitAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { GitCommit, GitRepo } from '../../../../../../cloud-foundry/src/store/types/git.types';
 import { GitBranch } from '../../../../../../cloud-foundry/src/store/types/github.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { GitSCM } from '../../../../../../core/src/shared/data-services/scm/scm';
@@ -59,8 +60,6 @@ import {
   getApplicationDeploySourceTypes,
   getAutoSelectedDeployType,
 } from '../deploy-application-steps.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../../core/src/base-entity-schemas';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -231,8 +230,12 @@ export class DeployApplicationStep2Component
           const commitSha = commit || branch.commit.sha;
           const entityID = projectInfo.full_name + '-' + commitSha;
           const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
-          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('fetchCommit');
-          const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name) as FetchCommit;
+          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('get');
+          const fetchCommitAction = fetchCommitActionBuilder(null, null, {
+            scm: this.scm,
+            projectName: projectInfo.full_name,
+            commitId: commitSha
+          }) as FetchCommit;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             entityID,
             fetchCommitAction

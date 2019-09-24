@@ -13,8 +13,6 @@ import {
 
 export const gitRepoActionBuilders = {
   getRepoInfo: (
-    repoEntityID: string,
-    endpointGuid: string,
     projectEnvVars: EnvVarStratosProject
   ) => new FetchGitHubRepoInfo(projectEnvVars)
 } as OrchestratedActionBuilders;
@@ -46,7 +44,7 @@ export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
     commitSha: string,
     endpointGuid: string,
     commitMeta: GitMeta
-  ) => new FetchCommits(commitMeta.scm, commitSha, commitMeta.projectName)
+  ) => new FetchCommits(commitMeta.scm, commitMeta.projectName, commitSha)
 };
 
 export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
