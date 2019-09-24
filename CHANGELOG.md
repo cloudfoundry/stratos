@@ -9,6 +9,9 @@ This release contains a number of fixes and improvements:
 **Fixes:**
 
 - Clicking on a metrics endpoint to view details freezes the UI [\#212](https://github.com/SUSE/stratos/pull/212)
+- Ensure MB is only shown for memory based quota values in edit quota forms [\#3892](https://github.com/cloudfoundry-incubator/stratos/pull/3892)
+- Ensure stepper buttons are always visible and content scrolls [\#3890](https://github.com/cloudfoundry-incubator/stratos/pull/3890)
+- Fix autoscaler issue related to editing a newly created policy[\#3886](https://github.com/cloudfoundry-incubator/stratos/pull/3886)
 
 **Improvements:**
 
