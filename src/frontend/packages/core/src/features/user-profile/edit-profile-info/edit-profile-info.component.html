@@ -19,13 +19,16 @@
         <mat-form-field>
           <input matInput placeholder="Primary Email Address" formControlName="emailAddress">
         </mat-form-field>
-        <p *ngIf="!(canChangePassword | async)">Current password is required when changing email address</p>
-        <p *ngIf="(canChangePassword | async)">Current password is required when changing email address or password</p>
-        <mat-form-field>
+        <p *ngIf="!(canChangePassword | async) && needsPasswordForEmailChange">Current password is required when changing email address</p>
+        <p *ngIf="(canChangePassword | async) && needsPasswordForEmailChange">Current password is required when changing email address or password</p>
+        <mat-form-field *ngIf="needsPasswordForEmailChange">
           <input matInput placeholder="Current Password" type="password" formControlName="currentPassword" [required]="passwordRequired">
         </mat-form-field>
         <div *ngIf="(canChangePassword | async)" class="edit-profile__group">
           <p>Change Password (Leave blank to keep current password)</p>
+          <mat-form-field *ngIf="!needsPasswordForEmailChange">
+            <input matInput placeholder="Current Password" type="password" formControlName="currentPassword" [required]="passwordRequired">
+          </mat-form-field>
           <mat-form-field>
             <input matInput placeholder="New Password" type="password" formControlName="newPassword">
           </mat-form-field>

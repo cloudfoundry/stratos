@@ -78,7 +78,7 @@ const longSuite = globby.sync([
   './src/test-e2e/cloud-foundry/space-level/space-users-list-e2e.spec.ts'
 ])
 
-const longSuite2 = globby.sync([
+const manageUsersSuite = globby.sync([
   './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/cf-level/cf-users-removal-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/org-level/org-users-removal-e2e.spec.ts',
@@ -88,10 +88,23 @@ const longSuite2 = globby.sync([
   './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts'
 ])
 
-const fullMinusLongSuites = globby.sync([
+const coreSuite = globby.sync([
+  './src/test-e2e/check/check-login-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-connect-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-register-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-unregister-e2e.spec.ts',
+  './src/test-e2e/home/home-e2e.spec.ts',
+  './src/test-e2e/login/login-e2e.spec.ts',
+  './src/test-e2e/login/login-sso-e2e.spec.ts',
+  './src/test-e2e/metrics/metrics-registration-e2e.spec.ts',
+])
+
+const fullMinusOtherSuites = globby.sync([
   ...fullSuite,
   ...longSuite.map(file => '!' + file),
-  ...longSuite2.map(file => '!' + file),
+  ...manageUsersSuite.map(file => '!' + file),
+  ...coreSuite.map(file => '!' + file),
 ])
 
 exports.config = {
@@ -110,12 +123,16 @@ exports.config = {
       ...longSuite,
       ...excludeTests
     ]),
-    longSuite2: globby.sync([
-      ...longSuite2,
+    manageUsers: globby.sync([
+      ...manageUsersSuite,
       ...excludeTests
     ]),
-    fullMinusLongSuite: globby.sync([
-      ...fullMinusLongSuites,
+    core: globby.sync([
+      ...coreSuite,
+      ...excludeTests
+    ]),
+    fullMinusOtherSuites: globby.sync([
+      ...fullMinusOtherSuites,
       ...excludeTests
     ]),
     sso: globby.sync([

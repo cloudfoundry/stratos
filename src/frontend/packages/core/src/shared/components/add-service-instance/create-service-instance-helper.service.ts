@@ -1,7 +1,7 @@
 import { Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetServiceInstances } from '../../../../../store/src/actions/service-instances.actions';
 import { GetServicePlanVisibilities } from '../../../../../store/src/actions/service-plan-visibility.actions';
@@ -204,7 +204,8 @@ export class CreateServiceInstanceHelper {
       )
     }, true)
       .entities$.pipe(
-        share()
+        publishReplay(1),
+        refCount()
       );
   }
 
