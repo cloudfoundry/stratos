@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
+import { generateASEntities } from '../../cf-autoscaler/src/store/autoscaler-entity-generator';
 import { generateStratosEntities } from '../../core/src/base-entity-types';
 import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../core/src/core/entity-catalogue.module';
 import { entityCatalogue, TestEntityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -23,7 +24,8 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
             testEntityCatalogue.clear();
             return [
               ...generateCFEntities(),
-              ...generateStratosEntities()
+              ...generateStratosEntities(),
+              ...generateASEntities(), // FIXME: CF should not depend on autoscaler. See #3916
             ];
           }
         }
