@@ -67,7 +67,7 @@ stratos-ui-ext    NodePort    10.108.70.55   <none>        443:31091/TCP   20s
 
 Open a web browser and navigate to the Stratos https service.
 
-Login with the username `admin` and the password you set when installing (the default used about was `changeme`). When you first login, you'll see a welcome screen.
+Login with the username `admin` and the password you set when installing (the default used above was `changeme`). When you first login, you'll see a welcome screen.
 
 You'll want to register and connect endpoints into Stratos in order to be able to view them.
 
