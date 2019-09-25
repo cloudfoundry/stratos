@@ -36,7 +36,7 @@ import {
   appEnvVarsEntityType,
   serviceBindingEntityType,
   serviceInstancesEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,

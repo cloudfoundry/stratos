@@ -42,7 +42,8 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
     public definition?: Schema,
     private options?: schema.EntityOptions,
     public relationKey?: string,
-    schemaKey?: string
+    schemaKey?: string,
+    public excludeFromRecursiveDelete: string[] = []
   ) {
     // Note - The core schema.Entity needs to be an entityKey or denormalize will fail
     // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency

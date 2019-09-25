@@ -8,11 +8,10 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import {
   applicationEntityType,
   appStatsEntityType,
-  cfEntityFactory,
   organizationEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
 import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -29,6 +28,7 @@ import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-so
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 

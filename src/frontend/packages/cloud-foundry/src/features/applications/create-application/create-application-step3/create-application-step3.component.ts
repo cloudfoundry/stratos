@@ -12,7 +12,7 @@ import {
   domainEntityType,
   organizationEntityType,
   routeEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';

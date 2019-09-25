@@ -12,7 +12,7 @@ import {
 } from '../../../cloud-foundry/src/actions/users-roles.actions';
 import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
 import { CfRoleChange } from '../../../cloud-foundry/src/store/types/users-roles.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';

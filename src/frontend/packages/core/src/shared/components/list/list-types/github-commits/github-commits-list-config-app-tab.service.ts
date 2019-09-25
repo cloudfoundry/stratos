@@ -14,7 +14,7 @@ import {
   StoreCFSettings,
 } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';

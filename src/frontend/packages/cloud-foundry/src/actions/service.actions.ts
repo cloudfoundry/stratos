@@ -4,9 +4,10 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { cfEntityFactory, serviceEntityType, servicePlanEntityType } from '../cf-entity-factory';
+import { cfEntityFactory } from '../cf-entity-factory';
+import { serviceEntityType, servicePlanEntityType } from '../cf-entity-types';
+import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { EntityInlineParentAction, createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
 export class GetAllServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(

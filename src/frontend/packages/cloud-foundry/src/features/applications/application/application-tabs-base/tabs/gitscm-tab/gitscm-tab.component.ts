@@ -7,6 +7,7 @@ import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { FetchBranchesForProject } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
+import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import {
@@ -17,11 +18,10 @@ import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shar
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';
 import { CFAppState } from '../../../../../../cf-app-state';
-import { gitCommitEntityType, gitRepoEntityType, gitBranchesEntityType } from '../../../../../../cf-entity-factory';
+import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from '../../../../../../cf-entity-types';
 import { GitBranch } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Component({
   selector: 'app-gitscm-tab',

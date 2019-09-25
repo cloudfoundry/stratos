@@ -1,102 +1,24 @@
 import { denormalize } from 'normalizr';
 
-import {
-  applicationEntityType,
-  appStatsEntityType,
-  cfUserEntityType,
-  domainEntityType,
-  organizationEntityType,
-  privateDomainsEntityType,
-  quotaDefinitionEntityType,
-  routeEntityType,
-  serviceBindingEntityType,
-  serviceEntityType,
-  serviceInstancesEntityType,
-  servicePlanEntityType,
-  spaceEntityType,
-  stackEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../cloud-foundry/src/cf-entity-helpers';
 import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { EntitySchema } from './entity-schema';
 
+export interface IFlatTreeValue {
+  schema: EntitySchema;
+  ids: Set<string>;
+}
 export interface IFlatTree {
-  [entityKey: string]: Set<string>;
+  [entityKey: string]: IFlatTreeValue;
 }
 
-interface IExcludes {
-  [entityKey: string]: string[];
-}
 export class EntitySchemaTreeBuilder {
-  constructor(private excludes: IExcludes = {
-    // Delete org
-    [organizationEntityType]: [
-      domainEntityType,
-      quotaDefinitionEntityType,
-      privateDomainsEntityType,
-    ],
-    // Delete space
-    [spaceEntityType]: [
-      domainEntityType,
-      // Service instance related
-      serviceEntityType,
-      servicePlanEntityType,
-      // App Related
-      stackEntityType
-    ],
-    // Delete app
-    [applicationEntityType]: [
-      stackEntityType,
-      spaceEntityType,
-      routeEntityType,
-      serviceBindingEntityType,
-      serviceInstancesEntityType
-    ],
-    // Terminate app instance
-    [appStatsEntityType]: [],
-    // Delete route, unbind route
-    [routeEntityType]: [
-      domainEntityType,
-      applicationEntityType,
-      spaceEntityType
-    ],
-    // Unbind service instance
-    [serviceBindingEntityType]: [
-      applicationEntityType,
-      serviceInstancesEntityType,
-      serviceEntityType
-    ],
-    // Delete service instance
-    [serviceInstancesEntityType]: [
-      servicePlanEntityType,
-      // Service bindings
-      applicationEntityType,
-      serviceInstancesEntityType,
-      serviceEntityType
-    ],
-    [userProvidedServiceInstanceEntityType]: [
-      servicePlanEntityType,
-      // Service bindings
-      applicationEntityType,
-      serviceInstancesEntityType,
-      serviceEntityType,
-      organizationEntityType,
-      spaceEntityType
-    ],
-    // Remove a user role
-    [cfUserEntityType]: [
-      organizationEntityType,
-      spaceEntityType
-    ]
-  }) { }
 
   private entityExcludes: string[];
   public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
-    this.entityExcludes = this.excludes[schema.entityType] || [];
+    this.entityExcludes = schema.excludeFromRecursiveDelete || [];
     return this.build(schema, denormed, undefined, true);
   }
 
@@ -129,9 +51,9 @@ export class EntitySchemaTreeBuilder {
     if (!schema.getId) {
       return this.build(schema[schema.entityType], schema[schema.entityType], flatTree);
     }
-    // Don't add the root element to the tree to avoid duplication actions whe consuming tree
+    // Don't add the root element to the tree to avoid duplication actions when consuming tree
     if (!root) {
-      flatTree = this.addIdToTree(flatTree, schema.entityType, schema.getId(entity));
+      flatTree = this.addIdToTree(flatTree, schema.key, schema.getId(entity), schema);
     }
     if (!keys) {
       return flatTree;
@@ -142,18 +64,22 @@ export class EntitySchemaTreeBuilder {
       if (Array.isArray(newEntity)) {
         return this.build(entityDefinition, newEntity, fullFlatTree);
       }
-
-      return this.handleSingleChildEntity(entityDefinition, newEntity, fullFlatTree, key);
+      return this.handleSingleChildEntity(entityDefinition, newEntity, fullFlatTree, entityDefinition.key);
     }, flatTree);
   }
 
-  private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
-    const ids = flatTree[getCFEntityKey(key)] || new Set<string>();
-    flatTree[getCFEntityKey(key)] = ids.add(newId);
+  private addIdToTree(flatTree: IFlatTree, key: string, newId: string, schema: EntitySchema) {
+    if (!flatTree[key]) {
+      flatTree[key] = {
+        schema,
+        ids: new Set<string>()
+      };
+    }
+    flatTree[key].ids = flatTree[key].ids.add(newId);
     return flatTree;
   }
 
-  private getDefinition(definition) {
+  private getDefinition(definition): EntitySchema {
     if (Array.isArray(definition)) {
       return definition[0];
     }
@@ -168,14 +94,14 @@ export class EntitySchemaTreeBuilder {
       return this.build(entityDefinition, entity, flatTree);
     }
     const id = entityDefinition.getId(entity);
-    const entityKeys = flatTree[key];
+    const entityKeys = flatTree[key] ? flatTree[key].ids : null;
     if (!id || (entityKeys && entityKeys.has(id))) {
       if (entityDefinition.definition) {
         return this.build(entityDefinition.definition as EntitySchema, entity, flatTree);
       }
       return flatTree;
     }
-    flatTree = this.addIdToTree(flatTree, key, id);
+    flatTree = this.addIdToTree(flatTree, key, id, entityDefinition);
     const subKeys = Object.keys(entityDefinition);
     if (subKeys.length > 0) {
       return this.build(entityDefinition, entity, flatTree);

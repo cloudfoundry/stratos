@@ -1,14 +1,13 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IFeatureFlag } from '../../../../../../../core/src/core/cf-api.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
 
 export const FeatureFlagDescriptions = {

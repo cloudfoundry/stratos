@@ -5,12 +5,7 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 
 import { GetAllUsersAsAdmin } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import {
-  cfEntityFactory,
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import {
@@ -33,6 +28,7 @@ import {
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { cfEntityFactory } from '../../cf-entity-factory';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 import {
   fetchTotalResults,

@@ -3,25 +3,24 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
-
+import { QParam, QParamJoiners } from '../../../store/src/q-param';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
+import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
-  cfEntityFactory,
   organizationEntityType,
   serviceBindingEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../cf-entity-factory';
-import { CFStartAction } from './cf-action.types';
+} from '../cf-entity-types';
 import {
   createEntityRelationKey,
+  createEntityRelationPaginationKey,
   EntityInlineParentAction,
-  createEntityRelationPaginationKey
 } from '../entity-relations/entity-relations.types';
-import { QParamJoiners, QParam } from '../../../store/src/q-param';
+import { CFStartAction } from './cf-action.types';
 
 export const getUserProvidedServiceInstanceRelations = [
   createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),

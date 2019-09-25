@@ -1,10 +1,10 @@
-import { CFEntitySchema } from '../../../cloud-foundry/src/cf-entity-factory';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
-import { EntitySchemaTreeBuilder } from './schema-tree-traverse';
-
+import { EntitySchema } from './entity-schema';
+import { EntitySchemaTreeBuilder, IFlatTreeValue } from './schema-tree-traverse';
 
 describe('SchemaTreeTraversal', () => {
   let entitySchemaTreeBuilder: EntitySchemaTreeBuilder;
+  const endpointType = 'endpointType';
   const parentKey = 'parentKey';
   const childKey = 'childKey1';
   const grandChildKey = 'grandChild1';
@@ -19,11 +19,11 @@ describe('SchemaTreeTraversal', () => {
     const childId = '2';
     const grandchildId = '3';
 
-    const grandChildSchema = new CFEntitySchema(grandChildKey);
-    const childSchema = new CFEntitySchema(childKey, {
+    const grandChildSchema = new EntitySchema(grandChildKey, endpointType);
+    const childSchema = new EntitySchema(childKey, endpointType, {
       [grandChildSchema.entityType]: grandChildSchema
     });
-    const parentSchema = new CFEntitySchema(parentKey, {
+    const parentSchema = new EntitySchema(parentKey, endpointType, {
       [childSchema.entityType]: childSchema
     });
 
@@ -48,13 +48,25 @@ describe('SchemaTreeTraversal', () => {
     };
     const action = new RecursiveDelete(parentId, parentSchema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
-    expect(build).toEqual({
-      [childSchema.key]: new Set([
+    const res1: IFlatTreeValue = {
+      schema: childSchema,
+      ids: new Set([
         childId
-      ]),
-      [grandChildSchema.key]: new Set([
+      ])
+    };
+    const res2: IFlatTreeValue = {
+      schema: grandChildSchema,
+      ids: new Set([
         grandchildId
       ])
+    };
+
+    expect(Object.keys(build)).toEqual([childSchema.key, grandChildSchema.key]);
+    expect(build[childSchema.key]).toEqual(res1);
+    expect(build[grandChildSchema.key]).toEqual(res2);
+    expect(build).toEqual({
+      [childSchema.key]: res1,
+      [grandChildSchema.key]: res2
     });
   });
 
@@ -63,11 +75,11 @@ describe('SchemaTreeTraversal', () => {
     const childId = '2';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const grandChildSchema = new CFEntitySchema(grandChildKey);
-    const childSchema = new CFEntitySchema(childKey, {
+    const grandChildSchema = new EntitySchema(grandChildKey, endpointType);
+    const childSchema = new EntitySchema(childKey, endpointType, {
       [grandChildSchema.entityType]: [grandChildSchema]
     });
-    const parentSchema = new CFEntitySchema(parentKey, {
+    const parentSchema = new EntitySchema(parentKey, endpointType, {
       [childSchema.entityType]: childSchema
     });
     const state = {
@@ -94,14 +106,22 @@ describe('SchemaTreeTraversal', () => {
     };
     const action = new RecursiveDelete(parentId, parentSchema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
-    expect(build).toEqual({
-      [childSchema.key]: new Set([
+    const res1: IFlatTreeValue = {
+      schema: childSchema,
+      ids: new Set([
         childId
-      ]),
-      [grandChildSchema.key]: new Set([
+      ])
+    };
+    const res2: IFlatTreeValue = {
+      schema: grandChildSchema,
+      ids: new Set([
         grandchildId,
         grandchild2Id
       ])
+    };
+    expect(build).toEqual({
+      [childSchema.key]: res1,
+      [grandChildSchema.key]: res2
     });
   });
 
@@ -111,14 +131,14 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const greatGrandChildSchema = new CFEntitySchema(greatGrandChildKey);
-    const grandChildSchema = new CFEntitySchema(grandChildKey, {
+    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey, endpointType);
+    const grandChildSchema = new EntitySchema(grandChildKey, endpointType, {
       [greatGrandChildSchema.entityType]: [greatGrandChildSchema]
     });
-    const childSchema = new CFEntitySchema(childKey, {
+    const childSchema = new EntitySchema(childKey, endpointType, {
       [grandChildSchema.entityType]: [grandChildSchema]
     });
-    const parentSchema = new CFEntitySchema(parentKey, {
+    const parentSchema = new EntitySchema(parentKey, endpointType, {
       [childSchema.entityType]: childSchema
     });
     const state = {
@@ -159,18 +179,31 @@ describe('SchemaTreeTraversal', () => {
     };
     const action = new RecursiveDelete(parentId, parentSchema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
-    expect(build).toEqual({
-      [childSchema.key]: new Set([
+    const res1: IFlatTreeValue = {
+      schema: childSchema,
+      ids: new Set([
         childId
-      ]),
-      [grandChildSchema.key]: new Set([
+      ])
+    };
+    const res2: IFlatTreeValue = {
+      schema: grandChildSchema,
+      ids: new Set([
         grandchildId,
         grandchild2Id
-      ]),
-      [greatGrandChildSchema.key]: new Set([
+      ])
+    };
+    const res3: IFlatTreeValue = {
+      schema: greatGrandChildSchema,
+      ids: new Set([
         childId,
         child2Id
       ])
+    };
+
+    expect(build).toEqual({
+      [childSchema.key]: res1,
+      [grandChildSchema.key]: res2,
+      [greatGrandChildSchema.key]: res3
     });
   });
 
@@ -180,16 +213,16 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const greatGrandChildSchema = new CFEntitySchema(greatGrandChildKey);
-    const grandChildSchema = new CFEntitySchema(grandChildKey, {
+    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey, endpointType);
+    const grandChildSchema = new EntitySchema(grandChildKey, endpointType, {
       [greatGrandChildSchema.entityType]: [greatGrandChildSchema]
     });
-    const childSchema = new CFEntitySchema(childKey, {
+    const childSchema = new EntitySchema(childKey, endpointType, {
       entity: {
         [grandChildSchema.entityType]: [grandChildSchema]
       }
     });
-    const parentSchema = new CFEntitySchema(parentKey, {
+    const parentSchema = new EntitySchema(parentKey, endpointType, {
       [childSchema.entityType]: childSchema
     });
     const state = {
@@ -234,18 +267,30 @@ describe('SchemaTreeTraversal', () => {
     };
     const action = new RecursiveDelete(parentId, parentSchema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
-    expect(build).toEqual({
-      [childSchema.key]: new Set([
+    const res1: IFlatTreeValue = {
+      schema: childSchema,
+      ids: new Set([
         childId
-      ]),
-      [grandChildSchema.key]: new Set([
+      ])
+    };
+    const res2: IFlatTreeValue = {
+      schema: grandChildSchema,
+      ids: new Set([
         grandchildId,
         grandchild2Id
-      ]),
-      [greatGrandChildSchema.key]: new Set([
+      ])
+    };
+    const res3: IFlatTreeValue = {
+      schema: greatGrandChildSchema,
+      ids: new Set([
         childId,
         child2Id
       ])
+    };
+    expect(build).toEqual({
+      [childSchema.key]: res1,
+      [grandChildSchema.key]: res2,
+      [greatGrandChildSchema.key]: res3
     });
   });
 
@@ -255,24 +300,18 @@ describe('SchemaTreeTraversal', () => {
     const child2Id = '5';
     const grandchildId = '3';
     const grandchild2Id = '4';
-    const greatGrandChildSchema = new CFEntitySchema(greatGrandChildKey);
-    const grandChildSchema = new CFEntitySchema(grandChildKey, {
+    const greatGrandChildSchema = new EntitySchema(greatGrandChildKey, endpointType);
+    const grandChildSchema = new EntitySchema(grandChildKey, endpointType, {
       [greatGrandChildSchema.entityType]: [greatGrandChildSchema]
     });
-    const childSchema = new CFEntitySchema(childKey, {
+    const childSchema = new EntitySchema(childKey, endpointType, {
       entity: {
         [grandChildSchema.entityType]: [grandChildSchema]
       }
     });
-    const parentSchema = new CFEntitySchema(parentKey, {
+    const parentSchema = new EntitySchema(parentKey, endpointType, {
       [childSchema.entityType]: childSchema
-    });
-
-    entitySchemaTreeBuilder = new EntitySchemaTreeBuilder({
-      [parentSchema.entityType]: [
-        grandChildSchema.entityType
-      ]
-    });
+    }, {}, null, null, [grandChildSchema.entityType]);
 
     const state = {
       [parentSchema.key]: {
@@ -316,10 +355,15 @@ describe('SchemaTreeTraversal', () => {
     };
     const action = new RecursiveDelete(parentId, parentSchema);
     const build = entitySchemaTreeBuilder.getFlatTree(action, state);
-    expect(build).toEqual({
-      [childSchema.key]: new Set([
+    const res1: IFlatTreeValue = {
+      schema: childSchema,
+      ids: new Set([
         childId
       ])
+    };
+    expect(Object.keys(build)).toEqual([childSchema.key]);
+    expect(build).toEqual({
+      [childSchema.key]: res1
     });
   });
 });

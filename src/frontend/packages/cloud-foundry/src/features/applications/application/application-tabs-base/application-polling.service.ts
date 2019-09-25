@@ -3,8 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { appStatsEntityType, appSummaryEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../../../core/src/core/entity-service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
@@ -12,9 +14,6 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../application.service';
-import { appSummaryEntityType, appStatsEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 @Injectable()
 export class ApplicationPollingService {
