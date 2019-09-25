@@ -3,13 +3,18 @@ import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, pairwise } from 'rxjs/operators';
 
-import { CreateQuotaDefinition } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import {
+  QuotaDefinitionActionBuilder,
+} from '../../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 import { AppState } from '../../../../../../store/src/app-state';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
+import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 
 
 @Component({
@@ -37,10 +42,13 @@ export class CreateQuotaStepComponent {
 
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
-    const action = new CreateQuotaDefinition(this.cfGuid, formValues);
-    this.store.dispatch(action);
-    return this.store.select(selectRequestInfo(action, formValues.name)).pipe(
-      filter(requestInfo => !!requestInfo && !requestInfo.creating),
+    const entityConfig =
+      entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    entityConfig.actionDispatchManager.dispatchCreate(formValues.name, this.cfGuid, formValues);
+    return entityConfig.getEntityMonitor(this.store, formValues.name).entityRequest$.pipe(
+      pairwise(),
+      filter(([oldV, newV]) => oldV.creating && !newV.creating),
+      map(([, newV]) => newV),
       map(requestInfo => ({
         success: !requestInfo.error,
         redirect: !requestInfo.error,

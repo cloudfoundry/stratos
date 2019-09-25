@@ -17,6 +17,8 @@ import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { QuotaDefinitionActionBuilder } from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 
 export interface QuotaFormValues {
   name: string;
@@ -79,13 +81,14 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
 
   fetchQuotasDefinitions() {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const quotaDefinitionEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const quotaDefinitionEntity =
+      entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
     const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getQuotaDefnitionsAction = actionBuilder(this.cfGuid, quotaPaginationKey);
+    const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid, {});
     this.quotaDefinitions$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
-        action: getQuotaDefnitionsAction,
+        action: getQuotaDefinitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(quotaDefinitionEntityType)
