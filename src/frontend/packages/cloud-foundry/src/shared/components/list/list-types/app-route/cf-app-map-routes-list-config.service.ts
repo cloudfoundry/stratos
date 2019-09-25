@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { routeEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { routeEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';

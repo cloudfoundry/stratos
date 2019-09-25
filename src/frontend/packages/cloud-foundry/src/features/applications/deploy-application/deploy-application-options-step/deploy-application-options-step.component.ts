@@ -9,9 +9,8 @@ import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators'
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GetAllOrganizationDomains } from '../../../../../../cloud-foundry/src/actions/organization.actions';
-import { GetAllStacks } from '../../../../../../cloud-foundry/src/actions/stack.action';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfDetails } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';

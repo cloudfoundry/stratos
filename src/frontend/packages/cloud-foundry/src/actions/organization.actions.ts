@@ -2,25 +2,24 @@ import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
-
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
+import { cfEntityFactory } from '../cf-entity-factory';
 import {
-  cfEntityFactory,
   cfUserEntityType,
   domainEntityType,
   organizationEntityType,
   spaceEntityType,
   spaceWithOrgEntityType,
-} from '../cf-entity-factory';
+} from '../cf-entity-types';
+import {
+  createEntityRelationPaginationKey,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+} from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
-import {
-  EntityInlineParentAction,
-  EntityInlineChildAction,
-  createEntityRelationPaginationKey
-} from '../entity-relations/entity-relations.types';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';

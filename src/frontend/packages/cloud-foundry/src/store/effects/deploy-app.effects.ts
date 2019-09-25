@@ -28,7 +28,7 @@ import {
   ProjectFetchFail,
 } from '../../actions/deploy-applications.actions';
 import { CFAppState } from '../../cf-app-state';
-import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-factory';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
 import { entityCatalogue } from './../../../../core/src/core/entity-catalogue/entity-catalogue.service';

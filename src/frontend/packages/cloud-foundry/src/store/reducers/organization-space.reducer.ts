@@ -4,7 +4,7 @@ import {
   DELETE_SPACE_SUCCESS,
   DeleteSpace,
 } from '../../actions/space.actions';
-import { spaceEntityType } from '../../cf-entity-factory';
+import { spaceEntityType } from '../../cf-entity-types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';

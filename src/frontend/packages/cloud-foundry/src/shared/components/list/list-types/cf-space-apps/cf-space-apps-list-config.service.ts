@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { IApp } from '../../../../../../../core/src/core/cf-api.types';
 import {

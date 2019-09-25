@@ -1,4 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
@@ -6,13 +7,12 @@ import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { IServiceBroker } from '../../../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
-import { APIResource } from '../../../../../../store/src/types/api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { spaceEntityType } from '../../../../cf-entity-factory';
-import { Store } from '@ngrx/store';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { spaceEntityType } from '../../../../cf-entity-types';
 
 @Component({
   selector: 'app-service-broker-card',

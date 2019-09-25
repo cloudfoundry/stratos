@@ -4,7 +4,7 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import {
   getActionsFromExtensions,
@@ -24,6 +24,7 @@ import {
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';

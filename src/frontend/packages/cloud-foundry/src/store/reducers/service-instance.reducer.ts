@@ -4,7 +4,7 @@ import {
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
 } from '../../actions/service-bindings.actions';
-import { serviceBindingEntityType } from '../../cf-entity-factory';
+import { serviceBindingEntityType } from '../../cf-entity-types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';

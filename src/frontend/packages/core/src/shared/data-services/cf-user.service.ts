@@ -5,14 +5,9 @@ import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { GetAllUsersAsAdmin } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import {
-  cfEntityFactory,
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ActiveRouteCfOrgSpace } from '../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import {

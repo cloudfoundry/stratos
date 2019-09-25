@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity-helpers';
 import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity-helpers';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
   CardMultiActionComponents,

@@ -5,10 +5,9 @@ import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators'
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   serviceInstancesEntityType,
   servicePlanVisibilityEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   IService,
@@ -23,6 +22,7 @@ import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitor
 import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../cf-entity-factory';
 import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { QParam, QParamJoiners } from '../../../../../store/src/q-param';

@@ -3,14 +3,12 @@ import { Http } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
-import {
-  AppMetadataTypes
-} from '../../../cloud-foundry/src/actions/app-metadata.actions';
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { WrapperRequestActionSuccess } from '../types/request.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { appStatsEntityType, appSummaryEntityType, appEnvVarsEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
+import { appEnvVarsEntityType, appStatsEntityType, appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { WrapperRequestActionSuccess } from '../types/request.types';
 
 
 

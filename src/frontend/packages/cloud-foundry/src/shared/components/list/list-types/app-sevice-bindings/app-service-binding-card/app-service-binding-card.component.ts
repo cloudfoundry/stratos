@@ -5,11 +5,10 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import {
-  cfEntityFactory,
   serviceBindingEntityType,
   serviceInstancesEntityType,
-  userProvidedServiceInstanceEntityType
-} from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationService } from '../../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { getCfService } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
@@ -25,6 +24,7 @@ import {
 } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
@@ -34,8 +34,8 @@ import {
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 
 interface EnvVarData {
   key: string;

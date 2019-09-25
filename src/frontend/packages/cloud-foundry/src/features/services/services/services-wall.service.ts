@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
@@ -12,6 +12,7 @@ import { getPaginationObservables } from '../../../../../store/src/reducers/pagi
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { cfEntityFactory } from '../../../cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
 @Injectable()

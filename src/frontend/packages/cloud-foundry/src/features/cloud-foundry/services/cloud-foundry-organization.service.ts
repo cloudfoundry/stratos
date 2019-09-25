@@ -12,7 +12,7 @@ import {
   quotaDefinitionEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../cloud-foundry/src/cf-entity-types';
 import { fetchServiceInstancesCount } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { OrgUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import {

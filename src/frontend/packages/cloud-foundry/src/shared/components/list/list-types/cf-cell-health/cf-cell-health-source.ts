@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -10,6 +9,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export interface CfCellHealthEntry {
   timestamp: number;
