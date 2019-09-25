@@ -20,9 +20,17 @@ describe('CloudFoundrySummaryTabComponent', () => {
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
-        declarations: [CloudFoundrySummaryTabComponent, CardCfInfoComponent, CardCfRecentAppsComponent, CompactAppCardComponent],
+        declarations: [
+          CloudFoundrySummaryTabComponent,
+          CardCfInfoComponent,
+          CardCfRecentAppsComponent,
+          CompactAppCardComponent
+        ],
         imports: generateCfBaseTestModules(),
-        providers: [...generateTestCfEndpointServiceProvider(), TabNavService]
+        providers: [
+          ...generateTestCfEndpointServiceProvider(),
+          TabNavService
+        ]
       }).compileComponents();
     })
   );

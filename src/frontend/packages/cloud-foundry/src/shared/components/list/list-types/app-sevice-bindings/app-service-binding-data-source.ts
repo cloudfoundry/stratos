@@ -31,12 +31,15 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource<ISer
     const serviceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
     const actionBuilder = serviceBindingEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
     const getAppServiceBindingsAction = actionBuilder(
-      appGuid, cfGuid, paginationKey, [
-        createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
-        createEntityRelationKey(serviceInstancesEntityType, serviceEntityType),
-        createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
-        createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
-      ]) as PaginatedAction;
+      appGuid, cfGuid, paginationKey, {
+        includeRelations: [
+          createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+          createEntityRelationKey(serviceInstancesEntityType, serviceEntityType),
+          createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
+          createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
+        ],
+        populateMissing: true
+      }) as PaginatedAction;
     return getAppServiceBindingsAction;
   }
 

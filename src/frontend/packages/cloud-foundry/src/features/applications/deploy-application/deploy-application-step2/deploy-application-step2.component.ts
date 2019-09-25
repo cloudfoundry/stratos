@@ -230,8 +230,12 @@ export class DeployApplicationStep2Component
           const commitSha = commit || branch.commit.sha;
           const entityID = projectInfo.full_name + '-' + commitSha;
           const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
-          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('fetchCommit');
-          const fetchCommitAction = fetchCommitActionBuilder(this.scm, commitSha, projectInfo.full_name) as FetchCommit;
+          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('get');
+          const fetchCommitAction = fetchCommitActionBuilder(null, null, {
+            scm: this.scm,
+            projectName: projectInfo.full_name,
+            commitId: commitSha
+          }) as FetchCommit;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             entityID,
             fetchCommitAction

@@ -15,7 +15,7 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
   return function entitiesReducer(state = {}, action: Action): Record<string, any> {
     switch (action.type) {
       case InitCatalogueEntitiesAction.ACTION_TYPE:
-        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
+        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
       case successAction:
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {

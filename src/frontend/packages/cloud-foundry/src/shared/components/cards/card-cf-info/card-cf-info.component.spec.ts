@@ -18,9 +18,17 @@ describe('CardCfInfoComponent', () => {
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
-        declarations: [CardCfInfoComponent, MetadataItemComponent, BooleanIndicatorComponent],
+        declarations: [
+          CardCfInfoComponent,
+          MetadataItemComponent,
+          BooleanIndicatorComponent
+        ],
         imports: generateCfBaseTestModulesNoShared(),
-        providers: [generateTestCfEndpointService(), UserInviteService, ConfirmationDialogService]
+        providers: [
+          generateTestCfEndpointService(),
+          UserInviteService,
+          ConfirmationDialogService
+        ]
       }).compileComponents();
     })
   );

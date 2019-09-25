@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { EntityRequestAction } from '../types/request.types';
@@ -36,7 +37,7 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
   return makeRequestEntityPipe(
     httpClient,
     request,
-    action.endpointType,
+    entityCatalogue.getEndpoint(action.endpointType, action.subType),
     action.endpointGuid,
     action.externalRequest
   ).pipe(

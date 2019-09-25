@@ -1248,6 +1248,10 @@ func (p *portalProxy) getLocalUser(userGUID string) (*interfaces.ConnectedUser, 
 	}
 
 	var scopes []string
+	scopes = make([]string, 2)
+	scopes[0] = user.Scope
+	scopes[1] = "password.write"
+
 	uaaAdmin := (user.Scope == p.Config.ConsoleConfig.ConsoleAdminScope)
 	uaaEntry := &interfaces.ConnectedUser{
 		GUID:   userGUID,

@@ -130,8 +130,8 @@ export class CsiModeService {
     const servceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
     const actionBuilder = servceBindingEntity.actionOrchestrator.getActionBuilder('create');
     const createServiceBindingAction = actionBuilder(
-      cfGuid,
       guid,
+      cfGuid,
       { applicationGuid: appGuid, serviceInstanceGuid, params }
     );
     this.store.dispatch(createServiceBindingAction);

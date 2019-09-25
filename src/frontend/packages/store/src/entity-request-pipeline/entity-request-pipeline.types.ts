@@ -3,7 +3,10 @@ import { RequestOptions } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import {
+  StratosBaseCatalogueEntity,
+  StratosCatalogueEndpointEntity,
+} from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
@@ -47,7 +50,7 @@ export type MakeEntityRequestPipe<
   > = (
     httpClient: PipelineHttpClient,
     request: HttpRequest<any> | Observable<HttpRequest<any>>,
-    endpointType: string,
+    endpointConfig: StratosCatalogueEndpointEntity,
     endpointGuids: string | string[],
     externalRequest?: boolean
   ) => Observable<JetstreamResponse<T>>;
