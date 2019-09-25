@@ -5,7 +5,6 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   SpaceQuotaDefinitionActionBuilders,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/space-quota.action-builders';
@@ -16,6 +15,7 @@ import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalo
 import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
+import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 
 
 @Component({

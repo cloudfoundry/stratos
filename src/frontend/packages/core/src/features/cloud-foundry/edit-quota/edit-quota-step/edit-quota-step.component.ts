@@ -9,7 +9,6 @@ import {
   GetQuotaDefinition,
   UpdateQuotaDefinition,
 } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   QuotaDefinitionActionBuilder,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
@@ -24,6 +23,7 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
+import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 
 
 @Component({
