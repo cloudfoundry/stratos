@@ -1,3 +1,4 @@
+import { IRequestTypeState } from '../../../../store/src/app-state';
 import { entityCatalogue } from './entity-catalogue.service';
 
 // FIXME: These should be removed/come from the entity catalogue - STRAT-151
@@ -14,7 +15,7 @@ export function getAllEntityStoreKeys() {
   ];
 }
 
-export function getDefaultStateFromEntityCatalogue<T = any>(entityKeys: string[], defaultState: T) {
+export function getDefaultStateFromEntityCatalogue<T = any>(entityKeys: string[], defaultState: T, initialState: IRequestTypeState) {
   return entityKeys.reduce((currentState, entityKey) => {
     if (currentState[entityKey]) {
       return currentState;
@@ -23,5 +24,5 @@ export function getDefaultStateFromEntityCatalogue<T = any>(entityKeys: string[]
       ...currentState,
       [entityKey]: defaultState
     };
-  }, {}) as T;
+  }, initialState) as T;
 }

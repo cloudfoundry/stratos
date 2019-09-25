@@ -9,6 +9,7 @@ import { SharedModule } from '../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../core/test-framework/application-service-helper';
 import { createEmptyStoreModule } from '../../../core/test-framework/store-test-helper';
+import { CfAutoscalerTestingModule } from '../cf-autoscaler-testing.module';
 import { AutoscalerBaseComponent } from './autoscaler-base.component';
 
 describe('AutoscalerBaseComponent', () => {
@@ -19,6 +20,7 @@ describe('AutoscalerBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [AutoscalerBaseComponent],
       imports: [
+        CfAutoscalerTestingModule,
         NoopAnimationsModule,
         createEmptyStoreModule(),
         CoreModule,

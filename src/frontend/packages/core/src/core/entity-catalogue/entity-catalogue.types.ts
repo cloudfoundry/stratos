@@ -20,6 +20,14 @@ export interface EntityCatalogueEntityConfig {
   schemaKey?: string;
 }
 
+export interface ActionBuilderConfig<T extends Record<any, any> = Record<any, any>> {
+  actionMetadata?: T;
+  entityGuid: string;
+  endpointGuid?: string;
+}
+
+export type EntityActionBuilderEntityConfig = EntityCatalogueEntityConfig & ActionBuilderConfig;
+
 export const extractEntityCatalogueEntityConfig = (ecec: Partial<EntityCatalogueEntityConfig>): EntityCatalogueEntityConfig => {
   const { entityType, endpointType, subType, schemaKey } = ecec;
   return { entityType, endpointType, subType, schemaKey };
@@ -50,7 +58,9 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly label?: string;
   readonly labelPlural?: string;
   readonly renderPriority?: number;
-  // This should be typed
+  /**
+   * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
+   */
   readonly listDetailsComponent?: any;
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
@@ -69,6 +79,10 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   readonly tokenSharing?: boolean;
   readonly urlValidation?: boolean;
   readonly unConnectable?: boolean;
+  /**
+   * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
+   */
+  readonly techPreview?: boolean;
   readonly urlValidationRegexString?: string;
   readonly authTypes: EndpointAuthTypeConfig[];
   readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];

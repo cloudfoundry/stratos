@@ -195,13 +195,16 @@ type GooseDBVersionRecord struct {
 
 // Info - this represents user specific info
 type Info struct {
-	Versions     *Versions                             `json:"version"`
-	User         *ConnectedUser                        `json:"user"`
-	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
-	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
-	Plugins      map[string]bool                       `json:"plugins"`
-	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
-	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
+	Versions      *Versions                             `json:"version"`
+	User          *ConnectedUser                        `json:"user"`
+	Endpoints     map[string]map[string]*EndpointDetail `json:"endpoints"`
+	CloudFoundry  *CFInfo                               `json:"cloud-foundry,omitempty"`
+	Plugins       map[string]bool                       `json:"plugins"`
+	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
+	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
+	Configuration struct {
+		TechPreview bool `json:"enableTechPreview"`
+	} `json:"config"`
 }
 
 // EndpointDetail extends CNSI Record and adds the user
@@ -252,8 +255,41 @@ type ConsoleConfig struct {
 	UseSSO                bool     `json:"use_sso" configName:"SSO_LOGIN"`
 }
 
+const defaultAdminScope = "stratos.admin"
+
 // IsSetupComplete indicates if we have enough config
 func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+
+	// Local user - check setup complete
+	if AuthEndpointTypes[consoleConfig.AuthEndpointType] == Local {
+
+		// Need LocalUser and LocalUserPassword
+		if len(consoleConfig.LocalUser) == 0 || len(consoleConfig.LocalUserPassword) == 0 {
+			return false
+		}
+
+		// Also, we will make sure that admin scopes are set up for admin, if not specified
+		if len(consoleConfig.LocalUserScope) == 0 {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Neither set, so use default for both
+				consoleConfig.LocalUserScope = defaultAdminScope
+				consoleConfig.ConsoleAdminScope = defaultAdminScope
+			} else {
+				// admin scope set, so just use that
+				consoleConfig.LocalUserScope = consoleConfig.ConsoleAdminScope
+			}
+		} else {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Console admin scope not set, so use local user scope
+				consoleConfig.ConsoleAdminScope = consoleConfig.LocalUserScope
+			}
+		}
+
+		// Setup is complete if we have LocalUser and LocalUserPassword set
+		return true
+	}
+
+	// UAA - check setup complete for UAA
 	if consoleConfig.UAAEndpoint == nil {
 		return false
 	}
@@ -313,4 +349,5 @@ type PortalConfig struct {
 	ConsoleConfig                   *ConsoleConfig
 	PluginConfig                    map[string]string
 	DatabaseProviderName            string
+	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
 }

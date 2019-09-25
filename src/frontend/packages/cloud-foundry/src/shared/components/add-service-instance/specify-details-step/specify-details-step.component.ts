@@ -25,19 +25,18 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
   SetCreateServiceInstanceOrg,
   SetServiceInstanceGuid,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CreateServiceBinding } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
-import {
-  CreateServiceInstance,
-  GetServiceInstance,
-  UpdateServiceInstance,
-} from '../../../../../../cloud-foundry/src/actions/service-instances.actions';
+import { UpdateServiceInstance } from '../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import {
+  appEnvVarsEntityType,
+  serviceBindingEntityType,
+  serviceInstancesEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
@@ -45,6 +44,7 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { CreateServiceInstanceState } from '../../../../../../cloud-foundry/src/store/types/create-service-instance.types';
 import { IServiceInstance, IServicePlan } from '../../../../../../core/src/core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -320,8 +320,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                   return req;
                 } else {
                   // Refetch env vars for app, since they have been changed by CF
+                  const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+                  const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+                  const getAppEnvVarsAction = actionBuilder(state.bindAppGuid, state.cfGuid);
                   this.store.dispatch(
-                    new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
+                    getAppEnvVarsAction
                   );
 
                   return this.routeToServices(state.cfGuid, state.bindAppGuid);
@@ -396,10 +399,23 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     tagsStr: string[],
     isEditMode: boolean
   ) {
+    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     if (isEditMode) {
-      return new UpdateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+      const updateActionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('update');
+      const updateServiceInstanceAction = updateActionBuilder(
+        cfGuid,
+        newServiceInstanceGuid,
+        { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
+      );
+      return updateServiceInstanceAction;
     }
-    return new CreateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+    const createActionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('create');
+    const createServiceInstanceAction = createActionBuilder(
+      cfGuid,
+      newServiceInstanceGuid,
+      { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
+    );
+    return createServiceInstanceAction;
   }
 
   private getIdFromResponseGetter(cfGuid: string, newId: string, isEditMode: boolean) {
@@ -408,7 +424,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         // We need to re-fetch the Service Instance
         // incase of creation because the entity returned is incomplete
         const guid = response.result[0];
-        this.store.dispatch(new GetServiceInstance(guid, cfGuid));
+        const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+        const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
+        const getServiceInstanceAction = actionBuilder(guid, cfGuid);
+        this.store.dispatch(getServiceInstanceAction);
         return guid;
       }
       return newId;
@@ -460,14 +479,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-
-    this.store.dispatch(new CreateServiceBinding(
+    const servceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = servceBindingEntity.actionOrchestrator.getActionBuilder('create');
+    const createServiceBindingAction = actionBuilder(
       cfGuid,
       guid,
-      appGuid,
-      serviceInstanceGuid,
-      params
-    ));
+      { applicationGuid: appGuid, serviceInstanceGuid, params }
+    );
+    this.store.dispatch(createServiceBindingAction);
 
     return this.store.select(selectCfRequestInfo(serviceBindingEntityType, guid));
   }

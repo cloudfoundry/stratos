@@ -102,6 +102,10 @@ export interface EntityInlineParentAction extends EntityRequestAction {
   populateMissing: boolean;
 }
 
+export function isEntityInlineParentAction(anything: any): EntityInlineParentAction {
+  return anything && !!anything.includeRelations && anything.populateMissing !== undefined ? anything as EntityInlineParentAction : null;
+}
+
 
 /**
  * The result of a validation run. Indicates if any separate api requests have been started and a promise firing when they have completed

@@ -10,13 +10,14 @@ import {
 } from '../../../../store/src/actions/user-profile.actions';
 import { AppState } from '../../../../store/src/app-state';
 import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../../store/src/effects/user-profile.effects';
+import { userProfileSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import {
   ActionState,
   getDefaultActionState,
   rootUpdatingKey,
 } from '../../../../store/src/reducers/api-request-reducer/types';
 import { AuthState } from '../../../../store/src/reducers/auth.reducer';
-import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import {
   UserProfileInfo,
   UserProfileInfoEmail,
@@ -29,6 +30,8 @@ import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 
 @Injectable()
 export class UserProfileService {
+
+  isError$: Observable<boolean>;
 
   isFetching$: Observable<boolean>;
 
@@ -46,6 +49,11 @@ export class UserProfileService {
       filter(data => data && !!data.id)
     );
     this.isFetching$ = this.entityMonitor.isFetchingEntity$;
+
+    this.isError$ = this.store.select(selectRequestInfo(userProfileSchemaKey, UserProfileEffect.guid)).pipe(
+      filter(requestInfo => !!requestInfo && !requestInfo.fetching),
+      map(requestInfo => requestInfo.error)
+    );
   }
 
   fetchUserProfile() {

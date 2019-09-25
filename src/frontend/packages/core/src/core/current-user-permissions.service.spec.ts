@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { first, tap } from 'rxjs/operators';
 
-import { cfEntityFactory, featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { generateCFEntities } from '../../../cloud-foundry/src/cf-entity-generator';
+import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { AppState } from '../../../store/src/app-state';
 import { AppStoreExtensionsModule } from '../../../store/src/store.extensions.module';
 import { APIResource } from '../../../store/src/types/api.types';
@@ -22,7 +23,7 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { EffectsFeatureTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
@@ -918,7 +919,7 @@ describe('CurrentUserPermissionsService', () => {
       imports: [
         AppStoreExtensionsModule,
         {
-          ngModule: EffectsFeatureTestModule,
+          ngModule: EntityCatalogueTestModule,
           providers: [
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [

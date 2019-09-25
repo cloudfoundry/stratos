@@ -4,6 +4,7 @@ import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AddSpaceComponent } from './add-space.component';
 import { CreateSpaceStepComponent } from './create-space-step/create-space-step.component';
+import { CFBaseTestModules } from '../../../../test-framework/cf-test-helper';
 
 describe('AddSpaceComponent', () => {
   let component: AddSpaceComponent;
@@ -12,7 +13,9 @@ describe('AddSpaceComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [AddSpaceComponent, CreateSpaceStepComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        ...CFBaseTestModules,
+      ],
       providers: [TabNavService]
     })
       .compileComponents();

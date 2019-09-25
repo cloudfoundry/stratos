@@ -5,28 +5,27 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { AssignRouteToApplication } from '../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CreateNewApplication } from '../../../../../../cloud-foundry/src/actions/application.actions';
-import { GetOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
-import { CreateRoute } from '../../../../../../cloud-foundry/src/actions/route.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
   organizationEntityType,
   routeEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { createGetApplicationAction } from '../../application.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
+import { createGetApplicationAction } from '../../application.service';
 
 
 @Component({
@@ -116,15 +115,16 @@ export class CreateApplicationStep3Component implements OnInit {
     const newRouteGuid = hostName + selectedDomainGuid;
 
     if (shouldCreate) {
-      this.store.dispatch(new CreateRoute(
-        newRouteGuid,
+      const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+      const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('create');
+      const createRouteAction = actionBuilder(newRouteGuid,
         cloudFoundry,
         {
           space_guid: space,
           domain_guid: selectedDomainGuid,
           host: hostName
-        }
-      ));
+        });
+      this.store.dispatch(createRouteAction);
       return this.wrapObservable(this.store.select(selectCfRequestInfo(routeEntityType, newRouteGuid)),
         'Application created. Could not create route');
     }
@@ -135,7 +135,10 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
-    this.store.dispatch(new AssignRouteToApplication(appGuid, routeGuid, endpointGuid));
+    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
+    const assignRouteAction = actionBuilder(appGuid, routeGuid, endpointGuid);
+    this.store.dispatch(assignRouteAction);
     return this.wrapObservable(this.store.select(selectCfRequestInfo(applicationEntityType, appGuid)),
       'Application and route created. Could not associated route with app');
   }
@@ -160,12 +163,18 @@ export class CreateApplicationStep3Component implements OnInit {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
         this.hostControl().markAsDirty();
         this.newAppData = state;
+        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
+        const getOrgAction = getOrgActionBuilder(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, {
+          includeRelations: [
+            createEntityRelationKey(organizationEntityType, domainEntityType)
+          ],
+          populateMissing: true
+        });
+
         const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
           state.cloudFoundryDetails.org,
-          new GetOrganization(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
-            createEntityRelationKey(organizationEntityType, domainEntityType)
-          ]),
-          true
+          getOrgAction
         );
         return orgEntService.waitForEntity$.pipe(
           map(({ entity }) => {

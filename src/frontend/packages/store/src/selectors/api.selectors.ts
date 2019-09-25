@@ -55,6 +55,7 @@ export function selectDeletionInfo(entityKey: string, entityGuid: string) {
 }
 
 export function selectRequestInfo(entityKeyOrConfig: string | EntityCatalogueEntityConfig, entityGuid: string) {
+  // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
   const entityKey = typeof (entityKeyOrConfig) === 'string' ?
     entityKeyOrConfig :
     EntityCatalogueHelpers.buildEntityKey(entityKeyOrConfig.entityType, entityKeyOrConfig.endpointType);

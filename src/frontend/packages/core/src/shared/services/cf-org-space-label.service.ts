@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { haveMultiConnectedCfs } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
@@ -12,7 +12,7 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { EntityCatalogueHelpers } from '../../core/entity-catalogue/entity-catalogue.helper';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 
 export class CfOrgSpaceLabelService {
 
@@ -33,7 +33,7 @@ export class CfOrgSpaceLabelService {
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
     // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
-    const endpointEntityKey = EntityCatalogueHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
+    const endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
 
     this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
 

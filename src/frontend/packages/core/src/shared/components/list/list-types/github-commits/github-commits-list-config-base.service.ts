@@ -3,16 +3,15 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 
 @Injectable()
-export abstract class GithubCommitsListConfigServiceBase implements IListConfig<APIResource<GitCommit>> {
+export abstract class GithubCommitsListConfigServiceBase implements IListConfig<GitCommit> {
   protected dataSource: GithubCommitsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
@@ -20,17 +19,17 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
     noEntries: 'There are no commits'
   };
 
-  protected columns: ITableColumn<APIResource<GitCommit>>[] = [
+  protected columns: ITableColumn<GitCommit>[] = [
     {
       columnId: 'message',
       headerCell: () => 'Message',
       cellDefinition: {
-        valuePath: 'entity.commit.message'
+        valuePath: 'commit.message'
       },
       sort: {
         type: 'sort',
         orderKey: 'message',
-        field: 'entity.commit.message'
+        field: 'commit.message'
       },
       cellFlex: '3',
       class: 'app-table__cell--table-column-clip'
@@ -41,8 +40,8 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
       cellDefinition: {
         externalLink: true,
         newTab: true,
-        getLink: (commit) => commit.entity.html_url,
-        getValue: (commit) => commit.entity.sha.substring(0, 8)
+        getLink: (commit) => commit.html_url,
+        getValue: (commit) => commit.sha.substring(0, 8)
       },
       sort: {
         type: 'sort',
@@ -58,7 +57,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
       sort: {
         type: 'sort',
         orderKey: 'author',
-        field: 'entity.commit.author.name'
+        field: 'commit.author.name'
       },
       cellFlex: '2'
     },
@@ -66,12 +65,12 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
       columnId: 'date',
       headerCell: () => 'Date',
       cellDefinition: {
-        getValue: (commit) => this.datePipe.transform(commit.entity.commit.author.date, 'medium')
+        getValue: (commit) => this.datePipe.transform(commit.commit.author.date, 'medium')
       },
       sort: {
         type: 'sort',
         orderKey: 'date',
-        field: 'entity.commit.author.date'
+        field: 'commit.author.date'
       },
       cellFlex: '2'
     },

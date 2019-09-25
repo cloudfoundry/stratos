@@ -4,18 +4,13 @@ import { IQuotaDefinition } from '../../../core/src/core/cf-api.types';
 import {
   QuotaFormValues,
 } from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
-
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { CFEntityConfig } from '../../cf-types';
-import {
-  cfEntityFactory,
-  organizationEntityType,
-  quotaDefinitionEntityType,
-  spaceQuotaEntityType,
-} from '../cf-entity-factory';
-import { CFStartAction } from './cf-action.types';
+import { cfEntityFactory } from '../cf-entity-factory';
+import { organizationEntityType, quotaDefinitionEntityType, spaceQuotaEntityType } from '../cf-entity-types';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { CFStartAction } from './cf-action.types';
 
 export const GET_QUOTA_DEFINITION = '[QuotaDefinition] Get one';
 export const GET_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinition] Get one success';
@@ -233,13 +228,12 @@ export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
 }
 
 export class CreateQuotaDefinition extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public createQuota: QuotaFormValues) {
+  constructor(public guid: string, public endpointGuid: string, public createQuota: QuotaFormValues) {
     super();
     this.options = new RequestOptions();
     this.options.url = `quota_definitions`;
     this.options.method = RequestMethod.Post;
     this.options.body = orgSpaceQuotaFormValuesToApiObject(createQuota);
-    this.guid = createQuota.name;
   }
   actions = [
     CREATE_QUOTA_DEFINITION,
@@ -249,7 +243,6 @@ export class CreateQuotaDefinition extends CFStartAction implements ICFAction {
   entity = [quotaDefinitionEntitySchema];
   entityType = quotaDefinitionEntityType;
   options: RequestOptions;
-  guid: string;
 }
 
 export class UpdateQuotaDefinition extends CFStartAction implements ICFAction {
@@ -296,13 +289,12 @@ export class DeleteQuotaDefinition extends CFStartAction implements ICFAction {
 }
 
 export class CreateSpaceQuotaDefinition extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, orgGuid: string, public createQuota: QuotaFormValues) {
+  constructor(public guid: string, public endpointGuid: string, orgGuid: string, public createQuota: QuotaFormValues) {
     super();
     this.options = new RequestOptions();
     this.options.url = `space_quota_definitions`;
     this.options.method = RequestMethod.Post;
     this.options.body = orgSpaceQuotaFormValuesToApiObject(createQuota, false, orgGuid);
-    this.guid = createQuota.name;
   }
   actions = [
     CREATE_SPACE_QUOTA_DEFINITION,
@@ -312,7 +304,6 @@ export class CreateSpaceQuotaDefinition extends CFStartAction implements ICFActi
   entity = [spaceQuotaEntitySchema];
   entityType = spaceQuotaEntityType;
   options: RequestOptions;
-  guid: string;
 }
 
 export class UpdateSpaceQuotaDefinition extends CFStartAction implements ICFAction {

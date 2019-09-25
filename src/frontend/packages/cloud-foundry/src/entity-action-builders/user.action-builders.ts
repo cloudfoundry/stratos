@@ -2,18 +2,18 @@ import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalo
 import { GetAllOrgUsers } from '../actions/organization.actions';
 import { GetAllSpaceUsers } from '../actions/space.actions';
 import { GetAllUsersAsAdmin, GetUser } from '../actions/users.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const userActionBuilders = {
   get: (
     guid,
     endpointGuid
-  ) => new GetUser(guid, endpointGuid),
+  ) => new GetUser(endpointGuid, guid),
   // Must be admin user for this to succeed.
-  getAll: (
+  getMultiple: (
     paginationKey: string,
     endpointGuid: string,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllUsersAsAdmin(endpointGuid, includeRelations, populateMissing, paginationKey),
   getAllInOrganization: (
     guid: string,

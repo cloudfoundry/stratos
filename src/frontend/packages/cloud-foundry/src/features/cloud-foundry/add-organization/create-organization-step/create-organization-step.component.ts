@@ -10,21 +10,21 @@ import { CreateOrganization } from '../../../../../../cloud-foundry/src/actions/
 import { GetQuotaDefinitions } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   organizationEntityType,
   quotaDefinitionEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
+import {
+  createEntityRelationPaginationKey,
+} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../cf-entity-factory';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 
@@ -79,10 +79,13 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     );
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    const quotaDefinitionEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getQuotaDefinitionsAction = actionBuilder(this.cfGuid, quotaPaginationKey);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,
-        action: new GetQuotaDefinitions(quotaPaginationKey, this.cfGuid),
+        action: getQuotaDefinitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
           cfEntityFactory(quotaDefinitionEntityType)

@@ -7,4 +7,6 @@ type LocalUser struct {
 	Username     string `json:"username"`
 	Email        string `json:"email"`
 	Scope        string `json:"scope"`
+	GivenName    string `json:"given_name"`
+	FamilyName   string `json:"family_name"`
 }

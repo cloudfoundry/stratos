@@ -1,7 +1,7 @@
-import { failedEntityHandler } from './fail-entity-request.handler';
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { EntityRequestAction } from '../../types/request.types';
+import { failedEntityHandler } from './fail-entity-request.handler';
 
 describe('failedEntityHandlers', () => {
   it('Should dispatch actions', () => {
@@ -56,6 +56,6 @@ describe('failedEntityHandlers', () => {
       },
       true
     );
-    expect(spyDispatcher).toHaveBeenCalledWith(3);
+    expect(spyDispatcher).toHaveBeenCalledTimes(3);
   });
 });

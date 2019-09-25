@@ -12,6 +12,7 @@ import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ApplicationActionBuilders extends CFOrchestratedActionBuilders {
   restage: (guid: string, endpointGuid: string) => RestageApplication;
@@ -30,8 +31,7 @@ export const applicationActionBuilder = {
   get: (
     guid,
     endpointGuid,
-    includeRelations = [],
-    populateMissing = true
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetApplication(guid, endpointGuid, includeRelations, populateMissing),
   remove: (guid: string, endpointGuid: string) => new DeleteApplication(guid, endpointGuid),
   create: (id: string, endpointGuid: string, application: IApp) => new CreateNewApplication(id, endpointGuid, application),
@@ -42,17 +42,16 @@ export const applicationActionBuilder = {
     existingApplication?: IApp,
     updateEntities?: AppMetadataTypes[]
   ) => new UpdateExistingApplication(guid, endpointGuid, updatedApplication, existingApplication, updateEntities),
-  getAll: (
+  getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    includeRelations = [],
-    populateMissing = false
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllApplications(paginationKey, endpointGuid, includeRelations, populateMissing),
   restage: (guid: string, endpointGuid: string) => new RestageApplication(guid, endpointGuid),
   assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => new AssignRouteToApplication(
-    endpointGuid,
+    applicationGuid,
     routeGuid,
-    applicationGuid
+    endpointGuid
   ),
   getAllInSpace: (
     spaceGuid: string,

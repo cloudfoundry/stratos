@@ -1,19 +1,18 @@
 import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { GetAllOrganizations, DeleteOrganization, UpdateOrganization, GetOrganization } from '../actions/organization.actions';
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export const organizationActionBuilders = {
   get: (
     guid,
     endpointGuid,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetOrganization(guid, endpointGuid, includeRelations, populateMissing),
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
-    includeRelations?: string[],
-    populateMissing?: boolean
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllOrganizations(paginationKey, endpointGuid, includeRelations, populateMissing),
   remove: (guid, endpointGuid) => new DeleteOrganization(guid, endpointGuid),
   update: (guid, endpointGuid, updatedOrg: IUpdateOrganization) => new UpdateOrganization(

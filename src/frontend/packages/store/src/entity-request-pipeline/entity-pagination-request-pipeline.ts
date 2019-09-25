@@ -7,6 +7,7 @@ import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEntity,
 } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
@@ -44,8 +45,9 @@ function getRequestObservable(
   const initialRequest = makeRequestEntityPipe(
     httpClient,
     request,
-    action.endpointType,
-    action.endpointGuid
+    entityCatalogue.getEndpoint(action.endpointType, action.subType),
+    action.endpointGuid,
+    action.externalRequest
   );
   if (action.flattenPagination && !paginationPageIterator) {
     console.warn('Action requires all request pages but no page flattener was given.');
@@ -84,6 +86,10 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     action.options.url,
     flattenerConfig
   );
+
+  // Keep, helpful for debugging below chain via tap
+  // const debug = (val, location) => console.log(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);
+
   return getRequestObjectObservable(request).pipe(
     first(),
     switchMap(requestObject => {
@@ -104,7 +110,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
           requestType,
           multiEndpointResponses,
           actionDispatcher
-        ))
+        )),
       );
     })
   );

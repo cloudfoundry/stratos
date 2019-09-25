@@ -1,4 +1,4 @@
-import { cfUserEntityType } from '../cf-entity-factory';
+import { cfUserEntityType } from '../cf-entity-types';
 import { CfUserRoleParams } from '../store/types/user.types';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 

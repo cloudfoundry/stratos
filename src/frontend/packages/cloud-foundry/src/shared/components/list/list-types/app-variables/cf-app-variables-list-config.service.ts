@@ -3,18 +3,24 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { AppVariablesDelete } from '../../../../../actions/app-variables.actions';
-import { UpdateExistingApplication } from '../../../../../actions/application.actions';
-import { CFAppState } from '../../../../../cf-app-state';
-import { applicationEntityType } from '../../../../../cf-entity-factory';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TableCellEditComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
+import {
+  TableCellEditComponent,
+} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import {
+  IListAction,
+  IListConfig,
+  IMultiListAction,
+  ListViewTypes,
+} from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { UpdateExistingApplication } from '../../../../../actions/application.actions';
+import { CFAppState } from '../../../../../cf-app-state';
+import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 
@@ -81,11 +87,15 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     const confirmation = this.getConfirmationModal(newValues);
-    const action = new AppVariablesDelete(
-      this.envVarsDataSource.cfGuid,
+
+    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('removeFromApplication');
+    const action = actionBuilder(
       this.envVarsDataSource.appGuid,
+      this.envVarsDataSource.cfGuid,
       this.envVarsDataSource.transformedEntities,
-      newValues);
+      newValues
+    );
 
     const entityReq$ = this.getEntityMonitor();
     const trigger$ = new Subject();

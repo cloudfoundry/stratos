@@ -3,7 +3,9 @@ import { MatDialog } from '@angular/material';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
+import { fetchAutoscalerInfo } from '../../../../../../cf-autoscaler/src/core/autoscaler-helpers/autoscaler-available';
 import { ICfV2Info } from '../../../../../../core/src/core/cf-api.types';
+import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
@@ -18,13 +20,15 @@ import { UserInviteService } from '../../../../features/cloud-foundry/user-invit
   styleUrls: ['./card-cf-info.component.scss']
 })
 export class CardCfInfoComponent implements OnInit, OnDestroy {
-  apiUrl: string;
-  subs: Subscription[] = [];
+  public apiUrl: string;
+  private subs: Subscription[] = [];
+  public autoscalerVersion$: Observable<string>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public userInviteService: UserInviteService,
     private dialog: MatDialog,
+    private esf: EntityServiceFactory
   ) { }
 
   description$: Observable<string>;
@@ -39,6 +43,13 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
 
     this.description$ = this.cfEndpointService.info$.pipe(
       map(entity => this.getDescription(entity))
+    );
+
+    // FIXME: CF should not depend on autoscaler. See #3916
+    this.autoscalerVersion$ = fetchAutoscalerInfo(this.cfEndpointService.cfGuid, this.esf).pipe(
+      map(e => e.entityRequestInfo.error ?
+        null :
+        e.entity ? e.entity.entity.build : ''),
     );
   }
 

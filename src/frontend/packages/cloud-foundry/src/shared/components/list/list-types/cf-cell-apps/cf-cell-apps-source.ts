@@ -6,10 +6,9 @@ import { GetApplication } from '../../../../../../../cloud-foundry/src/actions/a
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  cfEntityFactory,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 import {
@@ -18,11 +17,11 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
 
 // TODO: Move file to CF package (#3769)
@@ -85,8 +84,7 @@ export class CfCellAppsDataSource
         new GetApplication(appGuid, cfGuid, [
           createEntityRelationKey(applicationEntityType, spaceEntityType),
           createEntityRelationKey(spaceEntityType, organizationEntityType)
-        ]),
-        true
+        ])
       ).waitForEntity$.pipe(
         map(entityInfo => entityInfo.entity)
       );

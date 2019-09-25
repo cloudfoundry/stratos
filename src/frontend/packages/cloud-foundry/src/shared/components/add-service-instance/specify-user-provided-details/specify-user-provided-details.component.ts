@@ -8,27 +8,35 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { GetAppEnvVarsAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { userProvidedServiceInstanceEntityType, serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
-import { selectCreateServiceInstance } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
+import {
+  appEnvVarsEntityType,
+  serviceBindingEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
+import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import {
+  selectCreateServiceInstance,
+} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
+import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment';
 import {
-  CloudFoundryUserProvidedServicesService
-} from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
-import { urlValidationExpression, safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
-import { AppNameUniqueChecking } from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
-import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
+  AppNameUniqueChecking,
+} from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-
+import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 @Component({
@@ -273,8 +281,11 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
             // Refetch env vars for app, since they have been changed by CF
+            const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+            const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+            const getAppEnvVarsAction = actionBuilder(data.bindAppGuid, data.cfGuid);
             this.store.dispatch(
-              new GetAppEnvVarsAction(data.bindAppGuid, data.cfGuid)
+              getAppEnvVarsAction
             );
             return { success: true, redirect: true };
           }

@@ -7,6 +7,15 @@ import (
 	"github.com/labstack/echo"
 )
 
+func (a *Autoscaler) getAutoscalerInfo(echoContext echo.Context) error {
+	healthURL, _ := url.Parse("/v1/info")
+	responses, err := a.portalProxy.ProxyRequest(echoContext, healthURL)
+	if err != nil {
+		return err
+	}
+	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+}
+
 func (a *Autoscaler) getAutoscalerHealth(echoContext echo.Context) error {
 	healthURL, _ := url.Parse("/health")
 	responses, err := a.portalProxy.ProxyRequest(echoContext, healthURL)

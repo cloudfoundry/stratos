@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { GetAppEnvVarsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
@@ -13,6 +13,7 @@ import {
   PaginationObservables,
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
 
 
 export interface EnvVarStratosProject {
@@ -40,7 +41,8 @@ export class ApplicationEnvVarsHelper {
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
     const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-    const action = new GetAppEnvVarsAction(appGuid, cfGuid);
+    const actionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('get');
+    const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     return getPaginationObservables<APIResource>({
       store: this.store,
       action,

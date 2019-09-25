@@ -13,11 +13,11 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { GetAllOrganizations } from '../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -37,6 +37,8 @@ import { selectPaginationState } from '../../../../store/src/selectors/paginatio
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { cfEntityFactory } from '../../cf-entity-factory';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
@@ -155,6 +157,7 @@ export const createCfOrSpaceMultipleFilterFn = (
  */
 @Injectable()
 export class CfOrgSpaceDataService implements OnDestroy {
+
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
   public cf: CfOrgSpaceItem<EndpointModel>;
@@ -162,21 +165,13 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public space: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
-  public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
-    createEntityRelationKey(organizationEntityType, spaceEntityType),
-  ]);
+  public paginationAction = this.createPaginationAction();
 
   /**
    * This will contain all org and space data
    */
-  private allOrgs = getPaginationObservables<APIResource<IOrganization>>({
-    store: this.store,
-    action: this.paginationAction,
-    paginationMonitor: this.paginationMonitorFactory.create(
-      this.paginationAction.paginationKey,
-      cfEntityFactory(this.paginationAction.entityType)
-    )
-  }, true);
+  private allOrgs = this.getAllOrgsObservable();
+
   private allOrgsLoading$ = this.allOrgs.pagination$.pipe(map(
     pag => getCurrentPageRequestInfo(pag).busy
   ));
@@ -209,6 +204,17 @@ export class CfOrgSpaceDataService implements OnDestroy {
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
     );
 
+  }
+
+  private getAllOrgsObservable() {
+    return getPaginationObservables<APIResource<IOrganization>>({
+      store: this.store,
+      action: this.paginationAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.paginationAction.paginationKey,
+        cfEntityFactory(this.paginationAction.entityType)
+      )
+    }, true);
   }
 
   private createCf() {
@@ -289,6 +295,18 @@ export class CfOrgSpaceDataService implements OnDestroy {
       loading$: this.org.loading$,
       select: new BehaviorSubject(undefined)
     };
+  }
+
+  private createPaginationAction() {
+    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const getAllOrganizationsAction = actionBuilder(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
+      includeRelations: [
+        createEntityRelationKey(organizationEntityType, spaceEntityType),
+      ],
+      populateMissing: true
+    });
+    return getAllOrganizationsAction;
   }
 
   public getEndpointOrgs(endpointGuid: string) {

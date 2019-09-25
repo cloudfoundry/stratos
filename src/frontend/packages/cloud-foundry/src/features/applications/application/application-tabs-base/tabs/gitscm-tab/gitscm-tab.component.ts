@@ -5,13 +5,9 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
-import {
-  FetchBranchesForProject,
-  FetchCommit,
-} from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { FetchGitHubRepoInfo } from '../../../../../../../../cloud-foundry/src/actions/github.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { FetchBranchesForProject } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
+import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import {
@@ -19,6 +15,11 @@ import {
 } from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';
+import { CFAppState } from '../../../../../../cf-app-state';
+import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from '../../../../../../cf-entity-types';
+import { GitBranch } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 
@@ -43,9 +44,9 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
 })
 export class GitSCMTabComponent implements OnInit, OnDestroy {
 
-  gitBranchEntityService: EntityService;
-  gitCommitEntityService: EntityService;
-  gitSCMRepoEntityService: EntityService;
+  gitBranchEntityService: EntityService<GitBranch>;
+  gitCommitEntityService: EntityService<GitCommit>;
+  gitSCMRepoEntityService: EntityService<GitRepo>;
 
   deployAppSubscription: Subscription;
   stratosProject$: Observable<EnvVarStratosProject>;
@@ -91,27 +92,34 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const repoEntityID = `${scmType}-${projectName}`;
         const commitEntityID = `${repoEntityID}-${commitId}`;
 
+        const gitRepoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitRepoEntityType);
+        const getRepoActionBuilder = gitRepoEntity.actionOrchestrator.getActionBuilder('getRepoInfo');
+        const getRepoAction = getRepoActionBuilder(stProject) as FetchGitHubRepoInfo;
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
           repoEntityID,
-          new FetchGitHubRepoInfo(stProject),
-          false
+          getRepoAction
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
-          commitEntityID,
-          new FetchCommit(scm, commitId, projectName),
-          false
+          {
+            endpointType: CF_ENDPOINT_TYPE,
+            entityType: gitCommitEntityType,
+            actionMetadata: { projectName: stProject.deploySource.project, scm, commitId },
+            entityGuid: commitEntityID,
+          }
         );
 
         const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
+        const gitBranchesEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
+        const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
+        const fetchBranchesAction = fetchBranchesActionBuilder(branchID, null, { projectName, scm });
         this.gitBranchEntityService = this.entityServiceFactory.create(
           branchID,
-          new FetchBranchesForProject(scm, projectName),
-          false
+          new FetchBranchesForProject(scm, projectName)
         );
 
         this.gitSCMRepo$ = this.gitSCMRepoEntityService.waitForEntity$.pipe(
-          map(p => p.entity && p.entity.entity)
+          map(p => p.entity && p.entity)
         );
 
         this.gitSCMRepoErrorSub = this.gitSCMRepoEntityService.entityMonitor.entityRequest$.pipe(
@@ -126,13 +134,13 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         });
 
         this.commit$ = this.gitCommitEntityService.waitForEntity$.pipe(
-          map(p => p.entity && p.entity.entity)
+          map(p => p.entity && p.entity)
         );
 
         this.isHead$ = this.gitBranchEntityService.waitForEntity$.pipe(
           map(p => {
             return (
-              p.entity.entity.commit.sha ===
+              p.entity.commit.sha ===
               stProject.deploySource.commit.trim()
             );
           }),

@@ -47,6 +47,6 @@ function getDockerImageCommitLabel() {
 
   DIGEST=`dockerMakeCurl $URL "true" | jq -r '.config.digest'`
   
-  COMMIT=`dockerMakeCurl "$REGISTRY_ADDRESS/v2/$ORG/$IMAGE/blobs/$DIGEST" "false" | jq -r .container_config.Labels.commit`
+  COMMIT=`dockerMakeCurl "$REGISTRY_ADDRESS/v2/$ORG/$IMAGE/blobs/$DIGEST" "false" | jq -r .container_config.Labels["com.stratos.commit"]`
   echo "$COMMIT"
 }

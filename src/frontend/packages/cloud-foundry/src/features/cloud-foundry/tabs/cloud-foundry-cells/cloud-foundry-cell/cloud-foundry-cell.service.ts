@@ -113,7 +113,6 @@ export class CloudFoundryCellService {
     return this.entityServiceFactory.create<IMetrics<IMetricVectorResult<IMetricCell>>>(
       action.guid,
       action,
-      false
     ).waitForEntity$.pipe(
       map(entityInfo => entityInfo.entity),
       map(entity => {

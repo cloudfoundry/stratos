@@ -15,11 +15,11 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
   return function entitiesReducer(state = {}, action: Action): Record<string, any> {
     switch (action.type) {
       case InitCatalogueEntitiesAction.ACTION_TYPE:
-        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {});
+        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
       case successAction:
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
-          const entityKey = entityCatalogue.getEntity(success.apiAction.endpointType, success.apiAction.entityType).entityKey;
+          const entityKey = entityCatalogue.getEntity(success.apiAction).entityKey;
           return deleteEntity(state, entityKey, success.apiAction.guid);
         } else if (success.response) {
           return deepMergeState(state, success.response.entities);
@@ -40,7 +40,7 @@ function cleanStateFromFlatTree(state: Record<string, any>, action: SetTreeDelet
 
 function reduceTreeToState(tree: IFlatTree) {
   return (state: Record<string, any>, entityKey: string) => {
-    const ids = tree[entityKey];
+    const ids = tree[entityKey].ids;
     return Array.from(ids).reduce(reduceIdsToState(entityKey), state);
   };
 }

@@ -91,7 +91,6 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
-
 import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
@@ -217,11 +216,10 @@ import { CreateSpaceQuotaStepComponent } from '../../../../core/src/features/clo
     CloudFoundryEndpointService,
     // CfRolesService,
     CloudFoundryCellService,
-    UserInviteService
+    UserInviteService,
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent
   ]
-
 })
 export class CloudFoundryModule { }

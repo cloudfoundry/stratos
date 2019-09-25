@@ -2,7 +2,7 @@ import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalo
 import { GetAllFeatureFlags } from '../actions/feature-flags.actions';
 
 export const featureFlagActionBuilders = {
-  getAll: (
+  getMultiple: (
     endpointGuid,
     paginationKey,
   ) => new GetAllFeatureFlags(endpointGuid, paginationKey)

@@ -6,7 +6,6 @@ import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
-import { parseHttpPipeError } from '../../../../core/src/core/utils.service';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import {
@@ -29,11 +28,23 @@ import {
   ProjectFetchFail,
 } from '../../actions/deploy-applications.actions';
 import { CFAppState } from '../../cf-app-state';
-import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-factory';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
 import { entityCatalogue } from './../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from './../../../cf-types';
+
+function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
+  if (!res.status) {
+    return res;
+  }
+  try {
+    return res.json ? res.json() : res;
+  } catch (e) {
+    logger.warn('Failed to parse response body', e);
+  }
+  return {};
+}
 
 export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {
   const response = parseHttpPipeError(error, logger);
@@ -79,7 +90,7 @@ export class DeployAppEffects {
         entityType: gitBranchesEntityType,
         endpointType: CF_ENDPOINT_TYPE,
         type: action.type,
-        paginationKey: 'branches'
+        paginationKey: action.paginationKey
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getBranches(action.projectName).pipe(
@@ -95,10 +106,11 @@ export class DeployAppEffects {
             const id = `${scmType}-${action.projectName}-${b.name}`;
             b.projectId = action.projectName;
             b.entityId = id;
-            mappedData.entities[entityKey][id] = {
-              entity: b,
-              metadata: {}
-            };
+            // mappedData.entities[entityKey][id] = {
+            //   entity: b,
+            //   metadata: {}
+            // };
+            mappedData.entities[entityKey][id] = b;
             mappedData.result.push(id);
           });
           return [
@@ -118,7 +130,7 @@ export class DeployAppEffects {
       const apiAction = {
         entityType: gitCommitEntityType,
         endpointType: CF_ENDPOINT_TYPE,
-        type: action.type
+        type: action.type,
       } as ICFAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getCommit(action.projectName, action.commitSha).pipe(
@@ -171,10 +183,11 @@ export class DeployAppEffects {
 
   addCommit(entityKey: string, mappedData: NormalizedResponse, scmType: string, projectName: string, commit: GitCommit) {
     const id = scmType + '-' + projectName + '-' + commit.sha;
-    mappedData.entities[entityKey][id] = {
-      entity: commit,
-      metadata: {}
-    };
+    mappedData.entities[entityKey][id] = commit;
+    // mappedData.entities[entityKey][id] = {
+    //   entity: commit,
+    //   metadata: {}
+    // };
     mappedData.result.push(id);
   }
 

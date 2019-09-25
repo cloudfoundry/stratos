@@ -3,8 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { appStatsEntityType, appSummaryEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../../../core/src/core/entity-service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
@@ -67,6 +69,7 @@ export class ApplicationPollingService {
 
   public poll(withApp = false) {
     const { cfGuid, appGuid } = this.applicationService;
+    const actionDispatcher = (action) => this.store.dispatch(action);
     if (withApp) {
       const updatingApp = {
         ...this.entityService.action,
@@ -77,9 +80,13 @@ export class ApplicationPollingService {
     this.entityService.entityObs$.pipe(
       first(),
     ).subscribe(resource => {
-      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+      const appSummaryActionDispatcher = appSummaryEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
+      appSummaryActionDispatcher.dispatchGet(appGuid, cfGuid);
       if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
-        this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+        const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+        const appStatsActionDispatcher = appStatsEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
+        appStatsActionDispatcher.dispatchGet(appGuid, cfGuid);
       }
     });
   }

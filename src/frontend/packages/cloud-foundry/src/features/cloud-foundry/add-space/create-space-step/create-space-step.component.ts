@@ -5,9 +5,8 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { CreateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
+import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -76,11 +75,14 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   submit: StepOnNextFunction = () => {
-    this.store.dispatch(new CreateSpace(this.cfGuid, this.orgGuid, {
-      name: this.spaceName.value,
-      organization_guid: this.orgGuid,
-      space_quota_definition_guid: this.quotaDefinition.value
-    }));
+    // const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    // const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('create');
+    // const createSpaceAction = actionBuilder(this.cfGuid, this.orgGuid, {
+    //   name: this.spaceName.value,
+    //   organization_guid: this.orgGuid,
+    //   space_quota_definition_guid: this.quotaDefinition.value
+    // });
+    // this.store.dispatch(createSpaceAction); //TODO: commented out??
 
     return this.store.select(selectCfRequestInfo(spaceEntityType, `${this.orgGuid}-${this.spaceName.value}`)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),

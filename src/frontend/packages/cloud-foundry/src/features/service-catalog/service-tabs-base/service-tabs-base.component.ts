@@ -72,7 +72,7 @@ export class ServiceTabsBaseComponent {
 
   getServiceLabel = (): Observable<string> => {
     return this.servicesService.service$.pipe(
-      map((s) => !!s.entity.extra ? JSON.parse(s.entity.extra).displayName : s.entity.label),
+      map((s) => !!s.entity.extra ? JSON.parse(s.entity.extra).displayName || s.entity.label : s.entity.label),
       publishReplay(1),
       refCount()
     );

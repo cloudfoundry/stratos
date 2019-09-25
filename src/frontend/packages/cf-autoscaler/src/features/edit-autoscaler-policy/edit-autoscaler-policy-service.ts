@@ -31,8 +31,7 @@ export class EditAutoscalerPolicyService {
   updateFromStore(appGuid: string, cfGuid: string) {
     const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicyLocal>>(
       appGuid,
-      new GetAppAutoscalerPolicyAction(appGuid, cfGuid),
-      false
+      new GetAppAutoscalerPolicyAction(appGuid, cfGuid)
     );
 
     appAutoscalerPolicyService.entityObs$.pipe(
@@ -43,13 +42,13 @@ export class EditAutoscalerPolicyService {
       first(),
     ).subscribe((({ entity }) => {
       if (entity && entity.entity) {
-        this.stateSubject.next(entity.entity);
+        this.setState(entity.entity);
       }
     }));
   }
 
   setState(state: AppAutoscalerPolicyLocal) {
-    const { ...newState } = state;
+    const newState = JSON.parse(JSON.stringify(state));
     this.stateSubject.next(newState);
   }
 

@@ -2,12 +2,11 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { DeleteServiceBinding } from '../../../../cloud-foundry/src/actions/service-bindings.actions';
-import { DeleteServiceInstance } from '../../../../cloud-foundry/src/actions/service-instances.actions';
 import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-factory';
+import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding } from '../../../../core/src/core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
@@ -41,7 +40,9 @@ export class ServiceActionHelperService {
       }));
       return;
     }
-    const action = new DeleteServiceBinding(endpointGuid, serviceBindings[0].metadata.guid, serviceInstanceGuid);
+    const sgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('remove');
+    const action = actionBuilder(endpointGuid, serviceBindings[0].metadata.guid, { serviceInstanceGuid });
     if (!noConfirm) {
       const confirmation = new ConfirmationDialogConfig(
         'Detach Service Instance',
@@ -67,8 +68,11 @@ export class ServiceActionHelperService {
       endpointType: CF_ENDPOINT_TYPE,
       entityType: serviceInstancesEntityType
     };
+    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('remove');
+    const deleteServiceInstanceAction = actionBuilder(endpointGuid, serviceInstanceGuid);
     const action = userProvided ? new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesEntityConfig) :
-      new DeleteServiceInstance(endpointGuid, serviceInstanceGuid);
+      deleteServiceInstanceAction;
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
       {
