@@ -16,8 +16,10 @@
           <div class="list-component__header__left--metrics-range"
             *ngIf="config.showCustomTime && !(isAddingOrSelecting$ | async)">
             <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
-              (metricsAction)="config.getDataSource().updateMetricsAction($event)" [times]="config.customTimeWindows"
-              [selectedTimeValue]="config.customTimeInitialValue" [pollInterval]="config.customTimePollingInterval"
+              (metricsAction)="config.getDataSource().updateMetricsAction($event)"
+              [times]="config.customTimeWindows"
+              [selectedTimeValue]="config.customTimeInitialValue"
+              [pollInterval]="config.customTimePollingInterval"
               [validate]="config.customTimeValidation">
             </app-metrics-range-selector>
           </div>

@@ -27,14 +27,10 @@ import {
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { SetParams, SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
+import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationParam,
-} from '../../../../../../store/src/types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
@@ -50,7 +46,6 @@ import {
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { LocalPaginationHelpers } from './local-list.helpers';
-import { QParam } from '../../../../../../store/src/q-param';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -436,18 +431,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public updateMetricsAction(newAction: MetricsAction) {
     this.metricsAction = newAction;
 
-    if (this.isLocal) {
-      this.store.dispatch(newAction);
+    if (this.config.handleTimeWindowChange) {
+      this.config.handleTimeWindowChange(newAction);
     } else {
-      this.pagination$.pipe(
-        first()
-      ).subscribe(pag => {
-        this.store.dispatch(new SetParams(newAction, this.paginationKey, {
-          ...pag.params,
-          // TODO This needs to be a string key-value pair.
-          // metricConfig: newAction.query
-        }, false, true));
-      });
+      this.store.dispatch(newAction);
     }
   }
 
