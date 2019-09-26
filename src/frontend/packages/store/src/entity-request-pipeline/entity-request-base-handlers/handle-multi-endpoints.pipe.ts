@@ -2,20 +2,21 @@ import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
 
-export class JetstreamError {
+/**
+ * Generic container for information about an errored request to a specific endpoint
+ */
+export class JetstreamError<T = any> {
   constructor(
     public errorCode: string,
     public guid: string,
     public url: string,
-    public errorResponse?: JetStreamErrorInformation
+    /**
+     * Actual content of response from backend
+     */
+    public jetstreamErrorResponse: JetStreamErrorResponse<T>
   ) { }
 }
 
-interface JetStreamErrorInformation {
-  code: number;
-  description: string;
-  error_code: string;
-}
 export interface MultiEndpointResponse<T> {
   endpointGuid: string;
   entities: T;
@@ -42,10 +43,11 @@ function mapResponses(
   }
   return Object.keys(jetstreamResponse).reduce((multiResponses, endpointGuid) => {
     const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
+
     const jetStreamError = hasJetStreamError(jetstreamEndpointResponse as JetStreamErrorResponse[]);
     if (jetStreamError) {
       multiResponses.errors.push(
-        buildJetstreamError(jetStreamError as JetStreamErrorResponse, endpointGuid, requestUrl)
+        buildJetstreamError(jetStreamError, endpointGuid, requestUrl)
       );
     } else {
       multiResponses.successes = multiResponses.successes.concat(postProcessSuccessResponses(
@@ -106,26 +108,12 @@ function postProcessSuccessResponses(
   };
 }
 
-function getJetstreamErrorInformation(jetstreamErrorResponse: JetStreamErrorResponse): JetStreamErrorInformation {
-  const errorResponse =
-    jetstreamErrorResponse &&
-      (!!jetstreamErrorResponse.errorResponse &&
-        typeof jetstreamErrorResponse.errorResponse !== 'string')
-      ? jetstreamErrorResponse.errorResponse
-      : ({} as JetStreamErrorInformation);
-  return {
-    code: 0,
-    description: 'Unknown',
-    error_code: '0',
-    ...errorResponse
-  };
-}
 
 function buildJetstreamError(
   jetstreamErrorResponse: JetStreamErrorResponse,
   endpointGuid: string,
   requestUrl: string
-) {
+): JetstreamError {
   const errorCode = jetstreamErrorResponse && jetstreamErrorResponse.error
     ? jetstreamErrorResponse.error.statusCode.toString()
     : '500';
@@ -134,7 +122,7 @@ function buildJetstreamError(
     errorCode,
     endpointGuid,
     requestUrl,
-    getJetstreamErrorInformation(jetstreamErrorResponse),
+    jetstreamErrorResponse,
   );
 }
 export const handleMultiEndpointsPipeFactory = (

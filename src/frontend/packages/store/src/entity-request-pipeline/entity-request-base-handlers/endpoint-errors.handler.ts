@@ -17,8 +17,8 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
     const entityErrorAction = catalogueEntity.getRequestAction('failure', action, requestType);
     // Dispatch a error action for the specific endpoint that's failed
     const fakedAction = { ...action, endpointGuid: error.guid };
-    const errorMessage = error.errorResponse
-      ? error.errorResponse.description || error.errorCode
+    const errorMessage = error.jetstreamErrorResponse
+      ? error.jetstreamErrorResponse.error.status || error.errorCode
       : error.errorCode;
     actionDispatcher(
       new APISuccessOrFailedAction(
@@ -34,7 +34,7 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
         message: 'API request error',
         metadata: {
           url: error.url,
-          errorResponse: error.errorResponse,
+          errorResponse: error.jetstreamErrorResponse,
         },
       }),
     );

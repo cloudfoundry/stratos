@@ -13,6 +13,7 @@ import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
+import { JetstreamError } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { PipelineHttpClient } from './pipline-http-client.service';
 
 export type ActionDispatcher<T extends Action = Action> = (action: T) => void;
@@ -107,6 +108,10 @@ export type PrePaginationApiRequest = (
   catalogueEntity: StratosBaseCatalogueEntity,
   appState: InternalAppState
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
+
+export type ApiErrorMessageHandler = (
+  errors: JetstreamError[]
+) => string;
 
 export interface BasePipelineConfig<T extends AppState = InternalAppState, Y extends Action = Action> {
   requestType: ApiRequestTypes;

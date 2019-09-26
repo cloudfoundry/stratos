@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
@@ -9,16 +9,13 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
   styleUrls: ['./edit-organization.component.scss'],
   providers: [getActiveRouteCfOrgSpaceProvider]
 })
-export class EditOrganizationComponent implements OnInit {
+export class EditOrganizationComponent {
 
   orgUrl: string;
 
-  constructor(private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor(activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
     this.orgUrl = `/cloud-foundry/${cfGuid}/organizations/${orgGuid}`;
-  }
-
-  ngOnInit() {
   }
 
 }
