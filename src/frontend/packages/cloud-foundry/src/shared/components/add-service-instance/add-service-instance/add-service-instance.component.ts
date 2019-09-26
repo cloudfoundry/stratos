@@ -148,8 +148,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
         this.appsEmitted.next(false);
         const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
         const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-        const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
-        const getAllAppsInSpaceAction = actionBuilder(csi.cfGuid, csi.spaceGuid, paginationKey) as PaginatedAction;
+        const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+        const getAllAppsInSpaceAction = actionBuilder(csi.spaceGuid, csi.cfGuid, paginationKey) as PaginatedAction;
         return getPaginationObservables({
           store: this.store,
           action: getAllAppsInSpaceAction,
