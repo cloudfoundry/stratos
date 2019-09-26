@@ -3,19 +3,17 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
-import { GetAppSummaryAction } from '../../../cloud-foundry/src/actions/app-metadata.actions';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 import { ASSIGN_ROUTE_SUCCESS } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
+import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import {
   createAppInstancesMetricAction,
 } from '../../../cloud-foundry/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointOnlyAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
 
 // TODO: Move this file to cf package - #3769
 @Injectable()

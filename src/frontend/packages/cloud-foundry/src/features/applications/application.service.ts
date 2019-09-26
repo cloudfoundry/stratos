@@ -4,9 +4,7 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
-import {
-  AppMetadataTypes
-} from '../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { AppMetadataTypes } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   GetApplication,
   UpdateApplication,
@@ -18,14 +16,14 @@ import {
   appEnvVarsEntityType,
   applicationEntityType,
   appStatsEntityType,
+  appSummaryEntityType,
   domainEntityType,
   organizationEntityType,
   routeEntityType,
   serviceBindingEntityType,
   spaceEntityType,
   stackEntityType,
-  appSummaryEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -48,7 +46,7 @@ import {
 import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
-import { PaginationEntityState, PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {

@@ -18,7 +18,7 @@ import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pa
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
-import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-factory';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';

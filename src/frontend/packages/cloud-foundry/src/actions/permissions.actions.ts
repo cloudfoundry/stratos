@@ -2,7 +2,7 @@ import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { APIResource } from '../../../store/src/types/api.types';
-import { organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
 
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS = '[Current User] Get audited org Relations';
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS_SUCCESS = '[Current User] Get audited org Relations success';

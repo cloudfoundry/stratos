@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { cfEntityFactory, organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IOrgFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
 import {
   getActionsFromExtensions,
@@ -20,6 +20,7 @@ import {
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';

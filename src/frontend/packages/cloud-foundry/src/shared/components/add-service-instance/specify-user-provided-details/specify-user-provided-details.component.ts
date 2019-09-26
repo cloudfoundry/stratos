@@ -17,7 +17,7 @@ import {
   appEnvVarsEntityType,
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   selectCreateServiceInstance,
@@ -37,7 +37,6 @@ import {
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
-
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 @Component({

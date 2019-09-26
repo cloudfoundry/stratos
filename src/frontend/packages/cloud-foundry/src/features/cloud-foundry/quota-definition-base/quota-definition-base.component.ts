@@ -9,16 +9,16 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 export class QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

@@ -30,10 +30,9 @@ import { GetServiceInstance } from '../../../../../../cloud-foundry/src/actions/
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  cfEntityFactory,
   serviceInstancesEntityType,
   spaceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -54,6 +53,7 @@ import { EntityServiceFactory } from '../../../../../../core/src/core/entity-ser
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { cfEntityFactory } from '../../../../cf-entity-factory';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
@@ -148,8 +148,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
         this.appsEmitted.next(false);
         const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
         const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-        const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
-        const getAllAppsInSpaceAction = actionBuilder(csi.cfGuid, csi.spaceGuid, paginationKey) as PaginatedAction;
+        const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+        const getAllAppsInSpaceAction = actionBuilder(csi.spaceGuid, csi.cfGuid, paginationKey) as PaginatedAction;
         return getPaginationObservables({
           store: this.store,
           action: getAllAppsInSpaceAction,

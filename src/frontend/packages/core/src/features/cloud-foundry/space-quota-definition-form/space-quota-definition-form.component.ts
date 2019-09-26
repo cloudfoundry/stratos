@@ -6,7 +6,9 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { cfEntityFactory, spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -14,7 +16,6 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 
 
 @Component({

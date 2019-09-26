@@ -7,7 +7,7 @@ import {
   domainEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

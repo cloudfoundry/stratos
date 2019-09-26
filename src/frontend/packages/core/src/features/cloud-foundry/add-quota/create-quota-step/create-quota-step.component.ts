@@ -6,7 +6,6 @@ import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   QuotaDefinitionActionBuilder,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
@@ -15,6 +14,7 @@ import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalo
 import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
+import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 
 
 @Component({

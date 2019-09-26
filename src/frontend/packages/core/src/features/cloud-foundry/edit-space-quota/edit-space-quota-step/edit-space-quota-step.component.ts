@@ -9,7 +9,6 @@ import {
   GetSpaceQuotaDefinition,
   UpdateSpaceQuotaDefinition,
 } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-factory';
 import {
   SpaceQuotaDefinitionActionBuilders,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/space-quota.action-builders';
@@ -22,6 +21,7 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
+import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 
 
 @Component({

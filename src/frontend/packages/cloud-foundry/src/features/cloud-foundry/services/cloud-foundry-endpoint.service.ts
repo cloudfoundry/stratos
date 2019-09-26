@@ -4,11 +4,9 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
-import { GetCFInfo } from '../../../../../cloud-foundry/src/actions/cloud-foundry.actions';
 import { DeleteOrganization, GetAllOrganizations } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   cfInfoEntityType,
   domainEntityType,
   organizationEntityType,
@@ -16,7 +14,7 @@ import {
   quotaDefinitionEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -43,10 +41,11 @@ import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endp
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
+import { cfEntityFactory } from '../../../cf-entity-factory';
+import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
-import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -151,7 +150,7 @@ export class CloudFoundryEndpointService {
     );
 
     const cfInfoEntity = entityCatalogue.getEntity<any, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType);
-    const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get') ;
+    const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(this.cfGuid);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       this.cfGuid,

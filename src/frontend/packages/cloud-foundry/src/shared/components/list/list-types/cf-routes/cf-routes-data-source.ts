@@ -9,7 +9,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { routeEntityType } from '../../../../../cf-entity-factory';
+import { routeEntityType } from '../../../../../cf-entity-types';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 
 

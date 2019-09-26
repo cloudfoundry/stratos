@@ -7,12 +7,11 @@ import { filter, map, tap } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
-  cfEntityFactory,
   organizationEntityType,
+  quotaDefinitionEntityType,
   spaceEntityType,
   spaceQuotaEntityType,
-  quotaDefinitionEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-factory';
+} from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -22,6 +21,7 @@ import { getPaginationKey } from '../../../../store/src/actions/pagination.actio
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../../cf-entity-factory';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export class AddEditSpaceStepBase {
