@@ -4,6 +4,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 
 import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
@@ -14,7 +15,12 @@ import { patchActionWithForcedConfig } from './entity-request-base-handlers/forc
 import { jetstreamErrorHandler } from './entity-request-base-handlers/jetstream-error.handler';
 import { startEntityHandler } from './entity-request-base-handlers/start-entity-request.handler';
 import { successEntityHandler } from './entity-request-base-handlers/success-entity-request.handler';
-import { EntityRequestPipeline, PreApiRequest, SuccessfulApiResponseDataMapper } from './entity-request-pipeline.types';
+import {
+  EntityRequestPipeline,
+  PipelineResult,
+  PreApiRequest,
+  SuccessfulApiResponseDataMapper,
+} from './entity-request-pipeline.types';
 import { PipelineHttpClient } from './pipline-http-client.service';
 
 export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
@@ -72,7 +78,12 @@ export const apiRequestPipelineFactory = (
     }),
     map(() => catalogueEntity.getRequestAction('complete', action, requestType)),
     catchError(error => {
-      failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, null, recursivelyDelete);
+      const httpResponse = isHttpErrorResponse(error);
+      const res: PipelineResult = {
+        success: false,
+        errorMessage: httpResponse ? httpResponse.error : null
+      }
+      failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, res, recursivelyDelete);
       // TODO We should pass the endpoint ids to this so we can correctly map the error to the endpoint.
       jetstreamErrorHandler(
         error,

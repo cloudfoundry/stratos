@@ -18,7 +18,6 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
     // Dispatch a error action for the specific endpoint that's failed
     const fakedAction = { ...action, endpointGuid: error.guid };
     const errorMessage = error.jetstreamErrorResponse
-      // TODO: RC test
       ? error.jetstreamErrorResponse.error.status || error.errorCode
       : error.errorCode;
     actionDispatcher(

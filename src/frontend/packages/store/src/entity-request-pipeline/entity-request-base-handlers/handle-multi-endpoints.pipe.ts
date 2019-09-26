@@ -2,12 +2,18 @@ import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
 
-export class JetstreamError {
+/**
+ * Generic container for information about an errored request to a specific endpoint
+ */
+export class JetstreamError<T = any> {
   constructor(
     public errorCode: string,
     public guid: string,
     public url: string,
-    public jetstreamErrorResponse: JetStreamErrorResponse
+    /**
+     * Actual content of response from backend
+     */
+    public jetstreamErrorResponse: JetStreamErrorResponse<T>
   ) { }
 }
 
@@ -37,6 +43,7 @@ function mapResponses(
   }
   return Object.keys(jetstreamResponse).reduce((multiResponses, endpointGuid) => {
     const jetstreamEndpointResponse = jetstreamResponse[endpointGuid];
+
     const jetStreamError = hasJetStreamError(jetstreamEndpointResponse as JetStreamErrorResponse[]);
     if (jetStreamError) {
       multiResponses.errors.push(
@@ -101,20 +108,6 @@ function postProcessSuccessResponses(
   };
 }
 
-// function getJetstreamErrorInformation(jetstreamErrorResponse: JetStreamErrorResponse): JetStreamErrorInformation {
-//   const errorResponse =
-//     jetstreamErrorResponse &&
-//       (!!jetstreamErrorResponse.errorResponse &&
-//         typeof jetstreamErrorResponse.errorResponse !== 'string')
-//       ? jetstreamErrorResponse.errorResponse
-//       : ({} as JetStreamErrorInformation);
-//   return {
-//     code: 0,
-//     description: 'Unknown',
-//     error_code: '0',
-//     ...errorResponse
-//   };
-// }
 
 function buildJetstreamError(
   jetstreamErrorResponse: JetStreamErrorResponse,
@@ -129,7 +122,6 @@ function buildJetstreamError(
     errorCode,
     endpointGuid,
     requestUrl,
-    // getJetstreamErrorInformation(jetstreamErrorResponse),
     jetstreamErrorResponse,
   );
 }

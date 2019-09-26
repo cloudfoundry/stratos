@@ -79,6 +79,7 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
+import { CfErrorResponse, getCfError } from './cf-error-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
@@ -168,26 +169,20 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
       }
       return data;
     },
-    globalErrorMessageHandler: (errors: JetstreamError[]) => {
+    globalErrorMessageHandler: (errors: JetstreamError<CfErrorResponse>[]) => {
       if (!errors || errors.length === 0) {
         return 'No errors in response';
       }
 
       if (errors.length === 1) {
-        return getCfError(errors[0].jetstreamErrorResponse.errorResponse);
+        return getCfError(errors[0].jetstreamErrorResponse);
       }
 
       return errors.reduce((message, error) => {
-        message += `\n${getCfError(error.jetstreamErrorResponse.errorResponse)}`;
+        message += `\n${getCfError(error.jetstreamErrorResponse)}`;
         return message;
       }, 'Multiple Cloud Foundry Errors. ');
     },
-    // TODO: this is the `response`
-    //       errorMessage: "Request Failed"
-    // success: false
-
-    // TODO: Push jetstream part into core failure handler
-    // const jetstreamError = getJetStreamError(response);
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
       getTotalPages: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
