@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { GetApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
-import { applicationEntityType, cfEntityFactory } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory } from '../../../../../../../../cloud-foundry/src/cf-entity-factory';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
@@ -16,9 +16,10 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../../core/test-framework/entity-service.helper';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
+import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { applicationEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
 

@@ -31,15 +31,15 @@ import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { GetOrganization } from '../actions/organization.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { CFAppState } from '../cf-app-state';
+import { cfEntityFactory } from '../cf-entity-factory';
+import { generateCFEntities } from '../cf-entity-generator';
 import {
-  cfEntityFactory,
+  CFRequestDataState,
   organizationEntityType,
   quotaDefinitionEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../cf-entity-factory';
-import { generateCFEntities } from '../cf-entity-generator';
-import { CFRequestDataState } from '../cf-entity-types';
+} from '../cf-entity-types';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validateEntityRelations } from './entity-relations';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from './entity-relations.types';

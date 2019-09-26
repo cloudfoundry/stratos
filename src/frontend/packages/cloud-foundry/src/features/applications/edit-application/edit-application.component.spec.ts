@@ -6,7 +6,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
-import { applicationEntityType, cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import {
   ApplicationStateService,
@@ -17,8 +17,9 @@ import {
   ApplicationServiceMock,
   generateTestApplicationServiceProvider,
 } from '../../../../../core/test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
+import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { applicationEntityType } from '../../../cf-entity-types';
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';

@@ -22,8 +22,9 @@ import { WrapperRequestActionSuccess } from '../../../store/src/types/request.ty
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { CFAppState } from '../cf-app-state';
-import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../cf-entity-factory';
+import { cfEntityFactory } from '../cf-entity-factory';
 import { generateCFEntities } from '../cf-entity-generator';
+import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
 import { populatePaginationFromParent } from './entity-relations';
 
 

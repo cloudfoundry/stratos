@@ -9,7 +9,8 @@ import { generateTestApplicationServiceProvider } from '../../../../../../../cor
 import { generateTestEntityServiceProvider } from '../../../../../../../core/test-framework/entity-service.helper';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { GetApplication } from '../../../../../actions/application.actions';
-import { applicationEntityType, cfEntityFactory } from '../../../../../cf-entity-factory';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { applicationEntityType } from '../../../../../cf-entity-types';
 import { ApplicationsModule } from '../../../../../features/applications/applications.module';
 import { CfAppVariablesListConfigService } from './cf-app-variables-list-config.service';
 
