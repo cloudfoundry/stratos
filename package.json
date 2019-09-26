@@ -136,7 +136,6 @@
     "request-promise-native": "^1.0.7",
     "rxjs-tslint": "^0.1.5",
     "sass-lint": "^1.12.1",
-    "stratos-merge-dirs": "^0.2.3",
     "stratos-protractor-reporter": "^1.2.3",
     "ts-node": "~3.2.0",
     "tsickle": ">=0.29.0",
