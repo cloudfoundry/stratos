@@ -119,7 +119,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
       quotaDefinitionEntityType
     );
     const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid, {});
+    const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid);
     this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,

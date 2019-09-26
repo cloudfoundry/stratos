@@ -7,24 +7,22 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { CreateOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
-import { GetQuotaDefinitions } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  organizationEntityType,
-  quotaDefinitionEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-types';
+import { organizationEntityType, quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
+import { QuotaDefinitionActionBuilder } from '../../../../entity-action-builders/quota-definition.action-builders';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 
@@ -79,9 +77,12 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     );
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const quotaDefinitionEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+    const quotaDefinitionEntity = entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(
+      CF_ENDPOINT_TYPE,
+      quotaDefinitionEntityType
+    );
     const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getQuotaDefinitionsAction = actionBuilder(this.cfGuid, quotaPaginationKey);
+    const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid, { includeRelations: [] });
     this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
       {
         store: this.store,

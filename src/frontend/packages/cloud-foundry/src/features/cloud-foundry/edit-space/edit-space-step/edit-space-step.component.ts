@@ -14,9 +14,11 @@ import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.a
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType, spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { SpaceQuotaDefinitionActionBuilders } from '../../../../entity-action-builders/space-quota.action-builders';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
@@ -128,17 +130,18 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     let spaceQuotaQueryGuid;
     let action: AssociateSpaceQuota | DisassociateSpaceQuota;
 
-    const spaceQuotaEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
+    const spaceQuotaEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(
+      CF_ENDPOINT_TYPE,
+      spaceQuotaEntityType
+    );
     if (spaceQuotaGuid) {
       spaceQuotaQueryGuid = spaceQuotaGuid;
-      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('associateSpaceQuota');
-      const associateSpaceQuotaAction = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
-      action = associateSpaceQuotaAction as AssociateSpaceQuota;
+      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('associateWithSpace');
+      action = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaQueryGuid) as AssociateSpaceQuota;
     } else {
       spaceQuotaQueryGuid = this.originalSpaceQuotaGuid;
-      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('disassociateSpaceQuota');
-      const disassociateSpaceQuotaAction = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaGuid);
-      action = disassociateSpaceQuotaAction as AssociateSpaceQuota;
+      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('disassociateFromSpace');
+      action = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaQueryGuid) as DisassociateSpaceQuota;
     }
     this.store.dispatch(action);
 
