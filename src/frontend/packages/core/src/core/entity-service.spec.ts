@@ -9,6 +9,7 @@ import { GeneralAppState } from '../../../store/src/app-state';
 import {
   failedEntityHandler,
 } from '../../../store/src/entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
+import { PipelineResult } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { completeApiRequest, startApiRequest } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
@@ -66,6 +67,7 @@ const catalogueEntity = new StratosBaseCatalogueEntity({
   ),
   label: 'Entity',
   labelPlural: 'Entities',
+
 });
 
 function createTestService(
@@ -102,12 +104,18 @@ function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey:
   } as NormalizedResponse;
   const res = new APIResponse();
   res.response = data;
+
+  const pipelineRes: PipelineResult = {
+    success: true
+  };
+
   return {
     action,
     entities,
     entitySchema,
     entityService,
-    res
+    res,
+    pipelineRes
   };
 }
 
@@ -208,7 +216,7 @@ describe('EntityServiceService', () => {
       const {
         action,
         entityService,
-        res
+        pipelineRes
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       entityService.entityObs$.pipe(
@@ -219,7 +227,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, pipelineRes);
     })();
   });
 
@@ -229,7 +237,8 @@ describe('EntityServiceService', () => {
       const {
         action,
         entityService,
-        res
+        res,
+        pipelineRes
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       completeApiRequest(store, action, res);
@@ -241,7 +250,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, pipelineRes);
     })();
   });
 
@@ -374,7 +383,8 @@ describe('EntityServiceService', () => {
       const {
         action,
         entityService,
-        res
+        res,
+        pipelineRes
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       completeApiRequest(store, action, res);
@@ -398,7 +408,7 @@ describe('EntityServiceService', () => {
         first(),
         tap(ent => {
           expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, res);
+          failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, pipelineRes);
         })
       ).subscribe();
     })();
