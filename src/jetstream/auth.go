@@ -102,9 +102,30 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 		return err
 	}
 
+	if !safeState(state, p.Config.SSOWhiteList) {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: Disallowed state",
+			"SSO Login: Disallowed state")
+		return err
+	}
+
 	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 	return nil
+}
+
+func safeState(state string, whiteListStr string) bool {
+	if len(whiteListStr) == 0 {
+		return true;
+	}
+
+	whiteList := strings.Split(whiteListStr, ",")
+	if len(whiteList) == 0 {
+		return true;
+	}
+
+	return ArrayContainsString(whiteList, state)
 }
 
 func getSSORedirectURI(base string, state string, endpointGUID string) string {
