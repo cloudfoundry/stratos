@@ -42,7 +42,9 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
     action.externalRequest
   ).pipe(
     map(response => singleRequestToPaged(response)),
+    // Convert { [endpointGuid]: <raw response> } to { { errors: [], successes: [] } }
     map(handleMultiEndpointsPipe),
+    // Convert { { errors: [], successes: [] } } to { response: NoramlisedResponse, success: boolean }
     map(multiEndpointResponses => mapMultiEndpointResponses(
       action,
       catalogueEntity,

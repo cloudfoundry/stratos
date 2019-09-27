@@ -29,9 +29,11 @@ describe('endpoint-error-handler', () => {
       endpointGuid,
       'url',
       {
-        code: 1,
-        description: 'test',
-        error_code: '200'
+        error: {
+          status: 'test',
+          statusCode: 200
+        },
+        errorResponse: 'response'
       }
     );
     const actionDispatcher = () => {
@@ -41,7 +43,7 @@ describe('endpoint-error-handler', () => {
         if (timesCalled === 1) {
           const successOrFailure = action as APISuccessOrFailedAction;
           expect(successOrFailure instanceof APISuccessOrFailedAction).toBe(true);
-          expect(successOrFailure.response).toBe(error.errorResponse.description);
+          expect(successOrFailure.response).toBe(error.jetstreamErrorResponse.error.status);
           expect(successOrFailure.apiAction.endpointGuid).toBe(endpointGuid);
           expect(successOrFailure.apiAction.type).toBe('test');
           expect(successOrFailure.type).toBe(entity.getRequestAction('failure', requestType).type);
@@ -53,7 +55,7 @@ describe('endpoint-error-handler', () => {
           expect(eventAction.eventState.severity).toBe(InternalEventSeverity.ERROR);
           expect(eventAction.eventState.message).toBe('API request error');
           expect(eventAction.eventState.metadata.url).toBe(error.url);
-          expect(eventAction.eventState.metadata.errorResponse).toBe(error.errorResponse);
+          expect(eventAction.eventState.metadata.errorResponse).toBe(error.jetstreamErrorResponse);
           done();
         }
       };

@@ -15,6 +15,7 @@ import { NormalizedResponse } from '../../../store/src/types/api.types';
 import { EntityRequestAction, ICFAction } from '../../../store/src/types/request.types';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
@@ -23,7 +24,6 @@ import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-
 import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
-import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 
 function getActionDispatcher(store: Store<any>) {
   return (action: Action) => {

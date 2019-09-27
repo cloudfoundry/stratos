@@ -34,6 +34,9 @@ import {
 } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import {
+  JetstreamError,
+} from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
@@ -76,6 +79,7 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
+import { CfErrorResponse, getCfError } from './cf-error-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
@@ -164,6 +168,20 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
         }
       }
       return data;
+    },
+    globalErrorMessageHandler: (errors: JetstreamError<CfErrorResponse>[]) => {
+      if (!errors || errors.length === 0) {
+        return 'No errors in response';
+      }
+
+      if (errors.length === 1) {
+        return getCfError(errors[0].jetstreamErrorResponse);
+      }
+
+      return errors.reduce((message, error) => {
+        message += `\n${getCfError(error.jetstreamErrorResponse)}`;
+        return message;
+      }, 'Multiple Cloud Foundry Errors. ');
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
