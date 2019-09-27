@@ -26,7 +26,6 @@ import {
   SetCreateServiceInstanceServicePlan,
   SetServiceInstanceGuid,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { GetServiceInstance } from '../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
@@ -49,19 +48,23 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
+import { ApplicationActionBuilders } from '../../../../entity-action-builders/application.action-builders';
+import { ServiceInstanceActionBuilders } from '../../../../entity-action-builders/service-instance.action.builders';
+import { SpaceActionBuilders } from '../../../../entity-action-builders/space.action-builders';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -97,6 +100,21 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   public cfGuid$: Observable<string>;
   public spaceGuid$ = this.cfDetails$.pipe(
     map(details => details.spaceGuid)
+  );
+
+  private serviceInstanceEntity = entityCatalogue.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
+    CF_ENDPOINT_TYPE,
+    serviceInstancesEntityType
+  );
+
+  private spaceEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
+    CF_ENDPOINT_TYPE,
+    spaceEntityType
+  );
+
+  private appEntity = entityCatalogue.getEntity<IEntityMetadata, any, ApplicationActionBuilders>(
+    CF_ENDPOINT_TYPE,
+    applicationEntityType
   );
 
   constructor(
@@ -147,8 +165,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       switchMap(csi => {
         this.appsEmitted.next(false);
         const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
-        const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-        const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
+        const actionBuilder = this.appEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
         const getAllAppsInSpaceAction = actionBuilder(csi.spaceGuid, csi.cfGuid, paginationKey) as PaginatedAction;
         return getPaginationObservables({
           store: this.store,
@@ -259,22 +276,16 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   }
 
   private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {
-    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
-    const action = actionBuilder(serviceInstanceId, cfId);
     return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      serviceInstancesEntityType,
-      new GetServiceInstance(serviceInstanceId, cfId)
+      serviceInstanceId,
+      this.serviceInstanceEntity.actionOrchestrator.getActionBuilder('get')(serviceInstanceId, cfId)
     );
   }
 
   private getSpaceEntityService(spaceGuid: string, cfGuid: string) {
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-    const getSpaceAction = actionBuilder(spaceGuid, cfGuid);
     return this.entityServiceFactory.create<APIResource<ISpace>>(
-      spaceEntityType,
-      getSpaceAction
+      spaceGuid,
+      this.spaceEntity.actionOrchestrator.getActionBuilder('get')(spaceGuid, cfGuid)
     );
   }
 

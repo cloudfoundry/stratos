@@ -3,7 +3,6 @@ import { normalize } from 'normalizr';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
@@ -14,10 +13,10 @@ import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
 import {
+  ActionBuilderAction,
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
-  ActionBuilderAction,
 } from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
@@ -140,7 +139,7 @@ export class StratosBaseCatalogueEntity<
     return this.builders.entityBuilder.getGuid(metadata);
   }
 
-  public getEntityMonitor<Q extends AppState>(
+  public getEntityMonitor<Q extends AppState, Y = any>(
     store: Store<Q>,
     entityId: string,
     {
@@ -148,7 +147,7 @@ export class StratosBaseCatalogueEntity<
       startWithNull = false
     } = {}
   ) {
-    return new EntityMonitor(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
+    return new EntityMonitor<Y>(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
   }
 
   public getTypeAndSubtype() {

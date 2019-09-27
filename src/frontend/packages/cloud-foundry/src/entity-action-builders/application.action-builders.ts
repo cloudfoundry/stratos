@@ -1,18 +1,18 @@
-import {
-  GetApplication,
-  DeleteApplication,
-  CreateNewApplication,
-  UpdateExistingApplication,
-  UpdateApplication,
-  RestageApplication,
-  GetAllApplications
-} from '../actions/application.actions';
 import { IApp } from '../../../core/src/core/cf-api.types';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
+import {
+  CreateNewApplication,
+  DeleteApplication,
+  GetAllApplications,
+  GetApplication,
+  RestageApplication,
+  UpdateApplication,
+  UpdateExistingApplication,
+} from '../actions/application.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
 export interface ApplicationActionBuilders extends CFOrchestratedActionBuilders {
   restage: (guid: string, endpointGuid: string) => RestageApplication;
@@ -27,7 +27,7 @@ export interface ApplicationActionBuilders extends CFOrchestratedActionBuilders 
   ) => GetAllAppsInSpace;
 }
 
-export const applicationActionBuilder = {
+export const applicationActionBuilder: ApplicationActionBuilders = {
   get: (
     guid,
     endpointGuid,
@@ -68,6 +68,6 @@ export const applicationActionBuilder = {
     populateMissing,
     flattenPagination
   )
-} as ApplicationActionBuilders;
+};
 
 
