@@ -40,8 +40,14 @@ export class PageHeaderSubPo extends Component {
       });
   }
 
+  waitForIconButton(iconName: string): promise.Promise<void> {
+    return browser.wait(
+      this.until.presenceOf(this.locator.element(by.cssContainingText('.page-header-sub-nav__container button mat-icon', iconName)))
+    );
+  }
+
   clickIconButton(iconName: string): promise.Promise<void> {
-    return this.getIconButton(iconName).then(btn => btn.click());
+    return this.waitForIconButton(iconName).then(() => this.getIconButton(iconName).then(btn => btn.click()));
   }
 
   hasIconButton(iconName: string): promise.Promise<boolean> {

@@ -16,6 +16,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../../store/src/actions/endpoint.actions';
 import {
@@ -111,8 +112,10 @@ function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, htt
   );
 }
 
-const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) =>
-  store.select(selectPaginationState(action.entityType, action.paginationKey));
+const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) => {
+  const entityKey = entityCatalogue.getEntityKey(action);
+  return store.select(selectPaginationState(entityKey, action.paginationKey));
+};
 
 /**
  * Using the given action wait until the associated pagination section changes from busy to not busy
