@@ -374,7 +374,7 @@ export class CfUserService {
   private createCfGetUsersAction = (cfGuid: string): PaginatedAction => {
     const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
     const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(cfGuid, null);
+    const action = actionBuilder(null, cfGuid);
     return action;
   }
 
