@@ -1,6 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -13,6 +14,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { appEventEntityType } from '../../../../../cf-entity-types';
+import { ApplicationEventActionBuilders } from '../../../../../entity-action-builders/application-event.action-builders';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfAppEventsDataSource extends ListDataSource<APIResource> {
@@ -47,9 +49,12 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
-    const appEventEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEventEntityType);
+    const appEventEntity = entityCatalogue.getEntity<IEntityMetadata, any, ApplicationEventActionBuilders>(
+      CF_ENDPOINT_TYPE,
+      appEventEntityType
+    );
     const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(cfGuid, paginationKey, { appGuid });
+    const action = actionBuilder(cfGuid, paginationKey, { applicationGuid: appGuid });
 
     super(
       {

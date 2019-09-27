@@ -1,14 +1,15 @@
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import {
-  GetServiceInstances,
-  GetServiceInstance,
-  DeleteServiceInstance,
   CreateServiceInstance,
-  UpdateServiceInstance
+  DeleteServiceInstance,
+  GetServiceInstance,
+  GetServiceInstances,
+  UpdateServiceInstance,
 } from '../actions/service-instances.actions';
 import { GetServicePlanServiceInstances } from '../actions/service-plan.actions';
 import { GetServiceInstancesForSpace } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
+
 export interface CreateUpdateActionMeta {
   name: string;
   servicePlanGuid: string;
@@ -16,7 +17,49 @@ export interface CreateUpdateActionMeta {
   params: object;
   tags: string[];
 }
-export const serviceInstanceActionBuilders = {
+
+export interface ServiceInstanceActionBuilders extends CFOrchestratedActionBuilders {
+  get: (
+    guid: string,
+    endpointGuid: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetServiceInstance;
+  remove: (
+    guid: string,
+    endpointGuid: string,
+  ) => DeleteServiceInstance;
+  create: (
+    createId: string,
+    endpointGuid: string,
+    meta: CreateUpdateActionMeta
+  ) => CreateServiceInstance;
+  update: (
+    guid: string,
+    endpointGuid: string,
+    meta: CreateUpdateActionMeta
+  ) => UpdateServiceInstance;
+  getMultiple: (
+    endpointGuid: string,
+    paginationKey: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetServiceInstances;
+  getAllInServicePlan: (
+    servicePlanGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    { includeRelations }?: CFBasePipelineRequestActionMeta
+  ) => GetServicePlanServiceInstances;
+  getAllInSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    qParams: string[],
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetServiceInstancesForSpace;
+}
+
+
+export const serviceInstanceActionBuilders: ServiceInstanceActionBuilders = {
   get: (
     guid,
     endpointGuid,
@@ -80,4 +123,4 @@ export const serviceInstanceActionBuilders = {
     qParams: string[],
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceInstancesForSpace(spaceGuid, endpointGuid, paginationKey, qParams, includeRelations, populateMissing)
-} as CFOrchestratedActionBuilders;
+};

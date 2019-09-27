@@ -8,7 +8,7 @@ export interface SpaceActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetSpace;
   remove: (
     guid: string,

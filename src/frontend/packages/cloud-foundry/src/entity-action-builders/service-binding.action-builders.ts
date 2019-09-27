@@ -1,10 +1,40 @@
 import { GetAppServiceBindings } from '../actions/application-service-routes.actions';
 import { CreateServiceBinding, DeleteServiceBinding, FetchAllServiceBindings } from '../actions/service-bindings.actions';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { ListServiceBindingsForInstance } from '../actions/service-instances.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
-export const serviceBindingActionBuilders = {
+export interface ServiceBindingActionBuilders extends CFOrchestratedActionBuilders {
+  create: (
+    id: string,
+    endpointGuid: string,
+    { applicationGuid, serviceInstanceGuid, params }: { applicationGuid: string, serviceInstanceGuid: string, params: object }
+  ) => CreateServiceBinding;
+  remove: (
+    guid: string,
+    endpointGuid: string,
+    { serviceInstanceGuid }: { serviceInstanceGuid: string }
+  ) => DeleteServiceBinding;
+  getMultiple: (
+    endpointGuid: string,
+    paginationKey: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => FetchAllServiceBindings;
+  getAllForApplication: (
+    applicationGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetAppServiceBindings;
+  getAllForServiceInstance: (
+    serviceInstanceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    { includeRelations }: CFBasePipelineRequestActionMeta
+  ) => ListServiceBindingsForInstance;
+}
+
+export const serviceBindingActionBuilders: ServiceBindingActionBuilders = {
   create: (
     id,
     endpointGuid,
@@ -48,6 +78,6 @@ export const serviceBindingActionBuilders = {
     paginationKey,
     includeRelations
   )
-} as CFOrchestratedActionBuilders;
+};
 
 
