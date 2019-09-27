@@ -8,9 +8,12 @@ import { filter } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { SpaceActionBuilders } from '../../../../entity-action-builders/space.action-builders';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
@@ -44,7 +47,6 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private entityServiceFactory: EntityServiceFactory
   ) {
     super(store, activatedRoute, paginationMonitorFactory, activeRouteCfOrgSpace);
   }
@@ -75,16 +77,21 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   submit: StepOnNextFunction = () => {
-    // const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-    // const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('create');
-    // const createSpaceAction = actionBuilder(this.cfGuid, this.orgGuid, {
-    //   name: this.spaceName.value,
-    //   organization_guid: this.orgGuid,
-    //   space_quota_definition_guid: this.quotaDefinition.value
-    // });
-    // this.store.dispatch(createSpaceAction); //TODO: commented out??
+    const id = `${this.orgGuid}-${this.spaceName.value}`;
+    const spaceEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
+      CF_ENDPOINT_TYPE,
+      spaceEntityType
+    );
+    spaceEntity.actionDispatchManager.dispatchCreate(id, this.cfGuid, {
+      createSpace: {
+        name: this.spaceName.value,
+        organization_guid: this.orgGuid,
+        space_quota_definition_guid: this.quotaDefinition.value
+      },
+      orgGuid: this.orgGuid
+    });
 
-    return this.store.select(selectCfRequestInfo(spaceEntityType, `${this.orgGuid}-${this.spaceName.value}`)).pipe(
+    return this.store.select(selectCfRequestInfo(spaceEntityType, id)).pipe(
       filter(o => !!o && !o.fetching && !o.creating),
       this.map('Failed to create space: ')
     );

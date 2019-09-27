@@ -152,6 +152,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.component.isTable = false;
     }
     this.component.row = this.pRow;
+    this.componentRef.changeDetectorRef.detectChanges();
+
 
     this.updateCardStatus();
   }

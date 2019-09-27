@@ -28,8 +28,8 @@ export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBu
     orgGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    includeRelations: string[],
-    populateMissing,
+    includeRelations?: string[],
+    populateMissing?: boolean,
   ) => GetOrganizationSpaceQuotaDefinitions;
   associateWithSpace: (
     spaceGuid: string,

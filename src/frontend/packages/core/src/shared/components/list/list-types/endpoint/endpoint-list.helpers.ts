@@ -154,7 +154,6 @@ export class EndpointListHelper {
     EndpointDetailsContainerRefs {
     const componentFactory = componentFactoryResolver.resolveComponentFactory<EndpointListDetailsComponent>(listDetailsComponent);
     const componentRef = container.createComponent<EndpointListDetailsComponent>(componentFactory);
-    componentRef.changeDetectorRef.detectChanges();
     const component = isEndpointListDetailsComponent(componentRef.instance);
     const refs = {
       componentRef,

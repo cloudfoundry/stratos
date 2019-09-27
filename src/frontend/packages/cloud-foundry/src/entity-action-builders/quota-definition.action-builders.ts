@@ -3,9 +3,7 @@ import {
   QuotaFormValues,
 } from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 import {
-  AssociateSpaceQuota,
   CreateQuotaDefinition,
-  DisassociateSpaceQuota,
   GetOrganizationSpaceQuotaDefinitions,
   GetQuotaDefinitions,
   UpdateQuotaDefinition,
@@ -26,18 +24,8 @@ export interface QuotaDefinitionActionBuilder extends OrchestratedActionBuilders
   getMultiple: (
     paginationKey: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetQuotaDefinitions;
-  associateSpaceQuota: (
-    spaceGuid: string,
-    endpointGuid: string,
-    spaceQuotaGuid: string
-  ) => AssociateSpaceQuota;
-  disassociateSpaceQuota: (
-    spaceGuid: string,
-    endpointGuid: string,
-    spaceQuotaGuid: string
-  ) => DisassociateSpaceQuota;
   getOrganizationSpaceQuotaDefinitions: (
     orgGuid: string,
     paginationKey: string,
@@ -63,16 +51,16 @@ export const quotaDefinitionActionBuilder: QuotaDefinitionActionBuilder = {
     endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetQuotaDefinitions(paginationKey, endpointGuid, includeRelations, populateMissing),
-  associateSpaceQuota: (
-    spaceGuid: string,
-    endpointGuid: string,
-    spaceQuotaGuid: string
-  ) => new AssociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
-  disassociateSpaceQuota: (
-    spaceGuid: string,
-    endpointGuid: string,
-    spaceQuotaGuid: string
-  ) => new DisassociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
+  // associateSpaceQuota: (
+  //   spaceGuid: string,
+  //   endpointGuid: string,
+  //   spaceQuotaGuid: string
+  // ) => new AssociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
+  // disassociateSpaceQuota: (
+  //   spaceGuid: string,
+  //   endpointGuid: string,
+  //   spaceQuotaGuid: string
+  // ) => new DisassociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
   getOrganizationSpaceQuotaDefinitions: (
     orgGuid: string,
     paginationKey: string,
