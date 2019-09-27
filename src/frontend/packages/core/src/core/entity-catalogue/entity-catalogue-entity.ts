@@ -139,7 +139,7 @@ export class StratosBaseCatalogueEntity<
     return this.builders.entityBuilder.getGuid(metadata);
   }
 
-  public getEntityMonitor<Q extends AppState, Y = any>(
+  public getEntityMonitor<Q extends AppState, B = any>(
     store: Store<Q>,
     entityId: string,
     {
@@ -147,7 +147,7 @@ export class StratosBaseCatalogueEntity<
       startWithNull = false
     } = {}
   ) {
-    return new EntityMonitor<Y>(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
+    return new EntityMonitor<B>(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
   }
 
   public getTypeAndSubtype() {
