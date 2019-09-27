@@ -82,7 +82,7 @@ export const apiRequestPipelineFactory = (
       const res: PipelineResult = {
         success: false,
         errorMessage: httpResponse ? httpResponse.error : null
-      }
+      };
       failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, res, recursivelyDelete);
       // TODO We should pass the endpoint ids to this so we can correctly map the error to the endpoint.
       jetstreamErrorHandler(
