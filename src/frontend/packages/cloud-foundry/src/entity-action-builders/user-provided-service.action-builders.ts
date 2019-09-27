@@ -6,10 +6,37 @@ import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../actions/user-provided-service.actions';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
-export const userProvidedServiceActionBuilder = {
+export interface UserProvidedServiceActionBuilder extends CFOrchestratedActionBuilders {
+  get: (
+    guid: string,
+    endpointGuid: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetUserProvidedService;
+  remove: (guid: string, endpointGuid: string) => DeleteApplication;
+  update: (
+    guid: string,
+    endpointGuid: string,
+    existingUserProvidedServiceInstance?: Partial<IUserProvidedServiceInstanceData>,
+    proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
+  ) => UpdateUserProvidedServiceInstance;
+  getMultiple: (
+    endpointGuid: string,
+    paginationKey: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetAllUserProvidedServices;
+  getAllInSpace: (
+    endpointGuid: string,
+    spaceGuid?: string,
+    paginationKey?: string,
+    includeRelations?: string[],
+    populateMissing?: boolean,
+  ) => GetAllUserProvidedServices;
+}
+
+export const userProvidedServiceActionBuilder: UserProvidedServiceActionBuilder = {
   get: (
     guid,
     endpointGuid,
@@ -33,12 +60,12 @@ export const userProvidedServiceActionBuilder = {
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllUserProvidedServices(paginationKey, endpointGuid, includeRelations, populateMissing),
   getAllInSpace: (
-    spaceGuid: string,
     endpointGuid: string,
-    paginationKey: string,
+    spaceGuid?: string,
+    paginationKey?: string,
     includeRelations?: string[],
     populateMissing?: boolean,
-  ) => new GetAllUserProvidedServices(paginationKey, endpointGuid, includeRelations, populateMissing, spaceGuid)
-} as CFOrchestratedActionBuilders;
+  ) => new GetAllUserProvidedServices(endpointGuid, paginationKey, includeRelations, populateMissing, spaceGuid)
+};
 
 
