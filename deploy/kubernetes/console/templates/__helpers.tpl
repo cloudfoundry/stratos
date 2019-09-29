@@ -105,3 +105,22 @@ Generate self-signed certificate
 tls.crt: {{ $cert.Cert | b64enc }}
 tls.key: {{ $cert.Key | b64enc }}
 {{- end -}}
+
+
+{{/*
+Ingress Host:
+*/}}
+{{- define "ingress.host" -}}
+{{$host := ""}}
+{{- if .Values.console.service -}}
+{{- if .Values.console.service.ingress -}}
+{{- if .Values.console.service.ingress.host -}}
+{{$host = .Values.console.service.ingress.host }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if and .Values.env.DOMAIN (not $host) -}}
+{{$host = print "console." .Values.env.DOMAIN }}
+{{- end -}}
+{{ required "Host name is required" $host | quote }}
+{{- end -}}
