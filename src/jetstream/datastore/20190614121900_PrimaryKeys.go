@@ -21,7 +21,7 @@ func init() {
 			return err
 		}
 
-		addSetupConfigPrimaryKey := "ALTER TABLE console_config ADD CONSTRAINT PK_ConsoleConfig PRIMARY KEY (uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation);"
+		addSetupConfigPrimaryKey := "ALTER TABLE console_config ADD CONSTRAINT PK_ConsoleConfig PRIMARY KEY (uaa_endpoint, console_admin_scope);"
 		_, err = txn.Exec(addSetupConfigPrimaryKey)
 		if err != nil {
 			return err
