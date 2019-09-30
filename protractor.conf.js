@@ -212,18 +212,19 @@ exports.config = {
     }
 
     var defer = protractor.promise.defer();
-    https
-      .get(options, (resp) => {
-        if (resp.statusCode >= 400) {
-          defer.reject('Failed to validate Github API Url. Status Code: ' + resp.statusCode);
-        } else {
-          defer.fulfill('Github API Url responding');
-        }
-      })
-      .on("error", (err) => {
-        defer.reject('Failed to validate Github API Url: ' + err.message);
-      });
-    return defer.promise;
+    return new Promise(function(resolve, reject) {
+      https
+        .get(options, (resp) => {
+          if (resp.statusCode >= 400) {
+            reject('Failed to validate Github API Url. Status Code: ' + resp.statusCode);
+          } else {
+            resolve('Github API Url responding');
+          }
+        })
+        .on("error", (err) => {
+          reject('Failed to validate Github API Url: ' + err.message);
+        });
+    });
   }
 };
 
