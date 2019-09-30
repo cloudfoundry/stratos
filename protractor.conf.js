@@ -211,7 +211,6 @@ exports.config = {
       rejectUnauthorized: false
     }
 
-    var defer = protractor.promise.defer();
     return new Promise(function(resolve, reject) {
       https
         .get(options, (resp) => {
