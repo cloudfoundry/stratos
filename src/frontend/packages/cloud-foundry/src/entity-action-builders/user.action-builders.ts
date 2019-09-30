@@ -11,8 +11,8 @@ export const userActionBuilders = {
   ) => new GetUser(endpointGuid, guid),
   // Must be admin user for this to succeed.
   getMultiple: (
-    paginationKey: string,
     endpointGuid: string,
+    paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllUsersAsAdmin(endpointGuid, includeRelations, populateMissing, paginationKey),
   getAllInOrganization: (
