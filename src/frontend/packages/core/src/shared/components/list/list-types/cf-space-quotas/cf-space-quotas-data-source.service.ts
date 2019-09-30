@@ -23,7 +23,7 @@ export class CfOrgSpaceQuotasDataSourceService extends ListDataSource<APIResourc
 
   constructor(store: Store<CFAppState>, orgGuid: string, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-    const action = new GetOrganizationSpaceQuotaDefinitions(orgGuid, quotaPaginationKey, cfGuid);
+    const action = new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, orgGuid, cfGuid);
 
     super({
       store,
