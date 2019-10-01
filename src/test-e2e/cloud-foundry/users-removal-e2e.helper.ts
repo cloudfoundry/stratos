@@ -47,11 +47,11 @@ export function setupCfUserRemovalTests(
 
   beforeAll(() => {
     const e2eSetup = e2e.setup(ConsoleUserType.admin)
-    .clearAllEndpoints()
-    .registerDefaultCloudFoundry()
-    .connectAllEndpoints(ConsoleUserType.admin)
-    .loginAs(ConsoleUserType.admin)
-    .getInfo(ConsoleUserType.admin);
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .loginAs(ConsoleUserType.admin)
+      .getInfo(ConsoleUserType.admin);
     cfHelper = new CFHelpers(e2eSetup);
 
 
@@ -59,11 +59,15 @@ export function setupCfUserRemovalTests(
       .then(() => uaaHelpers.createUser(userName))
       .then(newUser => {
         uaaUserGuid = newUser.id;
+        e2e.log('Created UAA User: ', uaaUserGuid);
         const defaultCf = e2e.secrets.getDefaultCFEndpoint();
         cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
       })
       .then(() => cfHelper.createUser(cfGuid, uaaUserGuid))
-      .then(() => setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true, e2eSetup))
+      .then(cfUserBody => {
+        e2e.log('Created Cf User: ', cfUserBody);
+        return setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true, e2eSetup);
+      })
       .then(res => {
         cfGuid = res.cfGuid;
         orgGuid = res.orgGuid;
@@ -71,6 +75,7 @@ export function setupCfUserRemovalTests(
         return cfHelper.fetchUser(cfGuid, userName);
       })
       .then(user => {
+        e2e.log(`Fetched Cf User: ${user.entity.username}. Guid: ${user.metadata.guid}`);
         expect(user).toBeTruthy();
         userGuid = user.metadata.guid;
 
@@ -79,10 +84,11 @@ export function setupCfUserRemovalTests(
         return protractor.promise.controlFlow().execute(() => {
           return navToUserTableFn(cfGuid, orgGuid, spaceGuid);
         });
-      });
+      })
+      .then(() => e2e.log(`Naved to user table`));
   });
 
-  it ('Clicks on remove menu option', () => {
+  it('Clicks on remove menu option', () => {
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
     expect(usersTable.getTotalResults()).toBe(1);
@@ -151,7 +157,7 @@ export function setupCfUserRemovalTests(
   });
 
   if (cfLevel !== CfUserRemovalTestLevel.Space &&
-      removalLevel === CfRolesRemovalLevel.Spaces) {
+    removalLevel === CfRolesRemovalLevel.Spaces) {
 
     it('Shows user with org roles only', () => {
       // user was removed from space level
@@ -162,7 +168,7 @@ export function setupCfUserRemovalTests(
       expect(usersTable.getPermissions(0, false).getChipElements().count()).toBe(0);
     });
   } else {
-    it('Doesnt show user with roles anymore', () => {
+    it(`Doesn't show user with roles any more`, () => {
       const usersTable = new CFUsersListComponent();
       usersTable.header.setSearchText(userName);
 
@@ -232,8 +238,8 @@ export function setupCfUserRemovalTests(
   afterAll(() => {
     const deleteUser = uaaUserGuid ? cfHelper.deleteUser(cfGuid, userGuid, userName, uaaUserGuid) : promise.fullyResolved(true);
     return promise.all([
-      deleteUser,
-      cfHelper.deleteOrgIfExisting(cfGuid, orgName)
-    ]) ;
+      deleteUser.then(() => e2e.log(`Deleted Cf user ${userGuid} & UAA user ${uaaUserGuid}`)),
+      cfHelper.deleteOrgIfExisting(cfGuid, orgName).then(() => e2e.log(`Deleted Org: ${orgName}`))
+    ]);
   });
 }
