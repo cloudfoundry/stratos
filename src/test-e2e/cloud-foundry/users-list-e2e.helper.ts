@@ -52,14 +52,17 @@ export function setUpTestOrgSpaceUserRoles(
   cfHelper: CFHelpers,
   dropBillingManager = false
 ): promise.Promise<{ cfGuid: string, orgGuid: string, spaceGuid: string, cfHelper: CFHelpers }> {
-  let orgGuid, spaceGuid;
+  let orgGuid;
+  let spaceGuid;
   return cfHelper.addOrgIfMissingForEndpointUsers(cfGuid, defaultCf, orgName)
     .then(org => {
       orgGuid = org.metadata.guid;
       return cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, spaceName, defaultCf, true);
     })
     .then(space => spaceGuid = space.metadata.guid)
+    .then(() => browser.sleep(500))
     .then(() => cfHelper.addOrgUserRole(cfGuid, orgGuid, userName))
+    .then(() => browser.sleep(500))
     .then(() => promise.all([
       cfHelper.addOrgUserManager(cfGuid, orgGuid, userName),
       cfHelper.addOrgUserAuditor(cfGuid, orgGuid, userName),
