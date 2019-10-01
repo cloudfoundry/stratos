@@ -1,5 +1,17 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+
+export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
+  if (activatedRoute.snapshot.params[id]) {
+    return activatedRoute.snapshot.params[id];
+  } else if (activatedRoute.parent) {
+    return getIdFromRoute(activatedRoute.parent, id);
+  }
+  return null;
+}
+
+// TODO: RC types in entity generator
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 

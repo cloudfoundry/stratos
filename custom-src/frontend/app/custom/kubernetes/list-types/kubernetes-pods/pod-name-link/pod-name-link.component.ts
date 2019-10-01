@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { KubernetesPod } from '../../../store/kube.types';
-import { TableCellCustom } from '../../../../../shared/components/list/list.types';
 import { ActivatedRoute } from '@angular/router';
-import { getIdFromRoute } from '../../../../../features/cloud-foundry/cf.helpers';
-import { EndpointsService } from '../../../../../core/endpoints.service';
-import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
-import { first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+
+import { EndpointsService } from '../../../../../core/endpoints.service';
+import { getIdFromRoute } from '../../../../../core/utils.service';
+import { TableCellCustom } from '../../../../../shared/components/list/list.types';
+import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+import { KubernetesPod } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-pod-name-link',

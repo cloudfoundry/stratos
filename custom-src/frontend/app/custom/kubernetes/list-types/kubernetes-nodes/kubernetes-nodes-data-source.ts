@@ -5,11 +5,11 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
+import { kubernetesNodesSchemaKey } from '../../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { KubernetesNode } from '../../store/kube.types';
 import { GetKubernetesNodes } from '../../store/kubernetes.actions';
-import { kubernetesNodesSchemaKey } from '../../store/kubernetes.entities';
 
 export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode> {
 

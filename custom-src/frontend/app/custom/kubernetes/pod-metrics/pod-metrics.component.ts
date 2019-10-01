@@ -6,12 +6,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/src/types/metric.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
+import { getIdFromRoute } from '../../../core/utils.service';
 import { MetricsConfig } from '../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../shared/components/metrics-chart/metrics-chart.types';
 import {
@@ -25,7 +24,6 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesPod } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
-import { kubernetesPodsSchemaKey } from '../store/kubernetes.entities';
 
 @Component({
   selector: 'app-pod-metrics',
@@ -179,11 +177,8 @@ export class PodMetricsComponent {
       })
     );
     this.podEntity$ = this.entityServiceFactory.create<KubernetesPod>(
-      kubernetesPodsSchemaKey,
-      entityFactory(kubernetesPodsSchemaKey),
       this.podName,
       new GetKubernetesPod(this.podName, this.namespaceName, this.helmReleaseService.kubeGuid),
-      false
     ).entityObs$;
   }
 }

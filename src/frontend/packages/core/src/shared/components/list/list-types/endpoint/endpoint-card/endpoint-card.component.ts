@@ -76,9 +76,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       const metadata = this.endpointCatalogueEntity.builders.entityBuilder.getMetadata(row);
       this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogueEntity.definition.unConnectable ?
         this.endpointCatalogueEntity.builders.entityBuilder.getLink(metadata) : null;
+      this.connectionStatus = this.endpointCatalogueEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
     }
     this.updateInnerComponent();
-    this.connectionStatus = this.endpointConfig.doesNotSupportConnect ? 'connected' : row.connectionStatus;
+
   }
   get row(): EndpointModel {
     return this.pRow;

@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 
-import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
+import { IListConfig } from '../../../../shared/components/list/list.component.types';
+import { kubernetesPodsSchemaKey } from '../../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesPod } from '../../store/kube.types';
 import { GetKubernetesPodsInNamespace } from '../../store/kubernetes.actions';
-import { kubernetesPodsSchemaKey } from '../../store/kubernetes.entities';
 
 export class KubernetesNamespacePodsDataSource extends ListDataSource<KubernetesPod, any> {
 

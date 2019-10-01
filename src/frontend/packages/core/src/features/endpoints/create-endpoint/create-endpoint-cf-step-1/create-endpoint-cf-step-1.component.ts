@@ -6,7 +6,6 @@ import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
-import { getIdFromRoute } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
@@ -17,6 +16,7 @@ import { selectPaginationState } from '../../../../../../store/src/selectors/pag
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
 import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getFullEndpointApiUrl } from '../../endpoint-helpers';

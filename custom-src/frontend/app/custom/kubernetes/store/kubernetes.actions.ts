@@ -4,8 +4,9 @@ import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../.
 import { getPaginationKey } from '../../../../../store/src/actions/pagination.actions';
 import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { PaginatedAction, PaginationParam } from '../../../../../store/src/types/pagination.types';
-import { IRequestAction } from '../../../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import {
+  KUBERNETES_ENDPOINT_TYPE,
   kubernetesAppsSchemaKey,
   kubernetesDashboardSchemaKey,
   kubernetesDeploymentsSchemaKey,
@@ -14,7 +15,7 @@ import {
   kubernetesPodsSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
-} from './kubernetes.entities';
+} from '../kubernetes-entity-factory';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';
@@ -82,7 +83,7 @@ const sortPodsByName = {
   'order-direction-field': 'name'
 };
 
-export interface KubeAction extends IRequestAction {
+export interface KubeAction extends EntityRequestAction {
   kubeGuid: string;
 }
 export interface KubePaginationAction extends PaginatedAction, KubeAction { }
@@ -98,7 +99,8 @@ export class GetKubernetesReleasePods implements KubePaginationAction {
   }
   initialParams: PaginationParam;
   type = GET_RELEASE_POD_INFO;
-  entityKey = kubernetesPodsSchemaKey;
+  entityType = kubernetesPodsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesPodsSchemaKey)];
   params: { labelSelector: string; };
   actions = [
@@ -117,7 +119,8 @@ export class KubeHealthCheck implements KubePaginationAction {
     limit: 1
   };
   type = GET_NODES_INFO;
-  entityKey = kubernetesNodesSchemaKey;
+  entityType = kubernetesNodesSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesNodesSchemaKey)];
   actions = [
     GET_NODES_INFO,
@@ -132,7 +135,8 @@ export class GetKubernetesNodes implements KubePaginationAction {
     this.paginationKey = getPaginationKey(kubernetesNodesSchemaKey, kubeGuid);
   }
   type = GET_NODES_INFO;
-  entityKey = kubernetesNodesSchemaKey;
+  entityType = kubernetesNodesSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesNodesSchemaKey)];
   actions = [
     GET_NODES_INFO,
@@ -150,7 +154,8 @@ export class GetKubernetesNode implements KubeAction {
   constructor(public nodeName: string, public kubeGuid: string) {
   }
   type = GET_NODE_INFO;
-  entityKey = kubernetesNodesSchemaKey;
+  entityType = kubernetesNodesSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesNodesSchemaKey)];
 
   actions = [
@@ -164,7 +169,8 @@ export class GetKubernetesNamespace implements KubeAction {
   constructor(public namespaceName: string, public kubeGuid: string) {
   }
   type = GET_NAMESPACE_INFO;
-  entityKey = kubernetesNamespacesSchemaKey;
+  entityType = kubernetesNamespacesSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesNamespacesSchemaKey)];
 
   actions = [
@@ -179,7 +185,8 @@ export class GetKubernetesPods implements KubePaginationAction {
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, 'k8', kubeGuid);
   }
   type = GET_POD_INFO;
-  entityKey = kubernetesPodsSchemaKey;
+  entityType = kubernetesPodsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesPodsSchemaKey)];
   actions = [
     GET_POD_INFO,
@@ -201,7 +208,8 @@ export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
     };
   }
   type = GET_PODS_ON_NODE_INFO;
-  entityKey = kubernetesPodsSchemaKey;
+  entityType = kubernetesPodsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesPodsSchemaKey)];
   actions = [
     GET_PODS_ON_NODE_INFO,
@@ -217,7 +225,8 @@ export class GetKubernetesServicesInNamespace implements PaginatedAction, KubeAc
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, `ns-${namespaceName}`, kubeGuid);
   }
   type = GET_SERVICES_IN_NAMESPACE_INFO;
-  entityKey = kubernetesServicesSchemaKey;
+  entityType = kubernetesServicesSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesServicesSchemaKey)];
   actions = [
     GET_SERVICES_IN_NAMESPACE_INFO,
@@ -235,7 +244,8 @@ export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction
     this.paginationKey = getPaginationKey(kubernetesPodsSchemaKey, `ns-${namespaceName}`, kubeGuid);
   }
   type = GET_PODS_IN_NAMESPACE_INFO;
-  entityKey = kubernetesPodsSchemaKey;
+  entityType = kubernetesPodsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesPodsSchemaKey)];
   actions = [
     GET_PODS_IN_NAMESPACE_INFO,
@@ -253,7 +263,8 @@ export class GetKubernetesNamespaces implements KubePaginationAction {
     this.paginationKey = getPaginationKey(kubernetesNamespacesSchemaKey, kubeGuid);
   }
   type = GET_NAMESPACES_INFO;
-  entityKey = kubernetesNamespacesSchemaKey;
+  entityType = kubernetesNamespacesSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesNamespacesSchemaKey)];
   actions = [
     GET_NAMESPACES_INFO,
@@ -272,7 +283,8 @@ export class GetKubernetesApps implements KubePaginationAction {
     this.paginationKey = getPaginationKey(kubernetesAppsSchemaKey, kubeGuid);
   }
   type = GET_KUBERNETES_APP_INFO;
-  entityKey = kubernetesAppsSchemaKey;
+  entityType = kubernetesAppsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesAppsSchemaKey)];
   actions = [
     GET_KUBERNETES_APP_INFO,
@@ -291,7 +303,8 @@ export class GetKubernetesServices implements KubePaginationAction {
     this.paginationKey = getPaginationKey(kubernetesServicesSchemaKey, kubeGuid);
   }
   type = GET_SERVICE_INFO;
-  entityKey = kubernetesServicesSchemaKey;
+  entityType = kubernetesServicesSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesServicesSchemaKey)];
   actions = [
     GET_SERVICE_INFO,
@@ -309,7 +322,8 @@ export class GetKubernetesPod implements KubeAction {
   constructor(public podName, public namespaceName, public kubeGuid) {
   }
   type = GET_KUBE_POD;
-  entityKey = kubernetesPodsSchemaKey;
+  entityType = kubernetesPodsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesPodsSchemaKey)];
   actions = [
     GET_KUBE_POD,
@@ -323,7 +337,8 @@ export class GetKubernetesStatefulSets implements KubePaginationAction {
     this.paginationKey = getPaginationKey(kubernetesStatefulSetsSchemaKey, kubeGuid);
   }
   type = GET_KUBE_STATEFULSETS;
-  entityKey = kubernetesStatefulSetsSchemaKey;
+  entityType = kubernetesStatefulSetsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesStatefulSetsSchemaKey)];
   actions = [
     GET_KUBE_STATEFULSETS,
@@ -338,7 +353,8 @@ export class GeKubernetesDeployments implements KubePaginationAction {
     this.paginationKey = getPaginationKey(kubernetesDeploymentsSchemaKey, kubeGuid);
   }
   type = GET_KUBE_DEPLOYMENT;
-  entityKey = kubernetesDeploymentsSchemaKey;
+  entityType = kubernetesDeploymentsSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesDeploymentsSchemaKey)];
   actions = [
     GET_KUBE_DEPLOYMENT,
@@ -352,7 +368,8 @@ export class GetKubernetesDashboard implements KubeAction {
   constructor(public kubeGuid: string) {
   }
   type = GET_KUBE_DASHBOARD;
-  entityKey = kubernetesDashboardSchemaKey;
+  entityType = kubernetesDashboardSchemaKey;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [entityFactory(kubernetesDashboardSchemaKey)];
 
   actions = [

@@ -15,7 +15,7 @@ import {
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { safeStringToObj } from '../../../../core/src/core/utils.service';
+import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { StratosStatus } from '../../../../core/src/shared/shared.types';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
@@ -34,7 +34,7 @@ import {
   servicePlanEntityType,
   spaceEntityType,
 } from '../../cf-entity-types';
-import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { fetchTotalResults } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 
 export const getSvcAvailability = (

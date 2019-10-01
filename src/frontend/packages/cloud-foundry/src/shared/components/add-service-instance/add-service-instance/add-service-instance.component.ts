@@ -36,7 +36,6 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { getIdFromRoute } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import {
   servicesServiceFactoryProvider,
 } from '../../../../../../cloud-foundry/src/features/service-catalog/service-catalog.helpers';
@@ -51,6 +50,7 @@ import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';

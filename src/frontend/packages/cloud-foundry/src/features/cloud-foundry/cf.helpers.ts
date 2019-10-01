@@ -24,7 +24,7 @@ import { IServiceInstance, IUserProvidedServiceInstance } from '../../../../core
 import { ISpace } from '../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/src/core/current-user-permissions.service';
-import { pathGet } from '../../../../core/src/core/utils.service';
+import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service';
 import {
   extractActualListEntity,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
@@ -215,15 +215,6 @@ export const getRowMetadata = (entity: APIResource | MultiActionListEntity) => {
   }
   return entity.metadata ? entity.metadata.guid : null;
 };
-
-export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
-  if (activatedRoute.snapshot.params[id]) {
-    return activatedRoute.snapshot.params[id];
-  } else if (activatedRoute.parent) {
-    return getIdFromRoute(activatedRoute.parent, id);
-  }
-  return null;
-}
 
 export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   return ({

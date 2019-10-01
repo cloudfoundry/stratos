@@ -4,10 +4,8 @@ import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
+import { EntityCatalogueModule } from '../../core/entity-catalogue.module';
 import { SharedModule } from '../../shared/shared.module';
-import {
-  KubernetesServicePortsComponent,
-} from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubernetesReleasePodsTabComponent } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
 import { HelmReleaseServicesComponent } from './helm-release/helm-release-services/helm-release-services.component';
 import {
@@ -16,6 +14,7 @@ import {
 import { HelmReleaseSummaryComponent } from './helm-release/helm-release-summary/helm-release-summary.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
+import { generateKubernetesEntities } from './kubernetes-entity-generator';
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
@@ -52,7 +51,7 @@ import {
 import {
   ConditionCellComponent,
   InverseConditionCellComponent,
-  SubtleConditionCellComponent
+  SubtleConditionCellComponent,
 } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 import {
   KubernetesNodeCapacityComponent,
@@ -81,6 +80,7 @@ import {
 import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
+import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { HelmReleaseService } from './services/helm-release.service';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
@@ -101,6 +101,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     SharedModule,
     NgxChartsModule,
     KubernetesRoutingModule,
+    EntityCatalogueModule.forFeature(generateKubernetesEntities),
   ],
   declarations: [
     KubernetesComponent,
