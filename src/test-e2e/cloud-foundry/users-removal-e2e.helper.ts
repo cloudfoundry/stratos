@@ -55,10 +55,11 @@ export function setupCfUserRemovalTests(
 
     cfHelper = new CFHelpers(e2eSetup);
     return uaaHelpers.setup()
+      .then(() => e2e.log(`Creating User: ${userName}`))
       .then(() => uaaHelpers.createUser(userName))
       .then(newUser => {
         uaaUserGuid = newUser.id;
-        e2e.log(`Created UAA User: ${userName}. Guid: ${uaaUserGuid}`);
+        e2e.log(`Created UAA User: ${newUser.userName}. Guid: ${uaaUserGuid}`);
         const defaultCf = e2e.secrets.getDefaultCFEndpoint();
         cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
       })
@@ -77,6 +78,13 @@ export function setupCfUserRemovalTests(
         orgGuid = res.orgGuid;
         spaceGuid = res.spaceGuid;
       })
+      // Ensure that cf thinks we have the user we've just created, otherwise it won't appear in a list
+      .then(() => cfHelper.fetchUser(cfGuid, userName))
+      .then(cfUser => {
+        expect(cfUser).toBeTruthy();
+        expect(cfUser.entity.username).toBeTruthy();
+        expect(cfUser.metadata.guid).toBe(userGuid);
+      })
       .then(() => {
         removeUsersPage = new RemoveUsersPage(cfGuid, orgGuid, spaceGuid, userGuid);
         return protractor.promise.controlFlow().execute(() => {
@@ -84,12 +92,13 @@ export function setupCfUserRemovalTests(
         });
       })
       .then(() => e2e.log(`Nav'd to user table`));
-  }, 70000);
+  }, 75000);
 
   it('Clicks on remove menu option', () => {
+
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
-    expect(usersTable.getTotalResults()).toBe(1);
+    expect(usersTable.getTotalResults()).toBe(1, `Failed to find user in table: ${userName}`);
 
     if (removalLevel === CfRolesRemovalLevel.OrgsSpaces) {
       usersTable.table.openRowActionMenuByIndex(0).clickItem('Remove from org');

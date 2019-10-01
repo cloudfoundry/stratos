@@ -1,4 +1,4 @@
-import { promise } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import {
   IApp,
@@ -119,7 +119,7 @@ export class CFHelpers {
   addSpaceIfMissing(cnsiGuid, orgGuid, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
     const that = this;
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
-      .then(function (space) {
+      .then(function(space) {
         return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, spaceName, userGuid);
       });
   }
@@ -425,6 +425,7 @@ export class CFHelpers {
   deleteUser(cfGuid: string, userGuid: string, userName?: string, uaaUserGuid?: string): promise.Promise<any> {
     const uaaHelpers = new UaaHelpers();
     return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
+      .then(() => browser.sleep(500))
       .then(() => uaaHelpers.deleteUser(uaaUserGuid, userName));
   }
 
