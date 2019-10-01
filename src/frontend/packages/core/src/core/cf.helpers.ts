@@ -1,6 +1,8 @@
+import { CfApplicationState } from '../../../cloud-foundry/src/store/types/application.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IApp } from './cf-api.types';
-import { CfApplicationState } from '../../../store/src/types/application.types';
+
+// TODO: Move contents to cf cf.helpers.ts
 
 export function getStartedAppInstanceCount(apps: APIResource<IApp>[]): number {
   if (!apps || !apps.length) {

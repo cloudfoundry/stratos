@@ -24,18 +24,14 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { SetParams, SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory, EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
+import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationParam,
-  QParam,
-} from '../../../../../../store/src/types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
@@ -71,7 +67,6 @@ export function distinctPageUntilChanged(dataSource) {
     return oldPageKeys === newPageKeys;
   };
 }
-
 export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
 export abstract class ListDataSource<T, A = T> extends DataSource<T> implements IListDataSource<T> {
 
@@ -82,6 +77,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Store related
   public entityKey: string;
+  public endpointType: string;
 
   // Add item
   public addItem: T;
@@ -110,10 +106,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // ------------- Private
   private externalDestroy: () => void;
 
-  protected store: Store<AppState>;
+  protected store: Store<CFAppState>;
   public action: PaginatedAction | PaginatedAction[];
   public masterAction: PaginatedAction;
-  protected sourceScheme: EntitySchema;
+  public sourceScheme: EntitySchema;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
@@ -121,7 +117,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public isLocal = false;
   public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[] = [];
 
-  private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
   protected metricsAction: MetricsAction;
@@ -130,17 +125,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public refresh: () => void;
 
   public isMultiAction$: Observable<boolean>;
+  entityType: string;
+
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
   constructor(
-    private config: IListDataSourceConfig<A, T>
+    private config: IListDataSourceConfig<A, T>,
   ) {
     super();
     this.init(config);
     const paginationMonitor = new PaginationMonitor(
       this.store,
       this.paginationKey,
-      this.sourceScheme,
+      this.masterAction,
       this.isLocal
     );
     const { pagination$, entities$ } = getPaginationObservables({
@@ -172,7 +169,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       if (
         paginationEntity.ids[paginationEntity.currentPage] &&
         (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
-        this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, newLength));
+        this.store.dispatch(new SetResultCount(this, this.paginationKey, newLength));
       }
     };
 
@@ -212,8 +209,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.store = config.store;
     this.action = config.action;
     this.refresh = this.getRefreshFunction(config);
-    this.sourceScheme = config.schema instanceof MultiActionConfig ?
-      entityFactory(config.schema.schemaConfigs[0].schemaKey) : config.schema;
+    this.sourceScheme = this.getSourceSchema(config.schema);
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
@@ -225,6 +221,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+    this.entityType = this.action.entityType;
+    this.endpointType = this.action.endpointType;
     this.masterAction = this.action as PaginatedAction;
     this.setupAction(config);
     if (!this.isLocal && this.config.listConfig) {
@@ -244,12 +242,12 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.action = config.schema.schemaConfigs.map((multiActionConfig, i) => ({
           ...multiActionConfig.paginationAction,
           paginationKey: this.masterAction.paginationKey,
-          entityKey: this.masterAction.entityKey,
+          entityType: this.masterAction.entityType,
           entity: this.masterAction.entity,
           flattenPaginationMax: this.masterAction.flattenPaginationMax,
           flattenPagination: this.masterAction.flattenPagination,
           __forcedPageNumber__: i + 1,
-          __forcedPageSchemaKey__: multiActionConfig.schemaKey
+          __forcedPageEntityConfig__: multiActionConfig.paginationAction
         }) as PaginatedAction);
       }
       this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
@@ -260,14 +258,20 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     if (!multiActionConfig.selectPlaceholder) {
       return null;
     }
-    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => ([
-      ...actionMap,
-      {
+    const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => {
+      const catalogueEntity = entityCatalogue.getEntity(
+        schemaConfig.paginationAction.endpointType,
+        schemaConfig.paginationAction.entityType
+      );
+      const entityKey = entityCatalogue.getEntityKey(schemaConfig.paginationAction);
+      const idPage = {
         page: i + 1,
-        label: schemaConfig.prettyName,
-        schemaKey: schemaConfig.schemaKey
-      }
-    ]), [] as IEntitySelectItem[]);
+        label: catalogueEntity.definition.label || 'Unknown',
+        entityKey
+      };
+      actionMap.push(idPage);
+      return actionMap;
+    }, [] as IEntitySelectItem[]);
     if (Object.keys(pageToIdMap).length < 2) {
       return null;
     }
@@ -289,6 +293,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.store.dispatch(this.metricsAction || this.masterAction);
       }
     };
+  }
+
+  private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
+    if (schema instanceof MultiActionConfig) {
+      const { paginationAction } = schema.schemaConfigs[0];
+      const catalogueEntity = entityCatalogue.getEntity(paginationAction.endpointType, paginationAction.entityType);
+      return catalogueEntity.getSchema(paginationAction.schemaKey);
+    }
+    return schema;
   }
 
   disconnect() {
@@ -355,7 +368,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           })
         ));
         return obs;
-      }, []));
+      }, [] as Observable<RowState>[]));
     }));
 
     updatedAllRows$.pipe(
@@ -415,54 +428,25 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   }
 
-  protected setQParam(setQ: QParam, qs: QParam[]): boolean {
-    const existing = qs.find((q: QParam) => q.key === setQ.key);
-    let changed = true;
-    if (setQ.value && setQ.value.length) {
-      if (existing) {
-        // Set existing value
-        changed = existing.value !== setQ.value;
-        existing.value = setQ.value;
-      } else {
-        // Add new value
-        qs.push(setQ);
-      }
-    } else {
-      if (existing) {
-        // Remove existing
-        qs.splice(qs.indexOf(existing), 1);
-      } else {
-        changed = false;
-      }
-    }
-    return changed;
-  }
-
   public updateMetricsAction(newAction: MetricsAction) {
     this.metricsAction = newAction;
 
-    if (this.isLocal) {
-      this.store.dispatch(newAction);
+    if (this.config.handleTimeWindowChange) {
+      this.config.handleTimeWindowChange(newAction);
     } else {
-      this.pagination$.pipe(
-        first()
-      ).subscribe(pag => {
-        this.store.dispatch(new SetParams(newAction.entityKey, this.paginationKey, {
-          ...pag.params,
-          metricConfig: newAction.query
-        }, false, true));
-      });
+      this.store.dispatch(newAction);
     }
   }
 
   private createSortObservable(): Observable<ListSort> {
+    // TODO Is this local only or are they some CF params?
     return this.pagination$.pipe(
       map(pag => ({
         direction: pag.params['order-direction'] as SortDirection,
         field: pag.params['order-direction-field']
       })),
       filter(x => !!x),
-      distinctUntilChanged((x, y) => x.direction === y.direction && x.field === y.field),
+      distinctUntilChanged((x: ListSort, y: ListSort) => x.direction === y.direction && x.field === y.field),
       tag('list-sort')
     );
   }

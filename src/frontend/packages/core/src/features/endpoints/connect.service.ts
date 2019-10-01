@@ -14,13 +14,16 @@ import {
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../store/src/effects/system.effects';
+import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { EndpointsService } from '../../core/endpoints.service';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 
@@ -56,13 +59,15 @@ export class ConnectEndpointService {
   private hasAttemptedConnect: boolean;
   private pData: ConnectEndpointData;
 
+  private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
   // and end up with an empty list where we should have results.
   private connectDelay = 1000;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<EndpointOnlyAppState>,
     private endpointsService: EndpointsService,
     public config: ConnectEndpointConfig,
   ) {
@@ -140,7 +145,7 @@ export class ConnectEndpointService {
 
   private getUpdateSelector() {
     return selectUpdateInfo(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       this.config.guid,
       EndpointsEffect.connectingKey
     );
@@ -148,14 +153,14 @@ export class ConnectEndpointService {
 
   private getRequestSelector() {
     return selectRequestInfo(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       SystemEffects.guid
     );
   }
 
   private getEntitySelector() {
     return selectEntity<EndpointModel>(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       this.config.guid,
     );
   }

@@ -1,5 +1,7 @@
 import { Action } from '@ngrx/store';
 
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
@@ -39,7 +41,7 @@ export class EndpointActionComplete implements Action {
 
 export class EndpointAction implements Action {
   type: string;
-  endpointType: EndpointType = 'cf';
+  endpointType: EndpointType = CF_ENDPOINT_TYPE;
 }
 
 // Different Auth Type support for connecting to Endpoints
@@ -58,7 +60,8 @@ export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 export class GetAllEndpoints implements PaginatedAction {
   public static storeKey = endpointListKey;
   constructor(public login = false) { }
-  entityKey = endpointSchemaKey;
+  entityType = endpointSchemaKey;
+  endpointType = STRATOS_ENDPOINT_TYPE;
   paginationKey = GetAllEndpoints.storeKey;
   type = GET_ENDPOINTS;
   actions = [

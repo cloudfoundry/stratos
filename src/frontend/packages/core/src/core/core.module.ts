@@ -97,5 +97,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     LogOutDialogComponent
   ],
 })
-export class CoreModule { }
+export class CoreModule {
+  constructor() { }
+
+}
 

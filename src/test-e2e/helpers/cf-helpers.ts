@@ -1,15 +1,17 @@
 import { promise } from 'protractor';
 
+import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
 import {
   IApp,
   IDomain,
   IOrganization,
-  IQuotaDefinition,
+  IOrgQuotaDefinition,
   IRoute,
   ISpace,
+  ISpaceQuotaDefinition,
 } from '../../frontend/packages/core/src/core/cf-api.types';
-import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
-import { CfUser } from '../../frontend/packages/store/src/types/user.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { CfOrgLevelPage } from '../cloud-foundry/org-level/cf-org-level-page.po';
 import { CfSpaceLevelPage } from '../cloud-foundry/space-level/cf-space-level-page.po';
@@ -490,7 +492,7 @@ export class CFHelpers {
       ...options
     };
 
-    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'quota_definitions', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<IOrgQuotaDefinition>>(cfGuid, 'quota_definitions', body);
   }
 
   addSpaceQuota(cfGuid, orgGuid, name, options = {}) {
@@ -504,6 +506,6 @@ export class CFHelpers {
       total_reserved_route_ports: -1,
       ...options
     };
-    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<ISpaceQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
   }
 }

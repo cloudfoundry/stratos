@@ -7,7 +7,7 @@ import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
 import { SetupUAA, SetupUAASave } from '../../../../../store/src/actions/setup.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { InternalAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
@@ -22,7 +22,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
 
   private clientRedirectURI: string;
 
-  constructor(private store: Store<AppState>, private router: Router) {
+  constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, private router: Router) {
     // Client Redirect URI for SSO
     this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';

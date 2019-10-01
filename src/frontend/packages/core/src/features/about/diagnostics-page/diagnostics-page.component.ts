@@ -6,7 +6,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { SessionData } from '../../../../../store/src/types/auth.types';
-import { AppState } from '../../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 
 @Component({
@@ -36,7 +36,11 @@ export class DiagnosticsPageComponent implements OnInit {
   public gitBranchLink: string;
   public gitCommitLink: string;
 
-  constructor(private meta: Meta, private store: Store<AppState>, @Inject(Customizations) public customizations: CustomizationsMetadata) { }
+  constructor(
+    private meta: Meta,
+    private store: Store<GeneralEntityAppState>,
+    @Inject(Customizations) public customizations: CustomizationsMetadata
+  ) { }
 
   ngOnInit() {
 

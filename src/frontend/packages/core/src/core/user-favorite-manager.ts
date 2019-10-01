@@ -1,9 +1,10 @@
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { ToggleUserFavoriteAction } from '../../../store/src/actions/user-favourites-actions/toggle-user-favorite-action';
-import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { GeneralEntityAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
@@ -13,16 +14,12 @@ import {
 } from '../../../store/src/selectors/favorite-groups.selectors';
 import { isFavorite } from '../../../store/src/selectors/favorite.selectors';
 import { IUserFavoritesGroups } from '../../../store/src/types/favorite-groups.types';
+import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import {
-  IEndpointFavMetadata,
-  IFavoriteMetadata,
-  UserFavorite,
-  UserFavoriteEndpoint,
-} from '../../../store/src/types/user-favorites.types';
-import {
-  favoritesConfigMapper,
+  FavoritesConfigMapper,
   TFavoriteMapperFunction,
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { LoggerService } from './logger.service';
 
 export interface IFavoriteEntity {
@@ -44,26 +41,26 @@ export interface IAllFavorites {
   entityGroups: IGroupedFavorites[];
 }
 
+export interface IFavoritesInfo {
+  fetching: boolean;
+  error: boolean;
+}
+
 export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetadata> {
   type: string;
   cardMapper: TFavoriteMapperFunction<any>;
   prettyName: string;
   favorite: UserFavorite<T>;
 }
-
+@Injectable({
+  providedIn: 'root'
+})
 export class UserFavoriteManager {
   constructor(
-    private store: Store<AppState>,
-    private logger: LoggerService
+    private store: Store<GeneralEntityAppState>,
+    private logger: LoggerService,
+    private favoritesConfigMapper: FavoritesConfigMapper
   ) { }
-
-  private getTypeAndID(favorite: UserFavorite<IFavoriteMetadata>) {
-    const type = favorite.entityType;
-    return {
-      type,
-      id: favorite.entityId || favorite.endpointId
-    };
-  }
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
@@ -97,6 +94,7 @@ export class UserFavoriteManager {
 
   private getHydrateObservable() {
     return this.getAllFavorites().pipe(
+      filter(([groups, favoriteEntities]) => !!groups && !!favoriteEntities),
       switchMap(([groups, favoriteEntities]) => this.getHydratedGroups(groups, favoriteEntities))
     );
   }
@@ -128,9 +126,7 @@ export class UserFavoriteManager {
         map(endpoints => {
           const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid, this.logger);
           const endpointEntity = endpoints[endpointGuid];
-          return new UserFavoriteEndpoint(
-            endpointEntity
-          );
+          return this.favoritesConfigMapper.getFavoriteEndpointFromEntity(endpointEntity);
         }),
         map(endpointFavorite => ({
           endpoint: this.mapToHydrated<IEndpointFavMetadata>(endpointFavorite),
@@ -145,10 +141,12 @@ export class UserFavoriteManager {
   }
 
   private mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
+    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
+
     return {
-      type: this.getTypeAndID(favorite).type,
-      cardMapper: favoritesConfigMapper.getMapperFunction(favorite),
-      prettyName: favoritesConfigMapper.getPrettyTypeName(favorite),
+      type: catalogueEntity.definition.type,
+      cardMapper: this.favoritesConfigMapper.getMapperFunction(favorite),
+      prettyName: catalogueEntity.definition.label,
       favorite
     };
   }

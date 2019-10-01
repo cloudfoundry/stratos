@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { SessionData } from '../../../../../store/src/types/auth.types';
-import { AppState } from '../../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 
 @Component({
@@ -35,7 +35,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   componentRef: ComponentRef<any>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<GeneralEntityAppState>,
     private resolver: ComponentFactoryResolver,
     @Inject(Customizations) public customizations: CustomizationsMetadata
   ) { }

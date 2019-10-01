@@ -1,3 +1,5 @@
+import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+
 export const enum RequestSectionKeys {
   CF = 'cf',
   Other = 'other'
@@ -17,19 +19,19 @@ export interface ActionState {
  * We use schemaKey to track this type
  */
 export interface ListActionState extends ActionState {
-  schemaKey?: string;
+  entityConfig?: EntityCatalogueEntityConfig;
   /**
    * Does the collection size exceed the max allowed? Used in conjunction PaginationEntityState maxedMode.
    */
   maxed?: boolean;
-  entityKey?: string;
+  baseEntityConfig?: EntityCatalogueEntityConfig;
 }
 
 export interface DeleteActionState extends ActionState {
   deleted: boolean;
 }
 
-export const getDefaultActionState = () => ({
+export const getDefaultActionState = (): ActionState => ({
   busy: false,
   error: false,
   message: ''

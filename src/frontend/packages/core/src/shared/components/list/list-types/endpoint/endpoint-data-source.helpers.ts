@@ -6,21 +6,19 @@ import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factor
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
 import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
 
 export function EndpointRowStateSetUpManager(
   paginationMonitor: PaginationMonitor<EndpointModel>,
   entityMonitorFactory: EntityMonitorFactory,
-  rowStateManager: TableRowStateManager,
-  schemaKey: string
+  rowStateManager: TableRowStateManager
 ) {
   return paginationMonitor.currentPage$.pipe(
     distinctUntilChanged(),
     switchMap(entities => entities
       .map(entity => {
         const entityMonitor = entityMonitorFactory
-          .create(entity.guid, schemaKey, entityFactory(schemaKey));
+          .create(entity.guid, paginationMonitor.entityConfig);
         const request$ = entityMonitor.entityRequest$.pipe(
           map(request => {
             const disconnect = request.updating[EndpointsEffect.disconnectingKey] || { busy: false };

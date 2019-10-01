@@ -4,6 +4,9 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { UtilsService } from '../../../core/src/core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
@@ -13,8 +16,6 @@ import {
   EntitiesPipelineCompleted,
   ValidateEntitiesStart,
 } from '../actions/request.actions';
-import { AppState } from '../app-state';
-import { validateEntityRelations } from '../helpers/entity-relations/entity-relations';
 import {
   completeApiRequest,
   getFailApiRequestActions,
@@ -25,12 +26,11 @@ import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { getPaginationState } from '../selectors/pagination.selectors';
 import { UpdateCfAction } from '../types/request.types';
 
-
 @Injectable()
 export class RequestEffect {
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private utils: UtilsService,
     private logger: LoggerService,
   ) { }
@@ -67,6 +67,7 @@ export class RequestEffect {
    *    been dropped because their count is over 50
    *
    */
+  // TODO Move this into Cf - #3769
   @Effect() validateEntities$ = this.actions$.pipe(
     ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
     mergeMap(action => {
@@ -118,7 +119,7 @@ export class RequestEffect {
         .pipe(catchError(error => {
           this.logger.warn(`Entity validation process failed`, error);
           if (validateAction.apiRequestStarted) {
-            return getFailApiRequestActions(apiAction, error, requestType);
+            return getFailApiRequestActions(apiAction, error, requestType, entityCatalogue.getEntity(apiAction));
           } else {
             this.update(apiAction, false, error.message);
             return [];
@@ -137,7 +138,6 @@ export class RequestEffect {
           this.update(completeAction.apiAction, false, null);
         }
       } else if (completeAction.validateAction.apiRequestStarted) {
-
         const apiAction = completeAction.apiAction;
         const requestType = getRequestTypeFromMethod(apiAction);
         const apiResponse: APIResponse = completeAction.apiResponse || {
@@ -153,16 +153,16 @@ export class RequestEffect {
           (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
         ) {
-          const entityKey = apiAction.proxyPaginationEntityKey || apiAction.entityKey;
+          // FIXME: Look at using entity config instead of actions in these actions ctors
           if (apiAction.removeEntityOnDelete) {
-            actions.unshift(new ClearPaginationOfEntity(entityKey, apiAction.guid));
+            actions.unshift(new ClearPaginationOfEntity(apiAction, apiAction.guid));
           } else {
-            actions.unshift(new ClearPaginationOfType(entityKey));
+            actions.unshift(new ClearPaginationOfType(apiAction));
           }
 
           if (Array.isArray(apiAction.clearPaginationEntityKeys)) {
             // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
-            actions.push(...apiAction.clearPaginationEntityKeys.map(key => new ClearPaginationOfType(key)));
+            actions.push(...apiAction.clearPaginationEntityKeys.map(key => new ClearPaginationOfType(apiAction)));
           }
         }
       }

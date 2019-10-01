@@ -5,7 +5,7 @@ import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { Logout } from '../../../../store/src/actions/auth.actions';
-import { AppState } from '../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../store/src/app-state';
 
 @Component({
   selector: 'app-log-out-dialog',
@@ -16,7 +16,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(
     public dialogRef: MatDialogRef<LogOutDialogComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
-    private store: Store<AppState>) { }
+    private store: Store<GeneralEntityAppState>) { }
 
   private autoLogout: Subscription;
   public countDown: number;

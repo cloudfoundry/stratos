@@ -1,22 +1,15 @@
-import { RequestMethod } from '@angular/http';
+import { HttpRequest } from '@angular/common/http';
+import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
-import { MetricQueryConfig } from '../actions/metrics.actions';
+import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ListActionState } from '../reducers/api-request-reducer/types';
-import { IRequestAction } from './request.types';
+import { EntityRequestAction } from './request.types';
 
-export class QParam {
-  constructor(
-    public key: string,
-    public value: string | string[],
-    public joiner: '>=' | '<=' | '<' | '>' | ' IN ' | ':' | '=' = ':'
-  ) { }
-}
 
 export interface PaginationParam {
-  q?: QParam[];
-  metricConfig?: MetricQueryConfig;
-  [entityKey: string]: any;
+  [entityKey: string]: string | string[] | number;
 }
 
 export interface PaginationClientFilter {
@@ -62,13 +55,12 @@ export function isPaginatedAction(obj: any): PaginatedAction {
   return obj && Object.keys(obj).indexOf('paginationKey') >= 0 ? obj as PaginatedAction : null;
 }
 
-export interface BasePaginatedAction extends Action {
-  entityKey: string;
+export interface BasePaginatedAction extends BasePipelineRequestAction, Action {
   paginationKey: string;
 }
 
-export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
-  actions: string[];
+export interface PaginatedAction extends BasePaginatedAction, EntityRequestAction {
+  actions?: string[];
   /*
    * Fetch all pages and add them to a single page
    */
@@ -79,16 +71,11 @@ export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
   flattenPaginationMax?: number;
   initialParams?: PaginationParam;
   pageNumber?: number;
-  options?: {
-    params?: {
-      paramsMap: any;
-    },
-    method?: RequestMethod | string | null
-  };
+  options?: RequestOptions | HttpRequest<any>;
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;
-  __forcedPageSchemaKey__?: string;
+  __forcedPageEntityConfig__?: EntityCatalogueEntityConfig;
 }
 
 export interface PaginationEntityTypeState {

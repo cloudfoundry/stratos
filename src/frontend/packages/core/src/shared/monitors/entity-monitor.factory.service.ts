@@ -1,13 +1,15 @@
-import { AppState } from './../../../../store/src/app-state';
 import { Injectable } from '@angular/core';
-import { EntityMonitor } from './entity-monitor';
 import { Store } from '@ngrx/store';
-import { schema as normalizrSchema } from 'normalizr';
+
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { EntityMonitor } from './entity-monitor';
 
 @Injectable()
 export class EntityMonitorFactory {
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<CFAppState>) { }
 
   private monitorCache: {
     [key: string]: EntityMonitor
@@ -15,20 +17,25 @@ export class EntityMonitorFactory {
 
   public create<T>(
     id: string,
-    entityKey: string,
-    schema: normalizrSchema.Entity,
+    entityConfig: EntityCatalogueEntityConfig,
     startWithNull = true
   ): EntityMonitor<T> {
-    const cacheKey = id + entityKey;
+    const { endpointType, entityType } = entityConfig;
+    const cacheKey = id + endpointType + entityType;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {
-      const monitor = new EntityMonitor<T>(
+      const catalogueEntity = entityCatalogue.getEntity(entityConfig);
+      if (!catalogueEntity) {
+        throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+      }
+      const monitor = catalogueEntity.getEntityMonitor(
         this.store,
         id,
-        entityKey,
-        schema,
-        startWithNull
+        {
+          startWithNull,
+          schemaKey: entityConfig.schemaKey
+        }
       );
       this.monitorCache[cacheKey] = monitor;
       return monitor;

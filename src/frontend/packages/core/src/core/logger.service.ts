@@ -8,7 +8,7 @@ import {
   LoggerWarnAction,
   LogLevel,
 } from '../../../store/src/actions/log.actions';
-import { AppState } from '../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../store/src/app-state';
 import { environment } from '../environments/environment.prod';
 
 export enum LogLevelStringToNumber {
@@ -21,7 +21,7 @@ export enum LogLevelStringToNumber {
 @Injectable()
 export class LoggerService {
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<GeneralEntityAppState>) { }
 
   private log(level: LogLevel, message: string, arg: any) {
     if (LogLevelStringToNumber[level] < LogLevelStringToNumber[environment.logLevel] || !environment.logToConsole) {

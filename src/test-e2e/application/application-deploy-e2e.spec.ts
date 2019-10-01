@@ -4,6 +4,7 @@ import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
@@ -61,18 +62,10 @@ describe('Application Deploy -', () => {
 
   describe('Deploy process - ', () => {
 
-    let originalTimeout = 40000;
     beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(function () {
-      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
-    });
-
-    afterEach(function () {
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-    });
+    extendE2ETestTime(120000);
 
     // Allow up to 2 minutes for the application to be deployed
     describe('Should deploy app from GitHub', () => {
