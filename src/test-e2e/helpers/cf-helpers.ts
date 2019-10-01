@@ -428,11 +428,11 @@ export class CFHelpers {
       .then(() => uaaHelpers.deleteUser(uaaUserGuid, userName));
   }
 
-  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string }> {
+  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<APIResource<CfUser>> {
     const body = {
       guid: uaaUserGuid
     };
-    return this.cfRequestHelper.sendCfPost<{ guid: string }>(cfGuid, 'users', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<CfUser>>(cfGuid, 'users', body);
   }
 
   /**

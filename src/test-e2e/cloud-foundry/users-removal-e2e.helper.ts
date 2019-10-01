@@ -52,41 +52,39 @@ export function setupCfUserRemovalTests(
       .connectAllEndpoints(ConsoleUserType.admin)
       .loginAs(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
+
     cfHelper = new CFHelpers(e2eSetup);
-
-
     return uaaHelpers.setup()
       .then(() => uaaHelpers.createUser(userName))
       .then(newUser => {
         uaaUserGuid = newUser.id;
-        e2e.log('Created UAA User: ', uaaUserGuid);
+        e2e.log(`Created UAA User: ${userName}. Guid: ${uaaUserGuid}`);
         const defaultCf = e2e.secrets.getDefaultCFEndpoint();
         cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
       })
       .then(() => cfHelper.createUser(cfGuid, uaaUserGuid))
-      .then(cfUserBody => {
-        e2e.log('Created Cf User: ', cfUserBody);
+      .then(cfUser => {
+        expect(cfUser).toBeTruthy();
+        expect(cfUser.entity.username).toBeTruthy();
+        expect(cfUser.metadata.guid).toBeTruthy();
+
+        e2e.log(`Created Cf User: ${cfUser.entity.username}. Guid: ${cfUser.metadata.guid}`);
+        userGuid = cfUser.metadata.guid;
         return setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true, e2eSetup);
       })
       .then(res => {
         cfGuid = res.cfGuid;
         orgGuid = res.orgGuid;
         spaceGuid = res.spaceGuid;
-        return cfHelper.fetchUser(cfGuid, userName);
       })
-      .then(user => {
-        e2e.log(`Fetched Cf User: ${user.entity.username}. Guid: ${user.metadata.guid}`);
-        expect(user).toBeTruthy();
-        userGuid = user.metadata.guid;
-
+      .then(() => {
         removeUsersPage = new RemoveUsersPage(cfGuid, orgGuid, spaceGuid, userGuid);
-
         return protractor.promise.controlFlow().execute(() => {
           return navToUserTableFn(cfGuid, orgGuid, spaceGuid);
         });
       })
-      .then(() => e2e.log(`Naved to user table`));
-  });
+      .then(() => e2e.log(`Nav'd to user table`));
+  }, 70000);
 
   it('Clicks on remove menu option', () => {
     const usersTable = new CFUsersListComponent();
