@@ -12,6 +12,10 @@ func init() {
 
 		var dropTrigger string
 
+		if strings.Contains(conf.Driver.Name, "sqlite") {
+			//SQLITE
+			dropTrigger = "DROP TRIGGER update_last_updated;"
+		}
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			// POSTGRESQL
 			dropTrigger = "DROP TRIGGER update_trigger ON local_users;"
