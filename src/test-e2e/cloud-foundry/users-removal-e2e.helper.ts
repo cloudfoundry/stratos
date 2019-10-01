@@ -1,6 +1,8 @@
 import { browser, by, element, promise } from 'protractor';
 import { protractor } from 'protractor/built/ptor';
 
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
+import { CfUser } from '../../frontend/packages/store/src/types/user.types';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
@@ -78,8 +80,14 @@ export function setupCfUserRemovalTests(
         orgGuid = res.orgGuid;
         spaceGuid = res.spaceGuid;
       })
-      // Ensure that cf thinks we have the user we've just created, otherwise it won't appear in a list
-      .then(() => cfHelper.fetchUser(cfGuid, userName))
+      // Ensure that cf responds with the user we've just created, otherwise it won't appear in the ui
+      .then(() => cfHelper.cfRequestHelper.chain<APIResource<CfUser>>(
+        null,
+        () => cfHelper.fetchUser(cfGuid, userName),
+        10,
+        (user: APIResource<CfUser>) => !!user,
+        0
+      ))
       .then(cfUser => {
         expect(cfUser).toBeTruthy();
         expect(cfUser.entity.username).toBeTruthy();
