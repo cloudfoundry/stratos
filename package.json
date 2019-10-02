@@ -39,7 +39,8 @@
     "customize-reset": "gulp customize-reset",
     "store-git-metadata": "gulp store-git-metadata",
     "postinstall": "npm run customize && gulp dev-setup",
-    "update": "ng update @nrwl/workspace"
+    "update": "ng update @nrwl/workspace",
+    "nx": "nx"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -85,17 +86,17 @@
     "ts-md5": "^1.2.4",
     "web-animations-js": "^2.3.2",
     "xterm": "^4.0.2",
-    "zone.js": "~0.9.1",
-    "@nrwl/angular": "8.0.0"
+    "zone.js": "~0.10.2",
+    "@nrwl/angular": "8.5.2"
   },
   "engines": {
     "node": "8.11.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.803.6",
-    "@angular-devkit/build-ng-packagr": "~0.803.6",
-    "@angular-devkit/schematics": "^8.3.6",
-    "@angular/cli": "^8.3.6",
+    "@angular-devkit/build-angular": "~0.803.7",
+    "@angular-devkit/build-ng-packagr": "~0.803.7",
+    "@angular-devkit/schematics": "^8.3.7",
+    "@angular/cli": "^8.3.7",
     "@angular/compiler-cli": "^8.2.9",
     "@angular/language-service": "^8.2.9",
     "@types/jasmine": "^3.4.2",
@@ -141,7 +142,7 @@
     "tsickle": "^0.37.0",
     "tslib": "^1.9.0",
     "tslint": "~5.20.0",
-    "typescript": "<3.6.0",
-    "@nrwl/workspace": "8.0.0"
+    "typescript": "3.6.3",
+    "@nrwl/workspace": "8.5.2"
   }
 }
