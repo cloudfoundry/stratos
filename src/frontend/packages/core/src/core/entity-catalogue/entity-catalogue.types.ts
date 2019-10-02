@@ -120,6 +120,14 @@ export interface IStratosEntityDefinition<
   readonly preRequest?: PreApiRequest;
   readonly prePaginationRequest?: PrePaginationApiRequest;
   readonly errorMessageHandler?: ApiErrorMessageHandler;
+  // Should the request response object for this entity be parsed as if it's passed through the jetstream backend?
+  readonly nonJetstreamRequest?: boolean;
+  readonly nonJetstreamRequestHandler?: nonJetstreamRequestHandler;
+}
+
+export class nonJetstreamRequestHandler<T = any> {
+  isSuccess: (request: T) => boolean;
+  getErrorCode?: (request: T) => string;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {

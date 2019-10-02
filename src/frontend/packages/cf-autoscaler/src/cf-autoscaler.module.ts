@@ -15,7 +15,7 @@ import { AutoscalerTabExtensionComponent } from './features/autoscaler-tab-exten
 import { generateASEntities } from './store/autoscaler-entity-generator';
 import { AutoscalerEffects } from './store/autoscaler.effects';
 
-// TODO Work out why we need this and remove it.
+// FIXME Work out why we need this and remove it.
 const customRoutes: Routes = [
   {
     path: 'autoscaler',

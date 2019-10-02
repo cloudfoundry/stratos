@@ -4,6 +4,11 @@ import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalo
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipeline.types';
 
+export function isJetstreamRequest(definition: IStratosEntityDefinition): boolean {
+  return !definition.nonJetstreamRequest && !definition.nonJetstreamRequestHandler;
+}
+
+
 export function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
   const definition = catalogueEntity.definition as IStratosEntityDefinition;
   if (typeof definition.successfulRequestDataMapper === 'string') {

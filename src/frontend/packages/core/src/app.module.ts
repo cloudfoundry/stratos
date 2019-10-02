@@ -16,7 +16,6 @@ import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
-import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { AppStoreModule } from '../../store/src/store.module';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
@@ -86,7 +85,6 @@ export class CustomRouterStateSerializer
   ],
   imports: [
     EntityCatalogueModule.forFeature(generateStratosEntities),
-    AppStoreExtensionsModule,
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,

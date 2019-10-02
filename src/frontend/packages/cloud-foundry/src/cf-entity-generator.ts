@@ -653,7 +653,14 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     schema: cfEntityFactory(gitCommitEntityType),
     label: 'Git Commit',
     labelPlural: 'Git Commits',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    nonJetstreamRequest: true,
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      return {
+        ...data,
+        guid: action.guid
+      };
+    },
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
     definition,
@@ -664,7 +671,8 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
       actionBuilders: gitCommitActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
-          name: ent.commit ? ent.commit.message || ent.sha : ent.sha
+          name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
+          guid: ent.guid
         }),
         getGuid: metadata => metadata.guid,
       }
