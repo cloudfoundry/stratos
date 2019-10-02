@@ -112,6 +112,8 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
+import { ListHostDirective } from './components/list/simple-list/list-host.directive';
 
 /* tslint:disable:max-line-length */
 
@@ -212,6 +214,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     SnackBarReturnComponent,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    SimpleListComponent,
+    ListHostDirective,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -299,7 +303,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     AppNameUniqueDirective,
     PollingIndicatorComponent,
-    UnlimitedInputComponent
+    UnlimitedInputComponent,
+    SimpleListComponent,
+    ListHostDirective
   ],
   entryComponents: [
     DialogConfirmComponent,
