@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { Store } from '@ngrx/store';
 
-import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
+import { AppState } from '../../../../store/src/app-state';
+import { EndpointHealthCheck } from '../../../endpoints-health-checks';
 import { CoreModule } from '../../core/core.module';
+import { EndpointsService } from '../../core/endpoints.service';
 import { EntityCatalogueModule } from '../../core/entity-catalogue.module';
 import { SharedModule } from '../../shared/shared.module';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
@@ -13,18 +16,21 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
+import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
 import { KubernetesStoreModule } from './kubernetes.store.module';
+import { KubeHealthCheck } from './store/kubernetes.actions';
 
-export interface IK8FavMetadata extends IFavoriteMetadata {
-  guid: string;
-  name: string;
-  address: string;
-}
+// TODO: RC Remove
+// export interface IK8FavMetadata extends IFavoriteMetadata {
+//   guid: string;
+//   name: string;
+//   address: string;
+// }
 
 @NgModule({
   imports: [
-    // TODO: RC Everytime this is imported it's executed. See note & `hack` in `generateKubernetesEntities`
+    // TODO: RC Every time this is imported it's executed. See note & `hack` in `generateKubernetesEntities`
     EntityCatalogueModule.forFeature(generateKubernetesEntities),
     CoreModule,
     CommonModule,
@@ -45,32 +51,9 @@ export interface IK8FavMetadata extends IFavoriteMetadata {
   ]
 })
 export class KubernetesSetupModule {
-  constructor() {
-    const endpointType = 'k8s';
-    // TODO: RC
-    // favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IK8FavMetadata>(
-    //   new FavoriteConfig({
-    //     endpointType,
-    //     entityType: endpointSchemaKey
-    //   },
-    //     'Kubernetes',
-    //     (endpoint: IK8FavMetadata) => ({
-    //       type: endpointType,
-    //       routerLink: `/kubernetes/${endpoint.guid}`,
-    //       lines: [
-    //         ['Address', endpoint.address]
-    //       ],
-    //       name: endpoint.name,
-    //     }),
-    //     endpoint => ({
-    //       guid: endpoint.guid,
-    //       name: endpoint.name,
-    //       address: getFullEndpointApiUrl(endpoint),
-    //     })
-    //   )
-    // );
+  constructor(endpointService: EndpointsService, store: Store<AppState>) {
+    endpointService.registerHealthCheck(
+      new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))
+    );
   }
-
-
-
 }

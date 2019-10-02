@@ -150,6 +150,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
+    renderPriority: 1,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },

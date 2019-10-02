@@ -147,8 +147,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       ),
       this.tabNavService.tabSubNav$
     );
+    // TODO: Move cf code out to cf module #3849
     this.endpointsService.registerHealthCheck(
-      new EndpointHealthCheck('cf', (endpoint) => {
+      new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => {
         entityCatalogue.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
           .actionDispatchManager.dispatchGet(endpoint.guid);
       })
