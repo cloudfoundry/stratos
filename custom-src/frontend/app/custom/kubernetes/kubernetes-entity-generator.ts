@@ -1,5 +1,6 @@
 import { Validators } from '@angular/forms';
 
+import { metricEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
 import {
   StratosBaseCatalogueEntity,
@@ -152,6 +153,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogueEntity[] {
     generateNamespacesEntity(endpointDefinition),
     generateServicesEntity(endpointDefinition),
     generateDashboardEntity(endpointDefinition),
+    generateMetricEntity(endpointDefinition)
   ];
 }
 
@@ -232,4 +234,15 @@ function generateDashboardEntity(endpointDefinition: StratosEndpointExtensionDef
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata>(definition);
+}
+
+function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition = {
+    type: metricEntityType,
+    schema: kubernetesEntityFactory(metricEntityType),
+    label: 'Kubernetes Metric',
+    labelPlural: 'Kubernetes Metrics',
+    endpoint: endpointDefinition,
+  };
+  return new StratosCatalogueEntity(definition);
 }

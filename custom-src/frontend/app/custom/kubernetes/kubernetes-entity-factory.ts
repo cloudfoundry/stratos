@@ -1,5 +1,6 @@
 import { Schema, schema } from 'normalizr';
 
+import { metricEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { getAPIResourceGuid } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { getKubeAPIResourceGuid } from './store/kube.selectors';
@@ -96,6 +97,7 @@ entityCache[kubernetesDashboardSchemaKey] = new KubernetesEntitySchema(
   { idAttribute: getKubeAPIResourceGuid }
 );
 
+entityCache[metricEntityType] = new KubernetesEntitySchema(metricEntityType);
 
 export function kubernetesEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { endpointSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { endpointEntitySchema } from '../../../base-entity-schemas';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
@@ -18,8 +18,8 @@ export class KubernetesService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.kubeEndpointsMonitor = this.paginationMonitorFactory.create(
-      'endpoint-list', //TODO: RC check
-      entityFactory(endpointSchemaKey)
+      endpointListKey,
+      endpointEntitySchema
     );
 
     this.kubeEndpoints$ = this.kubeEndpointsMonitor.currentPage$.pipe(

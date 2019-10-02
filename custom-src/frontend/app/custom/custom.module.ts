@@ -58,7 +58,7 @@ export class CustomModule {
 
   constructor(endpointService: EndpointsService, store: Store<AppState>, router: Router) {
     // TODO: RC v3 world
-    // TODO: called multiple times
+    // TODO: helm, to move. 'helm' --> helm endpoint type
     endpointService.registerHealthCheck(
       new EndpointHealthCheck('helm', (endpoint) => {
         if (endpoint.endpoint_metadata && endpoint.endpoint_metadata.status === 'Synchronizing') {

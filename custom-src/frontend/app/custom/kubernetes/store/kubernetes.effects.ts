@@ -380,8 +380,7 @@ export class KubernetesEffects {
     const paginationAction = action as KubePaginationAction;
     if (paginationAction.initialParams) {
       requestArgs.params = Object.keys(paginationAction.initialParams).reduce((httpParams, initialKey: string) => {
-        return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString()); // TODO: RC Test
-        // return httpParams.set(initialKey, paginationAction.initialParams[initialKey]);
+        return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
       }, new HttpParams());
     }
     return this.http
