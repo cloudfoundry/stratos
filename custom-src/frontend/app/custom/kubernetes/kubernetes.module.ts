@@ -1,10 +1,8 @@
-/* tslint:disable:max-line-length */
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
-import { EntityCatalogueModule } from '../../core/entity-catalogue.module';
 import { SharedModule } from '../../shared/shared.module';
 import { KubernetesReleasePodsTabComponent } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
 import { HelmReleaseServicesComponent } from './helm-release/helm-release-services/helm-release-services.component';
@@ -14,7 +12,6 @@ import {
 import { HelmReleaseSummaryComponent } from './helm-release/helm-release-summary/helm-release-summary.component';
 import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
-import { generateKubernetesEntities } from './kubernetes-entity-generator';
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
@@ -92,6 +89,7 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
+/* tslint:disable:max-line-length */
 
 /* tslint:enable */
 @NgModule({
@@ -101,7 +99,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     SharedModule,
     NgxChartsModule,
     KubernetesRoutingModule,
-    EntityCatalogueModule.forFeature(generateKubernetesEntities),
   ],
   declarations: [
     KubernetesComponent,

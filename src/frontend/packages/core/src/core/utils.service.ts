@@ -12,6 +12,8 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
 }
 
 // TODO: RC types in entity generator
+// TODO: RC Action builders
+
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 

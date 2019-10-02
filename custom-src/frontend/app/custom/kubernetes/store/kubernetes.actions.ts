@@ -385,12 +385,27 @@ function getKubeMetricsAction(guid: string) {
 
 export class FetchKubernetesMetricsAction extends MetricsAction {
   constructor(guid: string, cfGuid: string, metricQuery: string) {
-    super(guid, cfGuid, new MetricQueryConfig(metricQuery), getKubeMetricsAction(guid));
+    super(
+      guid,
+      cfGuid,
+      new MetricQueryConfig(metricQuery),
+      getKubeMetricsAction(guid),
+      undefined,
+      undefined,
+      undefined,
+      KUBERNETES_ENDPOINT_TYPE
+    );
   }
 }
 
 export class FetchKubernetesChartMetricsAction extends MetricsChartAction {
   constructor(guid: string, cfGuid: string, metricQuery: string) {
-    super(guid, cfGuid, new MetricQueryConfig(metricQuery), getKubeMetricsAction(guid));
+    super(
+      guid,
+      cfGuid,
+      new MetricQueryConfig(metricQuery),
+      getKubeMetricsAction(guid),
+      KUBERNETES_ENDPOINT_TYPE
+    );
   }
 }

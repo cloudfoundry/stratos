@@ -15,10 +15,10 @@ import { KubernetesSetupModule } from './kubernetes/kubernetes.setup.module';
 import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
 import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.component';
 import { SuseLoginComponent } from './suse-login/suse-login.component';
-import { HelmModule } from './helm/helm.module';
-import { HelmSetupModule } from './helm/helm.setup.module';
 import { SuseWelcomeComponent } from './suse-welcome/suse-welcome.component';
 
+// import { HelmModule } from './helm/helm.module';
+// import { HelmSetupModule } from './helm/helm.setup.module';
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
   hasEula: true,
@@ -33,9 +33,10 @@ const SuseCustomizations: CustomizationsMetadata = {
     SharedModule,
     MDAppModule,
     KubernetesSetupModule,
-    HelmModule,
-    HelmSetupModule
+    // HelmModule, // TODO: RC Helm
+    // HelmSetupModule
   ],
+  // FIXME: Ensure that anything lazy loaded/in kube endpoint pages is not included here - #3675
   declarations: [
     SuseLoginComponent,
     SuseAboutInfoComponent,
@@ -57,6 +58,8 @@ export class CustomModule {
   static init = false;
 
   constructor(endpointService: EndpointsService, store: Store<AppState>, router: Router) {
+    // TODO: RC v3 world
+    // TODO: called multiple times
     endpointService.registerHealthCheck(
       new EndpointHealthCheck('k8s', (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))
     );

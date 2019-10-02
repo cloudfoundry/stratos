@@ -75,27 +75,14 @@ export interface KubeDashboardStatus {
   installed: boolean;
 }
 
-export type GetID<T> = (p: T) => string;
-export type Filter<T> = (p: T) => boolean;
+type GetID<T> = (p: T) => string;
+type Filter<T> = (p: T) => boolean;
 
 @Injectable()
 export class KubernetesEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
-  constructor(
-    private http: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>
-  ) { }
 
-  private dashboardEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesDashboardSchemaKey);
-  private nodeEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesSchemaKey);
-  private namespaceEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesSchemaKey);
-  private podsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsSchemaKey);
-  private servicesEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesServicesSchemaKey);
-  private statefulSetsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesStatefulSetsSchemaKey);
-  private deploymentsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesDeploymentsSchemaKey);
-  private appsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesAppsSchemaKey);
-
+  constructor(private http: HttpClient, private actions$: Actions, private store: Store<AppState>) { }
 
   @Effect()
   fetchDashboardInfo$ = this.actions$.pipe(
@@ -107,16 +94,17 @@ export class KubernetesEffects {
         headers
       };
       const url = `/pp/${this.proxyAPIVersion}/kubedash/${action.kubeGuid}/status`;
+      const dashboardEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesDashboardSchemaKey);
       return this.http
         .get(url, requestArgs)
         .pipe(mergeMap(response => {
           const result = {
-            entities: { [this.dashboardEntityConfig.entityKey]: {} },
+            entities: { [dashboardEntityConfig.entityKey]: {} },
             result: []
           } as NormalizedResponse;
           const status = response as KubeDashboardStatus;
           const id = status.guid;
-          result.entities[this.dashboardEntityConfig.entityKey][id] = status;
+          result.entities[dashboardEntityConfig.entityKey][id] = status;
           result.result.push(id);
           return [
             new WrapperRequestActionSuccess(result, action)
@@ -137,10 +125,11 @@ export class KubernetesEffects {
   fetchReleasePodsInfo$ = this.actions$.pipe(
     ofType<GetKubernetesReleasePods>(GET_RELEASE_POD_INFO),
     flatMap(action => {
+      const nodeEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesSchemaKey);
       return this.processListAction<KubernetesPod>(
         action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
-        this.nodeEntityConfig.entityKey,
+        nodeEntityConfig.entityKey,
         getKubeAPIResourceGuid
       );
     })
@@ -156,9 +145,10 @@ export class KubernetesEffects {
   fetchNodeInfo$ = this.actions$.pipe(
     ofType<GetKubernetesNode>(GET_NODE_INFO),
     flatMap(action => {
+      const nodeEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesSchemaKey);
       return this.processSingleItemAction<KubernetesNode>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes/${action.nodeName}`,
-        this.nodeEntityConfig.entityKey,
+        nodeEntityConfig.entityKey,
         (node) => node.metadata.name);
     })
   );
@@ -167,9 +157,10 @@ export class KubernetesEffects {
   fetchNamespaceInfo$ = this.actions$.pipe(
     ofType<GetKubernetesNamespace>(GET_NAMESPACE_INFO),
     flatMap(action => {
+      const namespaceEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesSchemaKey);
       return this.processSingleItemAction<KubernetesNamespace>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}`,
-        this.namespaceEntityConfig.entityKey,
+        namespaceEntityConfig.entityKey,
         getKubeAPIResourceGuid);
     })
   );
@@ -178,9 +169,10 @@ export class KubernetesEffects {
   fetchPodsInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPods>(GET_POD_INFO),
     flatMap(action => {
+      const podsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsSchemaKey);
       return this.processListAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
-        this.podsEntityConfig.entityKey,
+        podsEntityConfig.entityKey,
         getKubeAPIResourceGuid);
     })
   );
@@ -189,9 +181,10 @@ export class KubernetesEffects {
   fetchPodsOnNodeInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPodsOnNode>(GET_PODS_ON_NODE_INFO),
     flatMap(action => {
+      const podsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsSchemaKey);
       return this.processListAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
-        this.podsEntityConfig.entityKey,
+        podsEntityConfig.entityKey,
         getKubeAPIResourceGuid
       );
     })
@@ -201,9 +194,10 @@ export class KubernetesEffects {
   fetchPodsInNamespaceInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPodsInNamespace>(GET_PODS_IN_NAMESPACE_INFO),
     flatMap(action => {
+      const podsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsSchemaKey);
       return this.processListAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods`,
-        this.podsEntityConfig.entityKey,
+        podsEntityConfig.entityKey,
         getKubeAPIResourceGuid
       );
     })
@@ -213,9 +207,10 @@ export class KubernetesEffects {
   fetchServicesInNamespaceInfo$ = this.actions$.pipe(
     ofType<GetKubernetesServicesInNamespace>(GET_SERVICES_IN_NAMESPACE_INFO),
     flatMap(action => {
+      const servicesEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesServicesSchemaKey);
       return this.processListAction<KubeService>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/services`,
-        this.servicesEntityConfig.entityKey,
+        servicesEntityConfig.entityKey,
         getKubeAPIResourceGuid
       );
     })
@@ -225,9 +220,10 @@ export class KubernetesEffects {
   fetchPodInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPod>(GET_KUBE_POD),
     flatMap(action => {
+      const podsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsSchemaKey);
       return this.processListAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`,
-        this.podsEntityConfig.entityKey,
+        podsEntityConfig.entityKey,
         getKubeAPIResourceGuid);
     })
   );
@@ -236,9 +232,10 @@ export class KubernetesEffects {
   fetchServicesInfo$ = this.actions$.pipe(
     ofType<GetKubernetesServices>(GET_SERVICE_INFO),
     flatMap(action => {
+      const servicesEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesServicesSchemaKey);
       return this.processListAction<KubeService>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/services`,
-        this.servicesEntityConfig.entityKey,
+        servicesEntityConfig.entityKey,
         getKubeAPIResourceGuid);
     })
   );
@@ -247,9 +244,10 @@ export class KubernetesEffects {
   fetchNamespacesInfo$ = this.actions$.pipe(
     ofType<GetKubernetesNamespaces>(GET_NAMESPACES_INFO),
     flatMap(action => {
+      const namespaceEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesSchemaKey);
       return this.processListAction<KubernetesNamespace>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
-        this.namespaceEntityConfig.entityKey,
+        namespaceEntityConfig.entityKey,
         getKubeAPIResourceGuid);
     })
   );
@@ -258,9 +256,10 @@ export class KubernetesEffects {
   fetchStatefulSets$ = this.actions$.pipe(
     ofType<GetKubernetesStatefulSets>(GET_KUBE_STATEFULSETS),
     flatMap(action => {
+      const statefulSetsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesStatefulSetsSchemaKey);
       return this.processListAction<KubernetesStatefulSet>(action,
         `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`,
-        this.statefulSetsEntityConfig.entityKey,
+        statefulSetsEntityConfig.entityKey,
         getKubeAPIResourceGuid);
     })
   );
@@ -269,9 +268,10 @@ export class KubernetesEffects {
   fetchDeployments$ = this.actions$.pipe(
     ofType<GeKubernetesDeployments>(GET_KUBE_DEPLOYMENT),
     flatMap(action => {
+      const deploymentsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesDeploymentsSchemaKey);
       return this.processListAction<KubernetesDeployment>(action,
         `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
-        this.deploymentsEntityConfig.entityKey,
+        deploymentsEntityConfig.entityKey,
         getKubeAPIResourceGuid);
     })
   );
@@ -285,6 +285,7 @@ export class KubernetesEffects {
       const requestArgs = {
         headers
       };
+      const appsEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesAppsSchemaKey);
       return this.http
         .get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`, requestArgs)
         .pipe(
@@ -327,13 +328,13 @@ export class KubernetesEffects {
               })
               ).reduce((res, app) => {
                 const id = `${app.kubeId}-${app.name}`;
-                res.entities[this.appsEntityConfig.entityKey][id] = app;
+                res.entities[appsEntityConfig.entityKey][id] = app;
                 if (res.result.indexOf(id) === -1) {
                   res.result.push(id);
                 }
                 return res;
               }, {
-                entities: { [this.appsEntityConfig.entityKey]: {} },
+                entities: { [appsEntityConfig.entityKey]: {} },
                 result: []
               } as NormalizedResponse);
 
@@ -356,9 +357,10 @@ export class KubernetesEffects {
 
 
   private processNodeAction(action: GetKubernetesReleasePods | GetKubernetesNodes) {
+    const nodeEntityConfig = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesSchemaKey);
     return this.processListAction<KubernetesNode>(action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
-      this.nodeEntityConfig.entityKey,
+      nodeEntityConfig.entityKey,
       getKubeAPIResourceGuid);
   }
 
@@ -378,7 +380,8 @@ export class KubernetesEffects {
     const paginationAction = action as KubePaginationAction;
     if (paginationAction.initialParams) {
       requestArgs.params = Object.keys(paginationAction.initialParams).reduce((httpParams, initialKey: string) => {
-        return httpParams.set(initialKey, paginationAction.initialParams[initialKey]);
+        return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString()); // TODO: RC Test
+        // return httpParams.set(initialKey, paginationAction.initialParams[initialKey]);
       }, new HttpParams());
     }
     return this.http

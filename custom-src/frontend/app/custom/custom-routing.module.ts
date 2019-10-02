@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
 const kubernetes: Routes = [
   {
@@ -15,19 +15,20 @@ const kubernetes: Routes = [
       }
     }
   },
-  {
-    path: 'monocular',
-    loadChildren: './helm/helm.module#HelmModule',
-    data: {
-      stratosNavigation: {
-        text: 'Helm',
-        matIcon: 'helm',
-        matIconFont: 'stratos-icons',
-        position: 65,
-        requiresEndpointType: 'helm'
-      }
-    }
-  }
+  // TODO: RC helm
+  // {
+  //   path: 'monocular',
+  //   loadChildren: './helm/helm.module#HelmModule',
+  //   data: {
+  //     stratosNavigation: {
+  //       text: 'Helm',
+  //       matIcon: 'helm',
+  //       matIconFont: 'stratos-icons',
+  //       position: 65,
+  //       requiresEndpointType: 'helm'
+  //     }
+  //   }
+  // }
 ];
 
 @NgModule({

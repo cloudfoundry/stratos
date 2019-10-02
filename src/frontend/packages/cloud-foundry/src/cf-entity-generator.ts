@@ -27,7 +27,6 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
 } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
@@ -135,9 +134,10 @@ export interface CFBasePipelineRequestActionMeta {
   flatten?: boolean;
 }
 
-export function registerCFEntities() {
-  generateCFEntities().forEach(entity => entityCatalogue.register(entity));
-}
+// TODO: RC not used
+// export function registerCFEntities() {
+//   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
+// }
 
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {

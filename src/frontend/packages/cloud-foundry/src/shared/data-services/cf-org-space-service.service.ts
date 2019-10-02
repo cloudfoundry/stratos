@@ -27,6 +27,7 @@ import {
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../store/src/app-state';
 import { QParam, QParamJoiners } from '../../../../store/src/q-param';
 import {
   getCurrentPageRequestInfo,
@@ -104,7 +105,7 @@ export const initCfOrgSpaceService = (
 };
 
 export const createCfOrSpaceMultipleFilterFn = (
-  store: Store<CFAppState>,
+  store: Store<AppState>,
   action: PaginatedAction,
   setQParam: (setQ: QParam, qs: QParam[]) => boolean
 ) => {

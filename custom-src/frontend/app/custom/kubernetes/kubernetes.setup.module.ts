@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
 
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
 import { CoreModule } from '../../core/core.module';
+import { EntityCatalogueModule } from '../../core/entity-catalogue.module';
 import { SharedModule } from '../../shared/shared.module';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
@@ -13,7 +13,8 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
-import { KubernetesEffects } from './store/kubernetes.effects';
+import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { KubernetesStoreModule } from './kubernetes.store.module';
 
 export interface IK8FavMetadata extends IFavoriteMetadata {
   guid: string;
@@ -23,13 +24,12 @@ export interface IK8FavMetadata extends IFavoriteMetadata {
 
 @NgModule({
   imports: [
+    // TODO: RC Everytime this is imported it's executed. See note & `hack` in `generateKubernetesEntities`
+    EntityCatalogueModule.forFeature(generateKubernetesEntities),
     CoreModule,
     CommonModule,
     SharedModule,
-    // KubernetesStoreModule,
-    EffectsModule.forFeature([
-      KubernetesEffects
-    ])
+    KubernetesStoreModule,
   ],
   declarations: [
     KubernetesCertsAuthFormComponent,
