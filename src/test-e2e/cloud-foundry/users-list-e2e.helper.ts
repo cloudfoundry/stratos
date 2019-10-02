@@ -60,8 +60,12 @@ export function setUpTestOrgSpaceUserRoles(
       return cfHelper.addSpaceIfMissingForEndpointUsers(cfGuid, org.metadata.guid, spaceName, defaultCf, true);
     })
     .then(space => spaceGuid = space.metadata.guid)
+    // Allow time for org/space to be created. In theory these requests should be synchronous but have seen failures related to missing
+    // space
     .then(() => browser.sleep(500))
     .then(() => cfHelper.addOrgUserRole(cfGuid, orgGuid, userName))
+    // Allow time for user to be added to org before applying other roles that are depending. Again should be syncrhonous but have seen
+    // failures
     .then(() => browser.sleep(500))
     .then(() => promise.all([
       cfHelper.addOrgUserManager(cfGuid, orgGuid, userName),
@@ -93,22 +97,23 @@ export function setupCfUserTableTests(
   const spaceName = E2EHelpers.createCustomName(customOrgSpacesLabel);
   const userName = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
 
-  let cfGuid: string, cfHelper: CFHelpers;
+  let cfGuid: string;
+  let cfHelper: CFHelpers;
 
   beforeAll(() => {
-    let orgGuid: string, spaceGuid: string;
+    let orgGuid: string;
+    let spaceGuid: string;
 
-    setUpTestOrgSpaceE2eTest(orgName, spaceName, userName).then(res => {
-      cfHelper = res.cfHelper;
-      cfGuid = res.cfGuid;
-      orgGuid = res.orgGuid;
-      spaceGuid = res.spaceGuid;
-    });
-
-    return protractor.promise.controlFlow().execute(() => {
-      return navToUserTableFn(cfGuid, orgGuid, spaceGuid);
-    });
-  });
+    // Be safe - ensure beforeAll responds with a promise chain with all promises
+    return setUpTestOrgSpaceE2eTest(orgName, spaceName, userName)
+      .then(res => {
+        cfHelper = res.cfHelper;
+        cfGuid = res.cfGuid;
+        orgGuid = res.orgGuid;
+        spaceGuid = res.spaceGuid;
+      })
+      .then(() => navToUserTableFn(cfGuid, orgGuid, spaceGuid));
+  }, 75000);
 
   describe('Correct role pills shown, pills removed successfully', () => {
     // NOTE - Order is important
