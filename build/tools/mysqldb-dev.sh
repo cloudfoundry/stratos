@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Startind MariaDB database for development"
+echo "Starting MariaDB database for development"
 
 STRATOS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../.. && pwd)"
 echo $STRATOS_PATH
@@ -28,12 +28,21 @@ docker cp ./dbsetup.sql ${ID}:/dbsetup.sql
 docker cp ./init.sh ${ID}:/init.sh
 rm dbsetup.sql init.sh
 
-echo "Just waiting a few seconds for the DB to come online ..."
-sleep 20
+#Fetch dockerize tool
+wget https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz
+tar -xzvf dockerize-linux-amd64-v0.6.1.tar.gz
+rm dockerize-linux-amd64-v0.6.1.tar.gz
 
-docker exec -t ${ID} /init.sh
+chmod +x ./dockerize
+docker cp ./dockerize ${ID}:/dockerize
+rm dockerize
+
+#We us wait for the internal socket to come up before running init script
+echo "Just waiting a few seconds for the DB to come online ..."
+docker exec -t ${ID} /dockerize -wait file:///var/run/mysql/mysql.sock -timeout 1m
 
 echo "Database ready"
+docker exec -t ${ID} /init.sh
 
 mkdir -p ${STRATOS_PATH}/src/jetstream/db
 cp ${STRATOS_PATH}/deploy/db/dbconf.yml ${STRATOS_PATH}/src/jetstream/db
