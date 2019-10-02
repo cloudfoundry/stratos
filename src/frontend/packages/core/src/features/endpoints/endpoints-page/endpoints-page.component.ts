@@ -11,7 +11,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { combineLatest, Subscription } from 'rxjs';
 import { delay, first, map, tap } from 'rxjs/operators';

@@ -38,7 +38,7 @@ export function generateBaseTestStoreModules() {
     StoreModule.forRoot(
       appReducers,
       {
-        initialState: createBasicStoreModule()
+        initialState: createBasicStoreModule(), runtimeChecks: { strictStateImmutability: true, strictActionImmutability: true }
       }
     )
   ];

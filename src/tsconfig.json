@@ -10,19 +10,9 @@
     "experimentalDecorators": true,
     "target": "es5",
     "module": "es2015",
-    "types": [
-      "hammerjs",
-      "jasmine",
-      "jasminewd2",
-      "karma"
-    ],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2017",
-      "dom"
-    ],
+    "types": ["hammerjs", "jasmine", "jasminewd2", "karma"],
+    "typeRoots": ["node_modules/@types"],
+    "lib": ["es2017", "dom"],
     "preserveSymlinks": true
   }
 }

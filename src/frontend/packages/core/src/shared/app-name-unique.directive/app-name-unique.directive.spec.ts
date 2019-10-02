@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, TestBed } from '@angular/core/testing';
 import { ConnectionBackend, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
-import { MatDialogModule } from '@angular/material';
+import { MatDialogModule } from '@angular/material/dialog';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 

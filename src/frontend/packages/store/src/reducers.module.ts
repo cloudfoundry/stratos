@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { storeFreeze } from 'ngrx-store-freeze';
+
 import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { environment } from '../../core/src/environments/environment';
@@ -81,7 +81,7 @@ if (!environment.production) {
 const storeModule = StoreModule.forRoot(
   appReducers,
   {
-    metaReducers
+    metaReducers, runtimeChecks: { strictStateImmutability: true, strictActionImmutability: true }
   }
 );
 const imports = environment.production ? [

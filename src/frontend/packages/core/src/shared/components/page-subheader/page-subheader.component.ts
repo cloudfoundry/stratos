@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
-import { MatButton, MatTabNav } from '@angular/material';
+import { MatButton } from '@angular/material/button';
+import { MatTabNav } from '@angular/material/tabs';
 import { Store } from '@ngrx/store';
 import { fromEvent, interval, Subscription } from 'rxjs';
 import { debounceTime, delay, filter, tap } from 'rxjs/operators';

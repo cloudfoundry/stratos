@@ -1,6 +1,6 @@
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 
 import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';

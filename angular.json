@@ -44,10 +44,12 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }]
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                }
+              ]
             }
           }
         },
@@ -122,10 +124,12 @@
           },
           "configurations": {
             "production": {
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }],
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -163,9 +167,7 @@
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.spec.json",
             "karmaConfig": "src/frontend/packages/core/karma.conf.js",
-            "styles": [
-              "src/frontend/packages/core/src/styles.css"
-            ],
+            "styles": ["src/frontend/packages/core/src/styles.css"],
             "scripts": [],
             "assets": [
               "src/frontend/packages/core/src/favicon.ico",
@@ -329,5 +331,8 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/angular"
   }
 }

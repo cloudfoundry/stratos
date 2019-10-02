@@ -14,7 +14,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import {
   asapScheduler,

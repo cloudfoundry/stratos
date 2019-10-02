@@ -155,7 +155,7 @@ export function generateCfStoreModules() {
     CloudFoundryTestingModule,
     AppStoreExtensionsModule,
     StoreModule.forRoot(
-      appReducers,
+      appReducers, { runtimeChecks: { strictStateImmutability: true, strictActionImmutability: true }},
       // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
     )
   ];

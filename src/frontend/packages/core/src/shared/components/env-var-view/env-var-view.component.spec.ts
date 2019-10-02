@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
 import { CodeBlockComponent } from '../code-block/code-block.component';

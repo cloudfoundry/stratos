@@ -4,7 +4,7 @@ import { DialogConfirmComponent } from './dialog-confirm.component';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 
 describe('DialogConfirmComponent', () => {

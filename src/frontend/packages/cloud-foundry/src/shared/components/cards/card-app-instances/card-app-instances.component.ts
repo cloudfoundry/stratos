@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 

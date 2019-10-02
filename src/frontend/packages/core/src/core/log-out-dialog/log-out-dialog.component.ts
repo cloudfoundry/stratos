@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';

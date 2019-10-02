@@ -98,7 +98,7 @@ export class CustomRouterStateSerializer
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule, // Create action for router navigation
+    StoreRouterConnectingModule.forRoot(), // Create action for router navigation
     AboutModule,
     CustomImportModule,
     XSRFModule,
