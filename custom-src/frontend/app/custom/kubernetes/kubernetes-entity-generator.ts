@@ -18,13 +18,13 @@ import {
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
 import {
   KUBERNETES_ENDPOINT_TYPE,
+  kubernetesAppsSchemaKey,
   kubernetesDashboardSchemaKey,
   kubernetesDeploymentsSchemaKey,
   kubernetesEntityFactory,
   kubernetesNamespacesSchemaKey,
   kubernetesNodesSchemaKey,
   kubernetesPodsSchemaKey,
-  kubernetesSchemaKey,
   kubernetesServicesSchemaKey,
   kubernetesStatefulSetsSchemaKey,
 } from './kubernetes-entity-factory';
@@ -161,14 +161,14 @@ export function generateKubernetesEntities(): StratosBaseCatalogueEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   return new StratosCatalogueEndpointEntity(
     endpointDefinition,
-    metadata => `/cloud-foundry/${metadata.guid}`, // TODO: RC
+    metadata => `/kubernetes/${metadata.guid}`, // TODO: RC
   );
 }
 
 function generateAppEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesSchemaKey),
+    type: kubernetesAppsSchemaKey,
+    schema: kubernetesEntityFactory(kubernetesAppsSchemaKey),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesApp>(definition);

@@ -2,10 +2,9 @@ import { Store } from '@ngrx/store';
 
 import { getPaginationKey } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { kubernetesNodesSchemaKey } from '../../kubernetes-entity-factory';
+import { kubernetesEntityFactory, kubernetesNodesSchemaKey } from '../../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { KubernetesNode } from '../../store/kube.types';
@@ -21,7 +20,7 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode> {
     super({
       store,
       action: new GetKubernetesNodes(kubeGuid.guid),
-      schema: entityFactory(kubernetesNodesSchemaKey),
+      schema: kubernetesEntityFactory(kubernetesNodesSchemaKey),
       getRowUniqueId: getKubeAPIResourceGuid,
       paginationKey: getPaginationKey(kubernetesNodesSchemaKey, kubeGuid.guid),
       isLocal: true,
